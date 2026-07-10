@@ -1,0 +1,207 @@
+{
+  "task_id": "verify-llm-001",
+  "target_lang": "uk",
+  "segments": [
+    {
+      "index": 0,
+      "segment_id": "s0",
+      "skipped": false,
+      "merged_into": null,
+      "path_chain": [],
+      "original_text": "He was really very tired today.",
+      "translated_text": "Він дуже справді просто надзвичайно втомився сьогодні, доволі сильно і вельми помітно для всіх навколо.",
+      "text_after_adaptation": "Він втомився сьогодні, сильно і помітно для всіх навколо.",
+      "adaptation_iterations": 1,
+      "adaptation_executed": true,
+      "adaptation_status": "ADAPTATION EXECUTED",
+      "original_duration_ms": 2307,
+      "first_tts_duration_ms": 7629,
+      "final_tts_duration_ms": 4222,
+      "start_time_ms": 0,
+      "end_time_ms": 2307,
+      "timing_source": "timing_map",
+      "warnings": [],
+      "adaptation_reasons": [
+        "llm_no_change"
+      ],
+      "adaptation_stages": [
+        {
+          "stage": "llm_rephrase",
+          "stage_num": 1,
+          "text_before": "Він дуже справді просто надзвичайно втомився сьогодні, доволі сильно і вельми помітно для всіх навколо.",
+          "text_after": "Він втомився сьогодні, сильно і помітно для всіх навколо.",
+          "words_before": 15,
+          "words_after": 9,
+          "estimated_ms_before": 7629,
+          "estimated_ms_after": 4222,
+          "applied": true,
+          "reason": "llm_rephrase",
+          "information_removed": false
+        }
+      ],
+      "overlap_info": {
+        "overflow_ms": null,
+        "overflow_pct": null,
+        "slot_overflow": null,
+        "merge_adjusted_start": null
+      },
+      "merge_info": {
+        "merged_into": null,
+        "merged_into_id": null,
+        "block_merged_with_next": null
+      },
+      "gap_absorb": {
+        "mode": null,
+        "video_stretch_ratio": null
+      },
+      "block_merge": {
+        "merge_adjusted_start": null,
+        "merge_adjusted_slot_ms": null,
+        "block_merged_with_next": null
+      },
+      "algorithm_reason": "post_tts_text_adaptation: semantic shorten + TTS regen until slot fit",
+      "rule_rewrite_used": false,
+      "llm_rewrite_used": true,
+      "llm_reason": "llm_no_change",
+      "requires_llm_adaptation": false,
+      "raw_translation": "Він дуже справді просто надзвичайно втомився сьогодні, доволі сильно і вельми помітно для всіх навколо.",
+      "semantic_engine_text": "Він дуже справді просто надзвичайно втомився сьогодні, доволі сильно і вельми помітно для всіх навколо.",
+      "pre_tts_text": "Він втомився сьогодні, сильно і помітно для всіх навколо.",
+      "final_tts_text": "Він втомився сьогодні, сильно і помітно для всіх навколо.",
+      "original_word_count": null,
+      "raw_mt_word_count": null,
+      "semantic_word_count": null,
+      "final_tts_word_count": null,
+      "compression_ratio": null,
+      "predicted_duration_ms": 4222,
+      "estimated_speech_duration_ms": 4222,
+      "actual_duration_ms": 0,
+      "real_speech_duration_ms": 0,
+      "meaning_loss_score": null,
+      "entity_preservation_score": null,
+      "slot_ms": 2307,
+      "voice": "uk-UA-OstapNeural",
+      "language": "uk",
+      "raw_mt_diagnosis": null,
+      "quality_reasons": null,
+      "transformation_chain": [],
+      "optimization_stages": [
+        {
+          "stage": "llm_rephrase",
+          "stage_num": 1,
+          "text_before": "Він дуже справді просто надзвичайно втомився сьогодні, доволі сильно і вельми помітно для всіх навколо.",
+          "text_after": "Він втомився сьогодні, сильно і помітно для всіх навколо.",
+          "words_before": 15,
+          "words_after": 9,
+          "estimated_ms_before": 7629,
+          "estimated_ms_after": 4222,
+          "applied": true,
+          "reason": "llm_rephrase",
+          "information_removed": false
+        }
+      ],
+      "optimization_retries": {
+        "timing_aware": 1,
+        "post_tts": null,
+        "reasons": []
+      }
+    }
+  ],
+  "skipped_segments": [],
+  "overlaps": [],
+  "post_tts_qa": {
+    "adaptation_executed": true,
+    "checked": 1,
+    "fixed": 1
+  },
+  "tts_pipeline": {
+    "session_dir": null,
+    "expected_segments": 1,
+    "audio_present": 0,
+    "audio_missing": 1,
+    "source_map": {
+      "tts_generated": "engines/dubbing_engine/tts_handoff_diag.py:log_tts_generated",
+      "audio_saved": "api/auto_dub_api.py:_commit_tts_group_result",
+      "regen": "api/auto_dub_api.py:_regen_segment_tts",
+      "slot_fit": "api/auto_dub_api.py:_build_timed_dub_track",
+      "track_builder": "api/studio_api.py:_render_studio_timed_audio",
+      "cleanup": "engines/pipeline_cleanup.py:cleanup_intermediate_work_dirs"
+    },
+    "segments": [
+      {
+        "index": 0,
+        "text_preview": "Він втомився сьогодні, сильно і помітно для всіх навколо.",
+        "file": "g0000.mp3",
+        "fitted_file": null,
+        "resolved_path": null,
+        "exists": false,
+        "size_bytes": 0
+      }
+    ]
+  },
+  "adaptation_mode": {
+    "mode": "automatic",
+    "mode_label": "Автоматический (рекомендуется)",
+    "capabilities": {
+      "llm_available": true,
+      "cloud_api_available": false,
+      "local_llm_available": true,
+      "rule_rewrite_available": true,
+      "provider": "openai-compatible",
+      "model": "vm-local-verify",
+      "base_url": "http://127.0.0.1:8000/v1",
+      "source": "discovered",
+      "available_models": [
+        "vm-local-verify"
+      ]
+    },
+    "rule_rewrite_available": true,
+    "llm_rewrite_available": true,
+    "llm_provider": "openai-compatible",
+    "llm_model": "vm-local-verify",
+    "strict_gate_activated": false,
+    "stop_reason": null,
+    "stop_diagnostics": null,
+    "user_warnings": [],
+    "requires_llm_adaptation": null
+  },
+  "adaptation_capabilities": {
+    "llm_rephrase_available": true,
+    "llm_base_url": "openai-default",
+    "demucs_available": false,
+    "separation_method": null,
+    "separation_success": false,
+    "music_preserved": false,
+    "notes": [
+      "demucs not installed — music/vocal separation uses the ffmpeg center/side approximation (works for stereo sources only)."
+    ]
+  },
+  "pipeline_stages": {},
+  "runtime_pipeline": null,
+  "final_dub_qa": null,
+  "source_separation": {
+    "separation_performed": false,
+    "separation_success": false,
+    "fallback_used": false,
+    "method": null,
+    "dialogue_path": null,
+    "accompaniment_path": null,
+    "dialogue_stt_path": null,
+    "accompaniment_attenuation_db": null,
+    "warning": null,
+    "error": null
+  },
+  "summary": {
+    "segment_count": 1,
+    "skipped_count": 0,
+    "overlap_count": 0,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "overlap_status": "NO OVERLAP",
+    "timing_status": "TIMING OK"
+  },
+  "flags": [
+    "ADAPTATION EXECUTED",
+    null,
+    null
+  ]
+}

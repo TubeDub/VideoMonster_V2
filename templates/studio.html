@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Студия — TubeDub{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/studio.css"/>
+{% endblock %}
+{% block content %}
+
+<!-- POST-DUB EDITOR (task_id in URL) -->
+<div id="studio-editor-root" class="se-root" style="display:none;">
+  <div class="se-toolbar">
+    <h1 data-i18n="studio.title">🎛 Dub Studio</h1>
+    <span id="se-task-label" style="font-size:11px;color:var(--text2);"></span>
+    <button type="button" class="btn btn-sm" id="se-btn-play" data-i18n="studio.play">▶ Play</button>
+    <button type="button" class="btn btn-primary btn-sm se-mix-btn" id="se-btn-mix"
+            data-i18n="studio.mix_project">🎬 Свести проект</button>
+    <a id="se-download-link" href="#" class="btn btn-primary btn-sm se-download-btn"
+       style="display:none;" download data-i18n="dub.download">⬇ Скачать MP4</a>
+    <button type="button" class="btn btn-sm" id="se-btn-export" data-i18n="studio.export_mp4"
+            title="Экспорт (ручной)" style="display:none;">📦 Экспорт MP4</button>
+    <span id="se-mix-status" style="font-size:11px;color:var(--text2);"></span>
+    <span id="se-export-status" style="color:var(--text2);font-size:11px;"></span>
+    <a href="/dub" class="btn btn-sm btn-secondary" data-i18n="studio.back_dub">← Дубляж</a>
+  </div>
+  <div class="se-body">
+    <aside class="se-plugins">
+      <div style="font-weight:600;margin-bottom:8px;" data-i18n="studio.plugins">Эффекты</div>
+      <div id="studio-plugins-list"></div>
+    </aside>
+    <div class="se-center">
+      <div class="se-video-wrap">
+        <video id="se-video" playsinline muted preload="auto"></video>
+      </div>
+      <div class="se-transport">
+        <span id="se-time-current">0:00</span>
+        <input type="range" id="se-scrubber" min="0" max="1000" value="0" style="flex:1;"/>
+        <span id="se-time-total">0:00</span>
+      </div>
+    </div>
+    <aside class="se-inspector" id="studio-inspector">
+      <div class="se-loading" data-i18n="studio.loading">Загрузка сессии…</div>
+    </aside>
+    <div class="se-timeline-panel">
+      <div id="studio-timeline"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGACY TEXT STUDIO (no task_id) -->
+<div id="studio-text-root">
+<div class="page-header-row">
+  <h1>🎙️ Студия</h1>
+  <div class="header-controls">
+    <select id="voice-select" class="select-control" title="Голос">
+      {% for lang_code, voice_list in voices.items() %}
+        {% for v in voice_list %}
+          <option value="{{ v.id }}" {% if v.id == 'ru-RU-DmitryNeural' %}selected{% endif %}>{{ v.name }}</option>
+        {% endfor %}
+      {% endfor %}
+    </select>
+    <select id="target-lang" class="select-control" title="Язык перевода">
+      {% for name, code in languages.items() %}
+        <option value="{{ code }}" {% if code == 'ru' %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<div class="studio-layout">
+  <div class="panel panel-top">
+    <div class="panel-header">
+      <span class="panel-title">Исходный текст</span>
+      <div class="panel-actions">
+        <button class="btn btn-sm" onclick="pasteText('source-box')">📋 Вставить</button>
+        <button class="btn btn-sm" onclick="clearAll()">🗑 Очистить</button>
+        <button class="btn btn-sm" id="btn-load-srt" onclick="triggerSrtLoad()">📂 Импорт субтитров</button>
+        <input type="file" id="srt-input" accept=".srt,.vtt,.ass,.ssa,.txt" style="display:none" onchange="loadSubtitleFile(this)"/>
+      </div>
+    </div>
+    <textarea id="source-box" class="text-area" placeholder="Введите или вставьте текст, либо загрузите SRT-файл..."></textarea>
+    <div class="panel-footer">
+      <span id="detected-lang" class="detected-label">Язык: не определён</span>
+      <span id="source-chars" class="char-count">0 символов</span>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="doCleanAndTranslate()">🌍 Очистить и перевести</button>
+    <button class="btn btn-secondary" onclick="doTranslateOnly()">⚡ Быстрый перевод</button>
+    <button class="btn btn-secondary" onclick="doCleanOnly()">🧹 Только очистить SRT</button>
+  </div>
+
+  <div class="panel" style="height:auto; margin-bottom:10px;">
+    <div class="panel-header">
+      <span class="panel-title">⏱ Timing Engine</span>
+      <label class="toggle-label" style="margin-left:auto; display:flex; align-items:center; gap:6px; cursor:pointer;">
+        <input type="checkbox" id="use-timing" onchange="toggleTimingOptions()" style="width:16px;height:16px;cursor:pointer;"/>
+        <span style="font-size:12px;color:var(--text2);">Синхронизировать по тайм-кодам SRT</span>
+      </label>
+    </div>
+    <div id="timing-options" style="padding:12px 16px;display:none;flex-direction:column;gap:10px;">
+      <div class="row-group" style="flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:180px;">
+          <label style="font-size:12px;color:var(--text2);">Режим тайминга</label>
+          <select id="timing-mode" class="select-control" onchange="onTimingModeChange()">
+            <option value="exact">Точный (exact) — по тайм-кодам</option>
+            <option value="preserve_pauses">Сохранять паузы</option>
+            <option value="match_total">Под общую длину</option>
+          </select>
+        </div>
+        <div id="total-duration-group" style="display:none;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+          <label style="font-size:12px;color:var(--text2);">Целевая длина (ЧЧ:ММ:СС)</label>
+          <input id="total-duration" type="text" class="input-control" placeholder="напр. 1:30 или 0:01:30"/>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);" id="timing-mode-hint">
+        💡 Каждый сегмент размещается строго на своём тайм-коде из SRT.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="height:auto;margin-bottom:10px;">
+    <div class="panel-header">
+      <span class="panel-title">✏️ Сегменты</span>
+      <div class="panel-actions">
+        <button class="btn btn-sm" onclick="syncSegmentsFromSource()">↻ Из текста</button>
+        <button class="btn btn-sm" onclick="applySegmentsToSource()">↪ В текст</button>
+      </div>
+    </div>
+    <div id="segments-editor" class="segments-editor" style="max-height:220px;overflow:auto;padding:8px 12px;"></div>
+  </div>
+
+  <div class="panel panel-bottom">
+    <div class="panel-header">
+      <span class="panel-title">Переведённый текст</span>
+      <div class="panel-actions">
+        <button class="btn btn-sm" onclick="copyText('translated-box')">📋 Копировать</button>
+        <button class="btn btn-sm btn-highlight" onclick="doTTS()">🔊 Озвучить</button>
+        <button class="btn btn-sm" onclick="exportSubs('srt')">💾 SRT</button>
+        <button class="btn btn-sm" onclick="exportSubs('vtt')">💾 VTT</button>
+        <button class="btn btn-sm" onclick="goRedub()">🎬 Дубляж</button>
+        <button class="btn btn-sm" onclick="saveDocument()">💾 Сохранить VMR</button>
+        <button class="btn btn-sm" onclick="downloadTxt()">📄 Скачать TXT</button>
+      </div>
+    </div>
+    <textarea id="translated-box" class="text-area" placeholder="Перевод появится здесь..."></textarea>
+    <div class="panel-footer">
+      <span id="translated-chars" class="char-count">0 символов</span>
+    </div>
+  </div>
+</div>
+
+<div id="status-bar" class="status-bar">
+  <span id="status-text">Готов к работе</span>
+  <div id="progress-bar" class="progress-bar" style="display:none">
+    <div id="progress-fill" class="progress-fill"></div>
+  </div>
+</div>
+
+<div id="audio-section" class="audio-section" style="display:none">
+  <div class="audio-header">
+    <span>🎧 Результат озвучки</span>
+    <button class="btn btn-sm" onclick="closeAudio()">✖</button>
+  </div>
+  <div id="audio-players" class="audio-players"></div>
+</div>
+
+<div id="timed-section" class="audio-section" style="display:none;margin-top:10px;border-color:#4f8ef7">
+  <div class="audio-header" style="color:#4f8ef7">
+    <span>⏱ Тайминговая дорожка (Timing Engine)</span>
+    <button class="btn btn-sm" onclick="document.getElementById('timed-section').style.display='none'">✖</button>
+  </div>
+  <div id="timed-player" class="audio-players"></div>
+  <div id="timing-warnings" style="font-size:12px;color:#f56565;margin-top:8px;"></div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/i18n.js"></script>
+<script src="/static/js/studio_timeline.js"></script>
+<script src="/static/js/studio.js"></script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{
+  "keys": {
+    "VM-T7XX-BKKH-44ED": {
+      "type": "TEST-7",
+      "test_build_id": "29ff330b5a69",
+      "created_at": 1781644592.229064,
+      "source": "test_build"
+    },
+    "VM-T7XX-DAU8-B9E2": {
+      "type": "TEST-7",
+      "test_build_id": "af418345965b",
+      "created_at": 1781663906.2758918,
+      "source": "test_build"
+    },
+    "VM-T7XX-CX6Z-DF1C": {
+      "type": "TEST-7",
+      "test_build_id": "029a19f5aa8c",
+      "created_at": 1781830660.5496042,
+      "source": "setup_installer"
+    },
+    "VM-T7XX-RRY5-DB3E": {
+      "type": "TEST-7",
+      "test_build_id": "69f5d93e4210",
+      "created_at": 1782144678.544378,
+      "source": "test_build"
+    },
+    "VM-T7XX-C94Q-8396": {
+      "type": "TEST-7",
+      "test_build_id": "4c1c17f09818",
+      "created_at": 1782146331.6220794,
+      "source": "test_build"
+    },
+    "VM-T7XX-FKR4-8E49": {
+      "type": "TEST-7",
+      "activated_at": 1782250689.1578164,
+      "device": "ff944c26184e8e54"
+    }
+  }
+}

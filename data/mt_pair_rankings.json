@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "pairs": {
+    "en->ru": ["marian"],
+    "en->uk": ["marian"],
+    "ru->uk": ["marian"],
+    "uk->ru": ["marian"],
+    "en->de": ["marian"],
+    "en->fr": ["marian"],
+    "en->pl": ["marian", "argos"],
+    "en->es": ["marian"],
+    "en->it": ["marian"],
+    "en->tr": ["argos"],
+    "en->ja": ["argos"]
+  }
+}

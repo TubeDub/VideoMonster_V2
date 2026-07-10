@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "engines": [
+    {
+      "id": "edge-offline",
+      "name": "Edge Neural (локальный)",
+      "provider": "Microsoft Edge TTS",
+      "description": "Бесплатный нейро-голос через edge-tts. Работает офлайн после установки пакета.",
+      "mode": "offline"
+    },
+    {
+      "id": "online-studio",
+      "name": "Online Studio",
+      "provider": "VideoMonster Cloud",
+      "description": "Облачная студия озвучки (скоро).",
+      "mode": "online",
+      "config_keys": ["VM_STUDIO_TTS_URL"]
+    },
+    {
+      "id": "openai-voice",
+      "name": "OpenAI Voice",
+      "provider": "OpenAI",
+      "description": "GPT-4o mini TTS / Voice API (скоро).",
+      "mode": "online",
+      "config_keys": ["OPENAI_API_KEY"]
+    },
+    {
+      "id": "elevenlabs",
+      "name": "ElevenLabs",
+      "provider": "ElevenLabs",
+      "description": "Премиальные голоса с естественной интонацией (скоро).",
+      "mode": "online",
+      "config_keys": ["ELEVENLABS_API_KEY"]
+    },
+    {
+      "id": "azure-neural",
+      "name": "Azure Neural",
+      "provider": "Microsoft Azure",
+      "description": "Azure Cognitive Services Neural TTS (скоро).",
+      "mode": "online",
+      "config_keys": ["AZURE_SPEECH_KEY"]
+    },
+    {
+      "id": "google-neural",
+      "name": "Google Neural",
+      "provider": "Google Cloud",
+      "description": "Google Cloud Text-to-Speech Neural2 (скоро).",
+      "mode": "online",
+      "config_keys": ["GOOGLE_TTS_KEY"]
+    }
+  ]
+}

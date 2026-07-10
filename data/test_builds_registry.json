@@ -1,0 +1,90 @@
+{
+  "builds": [
+    {
+      "id": "f1b4157d75a8",
+      "created_at": 1781639332.4583948,
+      "key_type": "TEST-7",
+      "key": "VM-T7XX-E0C8-EFB8",
+      "label": "Первый тестовый билд (авто-инициализация)",
+      "zip_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\test_builds\\VideoMonster_V2_TEST-7_20260616_2248.zip",
+      "zip_name": "VideoMonster_V2_TEST-7_20260616_2248.zip",
+      "expires_at": 1782244132.4582376,
+      "revoked": false,
+      "tier": "demo"
+    },
+    {
+      "id": "29ff330b5a69",
+      "created_at": 1781644592.229064,
+      "key_type": "TEST-7",
+      "key": "VM-T7XX-BKKH-44ED",
+      "label": "ee",
+      "zip_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\test_builds\\TubeDub_V2_TEST-7_20260617_0016.zip",
+      "zip_name": "TubeDub_V2_TEST-7_20260617_0016.zip",
+      "expires_at": 1782249392.2289367,
+      "revoked": false,
+      "tier": "demo"
+    },
+    {
+      "id": "af418345965b",
+      "created_at": 1781663906.2758918,
+      "key_type": "TEST-7",
+      "key": "VM-T7XX-DAU8-B9E2",
+      "label": "777",
+      "zip_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\test_builds\\TubeDub_V2_TEST-7_20260617_0538.zip",
+      "zip_name": "TubeDub_V2_TEST-7_20260617_0538.zip",
+      "expires_at": 1782268706.2757227,
+      "revoked": false,
+      "tier": "demo"
+    },
+    {
+      "id": "0072785f30ac",
+      "created_at": 1781818671.9651372,
+      "format": "setup",
+      "test_build": false,
+      "label": "",
+      "setup_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\installers\\TubeDub_Setup.exe",
+      "setup_stamped": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\installers\\TubeDub_Setup_20260619_0037.exe",
+      "setup_name": "TubeDub_Setup.exe",
+      "size_mb": 272.74,
+      "key_type": "RETAIL"
+    },
+    {
+      "id": "029a19f5aa8c",
+      "created_at": 1781830660.5496042,
+      "format": "setup",
+      "test_build": true,
+      "label": "Beta testers",
+      "setup_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\installers\\TubeDub_Test_7_Days_Setup.exe",
+      "setup_stamped": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\installers\\TubeDub_Test_7_Days_Setup_20260619_0357.exe",
+      "setup_name": "TubeDub_Test_7_Days_Setup.exe",
+      "size_mb": 272.73,
+      "key_type": "TEST-7",
+      "key": "VM-T7XX-CX6Z-DF1C",
+      "expires_at": 1782435460.5507672
+    },
+    {
+      "id": "69f5d93e4210",
+      "created_at": 1782144678.544378,
+      "key_type": "TEST-7",
+      "key": "VM-T7XX-RRY5-DB3E",
+      "label": "Первый тестовый билд (авто-инициализация)",
+      "zip_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\test_builds\\TubeDub_V2_TEST-7_20260622_1850.zip",
+      "zip_name": "TubeDub_V2_TEST-7_20260622_1850.zip",
+      "expires_at": 1782749478.5442138,
+      "revoked": false,
+      "tier": "demo"
+    },
+    {
+      "id": "4c1c17f09818",
+      "created_at": 1782146331.6220794,
+      "key_type": "TEST-7",
+      "key": "VM-T7XX-C94Q-8396",
+      "label": "Первый тестовый билд (авто-инициализация)",
+      "zip_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\test_builds\\TubeDub_V2_TEST-7_20260622_1914.zip",
+      "zip_name": "TubeDub_V2_TEST-7_20260622_1914.zip",
+      "expires_at": 1782751131.621888,
+      "revoked": false,
+      "tier": "demo"
+    }
+  ]
+}

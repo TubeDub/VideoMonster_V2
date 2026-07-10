@@ -1,0 +1,30 @@
+{
+  "id": "anime_narrator",
+  "pack": "regional",
+  "region_pack": "jp",
+  "mix_mode": "full_dub",
+  "original_volume": 0.0,
+  "dub_volume": 1.0,
+  "background_volume": 0.0,
+  "tts_rate": "-8%",
+  "tts_pitch": "+1Hz",
+  "i18n_key": "dub.style_anime_narrator",
+  "order": 101,
+  "reply_start_delay_ms": 120,
+  "max_atempo": 1.12,
+  "delivery": "anime_narrator_calm",
+  "intonation_range": "medium",
+  "voice_fx": {
+    "highpass_hz": 95,
+    "mid_peak_hz": 2600,
+    "mid_peak_gain_db": 1.8,
+    "compressor_ratio": 2.0,
+    "compressor_threshold_db": -18,
+    "volume_gain_db": 0.0
+  },
+  "preview_phrases": {
+    "default": "Anime narrator style — clear and composed.",
+    "ja": "アニメのナレーション調 — 落ち着いてはっきりした語りです。",
+    "en": "Anime narrator style — clear, composed delivery."
+  }
+}

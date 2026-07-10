@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+{% block title %}TubeDub — Дубляж{% endblock %}
+{% block main_class %} main-content--dub-wizard{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/css/dub.css?v=20260705b" />
+<div class="dub-page dub-wizard-page">
+    <!-- Скрытые контролы — значения читаются пайплайном как раньше -->
+    <div class="wizard-hidden-controls" aria-hidden="true">
+        <select id="source-lang" class="select-control" disabled>
+            {% for name, code in languages.items() %}
+            <option value="{{ code }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <input type="radio" name="source-mode" id="source-auto" value="auto" checked />
+        <input type="radio" name="source-mode" id="source-manual" value="manual" />
+        <div id="detected-lang-row" data-lang-code="">
+            <strong id="detected-lang-name"></strong>
+        </div>
+        <select id="target-lang" class="select-control">
+            {% for name, code in languages.items() %}
+            <option value="{{ code }}" {% if code=='ru' %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+        <select id="voice-select"></select>
+        <input type="hidden" id="tts-engine" value="edge-offline" />
+        <select id="model-size" class="select-control">
+            <option value="tiny" selected>tiny</option>
+            <option value="base">base</option>
+            <option value="small">small</option>
+            <option value="medium">medium</option>
+            <option value="large">large</option>
+        </select>
+        <select id="content-mode" class="select-control">
+            <option value="movie" data-i18n="dub.mode_movie">🎬 Фильм</option>
+            <option value="tv_series" data-i18n="dub.mode_tv_series">📺 Сериал</option>
+            <option value="anime" data-i18n="dub.mode_anime">⛩ Аниме</option>
+            <option value="cartoon" data-i18n="dub.mode_cartoon">🎨 Мультфильм</option>
+            <option value="youtube" data-i18n="dub.mode_youtube">▶ YouTube</option>
+            <option value="blogger" data-i18n="dub.mode_blogger">🎙 Блогер</option>
+            <option value="podcast" data-i18n="dub.mode_podcast">🎧 Подкаст</option>
+            <option value="interview" data-i18n="dub.mode_interview">🎤 Интервью</option>
+            <option value="audiobook" data-i18n="dub.mode_audiobook">📖 Аудиокнига</option>
+        </select>
+        <select id="segmentation-mode" class="select-control">
+            <option value="timing" selected>timing</option>
+            <option value="sentence">sentence</option>
+        </select>
+        <div id="dub-style-list"></div>
+        <input type="checkbox" id="dub-styles-local-only" checked />
+        <input type="range" id="original-volume" min="0" max="100" value="0" />
+        <span id="original-volume-label">0%</span>
+        <div id="volume-presets" class="volume-presets">
+            <button type="button" class="vol-preset" data-pct="0"></button>
+            <button type="button" class="vol-preset" data-pct="20"></button>
+            <button type="button" class="vol-preset" data-pct="38"></button>
+            <button type="button" class="vol-preset" data-pct="40"></button>
+            <button type="button" class="vol-preset" data-pct="50"></button>
+            <button type="button" class="vol-preset" data-pct="70"></button>
+            <button type="button" class="vol-preset" data-pct="100"></button>
+        </div>
+        <div id="dub-style-hint"></div>
+        <input type="checkbox" id="translation-review-before-tts" checked />
+        <select id="strict-llm-adaptation" class="select-control">
+            <option value="automatic" selected>Автоматический</option>
+            <option value="strict">Максимальное качество</option>
+        </select>
+        <input type="checkbox" id="keep-original-track" />
+        <div id="voice-list"></div>
+        <div id="original-volume-group"></div>
+    </div>
+
+    <div class="dub-wizard-shell" id="dub-wizard-shell">
+        <span id="debug-mode-badge" class="dub-debug-badge" hidden data-i18n="dub.debug_mode_badge">Debug Mode</span>
+        <!-- Шаги 1–6 -->
+        <div class="wizard-flow" id="wizard-flow">
+            <div class="wizard-step-dots" id="wizard-step-dots" aria-hidden="true">
+                <span class="wizard-dot" data-dot="0"></span>
+                <span class="wizard-dot" data-dot="1"></span>
+                <span class="wizard-dot" data-dot="2"></span>
+                <span class="wizard-dot" data-dot="3"></span>
+                <span class="wizard-dot" data-dot="4"></span>
+                <span class="wizard-dot" data-dot="5"></span>
+            </div>
+
+            <!-- Шаг 1: Видео -->
+            <section class="wizard-step active" id="wizard-step-video" data-wizard-step="video">
+                <h2 class="wizard-step-title" data-i18n="dub.wizard_video_title">Выберите видео</h2>
+                <p class="wizard-step-sub" data-i18n="dub.wizard_video_sub">Перетащите файл или нажмите кнопку ниже</p>
+                <div id="drop-zone" class="wizard-drop-zone">
+                    <input type="file" id="video-input" accept=".mp4,.mkv,.mov,.avi,.webm" hidden />
+                    <div class="wizard-drop-inner">
+                        <div class="wizard-drop-icon">📁</div>
+                        <p class="wizard-drop-text" data-i18n="dub.drop_hint">Перетащите видео сюда</p>
+                        <span class="wizard-drop-or" data-i18n="dub.wizard_or">или</span>
+                        <button type="button" class="btn btn-primary btn-large" id="btn-pick-video"
+                            data-i18n="dub.pick_video">Выбрать видео</button>
+                    </div>
+                </div>
+                <div id="video-info" class="wizard-video-info" style="display:none;">
+                    <span class="wizard-video-name" id="video-name"></span>
+                    <span class="wizard-video-size char-count" id="video-size"></span>
+                </div>
+            </section>
+
+            <!-- Шаг 2: Язык -->
+            <section class="wizard-step wizard-step--lang" id="wizard-step-lang" data-wizard-step="lang" hidden>
+                <div class="wizard-step-head">
+                    <h2 class="wizard-step-title" data-i18n="dub.wizard_lang_title">Язык перевода</h2>
+                    <p class="wizard-step-sub" data-i18n="dub.wizard_lang_sub">Выберите язык озвучки</p>
+                </div>
+                <div class="wizard-lang-grid-wrap">
+                    <div id="wizard-lang-grid" class="wizard-lang-grid" role="listbox"></div>
+                </div>
+            </section>
+
+            <!-- Шаг 3: Голос -->
+            <section class="wizard-step" id="wizard-step-voice" data-wizard-step="voice" hidden>
+                <h2 class="wizard-step-title" data-i18n="dub.wizard_voice_title">Голос</h2>
+                <p class="wizard-step-sub" data-i18n="dub.wizard_voice_sub">Прослушайте и выберите голос</p>
+                <div id="wizard-voice-grid" class="wizard-tile-grid wizard-tile-grid--voice" role="listbox"></div>
+            </section>
+
+            <!-- Шаг 4: Тип контента -->
+            <section class="wizard-step" id="wizard-step-content" data-wizard-step="content" hidden>
+                <h2 class="wizard-step-title" data-i18n="dub.wizard_content_title">Тип контента</h2>
+                <p class="wizard-step-sub" data-i18n="dub.wizard_content_sub">Какой это материал?</p>
+                <div id="wizard-content-grid" class="wizard-tile-grid wizard-tile-grid--content" role="listbox"></div>
+            </section>
+
+            <!-- Шаг 5: Стиль -->
+            <section class="wizard-step" id="wizard-step-style" data-wizard-step="style" hidden>
+                <h2 class="wizard-step-title" data-i18n="dub.wizard_style_title">Стиль дубляжа</h2>
+                <p class="wizard-step-sub" data-i18n="dub.wizard_style_sub">Как должна звучать озвучка?</p>
+                <div id="wizard-style-grid" class="wizard-tile-grid wizard-tile-grid--style"></div>
+            </section>
+
+            <!-- Шаг 6: Запуск -->
+            <section class="wizard-step" id="wizard-step-start" data-wizard-step="start" hidden>
+                <h2 class="wizard-step-title" data-i18n="dub.wizard_ready_title">Всё готово</h2>
+                <p class="wizard-step-sub" data-i18n="dub.wizard_ready_sub">Проверьте параметры и запустите дубляж</p>
+                <div class="wizard-summary" id="wizard-summary"></div>
+                <div class="wizard-start-row">
+                    <button type="button" class="btn btn-primary wizard-start-btn" id="btn-start-dub" disabled
+                        data-i18n="dub.wizard_start">НАЧАТЬ ДУБЛЯЖ</button>
+                    <div id="dub-start-indicator" class="dub-start-indicator" style="display:none;" aria-live="polite">
+                        <span class="dub-dot" style="--i:0"></span>
+                        <span class="dub-dot" style="--i:1"></span>
+                        <span class="dub-dot" style="--i:2"></span>
+                        <span class="dub-start-label" data-i18n="dub.starting">Запуск…</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Прогресс -->
+        <div class="wizard-screen wizard-screen-progress" id="wizard-screen-progress" hidden>
+            <div class="wizard-progress-body">
+                <div class="wizard-progress-head">
+                    <div class="wizard-progress-pct" id="wizard-progress-pct">0%</div>
+                    <div class="wizard-info-ticker-wrap" aria-live="polite">
+                        <div class="wizard-info-ticker" id="wizard-info-ticker"></div>
+                    </div>
+                </div>
+                <div class="wizard-phase-list" id="wizard-phase-list">
+                    <div class="wizard-phase" data-phase="translate">
+                        <span class="wizard-phase-icon">📝</span>
+                        <span class="wizard-phase-name" data-i18n="dub.wizard_phase_translate">Перевод</span>
+                        <span class="wizard-phase-state" id="wizard-phase-translate"></span>
+                    </div>
+                    <div class="wizard-translate-substeps" id="wizard-translate-substeps" hidden aria-live="polite">
+                        <div class="wizard-substep" data-sub="marian_mt">
+                            <div class="wizard-substep-head">
+                                <span class="wizard-substep-label" data-i18n="dub.sub_marian">Marian MT</span>
+                                <span class="wizard-substep-meta">
+                                    <span class="wizard-substep-time" id="wizard-sub-marian-time"></span>
+                                    <span class="wizard-substep-status" id="wizard-sub-marian-status" aria-hidden="true"></span>
+                                </span>
+                            </div>
+                            <div class="wizard-substep-bar"><span class="wizard-substep-fill" id="wizard-sub-marian-fill"></span></div>
+                        </div>
+                        <div class="wizard-substep" data-sub="llm_adaptation">
+                            <div class="wizard-substep-head">
+                                <span class="wizard-substep-label" data-i18n="dub.sub_llm">Qwen / LLM Adaptation</span>
+                                <span class="wizard-substep-meta">
+                                    <span class="wizard-substep-time" id="wizard-sub-llm-time"></span>
+                                    <span class="wizard-substep-status" id="wizard-sub-llm-status" aria-hidden="true"></span>
+                                </span>
+                            </div>
+                            <div class="wizard-substep-bar"><span class="wizard-substep-fill" id="wizard-sub-llm-fill"></span></div>
+                        </div>
+                        <div class="wizard-substep" data-sub="post_processing">
+                            <div class="wizard-substep-head">
+                                <span class="wizard-substep-label" data-i18n="dub.sub_post">Post-processing</span>
+                                <span class="wizard-substep-meta">
+                                    <span class="wizard-substep-time" id="wizard-sub-post-time"></span>
+                                    <span class="wizard-substep-status" id="wizard-sub-post-status" aria-hidden="true"></span>
+                                </span>
+                            </div>
+                            <div class="wizard-substep-bar"><span class="wizard-substep-fill" id="wizard-sub-post-fill"></span></div>
+                        </div>
+                    </div>
+                    <div class="wizard-conveyor-timing" id="wizard-conveyor-timing" hidden aria-live="polite"></div>
+                    <div class="wizard-phase" data-phase="tts">
+                        <span class="wizard-phase-icon">🎙</span>
+                        <span class="wizard-phase-name" data-i18n="dub.wizard_phase_tts">Генерация речи</span>
+                        <span class="wizard-phase-state" id="wizard-phase-tts"></span>
+                    </div>
+                    <div class="wizard-phase" data-phase="sync">
+                        <span class="wizard-phase-icon">⏱</span>
+                        <span class="wizard-phase-name" data-i18n="dub.wizard_phase_sync">Синхронизация</span>
+                        <span class="wizard-phase-state" id="wizard-phase-sync"></span>
+                    </div>
+                    <div class="wizard-phase" data-phase="export">
+                        <span class="wizard-phase-icon">🎬</span>
+                        <span class="wizard-phase-name" data-i18n="dub.wizard_phase_export">Сборка MP4</span>
+                        <span class="wizard-phase-state" id="wizard-phase-export"></span>
+                    </div>
+                </div>
+                <div class="progress-bar wizard-progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width:0%;"></div>
+                </div>
+                <div id="dev-preview-panel" class="dev-preview-panel dev-only" hidden>
+                    <div class="dev-preview-head">Developer Preview</div>
+                    <video id="dev-preview-video" class="dev-preview-video" controls playsinline preload="metadata"></video>
+                    <div id="dev-preview-timing" class="dev-preview-timing"></div>
+                    <div id="dev-preview-timeline" class="dev-preview-timeline" aria-label="Agent timeline"></div>
+                    <div id="dev-preview-perf" class="dev-preview-perf"></div>
+                    <div id="dev-preview-error" class="dev-preview-error" hidden></div>
+                </div>
+                <span id="progress-percent" class="wizard-progress-percent-hidden" hidden>0%</span>
+                <ul id="progress-steps" class="progress-steps-list dev-only"></ul>
+                <div id="translation-review-banner" class="tr-banner wizard-tr-banner" style="display:none;">
+                    <p class="char-count" data-i18n="dub.review_pause_hint">Перевод готов. Проверьте текст перед озвучкой.</p>
+                    <div class="wizard-tr-actions">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-review-during-run"
+                            onclick="openTranslationReview()" data-i18n="dub.review_btn">📝 Контроль перевода</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="btn-approve-translation"
+                            onclick="approveTranslationReview()" data-i18n="dub.review_approve">✓ Одобрить и озвучить</button>
+                    </div>
+                </div>
+            </div>
+            <footer class="wizard-progress-footer">
+                <button type="button" class="btn btn-secondary wizard-progress-cancel" id="btn-progress-cancel"
+                    data-i18n="dub.wizard_cancel">Отмена</button>
+            </footer>
+        </div>
+
+        <!-- Результат -->
+        <div class="wizard-screen wizard-screen-result" id="wizard-screen-result" hidden>
+            <div class="panel" id="result-panel">
+                <div class="panel-header">
+                    <span class="panel-title" data-i18n="dub.result">Готово!</span>
+                </div>
+                <p data-i18n="dub.result_hint">Ваше озвученное видео готово к скачиванию.</p>
+                <div class="wizard-result-actions">
+                    <button type="button" id="download-link" class="btn btn-primary btn-large"
+                        onclick="saveToFolder()" data-i18n="dub.download">⬇ Скачать MP4</button>
+                    <button type="button" id="btn-openddf-report" class="btn btn-secondary btn-large" style="display:none;"
+                        onclick="openOpenDdfReport()">📊 OpenDDF</button>
+                    <button type="button" class="btn btn-secondary btn-large" id="btn-preview-output" style="display:none;"
+                        data-i18n="dub.preview">▶ Просмотр</button>
+                    <button type="button" class="btn btn-secondary btn-large" id="btn-open-studio" style="display:none;"
+                        data-i18n="dub.open_studio">🎛 Открыть в Dub Studio</button>
+                    <a id="subtitle-download-link" href="#" class="btn btn-secondary btn-large" download
+                        style="display:none;" data-i18n="dub.download_subs">⬇ Скачать SRT</a>
+                </div>
+                <div class="wizard-result-secondary">
+                    <button type="button" class="btn btn-secondary" id="btn-translation-review"
+                        style="display:none;" onclick="openTranslationReview()" data-i18n="dub.review_btn">📝 Контроль перевода</button>
+                    <button type="button" class="btn btn-sm btn-ghost" id="btn-wizard-new"
+                        data-i18n="dub.wizard_new">Новый дубляж</button>
+                    <button type="button" class="btn btn-sm btn-ghost" data-i18n="dub.report_error"
+                        onclick="vmSubmitErrorReport({ taskId: window.__vmLastTaskId })">📨 Сообщить об ошибке</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ошибка -->
+        <div class="wizard-screen wizard-screen-error" id="wizard-screen-error" hidden>
+            <div class="panel" id="error-panel" style="border-color:rgba(248,113,113,.35);">
+                <div class="panel-header">
+                    <span class="panel-title" data-i18n="dub.error_title">Ошибка дубляжа</span>
+                </div>
+                <div id="error-panel-summary" class="wizard-error-summary"></div>
+                <button type="button" id="error-panel-details-btn" class="btn btn-secondary" style="display:none;"
+                    data-i18n="dub.error_details">Подробнее</button>
+                <pre id="error-panel-details" class="wizard-error-details" style="display:none;"></pre>
+                <div id="error-panel-openddf" style="display:none;"></div>
+                <p id="error-panel-text" style="display:none;"></p>
+                <div class="wizard-result-secondary">
+                    <button type="button" class="btn btn-secondary" id="error-panel-diagnostics-btn" style="display:none;"
+                        onclick="vmDownloadOpenDdfZip()">📁 Скачать диагностику (ZIP)</button>
+                    <button type="button" class="btn btn-secondary" id="error-panel-openddf-btn" style="display:none;"
+                        onclick="openOpenDdfReport()">📊 OpenDDF</button>
+                    <button type="button" class="btn btn-secondary" data-i18n="dub.report_error"
+                        onclick="vmSubmitErrorReport({ taskId: window.__vmLastTaskId, errorMessage: window.__vmLastError, diagnostic: window.__vmLastDiagnostic })">
+                        📨 Сообщить об ошибке
+                    </button>
+                    <button type="button" class="btn btn-sm btn-ghost" id="btn-wizard-retry"
+                        data-i18n="dub.wizard_retry">Попробовать снова</button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="wizard-nav" id="wizard-nav" aria-label="Wizard navigation">
+            <button type="button" class="btn btn-secondary wizard-nav-btn" id="btn-wizard-back" hidden
+                data-i18n="dub.wizard_back">← Назад</button>
+            <span class="wizard-nav-spacer"></span>
+            <button type="button" class="btn btn-ghost wizard-nav-btn" id="btn-wizard-cancel" hidden
+                data-i18n="dub.wizard_cancel">Отмена</button>
+        </nav>
+    </div>
+
+    <!-- Подготовка компонентов -->
+    <div id="storage-wizard-overlay"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9998;align-items:center;justify-content:center;">
+        <div
+            style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:460px;width:92%;box-shadow:0 12px 40px rgba(0,0,0,.35);">
+            <h2 style="margin:0 0 8px;font-size:18px;" data-i18n="dub.storage_wizard_title">Где хранить компоненты?</h2>
+            <p style="font-size:12px;color:var(--text2);margin:0 0 16px;" data-i18n="dub.storage_wizard_sub">Выберите
+                диск с достаточным свободным местом. Можно изменить позже в настройках.</p>
+            <select id="storage-wizard-drive" class="select-control" style="width:100%;margin-bottom:12px;"></select>
+            <div id="storage-wizard-info" style="font-size:12px;color:var(--text2);margin-bottom:16px;"></div>
+            <div class="row-group" style="gap:8px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" id="storage-wizard-skip"
+                    data-i18n="dub.storage_wizard_skip">По умолчанию</button>
+                <button type="button" class="btn btn-primary" id="storage-wizard-ok"
+                    data-i18n="dub.storage_wizard_ok">Выбрать</button>
+            </div>
+        </div>
+    </div>
+    <div id="prepare-overlay"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;align-items:center;justify-content:center;">
+        <div
+            style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:420px;width:92%;box-shadow:0 12px 40px rgba(0,0,0,.35);">
+            <h2 style="margin:0 0 8px;font-size:18px;" data-i18n="dub.prepare_title">Подготовка компонентов</h2>
+            <p style="font-size:12px;color:var(--text2);margin:0 0 18px;" data-i18n="dub.prepare_sub">Настраиваем всё
+                необходимое для перевода видео</p>
+            <div class="progress-bar" style="display:block;margin-bottom:16px;">
+                <div id="prepare-fill" class="progress-fill" style="width:0%;"></div>
+            </div>
+            <div id="prepare-percent" style="font-size:12px;color:var(--text2);margin-bottom:12px;">0%</div>
+            <p id="prepare-status-text" style="font-size:13px;color:var(--text2);margin:0 0 12px;">Идёт подготовка
+                компонентов…</p>
+            <ul id="prepare-list" class="dev-only"
+                style="display:none;list-style:none;padding:0;margin:0;font-size:13px;"></ul>
+            <p id="prepare-error" style="display:none;color:#f87171;font-size:12px;margin-top:12px;"></p>
+            <div class="row-group" style="gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button type="button" class="btn btn-secondary btn-sm" id="prepare-cancel-btn"
+                    data-i18n="dub.wizard_cancel">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Просмотр готового MP4 -->
+    <div id="dub-preview-overlay" class="dub-preview-overlay" style="display:none;" role="dialog" aria-modal="true"
+        aria-labelledby="dub-preview-title">
+        <div class="dub-preview-panel">
+            <div class="dub-preview-header">
+                <h2 id="dub-preview-title" data-i18n="dub.preview">▶ Просмотр</h2>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-close-preview"
+                    data-i18n="dub.preview_close" data-i18n-aria-label="dub.preview_close" aria-label="Закрыть">✕</button>
+            </div>
+            <video id="dub-preview-video" class="dub-preview-video" controls playsinline></video>
+            <div class="dub-preview-footer">
+                <button type="button" id="btn-preview-download" class="btn btn-primary"
+                   onclick="saveToFolder()" data-i18n="dub.download">⬇ Скачать MP4</button>
+                <button type="button" class="btn btn-secondary" id="btn-close-preview-bottom"
+                   onclick="closeOutputPreview()" data-i18n="dub.preview_close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Текстовый экран (режим разработчика) -->
+    <div class="panel dev-only" id="segments-panel" style="display:none;">
+        <div class="panel-header" style="cursor:pointer;" id="segments-toggle">
+            <span class="panel-title" data-i18n="dub.segments">Текст дубляжа</span>
+            <span id="segments-chevron">▼</span>
+        </div>
+        <div id="segments-body">
+            <div id="segments-list" class="segments-list"></div>
+        </div>
+    </div>
+
+    <!-- Панель контроля перевода -->
+    <div id="translation-review-overlay" class="tr-overlay" style="display:none;" role="dialog" aria-modal="true"
+        aria-labelledby="tr-title">
+        <div class="tr-panel">
+            <div class="tr-header">
+                <h2 id="tr-title" data-i18n="dub.review_title">Контроль перевода</h2>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeTranslationReview()"
+                    aria-label="Close">✕</button>
+            </div>
+            <p class="char-count tr-hint" data-i18n="dub.review_hint_simple">Проверьте и при необходимости
+                отредактируйте финальный текст перед озвучкой.</p>
+            <div class="tr-toolbar">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyTranslationReview()"
+                    data-i18n="dub.review_copy">📋 Копировать всё</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="exportTranslationReview()"
+                    data-i18n="dub.review_export">⬇ Экспорт TXT</button>
+                <button type="button" class="btn btn-secondary btn-sm dev-only" id="btn-dev-inspector"
+                    style="display:none;" onclick="openTranslationInspector()">🔬 Developer Inspector</button>
+                <button type="button" class="btn btn-primary btn-sm" id="tr-approve-btn" style="display:none;"
+                    onclick="approveTranslationReview()" data-i18n="dub.review_approve">✓ Одобрить и озвучить</button>
+            </div>
+            <div class="tr-editor-toolbar">
+                <div class="tr-font-size-btns">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setReviewFontSize(14)"
+                        title="A−">A−</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setReviewFontSize(16)"
+                        title="A">A</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setReviewFontSize(20)"
+                        title="A+">A+</button>
+                </div>
+                <input type="search" id="tr-search" placeholder="Поиск…" oninput="filterReviewSegments(this.value)" />
+                <input type="text" id="tr-replace-from" placeholder="Заменить…" style="max-width:120px;" />
+                <input type="text" id="tr-replace-to" placeholder="На…" style="max-width:120px;" />
+                <button type="button" class="btn btn-secondary btn-sm" onclick="replaceInReview()"
+                    data-i18n="dub.review_replace">Заменить</button>
+            </div>
+            <div id="translation-review-body" class="tr-body"></div>
+        </div>
+    </div>
+
+    <!-- OpenDDF -->
+    <div id="openddf-overlay" class="tr-overlay" style="display:none;" role="dialog" aria-modal="true"
+        aria-labelledby="openddf-title">
+        <div class="tr-panel" style="max-width:960px;">
+            <div class="tr-header">
+                <h2 id="openddf-title">OpenDDF — диагностика дубляжа</h2>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeOpenDdfReport()"
+                    aria-label="Close">✕</button>
+            </div>
+            <div id="openddf-summary" class="char-count" style="margin-bottom:12px;"></div>
+            <div class="tr-toolbar">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="vmDownloadOpenDdfZip()">⬇ ZIP</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="exportOpenDdfReportJson()">⬇ JSON</button>
+            </div>
+            <div id="openddf-body" class="tr-body" style="max-height:65vh;"></div>
+        </div>
+    </div>
+
+    <!-- Developer overlays -->
+    <div id="dev-diagnostics-overlay" class="td-overlay dev-only" style="display:none;" role="dialog" aria-modal="true"
+        aria-labelledby="td-title">
+        <div class="td-panel">
+            <div class="td-header">
+                <h2 id="td-title">Developer Translation Diagnostics</h2>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeDeveloperDiagnostics()"
+                    aria-label="Close">✕</button>
+            </div>
+            <div id="td-summary" class="td-summary"></div>
+            <div class="td-toolbar">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="exportDeveloperDiagnostics()">⬇ Export
+                    Diagnostics</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="closeDeveloperDiagnostics(true)">→ К
+                    подтверждению перевода</button>
+            </div>
+            <div id="dev-diagnostics-body" class="td-body"></div>
+        </div>
+    </div>
+    <div id="dev-inspector-overlay" class="ti-overlay dev-only" style="display:none;" role="dialog" aria-modal="true"
+        aria-labelledby="ti-title">
+        <div class="ti-panel">
+            <div class="ti-header">
+                <h2 id="ti-title">Developer Translation Inspector</h2>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeTranslationInspector()"
+                    aria-label="Close">✕</button>
+            </div>
+            <div id="ti-summary" class="ti-summary"></div>
+            <div class="ti-toolbar">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyInspectorSegment()">Copy Current
+                    Segment</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyInspectorFullReport()">Copy Full
+                    Report</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="exportTranslationInspector()">Export
+                    Report</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="saveTranslationInspectorJson()">Save
+                    JSON</button>
+                <select id="ti-segment-select" class="ti-seg-select"
+                    onchange="selectInspectorSegment(this.value)"></select>
+            </div>
+            <div id="dev-inspector-body" class="ti-body"></div>
+        </div>
+    </div>
+
+    <!-- AI Module first-run dialog (TubeDub AI Manager) -->
+    <div id="ai-module-overlay" class="ti-overlay" style="display:none;" role="dialog" aria-modal="true"
+        aria-labelledby="ai-module-title">
+        <div class="ti-panel" style="max-width:480px;">
+            <h2 id="ai-module-title" style="margin:0 0 12px;font-size:18px;">AI-модуль TubeDub</h2>
+            <p id="ai-module-text" style="font-size:14px;line-height:1.55;color:var(--text2);margin:0 0 16px;">
+                Для максимального качества дубляжа требуется установить AI-модуль.<br><br>
+                Размер загрузки: <strong id="ai-module-size">~6 ГБ</strong><br><br>
+                После установки интеллектуальная адаптация текста станет значительно качественнее.
+            </p>
+            <div id="ai-module-progress" style="display:none;margin-bottom:12px;">
+                <div style="height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;">
+                    <div id="ai-module-progress-bar" style="height:100%;width:0;background:var(--accent);transition:width .3s;"></div>
+                </div>
+                <div id="ai-module-progress-msg" class="char-count" style="margin-top:6px;"></div>
+            </div>
+            <div class="row-group" style="gap:8px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary" id="ai-module-install-btn">Установить</button>
+                <button type="button" class="btn btn-secondary" id="ai-module-later-btn">Позже</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="application/json"
+        id="vm-bootstrap-data">{{ {"voices": voices, "languages": languages} | tojson }}</script>
+    <script>
+        (function () {
+            var data = JSON.parse(document.getElementById('vm-bootstrap-data').textContent);
+            window.VM_VOICES = data.voices;
+            window.VM_LANGUAGES = data.languages;
+        })();
+    </script>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/ui_sounds.js"></script>
+<script src="{{ url_for('static', filename='js/prepare.js') }}"></script>
+<script src="/static/js/cloud_post_dub.js"></script>
+<script src="/static/js/dub.js?v=20260709a"></script>
+{% endblock %}

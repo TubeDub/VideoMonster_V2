@@ -1,0 +1,18 @@
+{
+  "id": "subtitles_only",
+  "mix_mode": "original_only",
+  "original_volume": 1.0,
+  "dub_volume": 0.0,
+  "background_volume": 1.0,
+  "skip_tts": true,
+  "i18n_key": "dub.style_subs",
+  "order": 90,
+  "visible": true,
+  "reply_start_delay_ms": 0,
+  "max_atempo": 1.18,
+  "allow_atempo": false,
+  "prefer_semantic_adapt": false,
+  "sync_mode": "standard",
+  "voice_fx": null,
+  "preview_phrases": {}
+}

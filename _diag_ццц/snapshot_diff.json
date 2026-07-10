@@ -1,0 +1,6 @@
+{
+  "stage": "pipeline",
+  "task_id": "790fc4e33e3646b0b920591d26b26f6c",
+  "error_type": "RuntimeError",
+  "message": "{'reason': 'Этап завис: preparing. Нет активности 1 мин 32 с. ', 'reason_short': 'Этап завис: preparing. Нет активности 1 мин 32 с. ', 'error_code': 'PIPELINE_STALLED', 'stage': 'preparing'}"
+}

@@ -1,0 +1,344 @@
+{
+  "events": [
+    {
+      "ts_ms": 1783697239167,
+      "event": "boot_ok",
+      "feature_id": "core",
+      "message": "engines",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239243,
+      "event": "boot_ok",
+      "feature_id": "translation",
+      "message": "engines/translation_pipeline.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239247,
+      "event": "boot_ok",
+      "feature_id": "tts",
+      "message": "engines/tts.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239266,
+      "event": "boot_ok",
+      "feature_id": "dubbing",
+      "message": "api/auto_dub_api.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239269,
+      "event": "boot_ok",
+      "feature_id": "audio",
+      "message": "engines/dub_engine.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239273,
+      "event": "boot_ok",
+      "feature_id": "source_separation",
+      "message": "engines/source_separation.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239277,
+      "event": "boot_ok",
+      "feature_id": "video",
+      "message": "engines/ffmpeg_paths.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239280,
+      "event": "boot_ok",
+      "feature_id": "ui",
+      "message": "templates",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239283,
+      "event": "skipped",
+      "feature_id": "strict_llm_adaptation",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239289,
+      "event": "boot_ok",
+      "feature_id": "enterprise_translation",
+      "message": "engines/enterprise_translation",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239296,
+      "event": "boot_ok",
+      "feature_id": "word_timing",
+      "message": "engines/word_timing_map",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239299,
+      "event": "boot_ok",
+      "feature_id": "professional_dubbing",
+      "message": "engines/professional_dubbing",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239309,
+      "event": "boot_ok",
+      "feature_id": "voice_studio",
+      "message": "engines/recording_studio",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239313,
+      "event": "boot_ok",
+      "feature_id": "ocr",
+      "message": "api/ocr_api.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239316,
+      "event": "skipped",
+      "feature_id": "dub_studio",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239321,
+      "event": "skipped",
+      "feature_id": "soft_sync",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239324,
+      "event": "skipped",
+      "feature_id": "emotion_tts",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239327,
+      "event": "boot_ok",
+      "feature_id": "developer_tools",
+      "message": "engines/dev_diagnostics.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239331,
+      "event": "boot_ok",
+      "feature_id": "translation_inspector",
+      "message": "engines/translation_inspector.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239334,
+      "event": "boot_ok",
+      "feature_id": "pipeline_inspector",
+      "message": "engines/translation_diagnostics.py",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239341,
+      "event": "boot_ok",
+      "feature_id": "pipeline_platform",
+      "message": "engines/pipeline_platform",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239372,
+      "event": "skipped",
+      "feature_id": "ai_director",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239375,
+      "event": "skipped",
+      "feature_id": "ai_assistant",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239378,
+      "event": "skipped",
+      "feature_id": "user_recording",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239381,
+      "event": "skipped",
+      "feature_id": "live_translation",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239388,
+      "event": "skipped",
+      "feature_id": "live_stream",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239399,
+      "event": "skipped",
+      "feature_id": "ai_studio",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239406,
+      "event": "skipped",
+      "feature_id": "voice_trainer",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239414,
+      "event": "skipped",
+      "feature_id": "singing_trainer",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239980,
+      "event": "skipped",
+      "feature_id": "realtime_interpreter",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697239991,
+      "event": "skipped",
+      "feature_id": "screen_dub",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697240000,
+      "event": "skipped",
+      "feature_id": "advanced_voice_cloning",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697240007,
+      "event": "skipped",
+      "feature_id": "cloud_platform",
+      "message": "disabled",
+      "duration_ms": 0.0,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    },
+    {
+      "ts_ms": 1783697240013,
+      "event": "bootstrap_done",
+      "feature_id": "",
+      "message": "{\"ok\": true, \"loaded\": [\"core\", \"translation\", \"tts\", \"dubbing\", \"audio\", \"source_separation\", \"video\", \"ui\", \"enterprise_translation\", \"word_timing\", \"professional_dubbing\", \"voice_studio\", \"ocr\", \"developer_tools\", \"translation_inspector\", \"pipeline_inspector\", \"pipeline_platform\"], \"failed\": [], \"duration_ms\": 845.98}",
+      "duration_ms": 845.98,
+      "memory_mb": null,
+      "error": null,
+      "meta": {}
+    }
+  ]
+}

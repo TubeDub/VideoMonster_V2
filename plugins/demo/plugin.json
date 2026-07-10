@@ -1,0 +1,18 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "author": "VideoMonster Team",
+  "description": "Reference test plugin for SDK validation",
+  "minimum_api": "1.0.0",
+  "dependencies": [],
+  "capabilities": ["utility"],
+  "permissions": {
+    "file": false,
+    "network": false,
+    "gpu": false,
+    "audio": false,
+    "video": false,
+    "memory": false
+  },
+  "entry_point": "plugin.py"
+}

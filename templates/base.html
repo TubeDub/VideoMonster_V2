@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>{% block title %}TubeDub{% endblock %}</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="TubeDub"/>
+  <meta name="theme-color" content="#1a1a2e"/>
+  <link rel="apple-touch-icon" href="/static/icons/icon-180.png"/>
+  <link rel="manifest" href="/static/manifest.json"/>
+
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  {% block extra_head %}{% endblock %}
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+  /* ── TOAST CONTAINER ── */
+  #vm-notify-container {
+    position: fixed; bottom: 80px; right: 16px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none;
+  }
+  #vm-notify-container .vm-toast { pointer-events: all; }
+  .license-banner {
+    display: flex; align-items: center; gap: 12px;
+    margin: 0 0 16px; padding: 12px 16px;
+    background: rgba(251, 191, 36, .12);
+    border: 1px solid rgba(251, 191, 36, .35);
+    border-radius: 10px; font-size: 13px; color: var(--text);
+  }
+  .license-banner-icon { font-size: 18px; }
+  .mod-status-dot {
+    width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.25);
+  }
+  .nav-label-mod { flex: 1; }
+  .mod-exp-badge {
+    font-size: 9px; font-weight: 700; margin-left: 4px; color: #f6ad55;
+    vertical-align: super;
+  }
+  .sidebar-nav .nav-item {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mod-soon-badge {
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+    background: rgba(156,163,175,.18); border: 1px solid rgba(156,163,175,.35);
+    border-radius: 6px; color: #9ca3af; letter-spacing: .03em;
+    flex-shrink: 0; margin-left: auto;
+  }
+  .nav-item.soon-item {
+    opacity: .65;
+  }
+  .nav-item.soon-item:hover {
+    opacity: .85;
+  }
+  /* Active modules get a subtle green tint indicator */
+  .sidebar-nav .nav-item.active {
+    color: #3ecf8e;
+  }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- ═══ TOPBAR (mobile) ═══ -->
+    <header class="topbar">
+      <div class="topbar-logo">
+        <span style="font-size:20px;">🎬</span>
+        <span style="font-weight:700;font-size:15px;">TubeDub</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+        <select id="ui-lang-select" class="select-control" style="width:auto;padding:4px 8px;font-size:12px;" onchange="setUiLang(this.value)" title="Language">
+          <option value="ru">RU</option>
+          <option value="uk">UK</option>
+          <option value="en">EN</option>
+          <option value="de">DE</option>
+        </select>
+        <button id="mode-toggle-btn" class="mode-btn" onclick="toggleMode()" title="Переключить режим">✨ Просто</button>
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Меню">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect y="4" width="22" height="2" rx="1" fill="currentColor"/>
+            <rect y="10" width="22" height="2" rx="1" fill="currentColor"/>
+            <rect y="16" width="22" height="2" rx="1" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══ SIDEBAR OVERLAY ═══ -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">🎬</span>
+        <span class="logo-text">TubeDub</span>
+        <span id="sys-dot" title="Проверка системы…"
+              style="width:8px;height:8px;border-radius:50%;background:#555;
+                     margin-left:auto;flex-shrink:0;transition:background .4s;"
+        ></span>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav-dynamic">
+        {# Fallback if JS disabled #}
+        <a href="/" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></a>
+        <a href="/dub" class="nav-item"><span class="nav-icon">🎬</span><span class="nav-label">Дубляж</span></a>
+        <a href="/settings" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">Настройки</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" id="sidebar-update-hint" class="vm-update-badge"
+          style="display:none;width:100%;justify-content:center;margin-bottom:8px;font-size:11px;padding:7px 10px;"
+          title="Доступно обновление"></button>
+        <button class="mode-btn" onclick="toggleMode();closeSidebar();" id="sidebar-mode-btn" style="width:100%;text-align:center;">✨ Просто</button>
+        <div style="margin-top:8px;font-size:11px;color:var(--text2);text-align:center;" data-i18n="app.powered_by">Powered by VideoMonster Engine</div>
+      </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="main-content{% block main_class %}{% endblock %}">
+      <div id="license-banner" class="license-banner" style="display:none;">
+        <span class="license-banner-icon">⏳</span>
+        <span class="license-banner-text"></span>
+        <a href="/settings" class="btn btn-sm" style="margin-left:auto;">Настройки</a>
+      </div>
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- ═══ BOTTOM NAV (mobile) ═══ -->
+    <nav class="bottom-nav">
+      <a href="/" class="bottom-nav-item {% if request.path == '/' %}active{% endif %}">
+        <span class="nav-icon">🏠</span><span>Главная</span>
+      </a>
+      <a href="/dub" class="bottom-nav-item {% if request.path == '/dub' %}active{% endif %}">
+        <span class="nav-icon">🎬</span><span>Дубляж</span>
+      </a>
+      <a href="/translate" class="bottom-nav-item {% if request.path == '/translate' %}active{% endif %}">
+        <span class="nav-icon">🌍</span><span>Перевод</span>
+      </a>
+      <a href="/voice" class="bottom-nav-item {% if request.path == '/voice' %}active{% endif %}">
+        <span class="nav-icon">🔊</span><span>Озвучка</span>
+      </a>
+      <a href="/projects" class="bottom-nav-item {% if request.path == '/projects' %}active{% endif %}">
+        <span class="nav-icon">📁</span><span>Проекты</span>
+      </a>
+    </nav>
+
+  </div><!-- /.app-layout -->
+
+  <!-- ═══ FIRST-RUN PREPARATION SCREEN ═══ -->
+  <div id="tubedub-prepare-overlay" style="display:none;">
+    <div class="tdp-card">
+      <div class="tdp-logo">🎬 TubeDub</div>
+      <div class="tdp-title">Добро пожаловать в TubeDub</div>
+      <div class="tdp-sub" id="tdp-sub">Подготавливаем программу…</div>
+      <div class="tdp-bar"><div class="tdp-bar-fill" id="tdp-bar-fill"></div></div>
+      <div class="tdp-wait" id="tdp-wait"></div>
+      <ul class="tdp-list" id="tdp-list"></ul>
+      <div class="tdp-error" id="tdp-error" style="display:none;"></div>
+      <div class="tdp-actions" id="tdp-actions" style="display:none;">
+        <button type="button" class="tdp-btn" id="tdp-retry">Повторить</button>
+        <button type="button" class="tdp-btn" id="tdp-skip">Продолжить без ожидания</button>
+      </div>
+      <div class="tdp-done" id="tdp-done" style="display:none;">Готово</div>
+    </div>
+  </div>
+  <style>
+    #tubedub-prepare-overlay{position:fixed;inset:0;z-index:99999;display:flex;
+      align-items:center;justify-content:center;
+      background:radial-gradient(120% 120% at 50% 0%,#1a1d29 0%,#0c0e16 100%);
+      transition:opacity .5s ease;}
+    #tubedub-prepare-overlay.tdp-hide{opacity:0;pointer-events:none;}
+    .tdp-card{width:min(440px,90vw);padding:34px 30px;border-radius:18px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 24px 80px rgba(0,0,0,.55);text-align:center;color:#e8eaf0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
+    .tdp-logo{font-size:15px;letter-spacing:.5px;opacity:.7;margin-bottom:18px;}
+    .tdp-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+    .tdp-sub{font-size:13px;color:#9aa0b4;margin-bottom:22px;min-height:18px;}
+    .tdp-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);
+      overflow:hidden;margin-bottom:22px;}
+    .tdp-bar-fill{height:100%;width:0;border-radius:6px;
+      background:linear-gradient(90deg,#6c8cff,#9b6cff);transition:width .4s ease;}
+    .tdp-list{list-style:none;margin:0;padding:0;text-align:left;}
+    .tdp-list li{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;font-size:14px;
+      padding:7px 2px;color:#c7cbd9;}
+    .tdp-list li .tdp-ic{width:20px;text-align:center;font-size:14px;}
+    .tdp-list li.pending .tdp-ic{color:#6c8cff;animation:tdpspin 1s linear infinite;}
+    .tdp-list li.ready{color:#e8eaf0;}
+    .tdp-list li.ready .tdp-ic{color:#3ecf8e;}
+    .tdp-list li.optional .tdp-ic{color:#7a809a;}
+    .tdp-done{margin-top:18px;font-size:18px;font-weight:700;color:#3ecf8e;}
+    .tdp-list li.error{color:#f56565;}
+    .tdp-list li.active{color:#e8eaf0;}
+    .tdp-list li .tdp-pct{font-variant-numeric:tabular-nums;color:#9aa0b4;font-size:11px;min-width:36px;text-align:right;}
+    .tdp-list li .tdp-msg{flex-basis:100%;padding-left:30px;}
+    .tdp-wait{font-size:12px;color:#f6ad55;margin:8px 0 0;min-height:16px;}
+    .tdp-error{font-size:12px;color:#f56565;margin:10px 0 0;}
+    .tdp-actions{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+    .tdp-btn{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e8eaf0;
+      border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;}
+    .tdp-btn:hover{background:rgba(255,255,255,.1);}
+    @keyframes tdpspin{to{transform:rotate(360deg)}}
+  </style>
+  <script>
+  (function(){
+    if (localStorage.getItem('tubedub_prepared') === '1') return;
+    var overlay = document.getElementById('tubedub-prepare-overlay');
+    var list = document.getElementById('tdp-list');
+    var fill = document.getElementById('tdp-bar-fill');
+    var sub = document.getElementById('tdp-sub');
+    var waitEl = document.getElementById('tdp-wait');
+    var errEl = document.getElementById('tdp-error');
+    var actionsEl = document.getElementById('tdp-actions');
+    var doneEl = document.getElementById('tdp-done');
+    var retryBtn = document.getElementById('tdp-retry');
+    var skipBtn = document.getElementById('tdp-skip');
+    if (!overlay) return;
+    var startedAt = Date.now();
+    var icons = { ready:'✓', optional:'•', error:'✕', active:'⟳', pending:'○' };
+    function render(d){
+      var comps = d.components || [];
+      list.innerHTML = '';
+      comps.forEach(function(c){
+        var li = document.createElement('li');
+        var st = c.status || 'pending';
+        li.className = st;
+        var pct = Math.round(Number(c.percent) || 0);
+        li.innerHTML = '<span class="tdp-ic">' + (icons[st] || '○') + '</span>'
+          + '<span style="flex:1;min-width:0;">' + (c.label || c.id || '') + '</span>'
+          + '<span class="tdp-pct">' + (pct > 0 || st === 'ready' ? pct + '%' : '') + '</span>'
+          + (c.message ? '<span class="tdp-msg">' + c.message + '</span>' : '');
+        list.appendChild(li);
+      });
+      var overall = Number(d.overall_percent);
+      if (!overall && comps.length) {
+        var sum = 0;
+        comps.forEach(function(c){ sum += Number(c.percent) || 0; });
+        overall = sum / comps.length;
+      }
+      fill.style.width = Math.round(overall || 0) + '%';
+      if (d.current_component && d.running) {
+        sub.textContent = 'Устанавливаем: ' + d.current_component + '…';
+      } else if (d.error) {
+        sub.textContent = 'Ошибка подготовки';
+      } else if (d.ready) {
+        sub.textContent = 'Программа готова к работе';
+      } else {
+        sub.textContent = 'Устанавливаем необходимые компоненты…';
+      }
+      waitEl.textContent = d.wait_reason || '';
+      if (d.error) {
+        errEl.style.display = 'block';
+        errEl.textContent = d.error + (d.log_path ? ' (см. ' + d.log_path + ')' : '');
+        actionsEl.style.display = 'flex';
+      } else {
+        errEl.style.display = 'none';
+        actionsEl.style.display = 'none';
+      }
+    }
+    function finish(){
+      localStorage.setItem('tubedub_prepared','1');
+      fetch('/api/system/prepare-done', { method:'POST' }).catch(function(){});
+      sub.textContent = 'Программа готова к работе';
+      fill.style.width = '100%';
+      doneEl.style.display = 'block';
+      actionsEl.style.display = 'none';
+      setTimeout(function(){
+        overlay.classList.add('tdp-hide');
+        setTimeout(function(){ overlay.style.display = 'none'; }, 600);
+      }, 900);
+    }
+    var pollTimer = null;
+    function poll(){
+      fetch('/api/system/prepare-status').then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d.already_prepared) { localStorage.setItem('tubedub_prepared','1'); overlay.style.display='none'; return; }
+          render(d);
+          var elapsed = (Date.now() - startedAt) / 1000;
+          if (d.ready && d.done) { finish(); return; }
+          if (d.error && d.done) { return; }
+          if (elapsed > 300 && !d.ready) {
+            errEl.style.display = 'block';
+            errEl.textContent = 'Подготовка занимает слишком долго. См. logs/install.log';
+            actionsEl.style.display = 'flex';
+            return;
+          }
+          pollTimer = setTimeout(poll, 1000);
+        })
+        .catch(function(){
+          if ((Date.now() - startedAt) > 15000) {
+            errEl.style.display = 'block';
+            errEl.textContent = 'Сервер не отвечает. Запустите TubeDub снова.';
+            actionsEl.style.display = 'flex';
+            return;
+          }
+          pollTimer = setTimeout(poll, 1500);
+        });
+    }
+    if (retryBtn) retryBtn.onclick = function(){
+      fetch('/api/system/prepare-retry', { method:'POST' }).then(function(){ startedAt = Date.now(); poll(); });
+    };
+    if (skipBtn) skipBtn.onclick = function(){ finish(); };
+    overlay.style.display = 'flex';
+    sub.textContent = 'Устанавливаем необходимые компоненты…';
+    poll();
+  })();
+  </script>
+
+  <!-- ═══ NOTIFICATIONS CONTAINER ═══ -->
+  <div id="vm-notify-container"></div>
+  <input type="file" id="vm-universal-import-input" style="display:none;" accept=".mp4,.mkv,.mov,.avi,.webm,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.wma,.aiff,.amr,.ac3,.ape,.srt,.vtt,.ass,.ssa,.txt"/>
+
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/license.js"></script>
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/modules_nav.js"></script>
+  <script src="/static/js/beta.js"></script>
+  <script>
+  function toggleSidebar() {
+    const s = document.getElementById('sidebar');
+    const o = document.getElementById('sidebar-overlay');
+    const open = s.classList.toggle('open');
+    o.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  window.addEventListener('orientationchange', closeSidebar);
+
+  // ── Системная точка в логотипе ──────────────────────────────
+  (function() {
+    const dot = document.getElementById('sys-dot');
+    if (!dot) return;
+    fetch('/api/system/quick_status')
+      .then(r => r.json())
+      .then(d => {
+        const colors = { ok: '#3ecf8e', warn: '#f6ad55', error: '#f56565' };
+        dot.style.background = colors[d.level] || '#555';
+        dot.title = d.message;
+      })
+      .catch(() => { dot.style.background = '#555'; dot.title = 'Недоступно'; });
+  })();
+
+  // Синхронизировать sidebar mode btn с основным
+  document.addEventListener('DOMContentLoaded', () => {
+    const sbBtn = document.getElementById('sidebar-mode-btn');
+    const mbBtn = document.getElementById('mode-toggle-btn');
+    if (sbBtn && mbBtn) {
+      const observer = new MutationObserver(() => {
+        sbBtn.textContent = mbBtn.textContent;
+      });
+      observer.observe(mbBtn, { childList: true, characterData: true, subtree: true });
+    }
+  });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

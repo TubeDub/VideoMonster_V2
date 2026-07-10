@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Developer Panel — TubeDub{% endblock %}
+{% block extra_head %}
+<style>
+.ff-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-bottom:16px; }
+.ff-stat { padding:14px; border-radius:8px; background:var(--card); border:1px solid var(--border); }
+.ff-stat .val { font-size:22px; font-weight:700; }
+.ff-table { width:100%; border-collapse:collapse; font-size:12px; }
+.ff-table th, .ff-table td { padding:8px 6px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle; }
+.ff-dot { width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px; }
+.ff-actions { display:flex; flex-wrap:wrap; gap:4px; }
+.ff-actions button { font-size:10px; padding:3px 6px; }
+.ff-log { font-family:monospace; font-size:11px; max-height:220px; overflow:auto; background:#111; padding:10px; border-radius:6px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🚩 Developer Panel</h1>
+  <p class="subtitle">Feature Flags — безопасное включение модулей TubeDub</p>
+</div>
+
+<div id="ff-blocked" class="card" style="display:none;padding:20px;">
+  <p>Доступно только в <strong>режиме разработчика</strong> (🔧 Dev + owner host).</p>
+</div>
+
+<div id="ff-panel" style="display:none;">
+  <div class="ff-grid" id="ff-stats"></div>
+
+  <div class="card" style="padding:0;overflow:auto;margin-bottom:16px;">
+    <table class="ff-table">
+      <thead>
+        <tr>
+          <th>Модуль</th>
+          <th>Статус</th>
+          <th>ON/OFF</th>
+          <th>Ready</th>
+          <th>Env</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody id="ff-table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="padding:14px;">
+    <h3 style="margin:0 0 8px;font-size:14px;">Developer Log</h3>
+    <div class="ff-log" id="ff-log"></div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/feature_flags_panel.js"></script>
+{% endblock %}

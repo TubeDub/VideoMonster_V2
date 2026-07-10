@@ -1,0 +1,11 @@
+flask>=3.0.0
+edge-tts>=6.1.9
+deep-translator>=1.11.4
+langdetect>=1.0.9
+pydub>=0.25.1
+audioop-lts; python_version >= '3.13'
+ffmpeg-python>=0.2.0
+faster-whisper>=1.0.0
+pywebview>=5.0
+pyinstaller>=6.3.0
+# argostranslate — опционально для офлайн-перевода

@@ -1,0 +1,931 @@
+{
+  "final_dub_qa": {
+    "ok": false,
+    "issue_count": 75,
+    "issues": [
+      {
+        "index": 7,
+        "code": "split_sentence",
+        "segment_text": "Так як два тижні раніше, коли Джордж зробив це, а потім щось відбулося, добре що це ще один автомобіль на великій швидко",
+        "next_segment_text": "Що Джорджа-молодшого вигнали з машини, але́ ві́н вижив.",
+        "severity": "error"
+      },
+      {
+        "index": 15,
+        "code": "split_sentence",
+        "segment_text": "І сказав він, що він насправді був кінематографістом в Голлівуді. І Георг Жр. Про те, як він нещодавно був застосований ",
+        "next_segment_text": "Джордж, я знаю людей в Університеті, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром після цієї фатальної ",
+        "severity": "error"
+      },
+      {
+        "index": 16,
+        "code": "split_sentence",
+        "segment_text": "Джордж, я знаю людей в Університеті, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром після цієї фатальної ",
+        "next_segment_text": "Але́ цей момент життя Джорджа молодшого не змінив життя Джорджа назавжди.",
+        "severity": "error"
+      },
+      {
+        "index": 0,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 0,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 43.8%; потеряно 7 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 43.8,
+          "words_lost": 7,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 16,
+          "baseline_words": 9,
+          "tts_words": 9
+        }
+      },
+      {
+        "idx": 0,
+        "code": "duration_overflow",
+        "tts_ms": 6192,
+        "slot_ms": 4960,
+        "window_ms": 4960,
+        "overflow_ms": 1232,
+        "index": 0,
+        "severity": "warning"
+      },
+      {
+        "idx": 0,
+        "code": "overlap_with_next",
+        "overlap_ms": 1232,
+        "next_index": 1,
+        "tts_ms": 6192,
+        "window_ms": 4960,
+        "index": 0,
+        "severity": "warning"
+      },
+      {
+        "index": 1,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 1,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 30.0%; потеряно 6 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 30.0,
+          "words_lost": 6,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 20,
+          "baseline_words": 14,
+          "tts_words": 14
+        }
+      },
+      {
+        "idx": 1,
+        "code": "duration_overflow",
+        "tts_ms": 6912,
+        "slot_ms": 6320,
+        "window_ms": 6320,
+        "overflow_ms": 592,
+        "index": 1,
+        "severity": "warning"
+      },
+      {
+        "idx": 1,
+        "code": "overlap_with_next",
+        "overlap_ms": 592,
+        "next_index": 2,
+        "tts_ms": 6912,
+        "window_ms": 6320,
+        "index": 1,
+        "severity": "warning"
+      },
+      {
+        "index": 2,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 2,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 33.3%; потеряно 11 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 33.3,
+          "words_lost": 11,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 33,
+          "baseline_words": 22,
+          "tts_words": 22
+        }
+      },
+      {
+        "index": 3,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 3,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 13.8%; потеряно 4 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 13.8,
+          "words_lost": 4,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 29,
+          "baseline_words": 25,
+          "tts_words": 25
+        }
+      },
+      {
+        "idx": 3,
+        "code": "duration_overflow",
+        "tts_ms": 10824,
+        "slot_ms": 8880,
+        "window_ms": 8880,
+        "overflow_ms": 1944,
+        "index": 3,
+        "severity": "warning"
+      },
+      {
+        "idx": 3,
+        "code": "overlap_with_next",
+        "overlap_ms": 1944,
+        "next_index": 4,
+        "tts_ms": 10824,
+        "window_ms": 8880,
+        "index": 3,
+        "severity": "warning"
+      },
+      {
+        "index": 4,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 4,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 39.5%; потеряно 17 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 39.5,
+          "words_lost": 17,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 43,
+          "baseline_words": 26,
+          "tts_words": 26
+        }
+      },
+      {
+        "index": 5,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 5,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 28.9%; потеряно 11 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 28.9,
+          "words_lost": 11,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 38,
+          "baseline_words": 27,
+          "tts_words": 27
+        }
+      },
+      {
+        "index": 6,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 6,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 30.0%; потеряно 6 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 30.0,
+          "words_lost": 6,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 20,
+          "baseline_words": 14,
+          "tts_words": 14
+        }
+      },
+      {
+        "idx": 6,
+        "code": "duration_overflow",
+        "tts_ms": 8160,
+        "slot_ms": 5600,
+        "window_ms": 5600,
+        "overflow_ms": 2560,
+        "index": 6,
+        "severity": "warning"
+      },
+      {
+        "idx": 6,
+        "code": "overlap_with_next",
+        "overlap_ms": 2560,
+        "next_index": 7,
+        "tts_ms": 8160,
+        "window_ms": 5600,
+        "index": 6,
+        "severity": "warning"
+      },
+      {
+        "index": 7,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "idx": 7,
+        "code": "duration_overflow",
+        "tts_ms": 13056,
+        "slot_ms": 10800,
+        "window_ms": 10800,
+        "overflow_ms": 2256,
+        "index": 7,
+        "severity": "warning"
+      },
+      {
+        "idx": 7,
+        "code": "overlap_with_next",
+        "overlap_ms": 2256,
+        "next_index": 8,
+        "tts_ms": 13056,
+        "window_ms": 10800,
+        "index": 7,
+        "severity": "warning"
+      },
+      {
+        "index": 8,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 8,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 33.3%; потеряно 4 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 33.3,
+          "words_lost": 4,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 12,
+          "baseline_words": 8,
+          "tts_words": 8
+        }
+      },
+      {
+        "idx": 8,
+        "code": "duration_overflow",
+        "tts_ms": 4776,
+        "slot_ms": 3760,
+        "window_ms": 3760,
+        "overflow_ms": 1016,
+        "index": 8,
+        "severity": "warning"
+      },
+      {
+        "idx": 8,
+        "code": "overlap_with_next",
+        "overlap_ms": 1016,
+        "next_index": 9,
+        "tts_ms": 4776,
+        "window_ms": 3760,
+        "index": 8,
+        "severity": "warning"
+      },
+      {
+        "index": 9,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 9,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 32.1%; потеряно 9 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 32.1,
+          "words_lost": 9,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 28,
+          "baseline_words": 19,
+          "tts_words": 19
+        }
+      },
+      {
+        "idx": 9,
+        "code": "duration_overflow",
+        "tts_ms": 9216,
+        "slot_ms": 7840,
+        "window_ms": 7840,
+        "overflow_ms": 1376,
+        "index": 9,
+        "severity": "warning"
+      },
+      {
+        "idx": 9,
+        "code": "overlap_with_next",
+        "overlap_ms": 1376,
+        "next_index": 10,
+        "tts_ms": 9216,
+        "window_ms": 7840,
+        "index": 9,
+        "severity": "warning"
+      },
+      {
+        "index": 10,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 10,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 31.7%; потеряно 13 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 31.7,
+          "words_lost": 13,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 41,
+          "baseline_words": 28,
+          "tts_words": 28
+        }
+      },
+      {
+        "idx": 10,
+        "code": "duration_overflow",
+        "tts_ms": 15696,
+        "slot_ms": 12560,
+        "window_ms": 12560,
+        "overflow_ms": 3136,
+        "index": 10,
+        "severity": "warning"
+      },
+      {
+        "idx": 10,
+        "code": "overlap_with_next",
+        "overlap_ms": 3136,
+        "next_index": 11,
+        "tts_ms": 15696,
+        "window_ms": 12560,
+        "index": 10,
+        "severity": "warning"
+      },
+      {
+        "index": 11,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "idx": 11,
+        "code": "duration_overflow",
+        "tts_ms": 7296,
+        "slot_ms": 5280,
+        "window_ms": 5280,
+        "overflow_ms": 2016,
+        "index": 11,
+        "severity": "warning"
+      },
+      {
+        "idx": 11,
+        "code": "overlap_with_next",
+        "overlap_ms": 2016,
+        "next_index": 12,
+        "tts_ms": 7296,
+        "window_ms": 5280,
+        "index": 11,
+        "severity": "warning"
+      },
+      {
+        "index": 12,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 12,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 15.6%; потеряно 5 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 15.6,
+          "words_lost": 5,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 32,
+          "baseline_words": 27,
+          "tts_words": 27
+        }
+      },
+      {
+        "idx": 12,
+        "code": "duration_overflow",
+        "tts_ms": 13704,
+        "slot_ms": 10080,
+        "window_ms": 10080,
+        "overflow_ms": 3624,
+        "index": 12,
+        "severity": "warning"
+      },
+      {
+        "idx": 12,
+        "code": "overlap_with_next",
+        "overlap_ms": 3624,
+        "next_index": 13,
+        "tts_ms": 13704,
+        "window_ms": 10080,
+        "index": 12,
+        "severity": "warning"
+      },
+      {
+        "index": 13,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 13,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 25.0%; потеряно 4 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 25.0,
+          "words_lost": 4,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 16,
+          "baseline_words": 12,
+          "tts_words": 12
+        }
+      },
+      {
+        "idx": 13,
+        "code": "duration_overflow",
+        "tts_ms": 6768,
+        "slot_ms": 4320,
+        "window_ms": 4320,
+        "overflow_ms": 2448,
+        "index": 13,
+        "severity": "warning"
+      },
+      {
+        "idx": 13,
+        "code": "overlap_with_next",
+        "overlap_ms": 2448,
+        "next_index": 14,
+        "tts_ms": 6768,
+        "window_ms": 4320,
+        "index": 13,
+        "severity": "warning"
+      },
+      {
+        "index": 14,
+        "code": "meaning_preserved_token",
+        "severity": "error",
+        "hints": [
+          "Haskell",
+          "Wexler"
+        ]
+      },
+      {
+        "index": 14,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 14.3%; потеряно 5 слов; удалено 0 смысловых конструкций; риск потери смысла: HIGH",
+        "detail": {
+          "shortened_pct": 14.3,
+          "words_lost": 5,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.85,
+          "meaning_loss_risk": "HIGH",
+          "original_words": 35,
+          "baseline_words": 30,
+          "tts_words": 30
+        }
+      },
+      {
+        "index": 14,
+        "code": "preserved_token",
+        "tokens": "****** [REDACTED BY OPENDDF] ******",
+        "stage": "final",
+        "severity": "warning"
+      },
+      {
+        "idx": 14,
+        "code": "duration_overflow",
+        "tts_ms": 13272,
+        "slot_ms": 10960,
+        "window_ms": 10960,
+        "overflow_ms": 2312,
+        "index": 14,
+        "severity": "warning"
+      },
+      {
+        "idx": 14,
+        "code": "overlap_with_next",
+        "overlap_ms": 2312,
+        "next_index": 15,
+        "tts_ms": 13272,
+        "window_ms": 10960,
+        "index": 14,
+        "severity": "warning"
+      },
+      {
+        "index": 15,
+        "code": "meaning_preserved_token",
+        "severity": "error",
+        "hints": [
+          "George"
+        ]
+      },
+      {
+        "index": 15,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 10.8%; потеряно 4 слов; удалено 0 смысловых конструкций; риск потери смысла: HIGH",
+        "detail": {
+          "shortened_pct": 10.8,
+          "words_lost": 4,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.85,
+          "meaning_loss_risk": "HIGH",
+          "original_words": 37,
+          "baseline_words": 33,
+          "tts_words": 33
+        }
+      },
+      {
+        "idx": 15,
+        "code": "duration_overflow",
+        "tts_ms": 17376,
+        "slot_ms": 10880,
+        "window_ms": 10880,
+        "overflow_ms": 6496,
+        "index": 15,
+        "severity": "warning"
+      },
+      {
+        "idx": 15,
+        "code": "overlap_with_next",
+        "overlap_ms": 6496,
+        "next_index": 16,
+        "tts_ms": 17376,
+        "window_ms": 10880,
+        "index": 15,
+        "severity": "warning"
+      },
+      {
+        "index": 16,
+        "code": "meaning_preserved_token",
+        "severity": "error",
+        "hints": [
+          "USC"
+        ]
+      },
+      {
+        "index": 16,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 15.2%; потеряно 5 слов; удалено 0 смысловых конструкций; риск потери смысла: HIGH",
+        "detail": {
+          "shortened_pct": 15.2,
+          "words_lost": 5,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.6,
+          "meaning_loss_risk": "HIGH",
+          "original_words": 33,
+          "baseline_words": 28,
+          "tts_words": 28
+        }
+      },
+      {
+        "index": 16,
+        "code": "preserved_token",
+        "tokens": "****** [REDACTED BY OPENDDF] ******",
+        "stage": "final",
+        "severity": "warning"
+      },
+      {
+        "idx": 16,
+        "code": "duration_overflow",
+        "tts_ms": 13968,
+        "slot_ms": 10400,
+        "window_ms": 10400,
+        "overflow_ms": 3568,
+        "index": 16,
+        "severity": "warning"
+      },
+      {
+        "idx": 16,
+        "code": "overlap_with_next",
+        "overlap_ms": 3568,
+        "next_index": 17,
+        "tts_ms": 13968,
+        "window_ms": 10400,
+        "index": 16,
+        "severity": "warning"
+      },
+      {
+        "index": 17,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 17,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 21.4%; потеряно 3 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 21.4,
+          "words_lost": 3,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 14,
+          "baseline_words": 11,
+          "tts_words": 11
+        }
+      },
+      {
+        "idx": 17,
+        "code": "duration_overflow",
+        "tts_ms": 5664,
+        "slot_ms": 5120,
+        "window_ms": 5120,
+        "overflow_ms": 544,
+        "index": 17,
+        "severity": "warning"
+      },
+      {
+        "idx": 17,
+        "code": "overlap_with_next",
+        "overlap_ms": 544,
+        "next_index": 18,
+        "tts_ms": 5664,
+        "window_ms": 5120,
+        "index": 17,
+        "severity": "warning"
+      },
+      {
+        "index": 18,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 18,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 22.9%; потеряно 8 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 22.9,
+          "words_lost": 8,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 35,
+          "baseline_words": 27,
+          "tts_words": 27
+        }
+      },
+      {
+        "idx": 18,
+        "code": "duration_overflow",
+        "tts_ms": 15480,
+        "slot_ms": 13440,
+        "window_ms": 13440,
+        "overflow_ms": 2040,
+        "index": 18,
+        "severity": "warning"
+      },
+      {
+        "idx": 18,
+        "code": "overlap_with_next",
+        "overlap_ms": 1960,
+        "next_index": 19,
+        "tts_ms": 15480,
+        "window_ms": 13440,
+        "index": 18,
+        "severity": "warning"
+      },
+      {
+        "index": 19,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 19,
+        "code": "over_shortening",
+        "stage": "semantic",
+        "severity": "warning",
+        "summary": "Сокращено на 33.3%; потеряно 10 слов; удалено 0 смысловых конструкций; риск потери смысла: LOW",
+        "detail": {
+          "shortened_pct": 33.3,
+          "words_lost": 10,
+          "removed_constructs": 0,
+          "meaning_loss_score": 0.0,
+          "meaning_loss_risk": "LOW",
+          "original_words": 30,
+          "baseline_words": 20,
+          "tts_words": 20
+        }
+      }
+    ],
+    "overlap_count": 0,
+    "split_sentence_count": 3,
+    "long_pause_count": 0
+  },
+  "segment_diagnostics_count": 20,
+  "runtime_pipeline_summary": [
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Whisper STT",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Translation",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Natural Translation",
+      "enabled": true,
+      "executed": true,
+      "applied": false,
+      "status": "skipped",
+      "skip_reason": "no_changes_needed",
+      "segments_changed": 0,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Semantic Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Timing-Aware Translation",
+      "enabled": true,
+      "executed": false,
+      "applied": false,
+      "status": "not_run",
+      "skip_reason": "empty_input",
+      "segments_changed": null,
+      "segments_adapted": 0
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "QA Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "TTS",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "SSML / Prosody",
+      "enabled": false,
+      "executed": false,
+      "applied": false,
+      "status": "disabled",
+      "skip_reason": "not_reached",
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Phoneme Support",
+      "enabled": false,
+      "executed": false,
+      "applied": false,
+      "status": "disabled",
+      "skip_reason": "not_reached",
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Slot Fit",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Timing Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    }
+  ],
+  "openddf_summary": {
+    "segment_count": 20,
+    "skipped_count": 0,
+    "overlap_count": 27,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "overlap_status": "OVERLAP DETECTED",
+    "timing_status": "TIMING MISMATCH"
+  }
+}

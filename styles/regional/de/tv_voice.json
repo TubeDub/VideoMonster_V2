@@ -1,0 +1,30 @@
+{
+  "id": "tv_voice",
+  "pack": "regional",
+  "region_pack": "de",
+  "mix_mode": "custom",
+  "original_volume": 0.30,
+  "dub_volume": 0.96,
+  "background_volume": 0.30,
+  "tts_rate": "-6%",
+  "tts_pitch": "-1Hz",
+  "i18n_key": "dub.style_tv_voice_de",
+  "order": 101,
+  "reply_start_delay_ms": 140,
+  "max_atempo": 1.12,
+  "delivery": "german_tv_voiceover",
+  "intonation_range": "narrow",
+  "voice_fx": {
+    "highpass_hz": 95,
+    "mid_peak_hz": 2100,
+    "mid_peak_gain_db": 1.6,
+    "compressor_ratio": 2.0,
+    "compressor_threshold_db": -20,
+    "volume_gain_db": -0.5
+  },
+  "preview_phrases": {
+    "default": "German TV voice-over — clear and measured.",
+    "de": "Deutsche TV-Synchronstimme — ruhige, klare Sprecherstimme über dem Original.",
+    "en": "German TV voice-over — measured delivery with audible original."
+  }
+}

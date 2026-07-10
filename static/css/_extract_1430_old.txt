@@ -1,0 +1,2 @@
+.dub-page .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: var(--radius-sm); }
+.dub-page .btn { border-radius: var(--radius-sm); }

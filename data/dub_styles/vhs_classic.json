@@ -1,0 +1,40 @@
+{
+  "id": "vhs_classic",
+  "mix_mode": "custom",
+  "original_volume": 0.40,
+  "dub_volume": 0.92,
+  "background_volume": 0.40,
+  "tts_rate": "-11%",
+  "tts_pitch": "-2Hz",
+  "i18n_key": "dub.style_vhs_classic",
+  "order": 5,
+  "visible": true,
+  "reply_start_delay_ms": 225,
+  "reply_start_delay_jitter_ms": 75,
+  "max_atempo": 1.06,
+  "allow_atempo": false,
+  "prefer_semantic_adapt": true,
+  "sync_mode": "relaxed",
+  "voice_fx": {
+    "highpass_hz": 115,
+    "low_shelf_cut_hz": 240,
+    "low_shelf_gain_db": -4.5,
+    "mid_peak_hz": 2450,
+    "mid_peak_gain_db": 2.8,
+    "mid_peak_q": 1.1,
+    "nasal_peak_hz": 1350,
+    "nasal_peak_gain_db": 1.2,
+    "lowpass_hz": 11500,
+    "compressor_ratio": 2.6,
+    "compressor_threshold_db": -22,
+    "compressor_attack_ms": 14,
+    "compressor_release_ms": 130,
+    "volume_gain_db": -1.8
+  },
+  "preview_phrases": {
+    "default": "This is how classic single-voice VHS narration sounds.",
+    "ru": "Так звучит спокойный одноголосый перевод в духе видеокассет девяностых — ровно и без актёрской игры.",
+    "uk": "Так звучить спокійний одноголосий переклад на кшталт відеокасет дев'яностих — рівно і без акторської гри.",
+    "en": "Classic single-voice VHS-style narration — calm, even, without acting."
+  }
+}

@@ -1,0 +1,104 @@
+=== DUBBING ENGINE REPORT task=3fc94487eb5c41bd8d37e87011a748ca run=40de6198 ===
+lang=uk  segments=20  elapsed=242.07s
+adapted=10  skipped=0  strategies={'direct': 10, 'adapted': 0, 'video_adapt': 0, 'merge_next': 0, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=4803ms slot=4960ms
+       IN : 18-річний Джордж-молодший поїхав додому на вечерю через рідне місто.
+       OUT: 18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#01 strategy=add_pause pred=5945ms slot=6320ms
+       IN : Але коли Джордж їхав за кермом, він відчував, що він справді боявся потрапити ту
+       OUT: Але́ коли́ Джордж їхав за кермом, ві́н відчував, що ві́н справді боявся потрапит
+       [stress] ok
+       [timing] strategy=add_pause pred=5945ms slot=6320ms prev_end=4960ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#02 strategy=add_pause pred=11055ms slot=11520ms
+       IN : Джордж-молодший був дуже розумною дитиною, але також він дуже легко відволікся, 
+       OUT: Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволі
+       [stress] ok
+       [timing] strategy=add_pause pred=11055ms slot=11520ms prev_end=11280ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr
+  [✓] seg#03 strategy=direct pred=10191ms slot=8880ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#04 strategy=add_pause pred=11778ms slot=12720ms
+       IN : він просто не отримав одержимості свого сина, як чому б тобі не взяти фокус і не
+       OUT: Ві́н про́сто не отримав одержимості свого сина, як чому б тобі не взяти фокус і 
+       [punct] capitalised_first_word
+       [stress] ok
+       [timing] strategy=add_pause pred=11778ms slot=12720ms prev_end=31680ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#05 strategy=add_pause pred=9566ms slot=12160ms
+       IN : Джордж прийшов на цей перетин, де він був поруч з його домом, і він почав поверт
+       OUT: Джордж прийшов на цей перетин, де ві́н був поруч з його́ домом, і ві́н почав пов
+       [stress] ok
+       [timing] strategy=add_pause pred=9566ms slot=12160ms prev_end=44400ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#06 strategy=direct pred=8523ms slot=5600ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#07 strategy=add_pause pred=12066ms slot=10800ms
+       IN : Так як два тижні раніше, коли Джордж зробив це, а потім щось відбулося, добре що
+       OUT: Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре 
+       [punct] added_terminal_period
+       [stress] ok
+       [timing] strategy=add_pause pred=12066ms slot=10800ms prev_end=62320ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#08 strategy=add_pause pred=3990ms slot=3760ms
+       IN : що Джорджа молодшого вигнали з машини, але він вижив.
+       OUT: Що Джорджа молодшого вигнали з машини, але́ ві́н вижив.
+       [punct] capitalised_first_word
+       [stress] ok
+       [timing] strategy=add_pause pred=3990ms slot=3760ms prev_end=73120ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#09 strategy=add_pause pred=8781ms slot=7840ms
+       IN : Через два роки Джордж молодший повністю одужав від травм, стояв на фінішній ліні
+       OUT: Че́рез два роки Джордж молодший повністю одужав від травм, стояв на фінішній лін
+       [stress] ok
+       [timing] strategy=add_pause pred=8781ms slot=7840ms prev_end=76880ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#10 strategy=add_pause pred=11376ms slot=12560ms
+       IN : Так, з досвіду його ближнього бою, Джордж Джер. Уявлявся, що насправді був дад, 
+       OUT: Так, з досвіду його́ ближнього бою, Джордж Джер. Уявлявся, що насправді був дад,
+       [stress] ok
+       [timing] strategy=add_pause pred=11376ms slot=12560ms prev_end=84720ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; missing_entity:So George Jr
+  [✓] seg#11 strategy=direct pred=7115ms slot=5280ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#12 strategy=direct pred=14101ms slot=10080ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#13 strategy=direct pred=6698ms slot=4320ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#14 strategy=direct pred=14070ms slot=10960ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#15 strategy=direct pred=13925ms slot=10880ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#16 strategy=direct pred=13605ms slot=10400ms
+       NOTES: segment_watchdog_timeout; watchdog_timeout_30.0s
+  [✓] seg#17 strategy=add_pause pred=4951ms slot=5120ms
+       IN : Але цей момент життя Джорджа молодшого не змінив життя Джорджа назавжди.
+       OUT: Але́ цей момент життя Джорджа молодшого не змінив життя Джорджа назавжди.
+       [stress] ok
+       [timing] strategy=add_pause pred=4951ms slot=5120ms prev_end=149200ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#18 strategy=add_pause pred=11425ms slot=13440ms
+       IN : В цілому, це буде йти на повністю чергувати кінотеатр. Через 13 років, Джордж Дж
+       OUT: В цілому, це бу́де йти на повністю чергувати кінотеатр. Че́рез 13 років, Джордж 
+       [punct] added_terminal_period
+       [stress] ok
+       [timing] strategy=add_pause pred=11425ms slot=13440ms prev_end=154320ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#19 strategy=direct pred=10718ms slot=12880ms
+       IN : намагатися стати частиною найбільш успішної кінофраншизи в будь-який час. Георг 
+       OUT: Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Георг
+       [punct] capitalised_first_word
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; missing_entity:George Lucas

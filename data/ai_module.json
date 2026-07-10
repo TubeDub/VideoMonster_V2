@@ -1,0 +1,1026 @@
+{
+  "status": "installing",
+  "deferred": false,
+  "deferred_at": null,
+  "installed_by_tubedub": false,
+  "backend_label": "Локальный AI-модуль TubeDub",
+  "backend_internal": null,
+  "selected_provider": "llama",
+  "quality_mode": "max_quality",
+  "model": "llama3.1:8b",
+  "installed_at": "2026-07-01T00:07:51.894343+00:00",
+  "size_bytes": 7971255366,
+  "install_progress": {
+    "phase": "start",
+    "percent": 45,
+    "message": "Запуск AI-модуля…"
+  },
+  "install_log": [
+    {
+      "ts": "2026-07-04T20:00:36.915619+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-04T20:14:29.987069+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-04T20:25:21.053211+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T00:39:54.681679+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T00:40:02.847000+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T00:46:36.979500+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T00:57:44.373417+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T01:23:13.243959+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T01:23:20.709724+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T01:31:54.673264+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T01:43:02.357286+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T07:44:54.675985+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T07:45:01.599007+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T07:55:01.140532+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T08:06:14.946338+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T08:45:55.551260+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T08:46:04.332884+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T08:54:14.628176+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T08:59:53.844367+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T09:00:00.857683+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T09:16:59.649978+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T09:21:38.909402+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T09:23:14.826559+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T09:23:22.993238+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T09:29:47.962571+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T09:40:52.423604+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T11:12:04.612950+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T11:12:12.262543+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T11:18:31.482057+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T11:30:38.547871+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T12:44:44.148603+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T12:44:52.128390+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T12:51:31.287725+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T13:04:08.624836+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T13:29:08.221338+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T13:29:15.888282+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T13:35:31.524622+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T13:46:59.525453+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T16:33:38.409781+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T16:33:46.388803+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T16:39:55.861305+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T16:51:08.192888+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T17:59:31.398805+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T17:59:42.298634+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T18:07:28.273082+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T18:17:59.815700+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T19:57:00.545613+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T19:57:09.349575+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T20:03:29.041270+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T20:14:51.696764+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T22:58:30.272371+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T22:58:38.149968+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-05T23:05:49.737779+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-05T23:16:50.927185+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-06T03:00:20.218939+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T03:00:27.861618+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T15:48:08.544600+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T15:48:20.611535+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T17:09:31.567639+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T17:09:40.721685+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T17:15:08.990371+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T17:15:10.288381+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-06T17:15:11.661932+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T17:15:20.802958+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T17:43:04.092617+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T17:43:14.100466+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T18:00:09.557456+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T18:00:16.318071+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T18:06:00.172821+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T18:06:01.276203+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T23:55:24.916760+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T23:55:32.232055+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-06T23:56:00.914874+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-06T23:56:05.901078+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-06T23:56:11.093110+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-06T23:56:15.965350+00:00",
+      "level": "warn",
+      "message": "Verification attempt 2 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-06T23:56:16.069515+00:00",
+      "level": "warn",
+      "message": "Install state recovered → error: AI-модуль не отвечает"
+    },
+    {
+      "ts": "2026-07-06T23:56:21.182592+00:00",
+      "level": "warn",
+      "message": "Verification attempt 2 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-06T23:56:21.263337+00:00",
+      "level": "warn",
+      "message": "Install state recovered → error: AI-модуль не отвечает"
+    },
+    {
+      "ts": "2026-07-06T23:56:26.306317+00:00",
+      "level": "warn",
+      "message": "Verification attempt 2 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-06T23:56:26.405156+00:00",
+      "level": "warn",
+      "message": "Install state recovered → error: AI-модуль не отвечает"
+    },
+    {
+      "ts": "2026-07-07T00:02:49.012140+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T00:02:50.342285+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T02:22:35.892151+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-07T02:22:36.787136+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-07T02:22:38.121511+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-07T02:22:39.266799+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-07T02:22:41.011880+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-07T02:22:42.085123+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-07T02:57:59.450523+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T02:58:06.032016+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T03:12:42.421162+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-07T14:02:10.723512+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T14:02:21.058071+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T14:22:51.085577+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-07T16:23:29.069153+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T16:23:35.016590+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T17:28:47.016957+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T17:28:54.447745+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T17:41:42.037688+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-07T18:24:27.167485+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-07T20:42:15.884195+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T20:42:24.037190+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T20:57:10.060916+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-07T21:07:04.134989+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-07T22:09:25.593701+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T22:09:32.899660+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-07T22:22:11.000727+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-07T22:31:16.461675+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-08T06:09:34.109174+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T09:07:41.352614+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T09:07:51.199775+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T09:21:38.289744+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-08T10:09:58.944352+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T10:10:05.884265+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T10:25:42.471767+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-08T10:41:59.629348+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-08T16:02:32.518206+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T16:02:33.825312+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-08T16:02:42.561628+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T16:02:54.839279+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T16:22:33.656968+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-08T17:05:43.035405+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T17:05:52.021000+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T17:23:20.659564+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-08T17:35:46.210871+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T17:35:47.440676+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-08T17:35:49.759309+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T17:35:57.495831+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T19:40:15.051520+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T19:40:25.893892+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T20:26:25.303156+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T20:26:32.738047+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T20:47:09.154003+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-08T21:06:19.150286+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T21:06:28.750890+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T21:23:19.368484+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T21:23:21.975811+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-08T21:41:37.429534+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-09T02:51:33.800220+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T02:51:42.757680+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T02:53:10.684259+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T02:53:19.461066+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T02:55:29.133653+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T02:56:03.109759+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-09T03:09:02.341920+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T03:10:53.490647+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-09T03:10:57.170503+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-09T03:10:59.846429+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-09T03:11:01.276493+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-09T03:27:17.123581+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T03:27:19.688912+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T05:32:12.996172+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-09T15:20:40.378317+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T15:20:41.662882+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-09T15:20:45.624192+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T15:21:05.776242+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T15:21:05.840837+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T15:21:05.924031+00:00",
+      "level": "warn",
+      "message": "Verification attempt 2 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T15:21:06.065239+00:00",
+      "level": "warn",
+      "message": "Install state recovered → error: AI-модуль не отвечает"
+    },
+    {
+      "ts": "2026-07-09T16:35:30.589520+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T16:52:30.087053+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T16:52:32.569576+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T17:09:16.463614+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-09T17:15:41.101307+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T17:16:22.878939+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T17:16:27.935821+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T17:16:37.776844+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T17:16:48.515497+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T17:16:48.792229+00:00",
+      "level": "warn",
+      "message": "Verification attempt 1 slow/empty, retrying"
+    },
+    {
+      "ts": "2026-07-09T17:18:47.987525+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-09T17:18:49.325878+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-09T17:18:54.343759+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-09T17:18:55.718520+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-09T17:19:01.788948+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-09T17:19:03.692330+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-09T17:44:43.743289+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T18:03:40.415334+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T18:03:42.967811+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T18:15:25.781951+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-09T18:15:27.444981+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-09T19:16:51.269573+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T19:42:39.588998+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T19:59:27.495311+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T19:59:29.972854+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-09T20:08:26.903842+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-10T00:56:53.701878+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-10T00:56:54.803272+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-10T02:47:37.551817+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-10T03:04:24.687107+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-10T03:04:27.129494+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-10T03:13:19.756504+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    },
+    {
+      "ts": "2026-07-10T15:27:21.834682+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-10T15:28:28.527637+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-10T15:28:30.408784+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-10T15:28:32.553809+00:00",
+      "level": "info",
+      "message": "Verification OK"
+    },
+    {
+      "ts": "2026-07-10T15:28:34.038639+00:00",
+      "level": "info",
+      "message": "Install state recovered → ready (post-restart)"
+    },
+    {
+      "ts": "2026-07-10T15:44:58.113413+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-10T15:45:00.630983+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-10T15:55:14.587775+00:00",
+      "level": "info",
+      "message": "AI warmup OK"
+    }
+  ],
+  "last_verification": {
+    "ok": true,
+    "at": "2026-07-10T15:28:32.607518+00:00",
+    "recovered": true
+  },
+  "last_error": null
+}

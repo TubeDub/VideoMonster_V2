@@ -1,0 +1,70 @@
+{
+  "version": 2,
+  "description": "Proper nouns policy: Latin brands, preferred UA titles, name transliteration.",
+  "keep_latin": [
+    "Fiat",
+    "U.S.C.",
+    "Lucasfilm",
+    "Disney",
+    "Marvel",
+    "Netflix",
+    "YouTube",
+    "Google",
+    "Apple",
+    "Microsoft",
+    "Amazon",
+    "NASA",
+    "FBI",
+    "CIA",
+    "MIT",
+    "Harvard",
+    "Stanford",
+    "BMW",
+    "Mercedes",
+    "Audi",
+    "Toyota",
+    "Tesla",
+    "iPhone",
+    "Android",
+    "ChatGPT",
+    "OpenAI",
+    "Pixar",
+    "Silicon Valley",
+    "Wall Street",
+    "White House"
+  ],
+  "preferred_translations": {
+    "Star Wars": "«Зоряні війни»",
+    "The Star Wars": "«Зоряні війни»",
+    "Hollywood": "Голлівуд",
+    "University of Southern California": "Університет Південної Каліфорнії",
+    "USC": "Університет Південної Каліфорнії"
+  },
+  "transliterate_names": {
+    "George Jr.": "Джордж-молодший",
+    "George Jr": "Джордж-молодший",
+    "George Lucas": "Джордж Лукас",
+    "Haskell Wexler": "Хаскелл Векслер",
+    "James Cameron": "Джеймс Кемерон",
+    "Steven Spielberg": "Стівен Спілберг",
+    "Christopher Nolan": "Крістофер Нолан"
+  },
+  "cyrillic_mistranslations": {
+    "Fiat": ["Фіат", "Фиат", "Фiat", "фіат", "фиат"],
+    "USC": ["ЮСК", "Ю.С.К.", "юск"],
+    "Hollywood": ["Hollywoodі", "Hollywoodi", "Голливуд"],
+    "University of Southern California": [
+      "Университет Южной Калифорнии"
+    ],
+    "Lucasfilm": ["Лукasfilm", "Лукасfilm", "Лукасфільм"],
+    "Disney": ["Дісней", "Дисней"],
+    "Netflix": ["Нетфлікс", "Нетфликс"],
+    "YouTube": ["Ютуб", "ютуб"],
+    "Google": ["Гугл", "гугл"],
+    "George Lucas": ["George Lukas", "Джордж Лукas"],
+    "George Jr.": ["Джордж-молодший", "джордж-молодший"]
+  },
+  "wrong_title_translations": {
+    "Star Wars": ["Стар Вars", "Стар Wars", "Звёздные войны", "Зоряні wars"]
+  }
+}

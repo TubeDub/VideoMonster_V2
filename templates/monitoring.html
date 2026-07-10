@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Monitoring — VideoMonster{% endblock %}
+{% block extra_head %}
+<style>
+.mc-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+.mc-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.mc-card h3 { margin:0 0 6px; font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+.mc-val { font-size:24px; font-weight:700; }
+.mc-bar { height:6px; background:var(--border); border-radius:3px; margin-top:6px; overflow:hidden; }
+.mc-bar-fill { height:100%; background:#6366f1; border-radius:3px; transition:width .4s; }
+.mc-pipeline { display:flex; gap:4px; align-items:center; flex-wrap:wrap; margin:12px 0; }
+.mc-stage { padding:6px 10px; border-radius:6px; font-size:11px; border:1px solid var(--border); background:#12121c; }
+.mc-stage.active { border-color:#6366f1; background:rgba(99,102,241,.15); }
+.mc-stage.warn { border-color:#f59e0b; }
+.mc-stage.err { border-color:#ef4444; }
+.mc-arrow { color:var(--text-muted); font-size:10px; }
+.mc-timeline { max-height:240px; overflow-y:auto; font-family:monospace; font-size:11px; }
+.mc-tl-row { padding:4px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; }
+.mc-tl-time { color:#6366f1; min-width:60px; }
+.mc-dev { display:none; }
+#mc-panel.dev-mode .mc-dev { display:block; }
+#mc-panel.dev-mode .mc-dev-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+#mc-panel.dev-mode .mc-dev-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+#mc-panel.dev-mode .mc-user-only { display:none; }
+.mc-warn { padding:8px 12px; border-radius:6px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); font-size:12px; margin-bottom:8px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>📡 Monitoring Center</h1>
+  <p class="subtitle">
+    {% if developer %}Developer Mode — полная видимость системы{% else %}Ход обработки в реальном времени{% endif %}
+  </p>
+</div>
+
+<div id="mc-panel" class="{% if developer %}dev-mode{% endif %}">
+  <div class="mc-grid mc-user-only" id="mc-summary">
+    <div class="mc-card"><h3>Прогресс</h3><div class="mc-val" id="mc-progress">—</div><div class="mc-bar"><div class="mc-bar-fill" id="mc-progress-bar" style="width:0%"></div></div></div>
+    <div class="mc-card"><h3>ETA</h3><div class="mc-val" id="mc-eta">—</div></div>
+    <div class="mc-card"><h3>Этап</h3><div class="mc-val" id="mc-stage" style="font-size:16px">—</div></div>
+    <div class="mc-card"><h3>Скорость</h3><div class="mc-val" id="mc-speed" style="font-size:16px">—</div></div>
+  </div>
+
+  <div id="mc-warnings"></div>
+
+  <div class="mc-card mc-dev" style="margin-bottom:16px;">
+    <h3 style="font-size:14px;margin-bottom:10px;">Pipeline</h3>
+    <div class="mc-pipeline" id="mc-pipeline"></div>
+  </div>
+
+  <div class="mc-grid mc-dev">
+    <div class="mc-card"><h3>CPU</h3><div class="mc-val" id="mc-cpu">—</div><div class="mc-bar"><div class="mc-bar-fill" id="mc-cpu-bar"></div></div></div>
+    <div class="mc-card"><h3>GPU</h3><div class="mc-val" id="mc-gpu">—</div><div class="mc-bar"><div class="mc-bar-fill" id="mc-gpu-bar"></div></div></div>
+    <div class="mc-card"><h3>RAM</h3><div class="mc-val" id="mc-ram">—</div><div class="mc-bar"><div class="mc-bar-fill" id="mc-ram-bar"></div></div></div>
+    <div class="mc-card"><h3>VRAM</h3><div class="mc-val" id="mc-vram">—</div><div class="mc-bar"><div class="mc-bar-fill" id="mc-vram-bar"></div></div></div>
+  </div>
+
+  <div class="mc-dev mc-dev-grid">
+    <div class="mc-card">
+      <h3 style="font-size:14px;">Агенты</h3>
+      <div id="mc-agents" style="font-size:12px;"></div>
+    </div>
+    <div class="mc-card">
+      <h3 style="font-size:14px;">LLM Модели</h3>
+      <div id="mc-models" style="font-size:12px;"></div>
+    </div>
+    <div class="mc-card">
+      <h3 style="font-size:14px;">Очереди</h3>
+      <div id="mc-queues" style="font-size:12px;"></div>
+    </div>
+    <div class="mc-card">
+      <h3 style="font-size:14px;">Bottleneck</h3>
+      <div id="mc-bottleneck" style="font-size:12px;"></div>
+    </div>
+  </div>
+
+  <div class="mc-card mc-dev" style="margin-top:12px;">
+    <h3 style="font-size:14px;">Timeline</h3>
+    <div class="mc-timeline" id="mc-timeline"></div>
+  </div>
+
+  <div class="mc-dev mc-dev-toolbar">
+    <button class="btn btn-primary" id="mc-export-zip">📦 Export ZIP</button>
+    <button class="btn" id="mc-export-json">JSON</button>
+    <button class="btn" id="mc-export-html">HTML</button>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  window.VM_MONITORING_DEV = {{ 'true' if developer else 'false' }};
+</script>
+<script src="/static/js/monitoring.js"></script>
+{% endblock %}

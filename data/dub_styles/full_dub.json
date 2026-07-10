@@ -1,0 +1,24 @@
+{
+  "id": "full_dub",
+  "mix_mode": "full_dub",
+  "original_volume": 0.0,
+  "dub_volume": 1.0,
+  "background_volume": 0.0,
+  "tts_rate": "-3%",
+  "tts_pitch": null,
+  "i18n_key": "dub.style_full_dub",
+  "order": 2,
+  "visible": true,
+  "reply_start_delay_ms": 0,
+  "max_atempo": 1.18,
+  "allow_atempo": true,
+  "prefer_semantic_adapt": false,
+  "sync_mode": "standard",
+  "voice_fx": null,
+  "preview_phrases": {
+    "default": "Full dubbing replaces the original voice completely.",
+    "ru": "Полный дубляж — перевод полностью заменяет оригинальную речь.",
+    "uk": "Повний дубляж — переклад повністю замінює оригінальну мову.",
+    "en": "Full dubbing replaces the original voice completely."
+  }
+}

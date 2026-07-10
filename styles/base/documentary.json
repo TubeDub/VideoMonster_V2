@@ -1,0 +1,37 @@
+{
+  "id": "documentary",
+  "pack": "base",
+  "mix_mode": "custom",
+  "original_volume": 0.22,
+  "dub_volume": 1.0,
+  "background_volume": 0.22,
+  "tts_rate": "-6%",
+  "tts_pitch": "-1Hz",
+  "i18n_key": "dub.style_documentary",
+  "order": 2,
+  "reply_start_delay_ms": 80,
+  "max_atempo": 1.14,
+  "prefer_semantic_adapt": true,
+  "sync_mode": "relaxed",
+  "delivery": "calm_informative",
+  "intonation_range": "narrow",
+  "voice_fx": {
+    "highpass_hz": 90,
+    "low_shelf_cut_hz": 180,
+    "low_shelf_gain_db": -2.5,
+    "mid_peak_hz": 2200,
+    "mid_peak_gain_db": 1.5,
+    "compressor_ratio": 2.0,
+    "compressor_threshold_db": -20,
+    "volume_gain_db": -0.5
+  },
+  "preview_phrases": {
+    "default": "Documentary narration — calm and informative.",
+    "ru": "Документальный стиль — спокойная, ровная подача поверх тихого оригинала.",
+    "uk": "Документальний стиль — спокійна, рівна подача поверх тихого оригіналу.",
+    "en": "Documentary style — calm delivery over a quiet original.",
+    "ja": "ドキュメンタリー調の落ち着いたナレーションです。",
+    "de": "Dokumentarischer Stil — ruhige, sachliche Stimme über leisem Original.",
+    "fr": "Style documentaire — voix posée et informative sur fond original discret."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "documentary_fr",
+  "pack": "regional",
+  "region_pack": "fr",
+  "mix_mode": "custom",
+  "original_volume": 0.24,
+  "dub_volume": 1.0,
+  "background_volume": 0.24,
+  "tts_rate": "-6%",
+  "tts_pitch": "-1Hz",
+  "i18n_key": "dub.style_documentary_fr",
+  "order": 101,
+  "reply_start_delay_ms": 90,
+  "prefer_semantic_adapt": true,
+  "sync_mode": "relaxed",
+  "delivery": "french_documentary",
+  "intonation_range": "narrow",
+  "voice_fx": {
+    "highpass_hz": 88,
+    "mid_peak_hz": 2000,
+    "mid_peak_gain_db": 1.4,
+    "compressor_ratio": 2.0,
+    "compressor_threshold_db": -19,
+    "volume_gain_db": -0.3
+  },
+  "preview_phrases": {
+    "default": "French documentary voice — elegant and calm.",
+    "fr": "Voix documentaire française — posée et élégante sur fond original discret.",
+    "en": "French documentary style — calm, elegant narration."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "subtitles_only",
+  "pack": "base",
+  "mix_mode": "original_only",
+  "original_volume": 1.0,
+  "dub_volume": 0.0,
+  "background_volume": 1.0,
+  "skip_tts": true,
+  "i18n_key": "dub.style_subs",
+  "order": 90,
+  "visible": true,
+  "preview_phrases": {}
+}

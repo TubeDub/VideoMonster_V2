@@ -1,0 +1,21 @@
+{
+  "name": "openai",
+  "version": "1.0.0",
+  "author": "VideoMonster",
+  "description": "Builtin openai capability provider",
+  "minimum_api": "1.0.0",
+  "dependencies": [],
+  "capabilities": [
+    "translation"
+  ],
+  "permissions": {
+    "file": false,
+    "network": true,
+    "gpu": false,
+    "audio": false,
+    "video": false,
+    "memory": false
+  },
+  "entry_point": "plugin.py",
+  "execution_mode": "local"
+}

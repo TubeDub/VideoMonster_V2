@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Plugins — VideoMonster{% endblock %}
+{% block extra_head %}
+<style>
+.plg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px; }
+.plg-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+.plg-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.plg-card h3 { margin:0 0 4px; font-size:14px; }
+.plg-meta { font-size:11px; color:var(--text-muted); margin-bottom:8px; }
+.plg-caps { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0; }
+.plg-cap { font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(99,102,241,.15); color:#a5b4fc; }
+.plg-state { font-size:11px; font-weight:600; }
+.plg-state.enabled { color:#3ecf8e; }
+.plg-state.failed { color:#f56565; }
+.plg-state.disabled { color:#9ca3af; }
+.plg-actions { display:flex; gap:6px; margin-top:10px; }
+.plg-actions button { font-size:11px; padding:4px 8px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🧩 Plugin Manager</h1>
+  <p class="subtitle">Управление расширениями VideoMonster V2</p>
+</div>
+
+<div class="plg-header">
+  <div>
+    <span id="plg-summary" class="subtitle">Загрузка...</span>
+  </div>
+  <button class="btn btn-primary" id="plg-refresh">Обновить</button>
+</div>
+
+<div class="plg-grid" id="plg-list"></div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/plugins.js"></script>
+{% endblock %}

@@ -1,0 +1,3108 @@
+{
+  "task_id": "1c428751efc849d7a68085241325962e",
+  "project_uuid": "456f45d5-b8fd-48b6-b61a-410385115417",
+  "agent": "VoiceVerification/v1",
+  "summary": {
+    "segment_count": 20,
+    "passed_count": 0,
+    "failed_count": 20,
+    "retries": 60
+  },
+  "segment_count": 20,
+  "passed_count": 0,
+  "failed_count": 20,
+  "segments": [
+    {
+      "index": 0,
+      "segment_id": "620d606271a44edb8aa694a8fffbd2ac",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+      "recognized_text": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+      "final_metrics": {
+        "similarity": 0.8138,
+        "missing_words": [
+          "18-річний",
+          "джордж-молодший",
+          "додому",
+          "вечерю",
+          "че",
+          "рез",
+          "місто"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 1.0,
+        "asr_confidence": 0.75,
+        "recognized_text": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+        "issues": [
+          "missing_words",
+          "truncated_sentence",
+          "low_similarity"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_sentence",
+            "low_similarity"
+          ],
+          "expected_preview": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "recognized_preview": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+          "metrics": {
+            "similarity": 0.8138,
+            "missing_words": [
+              "18-річний",
+              "джордж-молодший",
+              "додому",
+              "вечерю",
+              "че",
+              "рез",
+              "місто"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0,
+            "asr_confidence": 0.75,
+            "recognized_text": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+            "issues": [
+              "missing_words",
+              "truncated_sentence",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_sentence",
+            "low_similarity"
+          ],
+          "expected_preview": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "recognized_preview": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+          "metrics": {
+            "similarity": 0.8138,
+            "missing_words": [
+              "18-річний",
+              "джордж-молодший",
+              "додому",
+              "вечерю",
+              "че",
+              "рез",
+              "місто"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0,
+            "asr_confidence": 0.75,
+            "recognized_text": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+            "issues": [
+              "missing_words",
+              "truncated_sentence",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_sentence",
+            "low_similarity"
+          ],
+          "expected_preview": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "recognized_preview": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+          "metrics": {
+            "similarity": 0.8138,
+            "missing_words": [
+              "18-річний",
+              "джордж-молодший",
+              "додому",
+              "вечерю",
+              "че",
+              "рез",
+              "місто"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0,
+            "asr_confidence": 0.75,
+            "recognized_text": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне міста.",
+            "issues": [
+              "missing_words",
+              "truncated_sentence",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "segment_id": "479fbab5a99449858f1a4d713250a110",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Але́ коли́ Джордж їхав за кермом, ві́н відчував, що ві́н справді боявся потрапити туди.",
+      "recognized_text": "Але коли Джорч їхав за кермом, вен вічував, що вен справді бо я все потрапити туди.",
+      "final_metrics": {
+        "similarity": 0.9136,
+        "missing_words": [
+          "джордж",
+          "ві",
+          "н",
+          "відчував",
+          "ві",
+          "н",
+          "боявся"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 1.0937,
+        "asr_confidence": 0.75,
+        "recognized_text": "Але коли Джорч їхав за кермом, вен вічував, що вен справді бо я все потрапити туди.",
+        "issues": [
+          "missing_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Але́ коли́ Джордж їхав за кермом, ві́н відчував, що ві́н справді боявся потрапити туди.",
+          "recognized_preview": "Але коли Джорч їхав за кормом, вен вічував, що він справді бо я все потрапити туди.",
+          "metrics": {
+            "similarity": 0.9136,
+            "missing_words": [
+              "джордж",
+              "ві",
+              "н",
+              "відчував",
+              "ві",
+              "н",
+              "боявся"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0937,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли Джорч їхав за кермом, вен вічував, що вен справді бо я все потрапити туди.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Але́ коли́ Джордж їхав за кермом, ві́н відчував, що ві́н справді боявся потрапити туди.",
+          "recognized_preview": "Але коли Джорч їхав за кермом, вен вічував, що вен справді бо я все потрапити туди.",
+          "metrics": {
+            "similarity": 0.9136,
+            "missing_words": [
+              "джордж",
+              "кермом",
+              "ві",
+              "н",
+              "відчував",
+              "ві",
+              "н",
+              "боявся"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0937,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли Джорч їхав за кормом, вен вічував, що він справді бо я все потрапити туди.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Але́ коли́ Джордж їхав за кермом, ві́н відчував, що ві́н справді боявся потрапити туди.",
+          "recognized_preview": "Але коли Джорч їхав за кермом, вен вічував, що вен справді бо я все потрапити туди.",
+          "metrics": {
+            "similarity": 0.9136,
+            "missing_words": [
+              "джордж",
+              "ві",
+              "н",
+              "відчував",
+              "ві",
+              "н",
+              "боявся"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0937,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли Джорч їхав за кермом, вен вічував, що вен справді бо я все потрапити туди.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "segment_id": "54ddd90aa2f6404cafcd6c6e5fb1ceb6",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікся, і че́рез це ві́н справді не займався чимось серйозним, окрім автомобілів.",
+      "recognized_text": "Джордж Молодший був дуже розумною дитиную, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався, чимось ср'йозним, окремав тому білив.",
+      "final_metrics": {
+        "similarity": 0.9049,
+        "missing_words": [
+          "джордж-молодший",
+          "ду",
+          "же",
+          "дитиною",
+          "тако",
+          "ж",
+          "ві",
+          "н",
+          "ду",
+          "же",
+          "че",
+          "рез",
+          "це",
+          "ві",
+          "н",
+          "серйозним",
+          "окрім",
+          "автомобілів"
+        ],
+        "truncated_words": [
+          "джордж-молодший",
+          "чимось",
+          "серйозним",
+          "окрім",
+          "автомобілів"
+        ],
+        "language_match": true,
+        "audio_completeness": 0.9729,
+        "asr_confidence": 0.75,
+        "recognized_text": "Джордж Молодший був дуже розумною дитиную, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався, чимось ср'йозним, окремав тому білив.",
+        "issues": [
+          "missing_words",
+          "truncated_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікся, і че́рез це ві́н справді не займавс",
+          "recognized_preview": "Джордж Молодший був дуже розумною дитиную, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався, ",
+          "metrics": {
+            "similarity": 0.9211,
+            "missing_words": [
+              "джордж-молодший",
+              "ду",
+              "же",
+              "тако",
+              "ж",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "че",
+              "рез",
+              "це",
+              "ві",
+              "н",
+              "серйозним",
+              "окрім",
+              "автомобілів"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "займався",
+              "чимось",
+              "серйозним",
+              "окрім",
+              "автомобілів"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9729,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж Молодший був дуже розумною дитиною, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався чимось ср'йозним, окремавто мобілив.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікся, і че́рез це ві́н справді не займавс",
+          "recognized_preview": "Джордж Молодший був дуже розумною дитиную, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався, ",
+          "metrics": {
+            "similarity": 0.9049,
+            "missing_words": [
+              "джордж-молодший",
+              "ду",
+              "же",
+              "дитиною",
+              "тако",
+              "ж",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "че",
+              "рез",
+              "це",
+              "ві",
+              "н",
+              "серйозним",
+              "окрім",
+              "автомобілів"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "чимось",
+              "серйозним",
+              "окрім",
+              "автомобілів"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9729,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж Молодший був дуже розумною дитиную, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався, чимось ср'йозним, окремав тому білив.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікся, і че́рез це ві́н справді не займавс",
+          "recognized_preview": "Джордж Молодший був дуже розумною дитиную, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався, ",
+          "metrics": {
+            "similarity": 0.9049,
+            "missing_words": [
+              "джордж-молодший",
+              "ду",
+              "же",
+              "дитиною",
+              "тако",
+              "ж",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "че",
+              "рез",
+              "це",
+              "ві",
+              "н",
+              "серйозним",
+              "окрім",
+              "автомобілів"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "чимось",
+              "серйозним",
+              "окрім",
+              "автомобілів"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9729,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж Молодший був дуже розумною дитиную, але також і віенд дуже легко відволікся.\nІ через цивіен справді не займався, чимось ср'йозним, окремав тому білив.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "segment_id": "8dea998e11cc41d2a9113254ae9a181a",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "І його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто дав йому Фіат, .",
+      "recognized_text": "І його батько купив йому маленьку і талійську машину фет, але його батько, не зважаючи на те, що він був втим, хто дав йому фет.",
+      "final_metrics": {
+        "similarity": 0.9593,
+        "missing_words": [
+          "італійську",
+          "фіат",
+          "незважаючи",
+          "ві",
+          "н",
+          "тим",
+          "фіат"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 1.1108,
+        "asr_confidence": 0.75,
+        "recognized_text": "І його батько купив йому маленьку і талійську машину фет, але його батько, не зважаючи на те, що він був втим, хто дав йому фет.",
+        "issues": [
+          "missing_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "І його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто дав",
+          "recognized_preview": "І його батько купив йому маленьку і талійську машину Файет, але його батько, не зважаючи на те, що він був втим, хто дав",
+          "metrics": {
+            "similarity": 0.9593,
+            "missing_words": [
+              "італійську",
+              "фіат",
+              "незважаючи",
+              "ві",
+              "н",
+              "тим",
+              "фіат"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.1108,
+            "asr_confidence": 0.75,
+            "recognized_text": "І його батько купив йому маленьку і талійську машину фет, але його батько, не зважаючи на те, що він був втим, хто дав йому фет.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "І його́ батько купив йому маленьку італійську машину Fiat, але́ його́ батько, незважаючи на те, що ві́н був тим, хто дав",
+          "recognized_preview": "І його батько купив йому маленьку і талійську машину фет, але його батько, не зважаючи на те, що він був тим, хто дав йо",
+          "metrics": {
+            "similarity": 0.9398,
+            "missing_words": [
+              "італійську",
+              "fiat",
+              "незважаючи",
+              "ві",
+              "н",
+              "тим",
+              "фіат"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.1216,
+            "asr_confidence": 0.75,
+            "recognized_text": "І його батько купив йому маленьку і талійську машину Файет, але його батько, не зважаючи на те, що він був втим, хто дав йому фіет.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "І його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто дав",
+          "recognized_preview": "І його батько купив йому маленьку і талійську машину фет, але його батько, не зважаючи на те, що він був втим, хто дав й",
+          "metrics": {
+            "similarity": 0.9633,
+            "missing_words": [
+              "італійську",
+              "фіат",
+              "незважаючи",
+              "ві",
+              "н",
+              "фіат"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.1108,
+            "asr_confidence": 0.75,
+            "recognized_text": "І його батько купив йому маленьку і талійську машину фет, але його батько, не зважаючи на те, що він був тим, хто дав йому фет.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "segment_id": "6a67eb87946744efb21c06b5ff03c959",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Ві́н про́сто не отримав одержимості свого сина, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, тому́ ми отримаємо твою справжню роботу.",
+      "recognized_text": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не застусувати його до інших речей, тому ми отримаємо твою справжнюю роботу.",
+      "final_metrics": {
+        "similarity": 0.9735,
+        "missing_words": [
+          "ві",
+          "н",
+          "про",
+          "сто",
+          "б",
+          "тобі",
+          "застосувати",
+          "справжню"
+        ],
+        "truncated_words": [
+          "твою",
+          "справжню",
+          "роботу"
+        ],
+        "language_match": true,
+        "audio_completeness": 0.883,
+        "asr_confidence": 0.75,
+        "recognized_text": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не застусувати його до інших речей, тому ми отримаємо твою справжнюю роботу.",
+        "issues": [
+          "missing_words",
+          "truncated_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Ві́н про́сто не отримав одержимості свого сина, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, том",
+          "recognized_preview": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не застусувати його до інших речей, тому ми",
+          "metrics": {
+            "similarity": 0.9735,
+            "missing_words": [
+              "ві",
+              "н",
+              "про",
+              "сто",
+              "б",
+              "тобі",
+              "застосувати",
+              "справжню"
+            ],
+            "truncated_words": [
+              "твою",
+              "справжню",
+              "роботу"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.883,
+            "asr_confidence": 0.75,
+            "recognized_text": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не застусувати його до інших речей, тому ми отримаємо твою справжнюю роботу.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Ві́н про́сто не отримав одержимості свого сина, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, том",
+          "recognized_preview": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не заступсувати його до інших речей, тому м",
+          "metrics": {
+            "similarity": 0.9735,
+            "missing_words": [
+              "ві",
+              "н",
+              "про",
+              "сто",
+              "б",
+              "тобі",
+              "застосувати",
+              "справжню"
+            ],
+            "truncated_words": [
+              "твою",
+              "справжню",
+              "роботу"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.883,
+            "asr_confidence": 0.75,
+            "recognized_text": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не застусувати його до інших речей, тому ми отримаємо твою справжнюю роботу.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Ві́н про́сто не отримав одержимості свого сина, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, том",
+          "recognized_preview": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не застусувати його до інших речей, тому ми",
+          "metrics": {
+            "similarity": 0.9703,
+            "missing_words": [
+              "ві",
+              "н",
+              "про",
+              "сто",
+              "б",
+              "тобі",
+              "застосувати",
+              "справжню"
+            ],
+            "truncated_words": [
+              "твою",
+              "справжню",
+              "роботу"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.883,
+            "asr_confidence": 0.75,
+            "recognized_text": "Він просто не отримав одержимості свого сина, як чому птобі не взяти фокус і не заступсувати його до інших речей, тому ми отримаємо твою справжнюю роботу.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "segment_id": "478f37fd45c44c8fb5ef44cb42ca61cc",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Джордж прийшов на цей перетин, де ві́н був поруч з його́ домом, і ві́н почав повертати, коли́ ві́н почув цей ду́же гучний звук і по́тім все́ потемніло.",
+      "recognized_text": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук і потім все потім ніло.",
+      "final_metrics": {
+        "similarity": 0.9541,
+        "missing_words": [
+          "джордж",
+          "перетин",
+          "ві",
+          "н",
+          "ві",
+          "н",
+          "ві",
+          "н",
+          "ду",
+          "же",
+          "по",
+          "тім",
+          "потемніло"
+        ],
+        "truncated_words": [
+          "по",
+          "тім",
+          "все",
+          "потемніло"
+        ],
+        "language_match": true,
+        "audio_completeness": 0.9118,
+        "asr_confidence": 0.75,
+        "recognized_text": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук і потім все потім ніло.",
+        "issues": [
+          "missing_words",
+          "truncated_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Джордж прийшов на цей перетин, де ві́н був поруч з його́ домом, і ві́н почав повертати, коли́ ві́н почув цей ду́же гучни",
+          "recognized_preview": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук ",
+          "metrics": {
+            "similarity": 0.9541,
+            "missing_words": [
+              "джордж",
+              "перетин",
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "по",
+              "тім",
+              "потемніло"
+            ],
+            "truncated_words": [
+              "по",
+              "тім",
+              "все",
+              "потемніло"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9118,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук і потім все потім ніло.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Джордж прийшов на цей перетин, де ві́н був поруч з його́ домом, і ві́н почав повертати, коли́ ві́н почув цей ду́же гучни",
+          "recognized_preview": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук ",
+          "metrics": {
+            "similarity": 0.9541,
+            "missing_words": [
+              "джордж",
+              "перетин",
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "по",
+              "тім",
+              "потемніло"
+            ],
+            "truncated_words": [
+              "по",
+              "тім",
+              "все",
+              "потемніло"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9118,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук і потім все потім ніло.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Джордж прийшов на цей перетин, де ві́н був поруч з його́ домом, і ві́н почав повертати, коли́ ві́н почув цей ду́же гучни",
+          "recognized_preview": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук ",
+          "metrics": {
+            "similarity": 0.9541,
+            "missing_words": [
+              "джордж",
+              "перетин",
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "по",
+              "тім",
+              "потемніло"
+            ],
+            "truncated_words": [
+              "по",
+              "тім",
+              "все",
+              "потемніло"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9118,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джорж прийшов на цей поретен, де він був поруч з його домом, і він почав повертати, коли він почув цей дуже гучний звук і потім все потім ніло.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "segment_id": "afd8bcf81fab4592be940c9e90a00c1b",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+      "recognized_text": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+      "final_metrics": {
+        "similarity": 0.9577,
+        "missing_words": [
+          "че",
+          "рез",
+          "джордж-молодший",
+          "лежав",
+          "ліжку",
+          "відділенні"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 1.4571,
+        "asr_confidence": 0.75,
+        "recognized_text": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+        "issues": [
+          "missing_words",
+          "duration_overflow"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+          "recognized_preview": "Через два тижні Джордж Молодший Лажав у лікарняному Лишку у віділені інтенсивної терапії місцевої лікарні.",
+          "metrics": {
+            "similarity": 0.9577,
+            "missing_words": [
+              "че",
+              "рез",
+              "джордж-молодший",
+              "лежав",
+              "ліжку",
+              "відділенні"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.4571,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+            "issues": [
+              "missing_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+          "recognized_preview": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+          "metrics": {
+            "similarity": 0.9484,
+            "missing_words": [
+              "че",
+              "рез",
+              "джордж-молодший",
+              "лежав",
+              "ліжку",
+              "відділенні"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.4571,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через два тижні Джордж Молодший Лажав у лікарняному Лишку у віділені інтенсивної терапії місцевої лікарні.",
+            "issues": [
+              "missing_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+          "recognized_preview": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+          "metrics": {
+            "similarity": 0.9577,
+            "missing_words": [
+              "че",
+              "рез",
+              "джордж-молодший",
+              "лежав",
+              "ліжку",
+              "відділенні"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.4571,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+            "issues": [
+              "missing_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "segment_id": "204fac88abb94def9aece4e52b55f6a6",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і розім'яти на машині Джорджа так важко.",
+      "recognized_text": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидкості,\nпромчала дорогою і розім'яти на машині Джорджа так важко.",
+      "final_metrics": {
+        "similarity": 0.9577,
+        "missing_words": [
+          "тижні",
+          "раніше",
+          "по",
+          "тім",
+          "відбулося",
+          "що"
+        ],
+        "truncated_words": [
+          "тижні",
+          "важко"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.2089,
+        "asr_confidence": 0.75,
+        "recognized_text": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидкості,\nпромчала дорогою і розім'яти на машині Джорджа так важко.",
+        "issues": [
+          "truncated_words"
+        ],
+        "route_to": "grammar",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "grammar",
+          "issues": [
+            "truncated_words"
+          ],
+          "expected_preview": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швид",
+          "recognized_preview": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидк",
+          "metrics": {
+            "similarity": 0.9577,
+            "missing_words": [
+              "тижні",
+              "раніше",
+              "по",
+              "тім",
+              "відбулося",
+              "що"
+            ],
+            "truncated_words": [
+              "тижні",
+              "важко"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2089,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидкості,\nпромчала дорогою і розім'яти на машині Джорджа так важко.",
+            "issues": [
+              "truncated_words"
+            ],
+            "route_to": "grammar",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "grammar",
+          "issues": [
+            "truncated_words"
+          ],
+          "expected_preview": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швид",
+          "recognized_preview": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидк",
+          "metrics": {
+            "similarity": 0.9577,
+            "missing_words": [
+              "тижні",
+              "раніше",
+              "по",
+              "тім",
+              "відбулося",
+              "що"
+            ],
+            "truncated_words": [
+              "тижні",
+              "важко"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2089,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидкості,\nпромчала дорогою і розім'яти на машині Джорджа так важко.",
+            "issues": [
+              "truncated_words"
+            ],
+            "route_to": "grammar",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "grammar",
+          "issues": [
+            "truncated_words"
+          ],
+          "expected_preview": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швид",
+          "recognized_preview": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидк",
+          "metrics": {
+            "similarity": 0.9577,
+            "missing_words": [
+              "тижні",
+              "раніше",
+              "по",
+              "тім",
+              "відбулося",
+              "що"
+            ],
+            "truncated_words": [
+              "тижні",
+              "важко"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2089,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, як два ти ж нераніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидкості,\nпромчала дорогою і розім'яти на машині Джорджа так важко.",
+            "issues": [
+              "truncated_words"
+            ],
+            "route_to": "grammar",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "segment_id": "ea679871344b43abaaae0bfaed22dfc9",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Що Джорджа-молодшого викинули з машини, але́ ві́н вижив.",
+      "recognized_text": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+      "final_metrics": {
+        "similarity": 0.9245,
+        "missing_words": [
+          "джорджа-молодшого",
+          "викинули",
+          "ві",
+          "н"
+        ],
+        "truncated_words": [
+          "джорджа-молодшого"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.2894,
+        "asr_confidence": 0.75,
+        "recognized_text": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+        "issues": [
+          "missing_words",
+          "truncated_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Що Джорджа-молодшого викинули з машини, але́ ві́н вижив.",
+          "recognized_preview": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+          "metrics": {
+            "similarity": 0.9245,
+            "missing_words": [
+              "джорджа-молодшого",
+              "викинули",
+              "ві",
+              "н"
+            ],
+            "truncated_words": [
+              "джорджа-молодшого"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2894,
+            "asr_confidence": 0.75,
+            "recognized_text": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Що Джорджа-молодшого викинули з машини, але́ ві́н вижив.",
+          "recognized_preview": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+          "metrics": {
+            "similarity": 0.9245,
+            "missing_words": [
+              "джорджа-молодшого",
+              "викинули",
+              "ві",
+              "н"
+            ],
+            "truncated_words": [
+              "джорджа-молодшого"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2894,
+            "asr_confidence": 0.75,
+            "recognized_text": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Що Джорджа-молодшого викинули з машини, але́ ві́н вижив.",
+          "recognized_preview": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+          "metrics": {
+            "similarity": 0.9245,
+            "missing_words": [
+              "джорджа-молодшого",
+              "викинули",
+              "ві",
+              "н"
+            ],
+            "truncated_words": [
+              "джорджа-молодшого"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2894,
+            "asr_confidence": 0.75,
+            "recognized_text": "Що Джорджа Молодчого виконули з машини, але віен вижив.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "segment_id": "25b0d9c6f85c448486dcc4fb1e2c4fa3",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+      "recognized_text": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+      "final_metrics": {
+        "similarity": 0.9205,
+        "missing_words": [
+          "че",
+          "рез",
+          "два",
+          "роки",
+          "джордж-молодший",
+          "одужав",
+          "прямій",
+          "фотоапарат"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 1.1541,
+        "asr_confidence": 0.75,
+        "recognized_text": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+        "issues": [
+          "missing_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапар",
+          "recognized_preview": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+          "metrics": {
+            "similarity": 0.9205,
+            "missing_words": [
+              "че",
+              "рез",
+              "два",
+              "роки",
+              "джордж-молодший",
+              "одужав",
+              "прямій",
+              "фотоапарат"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.1541,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапар",
+          "recognized_preview": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+          "metrics": {
+            "similarity": 0.9205,
+            "missing_words": [
+              "че",
+              "рез",
+              "два",
+              "роки",
+              "джордж-молодший",
+              "одужав",
+              "прямій",
+              "фотоапарат"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.1541,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапар",
+          "recognized_preview": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+          "metrics": {
+            "similarity": 0.9205,
+            "missing_words": [
+              "че",
+              "рез",
+              "два",
+              "роки",
+              "джордж-молодший",
+              "одужав",
+              "прямій",
+              "фотоапарат"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.1541,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "segment_id": "1c7900f92e0143ec9ae45e856843198d",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Так, з досвіду його́ клінічного смертельного досвіду, Джордж Джер. Уявлявся, що насправді був дад, що в деяких випадках ві́н став його́ потенціалом. Со Джордж Джер. Ві́н бі́льше не хоче займатися автогонками.",
+      "recognized_text": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках він став його потенціалом.\nСод Джордж Джер.\nВін більше не хоче займатися в Товонками.",
+      "final_metrics": {
+        "similarity": 0.9646,
+        "missing_words": [
+          "насправді",
+          "дад",
+          "ві",
+          "н",
+          "со",
+          "ві",
+          "н",
+          "бі",
+          "льше",
+          "автогонками"
+        ],
+        "truncated_words": [
+          "насправді",
+          "автогонками"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.4159,
+        "asr_confidence": 0.75,
+        "recognized_text": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках він став його потенціалом.\nСод Джордж Джер.\nВін більше не хоче займатися в Товонками.",
+        "issues": [
+          "missing_words",
+          "truncated_words",
+          "duration_overflow"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Так, з досвіду його́ клінічного смертельного досвіду, Джордж Джер. Уявлявся, що насправді був дад, що в деяких випадках ",
+          "recognized_preview": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках",
+          "metrics": {
+            "similarity": 0.9646,
+            "missing_words": [
+              "насправді",
+              "дад",
+              "ві",
+              "н",
+              "со",
+              "ві",
+              "н",
+              "бі",
+              "льше",
+              "автогонками"
+            ],
+            "truncated_words": [
+              "насправді",
+              "автогонками"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.4159,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках він став його потенціалом.\nСод Джордж Джер.\nВін більше не хоче займатися в Товонками.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Так, з досвіду його́ клінічного смертельного досвіду, Джордж Джер. Уявлявся, що насправді був дад, що в деяких випадках ",
+          "recognized_preview": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках",
+          "metrics": {
+            "similarity": 0.9646,
+            "missing_words": [
+              "насправді",
+              "дад",
+              "ві",
+              "н",
+              "со",
+              "ві",
+              "н",
+              "бі",
+              "льше",
+              "автогонками"
+            ],
+            "truncated_words": [
+              "насправді",
+              "автогонками"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.4159,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках він став його потенціалом.\nСод Джордж Джер.\nВін більше не хоче займатися в Товонками.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Так, з досвіду його́ клінічного смертельного досвіду, Джордж Джер. Уявлявся, що насправді був дад, що в деяких випадках ",
+          "recognized_preview": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках",
+          "metrics": {
+            "similarity": 0.9646,
+            "missing_words": [
+              "насправді",
+              "дад",
+              "ві",
+              "н",
+              "со",
+              "ві",
+              "н",
+              "бі",
+              "льше",
+              "автогонками"
+            ],
+            "truncated_words": [
+              "насправді",
+              "автогонками"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.4159,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, з досвідою його клінічного смертельного досвіду, Джордж Джер.\nУявлявся, що нас правді був дат, що в деяких випадках він став його потенціалом.\nСод Джордж Джер.\nВін більше не хоче займатися в Товонками.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "segment_id": "94095991a5c9417296800e57ebdf3402",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Замість цього ві́н узяв камеру і знову захопився своїм колишнім хобі— фотографією.",
+      "recognized_text": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+      "final_metrics": {
+        "similarity": 0.9565,
+        "missing_words": [
+          "ві",
+          "н",
+          "колишнім",
+          "фотографією"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 1.3091,
+        "asr_confidence": 0.75,
+        "recognized_text": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+        "issues": [
+          "missing_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Замість цього ві́н узяв камеру і знову захопився своїм колишнім хобі— фотографією.",
+          "recognized_preview": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+          "metrics": {
+            "similarity": 0.9565,
+            "missing_words": [
+              "ві",
+              "н",
+              "колишнім",
+              "фотографією"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.3091,
+            "asr_confidence": 0.75,
+            "recognized_text": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Замість цього ві́н узяв камеру і знову захопився своїм колишнім хобі— фотографією.",
+          "recognized_preview": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+          "metrics": {
+            "similarity": 0.9565,
+            "missing_words": [
+              "ві",
+              "н",
+              "колишнім",
+              "фотографією"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.3091,
+            "asr_confidence": 0.75,
+            "recognized_text": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Замість цього ві́н узяв камеру і знову захопився своїм колишнім хобі— фотографією.",
+          "recognized_preview": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+          "metrics": {
+            "similarity": 0.9565,
+            "missing_words": [
+              "ві",
+              "н",
+              "колишнім",
+              "фотографією"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.3091,
+            "asr_confidence": 0.75,
+            "recognized_text": "Замість цього віен узяв камеру і знову захопився своїм колишним хобі, в отографією.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "segment_id": "8a8aba1ad03846aba04c854cc216d9f3",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Насправді, Джордж-молодший подав заяву на престижну кінотехніку з Ю Ес Сі, Південної Каліфорнії, Південної Каліфорнії, але́ пі́сля того, як відпустив заяву, ві́н був цілком упевнений, що його́ не приймуть до неї.",
+      "recognized_text": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС. Південної каліфорній, а лепісля того, як відпустив заяву, вен був цілком опевнений, що його не примуть до ней.",
+      "final_metrics": {
+        "similarity": 0.8617,
+        "missing_words": [
+          "джордж-молодший",
+          "престижну",
+          "ю",
+          "ес",
+          "сі",
+          "каліфорнії",
+          "каліфорнії",
+          "але",
+          "пі",
+          "сля",
+          "ві",
+          "н",
+          "упевнений",
+          "приймуть",
+          "неї"
+        ],
+        "truncated_words": [
+          "джордж-молодший",
+          "його",
+          "не",
+          "приймуть",
+          "до",
+          "неї"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.5452,
+        "asr_confidence": 0.75,
+        "recognized_text": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС. Південної каліфорній, а лепісля того, як відпустив заяву, вен був цілком опевнений, що його не примуть до ней.",
+        "issues": [
+          "missing_words",
+          "truncated_words",
+          "duration_overflow"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Насправді, Джордж-молодший подав заяву на престижну кінотехніку з Ю Ес Сі, Південної Каліфорнії, Південної Каліфорнії, а",
+          "recognized_preview": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС. Південної каліфорній, а лепісля того, як відпусти",
+          "metrics": {
+            "similarity": 0.9471,
+            "missing_words": [
+              "джордж-молодший",
+              "престижну",
+              "ю",
+              "ес",
+              "сі",
+              "каліфорнії",
+              "каліфорнії",
+              "пі",
+              "сля",
+              "ві",
+              "н",
+              "упевнений",
+              "приймуть"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "приймуть",
+              "до",
+              "неї"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5452,
+            "asr_confidence": 0.75,
+            "recognized_text": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС.\nПівденної каліфорній, Південної каліфорній, але після того, як відпустив заяву,\nВін був цілком опевнений, що його не примуть до неї.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Насправді, Джордж-молодший подав заяву на престижну кінотехніку з Ю Ес Сі, Південної Каліфорнії, Південної Каліфорнії, а",
+          "recognized_preview": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС. Південної каліфорній, а лепісля того, як відпусти",
+          "metrics": {
+            "similarity": 0.8617,
+            "missing_words": [
+              "джордж-молодший",
+              "престижну",
+              "ю",
+              "ес",
+              "сі",
+              "каліфорнії",
+              "каліфорнії",
+              "але",
+              "пі",
+              "сля",
+              "ві",
+              "н",
+              "упевнений",
+              "приймуть",
+              "неї"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "його",
+              "не",
+              "приймуть",
+              "до",
+              "неї"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5452,
+            "asr_confidence": 0.75,
+            "recognized_text": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС. Південної каліфорній, а лепісля того, як відпустив заяву, вен був цілком опевнений, що його не примуть до ней.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Насправді, Джордж-молодший подав заяву на престижну кінотехніку з Ю Ес Сі, Південної Каліфорнії, Південної Каліфорнії, а",
+          "recognized_preview": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС. Південної каліфорній, а лепісля того, як відпусти",
+          "metrics": {
+            "similarity": 0.8617,
+            "missing_words": [
+              "джордж-молодший",
+              "престижну",
+              "ю",
+              "ес",
+              "сі",
+              "каліфорнії",
+              "каліфорнії",
+              "але",
+              "пі",
+              "сля",
+              "ві",
+              "н",
+              "упевнений",
+              "приймуть",
+              "неї"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "його",
+              "не",
+              "приймуть",
+              "до",
+              "неї"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5452,
+            "asr_confidence": 0.75,
+            "recognized_text": "Насправді, Джордж Молодший подав заяву на простижну кінотехніку з ЙОС. Південної каліфорній, а лепісля того, як відпустив заяву, вен був цілком опевнений, що його не примуть до ней.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "segment_id": "966c0f582cb24be38c1ea2af6ccb81bb",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду.",
+      "recognized_text": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+      "final_metrics": {
+        "similarity": 0.9101,
+        "missing_words": [
+          "джордж-молодший",
+          "до",
+          "подіуму",
+          "щоб",
+          "кілька",
+          "фотографій"
+        ],
+        "truncated_words": [
+          "джордж-молодший",
+          "щоб"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.5833,
+        "asr_confidence": 0.75,
+        "recognized_text": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+        "issues": [
+          "missing_words",
+          "truncated_words",
+          "duration_overflow"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду.",
+          "recognized_preview": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+          "metrics": {
+            "similarity": 0.9101,
+            "missing_words": [
+              "джордж-молодший",
+              "до",
+              "подіуму",
+              "щоб",
+              "кілька",
+              "фотографій"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "щоб"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5833,
+            "asr_confidence": 0.75,
+            "recognized_text": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду.",
+          "recognized_preview": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+          "metrics": {
+            "similarity": 0.9101,
+            "missing_words": [
+              "джордж-молодший",
+              "до",
+              "подіуму",
+              "щоб",
+              "кілька",
+              "фотографій"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "щоб"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5833,
+            "asr_confidence": 0.75,
+            "recognized_text": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду.",
+          "recognized_preview": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+          "metrics": {
+            "similarity": 0.9101,
+            "missing_words": [
+              "джордж-молодший",
+              "до",
+              "подіуму",
+              "щоб",
+              "кілька",
+              "фотографій"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "щоб"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5833,
+            "asr_confidence": 0.75,
+            "recognized_text": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "segment_id": "1ebda45554ec49188b22081efbf1c3e3",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Але́ коли́ ві́н йшов туди, чоловік зі смілостями підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а по́тім в якийсь момент людина насправді представився як Хаскела Уекслера.",
+      "recognized_text": "Але коли віян і шов тут, чоловік зі смілостями підійшов до нього і запитав Джорджа Молодчого про його фотографію.\nА потім в якийсь момент людина насправді представився як Хаскелу Олексла.",
+      "final_metrics": {
+        "similarity": 0.9459,
+        "missing_words": [
+          "ві",
+          "н",
+          "йшов",
+          "туди",
+          "джорджа-молодшого",
+          "по",
+          "тім",
+          "хаскела",
+          "уекслера"
+        ],
+        "truncated_words": [
+          "джорджа-молодшого"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.1869,
+        "asr_confidence": 0.75,
+        "recognized_text": "Але коли віян і шов тут, чоловік зі смілостями підійшов до нього і запитав Джорджа Молодчого про його фотографію.\nА потім в якийсь момент людина насправді представився як Хаскелу Олексла.",
+        "issues": [
+          "missing_words",
+          "truncated_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Але́ коли́ ві́н йшов туди, чоловік зі смілостями підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а п",
+          "recognized_preview": "Але коли віян і шов тут, чоловік зі смілостями підій шов до нього і запитав Джорджа Малочого про його фотографію.\nА поті",
+          "metrics": {
+            "similarity": 0.9459,
+            "missing_words": [
+              "ві",
+              "н",
+              "йшов",
+              "туди",
+              "джорджа-молодшого",
+              "по",
+              "тім",
+              "хаскела",
+              "уекслера"
+            ],
+            "truncated_words": [
+              "джорджа-молодшого"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.1869,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли віян і шов тут, чоловік зі смілостями підійшов до нього і запитав Джорджа Молодчого про його фотографію.\nА потім в якийсь момент людина, насправді, представився як Хаскелу Олексла.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Але́ коли́ ві́н йшов туди, чоловік зі смілостями підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а п",
+          "recognized_preview": "Але коли віян і шов тут, чоловік зі смілостями підійшов до нього і запитав Джорджа Молодчого про його фотографію.\nА поті",
+          "metrics": {
+            "similarity": 0.9488,
+            "missing_words": [
+              "ві",
+              "н",
+              "йшов",
+              "туди",
+              "підійшов",
+              "джорджа-молодшого",
+              "по",
+              "тім",
+              "хаскела"
+            ],
+            "truncated_words": [
+              "підійшов"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.1869,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли віян і шов тут, чоловік зі смілостями підій шов до нього і запитав Джорджа Малочого про його фотографію.\nА потім в якийсь момент людина насправді представився як хаскелу уекслера.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Але́ коли́ ві́н йшов туди, чоловік зі смілостями підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а п",
+          "recognized_preview": "Але коли віян і шов тут, чоловік зі смілостями підійшов до нього і запитав Джорджа Молодчого про його фотографію.\nА поті",
+          "metrics": {
+            "similarity": 0.9459,
+            "missing_words": [
+              "ві",
+              "н",
+              "йшов",
+              "туди",
+              "джорджа-молодшого",
+              "по",
+              "тім",
+              "хаскела",
+              "уекслера"
+            ],
+            "truncated_words": [
+              "джорджа-молодшого"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.1869,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли віян і шов тут, чоловік зі смілостями підійшов до нього і запитав Джорджа Молодчого про його фотографію.\nА потім в якийсь момент людина насправді представився як Хаскелу Олексла.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "segment_id": "45b3608a328845ef89d6a0acf31f9bc2",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Георг Жр. Про те, як ві́н нещодавно був застосований до Ю Ес Сі, Південної Каліфорнії, Південної Каліфорнії, щоб потрапити в програму кінематографі. І коли́ Haskell почув це, .",
+      "recognized_text": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, південної каліфорній, південної каліфорній, що потрапити в програму кіна Матографі.\nІ коли Хескал почув це.",
+      "final_metrics": {
+        "similarity": 0.8083,
+        "missing_words": [
+          "ві",
+          "н",
+          "ві",
+          "н",
+          "кінооператором",
+          "голлівуді",
+          "жр",
+          "про",
+          "те",
+          "ві",
+          "н",
+          "нещодавно",
+          "ю",
+          "ес",
+          "сі",
+          "каліфорнії",
+          "каліфорнії",
+          "щоб",
+          "кінематографі",
+          "haskell"
+        ],
+        "truncated_words": [
+          "коли",
+          "haskell",
+          "почув",
+          "це"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.7669,
+        "asr_confidence": 0.75,
+        "recognized_text": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, південної каліфорній, південної каліфорній, що потрапити в програму кіна Матографі.\nІ коли Хескал почув це.",
+        "issues": [
+          "missing_words",
+          "truncated_words",
+          "truncated_sentence",
+          "duration_overflow",
+          "low_similarity"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "expected_preview": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Георг Жр. Про те, як ві́н нещодавно був застосований до Ю Ес Сі",
+          "recognized_preview": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, півд",
+          "metrics": {
+            "similarity": 0.7529,
+            "missing_words": [
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "кінооператором",
+              "голлівуді",
+              "жр",
+              "про",
+              "те",
+              "ві",
+              "н",
+              "нещодавно",
+              "ю",
+              "ес",
+              "сі",
+              "південної",
+              "каліфорнії",
+              "південної",
+              "каліфорнії",
+              "щоб",
+              "кінематографі",
+              "haskell"
+            ],
+            "truncated_words": [
+              "коли",
+              "haskell",
+              "почув",
+              "це"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.7669,
+            "asr_confidence": 0.75,
+            "recognized_text": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, південний каліфорній, південний каліфорній, що потрапити в програму кінамату графі.\nІ коли Хескал почув це.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "expected_preview": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Георг Жр. Про те, як ві́н нещодавно був застосований до Ю Ес Сі",
+          "recognized_preview": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, півд",
+          "metrics": {
+            "similarity": 0.8083,
+            "missing_words": [
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "кінооператором",
+              "голлівуді",
+              "жр",
+              "про",
+              "те",
+              "ві",
+              "н",
+              "нещодавно",
+              "ю",
+              "ес",
+              "сі",
+              "каліфорнії",
+              "каліфорнії",
+              "щоб",
+              "кінематографі",
+              "haskell"
+            ],
+            "truncated_words": [
+              "коли",
+              "haskell",
+              "почув",
+              "це"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.7669,
+            "asr_confidence": 0.75,
+            "recognized_text": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, південної каліфорній, південної каліфорній, що потрапити в програму кіна Матографі.\nІ коли Хескал почув це.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "expected_preview": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Георг Жр. Про те, як ві́н нещодавно був застосований до Ю Ес Сі",
+          "recognized_preview": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, півд",
+          "metrics": {
+            "similarity": 0.8083,
+            "missing_words": [
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "кінооператором",
+              "голлівуді",
+              "жр",
+              "про",
+              "те",
+              "ві",
+              "н",
+              "нещодавно",
+              "ю",
+              "ес",
+              "сі",
+              "каліфорнії",
+              "каліфорнії",
+              "щоб",
+              "кінематографі",
+              "haskell"
+            ],
+            "truncated_words": [
+              "коли",
+              "haskell",
+              "почув",
+              "це"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.7669,
+            "asr_confidence": 0.75,
+            "recognized_text": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Георг жер, проте, як він, нащодавно був застосований до USB, південної каліфорній, південної каліфорній, що потрапити в програму кіна Матографі.\nІ коли Хескал почув це.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 16,
+      "segment_id": "3474e44dce6445d586c31789e4287c3a",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Джордж, я знаю людей в Ю Ес Сі, Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́сля цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до Ю Ес Сі, Південної Каліфорнії.",
+      "recognized_text": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків і звичайно.\nНа забаром після цієї фатальну зустрічі Джордж Молодчи отримає лист про зарахування до USB, південний калефорній.",
+      "final_metrics": {
+        "similarity": 0.7277,
+        "missing_words": [
+          "ю",
+          "ес",
+          "сі",
+          "південної",
+          "каліфорнії",
+          "дозвольте",
+          "дзвінків",
+          "незабаром",
+          "пі",
+          "сля",
+          "фатальної",
+          "джордж-молодший",
+          "ю",
+          "ес",
+          "сі",
+          "південної",
+          "каліфорнії"
+        ],
+        "truncated_words": [
+          "південної",
+          "каліфорнії"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.5877,
+        "asr_confidence": 0.75,
+        "recognized_text": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків і звичайно.\nНа забаром після цієї фатальну зустрічі Джордж Молодчи отримає лист про зарахування до USB, південний калефорній.",
+        "issues": [
+          "missing_words",
+          "truncated_words",
+          "truncated_sentence",
+          "duration_overflow",
+          "low_similarity"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "expected_preview": "Джордж, я знаю людей в Ю Ес Сі, Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́с",
+          "recognized_preview": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків і звичайно.\nНа забаром після ці",
+          "metrics": {
+            "similarity": 0.7247,
+            "missing_words": [
+              "ю",
+              "ес",
+              "сі",
+              "південної",
+              "каліфорнії",
+              "дозвольте",
+              "дзвінків",
+              "незабаром",
+              "пі",
+              "сля",
+              "фатальної",
+              "джордж-молодший",
+              "про",
+              "зарахування",
+              "ю",
+              "ес",
+              "сі",
+              "південної",
+              "каліфорнії"
+            ],
+            "truncated_words": [
+              "сі",
+              "південної",
+              "каліфорнії"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5877,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків, і звичайно.\nНа забаром після цієї фатальну зустрічі Джордж Молодчи отримає лист прозарахування до USB, південний калефорній.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "expected_preview": "Джордж, я знаю людей в Ю Ес Сі, Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́с",
+          "recognized_preview": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків і звичайно.\nНа забаром після ці",
+          "metrics": {
+            "similarity": 0.7277,
+            "missing_words": [
+              "ю",
+              "ес",
+              "сі",
+              "південної",
+              "каліфорнії",
+              "дозвольте",
+              "дзвінків",
+              "незабаром",
+              "пі",
+              "сля",
+              "фатальної",
+              "джордж-молодший",
+              "ю",
+              "ес",
+              "сі",
+              "південної",
+              "каліфорнії"
+            ],
+            "truncated_words": [
+              "південної",
+              "каліфорнії"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5877,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків і звичайно.\nНа забаром після цієї фатальну зустрічі Джордж Молодчи отримає лист про зарахування до USB, південний калефорній.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "expected_preview": "Джордж, я знаю людей в Ю Ес Сі, Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́с",
+          "recognized_preview": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків і звичайно.\nНа забаром після ці",
+          "metrics": {
+            "similarity": 0.7277,
+            "missing_words": [
+              "ю",
+              "ес",
+              "сі",
+              "південної",
+              "каліфорнії",
+              "дозвольте",
+              "дзвінків",
+              "незабаром",
+              "пі",
+              "сля",
+              "фатальної",
+              "джордж-молодший",
+              "ю",
+              "ес",
+              "сі",
+              "південної",
+              "каліфорнії"
+            ],
+            "truncated_words": [
+              "південної",
+              "каліфорнії"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5877,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж, я знаю людей в USB, південний калефорній.\nДо звольте мені зробити кілька звінків і звичайно.\nНа забаром після цієї фатальну зустрічі Джордж Молодчи отримає лист про зарахування до USB, південний калефорній.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 17,
+      "segment_id": "ae0cdf828ece4c22a1acbce16ef630ce",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди.",
+      "recognized_text": "Але цим момент життя джорджемолочого не змінив життя джорджена завжди.",
+      "final_metrics": {
+        "similarity": 0.9,
+        "missing_words": [
+          "цей",
+          "джорджа-молодшого",
+          "джорджа",
+          "назавжди"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 1.0875,
+        "asr_confidence": 0.75,
+        "recognized_text": "Але цим момент життя джорджемолочого не змінив життя джорджена завжди.",
+        "issues": [
+          "missing_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди.",
+          "recognized_preview": "Але цим момент життя джорджемолочого не змінив життя джорджена завжди.",
+          "metrics": {
+            "similarity": 0.9296,
+            "missing_words": [
+              "цей",
+              "джорджа-молодшого",
+              "назавжди"
+            ],
+            "truncated_words": [
+              "джорджа-молодшого"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.0875,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але цим момент життя джорджа молочого не змінив життя джорджа на завжди.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди.",
+          "recognized_preview": "Але цим момент життя джорджемолочого не змінив життя джорджена завжди.",
+          "metrics": {
+            "similarity": 0.9,
+            "missing_words": [
+              "цей",
+              "джорджа-молодшого",
+              "джорджа",
+              "назавжди"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0875,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але цим момент життя джорджемолочого не змінив життя джорджена завжди.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words"
+          ],
+          "expected_preview": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди.",
+          "recognized_preview": "Але цим момент життя джорджемолочого не змінив життя джорджена завжди.",
+          "metrics": {
+            "similarity": 0.9,
+            "missing_words": [
+              "цей",
+              "джорджа-молодшого",
+              "джорджа",
+              "назавжди"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0875,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але цим момент життя джорджемолочого не змінив життя джорджена завжди.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 18,
+      "segment_id": "d9738067ad8147c394139be98e4d1ae5",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж Джер. покаже на створення одного з найбільш загадних фільмів в історії. Його́ фільм бу́де.",
+      "recognized_text": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висторії.\nЙого фільм буде.",
+      "final_metrics": {
+        "similarity": 0.9675,
+        "missing_words": [
+          "тако",
+          "ж",
+          "повністю",
+          "че",
+          "рез",
+          "покаже",
+          "на",
+          "фільмів",
+          "в",
+          "історії",
+          "бу",
+          "де"
+        ],
+        "truncated_words": [
+          "фільмів",
+          "історії",
+          "його",
+          "фільм",
+          "бу",
+          "де"
+        ],
+        "language_match": true,
+        "audio_completeness": 1.0464,
+        "asr_confidence": 0.75,
+        "recognized_text": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висторії.\nЙого фільм буде.",
+        "issues": [
+          "missing_words",
+          "truncated_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж Джер. покаже на створення одного з найбільш загадних фільмів в ",
+          "recognized_preview": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висто",
+          "metrics": {
+            "similarity": 0.9675,
+            "missing_words": [
+              "тако",
+              "ж",
+              "повністю",
+              "че",
+              "рез",
+              "покаже",
+              "на",
+              "фільмів",
+              "в",
+              "історії",
+              "бу",
+              "де"
+            ],
+            "truncated_words": [
+              "фільмів",
+              "історії",
+              "його",
+              "фільм",
+              "бу",
+              "де"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.0464,
+            "asr_confidence": 0.75,
+            "recognized_text": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висторії.\nЙого фільм буде.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж Джер. покаже на створення одного з найбільш загадних фільмів в ",
+          "recognized_preview": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висто",
+          "metrics": {
+            "similarity": 0.9675,
+            "missing_words": [
+              "тако",
+              "ж",
+              "повністю",
+              "че",
+              "рез",
+              "покаже",
+              "на",
+              "фільмів",
+              "в",
+              "історії",
+              "бу",
+              "де"
+            ],
+            "truncated_words": [
+              "фільмів",
+              "історії",
+              "його",
+              "фільм",
+              "бу",
+              "де"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.0464,
+            "asr_confidence": 0.75,
+            "recognized_text": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висторії.\nЙого фільм буде.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж Джер. покаже на створення одного з найбільш загадних фільмів в ",
+          "recognized_preview": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висто",
+          "metrics": {
+            "similarity": 0.9675,
+            "missing_words": [
+              "тако",
+              "ж",
+              "повністю",
+              "че",
+              "рез",
+              "покаже",
+              "на",
+              "фільмів",
+              "в",
+              "історії",
+              "бу",
+              "де"
+            ],
+            "truncated_words": [
+              "фільмів",
+              "історії",
+              "його",
+              "фільм",
+              "бу",
+              "де"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.0464,
+            "asr_confidence": 0.75,
+            "recognized_text": "Це також оповністю змінити кіно.\nЧерез 13 років, Джордж Джер.\nПокажена створення одного з найбільш загадних фільмі висторії.\nЙого фільм буде.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "segment_id": "22bb307deb93489db80bbf22e341cd3f",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Георг Жр. Сьогодні Джордж Лукас і його́ кінофраншиза бу́дуть зірвати війни.",
+      "recognized_text": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофранше забудуть зірвати війни.",
+      "final_metrics": {
+        "similarity": 0.9066,
+        "missing_words": [
+          "намагатися",
+          "частиною",
+          "кінофраншизи",
+          "в",
+          "будь-яки",
+          "й",
+          "жр",
+          "джордж",
+          "кінофраншиза",
+          "бу",
+          "дуть"
+        ],
+        "truncated_words": [
+          "намагатися",
+          "війни"
+        ],
+        "language_match": true,
+        "audio_completeness": 0.9671,
+        "asr_confidence": 0.75,
+        "recognized_text": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофранше забудуть зірвати війни.",
+        "issues": [
+          "missing_words",
+          "truncated_words"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Георг Жр. Сьогодні Джордж Лукас і його́ кіноф",
+          "recognized_preview": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофра",
+          "metrics": {
+            "similarity": 0.9066,
+            "missing_words": [
+              "намагатися",
+              "частиною",
+              "кінофраншизи",
+              "в",
+              "будь-яки",
+              "й",
+              "жр",
+              "джордж",
+              "кінофраншиза",
+              "бу",
+              "дуть"
+            ],
+            "truncated_words": [
+              "намагатися",
+              "війни"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9671,
+            "asr_confidence": 0.75,
+            "recognized_text": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофранше забудуть зірвати війни.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Георг Жр. Сьогодні Джордж Лукас і його́ кіноф",
+          "recognized_preview": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофра",
+          "metrics": {
+            "similarity": 0.9066,
+            "missing_words": [
+              "намагатися",
+              "частиною",
+              "кінофраншизи",
+              "в",
+              "будь-яки",
+              "й",
+              "жр",
+              "джордж",
+              "кінофраншиза",
+              "бу",
+              "дуть"
+            ],
+            "truncated_words": [
+              "намагатися",
+              "війни"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9671,
+            "asr_confidence": 0.75,
+            "recognized_text": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофранше забудуть зірвати війни.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "expected_preview": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Георг Жр. Сьогодні Джордж Лукас і його́ кіноф",
+          "recognized_preview": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофра",
+          "metrics": {
+            "similarity": 0.9066,
+            "missing_words": [
+              "намагатися",
+              "частиною",
+              "кінофраншизи",
+              "в",
+              "будь-яки",
+              "й",
+              "жр",
+              "джордж",
+              "кінофраншиза",
+              "бу",
+              "дуть"
+            ],
+            "truncated_words": [
+              "намагатися",
+              "війни"
+            ],
+            "language_match": true,
+            "audio_completeness": 0.9671,
+            "asr_confidence": 0.75,
+            "recognized_text": "На Махатися стати частиную найбільш успішної кінофранше зибудья кію час.\nГеорг Жер, сьогодні Джорч Лукас, і його кінофранше забудуть зірвати війни.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    }
+  ]
+}

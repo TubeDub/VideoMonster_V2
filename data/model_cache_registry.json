@@ -1,0 +1,237 @@
+{
+  "version": 1,
+  "models": {
+    "Helsinki-NLP/opus-mt-en-ru": {
+      "last_used": "2026-07-10T15:27:13Z"
+    },
+    "Helsinki-NLP/opus-mt-en-de": {
+      "last_used": "2026-07-03T13:31:47Z"
+    },
+    "Helsinki-NLP/opus-mt-en-uk": {
+      "last_used": "2026-07-10T15:50:19Z"
+    },
+    "whisper-tiny": {
+      "last_used": "2026-07-10T15:27:13Z"
+    },
+    "Helsinki-NLP/opus-mt-fr-uk": {
+      "last_used": "2026-06-19T18:42:05Z"
+    },
+    "Helsinki-NLP/opus-mt-de-uk": {
+      "last_used": "2026-06-19T18:41:28Z"
+    },
+    "Helsinki-NLP/opus-mt-ru-uk": {
+      "last_used": "2026-06-19T18:40:33Z"
+    },
+    "Helsinki-NLP/opus-mt-nl-uk": {
+      "last_used": "2026-06-19T18:43:24Z"
+    },
+    "Helsinki-NLP/opus-mt-en-nl": {
+      "last_used": "2026-06-19T18:43:47Z"
+    },
+    "Helsinki-NLP/opus-mt-en-es": {
+      "last_used": "2026-06-19T18:46:56Z"
+    },
+    "Helsinki-NLP/opus-mt-es-uk": {
+      "last_used": "2026-06-19T18:42:48Z"
+    },
+    "facebook/nllb-200-distilled-600M": {
+      "last_used": "2026-06-21T09:15:29Z"
+    },
+    "whisper-large": {
+      "last_used": "2026-06-22T15:03:13Z"
+    }
+  },
+  "components": {
+    "mt:en-ru": {
+      "last_used": "2026-07-10T15:27:13Z",
+      "component_id": "mt",
+      "variant": "en-ru",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-ru"
+    },
+    "mt:en-de": {
+      "last_used": "2026-06-19T17:41:41Z",
+      "component_id": "mt",
+      "variant": "en-de",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-de"
+    },
+    "mt:en-uk": {
+      "last_used": "2026-07-10T15:27:13Z",
+      "component_id": "mt",
+      "variant": "en-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-uk"
+    },
+    "whisper:tiny": {
+      "last_used": "2026-07-10T15:29:00Z",
+      "component_id": "whisper",
+      "variant": "tiny",
+      "engine_hint": "whisper",
+      "artifact_id": "whisper-tiny"
+    },
+    "mt:fr-uk": {
+      "last_used": "2026-06-19T17:36:40Z",
+      "component_id": "mt",
+      "variant": "fr-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-fr-uk"
+    },
+    "mt:de-uk": {
+      "last_used": "2026-06-19T17:42:34Z",
+      "component_id": "mt",
+      "variant": "de-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-de-uk"
+    },
+    "mt:ru-uk": {
+      "last_used": "2026-06-19T17:35:11Z",
+      "component_id": "mt",
+      "variant": "ru-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-ru-uk"
+    },
+    "mt:nl-uk": {
+      "last_used": "2026-06-19T17:35:41Z",
+      "component_id": "mt",
+      "variant": "nl-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-nl-uk"
+    },
+    "mt:en-nl": {
+      "last_used": "2026-06-19T17:41:55Z",
+      "component_id": "mt",
+      "variant": "en-nl",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-nl"
+    },
+    "mt:en-es": {
+      "last_used": "2026-06-19T17:43:41Z",
+      "component_id": "mt",
+      "variant": "en-es",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-es"
+    },
+    "mt:es-uk": {
+      "last_used": "2026-06-19T17:44:03Z",
+      "component_id": "mt",
+      "variant": "es-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-es-uk"
+    },
+    "mt:marian:en-uk": {
+      "last_used": "2026-07-10T15:50:19Z",
+      "component_id": "mt",
+      "variant": "marian:en-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-uk"
+    },
+    "mt:marian:en-ru": {
+      "last_used": "2026-07-03T22:18:55Z",
+      "component_id": "mt",
+      "variant": "marian:en-ru",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-ru"
+    },
+    "mt:marian:ru-uk": {
+      "last_used": "2026-06-19T18:40:33Z",
+      "component_id": "mt",
+      "variant": "marian:ru-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-ru-uk"
+    },
+    "mt:marian:en-de": {
+      "last_used": "2026-07-03T13:31:47Z",
+      "component_id": "mt",
+      "variant": "marian:en-de",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-de"
+    },
+    "mt:marian:de-uk": {
+      "last_used": "2026-06-19T18:41:28Z",
+      "component_id": "mt",
+      "variant": "marian:de-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-de-uk"
+    },
+    "mt:marian:fr-uk": {
+      "last_used": "2026-06-19T18:42:05Z",
+      "component_id": "mt",
+      "variant": "marian:fr-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-fr-uk"
+    },
+    "mt:marian:es-uk": {
+      "last_used": "2026-06-19T18:42:48Z",
+      "component_id": "mt",
+      "variant": "marian:es-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-es-uk"
+    },
+    "mt:marian:nl-uk": {
+      "last_used": "2026-06-19T18:43:24Z",
+      "component_id": "mt",
+      "variant": "marian:nl-uk",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-nl-uk"
+    },
+    "mt:marian:en-nl": {
+      "last_used": "2026-06-19T18:43:47Z",
+      "component_id": "mt",
+      "variant": "marian:en-nl",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-nl"
+    },
+    "mt:marian:en-es": {
+      "last_used": "2026-06-19T18:46:56Z",
+      "component_id": "mt",
+      "variant": "marian:en-es",
+      "engine_hint": "marian",
+      "artifact_id": "Helsinki-NLP/opus-mt-en-es"
+    },
+    "mt:nllb:en-ru": {
+      "last_used": "2026-06-21T09:15:29Z",
+      "component_id": "mt",
+      "variant": "nllb:en-ru",
+      "engine_hint": "nllb",
+      "artifact_id": "facebook/nllb-200-distilled-600M"
+    },
+    "naturalizer:ru": {
+      "last_used": "2026-07-10T15:27:13Z",
+      "component_id": "naturalizer",
+      "variant": "ru",
+      "engine_hint": "bundled"
+    },
+    "mt:ru-en": {
+      "last_used": "2026-06-21T10:56:44Z",
+      "component_id": "mt",
+      "variant": "ru-en",
+      "engine_hint": "bundled"
+    },
+    "naturalizer:en": {
+      "last_used": "2026-06-21T10:56:50Z",
+      "component_id": "naturalizer",
+      "variant": "en",
+      "engine_hint": "bundled"
+    },
+    "naturalizer:uk": {
+      "last_used": "2026-07-10T15:27:13Z",
+      "component_id": "naturalizer",
+      "variant": "uk",
+      "engine_hint": "bundled"
+    },
+    "mt:uk-en": {
+      "last_used": "2026-06-21T10:56:50Z",
+      "component_id": "mt",
+      "variant": "uk-en",
+      "engine_hint": "bundled"
+    },
+    "whisper:large": {
+      "last_used": "2026-06-22T15:03:13Z",
+      "component_id": "whisper",
+      "variant": "large",
+      "engine_hint": "whisper",
+      "artifact_id": "whisper-large"
+    }
+  }
+}

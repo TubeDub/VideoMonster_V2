@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "modules": [
+    {
+      "id": "core",
+      "label": "Core Engine",
+      "release_channel": "RELEASE",
+      "feature_id": "core",
+      "api_namespace": "core",
+      "adapter": "core",
+      "dependencies": [],
+      "description": "Application core, logging, paths"
+    },
+    {
+      "id": "translation",
+      "label": "Translation",
+      "release_channel": "RELEASE",
+      "feature_id": "translation",
+      "api_namespace": "translation",
+      "adapter": "translation",
+      "dependencies": ["core"],
+      "description": "Translation pipeline and managers"
+    },
+    {
+      "id": "tts",
+      "label": "TTS",
+      "release_channel": "RELEASE",
+      "feature_id": "tts",
+      "api_namespace": "tts",
+      "adapter": "tts",
+      "dependencies": ["core"],
+      "description": "Text-to-speech synthesis"
+    },
+    {
+      "id": "audio",
+      "label": "Audio Engine",
+      "release_channel": "RELEASE",
+      "feature_id": "audio",
+      "api_namespace": "audio",
+      "adapter": "audio",
+      "dependencies": ["core"],
+      "description": "Audio processing and mux helpers"
+    },
+    {
+      "id": "video",
+      "label": "Video Engine",
+      "release_channel": "RELEASE",
+      "feature_id": "video",
+      "api_namespace": "video",
+      "adapter": "video",
+      "dependencies": ["core"],
+      "description": "FFmpeg video operations"
+    },
+    {
+      "id": "dubbing",
+      "label": "Dubbing Pipeline",
+      "release_channel": "RELEASE",
+      "feature_id": "dubbing",
+      "api_namespace": "dubbing",
+      "adapter": "dubbing",
+      "dependencies": ["translation", "tts", "audio", "video"],
+      "pipeline_stages": ["stt", "translation_manager", "tts", "audio_builder", "final_mux"],
+      "description": "Batch auto-dub pipeline"
+    },
+    {
+      "id": "pipeline_platform",
+      "label": "Pipeline Platform",
+      "release_channel": "DEVELOPER",
+      "feature_id": "pipeline_platform",
+      "api_namespace": "pipeline",
+      "adapter": "pipeline_platform",
+      "dependencies": ["translation", "dubbing"],
+      "pipeline_stages": [
+        "stt",
+        "translation_manager",
+        "enterprise_translation",
+        "natural_translation",
+        "translation_optimizer",
+        "timing_optimizer",
+        "tts",
+        "audio_builder",
+        "final_mux"
+      ],
+      "description": "Unified 9-stage pipeline contract and trace"
+    },
+    {
+      "id": "enterprise_translation",
+      "label": "Enterprise Translation",
+      "release_channel": "DEVELOPER",
+      "feature_id": "enterprise_translation",
+      "api_namespace": "enterprise_translation",
+      "adapter": "",
+      "dependencies": ["translation"],
+      "description": "Enterprise translation layer"
+    },
+    {
+      "id": "word_timing",
+      "label": "Word Timing Map",
+      "release_channel": "DEVELOPER",
+      "feature_id": "word_timing",
+      "api_namespace": "word_timing",
+      "adapter": "",
+      "dependencies": ["dubbing"],
+      "description": "Per-word timing through pipeline"
+    },
+    {
+      "id": "professional_dubbing",
+      "label": "Professional Dubbing",
+      "release_channel": "DEVELOPER",
+      "feature_id": "professional_dubbing",
+      "api_namespace": "professional_dubbing",
+      "adapter": "",
+      "dependencies": ["dubbing"],
+      "description": "Prosody and professional dub controls"
+    },
+    {
+      "id": "dub_studio",
+      "label": "Dub Studio",
+      "release_channel": "DEVELOPER",
+      "feature_id": "dub_studio",
+      "api_namespace": "dub_studio",
+      "adapter": "dub_studio",
+      "dependencies": ["dubbing", "audio"],
+      "description": "Multi-track dub studio (architecture only)"
+    },
+    {
+      "id": "project",
+      "label": "Project Storage",
+      "release_channel": "RELEASE",
+      "feature_id": "core",
+      "api_namespace": "project",
+      "adapter": "project",
+      "dependencies": ["core"],
+      "description": "Unified .tdproj project model and store"
+    },
+    {
+      "id": "developer_tools",
+      "label": "Developer Tools",
+      "release_channel": "DEVELOPER",
+      "feature_id": "developer_tools",
+      "api_namespace": "developer",
+      "adapter": "",
+      "dependencies": ["core"],
+      "description": "Developer panel and diagnostics"
+    },
+    {
+      "id": "cloud_platform",
+      "label": "Cloud Platform",
+      "release_channel": "DISABLED",
+      "feature_id": "cloud_platform",
+      "api_namespace": "cloud",
+      "adapter": "",
+      "dependencies": ["core"],
+      "description": "Cloud sync and remote jobs"
+    },
+    {
+      "id": "live_translation",
+      "label": "Live Translation",
+      "release_channel": "DISABLED",
+      "feature_id": "live_translation",
+      "api_namespace": "live",
+      "adapter": "",
+      "dependencies": ["translation", "tts"],
+      "description": "Real-time translation"
+    }
+  ]
+}

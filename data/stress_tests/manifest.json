@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "benchmark_video": "benchmark_video.mp4",
+  "defaults": {
+    "source_lang": "en",
+    "target_lang": "uk",
+    "voice": "uk-UA-OstapNeural",
+    "model_size": "tiny",
+    "dub_style": "modern",
+    "translation_review_before_tts": false,
+    "mix_volume": 0.3
+  },
+  "videos": {}
+}

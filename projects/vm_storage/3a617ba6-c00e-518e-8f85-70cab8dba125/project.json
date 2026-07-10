@@ -1,0 +1,35 @@
+{
+  "project_id": "3a617ba6-c00e-518e-8f85-70cab8dba125",
+  "title": "studio-e00540bd60b44de7975bfde73cc9af28",
+  "storage_version": 1,
+  "created_at": 1782865850.17,
+  "updated_at": 1783445316.0337532,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "7058d2f0-3670-429e-8c69-633878e66259",
+  "legacy_project_uuid": "",
+  "studio_session": {},
+  "tdproj": {
+    "format": "tubedub-project",
+    "version": 1,
+    "project_id": "7058d2f0-3670-429e-8c69-633878e66259",
+    "title": "studio-e00540bd60b44de7975bfde73cc9af28",
+    "created_ms": 1782865850170,
+    "updated_ms": 1782865850170,
+    "src_lang": "en",
+    "tgt_lang": "uk",
+    "modules": {},
+    "pipeline": {
+      "trace_id": "",
+      "last_run_ms": 0,
+      "stages": [],
+      "segments": []
+    },
+    "assets": [],
+    "meta": {}
+  },
+  "metadata": {},
+  "source": "legacy_tdproj",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\projects\\tdproj\\7058d2f0-3670-429e-8c69-633878e66259\\studio-e00540bd60b44de7975bfde73cc9af28.tdproj"
+}

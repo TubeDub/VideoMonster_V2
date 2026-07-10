@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "description": "Языковые пары, входящие в стандартную установку TubeDub (без lazy download)",
+  "pairs": [
+    ["en", "ru"],
+    ["ru", "en"],
+    ["en", "uk"],
+    ["uk", "en"],
+    ["ru", "uk"],
+    ["uk", "ru"]
+  ],
+  "whisper_sizes": ["tiny"],
+  "marian_models": [
+    "Helsinki-NLP/opus-mt-en-ru",
+    "Helsinki-NLP/opus-mt-ru-en",
+    "Helsinki-NLP/opus-mt-en-uk",
+    "Helsinki-NLP/opus-mt-uk-en",
+    "Helsinki-NLP/opus-mt-ru-uk",
+    "Helsinki-NLP/opus-mt-uk-ru"
+  ]
+}

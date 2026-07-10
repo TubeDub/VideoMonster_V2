@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "task_id": "example_task_id",
+  "golden_video": "uploads/video_e00b875b63.mp4",
+  "summary": {
+    "segment_count": 0,
+    "empty_segments": 0,
+    "truncated_sentences": 0,
+    "semantic_compression": 0,
+    "music_preserved": true,
+    "mix_quality": 1.0,
+    "reviewer_failures": 0
+  },
+  "music": {
+    "separation_success": true,
+    "used_stem_mix": true,
+    "music_detected_in_final": true,
+    "accompaniment_path": "output/artifacts/example/accompaniment.wav",
+    "fallback_used": false
+  },
+  "per_segment": [
+    {
+      "index": 0,
+      "segment_id": "seg-0",
+      "empty": false,
+      "truncated": false,
+      "semantic_compression": false,
+      "retry_count": 0,
+      "final_voice_duration_ms": 1800,
+      "slot_ms": 2000,
+      "translation_status": "ok",
+      "fallback_reason": ""
+    }
+  ]
+}

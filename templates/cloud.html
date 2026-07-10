@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Cloud — TubeDub{% endblock %}
+{% block extra_head %}
+<style>
+.cloud-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-bottom:16px; }
+.cloud-stat { padding:14px; border-radius:8px; background:var(--card); border:1px solid var(--border); }
+.cloud-stat .val { font-size:20px; font-weight:700; }
+.cloud-table { width:100%; border-collapse:collapse; font-size:12px; }
+.cloud-table th, .cloud-table td { padding:8px 6px; border-bottom:1px solid var(--border); text-align:left; }
+.cloud-dot { width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px; }
+.cloud-sync-bar { height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px; }
+.cloud-sync-fill { height:100%;background:var(--accent);width:0%;transition:width .3s; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>☁️ Cloud Platform</h1>
+  <p class="subtitle">Хранение, синхронизация и резервное копирование проектов</p>
+</div>
+
+<div id="cloud-off" class="card" style="display:none;padding:20px;">
+  <p>Cloud Platform отключён. Включите <code>FEATURE_CLOUD_PLATFORM</code> в Developer Panel или установите <code>VM_CLOUD_PLATFORM_ENABLED=1</code>.</p>
+</div>
+
+<div id="cloud-panel" style="display:none;">
+  <div class="cloud-grid" id="cloud-stats"></div>
+
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <h3 style="margin:0 0 10px;font-size:14px;">Подключённые облака</h3>
+    <div id="cloud-providers"></div>
+  </div>
+
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <h3 style="margin:0 0 10px;font-size:14px;">Настройки</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:13px;">
+      <label>Режим по умолчанию
+        <select id="cloud-default-mode" class="select-control" style="width:100%;margin-top:4px;">
+          <option value="local_only">Только локально</option>
+          <option value="cloud_only">Только облако</option>
+          <option value="local_and_cloud">Локально + облако</option>
+          <option value="auto_sync">Автосинхронизация</option>
+        </select>
+      </label>
+      <label>Резервное копирование
+        <select id="cloud-backup-schedule" class="select-control" style="width:100%;margin-top:4px;">
+          <option value="manual">Вручную</option>
+          <option value="every_30_min">Каждые 30 мин</option>
+          <option value="hourly">Каждый час</option>
+          <option value="daily">Ежедневно</option>
+        </select>
+      </label>
+      <label>Очистка локального кэша
+        <select id="cloud-cache-policy" class="select-control" style="width:100%;margin-top:4px;">
+          <option value="keep_all">Хранить всё</option>
+          <option value="delete_after_sync">Удалять после синхронизации</option>
+          <option value="keep_days">Хранить N дней</option>
+          <option value="last_project_only">Только последний проект</option>
+        </select>
+      </label>
+      <label>Провайдер по умолчанию
+        <select id="cloud-default-provider" class="select-control" style="width:100%;margin-top:4px;">
+          <option value="local">Local Disk</option>
+          <option value="google_drive">Google Drive</option>
+          <option value="onedrive">OneDrive</option>
+          <option value="dropbox">Dropbox</option>
+          <option value="tubedub_cloud">TubeDub Cloud</option>
+          <option value="s3">S3 Compatible</option>
+        </select>
+      </label>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="cloudSaveSettings()">Сохранить</button>
+      <button class="btn btn-sm" onclick="cloudRunBackup()">Запустить backup</button>
+      <button class="btn btn-sm" onclick="cloudRefresh()">Обновить</button>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:auto;margin-bottom:16px;">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="margin:0;font-size:14px;">Проекты</h3>
+      <input id="cloud-search" class="input-control" placeholder="Поиск…" style="max-width:200px;" oninput="cloudFilterProjects()"/>
+    </div>
+    <table class="cloud-table">
+      <thead><tr><th>Проект</th><th>Режим</th><th>Провайдер</th><th>Синхронизация</th><th>Версии</th></tr></thead>
+      <tbody id="cloud-projects-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="padding:0;overflow:auto;">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border);"><h3 style="margin:0;font-size:14px;">Очередь синхронизации</h3></div>
+    <table class="cloud-table">
+      <thead><tr><th>Задача</th><th>Тип</th><th>Статус</th><th>Прогресс</th><th>Скорость</th></tr></thead>
+      <tbody id="cloud-sync-body"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/cloud.js"></script>
+{% endblock %}

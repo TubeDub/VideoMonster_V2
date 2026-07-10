@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "1c428751efc849d7a68085241325962e",
+  "created_at": "2026-07-09T15:45:25.117837+00:00",
+  "task_id": "1c428751efc849d7a68085241325962e",
+  "stage": "pipeline",
+  "developer": {
+    "error_code": "RUNTIMEERROR",
+    "stage": "pipeline",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "pipeline",
+    "task_id": "1c428751efc849d7a68085241325962e",
+    "error_type": "RuntimeError",
+    "message": "{'title': 'Обработка остановлена', 'reason': 'Этап завис: Озвучка (TTS). Нет активности 1 мин 30 с. Возможная причина: движок TTS завис или сеть недоступна.', 'reason_short': 'Этап завис: Озвучка (TTS). Нет активности 1 мин 30 с. Возможная причина: движок TTS завис или сеть недоступна.', 'error_code': 'PIPELINE_STALLED', 'stage': 'Озвучка (TTS)', 'segment': None, 'llm_diagnostics': {}}"
+  },
+  "exception": {
+    "type": "RuntimeError",
+    "message": "{'title': 'Обработка остановлена', 'reason': 'Этап завис: Озвучка (TTS). Нет активности 1 мин 30 с. Возможная причина: движок TTS завис или сеть недоступна.', 'reason_short': 'Этап завис: Озвучка (TTS). Нет активности 1 мин 30 с. Возможная причина: движок TTS завис или сеть недоступна.', 'error_code': 'PIPELINE_STALLED', 'stage': 'Озвучка (TTS)', 'segment': None, 'llm_diagnostics': {}}"
+  },
+  "timeline_event_count": 35
+}

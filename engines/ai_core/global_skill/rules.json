@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "title": "TubeDub Global Skill",
+  "principles": [
+    "Do not break existing functionality",
+    "One agent — one task",
+    "Minimal coupling between components",
+    "Quality over speed when they conflict",
+    "Backward compatibility is mandatory"
+  ],
+  "rules": [
+    {
+      "id": "no_break_existing",
+      "category": "safety",
+      "text": "Never break existing functionality or public APIs"
+    },
+    {
+      "id": "no_arch_change_without_need",
+      "category": "architecture",
+      "text": "Do not change architecture without objective necessity"
+    },
+    {
+      "id": "no_ui_change_without_approval",
+      "category": "ui",
+      "text": "Do not change user interface without explicit approval"
+    },
+    {
+      "id": "back_navigation",
+      "category": "ux",
+      "text": "Always preserve Back navigation"
+    },
+    {
+      "id": "cancel_supported",
+      "category": "ux",
+      "text": "Always support Cancel for long operations"
+    },
+    {
+      "id": "no_data_delete_without_confirm",
+      "category": "safety",
+      "text": "Never delete user data without confirmation"
+    },
+    {
+      "id": "no_text_truncation",
+      "category": "quality",
+      "text": "Never truncate dubbing text without necessity"
+    },
+    {
+      "id": "quality_over_speed",
+      "category": "quality",
+      "text": "When quality and speed conflict, choose quality"
+    },
+    {
+      "id": "backward_compatible",
+      "category": "architecture",
+      "text": "Preserve backward compatibility"
+    },
+    {
+      "id": "no_hidden_deps",
+      "category": "architecture",
+      "text": "Do not create hidden cross-module dependencies"
+    },
+    {
+      "id": "one_agent_one_task",
+      "category": "agents",
+      "text": "Each agent performs exactly one responsibility"
+    },
+    {
+      "id": "minimal_coupling",
+      "category": "agents",
+      "text": "Agents communicate only through AI Network, never directly"
+    },
+    {
+      "id": "preserve_meaning",
+      "category": "quality",
+      "text": "Preserve meaning, names, numbers and intent in adaptation"
+    },
+    {
+      "id": "target_language_only",
+      "category": "quality",
+      "text": "Output must be in the target dubbing language"
+    }
+  ],
+  "llm_system_preamble": "You are part of TubeDub AI Core. Follow Global Skill: preserve meaning and target language; never truncate sentences; quality over speed; one task per response."
+}

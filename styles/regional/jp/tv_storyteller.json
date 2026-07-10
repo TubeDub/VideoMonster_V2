@@ -1,0 +1,34 @@
+{
+  "id": "tv_storyteller",
+  "pack": "regional",
+  "region_pack": "jp",
+  "mix_mode": "custom",
+  "original_volume": 0.30,
+  "dub_volume": 0.96,
+  "background_volume": 0.30,
+  "tts_rate": "-7%",
+  "tts_pitch": null,
+  "i18n_key": "dub.style_tv_storyteller",
+  "order": 102,
+  "reply_start_delay_ms": 200,
+  "reply_start_delay_jitter_ms": 50,
+  "max_atempo": 1.10,
+  "allow_atempo": false,
+  "prefer_semantic_adapt": true,
+  "sync_mode": "relaxed",
+  "delivery": "japanese_tv_storyteller",
+  "intonation_range": "narrow",
+  "voice_fx": {
+    "highpass_hz": 90,
+    "mid_peak_hz": 2100,
+    "mid_peak_gain_db": 1.5,
+    "compressor_ratio": 2.1,
+    "compressor_threshold_db": -20,
+    "volume_gain_db": -0.5
+  },
+  "preview_phrases": {
+    "default": "Japanese TV storyteller — measured narration over original.",
+    "ja": "日本のテレビ番組風 — 落ち着いた語り、原音は背景に残します。",
+    "en": "Japanese TV storyteller — calm voice-over with audible original."
+  }
+}

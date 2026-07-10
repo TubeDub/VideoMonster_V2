@@ -1,0 +1,23 @@
+{
+  "id": "professional",
+  "pack": "base",
+  "mix_mode": "full_dub",
+  "original_volume": 0.0,
+  "dub_volume": 1.0,
+  "background_volume": 0.0,
+  "tts_rate": "-4%",
+  "tts_pitch": null,
+  "i18n_key": "dub.style_professional",
+  "order": 0,
+  "visible": true,
+  "delivery": "professional_studio",
+  "intonation_range": "wide",
+  "prefer_semantic_adapt": false,
+  "sync_mode": "standard",
+  "preview_phrases": {
+    "default": "Professional dubbing — natural pauses and living intonation.",
+    "ru": "Профессиональный дубляж — естественные паузы и живая интонация.",
+    "uk": "Професійний дубляж — природні паузи та жива інтонація.",
+    "en": "Professional dubbing with natural rhythm and expressive delivery."
+  }
+}

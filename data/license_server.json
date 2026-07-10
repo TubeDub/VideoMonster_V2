@@ -1,0 +1,5 @@
+{
+  "enabled": false,
+  "url": "http://127.0.0.1:8787",
+  "comment": "Установите enabled: true и url вашего сервера. Или VM_LICENSE_SERVER_URL в окружении."
+}

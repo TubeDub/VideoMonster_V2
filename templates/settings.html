@@ -1,0 +1,1289 @@
+{% extends "base.html" %}
+{% block title %}Настройки — TubeDub{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>⚙️ Настройки</h1>
+  <p class="subtitle">Параметры интерфейса, голоса, перевода и лицензии</p>
+</div>
+
+<div class="settings-grid">
+
+  <!-- ── ЯЗЫК ИНТЕРФЕЙСА ─────────────────── -->
+  <div class="settings-card">
+    <h2>🌐 <span data-i18n="settings.ui_lang">Язык интерфейса</span></h2>
+    <div class="field-group">
+      <select id="settings-ui-lang" class="select-control" onchange="setUiLang(this.value)">
+        <option value="ru">Русский</option>
+        <option value="uk">Українська</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── РЕЖИМ ИНТЕРФЕЙСА ─────────────────── -->
+  <div class="settings-card">
+    <h2>🎛 Режим интерфейса</h2>
+
+    <div class="field-group">
+      <label>Режим работы</label>
+      <div id="mode-switcher"
+        style="display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;max-width:480px;">
+        <button id="mode-btn-simple" class="mode-sw-btn" onclick="setModeUI('simple')"
+          style="flex:1;padding:11px 16px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;">
+          ✨ Простой
+        </button>
+        <button id="mode-btn-pro" class="mode-sw-btn" onclick="setModeUI('pro')"
+          style="flex:1;padding:11px 16px;border:none;border-left:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;">
+          ⚙️ Профессиональный
+        </button>
+        <button id="mode-btn-dev" class="mode-sw-btn" onclick="setModeUI('dev')"
+          style="flex:1;padding:11px 16px;border:none;border-left:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;">
+          🔧 Разработчик
+        </button>
+      </div>
+      <div id="mode-desc" style="font-size:12px;color:var(--text2);margin-top:10px;"></div>
+      <p id="mod-manager-link" class="pro-only" style="display:none;margin-top:12px;font-size:12px;">
+        <a href="/dev/modules">🧩 Module Manager</a> — каналы релизов (Stable / Beta / Dev)
+      </p>
+      <style>body.mode-dev #mod-manager-link { display: block !important; }</style>
+    </div>
+  </div>
+
+  <!-- ── БЕТА: ПОДДЕРЖКА ─────────────────── -->
+  <div class="settings-card">
+    <h2>🧪 Бета-тестирование</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">
+      Диагностика, обновления и отправка отчёта разработчику одним нажатием.
+    </p>
+
+    <div class="field-group">
+      <label>Версия</label>
+      <div id="beta-app-version" style="font-size:13px;color:var(--text2);">Загрузка…</div>
+    </div>
+
+    <div class="row-group" style="flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      <button class="btn btn-secondary" onclick="vmRunDiagnostics('beta-diagnostics-box')">🔍 Диагностика системы</button>
+      <div data-vm-update-widget data-vm-update-meta="settings-update-meta"></div>
+      <button class="btn btn-secondary" onclick="vmSubmitErrorReport()">📨 Сообщить об ошибке</button>
+    </div>
+    <div id="settings-update-meta" class="vm-update-meta" style="margin-bottom:14px;"></div>
+
+    <div id="beta-diagnostics-box" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;min-height:48px;"></div>
+  </div>
+
+  <!-- ── TTS ─────────────────────────────── -->
+  <div class="settings-card">
+    <h2>🔊 Озвучка (TTS)</h2>
+
+    <div class="field-group">
+      <label>Язык голоса по умолчанию</label>
+      <select id="s-lang" class="select-control" onchange="updateVoiceList()">
+        {% for name, code in languages.items() %}
+        <option value="{{ code }}" {% if code=='ru' %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Голос по умолчанию</label>
+      <select id="s-voice" class="select-control">
+        {% for v in voices.ru %}
+        <option value="{{ v.id }}">{{ v.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Предпрослушать голос</label>
+      <div class="row-group">
+        <input id="s-preview-text" class="input-control" value="Привет! Это тестовая фраза для TubeDub."
+          placeholder="Текст для теста" />
+        <button class="btn btn-primary" onclick="previewVoice()">▶ Слушать</button>
+      </div>
+      <div id="preview-audio" style="margin-top:10px;display:none">
+        <audio id="preview-player" controls style="width:100%"></audio>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ПЕРЕВОД / AI ─────────────────────── -->
+  <div class="settings-card">
+    <h2>🌍 Перевод / AI</h2>
+
+    <div class="field-group">
+      <label>Язык перевода по умолчанию</label>
+      <select id="s-target-lang" class="select-control">
+        {% for name, code in languages.items() %}
+        <option value="{{ code }}" {% if code=='ru' %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Режим перевода</label>
+      <select id="s-translate-mode" class="select-control">
+        <option value="online">Онлайн (Google Translate)</option>
+        <option value="offline">Офлайн (Argos Translate)</option>
+        <option value="auto" selected>Авто (онлайн → офлайн)</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Автоочистка SRT</label>
+      <label class="toggle-label">
+        <input type="checkbox" id="s-auto-clean" checked />
+        <span class="toggle-switch"></span>
+        <span>Очищать субтитры перед переводом</span>
+      </label>
+    </div>
+
+    <div class="field-group">
+      <label>Контроль качества адаптации текста</label>
+      <select id="s-strict-llm-adaptation" class="select-control">
+        <option value="automatic" selected>Автоматический (рекомендуется)</option>
+        <option value="strict">Максимальное качество (строгий)</option>
+      </select>
+      <div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5;">
+        <b>Автоматический:</b> если AI-модуль установлен — полная интеллектуальная адаптация;
+        если нет — упрощённая адаптация, при неудаче показывается предупреждение, но дубляж
+        продолжается.<br />
+        <b>Максимальное качество:</b> если хотя бы один сегмент не удалось адаптировать
+        (AI-модуль недоступен или не справился) — пайплайн останавливается.
+      </div>
+      <div id="s-llm-capability-line"
+        style="font-size:12px;margin-top:8px;min-height:16px;color:var(--text2);"></div>
+    </div>
+  </div>
+
+  <!-- ── ЛИЦЕНЗИЯ ─────────────────────────── -->
+  <div class="settings-card">
+    <h2>🔑 Лицензия</h2>
+
+    <div class="field-group">
+      <div id="license-badge-row" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div id="license-badge"
+          style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;background:var(--panel2);border:2px solid var(--border);">
+          <span id="license-icon">🆓</span>
+          <span id="license-label">Бесплатная версия</span>
+        </div>
+      </div>
+
+      <label>Лицензионный ключ</label>
+      <div class="row-group">
+        <input type="text" id="license-key" class="input-control" placeholder="VM-XXXX-XXXX-XXXX"
+          style="font-family:monospace;letter-spacing:1px;" />
+        <button class="btn btn-primary" onclick="activateLicense()">🔑 Активировать</button>
+      </div>
+      <div id="license-status-line" style="font-size:12px;color:var(--text2);margin-top:8px;"></div>
+      <div id="license-server-line" style="font-size:11px;color:var(--text2);margin-top:4px;"></div>
+      <div id="license-msg" style="font-size:12px;margin-top:6px;min-height:16px;"></div>
+    </div>
+
+    <div class="field-group">
+      <label>Возможности</label>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+        <div style="font-size:13px;color:var(--success);">✅ Озвучка текста (TTS)</div>
+        <div style="font-size:13px;color:var(--success);">✅ Перевод текста</div>
+        <div style="font-size:13px;color:var(--success);">✅ Чтение книги (базовый)</div>
+        <div style="font-size:13px;color:var(--success);">✅ Дубляж (ручной режим)</div>
+        <div id="feat-autodub" class="feat-premium-item feat-pro-item" style="font-size:13px;">🔒 Авто-дубляж (Whisper)</div>
+        <div id="feat-mp4" class="feat-premium-item feat-pro-item" style="font-size:13px;">🔒 Экспорт MP4 (авто-дубляж)</div>
+        <div id="feat-batch" class="feat-premium-item feat-pro-item" style="font-size:13px;">🔒 Пакетная обработка</div>
+      </div>
+    </div>
+
+    <div id="deactivate-row" style="display:none;margin-top:8px;">
+      <button class="btn btn-sm" onclick="deactivateLicense()" style="color:var(--danger);border-color:var(--danger);">
+        Деактивировать лицензию
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ВЛАДЕЛЕЦ: ТЕСТОВЫЕ СБОРКИ ─────────── -->
+  <div class="settings-card" id="owner-panel" style="display:none;border-color:rgba(99,102,241,.35);">
+    <h2>🛠 Панель владельца</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">
+      Сборки TubeDub для тестеров: ZIP, <strong>TubeDub_Test_7_Days.exe</strong>, экосистема (7 free apps).
+    </p>
+
+    <div class="field-group">
+      <label>Токен владельца</label>
+      <input type="password" id="owner-token" class="input-control" placeholder="vm-owner-local"
+        style="font-family:monospace;" />
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;">
+        Env: VM_OWNER_TOKEN · Dev: VM_DEV_MODE=1
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Тип тестовой лицензии</label>
+      <select id="owner-build-type" class="select-control">
+        <option value="TEST-7">TEST-7 (Demo 7 дней)</option>
+        <option value="TEST-30">TEST-30 (Demo 30 дней)</option>
+        <option value="PREMIUM-WEEK">PREMIUM-WEEK (7 дней)</option>
+        <option value="PREMIUM-MONTH">PREMIUM-MONTH (30 дней)</option>
+        <option value="PREMIUM-YEAR">PREMIUM-YEAR (365 дней)</option>
+        <option value="LIFETIME">LIFETIME (бессрочно)</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Примечание (необязательно)</label>
+      <input type="text" id="owner-build-label" class="input-control" placeholder="Для тестера Алексея" />
+    </div>
+
+    <div class="field-group">
+      <label>Обновления TubeDub</label>
+      <div data-vm-update-widget data-vm-update-style="owner" data-vm-update-meta="owner-update-meta"></div>
+      <div id="owner-update-meta" class="vm-update-meta"></div>
+    </div>
+
+    <div class="row-group" style="margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <a href="/owner/download-center" class="btn btn-secondary">🧠 AI Download Center</a>
+      <button class="btn btn-primary" onclick="ownerBuildInstaller()">📦 Создать установщик</button>
+      <button class="btn btn-primary" onclick="ownerBuildTestInstaller()">🧪 Создать тестовую версию</button>
+      <button class="btn btn-secondary" onclick="ownerBuildTestExe()">EXE (legacy)</button>
+      <button class="btn btn-secondary" onclick="ownerCreateBuild()">ZIP (dev)</button>
+      <button class="btn btn-secondary" onclick="ownerBuildEcosystem()">🌐 Экосистема</button>
+      <button class="btn btn-secondary" onclick="ownerRefreshBuilds()">↻ Обновить список</button>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">
+      Установщики: <code>output/installers/TubeDub_Setup.exe</code> и
+      <code>TubeDub_Test_7_Days_Setup.exe</code>. Требуются PyInstaller и Inno Setup 6.
+      Положите FFmpeg в <code>tools/ffmpeg/</code> перед сборкой.
+    </div>
+    <div id="owner-build-status" style="font-size:12px;color:var(--text2);margin-bottom:10px;min-height:18px;"></div>
+    <div id="owner-msg" style="font-size:12px;margin-bottom:10px;min-height:16px;"></div>
+
+    <div class="field-group">
+      <label>Тестовые сборки и ключи</label>
+      <div id="owner-builds-list" style="font-size:12px;color:var(--text2);">
+        Загрузка…
+      </div>
+    </div>
+
+    <div class="field-group" style="margin-top:12px;">
+      <label>Управление ключом</label>
+      <div class="row-group">
+        <input type="text" id="owner-manage-key" class="input-control" placeholder="VM-XXXX-XXXX-XXXX"
+          style="font-family:monospace;" />
+        <button class="btn btn-sm" onclick="ownerRevokeKey()">Отключить</button>
+        <button class="btn btn-sm" onclick="ownerExtendKey(7)">+7 дн.</button>
+        <button class="btn btn-sm" onclick="ownerExtendKey(30)">+30 дн.</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ИНТЕРФЕЙС ──────────────────────── -->
+  <div class="settings-card">
+    <h2>🎨 Интерфейс</h2>
+    <div class="field-group">
+      <label class="toggle-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="checkbox" id="s-ui-sounds" checked />
+        <span>Звуки интерфейса (тихие короткие сигналы при нажатиях)</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ── МЕНЕДЖЕР МОДЕЛЕЙ ─────────────────── -->
+  <div class="settings-card" id="models-manager-card">
+    <h2>📦 Менеджер моделей</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      Модели загружаются только по требованию. Общий кэш для перевода, дубляжа, STT и чтения книг.
+    </p>
+    <div id="models-storage-summary" class="char-count" style="margin-bottom:12px;">Загрузка…</div>
+    <div style="overflow-x:auto;">
+      <table id="models-table" style="width:100%;font-size:12px;border-collapse:collapse;">
+        <thead>
+          <tr style="text-align:left;color:var(--text2);">
+            <th style="padding:6px 4px;">Компонент</th>
+            <th>Языки</th>
+            <th>Размер</th>
+            <th>Использован</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="models-table-body"></tbody>
+      </table>
+    </div>
+    <div class="row-group" style="flex-wrap:wrap;gap:8px;margin-top:14px;">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="modelsCleanupUnused()">🧹 Удалить неиспользуемые</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="modelsCleanupAll()">🗑 Очистить весь кэш</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="modelsRefresh()">↻ Обновить список</button>
+    </div>
+    <div id="models-dev-info" class="dev-only" style="display:none;margin-top:12px;font-size:11px;color:var(--text2);"></div>
+  </div>
+
+  <!-- ── AI MODULE ─────────────────────────── -->
+  <div class="settings-card" id="ai-module-card">
+    <h2>🤖 AI Module</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      Источник AI и API настраиваются на страницах
+      <a href="/ai/sources">AI Sources</a> и
+      <a href="/ai/settings">AI Settings</a>.
+      Локальный дубляж всегда бесплатный; модели не скачиваются автоматически.
+    </p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      AI-модуль TubeDub обеспечивает интеллектуальную адаптацию текста под длительность реплик.
+    </p>
+    <div id="ai-module-status-line" class="char-count" style="margin-bottom:12px;">Загрузка…</div>
+    <div id="ai-module-details" style="font-size:12px;margin-bottom:14px;"></div>
+    <div style="margin-bottom:14px;">
+      <label for="ai-quality-mode" style="font-size:12px;display:block;margin-bottom:6px;">Качество перевода (AI)</label>
+      <select id="ai-quality-mode" onchange="aiModuleSelectQuality()" style="min-width:220px;padding:6px 8px;border-radius:6px;border:1px solid var(--border,#333);background:var(--bg2,#1a1a1a);color:inherit;">
+        <option value="max_quality">Максимальное качество (рекомендуется)</option>
+        <option value="balanced">Баланс</option>
+        <option value="fast">Быстро (слабая модель, CPU)</option>
+      </select>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.4;">
+        Для украинского дубляжа нужна модель ≥7B. На вашем ПК используйте <b>Llama</b> или скачайте <b>DeepSeek</b>.
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label for="ai-model-select" style="font-size:12px;display:block;margin-bottom:6px;">AI Model</label>
+      <select id="ai-model-select" onchange="aiModuleSelectModel()" style="min-width:220px;padding:6px 8px;border-radius:6px;border:1px solid var(--border,#333);background:var(--bg2,#1a1a1a);color:inherit;">
+        <option value="deepseek">DeepSeek (Default)</option>
+        <option value="qwen">Qwen</option>
+        <option value="llama">Llama</option>
+      </select>
+      <button type="button" id="ai-download-deepseek-btn" class="btn btn-primary btn-sm" style="display:none;margin-left:8px;" onclick="aiModuleDownloadDeepSeek()">Download DeepSeek</button>
+    </div>
+    <div class="row-group" style="flex-wrap:wrap;gap:8px;">
+      <button type="button" class="btn btn-primary btn-sm" onclick="aiModuleInstall()">Установить</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="aiModuleReinstall()">Переустановить</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="aiModuleUpdateModel()">Обновить модель</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="aiModuleClearCache()">Очистить кэш моделей</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="aiModuleUninstall()">Удалить AI-модуль</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="aiModuleRefresh()">↻ Обновить</button>
+    </div>
+    <div id="ai-module-action-result" style="font-size:12px;margin-top:10px;color:var(--text2);"></div>
+    <div id="ai-diagnostics-panel" style="font-size:11px;margin-top:12px;padding:10px;border:1px solid var(--border,#333);border-radius:8px;display:none;">
+      <div style="font-weight:600;margin-bottom:6px;">AI Diagnostics (TZ)</div>
+      <div id="ai-diag-model">Модель: —</div>
+      <div id="ai-diag-route" style="margin-top:4px;">Маршрут: —</div>
+      <div id="ai-diag-events" style="margin-top:4px;color:var(--text2);"></div>
+    </div>
+  </div>
+
+  <!-- ── ХРАНИЛИЩЕ ─────────────────────────── -->
+  <div class="settings-card" id="storage-manager-card">
+    <h2>💾 Хранилище</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      Показывает, что именно занимает место на диске. Очистка удаляет <strong>только временные файлы</strong>
+      — проекты, готовые MP4, модели, настройки и пресеты не затрагиваются.
+    </p>
+    <div id="storage-summary" class="char-count" style="margin-bottom:12px;">Загрузка…</div>
+    <div id="storage-buckets" style="font-size:12px;margin-bottom:14px;"></div>
+    <div class="row-group" style="flex-wrap:wrap;gap:8px;">
+      <button type="button" class="btn btn-primary btn-sm" onclick="storageCleanupAll()">🧹 Очистить временные файлы и кэш</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="storageCleanupTemp()">🗂 Только временные</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="storageRefresh()">↻ Обновить</button>
+    </div>
+    <div id="storage-cleanup-result" style="font-size:12px;margin-top:10px;color:var(--text2);"></div>
+  </div>
+
+  <!-- ── О ПРОГРАММЕ ──────────────────────── -->
+  <div class="settings-card">
+    <h2>ℹ️ О программе</h2>
+    <div class="about-block">
+      <div class="about-row"><span>Продукт</span><strong>TubeDub</strong></div>
+      <div class="about-row"><span>Движок</span><strong>VideoMonster Engine</strong></div>
+      <div class="about-row"><span>TTS движок</span><strong>edge-tts (Microsoft Neural)</strong></div>
+      <div class="about-row"><span>Переводчик</span><strong>deep-translator / Argos (онлайн→офлайн)</strong></div>
+      <div class="about-row"><span>Определение языка</span><strong>langdetect</strong></div>
+      <div class="about-row"><span>Фреймворк</span><strong>Python + Flask</strong></div>
+    </div>
+
+    <blockquote class="tubedub-philosophy" style="margin:16px 0 0;padding:14px 16px;border-left:3px solid var(--accent);background:var(--panel2);border-radius:0 8px 8px 0;font-size:13px;line-height:1.55;color:var(--text2);">
+      <p style="margin:0 0 8px;font-style:italic;color:var(--text);">«Сосредоточься на самом важном — и ты найдёшь дело, ради которого действительно стоит работать.»</p>
+      <p style="margin:0;font-size:12px;">Философия TubeDub: качество важнее количества. Одно тестовое видео прошло через сотни прогонов перевода, дубляжа и синхронизации — и стало символом пути от идеи к профессиональной платформе.</p>
+    </blockquote>
+
+    <details style="margin-top:12px;font-size:13px;color:var(--text2);">
+      <summary style="cursor:pointer;color:var(--text);font-weight:500;">История проекта</summary>
+      <p style="margin:10px 0 0;line-height:1.55;">TubeDub вырос из бесконечных тестов на одном и том же видео — на нём проверялись алгоритмы перевода, таймингов, озвучки и качества речи. История этого ролика — о человеке, который нашёл своё главное направление и каждый день совершенствовался в нём. Так же развивается и TubeDub: новые возможности появляются постоянно, но цель остаётся неизменной — лучшие инструменты для видео, перевода и озвучки.</p>
+    </details>
+
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <a href="/mini/dub" class="btn btn-sm">🎬 Мини-дубляж</a>
+      <a href="/mini/voice" class="btn btn-sm">🔊 Мини-озвучка</a>
+      <a href="/mini/translate" class="btn btn-sm">🌍 Мини-перевод</a>
+      <a href="/mini/reader" class="btn btn-sm">📖 Мини «Чтение книги»</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="action-row" style="margin-top:24px">
+  <button class="btn btn-primary" onclick="saveSettings()">💾 Сохранить настройки</button>
+  <button class="btn btn-secondary" onclick="resetSettings()">↩ Сбросить</button>
+</div>
+
+<div id="status-bar" class="status-bar">
+  <span id="status-text">Настройки загружены</span>
+</div>
+
+<style>
+  .mode-sw-btn {
+    background: var(--panel2);
+    color: var(--text2);
+  }
+
+  .mode-sw-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .feat-pro-item {
+    color: var(--text2);
+    transition: color .2s;
+  }
+
+  body.mode-pro .feat-pro-item {
+    color: var(--success);
+  }
+
+  body.mode-pro .feat-pro-item::before {
+    content: "✅ ";
+  }
+
+  body.mode-pro .feat-pro-item {
+    font-size: 13px;
+  }
+</style>
+
+<script>
+  const VOICES = {{ voices| tojson | safe }};
+
+  /* ── РЕЖИМ ИНТЕРФЕЙСА ── */
+  const MODE_DESCS = {
+    simple: '✨ Простой — минимум настроек, только главные функции',
+    pro: '⚙️ Профессиональный — все движки, настройки, форматы, тайминги',
+    dev: '🔧 Разработчик — логи, pipeline, OCR, сегменты, диагностика',
+  };
+
+  function setModeUI(mode) {
+    setMode(mode);
+    const simpleBtn = document.getElementById('mode-btn-simple');
+    const proBtn = document.getElementById('mode-btn-pro');
+    const devBtn = document.getElementById('mode-btn-dev');
+    if (simpleBtn) simpleBtn.classList.toggle('active', mode === 'simple');
+    if (proBtn) proBtn.classList.toggle('active', mode === 'pro');
+    if (devBtn) devBtn.classList.toggle('active', mode === 'dev');
+    const desc = document.getElementById('mode-desc');
+    if (desc) desc.textContent = MODE_DESCS[mode] || '';
+    const names = { simple: '✨ Простой режим', pro: '⚙️ Профессиональный режим', dev: '🔧 Режим разработчика' };
+    vmNotify(names[mode] || 'Режим изменён', 'info', 2000);
+  }
+
+  /* ── TTS ── */
+  function updateVoiceList() {
+    const lang = document.getElementById('s-lang').value;
+    const sel = document.getElementById('s-voice');
+    sel.innerHTML = '';
+    const list = VOICES[lang] || VOICES['ru'];
+    list.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id; opt.textContent = v.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  function previewVoice() {
+    const text = document.getElementById('s-preview-text').value.trim();
+    const voice = document.getElementById('s-voice').value;
+    if (!text) return;
+    setStatus('Генерация превью...');
+    fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text.slice(0, 300), voice })
+    }).then(r => r.json()).then(d => {
+      if (d.error) { setStatus('Ошибка: ' + d.error); return; }
+      const player = document.getElementById('preview-player');
+      player.src = d.stream;
+      document.getElementById('preview-audio').style.display = 'block';
+      player.play();
+      setStatus('Готово');
+    }).catch(e => setStatus('Ошибка: ' + e));
+  }
+
+  /* ── НАСТРОЙКИ ── */
+  function saveSettings() {
+    const prev = JSON.parse(localStorage.getItem('vm_settings') || '{}');
+    const strictEl = document.getElementById('s-strict-llm-adaptation');
+    const settings = {
+      ...prev,
+      voice: document.getElementById('s-voice').value,
+      targetLang: document.getElementById('s-target-lang').value,
+      autoClean: document.getElementById('s-auto-clean').checked,
+      translateMode: document.getElementById('s-translate-mode').value,
+      uiSounds: document.getElementById('s-ui-sounds').checked,
+      strictLlmAdaptation: strictEl ? strictEl.value : (prev.strictLlmAdaptation || 'automatic'),
+    };
+    localStorage.setItem('vm_settings', JSON.stringify(settings));
+    vmNotify('Настройки сохранены ✓', 'success', 2500);
+    setStatus('Настройки сохранены ✓');
+  }
+
+  async function refreshLlmCapabilityLine() {
+    const line = document.getElementById('s-llm-capability-line');
+    if (!line) return;
+    try {
+      const r = await fetch('/api/ai-module/status');
+      const st = await r.json();
+      if (st.ready) {
+        line.style.color = 'var(--ok, #3ecf8e)';
+        line.textContent = '✓ AI-модуль установлен и готов к работе. Доступна интеллектуальная адаптация текста.';
+      } else {
+        line.style.color = 'var(--warn, #f6ad55)';
+        line.textContent = 'AI-модуль не установлен. Для максимального качества установите его в разделе «AI Module» или при первом дубляже.';
+      }
+    } catch (_e) {
+      line.textContent = '';
+    }
+  }
+
+  async function aiModuleRefresh() {
+    const line = document.getElementById('ai-module-status-line');
+    const det = document.getElementById('ai-module-details');
+    const sel = document.getElementById('ai-model-select');
+    const qsel = document.getElementById('ai-quality-mode');
+    const dlBtn = document.getElementById('ai-download-deepseek-btn');
+    if (!line) return;
+    line.textContent = 'Загрузка…';
+    try {
+      const r = await fetch('/api/ai-module/status');
+      const st = await r.json();
+      line.innerHTML = '<strong>Статус:</strong> ' + _escStorageHtml(st.status_label || '—');
+      if (det) {
+        det.innerHTML = [
+          st.backend_label ? '<div>Модуль: ' + _escStorageHtml(st.backend_label) + '</div>' : '',
+          st.model ? '<div>Модель: ' + _escStorageHtml(st.model) + '</div>' : '',
+          st.size_mb ? '<div>Занято: ' + st.size_mb + ' МБ</div>' : '',
+          st.installed_at ? '<div>Установлен: ' + _escStorageHtml(String(st.installed_at).slice(0, 19)) + '</div>' : '',
+          st.last_error ? '<div style="color:var(--danger,#f66);">' + _escStorageHtml(st.last_error) + '</div>' : '',
+        ].filter(Boolean).join('');
+      }
+      if (sel && st.selected_provider) {
+        sel.value = st.selected_provider;
+      }
+      if (qsel && st.quality_mode) {
+        qsel.value = st.quality_mode;
+      }
+      if (dlBtn && Array.isArray(st.providers)) {
+        const deepseek = st.providers.find(function (p) { return p.id === 'deepseek'; });
+        dlBtn.style.display = (deepseek && !deepseek.installed && st.status !== 'installing') ? 'inline-block' : 'none';
+      }
+      if (st.status === 'installing' && st.install_progress) {
+        line.innerHTML += '<br>' + _escStorageHtml(st.install_progress.message || 'Установка…')
+          + ' (' + (st.install_progress.percent || 0) + '%)';
+      }
+      _refreshAiDiagnosticsPanel();
+    } catch (e) {
+      line.textContent = 'Ошибка: ' + e.message;
+    }
+  }
+
+  async function _refreshAiDiagnosticsPanel() {
+    const panel = document.getElementById('ai-diagnostics-panel');
+    const modelEl = document.getElementById('ai-diag-model');
+    const routeEl = document.getElementById('ai-diag-route');
+    const eventsEl = document.getElementById('ai-diag-events');
+    if (!panel) return;
+    try {
+      const caps = await fetch('/api/auto_dub/adaptation_capabilities');
+      const cd = await caps.json();
+      const am = (cd.active_model || {});
+      if (modelEl) modelEl.textContent = 'Модель: ' + (am.display_name || am.model || '—');
+      panel.style.display = 'block';
+      const skill = await fetch('/api/ai_core/global-skill');
+      const sk = await skill.json();
+      if (eventsEl && sk.rule_count) {
+        eventsEl.textContent = 'Global Skill v' + (sk.version || '1') + ' · правил: ' + sk.rule_count;
+      }
+      if (routeEl) routeEl.textContent = 'Маршрут: Translation → Semantic → Timing → Grammar → Quality → Reviewer → TTS';
+    } catch (_e) {
+      panel.style.display = 'none';
+    }
+  }
+
+  async function aiModuleSelectQuality() {
+    const qsel = document.getElementById('ai-quality-mode');
+    if (!qsel) return;
+    try {
+      const r = await fetch('/api/ai-module/select-quality', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quality_mode: qsel.value }),
+      });
+      const d = await r.json();
+      if (!d.ok) {
+        vmNotify(d.error || 'Не удалось сменить режим', 'error');
+        return;
+      }
+      vmNotify('Режим качества AI обновлён.', 'success', 3000);
+      aiModuleRefresh();
+      refreshLlmCapabilityLine();
+    } catch (e) {
+      vmNotify('Ошибка: ' + e.message, 'error');
+    }
+  }
+
+  async function aiModuleSelectModel() {
+    const sel = document.getElementById('ai-model-select');
+    const res = document.getElementById('ai-module-action-result');
+    if (!sel) return;
+    try {
+      const r = await fetch('/api/ai-module/select-model', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: sel.value }),
+      });
+      const d = await r.json();
+      if (!d.ok) {
+        vmNotify(d.error || 'Не удалось сменить модель', 'error');
+        aiModuleRefresh();
+        return;
+      }
+      if (res) {
+        res.textContent = d.installed
+          ? 'Модель переключена: ' + (d.model || sel.value)
+          : 'Выбрана модель ' + sel.value + '. Нажмите «Download DeepSeek» для загрузки.';
+      }
+      if (d.needs_download && sel.value === 'deepseek') {
+        vmNotify('DeepSeek не установлен. Нажмите «Download DeepSeek».', 'info', 5000);
+      } else {
+        vmNotify('AI-модель переключена без перезапуска.', 'success', 3000);
+      }
+      aiModuleRefresh();
+      refreshLlmCapabilityLine();
+    } catch (e) {
+      vmNotify('Ошибка: ' + e.message, 'error');
+    }
+  }
+
+  async function aiModuleDownloadDeepSeek() {
+    const res = document.getElementById('ai-module-action-result');
+    if (res) res.textContent = 'Загрузка DeepSeek…';
+    await fetch('/api/ai-module/download-deepseek', { method: 'POST' });
+    _aiModulePollUntilDone();
+  }
+
+  async function _aiModulePollUntilDone() {
+    const res = document.getElementById('ai-module-action-result');
+    for (let i = 0; i < 600; i++) {
+      await new Promise(function (r) { setTimeout(r, 2000); });
+      const pr = await fetch('/api/ai-module/install/progress');
+      const st = await pr.json();
+      if (res && st.install_progress) {
+        res.textContent = (st.install_progress.message || '') + ' (' + (st.install_progress.percent || 0) + '%)';
+      }
+      if (st.status === 'ready') {
+        if (res) res.textContent = '';
+        vmNotify('AI-модуль успешно установлен.', 'success', 5000);
+        aiModuleRefresh();
+        refreshLlmCapabilityLine();
+        return;
+      }
+      if (st.status === 'error') {
+        if (res) res.textContent = '';
+        vmNotify(st.last_error || 'Ошибка установки', 'error');
+        aiModuleRefresh();
+        return;
+      }
+    }
+  }
+
+  async function aiModuleInstall() {
+    await fetch('/api/ai-module/install', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    _aiModulePollUntilDone();
+  }
+
+  async function aiModuleReinstall() {
+    if (!confirm('Переустановить AI-модуль?')) return;
+    await fetch('/api/ai-module/install', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reinstall: true }) });
+    _aiModulePollUntilDone();
+  }
+
+  async function aiModuleUpdateModel() {
+    await fetch('/api/ai-module/update-model', { method: 'POST' });
+    _aiModulePollUntilDone();
+  }
+
+  async function aiModuleClearCache() {
+    if (!confirm('Очистить кэш моделей AI-модуля?')) return;
+    const r = await fetch('/api/ai-module/clear-cache', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: true }) });
+    const d = await r.json();
+    vmNotify(d.ok ? 'Кэш очищен' : (d.error || 'Ошибка'), d.ok ? 'success' : 'error');
+    aiModuleRefresh();
+  }
+
+  async function aiModuleUninstall() {
+    if (!confirm('Удалить AI-модуль и локальные модели?')) return;
+    const r = await fetch('/api/ai-module/uninstall', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: true }) });
+    const d = await r.json();
+    vmNotify(d.ok ? 'AI-модуль удалён' : (d.error || 'Ошибка'), d.ok ? 'success' : 'error');
+    aiModuleRefresh();
+    refreshLlmCapabilityLine();
+  }
+
+  function resetSettings() {
+    localStorage.removeItem('vm_settings');
+    vmNotify('Настройки сброшены', 'info', 2000);
+    setTimeout(() => location.reload(), 600);
+  }
+
+  /* ── МЕНЕДЖЕР МОДЕЛЕЙ ── */
+  async function modelsRefresh() {
+    const tbody = document.getElementById('models-table-body');
+    const summary = document.getElementById('models-storage-summary');
+    const devBox = document.getElementById('models-dev-info');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5">Загрузка…</td></tr>';
+    try {
+      const r = await fetch('/api/models/components');
+      const d = await r.json();
+      const st = d.storage || {};
+      if (summary) {
+        summary.textContent =
+          `Кэш: ${st.total_gb || 0} ГБ · лимит ${st.max_gb || 10} ГБ · свободно на диске ${st.disk_free_gb || '?'} ГБ`;
+      }
+      const rows = (d.components || []).map(c => {
+        const dev = typeof isDevMode === 'function' && isDevMode();
+        const pathHint = dev && c.path ? `<div class="char-count">${c.path}</div>` : '';
+        return `<tr style="border-top:1px solid var(--border);">
+          <td style="padding:8px 4px;">${c.label || c.id}<br><span class="char-count">${c.id}:${c.variant}</span>${pathHint}</td>
+          <td>${c.languages || c.variant || '—'}</td>
+          <td>${c.size_mb || 0} МБ</td>
+          <td>${(c.last_used || '—').slice(0, 10)}</td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-sm" onclick="modelsUpdate('${c.id}','${c.variant}')">Обновить</button>
+            <button class="btn btn-sm" onclick="modelsDelete('${c.id}','${c.variant}')">Удалить</button>
+          </td>
+        </tr>`;
+      }).join('');
+      tbody.innerHTML = rows || '<tr><td colspan="5">Нет установленных моделей</td></tr>';
+      if (devBox && typeof isDevMode === 'function' && isDevMode()) {
+        devBox.style.display = 'block';
+        devBox.textContent = 'Dev: корень ' + (st.root || '');
+      }
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="5">Ошибка загрузки</td></tr>';
+    }
+  }
+
+  async function modelsDelete(id, variant) {
+    if (!confirm('Удалить эту модель из кэша?')) return;
+    const r = await fetch('/api/models/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, variant, confirmed: true }),
+    });
+    const d = await r.json();
+    vmNotify(d.ok ? 'Модель удалена' : (d.error || 'Ошибка'), d.ok ? 'success' : 'error');
+    modelsRefresh();
+  }
+
+  async function modelsUpdate(id, variant) {
+    const r = await fetch('/api/models/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, variant }),
+    });
+    const d = await r.json();
+    vmNotify(d.ok ? 'Модель обновлена' : (d.error || 'Ошибка'), d.ok ? 'success' : 'error');
+    modelsRefresh();
+  }
+
+  async function modelsCleanupUnused() {
+    if (!confirm('Удалить модели, не использовавшиеся более 90 дней?')) return;
+    const r = await fetch('/api/models/cleanup-unused', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirmed: true }),
+    });
+    const d = await r.json();
+    vmNotify(d.ok ? `Очищено: ${(d.deleted || []).length}` : (d.error || 'Ошибка'), d.ok ? 'success' : 'error');
+    modelsRefresh();
+  }
+
+  async function modelsCleanupAll() {
+    if (!confirm('Удалить ВСЕ модели из кэша? Потребуется повторная загрузка.')) return;
+    const r = await fetch('/api/models/cleanup-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirmed: true }),
+    });
+    const d = await r.json();
+    vmNotify(d.ok ? 'Кэш очищен' : (d.error || 'Ошибка'), d.ok ? 'success' : 'error');
+    modelsRefresh();
+  }
+
+  /* ── ХРАНИЛИЩЕ ── */
+  function _fmtStorageMb(mb) {
+    if (mb == null || isNaN(mb)) return '—';
+    if (mb >= 1024) return (mb / 1024).toFixed(2) + ' ГБ';
+    return mb.toFixed(1) + ' МБ';
+  }
+
+  function _escStorageHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  async function storageRefresh() {
+    const summary = document.getElementById('storage-summary');
+    const bucketsEl = document.getElementById('storage-buckets');
+    if (!summary) return;
+    summary.textContent = 'Загрузка…';
+    try {
+      const r = await fetch('/api/storage/audit');
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'audit failed');
+      summary.innerHTML = '<strong>Общий размер TubeDub:</strong> ' + _fmtStorageMb(d.total_mb)
+        + (d.disk_free_gb >= 0 ? ' · свободно на диске: ' + d.disk_free_gb + ' ГБ' : '')
+        + (d.deletable_temp_mb ? ' · можно очистить (временное): ' + _fmtStorageMb(d.deletable_temp_mb) : '');
+      if (bucketsEl) {
+        bucketsEl.innerHTML = (d.buckets || []).map(function (b) {
+          var prot = b.deletable ? '' : ' <span style="color:var(--text2);">🔒 ' + _escStorageHtml(b.protected_reason || 'защищено') + '</span>';
+          return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">'
+            + '<span>' + _escStorageHtml(b.label) + '</span>'
+            + '<span><strong>' + _fmtStorageMb(b.mb) + '</strong>' + prot + '</span></div>';
+        }).join('');
+      }
+    } catch (e) {
+      summary.textContent = 'Ошибка загрузки: ' + e.message;
+    }
+  }
+
+  async function _storageCleanup(scope) {
+    var resultEl = document.getElementById('storage-cleanup-result');
+    var r = await fetch('/api/storage/cleanup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scope: scope, confirm: true }),
+    });
+    var d = await r.json();
+    if (!d.ok) {
+      vmNotify(d.message || d.error || 'Ошибка очистки', 'error');
+      return;
+    }
+    var rep = d.storage_report || {};
+    var msg = 'Освобождено: ' + (rep.mb_freed != null ? rep.mb_freed + ' МБ' : '—')
+      + ' · удалено элементов: ' + (rep.files_deleted || 0);
+    if (resultEl) resultEl.textContent = msg;
+    vmNotify('Очистка завершена · ' + msg, 'success', 5000);
+    storageRefresh();
+  }
+
+  async function storageCleanupAll() {
+    if (!confirm('Удалить временные файлы дубляжа и кэш пайплайна?\n\nПроекты, MP4, модели и настройки НЕ будут затронуты.')) return;
+    await _storageCleanup('all');
+  }
+
+  async function storageCleanupTemp() {
+    if (!confirm('Удалить только временные файлы дубляжа (сессии, slot_fit)?')) return;
+    await _storageCleanup('temp');
+  }
+
+  /* ── ЛИЦЕНЗИЯ ── */
+  function _setLicenseBadge(status) {
+    const type = status.tier || status.type || 'basic';
+    const badge = document.getElementById('license-badge');
+    const icon = document.getElementById('license-icon');
+    const label = document.getElementById('license-label');
+    const deact = document.getElementById('deactivate-row');
+    const statusLine = document.getElementById('license-status-line');
+
+    const icons = { demo: '🧪', basic: '🆓', premium: '⭐' };
+    icon.textContent = icons[type] || '🆓';
+    label.textContent = status.label || type;
+    if (statusLine) statusLine.textContent = status.message || '';
+
+    const serverLine = document.getElementById('license-server-line');
+    if (serverLine) {
+      if (status.server_configured) {
+        const sync = status.last_online_sync
+          ? ' · синхр. ' + new Date(status.last_online_sync * 1000).toLocaleString('ru')
+          : '';
+        serverLine.textContent = '🌐 Онлайн-сервер подключён' + sync;
+      } else {
+        serverLine.textContent = '📴 Онлайн-сервер не настроен (только офлайн-ключи)';
+      }
+    }
+
+    if (type === 'premium' || type === 'demo') {
+      badge.style.background = 'rgba(72,187,120,.15)';
+      badge.style.borderColor = 'var(--success)';
+      if (deact) deact.style.display = status.key ? 'block' : 'none';
+    } else {
+      badge.style.background = 'var(--panel2)';
+      badge.style.borderColor = 'var(--border)';
+      if (deact) deact.style.display = 'none';
+    }
+
+    if (typeof applyLicenseFeatures === 'function') applyLicenseFeatures(status);
+  }
+
+  async function activateLicense() {
+    const key = document.getElementById('license-key').value.trim();
+    if (!key) { document.getElementById('license-msg').textContent = 'Введите ключ'; return; }
+    const msgEl = document.getElementById('license-msg');
+    msgEl.textContent = 'Проверка...';
+    try {
+      const r = await fetch('/api/license/activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        msgEl.style.color = 'var(--success)';
+        msgEl.textContent = d.message || 'Активировано!';
+        _setLicenseBadge(d);
+        if (typeof applyLicenseBanner === 'function') applyLicenseBanner(d);
+        vmNotify(d.message || 'Лицензия активирована', 'success', 4000);
+      } else {
+        msgEl.style.color = 'var(--danger)';
+        msgEl.textContent = d.error || 'Неверный ключ';
+        vmNotify('❌ ' + (d.error || 'Неверный ключ'), 'error');
+      }
+    } catch (e) {
+      msgEl.textContent = 'Ошибка подключения';
+    }
+  }
+
+  async function deactivateLicense() {
+    if (!confirm('Сбросить лицензию до Basic?')) return;
+    const r = await fetch('/api/license/deactivate', { method: 'POST' });
+    const d = await r.json();
+    _setLicenseBadge(d);
+    vmNotify('Лицензия сброшена (Basic)', 'info', 2500);
+  }
+
+  function setStatus(msg) {
+    document.getElementById('status-text').textContent = msg;
+  }
+
+  /* ── ВЛАДЕЛЕЦ ── */
+  function _ownerHeaders() {
+    const token = document.getElementById('owner-token').value.trim() || localStorage.getItem('vm_owner_token') || '';
+    return { 'Content-Type': 'application/json', 'X-VM-Owner-Token': token };
+  }
+
+  function _ownerMsg(text, ok = true) {
+    const el = document.getElementById('owner-msg');
+    if (!el) return;
+    el.style.color = ok ? 'var(--success)' : 'var(--danger)';
+    el.textContent = text;
+  }
+
+  async function ownerRefreshBuilds() {
+    const list = document.getElementById('owner-builds-list');
+    if (!list) return;
+    list.textContent = 'Загрузка…';
+    try {
+      const r = await fetch('/api/owner/test-builds', { headers: _ownerHeaders() });
+      const d = await r.json();
+      if (!d.ok) {
+        list.textContent = d.error || 'Ошибка загрузки';
+        return;
+      }
+      if (!d.builds || d.builds.length === 0) {
+        list.textContent = 'Сборок ещё нет. Создайте первую тестовую сборку.';
+        return;
+      }
+      list.innerHTML = d.builds.map(b => {
+        const dt = new Date((b.created_at || 0) * 1000).toLocaleString('ru');
+        const revoked = b.revoked ? ' · ОТКЛ' : '';
+        const setup = b.setup_exists
+          ? `<button class="btn btn-sm" style="margin-left:6px;" onclick="ownerDownloadBuild('${b.id}')">Setup</button>`
+          : '';
+        const zip = b.zip_exists
+          ? `<button class="btn btn-sm" style="margin-left:6px;" onclick="ownerDownloadBuild('${b.id}')">ZIP</button>`
+          : '';
+        const exe = b.exe_path
+          ? `<span style="margin-left:6px;">EXE: <code>${b.exe_path.split(/[/\\\\]/).pop()}</code></span>`
+          : '';
+        const setupName = b.setup_name ? `<span style="margin-left:6px;">Setup: <code>${b.setup_name}</code></span>` : '';
+        return `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
+          <strong>${b.key_type || b.format || 'build'}</strong> ${b.label || ''}${revoked}<br>
+          ${b.key ? `<code style="font-size:11px;">${b.key}</code> · ` : ''}${b.duration_text || ''} · ${dt}
+          ${setup}${setupName}${b.zip_exists ? zip : ' (ZIP удалён)'}${exe}
+        </div>`;
+      }).join('');
+    } catch (e) {
+      list.textContent = 'Ошибка: ' + e;
+    }
+  }
+
+  async function ownerCreateBuild() {
+    const type = document.getElementById('owner-build-type').value;
+    const label = document.getElementById('owner-build-label').value.trim();
+    _ownerMsg('Создание ZIP-сборки… (может занять минуту)');
+    try {
+      const r = await fetch('/api/owner/test-builds/create', {
+        method: 'POST',
+        headers: _ownerHeaders(),
+        body: JSON.stringify({ type, label }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        _ownerMsg(d.message || 'Сборка создана');
+        vmNotify(d.message || 'Тестовая сборка создана', 'success', 5000);
+        ownerRefreshBuilds();
+      } else {
+        _ownerMsg(d.error || 'Ошибка', false);
+      }
+    } catch (e) {
+      _ownerMsg('Ошибка: ' + e, false);
+    }
+  }
+
+  function _ownerBuildStatus(text, ok = true) {
+    const el = document.getElementById('owner-build-status');
+    if (!el) return;
+    el.style.color = ok ? 'var(--text2)' : 'var(--danger)';
+    el.textContent = text;
+  }
+
+  async function _pollOwnerJob(statusUrl, onDone) {
+    for (let i = 0; i < 600; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      const r = await fetch(statusUrl, { headers: _ownerHeaders() });
+      const d = await r.json();
+      if (!d.ok && d.error) {
+        _ownerBuildStatus(d.error, false);
+        return;
+      }
+      _ownerBuildStatus(d.message || d.status || '…');
+      if (d.status === 'done') {
+        onDone(d);
+        return;
+      }
+      if (d.status === 'error') {
+        _ownerBuildStatus(d.error || d.message || 'Ошибка', false);
+        _ownerMsg(d.error || d.message || 'Ошибка', false);
+        return;
+      }
+    }
+    _ownerBuildStatus('Таймаут ожидания сборки', false);
+  }
+
+  async function ownerBuildEcosystem() {
+    _ownerMsg('Запуск сборки экосистемы…');
+    _ownerBuildStatus('Сборка 7 EXE через PyInstaller…');
+    try {
+      const r = await fetch('/api/owner/build_ecosystem', {
+        method: 'POST',
+        headers: _ownerHeaders(),
+        body: '{}',
+      });
+      const d = await r.json();
+      if (!d.ok) {
+        _ownerMsg(d.error || 'Ошибка', false);
+        return;
+      }
+      await _pollOwnerJob(`/api/owner/build_ecosystem/status/${d.job_id}`, (job) => {
+        const res = job.result || {};
+        const msg = `${job.message || 'Готово'}. Папка: ${res.install_dir || d.install_dir || ''}`;
+        _ownerMsg(msg);
+        _ownerBuildStatus(msg);
+        vmNotify(msg, 'success', 8000);
+      });
+    } catch (e) {
+      _ownerMsg('Ошибка: ' + e, false);
+    }
+  }
+
+  async function ownerBuildTestInstaller() {
+    const type = document.getElementById('owner-build-type').value || 'TEST-7';
+    const label = document.getElementById('owner-build-label').value.trim();
+    _ownerMsg('Сборка TubeDub_Test_7_Days_Setup.exe…');
+    _ownerBuildStatus('PyInstaller + Inno Setup (10–30 мин)…');
+    try {
+      const r = await fetch('/api/owner/build_test_installer', {
+        method: 'POST',
+        headers: _ownerHeaders(),
+        body: JSON.stringify({ type, label }),
+      });
+      const d = await r.json();
+      if (!d.ok) {
+        _ownerMsg(d.error || 'Ошибка', false);
+        return;
+      }
+      await _pollOwnerJob(`/api/owner/build_test_installer/status/${d.job_id}`, (job) => {
+        const res = job.result || {};
+        const path = res.setup_path || res.setup_name || '';
+        const msg = `${job.message || 'Готово'}${path ? ' → ' + path : ''}`;
+        _ownerMsg(msg);
+        _ownerBuildStatus(msg);
+        vmNotify(msg, 'success', 8000);
+        ownerRefreshBuilds();
+      });
+    } catch (e) {
+      _ownerMsg('Ошибка: ' + e, false);
+    }
+  }
+
+  async function ownerBuildInstaller() {
+    const label = document.getElementById('owner-build-label').value.trim();
+    _ownerMsg('Сборка TubeDub_Setup.exe…');
+    _ownerBuildStatus('PyInstaller + Inno Setup (10–30 мин)…');
+    try {
+      const r = await fetch('/api/owner/build_installer', {
+        method: 'POST',
+        headers: _ownerHeaders(),
+        body: JSON.stringify({ label }),
+      });
+      const d = await r.json();
+      if (!d.ok) {
+        _ownerMsg(d.error || 'Ошибка', false);
+        return;
+      }
+      await _pollOwnerJob(`/api/owner/build_installer/status/${d.job_id}`, (job) => {
+        const res = job.result || {};
+        const path = res.setup_path || res.setup_name || '';
+        const msg = `${job.message || 'Готово'}${path ? ' → ' + path : ''}`;
+        _ownerMsg(msg);
+        _ownerBuildStatus(msg);
+        vmNotify(msg, 'success', 8000);
+        ownerRefreshBuilds();
+      });
+    } catch (e) {
+      _ownerMsg('Ошибка: ' + e, false);
+    }
+  }
+
+  async function ownerBuildTestExe() {
+    const type = document.getElementById('owner-build-type').value || 'TEST-7';
+    const label = document.getElementById('owner-build-label').value.trim();
+    _ownerMsg('Сборка TubeDub_Test_7_Days.exe…');
+    _ownerBuildStatus('PyInstaller: тестовый EXE (5–20 мин)…');
+    try {
+      const r = await fetch('/api/owner/build_test_version', {
+        method: 'POST',
+        headers: _ownerHeaders(),
+        body: JSON.stringify({ type, label }),
+      });
+      const d = await r.json();
+      if (!d.ok) {
+        _ownerMsg(d.error || 'Ошибка', false);
+        return;
+      }
+      await _pollOwnerJob(`/api/owner/build_test_version/status/${d.job_id}`, (job) => {
+        const res = job.result || {};
+        const path = res.exe_path || res.exe_name || '';
+        const msg = `${job.message || 'EXE готов'}${path ? ' → ' + path : ''}`;
+        _ownerMsg(msg);
+        _ownerBuildStatus(msg);
+        vmNotify(msg, 'success', 8000);
+        ownerRefreshBuilds();
+      });
+    } catch (e) {
+      _ownerMsg('Ошибка: ' + e, false);
+    }
+  }
+
+  async function ownerRevokeKey() {
+    const key = document.getElementById('owner-manage-key').value.trim();
+    if (!key) return;
+    const r = await fetch('/api/owner/test-builds/revoke', {
+      method: 'POST', headers: _ownerHeaders(), body: JSON.stringify({ key }),
+    });
+    const d = await r.json();
+    _ownerMsg(d.message || d.error || '', d.ok);
+    ownerRefreshBuilds();
+  }
+
+  async function ownerExtendKey(days) {
+    const key = document.getElementById('owner-manage-key').value.trim();
+    if (!key) return;
+    const r = await fetch('/api/owner/test-builds/extend', {
+      method: 'POST', headers: _ownerHeaders(), body: JSON.stringify({ key, days }),
+    });
+    const d = await r.json();
+    _ownerMsg(d.message || d.error || '', d.ok);
+    ownerRefreshBuilds();
+  }
+
+  async function ownerDownloadBuild(buildId) {
+    try {
+      const token = document.getElementById('owner-token').value.trim() || localStorage.getItem('vm_owner_token') || '';
+      const r = await fetch(`/api/owner/test-builds/download/${buildId}`, {
+        headers: { 'X-VM-Owner-Token': token },
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        _ownerMsg(d.error || 'Ошибка скачивания', false);
+        return;
+      }
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = buildId + '.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      _ownerMsg('Ошибка: ' + e, false);
+    }
+  }
+
+  async function initOwnerPanel() {
+    const panel = document.getElementById('owner-panel');
+    const tokenInput = document.getElementById('owner-token');
+    if (!panel) return;
+    const saved = localStorage.getItem('vm_owner_token');
+    if (saved && tokenInput) tokenInput.value = saved;
+    if (tokenInput) {
+      tokenInput.addEventListener('change', () => {
+        localStorage.setItem('vm_owner_token', tokenInput.value.trim());
+        ownerRefreshBuilds();
+      });
+    }
+    try {
+      const r = await fetch('/api/owner/status');
+      const d = await r.json();
+      if (d.owner_host) {
+        panel.style.display = 'block';
+        ownerRefreshBuilds();
+      }
+    } catch (_) { }
+  }
+
+  /* ── ИНИЦИАЛИЗАЦИЯ ── */
+  window.addEventListener('load', () => {
+    const saved = JSON.parse(localStorage.getItem('vm_settings') || '{}');
+    if (saved.targetLang) document.getElementById('s-target-lang').value = saved.targetLang;
+    if (saved.translateMode) document.getElementById('s-translate-mode').value = saved.translateMode;
+    if (saved.autoClean !== undefined) document.getElementById('s-auto-clean').checked = saved.autoClean;
+    const strictEl = document.getElementById('s-strict-llm-adaptation');
+    if (strictEl && saved.strictLlmAdaptation) strictEl.value = saved.strictLlmAdaptation;
+    refreshLlmCapabilityLine();
+    const uiSoundsEl = document.getElementById('s-ui-sounds');
+    if (uiSoundsEl) uiSoundsEl.checked = saved.uiSounds !== false;
+    const uiLang = localStorage.getItem('vm_ui_lang') || 'ru';
+    const uiSel = document.getElementById('settings-ui-lang');
+    if (uiSel) uiSel.value = uiLang;
+    const desc = document.getElementById('mode-desc');
+    if (desc && !desc.textContent) desc.textContent = MODE_DESCS[getMode()] || '';
+
+    fetch('/api/system/version').then(r => r.json()).then(v => {
+      const el = document.getElementById('beta-app-version');
+      if (el) el.textContent = v.display || (v.name + ' ' + v.version);
+    }).catch(() => {});
+
+    // Загрузить статус лицензии
+    fetch('/api/license/status').then(r => r.json()).then(d => {
+      _setLicenseBadge(d);
+    }).catch(() => { });
+
+    initOwnerPanel();
+    modelsRefresh();
+    storageRefresh();
+    aiModuleRefresh();
+  });
+</script>
+{% endblock %}

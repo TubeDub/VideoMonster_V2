@@ -1,0 +1,29 @@
+{
+  "id": "classic_narrator",
+  "pack": "regional",
+  "region_pack": "us",
+  "mix_mode": "custom",
+  "original_volume": 0.25,
+  "dub_volume": 1.0,
+  "background_volume": 0.25,
+  "tts_rate": "-5%",
+  "tts_pitch": "-1Hz",
+  "i18n_key": "dub.style_classic_narrator",
+  "order": 101,
+  "reply_start_delay_ms": 100,
+  "delivery": "classic_english_narration",
+  "intonation_range": "medium",
+  "voice_fx": {
+    "highpass_hz": 85,
+    "mid_peak_hz": 1900,
+    "mid_peak_gain_db": 1.2,
+    "compressor_ratio": 1.9,
+    "compressor_threshold_db": -19,
+    "volume_gain_db": 0.0
+  },
+  "preview_phrases": {
+    "default": "Classic English narration — warm and steady.",
+    "en": "Classic narration — warm, steady voice-over with quiet original.",
+    "ru": "Классическая англоязычная закадровая подача."
+  }
+}

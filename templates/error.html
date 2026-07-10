@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Ошибка — TubeDub</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .err-box {
+      text-align:center; padding:40px 32px;
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:16px; max-width:420px; width:90%;
+    }
+    .err-code   { font-size:72px; font-weight:800; color:var(--accent); line-height:1; margin-bottom:8px; }
+    .err-title  { font-size:20px; font-weight:700; margin-bottom:8px; }
+    .err-desc   { font-size:14px; color:var(--text2); line-height:1.6; margin-bottom:24px; }
+    .err-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  </style>
+</head>
+<body>
+  <div class="err-box">
+    <div class="err-code">{{ code }}</div>
+    <div class="err-title">{{ title }}</div>
+    <div class="err-desc">{{ description }}</div>
+    <div class="err-actions">
+      <a href="/" class="btn btn-primary">🏠 На главную</a>
+      <a href="javascript:history.back()" class="btn">← Назад</a>
+    </div>
+  </div>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

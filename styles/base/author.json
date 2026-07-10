@@ -1,0 +1,33 @@
+{
+  "id": "author",
+  "pack": "base",
+  "mix_mode": "custom",
+  "original_volume": 0.28,
+  "dub_volume": 1.0,
+  "background_volume": 0.28,
+  "tts_rate": "-4%",
+  "tts_pitch": null,
+  "i18n_key": "dub.style_author",
+  "order": 3,
+  "reply_start_delay_ms": 60,
+  "max_atempo": 1.16,
+  "delivery": "personal_measured",
+  "intonation_range": "medium",
+  "voice_fx": {
+    "highpass_hz": 85,
+    "mid_peak_hz": 1800,
+    "mid_peak_gain_db": 1.0,
+    "compressor_ratio": 1.8,
+    "compressor_threshold_db": -18,
+    "volume_gain_db": 0.0
+  },
+  "preview_phrases": {
+    "default": "Author's voice — personal, measured narration.",
+    "ru": "Авторский стиль — личная, размеренная подача, оригинал слышен на фоне.",
+    "uk": "Авторський стиль — особиста, розмірена подача, оригінал чутно на фоні.",
+    "en": "Author style — personal narration with the original audible.",
+    "ja": "作者の語り口 — 落ち着いた個人的なナレーションです。",
+    "de": "Autorenstil — persönliche, gemäßigte Erzählstimme mit hörbarem Original.",
+    "fr": "Style auteur — narration personnelle et posée, original audible."
+  }
+}

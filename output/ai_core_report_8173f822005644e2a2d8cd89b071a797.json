@@ -1,0 +1,1393 @@
+{
+  "task_id": "8173f822005644e2a2d8cd89b071a797",
+  "generated_at": "2026-07-09T06:34:43+00:00",
+  "final_status": "partial",
+  "ddf_summary": {
+    "total_agents": 10,
+    "failed_agents": 1,
+    "fallback_used": 2,
+    "warnings": 1,
+    "total_execution_time_ms": 12070214.8,
+    "total_llm_calls": 20
+  },
+  "agents": {
+    "Planner/v3": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "BALANCED",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "AudioExtraction": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 2867.8,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "extracted",
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_1d6c345168.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\8173f822005644e2a2d8cd89b071a797\\8173f822_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\8173f822005644e2a2d8cd89b071a797\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    "Whisper/STT": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "detected_lang=en",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "Director/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 7709972.7,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 20,
+      "decision": "creative_briefs_ready",
+      "input_metrics": {
+        "segment_count": 20
+      },
+      "output_metrics": {
+        "brief_count": 20,
+        "llm_used_count": 18,
+        "rule_only_count": 0
+      }
+    },
+    "Translation/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "translation_agent_v1",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "translation": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 607361.1,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {
+        "segments": 20
+      },
+      "output_metrics": {
+        "execution_time_ms": 607361.1,
+        "segment_count": 20,
+        "success_count": 39,
+        "retries": 66,
+        "fallback_used": true,
+        "translator_used": "deep-translator",
+        "per_segment_confidence": [
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5461
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5461
+          },
+          {
+            "translation": 0.75,
+            "entity": 1.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.7411
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.3333,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5044
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          }
+        ],
+        "avg_overall": 0.4818,
+        "avg_translation": 0.4818,
+        "avg_entity": 0.9167,
+        "avg_terminology": 0.1429,
+        "avg_language": 1.0
+      }
+    },
+    "ArchitectureValidation/4.3": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 0,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    },
+    "streaming_text": {
+      "called": true,
+      "success": false,
+      "execution_time_ms": 3750013.2,
+      "retry_count": 0,
+      "fallback_used": true,
+      "fallback_reason": "timeout_3750s",
+      "llm_calls": 0,
+      "decision": "rule_fallback",
+      "input_metrics": {},
+      "output_metrics": {}
+    }
+  },
+  "agent_timeline": [
+    {
+      "agent_name": "Planner/v3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "BALANCED",
+      "fallback_used": false,
+      "timestamp": "2026-07-09T03:11:16+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "AudioExtraction",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "extracted",
+      "fallback_used": false,
+      "timestamp": "2026-07-09T03:11:19+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 2867.8,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_1d6c345168.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\8173f822005644e2a2d8cd89b071a797\\8173f822_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\8173f822005644e2a2d8cd89b071a797\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    {
+      "agent_name": "Whisper/STT",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "detected_lang=en",
+      "fallback_used": false,
+      "timestamp": "2026-07-09T03:12:12+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Director/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "creative_briefs_ready",
+      "fallback_used": false,
+      "timestamp": "2026-07-09T05:20:42+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 7709972.7,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 20,
+      "input_metrics": {
+        "segment_count": 20
+      },
+      "output_metrics": {
+        "brief_count": 20,
+        "llm_used_count": 18,
+        "rule_only_count": 0
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped",
+      "fallback_used": true,
+      "timestamp": "2026-07-09T05:30:49+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "translation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-09T05:30:49+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 607361.1,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 20
+      },
+      "output_metrics": {
+        "execution_time_ms": 607361.1,
+        "segment_count": 20,
+        "success_count": 39,
+        "retries": 66,
+        "fallback_used": true,
+        "translator_used": "deep-translator",
+        "per_segment_confidence": [
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5461
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5461
+          },
+          {
+            "translation": 0.75,
+            "entity": 1.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.7411
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.3333,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5044
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4211
+          }
+        ],
+        "avg_overall": 0.4818,
+        "avg_translation": 0.4818,
+        "avg_entity": 0.9167,
+        "avg_terminology": 0.1429,
+        "avg_language": 1.0
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-09T05:30:49+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 0,
+        "active_agents": 1,
+        "contract_violations": 20,
+        "ux_validation_passed": true
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "translation_agent_v1",
+      "fallback_used": false,
+      "timestamp": "2026-07-09T05:30:50+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "streaming_text",
+      "called": true,
+      "success": false,
+      "error_msg": "timeout_3750s",
+      "decision": "rule_fallback",
+      "fallback_used": true,
+      "timestamp": "2026-07-09T06:34:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 3750013.2,
+      "retry_count": 0,
+      "fallback_reason": "timeout_3750s",
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-09T06:34:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 0,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    }
+  ],
+  "llm_calls_count": 28,
+  "llm_calls": [
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nNext: But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. | So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all t",
+      "sent_chars": 885,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 180011.8,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nNext: But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. | So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all t",
+      "sent_chars": 885,
+      "received": "Джордж-молодший, сьомнадцятирічний хлопець, проїздив через своє родове місто, повертаючись додому на вечерю.",
+      "finish_reason": "stop",
+      "ms": 117921.9,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: 18-річний хлопець на ім'я Джордж-молодший проїхав через своє рідне місто, повертаючись додому на вечерю.",
+      "sent_chars": 262,
+      "received": "18-річний Джордж-молодший проїхав свого родного міста, повертаючись додому на вечерю.",
+      "finish_reason": "stop",
+      "ms": 164077.8,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. | So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything a",
+      "sent_chars": 1460,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 342591.6,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: 18-річний Джордж-молодший проїхав свого родного міста, повертаючись додому на вечерю.",
+      "sent_chars": 243,
+      "received": "Джордж-молодший, 18 років, проїхав свого родного міста, повертаючись додому на вечерю.",
+      "finish_reason": "stop",
+      "ms": 320649.5,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. | So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything a",
+      "sent_chars": 1460,
+      "received": "І тоді його батько дарував йому маленьку італійську машину — Fiat. Але незважаючи на це, батько не розумів його захоплення автомобілями.",
+      "finish_reason": "stop",
+      "ms": 206553.1,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: Джордж-молодший, 18 років, проїхав свого родного міста, повертаючись додому на вечерю.",
+      "sent_chars": 244,
+      "received": "Джордж-молодший, 18 років, проїхав своє родне місто, повертаючись додому на вечерю.",
+      "finish_reason": "stop",
+      "ms": 141698.7,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument | between father and so",
+      "sent_chars": 1318,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 250079.4,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "grammar_polish",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Polish grammar and punctuation in Ukrainian. Preserve ALL facts, names, dates, numbers. Keep length within ±10% (104 chars). Do not add or remove information. Source: An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner. Text: 18-річний хлопець на ім'я Джордж-молодший проїхав через своє рідне місто, повертаючись додому на вечерю. Polished Ukrainian:",
+      "sent_chars": 388,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 351889.0,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument | between father and so",
+      "sent_chars": 1318,
+      "received": "Двадцять днів спустя Джордж-молодший лежав на ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+      "finish_reason": "stop",
+      "ms": 231332.5,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: Джордж-молодший був розумним хлопцем, але легко відволікався від серйозних справ, ось лишку часу віддавав автомобілям.",
+      "sent_chars": 276,
+      "received": "Джордж-молодший був розумним хлопцем, але часто відволікався від серйозних справ, ось лишку часу віддавав автомобілям.",
+      "finish_reason": "stop",
+      "ms": 292866.1,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "grammar_polish",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Polish grammar and punctuation in Ukrainian. Preserve ALL facts, names, dates, numbers. Keep length within ±10% (104 chars). Do not add or remove information. Source: An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner. Text: 18-річний хлопець на ім'я Джордж-молодший проїхав через своє рідне місто, повертаючись додому на вечерю. Polished Ukrainian:",
+      "sent_chars": 388,
+      "received": "18-річний хлопець по імені Джордж-молодший проїхав через своє рідне місто, повертаючись додому на вечірню.",
+      "finish_reason": "stop",
+      "ms": 205138.6,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black. | Two weeks later, George Jr. was l",
+      "sent_chars": 1291,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 325537.8,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "grammar_polish",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Polish grammar and punctuation in Ukrainian. Preserve ALL facts, names, dates, numbers. Keep length within ±10% (151 chars). Do not add or remove information. Source: So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars. Text: Джордж-молодший був дуже розумною дитиною, але також він дуже легко відволікся, і через це він справді не займався чимось серйозним, окрім автомобілів",
+      "sent_chars": 521,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 351876.5,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: І в той момент його батько дійсно купив йому маленьку італійську машину під назвою Fiat, але його батько, незважаючи на те, що він буквально подарував йому Fiat,",
+      "sent_chars": 319,
+      "received": "І в той момент його батько дійсно купив йому маленьку італійську машину під назвою Fiat, але незважаючи на це подарунок,",
+      "finish_reason": "stop",
+      "ms": 310057.3,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "grammar_polish",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Polish grammar and punctuation in Ukrainian. Preserve ALL facts, names, dates, numbers. Keep length within ±10% (151 chars). Do not add or remove information. Source: So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars. Text: Джордж-молодший був дуже розумною дитиною, але також він дуже легко відволікся, і через це він справді не займався чимось серйозним, окрім автомобілів",
+      "sent_chars": 521,
+      "received": "Джордж-молодший був дуже розумним хлопчиком, але легко відволікалася його увага, і через це він справді не займався чимось серйозно, окрім автомобілів.",
+      "finish_reason": "stop",
+      "ms": 194423.6,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black. | Two weeks later, George Jr. was l",
+      "sent_chars": 1291,
+      "received": "Два тижні раніше, коли Джордж робив поворот, до нього з кількістю вдарив інший автомобіль, що швидко експресувався по дорозі. Ця сила удару так була жорстка, що машину Джорджа просто розім'яли.",
+      "finish_reason": "stop",
+      "ms": 256405.5,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: він просто не отримав одержимості свого сина, як чому б тобі не взяти фокус і не застосувати його до інших речей, тому ми отримаємо твою справжню роботу.",
+      "sent_chars": 311,
+      "received": "він просто не отримав одержимості свого сина, взяти фокус та застосувати його до інших речей, тому ми отримаємо твою справжню роботу.",
+      "finish_reason": "stop",
+      "ms": 303793.3,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital. | So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the r",
+      "sent_chars": 1202,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 298221.4,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "grammar_polish",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Polish grammar and punctuation in Ukrainian. Preserve ALL facts, names, dates, numbers. Keep length within ±10% (163 chars). Do not add or remove information. Source: And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat, Text: І в той момент його батько дійсно купив йому маленьку італійську машину під назвою Fiat, але його батько, незважаючи на те, що він буквально подарував йому Fiat, . Polish",
+      "sent_chars": 513,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 360391.5,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital. | So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the r",
+      "sent_chars": 1202,
+      "received": "що Джорджа-младшого викинуло з автомобіля, але він вижив.",
+      "finish_reason": "stop",
+      "ms": 199956.0,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: він не отримав одержимості свого сина, як чому б тобі не взяти фокус і не застосувати його до інших речей, тому ми отримаємо твою справжню роботу.",
+      "sent_chars": 304,
+      "received": "він не отримав одержимості свого сина, чому б тобі не застосувати фокус до інших речей? тому ми отримаємо твою справжню роботу.",
+      "finish_reason": "stop",
+      "ms": 283067.7,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "grammar_polish",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Polish grammar and punctuation in Ukrainian. Preserve ALL facts, names, dates, numbers. Keep length within ±10% (163 chars). Do not add or remove information. Source: And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat, Text: І в той момент його батько дійсно купив йому маленьку італійську машину під назвою Fiat, але його батько, незважаючи на те, що він буквально подарував йому Fiat, . Polish",
+      "sent_chars": 513,
+      "received": "І в той момент його батько дійсно купив йому маленьку італійську машину під назвою Fiat, але його батько, незважаючи на те, що він буквально подарував йому Fiat,",
+      "finish_reason": "stop",
+      "ms": 223689.9,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard | that George Jr. was ejected from the car but he had survived.\nNex",
+      "sent_chars": 1260,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 375316.2,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "timing_shorten",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Shorten this Ukrainian dubbing line to fit ~3000ms of speech. Preserve ALL facts, names, dates, numbers. No ellipsis, no word cutting, no empty output. Line: він не отримав одержимості свого сина, чому б тобі не застосувати фокус до інших речей? тому ми отримаємо твою справжню роботу.",
+      "sent_chars": 285,
+      "received": "він не отримав одержимості свого сина, чому б тобі не застосувати фокус до інших речей? тому ми отримаємо твою справжню роботу.",
+      "finish_reason": "stop",
+      "ms": 166850.8,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard | that George Jr. was ejected from the car but he had survived.\nNex",
+      "sent_chars": 1260,
+      "received": "Два роки спустя, коли Джордж-молодший повністю відновився від своїх травм, він стояв у кінцевій зоні на гоночній трасі і підняв камеру.",
+      "finish_reason": "stop",
+      "ms": 201135.4,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": "grammar_polish",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Polish grammar and punctuation in Ukrainian. Preserve ALL facts, names, dates, numbers. Keep length within ±10% (153 chars). Do not add or remove information. Source: he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument Text: Він просто не отримав одержимості свого сина, як чому б тобі не взяти фокус і не застосувати його до ін",
+      "sent_chars": 570,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 250773.9,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": "semantic_rewrite",
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "sent": "Rewrite as natural spoken Ukrainian for dubbing. Preserve meaning, intent, emotion, and ALL proper names/abbreviations. Do NOT translate literally word-by-word. Full sentence restructure is allowed when meaning stays intact.\nDialogue context:\nPrevious: that George Jr. was ejected from the car but he had survived. | Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera.\nNext: Instead, he had picked up th",
+      "sent_chars": 1303,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 351826.2,
+      "usable": false
+    }
+  ],
+  "llm_status": {
+    "task": "8173f822005644e2a2d8cd89b071a797",
+    "spent_s": 8938.208008200025,
+    "consec_fail": 4,
+    "open": false,
+    "logged_open": false,
+    "global_consec_fail": 4,
+    "global_open": false,
+    "global_logged": false,
+    "slow_fail": 0,
+    "model_too_slow": false,
+    "slow_logged": false,
+    "phase": "AI_CORE",
+    "mode": "max_quality",
+    "per_segment_budget_s": 0.0,
+    "project_budget_s": 0.0,
+    "circuit_open": false,
+    "circuit_cooldown_s": 45.0,
+    "recent_decisions": [
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783577473.9093614
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783577473.9105654
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783577867.1986177
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783577867.2001548
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783577988.061699
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783577988.063579
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.3992803
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.4103355
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.4217534
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.454779
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.4892135
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.50186
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.5134323
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578089.5466554
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578386.0441291
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578386.0514743
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578386.0529683
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578386.0556593
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578465.0336006
+      },
+      {
+        "task_id": "8173f822005644e2a2d8cd89b071a797",
+        "segment": null,
+        "allowed": true,
+        "reason": "ok",
+        "ts": 1783578465.0348108
+      }
+    ]
+  },
+  "fallbacks": [
+    {
+      "agent": "Translation/v1",
+      "reason": "LLM skipped",
+      "segment": null
+    },
+    {
+      "agent": "streaming_text",
+      "reason": "timeout_3750s",
+      "segment": null
+    }
+  ],
+  "segment_attention": [],
+  "totals": {
+    "agents_run": 10,
+    "failed_agents": 1,
+    "fallback_count": 2,
+    "total_llm_calls": 20,
+    "total_execution_ms": 12070214.8
+  },
+  "legacy_ai_core": {
+    "profile": {},
+    "strategy": {},
+    "summary": {
+      "enabled": false,
+      "model": "",
+      "segment_count": 0,
+      "avg_variants_per_segment": 0.0,
+      "total_variants": 0,
+      "total_llm_calls": 0,
+      "total_generation_ms": 0.0,
+      "avg_slot_fit": 0.0,
+      "avg_meaning_score": 0.0
+    },
+    "segments": [],
+    "timeline": [],
+    "ai_agent_report": {
+      "enabled": false,
+      "agent_order": [
+        "planner",
+        "translation",
+        "semantic",
+        "entity",
+        "timing",
+        "grammar",
+        "quality",
+        "voice",
+        "mix"
+      ],
+      "agents": {
+        "planner": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": {},
+          "output_data": {},
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called"
+        },
+        "mix": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": {},
+          "output_data": {},
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called"
+        },
+        "translation": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": null,
+          "output_data": null,
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called",
+          "runs": 0,
+          "changes": 0,
+          "llm_calls": 0,
+          "cache_hits": 0
+        },
+        "semantic": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": null,
+          "output_data": null,
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called",
+          "runs": 0,
+          "changes": 0,
+          "llm_calls": 0,
+          "cache_hits": 0
+        },
+        "entity": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": null,
+          "output_data": null,
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called",
+          "runs": 0,
+          "changes": 0,
+          "llm_calls": 0,
+          "cache_hits": 0
+        },
+        "timing": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": null,
+          "output_data": null,
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called",
+          "runs": 0,
+          "changes": 0,
+          "llm_calls": 0,
+          "cache_hits": 0
+        },
+        "grammar": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": null,
+          "output_data": null,
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called",
+          "runs": 0,
+          "changes": 0,
+          "llm_calls": 0,
+          "cache_hits": 0
+        },
+        "quality": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": null,
+          "output_data": null,
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called",
+          "runs": 0,
+          "changes": 0,
+          "llm_calls": 0,
+          "cache_hits": 0
+        },
+        "voice": {
+          "called": false,
+          "execution_time_ms": 0.0,
+          "input_data": null,
+          "output_data": null,
+          "decision_taken": "",
+          "errors": [],
+          "rerun": false,
+          "status": "not_called",
+          "runs": 0,
+          "changes": 0,
+          "llm_calls": 0,
+          "cache_hits": 0
+        }
+      }
+    },
+    "ai_agent_timeline": {
+      "enabled": false,
+      "agent_order": [
+        "planner",
+        "translation",
+        "semantic",
+        "entity",
+        "timing",
+        "grammar",
+        "quality",
+        "voice",
+        "mix"
+      ],
+      "segment_count": 0,
+      "segments": [],
+      "per_agent": {},
+      "ai_agent_timeline_ru": {
+        "Мультиагентный режим": false,
+        "Порядок агентов": "planner → translation → semantic → entity → timing → grammar → quality → voice → mix",
+        "Сегментов": 0
+      }
+    },
+    "performance": {
+      "segment_count": 0,
+      "total_ai_core_ms": 0.0,
+      "total_llm_ms": 0.0,
+      "avg_segment_ms": 0.0,
+      "total_llm_calls": 0,
+      "total_retries": 0,
+      "segments_needed_llm": 0,
+      "fast_path_pct": 0.0,
+      "full_llm_pct": 0.0,
+      "strategy_breakdown": {
+        "none": 0,
+        "rule_rewrite": 0,
+        "full_llm": 0,
+        "other": 0
+      },
+      "ai_performance_report_ru": {
+        "Всего сегментов": 0,
+        "Время работы AI Core (мс)": 0.0,
+        "Время работы LLM (мс)": 0.0,
+        "Среднее время сегмента (мс)": 0.0,
+        "Вызовов LLM": 0,
+        "Повторных попыток": 0,
+        "Сегментов с реальной адаптацией LLM": 0,
+        "% быстрым режимом": 0.0,
+        "% полным LLM Rewrite": 0.0
+      }
+    },
+    "ai_core_report_ru": {
+      "Единая точка решений (AI Core)": false,
+      "Тип контента": "",
+      "Жанр": "",
+      "Стиль речи": "",
+      "Доминирующая эмоция": "",
+      "Темп речи": "",
+      "Сложность текста": "",
+      "Количество спикеров": "",
+      "Режим (скорость/качество)": "",
+      "Диапазон вариантов": "–",
+      "Использованная модель": "",
+      "Среднее число вариантов": 0.0,
+      "Всего вызовов LLM": 0,
+      "Средний Slot Fit": 0.0,
+      "Средний Meaning Score": 0.0
+    },
+    "decision_rationale": []
+  }
+}

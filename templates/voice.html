@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+{% block title %}Озвучка — TubeDub{% endblock %}
+{% block content %}
+<div class="page-header-row">
+  <h1>🔊 Озвучка текста</h1>
+  <div class="header-controls">
+    <select id="lang-filter" class="select-control" onchange="filterVoices(this.value)" title="Язык голоса">
+      {% for name, code in languages.items() %}
+      <option value="{{ code }}" {% if code=='ru' %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+    <select id="voice-select" class="select-control">
+      {% for v in voices.ru %}
+      <option value="{{ v.id }}">{{ v.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<div class="panel" style="height:auto;margin-bottom:12px;">
+  <div class="panel-header">
+    <span class="panel-title">🎤 Аудио → текст (STT)</span>
+    <div class="panel-actions">
+      <button class="btn btn-sm" onclick="triggerAudioLoad()">📂 Загрузить аудио</button>
+      <input type="file" id="audio-input" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.wma" style="display:none" onchange="uploadVoiceAudio(this)" />
+      <button class="btn btn-sm btn-primary" id="btn-transcribe" onclick="transcribeVoiceAudio()" disabled>📝 Распознать</button>
+    </div>
+  </div>
+  <div id="voice-audio-info" style="padding:8px 16px;font-size:12px;color:var(--text2);">Загрузите аудио для распознавания речи (Whisper)</div>
+</div>
+
+<div class="panel" style="height: auto;">
+  <div class="panel-header">
+    <span class="panel-title">Текст для озвучки</span>
+    <div class="panel-actions">
+      <button class="btn btn-sm" onclick="pasteText('voice-box')">📋 Вставить</button>
+      <button class="btn btn-sm"
+        onclick="document.getElementById('voice-box').value=''; updateCount('voice-box','voice-chars')">🗑
+        Очистить</button>
+      <button class="btn btn-sm" onclick="triggerSrtLoad()">📂 Субтитры</button>
+      <input type="file" id="srt-input" accept=".srt,.vtt,.ass,.ssa,.txt" style="display:none" onchange="loadSrtFileVoice(this)" />
+    </div>
+  </div>
+  <textarea id="voice-box" class="text-area" style="height:240px" placeholder="Введите текст для озвучки..."></textarea>
+  <div class="panel-footer">
+    <span id="voice-chars" class="char-count">0 символов</span>
+  </div>
+</div>
+
+<!-- ── НАСТРОЙКИ ТАЙМИНГА (только Pro-режим) ── -->
+<div class="panel pro-only" style="height:auto; margin-bottom:10px;">
+  <div class="panel-header">
+    <span class="panel-title">⏱ Timing Mode</span>
+    <label class="toggle-label" style="margin-left:auto">
+      <input type="checkbox" id="use-timing" onchange="toggleTimingOptions()" />
+      <span class="toggle-switch"></span>
+      <span style="font-size:12px;color:var(--text2);margin-left:6px">Использовать тайминг</span>
+    </label>
+  </div>
+  <div id="timing-options" style="padding:12px 16px;display:none;flex-direction:column;gap:10px;">
+    <div class="row-group" style="flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+        <label style="font-size:12px;color:var(--text2);">Режим тайминга</label>
+        <select id="timing-mode" class="select-control" onchange="onTimingModeChange()">
+          <option value="exact">Точный (exact) — по тайм-кодам</option>
+          <option value="preserve_pauses">Сохранять паузы</option>
+          <option value="match_total">Под общую длину</option>
+        </select>
+      </div>
+      <div id="total-duration-group" style="display:none;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+        <label style="font-size:12px;color:var(--text2);">Целевая длина (ЧЧ:ММ:СС)</label>
+        <input id="total-duration" type="text" class="input-control" placeholder="напр. 1:30 или 0:01:30" />
+      </div>
+    </div>
+    <div class="info-item" style="margin-top:4px;">
+      <span class="info-icon">💡</span>
+      <span style="font-size:12px;color:var(--text2);" id="timing-mode-hint">
+        Каждый сегмент размещается строго на своём тайм-коде из SRT.
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="action-row">
+  <button class="btn btn-primary btn-large" onclick="doVoiceTTS()">🔊 Озвучить</button>
+  <button class="btn btn-secondary" onclick="doVoicePreview()">▶ Предпрослушать</button>
+  <button class="btn btn-secondary" onclick="exportVoiceTxt()">📄 Экспорт TXT</button>
+</div>
+
+<div id="status-bar" class="status-bar">
+  <span id="status-text">Готов к работе</span>
+</div>
+
+<div id="audio-section" class="audio-section" style="display:none">
+  <div class="audio-header">
+    <span>🎧 Готовые аудиофайлы</span>
+    <button class="btn btn-sm" onclick="closeAudio()">✖</button>
+  </div>
+  <div id="audio-players" class="audio-players"></div>
+</div>
+
+<!-- ── Тайминговый результат ── -->
+<div id="timed-section" class="audio-section" style="display:none;margin-top:10px;border-color:#4f8ef7">
+  <div class="audio-header" style="color:#4f8ef7">
+    <span>⏱ Тайминговая дорожка (Timing Engine)</span>
+    <button class="btn btn-sm" onclick="document.getElementById('timed-section').style.display='none'">✖</button>
+  </div>
+  <div id="timed-player" class="audio-players"></div>
+  <div id="timing-warnings" style="font-size:12px;color:#f56565;margin-top:8px;"></div>
+</div>
+
+<div class="info-block" style="margin-top:24px">
+  <div class="info-item">
+    <span class="info-icon">💡</span>
+    <div>
+      <strong>Поддерживаемые форматы входных данных</strong>
+      <span>Обычный текст, субтитры SRT — тайминг сохраняется автоматически</span>
+    </div>
+  </div>
+  <div class="info-item">
+    <span class="info-icon">🎵</span>
+    <div>
+      <strong>Выходной формат</strong>
+      <span>MP3 файлы через edge-tts (Microsoft Neural voices)</span>
+    </div>
+  </div>
+  <div class="info-item">
+    <span class="info-icon">⏱</span>
+    <div>
+      <strong>Timing Engine</strong>
+      <span>Собирает сегменты в единую дорожку по тайм-кодам SRT (требует pydub)</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const VOICES = {{ voices| tojson | safe }};
+  let voiceTimingMap = [];
+  let voiceAudioFile = null;
+
+  const TIMING_HINTS = {
+    exact: "Каждый сегмент размещается строго на своём тайм-коде из SRT.",
+    preserve_pauses: "Паузы между сегментами сохраняются пропорционально оригиналу.",
+    match_total: "Вся дорожка растягивается/сжимается под указанную общую длину."
+  };
+
+  function filterVoices(langCode) {
+    const sel = document.getElementById('voice-select');
+    sel.innerHTML = '';
+    const list = VOICES[langCode] || VOICES['ru'];
+    list.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id; opt.textContent = v.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  function toggleTimingOptions() {
+    const on = document.getElementById('use-timing').checked;
+    document.getElementById('timing-options').style.display = on ? 'flex' : 'none';
+  }
+
+  function onTimingModeChange() {
+    const mode = document.getElementById('timing-mode').value;
+    document.getElementById('timing-mode-hint').textContent = TIMING_HINTS[mode] || '';
+    document.getElementById('total-duration-group').style.display =
+      mode === 'match_total' ? 'flex' : 'none';
+  }
+
+  function triggerSrtLoad() { document.getElementById('srt-input').click(); }
+  function triggerAudioLoad() { document.getElementById('audio-input').click(); }
+
+  function setVoiceAudioReady(filename, label) {
+    voiceAudioFile = filename;
+    document.getElementById('btn-transcribe').disabled = !voiceAudioFile;
+    document.getElementById('voice-audio-info').textContent =
+      'Файл: ' + (label || filename);
+  }
+
+  function uploadVoiceAudio(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    setStatus('⏳ Загрузка аудио…');
+    if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
+    fetch('/api/voice/upload', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) { setStatus('⚠️ ' + d.error); return; }
+        setVoiceAudioReady(d.filename, d.original_name || file.name);
+        setStatus('✅ Аудио загружено — нажмите «Распознать»');
+      })
+      .catch(e => setStatus('⚠️ ' + e))
+      .finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
+    input.value = '';
+  }
+
+  function transcribeVoiceAudio() {
+    if (!voiceAudioFile) { vmNotify('Сначала загрузите аудио', 'warning'); return; }
+    setStatus('⏳ Распознавание речи (Whisper)…');
+    document.getElementById('btn-transcribe').disabled = true;
+    if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
+    fetch('/api/voice/transcribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: voiceAudioFile, language: 'auto', model_size: 'tiny' })
+    }).then(r => r.json()).then(d => {
+      document.getElementById('btn-transcribe').disabled = false;
+      if (d.error) {
+        setStatus('⚠️ ' + (typeof vmFriendlyError === 'function' ? vmFriendlyError(d.error) : d.error));
+        return;
+      }
+      document.getElementById('voice-box').value = d.text;
+      updateCount('voice-box', 'voice-chars');
+      voiceTimingMap = d.timing_map || [];
+      setStatus(`✅ Распознано: ${d.segments || 0} сегм., язык: ${d.detected_name || d.detected || '?'}`);
+      vmNotify('Текст распознан — отредактируйте и нажмите «Озвучить»', 'success', 3500);
+      _vsSave();
+    }).catch(() => {
+      document.getElementById('btn-transcribe').disabled = false;
+      setStatus('⚠️ Ошибка соединения');
+    }).finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
+  }
+
+  function exportVoiceTxt() {
+    const text = document.getElementById('voice-box').value.trim();
+    if (!text) { vmNotify('Нет текста для экспорта', 'warning', 2000); return; }
+    downloadTextBlob(text, 'voice_transcript.txt');
+    vmNotify('TXT сохранён', 'success', 2000);
+  }
+
+  async function loadVoiceUniversalImport() {
+    if (typeof vmConsumeUniversalImport !== 'function') return;
+    await vmConsumeUniversalImport({
+      audio: async (d) => {
+        const name = d.upload_filename || (d.path ? d.path.split('/').pop() : '');
+        if (!name) return;
+        setVoiceAudioReady(name, d.original_filename || d.filename || name);
+        setStatus('✅ Аудио из импорта — нажмите «Распознать»');
+      },
+    });
+  }
+
+  function loadSrtFileVoice(input) {
+    const file = input.files[0]; if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    fetch('/api/studio/import', { method: 'POST', body: fd })
+      .then(r => r.json()).then(d => {
+        if (d.error) { setStatus('⚠️ ' + d.error); return; }
+        document.getElementById('voice-box').value = d.text || '';
+        updateCount('voice-box', 'voice-chars');
+        voiceTimingMap = d.timing_map || [];
+        setStatus(`Субтитры загружены, сегментов: ${d.lines || 0}`);
+      });
+    input.value = '';
+  }
+
+  function buildTTSPayload(text) {
+    const voice = document.getElementById('voice-select').value;
+    const useTiming = document.getElementById('use-timing').checked;
+    const timingMode = document.getElementById('timing-mode').value;
+    const totalDuration = document.getElementById('total-duration').value;
+    return {
+      text, voice,
+      timing_map: voiceTimingMap,
+      use_timing: useTiming,
+      timing_mode: timingMode,
+      total_duration: totalDuration,
+    };
+  }
+
+  function doVoiceTTS() {
+    const text = document.getElementById('voice-box').value.trim();
+    if (!text) { vmNotify('Введите текст для озвучки', 'warning', 2500); return; }
+    setStatus('⏳ Создаём голос…');
+    document.querySelector('.btn-primary').disabled = true;
+    if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
+    fetch('/api/tts', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildTTSPayload(text))
+    }).then(r => r.json()).then(d => {
+      document.querySelector('.btn-primary').disabled = false;
+      if (d.error) {
+        const msg = typeof vmFriendlyError === 'function' ? vmFriendlyError(d.error) : d.error;
+        setStatus('⚠️ ' + msg);
+        vmNotify(msg, 'error');
+        return;
+      }
+      showAudio(d);
+      showTimedAudio(d);
+      setStatus('✅ Готово! ' + (d.count > 1 ? d.count + ' файлов' : 'Аудио создано'));
+      vmNotify('🎤 Озвучка готова!', 'success', 3000);
+      _vsSave();
+    }).catch(e => {
+      document.querySelector('.btn-primary').disabled = false;
+      const msg = typeof vmFriendlyError === 'function' ? vmFriendlyError(String(e)) : String(e);
+      setStatus('⚠️ ' + msg);
+    }).finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
+  }
+
+  function doVoicePreview() {
+    const text = document.getElementById('voice-box').value.trim().slice(0, 400);
+    if (!text) { vmNotify('Введите текст', 'warning', 2000); return; }
+    setStatus('⏳ Предпрослушивание…');
+    if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
+    fetch('/api/tts', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildTTSPayload(text))
+    }).then(r => r.json()).then(d => {
+      if (d.error) {
+        const msg = typeof vmFriendlyError === 'function' ? vmFriendlyError(d.error) : d.error;
+        setStatus('⚠️ ' + msg); return;
+      }
+      showAudio(d); setStatus('▶ Превью готово');
+    }).catch(() => setStatus('⚠️ Ошибка соединения'))
+      .finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
+  }
+
+  function showAudio(d) {
+    const section = document.getElementById('audio-section');
+    const container = document.getElementById('audio-players');
+    container.innerHTML = '';
+    const files = d.files || [];
+    const downloads = d.downloads || [];
+    files.forEach((f, i) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'audio-item';
+      wrapper.innerHTML = `
+      <span class="audio-label">${files.length > 1 ? 'Сегм. ' + (i + 1) : 'Аудио'}</span>
+      <audio controls src="${d.streams?.[i] || '/api/stream/' + f}" class="audio-player"></audio>
+      <a href="${downloads[i] || '/api/download/' + f}" download class="btn btn-sm">⬇ Скачать</a>`;
+      container.appendChild(wrapper);
+    });
+    section.style.display = 'block';
+  }
+
+  function showTimedAudio(d) {
+    const section = document.getElementById('timed-section');
+    const container = document.getElementById('timed-player');
+    const warningsEl = document.getElementById('timing-warnings');
+    if (!d.timed_file) { section.style.display = 'none'; return; }
+    container.innerHTML = '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'audio-item';
+    wrapper.innerHTML = `
+    <span class="audio-label">Тайминг</span>
+    <audio controls src="${d.timed_stream || '/api/stream/' + d.timed_file}" class="audio-player"></audio>
+    <a href="${d.timed_download || '/api/download/' + d.timed_file}" download class="btn btn-sm">⬇ Скачать</a>`;
+    container.appendChild(wrapper);
+    warningsEl.textContent = (d.warnings || []).join(' | ');
+    section.style.display = 'block';
+  }
+
+  function closeAudio() { document.getElementById('audio-section').style.display = 'none'; }
+  function setStatus(msg) { document.getElementById('status-text').textContent = msg; }
+  function updateCount(textareaId, countId) {
+    const v = document.getElementById(textareaId).value;
+    document.getElementById(countId).textContent = v.length + ' символов';
+  }
+  /* ── AUTOSAVE (п.33/185 — не терять работу) ── */
+  const _VS_KEY = 'vm_voice_s';
+  function _vsSave() {
+    try {
+      localStorage.setItem(_VS_KEY, JSON.stringify({
+        lang: document.getElementById('lang-filter').value,
+        voice: document.getElementById('voice-select').value,
+        text: document.getElementById('voice-box').value.slice(0, 8000),
+      }));
+    } catch (e) { }
+  }
+  (function _vsRestore() {
+    try {
+      const s = JSON.parse(localStorage.getItem(_VS_KEY) || '{}');
+      if (s.lang) { document.getElementById('lang-filter').value = s.lang; filterVoices(s.lang); }
+      if (s.voice) document.getElementById('voice-select').value = s.voice;
+      if (s.text && s.text.length > 0) {
+        document.getElementById('voice-box').value = s.text;
+        updateCount('voice-box', 'voice-chars');
+      }
+    } catch (e) { }
+  })();
+
+  let _vsTimer = null;
+  document.getElementById('voice-box').addEventListener('input', () => {
+    updateCount('voice-box', 'voice-chars');
+    clearTimeout(_vsTimer);
+    _vsTimer = setTimeout(_vsSave, 1200);
+  });
+  document.getElementById('lang-filter').addEventListener('change', () => {
+    filterVoices(document.getElementById('lang-filter').value);
+    _vsSave();
+  });
+  document.getElementById('voice-select').addEventListener('change', _vsSave);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadVoiceUniversalImport();
+  });
+
+  /* Ctrl+Enter → озвучить */
+  document.getElementById('voice-box').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doVoiceTTS(); }
+  });
+</script>
+{% endblock %}

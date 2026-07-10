@@ -1,0 +1,89 @@
+{
+  "version": 2,
+  "cases": [
+    {
+      "id": "name_intro",
+      "category": "names",
+      "text": "My name is John.",
+      "pairs": ["en->uk", "en->ru", "en->de", "en->fr"],
+      "references": {
+        "en->uk": "Мене звати Джон.",
+        "en->ru": "Меня зовут Джон.",
+        "en->de": "Mein Name ist John.",
+        "en->fr": "Je m'appelle John."
+      }
+    },
+    {
+      "id": "fishing",
+      "category": "conversation",
+      "text": "Yesterday we went fishing.",
+      "pairs": ["en->uk", "en->ru", "en->pl", "en->es"],
+      "references": {
+        "en->uk": "Учора ми ходили на риболовлю.",
+        "en->ru": "Вчера мы ходили на рыбалку.",
+        "en->pl": "Wczoraj poszliśmy na ryby.",
+        "en->es": "Ayer fuimos de pesca."
+      }
+    },
+    {
+      "id": "age",
+      "category": "grammar_tense",
+      "text": "When I was eighteen, I moved to the city.",
+      "pairs": ["en->uk", "en->ru", "en->de", "en->fr"],
+      "references": {
+        "en->uk": "Коли мені було вісімнадцять, я переїхав до міста.",
+        "en->ru": "Когда мне было восемнадцать, я переехал в город.",
+        "en->de": "Als ich achtzehn war, zog ich in die Stadt.",
+        "en->fr": "Quand j'avais dix-huit ans, j'ai déménagé en ville."
+      }
+    },
+    {
+      "id": "idiom_cake",
+      "category": "idiom",
+      "text": "It was a piece of cake.",
+      "pairs": ["en->uk", "en->ru", "en->de", "en->fr", "en->pl"],
+      "references": {
+        "en->uk": "Це було дуже легко.",
+        "en->ru": "Это было проще простого.",
+        "en->de": "Das war ein Kinderspiel.",
+        "en->fr": "C'était du gâteau.",
+        "en->pl": "To była pestka."
+      }
+    },
+    {
+      "id": "long_sentence",
+      "category": "long",
+      "text": "When the weather got better after the storm, we decided to go outside and finish the work that we had started earlier in the morning.",
+      "pairs": ["en->uk", "en->ru", "en->de"]
+    },
+    {
+      "id": "dialogue",
+      "category": "dialogue",
+      "text": "Hey, are you coming tonight or should we wait for you?",
+      "pairs": ["en->uk", "en->ru", "en->it", "en->tr"]
+    },
+    {
+      "id": "brand",
+      "category": "brands",
+      "text": "NASA launched a new satellite last week.",
+      "pairs": ["en->uk", "en->ru", "en->de", "en->ja"],
+      "references": {
+        "en->uk": "NASA минулого тижня запустила новий супутник.",
+        "en->ru": "NASA запустило новый спутник на прошлой неделе.",
+        "en->de": "Die NASA hat letzte Woche einen neuen Satelliten gestartet."
+      }
+    },
+    {
+      "id": "geo",
+      "category": "geo",
+      "text": "We traveled from Paris to Berlin by train.",
+      "pairs": ["en->uk", "en->ru", "en->de", "en->fr"],
+      "references": {
+        "en->uk": "Ми поїхали поїздом з Парижа до Берліна.",
+        "en->ru": "Мы поехали из Парижа в Берлин на поезде.",
+        "en->de": "Wir fuhren mit dem Zug von Paris nach Berlin.",
+        "en->fr": "Nous avons voyagé de Paris à Berlin en train."
+      }
+    }
+  ]
+}

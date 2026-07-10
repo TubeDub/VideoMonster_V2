@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dub Studio — TubeDub{% endblock %}
+{% block extra_head %}
+<style>
+.ds-layout { display:grid; grid-template-columns:220px 1fr 280px; gap:12px; min-height:70vh; }
+.ds-panel { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; overflow:auto; }
+.ds-track { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.ds-seg { padding:8px; margin-bottom:6px; border-radius:6px; border:1px solid var(--border); font-size:12px; cursor:pointer; }
+.ds-seg.active { border-color:var(--accent); }
+.ds-dot { width:10px;height:10px;border-radius:50%;display:inline-block; }
+.ds-dot.green { background:#3ecf8e; }
+.ds-dot.yellow { background:#f6ad55; }
+.ds-dot.red { background:#f56565; }
+.ds-timeline { min-height:120px; background:var(--panel2); border-radius:6px; padding:8px; }
+.ds-fx-item { padding:6px; margin:4px 0; background:var(--panel2); border-radius:4px; font-size:11px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🎛️ Dub Studio</h1>
+  <p class="subtitle">Professional multitrack dubbing editor — timing, FX, emotions, A/B/C takes</p>
+</div>
+
+<div id="ds-off" class="card" style="display:none;padding:20px;">
+  <p>Dub Studio отключён. Включите <code>FEATURE_DUB_STUDIO</code> в Developer Panel.</p>
+</div>
+
+<div id="ds-panel" style="display:none;">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <button class="btn btn-primary btn-sm" onclick="dsNewProject()">+ Новый проект</button>
+    <button class="btn btn-sm" onclick="dsImportReview()">Импорт review JSON</button>
+    <button class="btn btn-sm" onclick="dsAnalyzeEmotions()">Анализ эмоций</button>
+    <button class="btn btn-sm" onclick="dsExport()">Экспорт WAV</button>
+    <button class="btn btn-sm" onclick="dsRefresh()">Обновить</button>
+    <select id="ds-project-select" class="select-control" style="min-width:200px;" onchange="dsLoadProject(this.value)"></select>
+  </div>
+
+  <div class="ds-layout">
+    <div class="ds-panel">
+      <h3 style="margin:0 0 8px;font-size:13px;">Дорожки</h3>
+      <div id="ds-tracks"></div>
+    </div>
+
+    <div class="ds-panel">
+      <h3 style="margin:0 0 8px;font-size:13px;">Timeline</h3>
+      <div class="ds-timeline" id="ds-timeline">Выберите проект…</div>
+      <h3 style="margin:12px 0 8px;font-size:13px;">Сегменты</h3>
+      <div id="ds-segments"></div>
+    </div>
+
+    <div class="ds-panel">
+      <h3 style="margin:0 0 8px;font-size:13px;">Инспектор</h3>
+      <div id="ds-inspector"><em>Выберите сегмент</em></div>
+      <h3 style="margin:16px 0 8px;font-size:13px;">FX Plugins</h3>
+      <div id="ds-plugins"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/dub_studio.js"></script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{
+  "name": "edge_tts",
+  "version": "1.0.0",
+  "author": "VideoMonster",
+  "description": "Builtin edge_tts capability provider",
+  "minimum_api": "1.0.0",
+  "dependencies": [],
+  "capabilities": [
+    "tts"
+  ],
+  "permissions": {
+    "file": false,
+    "network": true,
+    "gpu": false,
+    "audio": true,
+    "video": false,
+    "memory": false
+  },
+  "entry_point": "plugin.py",
+  "execution_mode": "local"
+}

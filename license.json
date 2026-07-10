@@ -1,0 +1,15 @@
+{
+  "tier": "demo",
+  "key": "VM-T7XX-FKR4-8E49",
+  "key_type": "TEST-7",
+  "activated_at": 1782250689.1578164,
+  "expires_at": 1782855489.1578164,
+  "device_id": "ff944c26184e8e54",
+  "last_sync_at": 1783697253.568249,
+  "auto_demo": false,
+  "revoked": false,
+  "usage": {
+    "translate_count": 0,
+    "translate_day": "2026-06-23"
+  }
+}

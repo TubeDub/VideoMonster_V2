@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}AI Sources — TubeDub{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🧠 AI Sources</h1>
+  <p class="subtitle">Локальный дубляж всегда бесплатный. Облако и API — только по желанию.</p>
+</div>
+
+<div class="settings-grid">
+  <div class="settings-card" id="policy-card">
+    <h2>Принцип</h2>
+    <ul style="font-size:13px;color:var(--text2);line-height:1.6;margin:0;padding-left:18px;">
+      <li>По умолчанию: <b>Local AI (Free)</b></li>
+      <li>Никаких окон «оплатите подписку»</li>
+      <li>Модели не скачиваются автоматически</li>
+      <li>Marian MT работает даже без LLM</li>
+    </ul>
+  </div>
+
+  <div class="settings-card">
+    <h2>Источник AI</h2>
+    <div id="source-modes" style="display:flex;flex-direction:column;gap:10px;">
+      <label class="ai-source-opt"><input type="radio" name="ai-source" value="local" checked> ○ Local AI (Free)</label>
+      <label class="ai-source-opt"><input type="radio" name="ai-source" value="user_api"> ○ My API</label>
+      <label class="ai-source-opt"><input type="radio" name="ai-source" value="tubedub_cloud"> ○ TubeDub Cloud</label>
+      <label class="ai-source-opt" style="opacity:.7;"><input type="radio" name="ai-source" value="future"> ○ Future AI</label>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="saveSource()">Сохранить</button>
+      <a class="btn btn-secondary" href="/ai/settings">AI Settings</a>
+      <button class="btn btn-secondary" onclick="runBenchmark()">Benchmark AI</button>
+    </div>
+    <div id="source-status" style="margin-top:12px;font-size:12px;color:var(--text2);"></div>
+  </div>
+
+  <div class="settings-card">
+    <h2>Оборудование → модель</h2>
+    <div id="hw-rec" style="font-size:13px;color:var(--text2);">Загрузка…</div>
+    <p style="font-size:12px;color:var(--text2);margin-top:10px;">Рекомендация не запускает скачивание. Вы решаете сами.</p>
+  </div>
+
+  <div class="settings-card" id="first-run-card" style="display:none;">
+    <h2>Локальные модели не обнаружены</h2>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+      <label><input type="radio" name="first-run" value="continue_without" checked> Продолжить без локальных моделей (Marian MT)</label>
+      <label><input type="radio" name="first-run" value="use_api"> Использовать мой API</label>
+      <label><input type="radio" name="first-run" value="download_local"> Скачать локальную модель (по подтверждению)</label>
+      <label><input type="radio" name="first-run" value="point_existing"> Указать существующую модель / папку</label>
+    </div>
+    <div style="margin-top:10px;">
+      <input id="models-dir" class="select-control" placeholder="D:\\AI Models или E:\\Ollama" style="width:100%;margin-bottom:8px;">
+      <button class="btn btn-primary" onclick="applyFirstRun()">Применить</button>
+    </div>
+    <div id="first-run-result" style="font-size:12px;margin-top:8px;color:var(--text2);"></div>
+  </div>
+
+  <div class="settings-card">
+    <h2>Активный маршрут</h2>
+    <pre id="active-route" style="font-size:12px;white-space:pre-wrap;background:var(--panel2);padding:12px;border-radius:8px;"></pre>
+  </div>
+
+  <div class="settings-card">
+    <h2>Benchmark</h2>
+    <pre id="bench-out" style="font-size:12px;white-space:pre-wrap;background:var(--panel2);padding:12px;border-radius:8px;min-height:60px;">—</pre>
+  </div>
+</div>
+
+<style>
+  .ai-source-opt { font-size:14px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; cursor:pointer; }
+  .ai-source-opt:has(input:checked) { border-color: var(--accent, #3b82f6); background: rgba(59,130,246,.08); }
+</style>
+
+<script>
+async function loadStatus() {
+  const r = await fetch('/api/ai/sources/status');
+  const d = await r.json();
+  if (!d.ok) { document.getElementById('source-status').textContent = d.error || 'Ошибка'; return; }
+  const mode = (d.source_mode || 'local');
+  document.querySelectorAll('input[name="ai-source"]').forEach(el => { el.checked = el.value === mode; });
+  document.getElementById('active-route').textContent = JSON.stringify(d.active_route || {}, null, 2);
+  const rec = d.recommended_local_model || {};
+  document.getElementById('hw-rec').innerHTML =
+    `<b>${rec.model || '—'}</b><br>${rec.reason || ''}<br>VRAM: ${rec.vram_gb ?? '—'} GB · GPU: ${rec.has_gpu ? 'yes' : 'no'}`;
+  if (d.first_run_prompt_needed) document.getElementById('first-run-card').style.display = '';
+  document.getElementById('source-status').textContent =
+    `Источник: ${mode}. Локальный свободный режим: ${d.policy?.local_always_free ? 'да' : 'нет'}`;
+}
+
+async function saveSource() {
+  const mode = document.querySelector('input[name="ai-source"]:checked')?.value || 'local';
+  const r = await fetch('/api/ai/sources', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ source_mode: mode })
+  });
+  const d = await r.json();
+  document.getElementById('source-status').textContent = d.ok ? 'Сохранено' : (d.error || 'Ошибка');
+  loadStatus();
+}
+
+async function applyFirstRun() {
+  const action = document.querySelector('input[name="first-run"]:checked')?.value || 'continue_without';
+  const models_dir = document.getElementById('models-dir').value.trim();
+  const body = { action, models_dir };
+  if (action === 'download_local') body.confirm_install = confirm('Установить Ollama? Модели не качаются без вашего согласия.');
+  const r = await fetch('/api/ai/sources/first-run', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  document.getElementById('first-run-result').textContent = d.ok ? ('OK: ' + (d.action || action)) : (d.error || 'Ошибка');
+  if (d.ok) document.getElementById('first-run-card').style.display = 'none';
+  loadStatus();
+}
+
+async function runBenchmark() {
+  document.getElementById('bench-out').textContent = 'Запуск…';
+  const r = await fetch('/api/ai/benchmark', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}'
+  });
+  const d = await r.json();
+  document.getElementById('bench-out').textContent = JSON.stringify(d, null, 2);
+}
+
+loadStatus();
+</script>
+{% endblock %}

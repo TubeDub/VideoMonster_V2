@@ -1,0 +1,81 @@
+.st-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.st-modal {
+  width: min(420px, 100%);
+  background: var(--panel, #1a1d27);
+  border: 1px solid var(--border, #2a2f3d);
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.st-modal h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.st-progress-wrap {
+  margin-bottom: 16px;
+}
+
+.st-progress-bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.st-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #22c55e);
+  transition: width 0.35s ease;
+}
+
+.st-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  font-size: 13px;
+}
+
+.st-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text2, #9aa0a6);
+  margin-bottom: 2px;
+}
+
+.st-message {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: var(--text2, #9aa0a6);
+  min-height: 18px;
+}
+
+.st-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.st-actions p {
+  margin: 0;
+  width: 100%;
+  font-size: 13px;
+}
+
+.st-close-running {
+  margin-top: 12px;
+}

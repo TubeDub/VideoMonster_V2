@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Мои проекты — TubeDub{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>📁 Мои проекты</h1>
+  <p class="subtitle">Последние дубляжи, озвучки и документы «Чтение книги»</p>
+</div>
+
+<div class="action-row" style="margin-bottom:16px;">
+  <button class="btn btn-secondary" onclick="openOutputFolder()">📂 Открыть папку с файлами</button>
+  <button class="btn btn-secondary" onclick="loadProjects()">🔄 Обновить</button>
+</div>
+
+<!-- ФИЛЬТРЫ -->
+<div id="filter-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+  <button class="filter-btn active" data-filter="all"   onclick="setFilter('all')">Все</button>
+  <button class="filter-btn"        data-filter="dub"   onclick="setFilter('dub')">🎬 Дубляж</button>
+  <button class="filter-btn"        data-filter="tts"   onclick="setFilter('tts')">🔊 Озвучка</button>
+  <button class="filter-btn"        data-filter="vmr"   onclick="setFilter('vmr')">📖 Книга</button>
+</div>
+
+<div id="projects-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+  <div class="projects-empty" style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2);">
+    <div style="font-size:40px;margin-bottom:12px;">📂</div>
+    <div>Загрузка проектов…</div>
+  </div>
+</div>
+
+<style>
+.project-card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color .2s, box-shadow .2s;
+  position: relative;
+}
+.project-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(107,126,255,.12);
+}
+.project-card .pc-icon { font-size: 28px; }
+.project-card .pc-type {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--accent);
+}
+.project-card .pc-title {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.project-card .pc-meta {
+  font-size: 12px; color: var(--text2);
+}
+.project-card .pc-actions {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+}
+.filter-btn {
+  background: none; border: 1px solid var(--border); color: var(--text2);
+  border-radius: 20px; padding: 5px 14px; font-size: 13px; cursor: pointer;
+  transition: all .2s;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+.pc-delete-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: none; border: none; color: var(--text2);
+  font-size: 16px; cursor: pointer; opacity: 0; transition: opacity .2s;
+  border-radius: 5px; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+}
+.project-card:hover .pc-delete-btn { opacity: 1; }
+.pc-delete-btn:hover { background: rgba(245,101,101,.2); color: #f56565; }
+</style>
+
+<script>
+let allProjects = [];
+let activeFilter = 'all';
+
+async function loadProjects() {
+  const grid = document.getElementById('projects-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2);">⏳ Загрузка…</div>';
+  try {
+    const r = await fetch('/api/projects/list');
+    const d = await r.json();
+    allProjects = d.projects || [];
+    renderProjects();
+  } catch(e) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#f56565;">❌ Ошибка загрузки: ' + e + '</div>';
+  }
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderProjects();
+}
+
+function renderProjects() {
+  const grid = document.getElementById('projects-grid');
+  const list = activeFilter === 'all' ? allProjects : allProjects.filter(p => p.type === activeFilter);
+
+  if (!list.length) {
+    const isAll = activeFilter === 'all';
+    const ctas = isAll
+      ? `<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
+           <a href="/dub"       class="btn btn-primary">🎬 Сделать дубляж</a>
+           <a href="/voice"     class="btn btn-secondary">🎤 Озвучить текст</a>
+           <a href="/translate" class="btn btn-secondary">🌍 Перевести</a>
+         </div>`
+      : `<div style="margin-top:12px;"><button class="btn btn-sm" onclick="setFilter('all')">← Показать все</button></div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:52px 24px;">
+      <div style="font-size:52px;margin-bottom:16px;">📂</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px;">
+        ${isAll ? 'Проектов пока нет' : 'В этой категории пусто'}
+      </div>
+      <div style="font-size:13px;color:var(--text2);max-width:360px;margin:0 auto;line-height:1.6;">
+        ${isAll
+          ? 'Ваши дубляжи, озвучки и переводы будут сохраняться здесь автоматически'
+          : 'Выберите другую категорию или создайте новый проект'}
+      </div>
+      ${ctas}
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const date  = new Date(p.created * 1000).toLocaleString('ru');
+    const size  = p.size_mb > 0 ? p.size_mb + ' МБ' : '';
+    let actions = `<a href="${p.download}" download class="btn btn-sm btn-primary">⬇ Скачать</a>`;
+    if (p.type === 'tts' && p.stream) {
+      actions += ` <button class="btn btn-sm" onclick="playAudio('${p.stream}','${p.filename}')">▶ Слушать</button>`;
+    }
+    if (p.type === 'vmr') {
+      actions += ` <button class="btn btn-sm" onclick="openInReader('${p.download}')">📖 Открыть</button>`;
+    }
+    return `
+    <div class="project-card" data-type="${p.type}">
+      <button class="pc-delete-btn" title="Удалить" onclick="deleteProject('${p.filename}',this)">🗑</button>
+      <div class="pc-icon">${p.icon}</div>
+      <div class="pc-type">${p.label}</div>
+      <div class="pc-title" title="${escHtml(p.title)}">${escHtml(p.title)}</div>
+      <div class="pc-meta">${date}${size ? ' · ' + size : ''}</div>
+      <div class="pc-actions">${actions}</div>
+    </div>`;
+  }).join('');
+}
+
+let _audioEl = null;
+function playAudio(src, name) {
+  if (!_audioEl) {
+    _audioEl = document.createElement('audio');
+    _audioEl.controls = true;
+    _audioEl.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:999;background:var(--panel2);border-radius:40px;padding:4px 10px;';
+    document.body.appendChild(_audioEl);
+  }
+  _audioEl.src = src;
+  _audioEl.play();
+  vmNotify('▶ Воспроизведение: ' + name, 'info', 2500);
+}
+
+function openInReader(downloadUrl) {
+  vmNotify('Сначала скачайте VMR-файл и откройте его в «Чтение книги»', 'info', 4000);
+  window.location.href = '/reader';
+}
+
+async function deleteProject(filename, btn) {
+  if (!confirm('Удалить файл "' + filename + '"?')) return;
+  const card = btn.closest('.project-card');
+  try {
+    const r = await fetch('/api/projects/delete/' + encodeURIComponent(filename), { method: 'DELETE' });
+    const d = await r.json();
+    if (d.ok) {
+      card.style.transition = 'opacity .3s';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        allProjects = allProjects.filter(p => p.filename !== filename);
+        renderProjects();
+      }, 300);
+      vmNotify('Файл удалён', 'success', 2500);
+    } else {
+      vmNotify('Ошибка: ' + (d.error || '?'), 'error');
+    }
+  } catch(e) {
+    vmNotify('Ошибка удаления: ' + e, 'error');
+  }
+}
+
+async function openOutputFolder() {
+  try {
+    const r = await fetch('/api/projects/open_folder', { method: 'POST' });
+    const d = await r.json();
+    if (d.ok) vmNotify('📂 Папка открыта', 'success', 2000);
+    else vmNotify(d.error || 'Ошибка', 'error');
+  } catch(e) { vmNotify('Ошибка: ' + e, 'error'); }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadProjects();
+</script>
+{% endblock %}

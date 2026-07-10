@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Project Brain — VideoMonster Dev{% endblock %}
+{% block extra_head %}
+<style>
+.brain-nav { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.brain-nav button { font-size:11px; padding:4px 10px; }
+.brain-content { background:#0d0d12; border:1px solid var(--border); border-radius:8px;
+  padding:16px; font-family:monospace; font-size:12px; white-space:pre-wrap;
+  max-height:70vh; overflow-y:auto; line-height:1.5; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🧠 Project Brain</h1>
+  <p class="subtitle">Единый источник знаний проекта (TZ #10)</p>
+</div>
+<div class="brain-nav" id="brain-nav"></div>
+<div class="brain-content" id="brain-content">Загрузка...</div>
+<div style="margin-top:12px;display:flex;gap:8px;">
+  <button class="btn btn-primary" id="brain-sync">Sync Documentation</button>
+  <button class="btn" id="brain-analyze">Analyze Project</button>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+(function(){
+  const FILES = ['PROJECT.md','ARCHITECTURE.md','ROADMAP.md','CODING_RULES.md',
+    'UX_RULES.md','PERFORMANCE.md','CHANGELOG.md','DECISIONS.md','MEMORY.md','KNOWN_ISSUES.md'];
+  const nav = document.getElementById('brain-nav');
+  const content = document.getElementById('brain-content');
+  FILES.forEach(f => {
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = f.replace('.md','');
+    b.onclick = () => load(f);
+    nav.appendChild(b);
+  });
+  async function load(f) {
+    const r = await fetch('/api/assistant/brain/' + f);
+    const j = await r.json();
+    content.textContent = j.ok ? j.content : (j.error || 'Error');
+  }
+  document.getElementById('brain-sync').onclick = async () => {
+    await fetch('/api/assistant/document', {method:'POST'});
+    load('ARCHITECTURE.md');
+  };
+  document.getElementById('brain-analyze').onclick = async () => {
+    const r = await fetch('/api/assistant/analyze');
+    const j = await r.json();
+    content.textContent = JSON.stringify(j, null, 2);
+  };
+  load('PROJECT.md');
+})();
+</script>
+{% endblock %}

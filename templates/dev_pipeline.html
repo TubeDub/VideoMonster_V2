@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Dev Pipeline — TubeDub 2.0{% endblock %}
+{% block extra_head %}
+<style>
+.dp-wrap { display:flex; gap:16px; align-items:flex-start; }
+.dp-sidebar { width:240px; flex-shrink:0; }
+.dp-main { flex:1; min-width:0; }
+.dp-stage { padding:8px 12px; border:1px solid var(--border); border-radius:6px; margin-bottom:8px; font-size:12px; }
+.dp-stage.done { border-left:3px solid #3ecf8e; }
+.dp-stage.pending { border-left:3px solid #6b7280; }
+.dp-log { width:100%; min-height:200px; font-family:monospace; font-size:11px; }
+.dp-word { display:flex; gap:4px; flex-wrap:wrap; margin-top:8px; }
+.dp-word span { background:var(--card); padding:2px 6px; border-radius:4px; font-size:11px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🔬 Dev Pipeline (TubeDub 2.0)</h1>
+  <p class="subtitle">Word map, AI Director, события — только Developer Mode</p>
+</div>
+
+<div id="dp-blocked" class="card" style="display:none;padding:20px;">
+  <p>Включите <strong>🔧 Dev</strong> (VM_DEV_MODE=1 или owner).</p>
+</div>
+
+<div id="dp-panel" style="display:none;">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <input id="dp-task-id" class="form-input" placeholder="Task ID" value="{{ task_id }}" style="max-width:280px;">
+    <button class="btn btn-primary" id="dp-load">Загрузить</button>
+    <button class="btn" id="dp-copy">📋 Копировать отчёт</button>
+  </div>
+
+  <div class="dp-wrap">
+    <div class="dp-sidebar card" style="padding:12px;">
+      <h3 style="margin:0 0 8px;font-size:13px;">Стадии</h3>
+      <div id="dp-stages"></div>
+      <h3 style="margin:16px 0 8px;font-size:13px;">Модули</h3>
+      <div id="dp-modules"></div>
+    </div>
+    <div class="dp-main">
+      <div class="card" style="padding:12px;margin-bottom:12px;">
+        <h3 style="margin:0 0 8px;font-size:13px;">AI Director</h3>
+        <pre id="dp-director" style="font-size:12px;white-space:pre-wrap;"></pre>
+      </div>
+      <div class="card" style="padding:12px;margin-bottom:12px;">
+        <h3 style="margin:0 0 8px;font-size:13px;">Word Timing Map</h3>
+        <div id="dp-words" class="dp-word"></div>
+      </div>
+      <div class="card" style="padding:12px;">
+        <h3 style="margin:0 0 8px;font-size:13px;">Полный отчёт</h3>
+        <textarea id="dp-log" class="dp-log" readonly></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/dev_pipeline.js"></script>
+{% endblock %}

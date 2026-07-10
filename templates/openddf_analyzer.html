@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}OpenDDF Analyzer 2.0{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/openddf_analyzer.css">
+{% endblock %}
+{% block content %}
+<div id="oda-app" class="oda-app" data-task-id="{{ task_id }}">
+  <header class="oda-header">
+    <div class="oda-header-left">
+      <h1>OpenDDF Analyzer <span class="oda-badge">2.0</span></h1>
+      <p class="oda-sub">Профессиональная диагностика пайплайна TubeDub — данные только из OpenDDF JSON</p>
+    </div>
+    <div class="oda-header-actions">
+      <input type="file" id="oda-file-input" accept=".json,application/json" hidden>
+      <button type="button" class="btn btn-secondary btn-sm" id="oda-btn-load-file">Загрузить JSON…</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="oda-btn-export-json">JSON</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="oda-btn-export-html">HTML</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="oda-btn-export-pdf">PDF</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="oda-btn-export-zip">ZIP</button>
+    </div>
+  </header>
+
+  <div class="oda-toolbar">
+    <input type="search" id="oda-search" class="oda-search" placeholder="Поиск: текст, сегмент, ошибка, модуль, сущность…">
+    <select id="oda-tab-select" class="oda-select">
+      <option value="overview">Обзор</option>
+      <option value="segments">Сегменты</option>
+      <option value="timeline">Timeline</option>
+      <option value="logs">Runtime Log</option>
+      <option value="statistics">Статистика</option>
+    </select>
+    <span id="oda-status" class="oda-status">Загрузите отчёт или откройте по task_id</span>
+  </div>
+
+  <main id="oda-main" class="oda-main">
+    <div class="oda-empty">Нет данных. Загрузите OpenDDF JSON или откройте <code>/dev/openddf-analyzer/&lt;task_id&gt;</code></div>
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/openddf_analyzer.js"></script>
+{% endblock %}

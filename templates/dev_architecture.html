@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Architecture — TubeDub Dev{% endblock %}
+{% block extra_head %}
+<style>
+.arch-grid { display:grid; grid-template-columns:240px 1fr; gap:14px; }
+.arch-sidebar .mod { font-size:12px; padding:8px; border:1px solid var(--border); border-radius:6px; margin-bottom:6px; }
+.arch-sidebar .mod.release { border-left:3px solid #3ecf8e; }
+.arch-sidebar .mod.dev { border-left:3px solid #f56565; }
+.arch-sidebar .mod.off { border-left:3px solid #666; opacity:.7; }
+.arch-panel { font-size:12px; }
+.arch-pre { font-family:monospace; font-size:11px; background:#111; padding:10px; border-radius:6px; max-height:200px; overflow:auto; white-space:pre-wrap; }
+.arch-route { font-family:monospace; font-size:11px; line-height:1.6; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🏗️ Architecture Dashboard</h1>
+  <p class="subtitle">Developer Mode — модули, Pipeline, API Bus, Feature Flags</p>
+</div>
+<div id="arch-blocked" class="card" style="display:none;padding:20px;">Только 🔧 Dev Mode</div>
+<div id="arch-panel" style="display:none;">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <button class="btn btn-primary" id="arch-refresh">Обновить</button>
+    <button class="btn" id="arch-copy">📋 Копировать отчёт</button>
+    <input id="arch-task" class="form-input" placeholder="Task ID (optional)" style="max-width:220px;">
+  </div>
+  <div class="arch-grid">
+    <div class="arch-sidebar card" style="padding:10px;" id="arch-modules"></div>
+    <div>
+      <div class="card arch-panel" style="padding:12px;margin-bottom:12px;">
+        <h3 style="margin:0 0 8px;font-size:13px;">Pipeline</h3>
+        <div id="arch-pipeline"></div>
+      </div>
+      <div class="card arch-panel" style="padding:12px;margin-bottom:12px;">
+        <h3 style="margin:0 0 8px;font-size:13px;">API Bus Routes</h3>
+        <div id="arch-routes" class="arch-pre"></div>
+      </div>
+      <div class="card arch-panel" style="padding:12px;">
+        <h3 style="margin:0 0 8px;font-size:13px;">Logs</h3>
+        <div id="arch-logs" class="arch-pre"></div>
+      </div>
+    </div>
+  </div>
+  <textarea id="arch-copy-area" class="arch-pre" style="width:100%;margin-top:12px;height:120px;display:none;" readonly></textarea>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/dev_architecture.js"></script>
+{% endblock %}

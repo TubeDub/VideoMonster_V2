@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "voices": {
+    "ru-RU-DmitryNeural": {
+      "title": "Дмитрий",
+      "gender": "male",
+      "description": "Спокойный мужской голос, универсален для документалки и обучения.",
+      "use_case": "Новости, документальные фильмы, нейтральная подача"
+    },
+    "ru-RU-SvetlanaNeural": {
+      "title": "Светлана",
+      "gender": "female",
+      "description": "Мягкий женский голос с естественной интонацией.",
+      "use_case": "Блоги, озвучка интерфейсов, спокойный контент"
+    },
+    "uk-UA-PolinaNeural": {
+      "title": "Поліна",
+      "gender": "female",
+      "description": "Природна українська вимова, нейтральний темп.",
+      "use_case": "Освітні відео, новини, загальний дубляж"
+    },
+    "uk-UA-OstapNeural": {
+      "title": "Остап",
+      "gender": "male",
+      "description": "Чоловічий голос з чіткою дикцією.",
+      "use_case": "Документальні проєкти, технічні огляди"
+    },
+    "en-US-JennyNeural": {
+      "title": "Jenny",
+      "gender": "female",
+      "description": "Friendly US English, clear articulation.",
+      "use_case": "Tutorials, product demos, casual content"
+    },
+    "en-US-GuyNeural": {
+      "title": "Guy",
+      "gender": "male",
+      "description": "Warm US male voice, natural pacing.",
+      "use_case": "Explainers, corporate, narration"
+    }
+  }
+}

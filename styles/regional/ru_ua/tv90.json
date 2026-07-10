@@ -1,0 +1,37 @@
+{
+  "id": "tv90",
+  "pack": "regional",
+  "region_pack": "ru_ua",
+  "mix_mode": "custom",
+  "original_volume": 0.35,
+  "dub_volume": 0.95,
+  "background_volume": 0.35,
+  "tts_rate": "-8%",
+  "tts_pitch": "-1Hz",
+  "i18n_key": "dub.style_tv90",
+  "order": 102,
+  "reply_start_delay_ms": 180,
+  "reply_start_delay_jitter_ms": 60,
+  "max_atempo": 1.08,
+  "allow_atempo": false,
+  "prefer_semantic_adapt": true,
+  "sync_mode": "relaxed",
+  "delivery": "tv_broadcast_90s",
+  "intonation_range": "narrow",
+  "voice_fx": {
+    "highpass_hz": 100,
+    "low_shelf_cut_hz": 200,
+    "low_shelf_gain_db": -3.0,
+    "mid_peak_hz": 2300,
+    "mid_peak_gain_db": 2.0,
+    "lowpass_hz": 12000,
+    "compressor_ratio": 2.2,
+    "compressor_threshold_db": -20,
+    "volume_gain_db": -1.0
+  },
+  "preview_phrases": {
+    "default": "90s TV voice-over — steady broadcast narration.",
+    "ru": "Телевизионная озвучка девяностых — ровная закадровая подача поверх оригинала.",
+    "uk": "Телевізійна озвучка дев'яностих — рівна закадрова подача поверх оригіналу."
+  }
+}

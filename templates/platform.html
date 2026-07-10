@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}TubeDub Platform{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🌐 AI Media Platform</h1>
+  <p class="text-muted">Live · Stream · Record · Coach — модульная платформа TubeDub</p>
+</div>
+
+<div id="platform-off" class="card" style="display:none;padding:20px;margin-bottom:16px;">
+  <p>Platform modules disabled. Set <code>VM_PLATFORM_ENABLED=1</code> or enable individual <code>VM_*_ENABLED</code> flags.</p>
+</div>
+
+<div class="card" style="padding:16px;margin-bottom:16px;">
+  <h3>Status</h3>
+  <pre id="platform-status" style="font-size:12px;overflow:auto;">Loading…</pre>
+</div>
+
+<div class="grid-2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;">
+  <div class="card" style="padding:16px;">
+    <h3>📺 Media Browser</h3>
+    <input id="browser-url" class="input-control" placeholder="YouTube / file path / HLS URL" style="width:100%;margin:8px 0;"/>
+    <select id="browser-lang" class="select-control" style="width:100%;margin-bottom:8px;">
+      <option value="ru">RU</option>
+      <option value="uk">UK</option>
+      <option value="en">EN</option>
+    </select>
+    <button class="btn btn-primary" onclick="platformBrowserStart()">Смотреть с AI-переводом</button>
+    <div id="browser-log" style="font-size:11px;margin-top:8px;max-height:120px;overflow:auto;"></div>
+  </div>
+
+  <div class="card" style="padding:16px;">
+    <h3>⚡ Live Translation</h3>
+    <input id="live-source" class="input-control" placeholder="Local video path" style="width:100%;margin:8px 0;"/>
+    <button class="btn" onclick="platformLiveStart()">Start live pipeline</button>
+    <pre id="live-events" style="font-size:10px;max-height:140px;overflow:auto;margin-top:8px;"></pre>
+  </div>
+
+  <div class="card" style="padding:16px;">
+    <h3>🎙️ Voice Training</h3>
+    <input id="voice-wav" class="input-control" placeholder="Path to WAV recording" style="width:100%;margin:8px 0;"/>
+    <textarea id="voice-script" class="input-control" placeholder="Script text" rows="3" style="width:100%;margin-bottom:8px;"></textarea>
+    <button class="btn" onclick="platformVoiceAnalyze()">Analyze</button>
+    <pre id="voice-out" style="font-size:11px;margin-top:8px;"></pre>
+  </div>
+
+  <div class="card" style="padding:16px;">
+    <h3>🎵 Vocal Training</h3>
+    <input id="vocal-wav" class="input-control" placeholder="Path to vocal WAV" style="width:100%;margin:8px 0;"/>
+    <input id="vocal-target-hz" class="input-control" placeholder="Target note Hz (optional)" style="width:100%;margin-bottom:8px;"/>
+    <button class="btn" onclick="platformVocalAnalyze()">Analyze pitch</button>
+    <pre id="vocal-out" style="font-size:11px;margin-top:8px;"></pre>
+  </div>
+</div>
+
+<script src="/static/js/platform.js"></script>
+{% endblock %}

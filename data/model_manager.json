@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "storage_root": "",
+  "max_storage_gb": 10,
+  "lru_enabled": true,
+  "require_confirm_before_lru": true,
+  "cleanup_unused_days": 90,
+  "last_cleanup": "",
+  "storage_wizard_done": true
+}

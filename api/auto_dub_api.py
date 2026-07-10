@@ -1,0 +1,10067 @@
+# auto_dub_api.py
+import os
+import time
+import uuid
+import json
+import shutil
+import logging
+import copy
+import subprocess
+import threading
+from contextlib import contextmanager
+from pathlib import Path
+from flask import Blueprint, request, jsonify
+from pydub import AudioSegment
+import ffmpeg
+
+from data.languages import LANG_CODE_TO_NAME
+from engines.dub_task_state import (
+    AUTO_TASK_CONTROLS,
+    AUTO_TASKS,
+    STATE_LOCK,
+    evict_expired_auto_tasks,
+    init_auto_task,
+    touch_task,
+)
+from engines.locale_utils import resolve_server_locale
+from engines.open_ddf import open_ddf as _open_ddf
+
+# Настройки логирования и директорий
+logger = logging.getLogger(__name__)
+bp = Blueprint("auto_dub_api", __name__)
+APP_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "output"))
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _artifacts_dir(task_info: dict | None = None) -> Path:
+    """Session-scoped artifact directory when ProjectSession is active."""
+    from engines.dubbing_engine.session_adapter import get_active_artifacts_dir
+
+    return get_active_artifacts_dir(OUTPUT_DIR, task_info=task_info)
+PIPELINE_STEPS = [
+    "preparing",
+    "extract_audio",
+    "transcribe",
+    "translate",
+    "tts",
+    "timing",
+    "dub",
+]
+
+STEP_LABELS = {
+    "ru": {
+        "preparing": "Подготовка",
+        "extract_audio": "Извлечение аудио",
+        "transcribe": "Whisper",
+        "translate": "Перевод",
+        "translation_review": "Проверка перевода",
+        "tts": "TTS",
+        "studio": "Студия",
+        "timing": "Сведение",
+        "dub": "Подготавливается MP4…",
+        "done": "Готово",
+    },
+    "uk": {
+        "preparing": "Підготовка",
+        "extract_audio": "Витяг аудіо",
+        "transcribe": "Whisper",
+        "translate": "Переклад",
+        "translation_review": "Перевірка перекладу",
+        "tts": "TTS",
+        "studio": "Студія",
+        "timing": "Зведення",
+        "dub": "Підготовка MP4…",
+        "done": "Готово",
+    },
+    "en": {
+        "preparing": "Preparing",
+        "extract_audio": "Extracting audio",
+        "transcribe": "Whisper",
+        "translate": "Translation",
+        "translation_review": "Translation review",
+        "tts": "TTS",
+        "studio": "Studio",
+        "timing": "Mixing",
+        "dub": "Preparing MP4…",
+        "done": "Done",
+    },
+}
+
+
+# Локализация уведомлений
+LOCALIZATION = {
+    "ru": {
+        "not_found": "Задача не найдена.",
+        "invalid_idx": "Неверный индекс сегмента.",
+        "tts_failed": "Не удалось сгенерировать аудио для сегмента.",
+        "timing_failed": "Ошибка генерации таймингов дорожки.",
+        "ffmpeg_missing": "Критическая ошибка: FFmpeg не найден в системе.",
+        "empty_stt": "Распознавание текста вернуло пустоту.",
+        "timed_missing": "Критическая ошибка: Файл звуковой дорожки timed.mp3 отсутствует.",
+        "dub_missing": "DubEngine сообщил об успехе, но выходной видеофайл MP4 отсутствует.",
+        "contract_broken": "Критическая ошибка: Контракт DubEngine поврежден.",
+        "export_error": "Критическая ошибка: не удалось физически записать timed.mp3 на диск.",
+        "pipeline_aborted": "Пайплайн прерван (пауза или внутренняя ошибка).",
+        "segment_mismatch": "Не удалось согласовать сегменты перевода с таймингом.",
+        "tts_timeout": "TTS завис или превысил лимит времени. Проверьте интернет.",
+        "output_file_blocked": "Файл с _OUTPUT_ в имени — это уже готовый дубляж. Выберите оригинальное видео без _OUTPUT_.",
+        "translate_failed": "Ошибка перевода. Проверьте интернет или выберите язык оригинала вручную.",
+        "translate_timeout": "Перевод занял слишком много времени (более 60 секунд). Попробуйте снова или уменьшите длину видео.",
+        "translate_not_prepared": "Модель перевода не подготовлена. Дождитесь завершения этапа «Подготовка компонентов».",
+        "long_processing": "Выполняется длительная обработка. Пожалуйста, подождите.",
+    },
+    "en": {
+        "not_found": "Task not found.",
+        "invalid_idx": "Invalid segment index.",
+        "tts_failed": "Failed to generate audio for segment.",
+        "timing_failed": "Timing engine track generation failed.",
+        "ffmpeg_missing": "Critical error: FFmpeg is not found in the system.",
+        "empty_stt": "Speech-to-text returned empty string.",
+        "timed_missing": "Critical error: Timed audio file timed.mp3 is missing.",
+        "dub_missing": "DubEngine reported success, but output MP4 file is missing.",
+        "contract_broken": "Critical error: DubEngine contract format is broken.",
+        "export_error": "Critical error: failed to physically write timed.mp3 to disk.",
+        "pipeline_aborted": "Pipeline aborted (pause or internal error).",
+        "segment_mismatch": "Could not align translated segments with timing map.",
+        "tts_timeout": "TTS timed out. Check your internet connection.",
+        "output_file_blocked": "Files with _OUTPUT_ in the name are already dubbed. Pick the original video without _OUTPUT_.",
+        "translate_failed": "Translation failed. Check your internet or pick the source language manually.",
+        "translate_timeout": "Translation took too long (over 60 seconds). Try again or use a shorter video.",
+        "translate_not_prepared": "Translation model is not prepared. Wait for «Preparing components» to finish.",
+        "long_processing": "Processing is taking longer than usual. Please wait.",
+    },
+    "uk": {
+        "not_found": "Завдання не знайдено.",
+        "invalid_idx": "Невірний індекс сегмента.",
+        "tts_failed": "Не вдалося згенерувати аудіо для сегмента.",
+        "timing_failed": "Помилка генерації таймінгів доріжки.",
+        "ffmpeg_missing": "Критична помилка: FFmpeg не знайдено в системі.",
+        "empty_stt": "Розпізнавання тексту повернуло порожнечу.",
+        "timed_missing": "Критична помилка: файл timed.mp3 відсутній.",
+        "dub_missing": "DubEngine повідомив про успіх, але MP4 відсутній.",
+        "contract_broken": "Критична помилка: контракт DubEngine пошкоджено.",
+        "export_error": "Критична помилка: не вдалося записати timed.mp3 на диск.",
+        "pipeline_aborted": "Пайплайн перервано (пауза або внутрішня помилка).",
+        "segment_mismatch": "Не вдалося узгодити сегменти перекладу з таймінгом.",
+        "tts_timeout": "TTS завис або перевищив ліміт часу. Перевірте інтернет.",
+        "output_file_blocked": "Файл з _OUTPUT_ у назві — це вже готовий дубляж. Оберіть оригінальне відео без _OUTPUT_.",
+        "translate_failed": "Помилка перекладу. Перевірте інтернет або оберіть мову оригіналу вручну.",
+        "translate_timeout": "Переклад зайняв занадто багато часу (понад 60 секунд). Спробуйте знову або скоротіть відео.",
+        "translate_not_prepared": "Модель перекладу не підготовлена. Дочекайтеся завершення «Підготовка компонентів».",
+        "long_processing": "Триває тривала обробка. Будь ласка, зачекайте.",
+    },
+}
+
+
+def _watchdog_status_snapshot(task_id: str) -> dict | None:
+    try:
+        from engines.pipeline_watchdog import get_pipeline_watchdog
+
+        wd = get_pipeline_watchdog(task_id)
+        return wd.snapshot() if wd else None
+    except Exception:
+        return None
+
+
+def _segment_tts_progress_meta(
+    task_id: str,
+    head_idx: int,
+    segments_data: list,
+    *,
+    voice: str,
+    tts_engine_id: str,
+    text: str,
+) -> dict:
+    """Metadata for transparent TTS progress (voice, LLM, chars, slot)."""
+    meta: dict = {
+        "voice": voice,
+        "tts_engine": tts_engine_id,
+        "tts_engine_id": tts_engine_id,
+        "char_count": len(str(text or "")),
+        "text_chars": len(str(text or "")),
+    }
+    seg = segments_data[head_idx] if 0 <= head_idx < len(segments_data) else {}
+    start = seg.get("start")
+    end = seg.get("end")
+    if start is not None and end is not None:
+        try:
+            meta["segment_duration_ms"] = max(0, int(end) - int(start))
+            meta["slot_ms"] = meta["segment_duration_ms"]
+        except (TypeError, ValueError):
+            pass
+    try:
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(task_id)
+            audits = (task.get("info") or {}).get("translation_audits") or []
+        for a in audits:
+            if int(a.get("index", -1)) == head_idx:
+                meta["llm_model"] = a.get("engine") or a.get("model") or ""
+                meta["translation_model"] = meta["llm_model"]
+                break
+        from engines.llm_adaptation_mode import detect_capabilities
+
+        caps = detect_capabilities()
+        if not meta.get("llm_model"):
+            meta["llm_model"] = caps.get("model") or ""
+    except Exception:
+        pass
+    return meta
+
+
+def _resolve_ui_lang(lang: str | None) -> str:
+    accept = ""
+    try:
+        accept = request.headers.get("Accept-Language", "")
+    except Exception:
+        accept = ""
+    resolved = resolve_server_locale(lang, accept)
+    if resolved in LOCALIZATION:
+        return resolved
+    return "en"
+
+
+def _update_progress_detail(task_id: str, **fields) -> None:
+    try:
+        from engines.pipeline_progress_tracker import enrich_progress_fields
+
+        fields = enrich_progress_fields(task_id, **fields)
+    except Exception:
+        fields = dict(fields)
+        fields["last_heartbeat_at"] = time.time()
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return
+        detail = task.setdefault("info", {}).setdefault("progress_detail", {})
+        detail.update({k: v for k, v in fields.items() if v is not None})
+    try:
+        from engines.pipeline_watchdog import watchdog_heartbeat
+
+        watchdog_heartbeat(task_id, **fields)
+    except Exception:
+        pass
+
+
+@contextmanager
+def _blocking_progress_heartbeat(
+    task_id: str,
+    phase: str,
+    *,
+    interval: float = 20.0,
+    messages: list[str] | None = None,
+):
+    """Emit progress heartbeats while a stage blocks the pipeline thread (Whisper, init)."""
+    stop = threading.Event()
+    msgs = messages or [phase]
+
+    def _loop() -> None:
+        i = 0
+        while not stop.wait(interval):
+            msg = msgs[i % len(msgs)]
+            i += 1
+            _update_progress_detail(task_id, phase=phase, live_message=msg)
+
+    _update_progress_detail(task_id, phase=phase, live_message=msgs[0])
+    worker = threading.Thread(
+        target=_loop,
+        name=f"progress-hb-{task_id[:8]}-{phase}",
+        daemon=True,
+    )
+    worker.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        worker.join(timeout=1.0)
+
+
+def _runtime_stage_record(
+    task_id: str,
+    recorder,
+    stage_num: int,
+    stage_name: str,
+    *,
+    segments_ok: int | None = None,
+    errors: int = 0,
+) -> None:
+    if recorder is None:
+        return
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        info = (task or {}).get("info") or {}
+        segs = info.get("segments_data") or []
+        engine_id = info.get("tts_engine_id") or "edge-offline"
+        integrity = str((info.get("pipeline_integrity") or {}).get("status") or "ok")
+    from engines.dubbing_engine.tts_failure_diag import engine_display_name
+
+    total = len(segs)
+    ok = segments_ok if segments_ok is not None else total
+    recorder.stage_complete(
+        stage_num,
+        stage_name,
+        segments_total=total,
+        segments_ok=ok,
+        errors=errors,
+        voice_engine=engine_display_name(str(engine_id)),
+        integrity_guard=integrity,
+    )
+
+
+def _estimate_eta_sec(task_id: str, step_progress: float) -> int | None:
+    """Rough ETA from step progress fraction 0..1 within current step."""
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return None
+        started = float(task.get("info", {}).get("step_started_at") or 0)
+    if started <= 0 or step_progress <= 0.01:
+        return None
+    elapsed = time.time() - started
+    remaining = elapsed * (1.0 - step_progress) / max(step_progress, 0.01)
+    return int(max(0, remaining))
+
+
+@bp.get("/api/auto_dub/voice_catalog")
+def api_voice_catalog():
+    path = APP_DIR / "data" / "voice_catalog.json"
+    voices = {}
+    if path.is_file():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            voices = data.get("voices") if isinstance(data, dict) else {}
+        except Exception:
+            pass
+    return jsonify({"ok": True, "voices": voices or {}})
+
+
+@bp.get("/api/auto_dub/content_modes")
+def api_content_modes():
+    """Return all supported content modes with localised labels."""
+    lang = request.args.get("lang", "ru")
+    try:
+        from engines.dubbing_engine.content_mode import all_modes_for_ui
+        modes = all_modes_for_ui(lang)
+    except Exception as exc:
+        logger.warning("[content_modes] %s", exc)
+        modes = [{"value": "movie", "label": "🎬 Фільм / Movie"}]
+    return jsonify({"ok": True, "modes": modes})
+
+
+@bp.get("/api/auto_dub/event_bus/status")
+def api_event_bus_status():
+    """Event Bus diagnostics (TZ Stage 1)."""
+    from core.event_bus import get_event_bus
+    from core.event_pipeline import event_bus_enabled
+
+    bus = get_event_bus()
+    return jsonify(
+        {
+            "ok": True,
+            "enabled": event_bus_enabled(),
+            "running": bus.running,
+            "recent_events": bus.history(limit=30),
+        }
+    )
+
+
+@bp.get("/api/auto_dub/pipeline_orchestrator/status")
+def api_pipeline_orchestrator_status():
+    """Pipeline + LLM orchestrator capacity and dispatch status (diagnostics)."""
+    from engines.llm_orchestrator import get_llm_orchestrator
+    from engines.pipeline_orchestrator import get_planner
+
+    return jsonify(
+        {
+            "ok": True,
+            "planner": get_planner().to_dict(),
+            "llm_orchestrator": get_llm_orchestrator().status(),
+        }
+    )
+
+
+@bp.get("/api/auto_dub/adaptation_capabilities")
+def api_adaptation_capabilities():
+    """Report adaptation backends + recommended mode for the UI (TZ §3/§9).
+
+    Lets the dub page warn the user when no LLM is configured instead of silently
+    degrading quality.
+    """
+    from engines.llm_adaptation_mode import (
+        MODE_STRICT,
+        detect_capabilities,
+        recommended_mode,
+        resolve_adaptation_mode,
+    )
+
+    caps = detect_capabilities()
+    flag_strict = resolve_adaptation_mode({}) == MODE_STRICT
+    warning = None
+    if not caps.get("llm_available"):
+        warning = (
+            "Для максимально качественного дубляжа рекомендуется установить AI-модуль TubeDub. "
+            "Можно продолжить работу в упрощённом режиме."
+        )
+    elif caps.get("model_warning"):
+        # LLM is present but too small for reliable multilingual adaptation.
+        warning = caps.get("model_warning")
+    try:
+        from engines.ai_core.global_skill import skill_version, to_dict as skill_to_dict
+        from engines.llm_providers.transport import list_cloud_profiles
+
+        skill_meta = skill_to_dict()
+        cloud_profiles = list_cloud_profiles()
+    except Exception:
+        skill_meta = {}
+        cloud_profiles = []
+    return jsonify(
+        {
+            "ok": True,
+            "capabilities": caps,
+            "recommended_mode": recommended_mode(caps),
+            "feature_flag_strict_default": flag_strict,
+            "warning": warning,
+            "active_model": {
+                "model": caps.get("model"),
+                "provider": caps.get("provider"),
+                "display_name": _model_display_name(caps.get("model") or ""),
+                "adequate": caps.get("model_adequate"),
+            },
+            "global_skill_version": skill_meta.get("version") or skill_version(),
+            "cloud_profiles": cloud_profiles,
+        }
+    )
+
+
+def _model_display_name(model: str) -> str:
+    low = str(model or "").lower()
+    if "deepseek" in low:
+        return "DeepSeek"
+    if "qwen" in low:
+        return "Qwen"
+    if "llama" in low:
+        return "Llama"
+    if "gemma" in low:
+        return "Gemma"
+    if "gpt" in low:
+        return "OpenAI GPT"
+    return model or "—"
+
+
+@bp.get("/api/auto_dub/tts_engines")
+def api_tts_engines():
+    from engines.tts_engines.registry import list_engine_infos
+
+    infos = list_engine_infos(APP_DIR)
+    return jsonify(
+        {
+            "ok": True,
+            "engines": [
+                {
+                    "id": i.id,
+                    "name": i.name,
+                    "mode": i.mode,
+                    "provider": i.provider,
+                    "description": i.description,
+                    "available": i.available,
+                    "supports_stress": i.supports_stress,
+                }
+                for i in infos
+            ],
+        }
+    )
+
+
+def _apply_translation_text_edits(
+    info: dict,
+    edits: list[dict] | None = None,
+) -> list[str]:
+    """Apply user text edits to segments_data + audits; return segment texts."""
+    from engines.translation_review import build_translation_review
+
+    segments_data = info.get("segments_data") or []
+    audits = info.get("translation_audits") or []
+    audit_by_idx = {int(a.get("index", -1)): a for a in audits}
+
+    if not segments_data and audits:
+        for i, row in enumerate(sorted(audits, key=lambda a: int(a.get("index", 0)))):
+            idx = int(row.get("index", i))
+            text = str(
+                row.get("final_text")
+                or row.get("tts_text")
+                or row.get("naturalized_text")
+                or row.get("raw_translation")
+                or ""
+            ).strip()
+            segments_data.append(
+                {
+                    "index": idx,
+                    "text": text,
+                    "plain_text": text,
+                    "translation_text": text,
+                    "file": None,
+                }
+            )
+
+    if edits:
+        for item in edits:
+            try:
+                idx = int(item.get("index", 0)) - 1
+            except (TypeError, ValueError):
+                continue
+            text = str(item.get("text") or "").strip()
+            if idx < 0 or idx >= len(segments_data) or not text:
+                continue
+            segments_data[idx]["text"] = text
+            segments_data[idx]["plain_text"] = text
+            segments_data[idx]["translation_text"] = text
+            row = audit_by_idx.get(idx)
+            if row:
+                row["final_text"] = text
+                row["tts_text"] = text
+                row["user_edited"] = True
+                try:
+                    from engines.translation_router import record_manual_correction
+
+                    src = info.get("detected_lang") or info.get("source_lang") or "en"
+                    tgt = info.get("target_lang") or "ru"
+                    engine = str(row.get("engine") or "unknown")
+                    record_manual_correction(
+                        APP_DIR,
+                        src_lang=src,
+                        tgt_lang=tgt,
+                        engine=engine,
+                    )
+                except Exception:
+                    pass
+
+    texts = []
+    for i, seg in enumerate(segments_data):
+        row = audit_by_idx.get(i, {})
+        texts.append(
+            str(row.get("final_text") or seg.get("text") or "").strip()
+        )
+    info["segments_data"] = segments_data
+    info["translation_audits"] = audits
+    info["translation_review"] = build_translation_review(info)
+    return texts
+
+
+def _raw_mt_texts_from_info(info: dict) -> list[str]:
+    """Faithful raw MT per segment for AI Core Translation Agent / adaptation."""
+    audits = info.get("translation_audits") or []
+    segments_data = info.get("segments_data") or []
+    source_segments = info.get("source_segments") or []
+    by_idx = {int(a.get("index", -1)): a for a in audits}
+    count = max(len(audits), len(segments_data), len(source_segments))
+    out: list[str] = []
+    for i in range(count):
+        row = by_idx.get(i, {})
+        text = str(
+            row.get("raw_translation")
+            or row.get("naturalized_text")
+            or row.get("final_text")
+            or row.get("tts_text")
+            or ""
+        ).strip()
+        if not text and i < len(segments_data):
+            text = str(
+                segments_data[i].get("translation_text")
+                or segments_data[i].get("plain_text")
+                or segments_data[i].get("text")
+                or ""
+            ).strip()
+        out.append(text)
+    return out
+
+
+def _translation_review_requires_manual_hold() -> bool:
+    """Pause pipeline only when developer diagnostics / inspector need manual review."""
+    from engines.translation_diagnostics import dev_diagnostics_enabled
+    from engines.translation_inspector import inspector_enabled
+
+    return dev_diagnostics_enabled() or inspector_enabled()
+
+
+def _populate_translation_review_data(task_id: str, segments: list[str]) -> None:
+    """Build translation review snapshot without changing pipeline control state."""
+    from engines.translation_review import build_translation_review
+    from engines.translation_diagnostics import (
+        build_developer_diagnostics,
+        dev_diagnostics_enabled,
+    )
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return
+        info = task["info"]
+        info["task_id"] = task_id
+        audits = info.get("translation_audits") or []
+        audit_by_idx = {int(a.get("index", -1)): a for a in audits}
+        segments_data = []
+        for i, seg in enumerate(segments):
+            text = str(seg or "").strip()
+            row = audit_by_idx.get(i, {})
+            if row.get("final_text"):
+                text = str(row["final_text"]).strip()
+            if not text:
+                src_segs = info.get("source_segments") or []
+                if i < len(src_segs):
+                    text = str(src_segs[i] or "").strip()
+            segments_data.append(
+                {
+                    "index": i,
+                    "text": text,
+                    "plain_text": text,
+                    "translation_text": text,
+                    "file": None,
+                }
+            )
+            if i < len(info.get("source_word_maps") or []):
+                segments_data[-1]["source_word_map"] = info["source_word_maps"][i]
+            elif i < len(info.get("segments_data") or []):
+                old = (info.get("segments_data") or [])[i].get("source_word_map")
+                if old:
+                    segments_data[-1]["source_word_map"] = old
+            if row and text:
+                row["final_text"] = text
+                row["tts_text"] = text
+        info["segments_data"] = segments_data
+        info["translation_review"] = build_translation_review(info)
+        if dev_diagnostics_enabled():
+            info["translation_diagnostics"] = build_developer_diagnostics(info)
+            try:
+                from engines.pipeline_platform.dev_view import build_dev_pipeline_view
+
+                info["pipeline_platform_trace"] = build_dev_pipeline_view(
+                    info, task_id=task_id, app_dir=str(Path(__file__).resolve().parent.parent)
+                )
+            except Exception:
+                pass
+        from engines.translation_inspector import build_translation_inspector, inspector_enabled
+
+        if inspector_enabled():
+            info["translation_inspector"] = build_translation_inspector(info)
+
+
+def _enter_translation_review_pause(task_id: str) -> None:
+    """Mark task paused at translation review (60%) until user approves."""
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not task or not control:
+            return
+        task["status"] = "translation_review"
+        task["step"] = "translation_review"
+        task["progress"] = 60.0
+        control["state"] = "paused"
+        control["awaiting_translation_review"] = True
+        control["editing"] = False
+        control["editor_error"] = False
+
+
+def _pause_for_translation_review(task_id: str, segments: list[str]) -> None:
+    """Populate review data and pause pipeline until user approves."""
+    _populate_translation_review_data(task_id, segments)
+    _enter_translation_review_pause(task_id)
+
+
+def _resume_from_translation_review(task_id: str) -> list[str] | None:
+    """Clear review pause and return approved segment texts."""
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not task or not control:
+            return None
+        info = task["info"]
+        texts = _apply_translation_text_edits(info)
+        control["awaiting_translation_review"] = False
+        control["state"] = "running"
+        control["editing"] = False
+        control["editor_error"] = False
+        task["status"] = "running"
+        info["translation_review_approved"] = True
+        return texts
+
+
+def _step_label(step: str, ui_lang: str = "ru") -> str:
+    labels = STEP_LABELS.get(ui_lang, STEP_LABELS["ru"])
+    if step == "done" or step not in labels:
+        return labels.get(step, labels.get("preparing", step))
+    return labels.get(step, step)
+
+
+def _get_lp(req):
+    lang = _resolve_ui_lang(req.args.get("lang"))
+    return LOCALIZATION.get(lang, LOCALIZATION["ru"])
+
+
+def _parse_timing(t_range):
+    """Безопасное извлечение временных меток диапазона в миллисекундах."""
+    try:
+        if isinstance(t_range, (list, tuple)) and len(t_range) == 2:
+            return int(t_range[0]), int(t_range[1])
+        if isinstance(t_range, dict):
+            return int(t_range.get("start", 0)), int(t_range.get("end", 0))
+    except (ValueError, TypeError):
+        pass
+    return 0, 0
+
+
+def _safe_export_audio(audio_obj, path):
+    """Унифицированный безопасный экспорт аудио-объекта на диск с обязательной проверкой."""
+    try:
+        if audio_obj is None:
+            return False
+        out = Path(path)
+        duration_ms = len(audio_obj)
+        ffmpeg = shutil.which("ffmpeg")
+        if ffmpeg and duration_ms > 30_000:
+            import tempfile
+
+            tmp = Path(tempfile.gettempdir()) / f"vm_timed_{uuid.uuid4().hex}.wav"
+            try:
+                audio_obj.export(str(tmp), format="wav")
+                timeout = max(120, int(duration_ms / 1000) * 4)
+                subprocess.run(
+                    [
+                        ffmpeg,
+                        "-y",
+                        "-i",
+                        str(tmp),
+                        "-codec:a",
+                        "libmp3lame",
+                        "-b:a",
+                        "192k",
+                        str(out),
+                    ],
+                    check=True,
+                    capture_output=True,
+                    timeout=timeout,
+                )
+                return out.is_file()
+            finally:
+                tmp.unlink(missing_ok=True)
+        audio_obj.export(str(out), format="mp3")
+        return out.is_file()
+    except Exception as e:
+        logger.error(f"Ошибка экспорта аудио: {e}")
+        return False
+
+
+DUB_SEGMENT_LOG = APP_DIR / "output" / "dub_segment_log.txt"
+DUB_TIMING_FIT_LOG = APP_DIR / "output" / "dub_timing_fit_log.txt"
+
+
+def _video_duration_ms(video_path: str) -> int | None:
+    ffprobe = shutil.which("ffprobe")
+    if not ffprobe or not video_path:
+        return None
+    try:
+        result = subprocess.run(
+            [
+                ffprobe,
+                "-v",
+                "quiet",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                video_path,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return int(float(result.stdout.strip()) * 1000)
+    except Exception:
+        return None
+
+
+def _write_dub_segment_log(task_id: str, entries: list[str]) -> None:
+    try:
+        DUB_SEGMENT_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with open(DUB_SEGMENT_LOG, "a", encoding="utf-8") as f:
+            f.write(f"=== task={task_id} ===\n")
+            for line in entries:
+                f.write(line + "\n")
+    except Exception as e:
+        logger.warning("dub segment log write failed: %s", e)
+
+
+def _regen_segment_tts_simple(
+    text: str, voice: str, tts_rate: str | None = None, tts_pitch: str | None = None
+) -> str | None:
+    """Simple TTS regen returning filename only (used by _apply_text_adaptation)."""
+    from engines.tts import generate_audio
+
+    if not text.strip():
+        return None
+    files = _normalize_tts_result(
+        generate_audio(
+            text=text, voice=voice, segments=[text], rate=tts_rate, pitch=tts_pitch
+        )
+    )
+    return files[0] if files else None
+
+
+def _apply_text_adaptation(
+    seg: dict,
+    issue: dict,
+    source_segments: list,
+    voice: str,
+    tts_files: list,
+    stage: str,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    semantic_log=None,
+    tgt_lang: str = "ru",
+    src_lang: str = "en",
+) -> bool:
+    from engines.translation_adapt import adapt_for_duration
+    from engines.semantic_adaptation import record_post_tts_adaptation
+
+    idx = issue["idx"]
+    src_hint = source_segments[idx] if idx < len(source_segments) else ""
+    target_ms = max(200, int(issue["window_ms"]) - 40)
+    original_text = str(seg.get("text") or "")
+    new_text = adapt_for_duration(
+        original_text,
+        int(issue["tts_ms"]),
+        target_ms,
+        src_hint,
+        stage=stage,
+        tgt_lang=tgt_lang,
+    )
+    if new_text == seg.get("text"):
+        return False
+
+    old_file = seg.get("file")
+    new_file = _regen_segment_tts_simple(new_text, voice, tts_rate=tts_rate, tts_pitch=tts_pitch)
+    if not new_file:
+        return False
+
+    if old_file:
+        (_artifacts_dir() / Path(old_file).name).unlink(missing_ok=True)
+    seg["text"] = new_text
+    seg["file"] = new_file
+    tts_files.append(new_file)
+
+    try:
+        from pydub import AudioSegment
+
+        tts_after = len(AudioSegment.from_file(str(_artifacts_dir() / new_file)))
+    except Exception:
+        tts_after = 0
+
+    record_post_tts_adaptation(
+        semantic_log,
+        index=idx,
+        source_hint=src_hint,
+        original=original_text,
+        adapted=new_text,
+        reason=f"post_tts_overflow_{stage}",
+        window_ms=target_ms,
+        tts_ms_before=int(issue.get("tts_ms") or 0),
+        tts_ms_after=tts_after,
+        src_lang=src_lang,
+        tgt_lang=tgt_lang,
+    )
+    return True
+
+
+def _wtm_record_checkpoint(wtm_log, task_id: str, stage: str) -> None:
+    """Phase 0: verify Word Timing Map integrity at pipeline stage (no dub changes)."""
+    if wtm_log is None:
+        return
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return
+        wtm_log.record(task["info"], stage)
+        task["info"]["word_timing_checkpoints"] = wtm_log.to_dict()
+
+
+def _segments_data_entries(
+    segments: list[str],
+    info: dict,
+) -> list[dict]:
+    """Build segments_data rows; preserve source_word_map from task info (Phase 1 WTM)."""
+    source_word_maps = info.get("source_word_maps") or []
+    audits = info.get("translation_audits") or []
+    audit_by_idx = {int(a.get("index", -1)): a for a in audits}
+    old_by_idx = {
+        int(s.get("index", i)): s
+        for i, s in enumerate(info.get("segments_data") or [])
+    }
+    out: list[dict] = []
+    for i, seg in enumerate(segments):
+        text = str(seg or "").strip()
+        audit = audit_by_idx.get(i, {})
+        final = str(audit.get("final_text") or text).strip()
+        working = final or text
+        entry: dict = {
+            "index": i,
+            "text": working,
+            "plain_text": working,
+            "translation_text": working,
+            "file": None,
+        }
+        old = old_by_idx.get(i) or {}
+        if old.get("segment_id"):
+            entry["segment_id"] = old["segment_id"]
+        if i < len(source_word_maps):
+            entry["source_word_map"] = source_word_maps[i]
+        elif old.get("source_word_map"):
+            entry["source_word_map"] = old["source_word_map"]
+        out.append(entry)
+    return out
+
+
+_INTEGRITY_COORDINATORS: dict = {}
+
+
+def _integrity_coordinator(task_id: str):
+    from engines.pipeline_integrity import PipelineIntegrityCoordinator
+
+    if task_id not in _INTEGRITY_COORDINATORS:
+        _INTEGRITY_COORDINATORS[task_id] = PipelineIntegrityCoordinator(task_id=task_id)
+    return _INTEGRITY_COORDINATORS[task_id]
+
+
+def _drop_integrity_coordinator(task_id: str) -> None:
+    _INTEGRITY_COORDINATORS.pop(task_id, None)
+
+
+def _commit_tts_group_result(
+    segments_data: list,
+    indices: list[int],
+    *,
+    tts_text: str,
+    audio_filename: str | None,
+    task_info: dict | None,
+) -> None:
+    """Write only TTS-contract segment fields after synthesis."""
+    from engines.pipeline_integrity.tts_segment_fields import (
+        apply_tts_synthesis_result,
+        mark_merged_tts_children,
+        measure_playback_duration_ms,
+    )
+
+    if not indices:
+        return
+    head_idx = int(indices[0])
+    if head_idx >= len(segments_data):
+        return
+    if audio_filename:
+        audio_path = _resolve_segment_audio_path(audio_filename, task_info)
+        duration = measure_playback_duration_ms(audio_path)
+        apply_tts_synthesis_result(
+            segments_data[head_idx],
+            tts_text=tts_text,
+            tts_file_path=audio_filename,
+            playback_duration=duration or None,
+            status="generated",
+        )
+        from engines.pipeline_integrity.tts_file_lifecycle import (
+            log_tts_lifecycle,
+            verify_tts_file_on_disk,
+        )
+
+        task_id = str((task_info or {}).get("task_id") or "")
+        sid = str(segments_data[head_idx].get("segment_id") or "")
+        log_tts_lifecycle(
+            task_id or None,
+            event="gen_end",
+            segment_id=sid or None,
+            segment_index=head_idx,
+            filename=audio_filename,
+            path=audio_path,
+            stage="tts",
+            success=True,
+            detail=f"duration_ms={duration}",
+        )
+        verify_tts_file_on_disk(
+            audio_path,
+            task_id=task_id or None,
+            segment_id=sid or None,
+            segment_index=head_idx,
+            filename=audio_filename,
+            stage="tts",
+            event="post_write_verify",
+        )
+        from engines.translation_stage_log import log_translation_stage
+
+        log_translation_stage(
+            task_id or None,
+            stage="post_tts",
+            segment_index=head_idx,
+            segment_id=sid or None,
+            text=tts_text,
+            detail=f"file={audio_filename}",
+        )
+    else:
+        apply_tts_synthesis_result(
+            segments_data[head_idx],
+            tts_text=tts_text,
+            tts_file_path=None,
+            status="empty",
+        )
+    mark_merged_tts_children(segments_data, indices)
+    if audio_filename and task_info and _dev_preview_enabled(task_info):
+        tid = str(task_info.get("task_id") or "")
+        if tid:
+            _schedule_dev_preview(tid)
+
+
+def _strict_llm_adaptation_enabled() -> bool:
+    """TZ §3 strict gate toggle.
+
+    Enabled via env VM_STRICT_LLM_ADAPTATION=1 or the 'strict_llm_adaptation'
+    feature flag. Default OFF so the product still produces a dub when no LLM is
+    configured (overflow handled by gap/video-adapt, never truncation).
+    """
+    val = str(os.getenv("VM_STRICT_LLM_ADAPTATION") or "").strip().lower()
+    if val in ("1", "true", "yes", "on"):
+        return True
+    if val in ("0", "false", "no", "off"):
+        return False
+    try:
+        from engines.core.feature_flags import is_enabled
+
+        return bool(is_enabled("strict_llm_adaptation", developer_session=False))
+    except Exception:
+        return False
+
+
+def _post_tts_max_retries() -> int:
+    """Fewer post-TTS LLM loops in fast mode (CPU dub runs)."""
+    try:
+        from engines.segment_timing_qa import MAX_TEXT_ADAPTATION_ITERATIONS
+        from engines.translation_adapt import MODE_FAST, adaptation_speed_mode
+
+        if adaptation_speed_mode() == MODE_FAST:
+            return 2
+        return MAX_TEXT_ADAPTATION_ITERATIONS
+    except Exception:
+        return 5
+
+
+def _post_tts_timing_qa(
+    task_id: str,
+    segments_data: list,
+    timing_map: list,
+    task_info: dict,
+    *,
+    voice: str,
+    target_lang: str,
+    src_lang: str,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+) -> tuple[list, dict]:
+    """
+    TZ §9–§10: normalize timing joints, validate post-TTS durations, semantic retry.
+    """
+    from engines.segment_timing_qa import (
+        normalize_timing_map_joints,
+        post_tts_validate_and_retry,
+    )
+
+    normalized_map, joint_fixes = normalize_timing_map_joints(timing_map)
+    if joint_fixes:
+        logger.info(
+            "Task %s: timing joint fixes applied: %d",
+            task_id,
+            len(joint_fixes),
+        )
+        task_info["timing_joint_fixes"] = joint_fixes
+
+    def _regen(text, **kwargs):
+        from engines.pipeline_segment_watchdog import run_segment_bounded
+
+        seg_idx = int(kwargs.get("segment_index") or 0)
+        work_root = _artifacts_dir() / "post_tts_retry" / task_id
+        work_root.mkdir(parents=True, exist_ok=True)
+
+        def _do_regen():
+            return _regen_segment_tts(
+                text,
+                voice=kwargs.get("voice") or voice,
+                work_dir=work_root,
+                tts_rate=kwargs.get("tts_rate") or tts_rate,
+                tts_pitch=kwargs.get("tts_pitch") or tts_pitch,
+                task_id=kwargs.get("task_id") or task_id,
+                segment_index=kwargs.get("segment_index"),
+                segment_id=kwargs.get("segment_id") or "",
+            )
+
+        watch = run_segment_bounded(
+            task_id=task_id or "",
+            phase="post_tts_regen",
+            segment_index=seg_idx,
+            stage="post_tts_regen",
+            fn=_do_regen,
+            fallback=lambda: (None, 0),
+        )
+        return watch.value
+
+    def _commit(segs, indices, *, tts_text, audio_filename):
+        _commit_tts_group_result(
+            segs,
+            indices,
+            tts_text=tts_text,
+            audio_filename=audio_filename,
+            task_info=task_info,
+        )
+
+    retry_stats = post_tts_validate_and_retry(
+        segments_data,
+        normalized_map,
+        source_segments=task_info.get("source_segments") or [],
+        voice=voice,
+        target_lang=target_lang,
+        src_lang=src_lang,
+        audits=task_info.get("translation_audits") or [],
+        task_id=task_id,
+        tts_rate=tts_rate,
+        tts_pitch=tts_pitch,
+        regen_fn=_regen,
+        commit_fn=_commit,
+        max_retries=_post_tts_max_retries(),
+    )
+    task_info["post_tts_qa"] = retry_stats
+    # Persist the captured LLM adaptation calls (proof of work — audit TЗ §1/§2/§9)
+    # so the OpenDDF report can show every call: text sent, text received, latency.
+    try:
+        from engines.translation_adapt import get_llm_calls, get_llm_status
+
+        task_info["llm_calls"] = get_llm_calls()
+        task_info["llm_status"] = get_llm_status()
+    except Exception:
+        pass
+    return normalized_map, retry_stats
+
+
+def _sync_tts_audits_from_groups(
+    audits: list,
+    segments_data: list,
+    tts_groups: list,
+    *,
+    trace,
+    prosody_only: bool,
+) -> None:
+    """Update translation audit rows from TTS groups — no segment.plain_text mutation."""
+    from engines.pipeline_integrity.tts_segment_fields import resolve_tts_input_text
+
+    audit_by_idx = {int(a.get("index", -1)): a for a in audits}
+    for group in tts_groups:
+        indices = group.get("indices") or []
+        if not indices:
+            continue
+        head = int(indices[0])
+        row = audit_by_idx.get(head)
+        if not row or head >= len(segments_data):
+            continue
+        tts_input = resolve_tts_input_text(group)
+        tts_ssml = str(group.get("text") or "").strip()
+        if tts_ssml.lstrip().startswith("<speak"):
+            row["tts_text"] = tts_ssml
+        elif tts_input:
+            row["tts_text"] = tts_input
+        if prosody_only or tts_ssml.lstrip().startswith("<speak"):
+            plain = str(
+                group.get("plain_text")
+                or segments_data[head].get("plain_text")
+                or segments_data[head].get("translation_text")
+                or segments_data[head].get("text")
+                or ""
+            ).strip()
+            if plain and not plain.lstrip().startswith("<speak"):
+                row.setdefault("final_text", plain)
+        if trace:
+            trace.upsert_from_audit(row)
+
+
+def _resolve_segment_audio_path(filename: str | None, task_info: dict | None = None) -> Path:
+    from engines.dubbing_engine.session_adapter import resolve_session_audio
+
+    return resolve_session_audio(filename, task_info=task_info, default_dir=OUTPUT_DIR)
+
+
+def _log_tts_synthesis_requests(
+    task_id: str,
+    *,
+    tts_groups: list,
+    segments_data: list,
+    voice: str,
+    target_lang: str,
+    provider: str,
+) -> None:
+    from engines.pipeline_integrity.tts_segment_fields import resolve_tts_input_text
+    from engines.translation_stage_log import log_tts_request
+
+    for g_idx, group in enumerate(tts_groups):
+        text = resolve_tts_input_text(group)
+        if not text:
+            continue
+        indices = group.get("indices") or []
+        head_idx = int(indices[0]) if indices else 0
+        seg_id = ""
+        if 0 <= head_idx < len(segments_data):
+            seg_id = str(segments_data[head_idx].get("segment_id") or "")
+        log_tts_request(
+            task_id,
+            segment_index=head_idx,
+            segment_id=seg_id or None,
+            language_code=target_lang,
+            voice_id=voice,
+            provider=provider,
+            text=text,
+            group_index=g_idx,
+        )
+
+
+def _tts_context_for_segment(
+    *,
+    task_id: str,
+    segment_id: str,
+    segment_index: int,
+    current: int,
+    total: int,
+    original_text: str,
+    tts_text: str,
+    voice: str,
+    target_lang: str,
+    tts_file_path: str | Path,
+    engine_id: str | None = None,
+) -> dict:
+    return {
+        "task_id": task_id,
+        "segment_id": segment_id,
+        "segment_index": segment_index,
+        "current": current,
+        "total": total,
+        "original_text": original_text,
+        "tts_text": tts_text,
+        "voice": voice,
+        "language": target_lang,
+        "tts_file_path": str(tts_file_path),
+        "engine_id": engine_id or "edge-offline",
+    }
+
+
+def _snapshot_project_on_tts_failure(task_id: str) -> None:
+    """Save studio session snapshot on TTS failure without stopping the task."""
+    try:
+        from api.studio_api import _save_session, build_session_from_auto_dub_task
+
+        state = build_session_from_auto_dub_task(task_id)
+        if state:
+            state["task_status"] = "tts_partial_failure"
+            _save_session(state)
+            logger.info("Task %s: project snapshot saved after TTS failure", task_id)
+    except Exception as exc:
+        logger.warning("Task %s: TTS failure snapshot skipped: %s", task_id, exc)
+
+
+def _record_tts_segment_failure(
+    task_id: str,
+    segments_data: list,
+    indices: list[int],
+    report,
+    *,
+    ui_lang: str = "ru",
+) -> str:
+    """Mark failed segments, persist report, fail-fast stop. Returns UI message."""
+    from engines.dubbing_engine.pipeline_failure_diag import fail_pipeline, from_tts_failure_report
+    from engines.dubbing_engine.tts_failure_diag import (
+        TTSFailureReport,
+        format_diagnostic_block,
+        mark_segment_tts_failed,
+        save_failure_report,
+    )
+
+    if isinstance(report, dict):
+        fields = {f: report.get(f) for f in TTSFailureReport.__dataclass_fields__}
+        if not fields.get("reason") and report.get("error_message"):
+            fields["reason"] = report.get("error_message")
+        fields["pipeline_state"] = "STOPPED"
+        fields["stage"] = "TTS"
+        report = TTSFailureReport(**fields)
+    else:
+        report.pipeline_state = "STOPPED"
+        report.stage = "TTS"
+
+    diag_block = format_diagnostic_block(report)
+
+    for idx in indices:
+        if 0 <= idx < len(segments_data):
+            mark_segment_tts_failed(segments_data[idx], report)
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if task:
+            info = task.setdefault("info", {})
+            failures = info.setdefault("tts_failures", [])
+            payload = report.to_dict()
+            payload["diagnostic_block"] = diag_block
+            failures.append(payload)
+            info["segments_data"] = segments_data
+            touch_task(task_id)
+
+    save_failure_report(report, task_id=task_id)
+    pipe_report = from_tts_failure_report(report, pipeline_state="STOPPED")
+    return fail_pipeline(task_id, pipe_report.reason, report=pipe_report, ui_lang=ui_lang)
+
+
+def _mark_tts_segment_skipped(
+    task_id: str,
+    segments_data: list,
+    indices: list[int],
+    report,
+    *,
+    reason: str = "skipped",
+) -> None:
+    """Mark segment TTS failure but continue pipeline (do not fail-fast)."""
+    from engines.dubbing_engine.tts_failure_diag import (
+        TTSFailureReport,
+        mark_segment_tts_failed,
+        save_failure_report,
+    )
+
+    if isinstance(report, dict):
+        fields = {f: report.get(f) for f in TTSFailureReport.__dataclass_fields__}
+        if not fields.get("reason") and report.get("error_message"):
+            fields["reason"] = report.get("error_message")
+        fields["pipeline_state"] = "PARTIAL"
+        fields["stage"] = "TTS"
+        report_obj = TTSFailureReport(**fields)
+    else:
+        report_obj = report
+        report_obj.pipeline_state = "PARTIAL"
+        report_obj.stage = "TTS"
+
+    for idx in indices:
+        if 0 <= idx < len(segments_data):
+            mark_segment_tts_failed(segments_data[idx], report_obj)
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if task:
+            info = task.setdefault("info", {})
+            failures = info.setdefault("tts_failures", [])
+            payload = report_obj.to_dict()
+            payload["skipped_continue"] = True
+            payload["skip_reason"] = reason
+            failures.append(payload)
+            info["segments_data"] = segments_data
+            touch_task(task_id)
+
+    try:
+        save_failure_report(report_obj, task_id=task_id)
+    except Exception as exc:
+        logger.debug("Task %s: TTS skip report save failed: %s", task_id, exc)
+
+    logger.warning(
+        "Task %s: TTS segment skipped (%s) indices=%s — continuing pipeline",
+        task_id,
+        reason,
+        indices,
+    )
+
+
+def _try_merge_neighbor_tts(
+    segments_data: list,
+    timing_map: list,
+    idx: int,
+    voice: str,
+    tts_files: list,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+) -> bool:
+    """Объединяет соседние реплики одной мысли в один TTS-блок."""
+    import re
+
+    if idx + 1 >= len(segments_data):
+        return False
+    head = segments_data[idx]
+    nxt = segments_data[idx + 1]
+    if nxt.get("merged_into") is not None or not head.get("text") or not nxt.get("text"):
+        return False
+    if re.search(r"[.!?…]\s*$", str(head.get("text") or "")):
+        return False
+
+    combined = f"{head['text'].strip()} {nxt['text'].strip()}".strip()
+    if len(combined.split()) > 30:
+        return False
+
+    custom = head.get("tts_timing")
+    if custom and len(custom) >= 2:
+        start_ms = int(custom[0])
+    elif idx < len(timing_map):
+        start_ms, _ = _parse_timing(timing_map[idx])
+    else:
+        start_ms = 0
+
+    if idx + 1 < len(timing_map):
+        _, end_ms = _parse_timing(timing_map[idx + 1])
+    else:
+        _, end_ms = _parse_timing(timing_map[idx])
+
+    new_file = _regen_segment_tts(combined, voice, tts_rate=tts_rate, tts_pitch=tts_pitch)
+    if not new_file:
+        return False
+
+    old = head.get("file")
+    if old:
+        (_artifacts_dir() / Path(old).name).unlink(missing_ok=True)
+    if nxt.get("file"):
+        (_artifacts_dir() / Path(nxt["file"]).name).unlink(missing_ok=True)
+
+    head["file"] = new_file
+    head["text"] = combined
+    head["tts_timing"] = [start_ms, end_ms]
+    nxt["file"] = None
+    nxt["merged_into"] = idx
+    head_sid = head.get("segment_id")
+    if head_sid:
+        nxt["merged_into_id"] = head_sid
+    tts_files.append(new_file)
+    logger.info("Task merge neighbor TTS idx=%d+%d", idx, idx + 1)
+    return True
+
+
+def _style_params_from_info(info: dict | None) -> dict:
+    from engines.dub_style_presets import get_dub_style, resolve_dub_style
+
+    info = info or {}
+    style_id = info.get("dub_style") or "modern"
+    if info.get("style_allow_atempo") is not None:
+        return {
+            "reply_start_delay_ms": int(info.get("reply_start_delay_ms") or 0),
+            "reply_start_delay_jitter_ms": int(info.get("reply_start_delay_jitter_ms") or 0),
+            "max_atempo": float(info.get("style_max_atempo") or 1.18),
+            "allow_atempo": bool(info.get("style_allow_atempo", True)),
+            "voice_fx": info.get("style_voice_fx"),
+            "prefer_semantic_adapt": bool(info.get("prefer_semantic_adapt")),
+        }
+    resolved = resolve_dub_style(style_id)
+    return {
+        "reply_start_delay_ms": int(resolved.get("reply_start_delay_ms") or 0),
+        "reply_start_delay_jitter_ms": int(resolved.get("reply_start_delay_jitter_ms") or 0),
+        "max_atempo": float(resolved.get("max_atempo") or 1.18),
+        "allow_atempo": bool(resolved.get("allow_atempo", True)),
+        "voice_fx": resolved.get("voice_fx"),
+        "prefer_semantic_adapt": bool(resolved.get("prefer_semantic_adapt")),
+    }
+
+
+def _store_style_profile(info: dict, resolved_style: dict) -> None:
+    info["dub_style"] = resolved_style.get("style_id")
+    info["tts_rate"] = resolved_style.get("tts_rate")
+    info["tts_pitch"] = resolved_style.get("tts_pitch")
+    info["reply_start_delay_ms"] = resolved_style.get("reply_start_delay_ms")
+    info["reply_start_delay_jitter_ms"] = resolved_style.get("reply_start_delay_jitter_ms")
+    info["style_max_atempo"] = resolved_style.get("max_atempo")
+    info["style_allow_atempo"] = resolved_style.get("allow_atempo")
+    info["style_voice_fx"] = resolved_style.get("voice_fx")
+    info["prefer_semantic_adapt"] = resolved_style.get("prefer_semantic_adapt")
+    info["sync_mode"] = resolved_style.get("sync_mode")
+
+
+def _adaptive_dub_resolve(
+    segments_data: list,
+    timing_map: list,
+    voice: str,
+    source_segments: list,
+    tts_files: list,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    semantic_log=None,
+    tgt_lang: str = "ru",
+    src_lang: str = "en",
+    style_allow_atempo: bool = True,
+    task_id: str | None = None,
+) -> int:
+    """
+    FINAL TZ №2 — порядок решений:
+    1) адаптация перевода (minimal → moderate → strong)
+    2) объединение соседних сегментов одной мысли
+    3) allow_atempo=True только если всё ещё не помещается
+    Скорость TTS не меняется на шагах 1–2.
+    """
+    from engines.overlap_quality import analyze_placed_segments, _can_merge_thought
+
+    fixes = 0
+    adapt_stages = ("minimal", "moderate", "strong")
+
+    for stage in adapt_stages:
+        issues = [
+            i
+            for i in analyze_placed_segments(segments_data, timing_map)
+            if i.get("overflow_ms", 0) > 40
+        ]
+        if not issues:
+            break
+        for issue in issues:
+            idx = issue["idx"]
+            seg = segments_data[idx]
+            if task_id:
+                _update_progress_detail(
+                    task_id,
+                    phase="timing",
+                    timing_substep="adapt",
+                    current_segment=idx + 1,
+                    total_segments=len(segments_data),
+                )
+            if _apply_text_adaptation(
+                seg, issue, source_segments, voice, tts_files, stage=stage,
+                tts_rate=tts_rate, tts_pitch=tts_pitch,
+                semantic_log=semantic_log, tgt_lang=tgt_lang, src_lang=src_lang,
+            ):
+                fixes += 1
+                logger.info(
+                    "Adaptive dub: adapt idx=%d stage=%s overflow=%dms",
+                    idx,
+                    stage,
+                    issue["overflow_ms"],
+                )
+
+    issues = [
+        i
+        for i in analyze_placed_segments(segments_data, timing_map)
+        if i.get("overflow_ms", 0) > 40
+    ]
+    for issue in issues:
+        idx = issue["idx"]
+        placed = analyze_placed_segments(segments_data, timing_map)
+        row = next((p for p in placed if p["idx"] == idx), None)
+        nxt_row = None
+        if row:
+            pos = next(
+                (j for j, p in enumerate(placed) if p["idx"] == idx), -1
+            )
+            if 0 <= pos < len(placed) - 1:
+                nxt_row = placed[pos + 1]
+
+        if nxt_row and _can_merge_thought(
+            row["text"] if row else "",
+            nxt_row.get("text", ""),
+        ):
+            if _try_merge_neighbor_tts(
+                segments_data, timing_map, idx, voice, tts_files,
+                tts_rate=tts_rate, tts_pitch=tts_pitch,
+            ):
+                fixes += 1
+                logger.info(
+                    "Adaptive dub: merge idx=%d+%d overflow=%dms",
+                    idx,
+                    idx + 1,
+                    issue["overflow_ms"],
+                )
+
+    for seg in segments_data:
+        seg["allow_atempo"] = False
+
+    if not style_allow_atempo:
+        return fixes
+
+    final_issues = analyze_placed_segments(segments_data, timing_map)
+    for issue in final_issues:
+        if issue.get("overflow_ms", 0) > 40:
+            idx = issue["idx"]
+            segments_data[idx]["allow_atempo"] = True
+            logger.warning(
+                "Adaptive dub: allow_atempo idx=%d — overflow=%dms after adapt+merge",
+                idx,
+                issue["overflow_ms"],
+            )
+
+    return fixes
+
+
+def _resolve_timing_overflows(
+    segments_data: list,
+    timing_map: list,
+    voice: str,
+    source_segments: list,
+    tts_files: list,
+) -> int:
+    """Обратная совместимость — делегирует в _adaptive_dub_resolve."""
+    return _adaptive_dub_resolve(
+        segments_data, timing_map, voice, source_segments, tts_files
+    )
+
+
+def _measure_tts_file_ms(file_name: str | None) -> int:
+    if not file_name:
+        return 0
+    path = _artifacts_dir() / Path(str(file_name)).name
+    if not path.is_file():
+        return 0
+    try:
+        return len(AudioSegment.from_file(str(path)))
+    except Exception:
+        return 0
+
+
+def _parse_segment_slot_timing(seg: dict, idx: int, timing_map: list) -> tuple[int, int]:
+    custom = seg.get("tts_timing")
+    if custom and len(custom) >= 2:
+        return int(custom[0]), int(custom[1])
+    if seg.get("start_ms") is not None:
+        return int(seg["start_ms"]), int(seg.get("end_ms") or int(seg["start_ms"]) + 3000)
+    if idx < len(timing_map):
+        from engines.timing_fit import _parse_timing
+
+        return _parse_timing(timing_map[idx])
+    return 0, 3000
+
+
+def _slot_fit_content_key(
+    text: str,
+    voice: str,
+    slot_ms: int,
+    tts_rate: str | None,
+    tts_pitch: str | None,
+) -> str:
+    import hashlib
+
+    raw = f"{(text or '').strip()}|{voice}|{slot_ms}|{tts_rate or ''}|{tts_pitch or ''}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def _segment_slot_fit_key(seg: dict) -> str | None:
+    """Read slot-fit cache key from timing_meta (allowed mutation container)."""
+    tm = seg.get("timing_meta")
+    if isinstance(tm, dict):
+        key = tm.get("slot_fit_key")
+        if key:
+            return str(key)
+    legacy = seg.get("slot_fit_key")
+    return str(legacy) if legacy else None
+
+
+def _set_segment_slot_fit_key(seg: dict, key: str) -> None:
+    """Persist slot-fit cache key inside timing_meta — not as a top-level segment field."""
+    tm = seg.get("timing_meta")
+    if not isinstance(tm, dict):
+        tm = {}
+    else:
+        tm = dict(tm)
+    tm["slot_fit_key"] = key
+    seg["timing_meta"] = tm
+
+
+def _finalize_slot_fit_timing_meta(
+    seg: dict,
+    prep_meta: dict | None,
+    *,
+    slot_fit_tts_ms: int | None = None,
+    slot_fit_text: str | None = None,
+    slot_fit_compressed: bool = False,
+    iterations: list[dict] | None = None,
+) -> None:
+    """Write slot-fit derived values into timing_meta without mutating translation/TTS fields."""
+    meta = dict(prep_meta or {})
+    if slot_fit_tts_ms is not None:
+        meta["slot_fit_tts_ms"] = int(slot_fit_tts_ms)
+    original_text = str(seg.get("text") or "").strip()
+    adapted = str(slot_fit_text or "").strip()
+    if adapted and adapted != original_text:
+        meta["slot_fit_text"] = adapted
+        meta["slot_fit_compressed"] = True
+    elif slot_fit_compressed:
+        meta["slot_fit_compressed"] = True
+    if iterations:
+        meta["slot_fit_iterations"] = list(iterations)
+    seg["timing_meta"] = meta
+
+
+def _publish_studio_session_keep_running(task_id: str, step: str) -> str | None:
+    """Persist studio session without leaving task in studio_ready during pipeline."""
+    try:
+        from api.studio_api import publish_studio_ready
+
+        studio_url = publish_studio_ready(task_id)
+    except Exception as exc:
+        logger.warning("Task %s: studio session publish skipped: %s", task_id, exc)
+        return None
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if task and task.get("status") == "studio_ready":
+            task["status"] = "running"
+            task["step"] = step
+            if studio_url:
+                task.setdefault("info", {})["studio_url"] = studio_url
+    return studio_url
+
+
+_DUB_SLOT_TOLERANCE_MS = 75
+_DUB_MAX_ATEMPO = 1.05          # quality-first: atempo is last resort, max barely-noticeable
+_VIDEO_ADAPT_MAX_PCT = 15.0     # overlap ≤ 15% → prefer gap-borrow / video slowdown
+
+# ── Block merge constants ──────────────────────────────────────────────────────
+# If a segment overflows AND overflow_pct ≤ this limit, try merging with the next
+# block rather than shortening text or applying atempo.
+_MERGE_OVERFLOW_MAX_PCT: float = 35.0
+_MAX_CONSECUTIVE_MERGES: int = 2      # hard limit per TZ
+_MERGE_NATURAL_PAUSE_MS: int = 100    # silence gap between two merged blocks
+_UNDERFILL_MERGE_THRESH: float = 0.45 # underfill < 45% of slot → consider merge/fix
+
+
+def _plan_block_merges(segments_data: list, timing_map: list) -> int:
+    """
+    Post-fit block merge planner — TZ new sync logic.
+
+    Rules (from TZ):
+    - Main sync unit is one semantic block, NOT the whole film.
+    - If a block slightly overflows (≤ 35%), it may borrow time from the NEXT
+      adjacent block only. Max 2 consecutive merges.
+    - After merging, next block starts from a clean time point.
+    - If a block has excessive underfill (< 45% fill): also try merging so the
+      combined pair fills the window more naturally.
+    - Never merge ≥ 3 consecutive blocks.
+
+    Sets `merge_adjusted_start` and `merge_adjusted_slot_ms` on the NEXT segment
+    when a merge is planned.  Returns total merge count.
+    """
+    merge_count = 0
+    consecutive = 0
+    n = len(segments_data)
+
+    for idx in range(n - 1):  # can't merge the last segment with anyone
+        seg = segments_data[idx]
+        if seg.get("merged_into") is not None:
+            continue
+
+        speech_ms = int(seg.get("tts_ms") or seg.get("fitted_ms") or 0)
+        start_ms, end_ms = _parse_segment_slot_timing(seg, idx, timing_map)
+        slot_ms = max(1, end_ms - start_ms)
+        overflow_pct = float(seg.get("overflow_pct") or 0.0)
+        if speech_ms > slot_ms and overflow_pct <= 0:
+            overflow_ms = speech_ms - slot_ms
+            overflow_pct = round(100.0 * overflow_ms / slot_ms, 1)
+
+        speech_extends_past_slot = speech_ms > slot_ms + _DUB_SLOT_TOLERANCE_MS
+        underfill = speech_ms > 0 and (speech_ms < slot_ms * _UNDERFILL_MERGE_THRESH)
+
+        overflow_candidate = (
+            (bool(seg.get("slot_overflow")) or speech_extends_past_slot)
+            and overflow_pct > 0
+            and overflow_pct <= _MERGE_OVERFLOW_MAX_PCT
+        )
+        underfill_candidate = (
+            underfill
+            and not seg.get("slot_overflow")
+            and not speech_extends_past_slot
+        )
+
+        if not (overflow_candidate or underfill_candidate):
+            if not seg.get("slot_overflow"):
+                consecutive = 0  # clean segment — reset chain
+            continue
+
+        if consecutive >= _MAX_CONSECUTIVE_MERGES:
+            consecutive = 0  # hard reset after reaching limit
+            logger.debug("[BlockMerge] seg#%d: merge limit reached, skipping", idx)
+            continue
+
+        # Find the next non-skipped segment
+        next_idx: int | None = None
+        for ni in range(idx + 1, n):
+            if segments_data[ni].get("merged_into") is None:
+                next_idx = ni
+                break
+
+        if next_idx is None:
+            consecutive = 0
+            continue
+
+        next_seg = segments_data[next_idx]
+        next_start, next_end = _parse_segment_slot_timing(next_seg, next_idx, timing_map)
+
+        # For overflow: segment i's audio ends at start_ms + tts_ms
+        # The next segment must start after that + natural pause
+        if overflow_candidate:
+            adjusted_start = start_ms + speech_ms + _MERGE_NATURAL_PAUSE_MS
+        else:
+            # Underfill: keep natural speech flow, start next right after i's speech
+            adjusted_start = start_ms + speech_ms + _MERGE_NATURAL_PAUSE_MS
+
+        if adjusted_start >= next_end:
+            # No room left for next segment — abandon merge
+            consecutive = 0
+            continue
+
+        new_slot = next_end - adjusted_start
+        next_tts_ms = int(next_seg.get("tts_ms") or next_seg.get("fitted_ms") or 0)
+
+        # Safety check: next segment's audio must fit in the adjusted slot
+        if next_tts_ms > 0 and new_slot < int(next_tts_ms * 0.5):
+            logger.debug(
+                "[BlockMerge] seg#%d→#%d: new_slot=%dms too tight for next tts=%dms — skip",
+                idx, next_idx, new_slot, next_tts_ms,
+            )
+            consecutive = 0
+            continue
+
+        # Apply merge
+        next_seg["merge_adjusted_start"] = adjusted_start
+        next_seg["merge_adjusted_slot_ms"] = new_slot
+        seg["block_merged_with_next"] = next_idx
+
+        if overflow_candidate:
+            seg["slot_overflow"] = False
+            seg["container_status"] = "yellow"  # merged, not red
+
+        consecutive += 1
+        merge_count += 1
+        logger.info(
+            "[BlockMerge] seg#%d → seg#%d: %s overflow=%.1f%% underfill=%s "
+            "adjusted_start=%dms new_slot=%dms",
+            idx, next_idx,
+            "overflow" if overflow_candidate else "underfill",
+            overflow_pct, underfill,
+            adjusted_start, new_slot,
+        )
+
+    if merge_count:
+        logger.info("[BlockMerge] total merges planned: %d (max consecutive: %d)",
+                    merge_count, _MAX_CONSECUTIVE_MERGES)
+    return merge_count
+
+
+def _validate_sync_plan(segments_data: list, timing_map: list) -> list[str]:
+    """
+    Final sync validation (TZ requirement).
+
+    Checks:
+    1. No overlap between adjacent segments
+    2. No excessive atempo (> 1.05x = speech becomes a tongue-twister)
+    3. No excessive underfill (< 40% fill = long dead air)
+    4. No cumulative drift (each segment anchored to original Whisper timing)
+
+    Returns list of warning strings (also logged).
+    """
+    warnings: list[str] = []
+    prev_end_ms = 0
+
+    for idx, seg in enumerate(segments_data):
+        if seg.get("merged_into") is not None:
+            continue
+
+        # Effective start — may be adjusted by block merge
+        if seg.get("merge_adjusted_start"):
+            start_ms = int(seg["merge_adjusted_start"])
+        else:
+            start_ms, _ = _parse_segment_slot_timing(seg, idx, timing_map)
+            start_ms = int(seg.get("start_ms") or start_ms)
+
+        tts_ms = int(seg.get("tts_ms") or 0)
+        actual_end = start_ms + tts_ms
+
+        orig_start, orig_end = _parse_segment_slot_timing(seg, idx, timing_map)
+        slot_ms = max(1, orig_end - orig_start)
+
+        # 1. Overlap check
+        if tts_ms > 0 and start_ms < prev_end_ms:
+            overlap = prev_end_ms - start_ms
+            warnings.append(
+                f"[SyncValidate] seg#{idx}: OVERLAP {overlap}ms with prev (start={start_ms} prev_end={prev_end_ms})"
+            )
+
+        # 2. Atempo check
+        meta = seg.get("timing_meta") or {}
+        atempo = float(meta.get("atempo") or 1.0)
+        if atempo > 1.05:
+            warnings.append(
+                f"[SyncValidate] seg#{idx}: atempo={atempo:.3f} EXCEEDS 1.05 — sounds like tongue-twister"
+            )
+
+        # 3. Underfill check (long dead air after speech)
+        if tts_ms > 0 and tts_ms < slot_ms * 0.40:
+            fill_pct = int(100 * tts_ms / slot_ms)
+            warnings.append(
+                f"[SyncValidate] seg#{idx}: underfill {fill_pct}% (tts={tts_ms}ms slot={slot_ms}ms) — dead air risk"
+            )
+
+        # 4. Drift check — segment must start near its original Whisper anchor
+        drift = abs(start_ms - orig_start)
+        if drift > 800:
+            warnings.append(
+                f"[SyncValidate] seg#{idx}: drift={drift}ms from original anchor "
+                f"(start={start_ms} orig={orig_start}) — sync accumulation risk"
+            )
+
+        if tts_ms > 0:
+            prev_end_ms = max(prev_end_ms, actual_end)
+
+    for w in warnings:
+        logger.warning(w)
+
+    return warnings
+
+
+def _equalize_speech_speeds(segments_data: list, timing_map: list) -> None:
+    """
+    Post-slot-fit pass: detect segments with unusually high atempo vs neighbours
+    and log a warning.  Future versions can re-generate those segments at a
+    slightly higher TTS rate so all segments sound equally paced.
+
+    Current implementation: read-only analysis + logging (safe, no regressions).
+    A segment is flagged if its atempo is >0.03 above the group median.
+    """
+    atempos: list[float] = []
+    for seg in segments_data:
+        if seg.get("merged_into") is not None:
+            continue
+        meta = seg.get("timing_meta") or {}
+        a = float(meta.get("atempo") or 1.0)
+        atempos.append(a)
+
+    if not atempos:
+        return
+
+    sorted_a = sorted(atempos)
+    median = sorted_a[len(sorted_a) // 2]
+    outliers = [
+        (i, seg, float((seg.get("timing_meta") or {}).get("atempo") or 1.0))
+        for i, seg in enumerate(segments_data)
+        if seg.get("merged_into") is None
+        and float((seg.get("timing_meta") or {}).get("atempo") or 1.0) > median + 0.03
+    ]
+    if outliers:
+        logger.info(
+            "speed_equalize: median atempo=%.3f, %d outlier segments detected: %s",
+            median,
+            len(outliers),
+            [(i, round(a, 3)) for i, _, a in outliers[:5]],
+        )
+        for _i, seg, a in outliers:
+            seg.setdefault("timing_meta", {})["speed_outlier"] = True
+            seg["timing_meta"]["atempo_vs_median"] = round(a - median, 3)
+
+
+def _log_dub_slot_fit(
+    task_id: str | None,
+    seg_idx: int,
+    step: str,
+    slot_ms: int,
+    tts_ms: int,
+    ratio: float = 1.0,
+) -> None:
+    msg = (
+        f"[DubSlotFit] seg={seg_idx} step={step} "
+        f"slot_ms={slot_ms} tts_ms={tts_ms} ratio={ratio:.3f}"
+    )
+    logger.info(msg)
+    if not task_id:
+        return
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return
+        detail = task.setdefault("info", {}).setdefault("progress_detail", {})
+        logs = detail.setdefault("slot_fit_log", [])
+        if not logs or logs[-1] != msg:
+            logs.append(msg)
+        if len(logs) > 300:
+            detail["slot_fit_log"] = logs[-300:]
+
+
+def _regen_segment_tts(
+    text: str,
+    *,
+    voice: str,
+    work_dir: Path,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    emotion: str | None = None,
+    task_id: str | None = None,
+    segment_index: int | None = None,
+    segment_id: str | None = None,
+) -> tuple[str | None, int]:
+    from engines.pipeline_integrity.tts_file_lifecycle import log_tts_lifecycle
+    from engines.tts import generate_audio
+
+    log_tts_lifecycle(
+        task_id,
+        event="gen_start",
+        segment_id=segment_id,
+        segment_index=segment_index,
+        stage="slot_fit_regen",
+        detail=f"text_len={len(text)}",
+    )
+    gen_kwargs: dict = {
+        "text": text,
+        "voice": voice,
+        "segments": [text],
+        "rate": tts_rate,
+        "pitch": tts_pitch,
+        "emotion": emotion,
+        "output_dir": _artifacts_dir(),
+    }
+    files = generate_audio(**gen_kwargs)
+    if not files:
+        log_tts_lifecycle(
+            task_id,
+            event="gen_end",
+            segment_id=segment_id,
+            segment_index=segment_index,
+            stage="slot_fit_regen",
+            success=False,
+            detail="generate_audio returned empty",
+        )
+        return None, 0
+    src = _artifacts_dir() / files[0]
+    if not src.is_file():
+        log_tts_lifecycle(
+            task_id,
+            event="gen_end",
+            segment_id=segment_id,
+            segment_index=segment_index,
+            filename=files[0],
+            path=src,
+            stage="slot_fit_regen",
+            success=False,
+            exists=False,
+            detail="output missing on disk",
+        )
+        return None, 0
+    work_dir.mkdir(parents=True, exist_ok=True)
+    dest = work_dir / files[0]
+    dest.write_bytes(src.read_bytes())
+    try:
+        tts_ms = len(AudioSegment.from_file(str(dest)))
+    except Exception:
+        tts_ms = 0
+    log_tts_lifecycle(
+        task_id,
+        event="gen_end",
+        segment_id=segment_id,
+        segment_index=segment_index,
+        filename=dest.name,
+        path=dest,
+        stage="slot_fit_regen",
+        success=True,
+        exists=dest.is_file(),
+        detail=f"duration_ms={tts_ms}",
+    )
+    return dest.name, tts_ms
+
+
+def _premux_segment_fits(audio_path: str | Path, slot_ms: int, tolerance_ms: int | None = None) -> tuple[bool, int]:
+    tolerance_ms = tolerance_ms if tolerance_ms is not None else _DUB_SLOT_TOLERANCE_MS
+    try:
+        dur = len(AudioSegment.from_file(str(audio_path)))
+    except Exception:
+        return False, 0
+    return dur <= slot_ms + tolerance_ms, dur
+
+
+def _commit_fitted_wav(
+    src_path: Path,
+    idx: int,
+    *,
+    task_info: dict | None = None,
+) -> str | None:
+    """Copy fitted WAV into the session artifact dir and verify it exists."""
+    if not src_path.is_file():
+        return None
+    dest_dir = _artifacts_dir(task_info)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    fit_dest = f"slot_{idx}_{uuid.uuid4().hex[:8]}_fit.wav"
+    dest = dest_dir / fit_dest
+    try:
+        shutil.copy2(src_path, dest)
+    except OSError as exc:
+        logger.warning("fitted wav copy failed idx=%s: %s", idx, exc)
+        return None
+    if not dest.is_file() or dest.stat().st_size < 64:
+        return None
+    return fit_dest
+
+
+def _repair_missing_fitted_files(
+    segments_data: list,
+    *,
+    task_info: dict | None,
+    task_id: str | None = None,
+) -> int:
+    """Rebuild missing slot_*_fit.wav from raw TTS when fit step failed silently."""
+    repaired = 0
+    for idx, seg in enumerate(segments_data):
+        if seg.get("merged_into") is not None:
+            continue
+        fitted = seg.get("fitted_file")
+        if fitted:
+            if _resolve_segment_audio_path(fitted, task_info).is_file():
+                continue
+        raw_name = seg.get("file")
+        if not raw_name:
+            seg.pop("fitted_file", None)
+            continue
+        raw_path = _resolve_segment_audio_path(raw_name, task_info)
+        if not raw_path.is_file():
+            seg.pop("fitted_file", None)
+            continue
+        new_fit = _commit_fitted_wav(raw_path, idx, task_info=task_info)
+        if new_fit:
+            seg["fitted_file"] = new_fit
+            repaired += 1
+            logger.info(
+                "Task %s: repaired missing fitted_file seg=%d -> %s",
+                task_id,
+                idx,
+                new_fit,
+            )
+        else:
+            seg.pop("fitted_file", None)
+    return repaired
+
+
+def _prepare_segment_audio_for_mux(
+    seg: dict,
+    *,
+    idx: int,
+    start_ms: int,
+    end_ms: int,
+    slot_ms: int,
+    voice: str,
+    target_lang: str,
+    source_hint: str,
+    tts_rate: str | None,
+    tts_pitch: str | None,
+    emotion: str | None,
+    work_dir: Path,
+    task_id: str | None = None,
+    task_info: dict | None = None,
+    max_compress_rounds: int = 3,
+    gap_after_ms: int = 0,
+) -> dict:
+    """
+    Quality-first segment audio prep — natural speech takes priority.
+
+    New hierarchy (speech compression is LAST, not first):
+      Phase 0  — TTS already fits within tolerance → done, no modification
+      Phase 1  — Trim trailing silence → fits? done
+      Phase 2  — Compress internal pauses → fits? done
+      Phase 3  — Overflow ≤ 15% → gap-absorb or video-adapt (no speech modification)
+      Phase 4  — Overflow > 15% → natural text shortening (up to max_compress_rounds)
+                 Each round: shorten text → regen TTS → re-check phases 1-3
+      Phase 5  — Minimal atempo ≤ 1.05x (LAST RESORT — barely perceptible)
+
+    Video-adapt segments (overflow 0-15%, gap < overflow) are tagged with
+    seg["video_stretch_ratio"] so DubEngine can slow the video instead of
+    rushing the voice.
+    """
+    from engines.regeneration import _overflow_status
+    from engines.timing_fit import (
+        DUB_SLOT_TOLERANCE_MS,
+        VIDEO_ADAPT_MAX_OVERFLOW_PCT,
+        classify_segment_overflow,
+        prepare_dub_segment_audio,
+    )
+
+    file_name = seg.get("file")
+    if not file_name:
+        return {"ok": False, "error": "no_tts_file", "overflow_pct": 100.0}
+
+    src_path = _artifacts_dir(task_info) / Path(str(file_name)).name
+    if not src_path.is_file():
+        src_path = _resolve_segment_audio_path(file_name, task_info)
+    if not src_path.is_file():
+        return {"ok": False, "error": "missing_tts", "overflow_pct": 100.0}
+
+    cur_text = str(seg.get("text") or "").strip()
+    iterations: list[dict] = []
+    slot_limit = slot_ms + DUB_SLOT_TOLERANCE_MS
+    prepared_path: Path | None = None
+    tts_ms = 0
+    fitted_ms = 0
+    stretch_ratio = 1.0
+    prep_meta: dict = {}
+    video_stretch_ratio = 1.0
+    gap_absorb_mode = False
+
+    def _fit_with_trim_only(src: Path, round_idx: int) -> tuple[Path | None, dict, int, float]:
+        """Phase 1-2: trim silence + compress pauses, NO atempo."""
+        rw = work_dir / f"round_{round_idx}_trim"
+        prepared_str, meta = prepare_dub_segment_audio(
+            src, slot_ms, rw,
+            max_atempo=1.0,          # no atempo — trim+compress only
+            tolerance_ms=DUB_SLOT_TOLERANCE_MS,
+        )
+        path = Path(prepared_str)
+        f_ms = int(meta.get("fitted_ms") or 0)
+        s_ratio = float(meta.get("atempo") or 1.0)
+        return path, meta, f_ms, s_ratio
+
+    def _fit_with_minimal_atempo(src: Path, round_idx: int) -> tuple[Path | None, dict, int, float]:
+        """Phase 5: last-resort minimal atempo (≤ 1.05x)."""
+        rw = work_dir / f"round_{round_idx}_atempo"
+        prepared_str, meta = prepare_dub_segment_audio(
+            src, slot_ms, rw,
+            max_atempo=_DUB_MAX_ATEMPO,
+            tolerance_ms=DUB_SLOT_TOLERANCE_MS,
+        )
+        path = Path(prepared_str)
+        f_ms = int(meta.get("fitted_ms") or 0)
+        s_ratio = float(meta.get("atempo") or 1.0)
+        return path, meta, f_ms, s_ratio
+
+    # ── Phase 0: quick pre-check ──────────────────────────────────────────────
+    tts_ms = len(AudioSegment.from_file(str(src_path)))
+    oc = classify_segment_overflow(tts_ms, slot_ms, gap_after_ms)
+
+    if oc.label == "fits":
+        # Already fits: copy to prepared location, skip all fitting
+        prep_meta = {
+            "slot_ms": slot_ms,
+            "fitted_ms": tts_ms,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+        }
+        prepared_path = work_dir / f"phase0_{src_path.name}"
+        prepared_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src_path, prepared_path)
+        fitted_ms = tts_ms
+    else:
+        # ── Phases 1-2: trim silence + compress pauses ────────────────────────
+        prepared_path, prep_meta, fitted_ms, stretch_ratio = _fit_with_trim_only(src_path, 0)
+        _log_dub_slot_fit(task_id, idx, "trim_compress", slot_ms, fitted_ms, stretch_ratio)
+
+        oc2 = classify_segment_overflow(fitted_ms, slot_ms, gap_after_ms)
+
+        if oc2.label == "fits":
+            pass  # phases 1-2 were enough
+
+        elif oc2.label in ("gap_absorb", "video_adapt"):
+            # ── Phase 3: overflow ≤ 15% → no speech modification ─────────────
+            gap_absorb_mode = oc2.label == "gap_absorb"
+            video_stretch_ratio = oc2.video_stretch_ratio
+            seg["video_stretch_ratio"] = round(video_stretch_ratio, 4)
+            seg["video_adapt_mode"] = oc2.label
+            _log_dub_slot_fit(task_id, idx, oc2.label, slot_ms, fitted_ms, 1.0)
+            # Keep fitted_ms / prepared_path as-is (speech untouched)
+            fitted_ms = tts_ms  # let it overflow naturally into gap
+
+        else:
+            # Overflow > 15% — text adaptation runs in post_tts; no atempo (TZ stage 2)
+            _log_dub_slot_fit(task_id, idx, "overflow_text_only", slot_ms, fitted_ms, 1.0)
+            iterations.append({"action": "overflow_text_only", "note": "no_atempo"})
+            if fitted_ms > slot_limit and prepared_path and prepared_path.is_file():
+                oc_audio = classify_segment_overflow(fitted_ms, slot_ms, gap_after_ms)
+                if oc_audio.label in ("gap_absorb", "video_adapt"):
+                    video_stretch_ratio = oc_audio.video_stretch_ratio
+                    seg["video_stretch_ratio"] = round(video_stretch_ratio, 4)
+                    seg["video_adapt_mode"] = oc_audio.label
+                    gap_absorb_mode = oc_audio.label == "gap_absorb"
+                    fitted_ms = tts_ms
+
+    if prepared_path is None or not prepared_path.is_file():
+        return {
+            "ok": False,
+            "error": "prepare_failed",
+            "overflow_pct": 100.0,
+            "iterations": iterations,
+        }
+
+    fits, measured_ms = _premux_segment_fits(prepared_path, slot_ms)
+    if measured_ms > 0:
+        fitted_ms = measured_ms
+
+    fit_dest = _commit_fitted_wav(prepared_path, idx, task_info=task_info)
+    if not fit_dest:
+        _overflow_ms = max(0, fitted_ms - slot_limit)
+        return {
+            "ok": False,
+            "error": "fitted_copy_failed",
+            "overflow_pct": round(100.0 * _overflow_ms / max(slot_ms, 1), 1),
+            "iterations": iterations,
+        }
+    seg["fitted_file"] = fit_dest
+
+    overflow_ms = max(0, fitted_ms - slot_limit)
+    overflow_pct = round(100.0 * overflow_ms / max(slot_ms, 1), 1)
+
+    # Gap-absorb mode: overflow goes into the inter-segment gap — mark green/yellow
+    if gap_absorb_mode and overflow_pct <= _VIDEO_ADAPT_MAX_PCT:
+        ok = True
+        seg["container_status"] = "yellow"   # acceptable overflow absorbed by gap
+        seg["slot_overflow"] = False
+    elif fits and overflow_ms <= 0:
+        ok = True
+        seg["container_status"] = _overflow_status(overflow_pct)
+        seg["slot_overflow"] = False
+    else:
+        ok = overflow_pct <= _VIDEO_ADAPT_MAX_PCT   # video_adapt segments still "ok"
+    if not ok:
+        _log_dub_slot_fit(task_id, idx, "warn", slot_ms, fitted_ms, stretch_ratio)
+        seg["container_status"] = "red"
+        seg["slot_overflow"] = True
+    elif "container_status" not in seg:
+        seg["container_status"] = "yellow"
+        seg["slot_overflow"] = False
+
+    seg["fitted_ms"] = fitted_ms
+    seg["overflow_ms"] = overflow_ms
+    seg["overflow_pct"] = overflow_pct
+    _finalize_slot_fit_timing_meta(
+        seg,
+        prep_meta,
+        slot_fit_tts_ms=tts_ms,
+        slot_fit_text=cur_text,
+        slot_fit_compressed=False,
+        iterations=iterations or None,
+    )
+    seg["start_ms"] = start_ms
+    seg["end_ms"] = end_ms
+    seg["slot_fit_attempts"] = len(iterations)
+
+    return {
+        "ok": ok,
+        "text": cur_text,
+        "file": seg.get("file"),
+        "fitted_file": fit_dest,
+        "tts_ms": tts_ms,
+        "fitted_ms": fitted_ms,
+        "slot_ms": slot_ms,
+        "overflow_ms": overflow_ms,
+        "overflow_pct": overflow_pct,
+        "video_stretch_ratio": video_stretch_ratio,
+        "meta": prep_meta,
+        "iterations": iterations,
+        "work_dir": str(work_dir),
+    }
+
+
+def _apply_stretch_only_slot_fit(
+    seg: dict,
+    *,
+    idx: int,
+    start_ms: int,
+    end_ms: int,
+    slot_ms: int,
+    work_root: Path,
+    word_map: dict | None = None,
+    task_id: str | None = None,
+    task_info: dict | None = None,
+) -> dict:
+    """Time-stretch existing TTS into slot without regenerating speech (no speech trim)."""
+    from engines.regeneration import _overflow_status
+    from engines.timing_fit import prepare_dub_segment_audio
+
+    file_name = seg.get("file")
+    if not file_name:
+        return {"ok": False, "overflow_pct": 100.0}
+
+    src = _artifacts_dir(task_info) / Path(str(file_name)).name
+    if not src.is_file():
+        src = _resolve_segment_audio_path(file_name, task_info)
+    if not src.is_file():
+        return {"ok": False, "overflow_pct": 100.0}
+
+    seg_work = work_root / f"seg_{idx}_stretch"
+    seg_work.mkdir(parents=True, exist_ok=True)
+    fitted_path, fit_meta = prepare_dub_segment_audio(
+        src,
+        slot_ms,
+        seg_work,
+        max_atempo=_DUB_MAX_ATEMPO,
+        tolerance_ms=_DUB_SLOT_TOLERANCE_MS,
+    )
+    fitted_ms = _measure_tts_file_ms(Path(fitted_path).name)
+    if fitted_ms <= 0:
+        try:
+            fitted_ms = len(AudioSegment.from_file(str(fitted_path)))
+        except Exception:
+            fitted_ms = 0
+
+    stretch_ratio = float(fit_meta.get("atempo") or 1.0)
+    _log_dub_slot_fit(task_id, idx, "stretch", slot_ms, fitted_ms, stretch_ratio)
+
+    slot_limit = slot_ms + _DUB_SLOT_TOLERANCE_MS
+    overflow_ms = max(0, fitted_ms - slot_limit)
+    overflow_pct = round(100.0 * overflow_ms / max(slot_ms, 1), 1)
+
+    fit_dest = _commit_fitted_wav(Path(fitted_path), idx, task_info=task_info)
+    if not fit_dest:
+        return {"ok": False, "overflow_pct": overflow_pct, "error": "fitted_copy_failed"}
+    seg["fitted_file"] = fit_dest
+    seg["fitted_ms"] = fitted_ms
+    seg["overflow_ms"] = overflow_ms
+    seg["overflow_pct"] = overflow_pct
+    seg["container_status"] = _overflow_status(overflow_pct)
+    fit_meta = dict(fit_meta or {})
+    fit_meta["slot_fit_tts_ms"] = fitted_ms
+    seg["timing_meta"] = fit_meta
+    seg["start_ms"] = start_ms
+    seg["end_ms"] = end_ms
+    seg["slot_fit_attempts"] = 0
+    seg["slot_fit_stretch_only"] = True
+
+    return {
+        "ok": overflow_ms <= 0,
+        "overflow_pct": overflow_pct,
+        "overflow_ms": overflow_ms,
+    }
+
+
+def _pipeline_slot_fit_segments(
+    segments_data: list,
+    timing_map: list,
+    *,
+    voice: str,
+    target_lang: str,
+    source_segments: list,
+    tts_files: list | None = None,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    max_attempts: int = 3,
+    task_id: str | None = None,
+    task_info: dict | None = None,
+    skip_text_compression: bool = False,
+) -> dict:
+    """
+    Mandatory segment audio prep before MP4 assembly (Dub module).
+    Order: trailing silence trim → stretch (≤1.15x) → compress text → regen TTS → warn.
+    Never trims speech content.
+    """
+    from engines.regeneration import _overflow_status
+
+    stats = {
+        "total": 0,
+        "already_fit": 0,
+        "compressed": 0,
+        "overflow": 0,
+        "failed": 0,
+    }
+    work_root = _artifacts_dir(task_info) / "slot_fit" / (task_id or uuid.uuid4().hex[:8])
+    work_root.mkdir(parents=True, exist_ok=True)
+    tts_files = tts_files if tts_files is not None else []
+    compress_rounds = 0 if skip_text_compression else max(0, int(max_attempts) - 1)
+
+    for idx, seg in enumerate(segments_data):
+        if seg.get("merged_into") is not None or not seg.get("file"):
+            continue
+        stats["total"] += 1
+        start_ms, end_ms = _parse_segment_slot_timing(seg, idx, timing_map)
+        slot_ms = max(1, end_ms - start_ms)
+
+        # Gap between this segment's end and the next segment's start —
+        # used by _prepare_segment_audio_for_mux to decide if overflow can
+        # be absorbed naturally (gap_absorb) without touching speech speed.
+        next_start_ms: int | None = None
+        for nxt_idx in range(idx + 1, len(segments_data)):
+            nxt = segments_data[nxt_idx]
+            if nxt.get("merged_into") is not None:
+                continue
+            nxt_start, _ = _parse_segment_slot_timing(nxt, nxt_idx, timing_map)
+            next_start_ms = nxt_start
+            break
+        gap_after_ms = max(0, (next_start_ms - end_ms)) if next_start_ms is not None else 0
+
+        text = str(seg.get("text") or "").strip()
+        fit_key = _slot_fit_content_key(text, voice, slot_ms, tts_rate, tts_pitch)
+        cached_fit = seg.get("fitted_file")
+        if (
+            _segment_slot_fit_key(seg) == fit_key
+            and cached_fit
+            and (_artifacts_dir(task_info) / Path(str(cached_fit)).name).is_file()
+        ):
+            fitted_ms = int(seg.get("fitted_ms") or 0) or _measure_tts_file_ms(cached_fit)
+            fits, measured = _premux_segment_fits(
+                _artifacts_dir(task_info) / Path(str(cached_fit)).name, slot_ms
+            )
+            if measured > 0:
+                fitted_ms = measured
+            overflow_ms = max(0, fitted_ms - (slot_ms + _DUB_SLOT_TOLERANCE_MS))
+            overflow_pct = round(100.0 * overflow_ms / max(slot_ms, 1), 1)
+            seg["overflow_ms"] = overflow_ms
+            seg["overflow_pct"] = overflow_pct
+            seg["container_status"] = _overflow_status(overflow_pct)
+            seg["start_ms"] = start_ms
+            seg["end_ms"] = end_ms
+            stats["already_fit"] += 1
+            if fits:
+                continue
+
+        if not text:
+            stats["failed"] += 1
+            seg["overflow_pct"] = 100.0
+            seg["container_status"] = "red"
+            seg["slot_overflow"] = True
+            _log_dub_slot_fit(task_id, idx, "warn", slot_ms, 0)
+            continue
+
+        if task_id:
+            _update_progress_detail(
+                task_id,
+                phase="slot_fit",
+                current_segment=idx + 1,
+                total_segments=len(segments_data),
+            )
+
+        seg_work = work_root / f"seg_{idx}"
+        seg_work.mkdir(parents=True, exist_ok=True)
+        emotion = seg.get("emotion") or (seg.get("tts_emotion") or {}).get("emotion")
+
+        from engines.pipeline_segment_watchdog import run_segment_bounded
+
+        def _run_slot_fit() -> dict:
+            return _prepare_segment_audio_for_mux(
+                seg,
+                idx=idx,
+                start_ms=start_ms,
+                end_ms=end_ms,
+                slot_ms=slot_ms,
+                voice=voice,
+                target_lang=target_lang,
+                source_hint=source_segments[idx] if idx < len(source_segments) else "",
+                tts_rate=tts_rate,
+                tts_pitch=tts_pitch,
+                emotion=str(emotion) if emotion else None,
+                work_dir=seg_work,
+                task_id=task_id,
+                task_info=task_info,
+                max_compress_rounds=compress_rounds,
+                gap_after_ms=gap_after_ms,
+            )
+
+        watch = run_segment_bounded(
+            task_id=task_id or "",
+            phase="slot_fit",
+            segment_index=idx,
+            stage="slot_fit",
+            fn=_run_slot_fit,
+            fallback=lambda: {
+                "ok": False,
+                "error": "segment_watchdog_timeout",
+                "overflow_pct": 100.0,
+            },
+        )
+        result = watch.value
+        if watch.timed_out or watch.error:
+            seg["slot_fit_error"] = watch.error or "timeout"
+            stretch = _apply_stretch_only_slot_fit(
+                seg,
+                idx=idx,
+                start_ms=start_ms,
+                end_ms=end_ms,
+                slot_ms=slot_ms,
+                work_root=work_root,
+                task_id=task_id,
+                task_info=task_info,
+            )
+            if stretch.get("ok") is not False or seg.get("fitted_file"):
+                result = {"ok": stretch.get("ok", True), **stretch}
+            if task_id:
+                _open_ddf.record_agent(
+                    task_id, "SlotFit", called=True, success=False,
+                    error=watch.error or "timeout",
+                    fallback_used=True, segment_idx=idx,
+                    decision="fit_skipped_raw_tts",
+                )
+                _open_ddf.mark_segment_attention(task_id, idx, "fit_skipped")
+
+        if result.get("file"):
+            dest_name = Path(str(result["file"])).name
+            if dest_name not in tts_files:
+                tts_files.append(dest_name)
+
+        _set_segment_slot_fit_key(
+            seg,
+            _slot_fit_content_key(
+                str(seg.get("text") or text), voice, slot_ms, tts_rate, tts_pitch
+            ),
+        )
+
+        overflow_pct = float(result.get("overflow_pct") or 100.0)
+        if not result.get("ok"):
+            stats["overflow"] += 1
+            seg["slot_overflow"] = True
+        else:
+            stats["compressed"] += 1
+            seg["slot_overflow"] = False
+
+        logger.info(
+            "Task %s slot_fit idx=%d attempts=%d overflow=%.1f%%",
+            task_id,
+            idx,
+            seg.get("slot_fit_attempts"),
+            overflow_pct,
+        )
+
+    # ── Block merge planning (max 2 consecutive merges) ───────────────────────
+    # For segments that still overflow after all fitting steps, try merging
+    # timing windows with the next adjacent segment before applying atempo.
+    merge_count = _plan_block_merges(segments_data, timing_map)
+    if merge_count:
+        logger.info("Task %s: %d block merges planned", task_id, merge_count)
+
+    # ── Final sync validation ─────────────────────────────────────────────────
+    validation_warnings = _validate_sync_plan(segments_data, timing_map)
+    if validation_warnings:
+        logger.warning("Task %s: %d sync validation issues", task_id, len(validation_warnings))
+
+    repaired = _repair_missing_fitted_files(
+        segments_data,
+        task_info=task_info,
+        task_id=task_id,
+    )
+    if repaired:
+        stats["repaired_fitted"] = repaired
+
+    return stats
+
+
+def _build_gap_adjusted_track_no_double_soft_sync(
+    segment_paths: list,
+    timing_map: list,
+    skip_soft_sync_flags: list[bool],
+    text_hints: list[str] | None = None,
+    **kwargs,
+):
+    """build_gap_adjusted_track wrapper — skip soft_sync for slot-fitted segments.
+
+    Passes text_hints to fit_segment_audio for natural-pause-based padding
+    instead of full-slot silence filling.
+    """
+    import engines.timing_fit as timing_fit_mod
+
+    orig_fit = timing_fit_mod.fit_segment_audio
+    call_idx = {"i": 0}
+
+    def _fit_with_skip(tts_path, slot_start, slot_end, next_start=None, work_dir=None, **fit_kw):
+        pos = call_idx["i"]
+        call_idx["i"] += 1
+        pre_fitted = pos < len(skip_soft_sync_flags) and skip_soft_sync_flags[pos]
+        # no_speech_trim only for already slot-fitted audio; raw TTS may overflow and must be trimmed
+        fit_kw.setdefault("no_speech_trim", pre_fitted)
+        fit_kw.setdefault("max_atempo", _DUB_MAX_ATEMPO)
+        if pre_fitted:
+            fit_kw["_skip_soft_sync"] = True
+        # Natural pause hint — avoids padding the full slot with silence
+        if text_hints and pos < len(text_hints):
+            fit_kw.setdefault("text_hint", text_hints[pos])
+        return orig_fit(
+            tts_path,
+            slot_start,
+            slot_end,
+            next_start,
+            work_dir=work_dir,
+            **fit_kw,
+        )
+
+    timing_fit_mod.fit_segment_audio = _fit_with_skip
+    try:
+        return timing_fit_mod.build_gap_adjusted_track(segment_paths, timing_map, **kwargs)
+    finally:
+        timing_fit_mod.fit_segment_audio = orig_fit
+
+
+def _build_timed_dub_track(
+    segments_data: list,
+    timing_map: list,
+    target_duration_ms,
+    task_id: str,
+    style_params: dict | None = None,
+    on_segment_progress=None,
+):
+    """Gap-aware dub track on silence base; logs dub_segment_log + dub_timing_fit_log."""
+    from engines.timing_fit import _segment_start_delays
+
+    style_params = style_params or {}
+    task_info: dict | None = None
+    if task_id:
+        with STATE_LOCK:
+            _task = AUTO_TASKS.get(task_id)
+            if _task:
+                task_info = _task.get("info") or {}
+
+    segment_paths: list[str] = []
+    skip_soft_sync_flags: list[bool] = []
+    aligned_timing: list = []
+    allow_atempo_flags: list[bool] = []
+    place_delays: list[int] = []
+    lead_ins: list[int] = []
+    text_hints: list[str] = []      # for natural-pause calculation in fit_segment_audio
+    log_entries: list[str] = []
+
+    for idx, seg in enumerate(segments_data):
+        if idx >= len(timing_map):
+            break
+        if seg.get("merged_into") is not None:
+            continue
+
+        custom_timing = seg.get("tts_timing")
+        if custom_timing and isinstance(custom_timing, (list, tuple)) and len(custom_timing) >= 2:
+            start_ms, end_ms = int(custom_timing[0]), int(custom_timing[1])
+        else:
+            start_ms, end_ms = _parse_timing(timing_map[idx])
+
+        # Block-merge: if previous segment claimed part of this segment's slot,
+        # use the adjusted start to place this segment later in the timeline.
+        if seg.get("merge_adjusted_start"):
+            start_ms = int(seg["merge_adjusted_start"])
+
+        text = str(seg.get("text") or "").strip()
+        audio_candidates = [
+            name
+            for name in (seg.get("fitted_file"), seg.get("file"))
+            if name
+        ]
+        tts_dur = 0
+        placed = False
+        premux_ok = False
+        pre_fitted = bool(seg.get("fitted_file"))
+        path = None
+        file_name = None
+
+        for candidate_name in audio_candidates:
+            from engines.dubbing_engine.session_adapter import resolve_session_audio
+
+            candidate_path = resolve_session_audio(
+                candidate_name,
+                task_info=task_info,
+                default_dir=OUTPUT_DIR,
+                segment_index=idx,
+            )
+            if candidate_path.is_file():
+                path = candidate_path
+                file_name = candidate_name
+                break
+
+        if path is not None and file_name:
+            slot_ms = max(1, end_ms - start_ms)
+            try:
+                tts_dur = len(AudioSegment.from_file(str(path)))
+            except Exception:
+                tts_dur = 0
+            premux_ok, measured = _premux_segment_fits(path, slot_ms)
+            if measured > 0:
+                tts_dur = measured
+            if tts_dur > 0 and not premux_ok:
+                from engines.regeneration import _overflow_status
+
+                _log_dub_slot_fit(task_id, idx, "warn", slot_ms, tts_dur)
+                overflow_ms = max(0, tts_dur - (slot_ms + _DUB_SLOT_TOLERANCE_MS))
+                overflow_pct = round(100.0 * overflow_ms / max(slot_ms, 1), 1)
+                seg["overflow_ms"] = overflow_ms
+                seg["overflow_pct"] = overflow_pct
+                seg["container_status"] = _overflow_status(overflow_pct)
+                if overflow_pct > 15:
+                    seg["container_status"] = "red"
+                seg["slot_overflow"] = True
+            if tts_dur > 0:
+                segment_paths.append(str(path))
+                skip_soft_sync_flags.append(pre_fitted)
+                aligned_timing.append({"start": start_ms, "end": end_ms})
+                allow_atempo_flags.append(bool(seg.get("allow_atempo", False)))
+                prosody = seg.get("prosody") or {}
+                place_delays.append(
+                    int(seg.get("place_delay_ms") or prosody.get("place_delay_ms") or 0)
+                )
+                lead_ins.append(
+                    int(seg.get("lead_in_ms") or prosody.get("lead_in_ms") or 0)
+                )
+                text_hints.append(text)
+                placed = True
+
+        log_entries.append(
+            f"idx={idx} text_len={len(text)} tts_file={file_name or '-'} "
+            f"tts_dur_ms={tts_dur} place_start={start_ms} place_end={end_ms} "
+            f"slot_ms={max(1, end_ms - start_ms)} premux={'ok' if premux_ok else 'fail'} "
+            f"allow_atempo={'yes' if seg.get('allow_atempo') else 'no'} "
+            f"pre_fitted={'yes' if pre_fitted else 'no'} "
+            f"placed={'yes' if placed else 'no'} "
+            f"block_merged={'yes' if seg.get('block_merged_with_next') else 'no'} "
+            f"merge_adjusted_start={seg.get('merge_adjusted_start', '-')}"
+        )
+
+    _write_dub_segment_log(task_id, log_entries)
+
+    from engines.dubbing_engine.tts_handoff_diag import (
+        log_empty_tts_diagnosis,
+        log_track_builder_input,
+    )
+
+    log_track_builder_input(
+        task_id or "-",
+        segment_paths=segment_paths,
+        segments_data=segments_data,
+        source="auto_dub._build_timed_dub_track",
+    )
+
+    if not segment_paths:
+        log_empty_tts_diagnosis(
+            task_id or "-",
+            task_info=task_info,
+            segments_data=segments_data,
+            segment_paths=segment_paths,
+            stage="auto_dub._build_timed_dub_track",
+        )
+        return None, [], {"ok": True, "fitted_overlap_count": 0}
+
+    delays = _segment_start_delays(
+        len(segment_paths),
+        int(style_params.get("reply_start_delay_ms") or 0),
+        int(style_params.get("reply_start_delay_jitter_ms") or 0),
+    )
+    combined_delays = [
+        int(delays[i]) + int(place_delays[i] if i < len(place_delays) else 0)
+        for i in range(len(segment_paths))
+    ]
+
+    timed_audio, fit_logs, overlap_report = _build_gap_adjusted_track_no_double_soft_sync(
+        segment_paths=segment_paths,
+        timing_map=aligned_timing,
+        skip_soft_sync_flags=skip_soft_sync_flags,
+        video_duration_ms=target_duration_ms,
+        log_path=DUB_TIMING_FIT_LOG,
+        task_id=task_id,
+        allow_atempo_flags=allow_atempo_flags,
+        start_delays_ms=combined_delays,
+        lead_in_ms_list=lead_ins,
+        text_hints=text_hints,
+        max_atempo=float(style_params.get("max_atempo") or _DUB_MAX_ATEMPO),
+        on_segment_progress=on_segment_progress,
+    )
+    warnings = [
+        line
+        for line in fit_logs
+        if ("overflow_ms=" in line and "overflow_ms=0" not in line)
+        or ("atempo=" in line and "atempo=1.0" not in line and "atempo=1." in line)
+    ]
+    return timed_audio, warnings, overlap_report
+
+
+def _persist_task_review(task: dict) -> str | None:
+    """Write translation review JSON next to output MP4."""
+    try:
+        from engines.translation_quality import persist_translation_review
+        from engines.translation_review import build_translation_review
+
+        info = task.get("info") or {}
+        output_name = task.get("output_file")
+        if not output_name:
+            return None
+        output_path = info.get("output_path_full") or str(OUTPUT_DIR / output_name)
+        if not Path(output_path).exists():
+            return None
+        review = info.get("translation_review") or build_translation_review(info)
+        path = persist_translation_review(output_path, review)
+        info["translation_review_path"] = path
+        return path
+    except Exception as e:
+        logger.debug("persist translation review skipped: %s", e)
+        return None
+
+
+def _remux_done_output(task_id: str, timed_audio_path: str) -> tuple[bool, str | None, list]:
+    """Remux final MP4 after post-done segment edit."""
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task or task.get("status") != "done":
+            return True, None, []
+        info = task.get("info") or {}
+
+    if info.get("skip_tts"):
+        return True, None, []
+
+    video_path = info.get("video_path_backup")
+    output_path = info.get("output_path_full")
+    if not output_path and task.get("output_file"):
+        output_path = str(OUTPUT_DIR / task["output_file"])
+
+    if not video_path or not Path(video_path).exists():
+        return False, None, ["Исходное видео недоступно для пересборки"]
+    if not timed_audio_path or not Path(timed_audio_path).exists():
+        return False, None, ["Timed audio missing"]
+    if not output_path:
+        return False, None, ["Output path unknown"]
+
+    target_duration = info.get("target_duration_ms")
+    dub_timeout_sec = max(600, int((target_duration or 0) / 1000) + 300)
+
+    from engines.dub_engine import DubEngine
+
+    logger.info("Task %s: remux after regen -> %s", task_id, output_path)
+    raw_result = DubEngine(
+        video_path=video_path, timed_audio=timed_audio_path
+    ).run(
+        output_path=output_path,
+        mode=info.get("dub_mode_backup") or "replace",
+        mix_mode=info.get("mix_mode_backup") or "standard",
+        mix_volume=float(info.get("mix_volume_backup") or 0.3),
+        original_volume=(info.get("mix_volumes_backup") or {}).get("original_volume"),
+        dub_volume=(info.get("mix_volumes_backup") or {}).get("dub_volume"),
+        background_volume=(info.get("mix_volumes_backup") or {}).get("background_volume"),
+        timeout_sec=dub_timeout_sec,
+    )
+
+    if isinstance(raw_result, tuple) and len(raw_result) >= 3:
+        ok, out_path, dub_errors = raw_result[0], raw_result[1], raw_result[2]
+    elif isinstance(raw_result, tuple) and len(raw_result) == 2:
+        ok, out_path, dub_errors = raw_result[0], raw_result[1], []
+    else:
+        return False, None, ["DubEngine contract broken"]
+
+    if not ok:
+        errs = dub_errors if isinstance(dub_errors, list) else [str(dub_errors)]
+        return False, None, errs
+
+    final_output = out_path or output_path
+    if not final_output or not Path(final_output).exists():
+        return False, None, ["Remux output missing"]
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if task:
+            task["output_file"] = Path(final_output).name
+            task["info"]["output_path_full"] = str(final_output)
+
+    return True, str(final_output), []
+
+
+def _dev_preview_enabled(info: dict | None) -> bool:
+    if not info:
+        return False
+    if info.get("developer_preview_enabled"):
+        return True
+    return os.getenv("VM_DEV_MODE", "").strip().lower() in ("1", "true", "yes", "on") or os.getenv(
+        "VM_ARCHITECT_MODE", ""
+    ).strip().lower() in ("1", "true", "yes", "on")
+
+
+def _build_dev_preview_sync(task_id: str) -> None:
+    from engines.developer_preview import (
+        MIN_PREVIEW_SEGMENTS,
+        contiguous_ready_prefix,
+        detect_first_pipeline_error,
+    )
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return
+        info = task.setdefault("info", {})
+        if not _dev_preview_enabled(info):
+            return
+        segments_data = list(info.get("segments_data") or [])
+        timing_map = list(info.get("timing_map_backup") or info.get("timing_map") or [])
+        video_path = str(info.get("video_path_backup") or info.get("video_path") or "")
+        prefix = contiguous_ready_prefix(segments_data)
+        if prefix < MIN_PREVIEW_SEGMENTS - 1 or not video_path or not timing_map:
+            return
+        gen = int(info.get("developer_preview_generation") or 0) + 1
+        style_params = dict(info.get("dub_style_params") or {})
+
+    partial_segs = segments_data[: prefix + 1]
+    partial_timing = timing_map[: prefix + 1]
+    _, end_ms = _parse_timing(partial_timing[-1])
+    target_duration_ms = max(500, int(end_ms) + 300)
+
+    timed_audio_obj, _warnings, _overlap = _build_timed_dub_track(
+        partial_segs,
+        partial_timing,
+        target_duration_ms,
+        task_id,
+        style_params=style_params,
+    )
+    if timed_audio_obj is None:
+        return
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        info = dict((task or {}).get("info") or {})
+    artifacts = _artifacts_dir(info)
+    preview_audio = str(artifacts / f"{task_id}_dev_preview_{gen}.mp3")
+    if not _safe_export_audio(timed_audio_obj, preview_audio):
+        return
+
+    preview_name = f"{task_id}_dev_preview_{gen}.mp4"
+    preview_path = str(OUTPUT_DIR / preview_name)
+    dub_timeout = max(120, int(target_duration_ms / 1000) + 60)
+    from engines.dub_engine import DubEngine
+
+    ok, out_path, _errs = DubEngine(
+        video_path=video_path,
+        timed_audio=preview_audio,
+    ).run(
+        output_path=preview_path,
+        mix_mode=info.get("mix_mode_backup") or "full_dub",
+        timeout_sec=dub_timeout,
+    )
+    if not ok or not out_path or not Path(out_path).is_file():
+        return
+
+    first_error = detect_first_pipeline_error(info)
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return
+        info = task.setdefault("info", {})
+        info["developer_preview"] = {
+            "file": preview_name,
+            "url": f"/output/{preview_name}",
+            "segments_ready": prefix + 1,
+            "generation": gen,
+            "updated_at": time.time(),
+            "duration_ms": end_ms,
+            "first_error": first_error,
+        }
+        info["developer_preview_generation"] = gen
+    logger.info(
+        "Task %s: dev preview gen=%d segments=%d -> %s",
+        task_id,
+        gen,
+        prefix + 1,
+        preview_name,
+    )
+
+
+def _schedule_dev_preview(task_id: str) -> None:
+    from engines.developer_preview import schedule_preview_build
+
+    schedule_preview_build(task_id, lambda: _build_dev_preview_sync(task_id))
+
+
+def _normalize_tts_result(raw_files):
+    """Приведение типов результатов generate_audio к безопасному списку строк."""
+    normalized = []
+    if raw_files is None:
+        return normalized
+    if isinstance(raw_files, str):
+        if raw_files.strip():
+            normalized.append(raw_files.strip())
+    elif isinstance(raw_files, (list, tuple)):
+        for item in raw_files:
+            if item and isinstance(item, str) and item.strip():
+                normalized.append(item.strip())
+            elif item and not isinstance(item, str):
+                normalized.append(str(item).strip())
+    return normalized
+
+
+def _normalize_progress(pct):
+    """Приводит прогресс от DubEngine (0..1 или 0..100) строго к диапазону 0..100."""
+    try:
+        val = float(pct)
+        if val <= 1.0 and val > 0.0:
+            return val * 100.0
+        if val < 0.0:
+            return 0.0
+        if val > 100.0:
+            return 100.0
+        return val
+    except (ValueError, TypeError):
+        return 0.0
+
+
+# ─────────────────────────────────────────────
+#  API Маршруты Управления Пайплайном
+# ─────────────────────────────────────────────
+
+
+@bp.post("/api/auto_dub/start")
+def api_auto_dub_start():
+    """Инициализация и запуск асинхронного фонового пайплайна дубляжа."""
+    from engines.license_manager import require_feature
+
+    allowed, lic_msg = require_feature("auto_dub")
+    if not allowed:
+        return jsonify({"error": lic_msg}), 403
+
+    lp = _get_lp(request)
+
+    from engines.ffmpeg_paths import find_ffmpeg
+
+    if not find_ffmpeg():
+        return jsonify({"error": lp["ffmpeg_missing"]}), 500
+
+    data = request.get_json(silent=True) or {}
+    logger.debug("auto_dub start payload keys: %s", list(data.keys()))
+    raw_path = (data.get("video_path") or "").strip()
+
+    if not raw_path:
+        return jsonify({"error": "Видео не выбрано"}), 400
+
+    if "_OUTPUT_" in Path(raw_path).name.upper():
+        return jsonify({"error": lp.get("output_file_blocked", lp["not_found"])}), 400
+
+    candidates = [
+        Path(raw_path),
+        APP_DIR / raw_path,
+        Path("uploads") / Path(raw_path).name,
+        APP_DIR / "uploads" / "imports" / Path(raw_path).name,
+        Path("output") / Path(raw_path).name,
+    ]
+    vp = next((p for p in candidates if p.exists()), None)
+    if not vp:
+        return jsonify({"error": f"Файл не найден: {raw_path}"}), 400
+
+    video_path = str(vp.resolve())
+
+    if "_OUTPUT_" in Path(video_path).name.upper():
+        return jsonify({"error": lp.get("output_file_blocked", lp["not_found"])}), 400
+
+    allowed_models = ["tiny", "base", "small", "medium", "large"]
+    model_size = data.get("model_size", "tiny")
+    if model_size not in allowed_models:
+        model_size = "tiny"
+
+    ui_lang = _resolve_ui_lang(data.get("ui_lang"))
+
+    from engines.dub_style_presets import DEFAULT_DUB_STYLE, normalize_style_id, resolve_dub_style
+
+    def _vol_pct(key: str) -> float | None:
+        if key not in data:
+            return None
+        try:
+            v = float(data[key])
+            return v / 100.0 if v > 1.0 else v
+        except (TypeError, ValueError):
+            return None
+
+    style_id = normalize_style_id(
+        (data.get("dub_style") or data.get("voice_style") or "").strip()
+    )
+    if not (data.get("dub_style") or data.get("voice_style")):
+        legacy_mix = (data.get("mix_mode") or data.get("dub_mode") or "").strip().lower()
+        if legacy_mix:
+            style_id = normalize_style_id(legacy_mix)
+
+    orig_override = _vol_pct("original_volume")
+    if orig_override is None:
+        orig_override = _vol_pct("original_volume_pct")
+
+    resolved_style = resolve_dub_style(style_id, original_volume=orig_override)
+    mix_mode = resolved_style["mix_mode"]
+    mix_volumes = resolved_style["mix_volumes"]
+    skip_tts = bool(resolved_style.get("skip_tts"))
+    tts_rate = resolved_style.get("tts_rate")
+    tts_pitch = resolved_style.get("tts_pitch")
+    style_id = resolved_style["style_id"]
+    review_before_tts = bool(data.get("translation_review_before_tts", True))
+
+    keep_original_track = bool(data.get("keep_original_track", False))
+
+    # TZ §2: per-job adaptation mode (automatic | strict). Absent → resolved later
+    # from the registered feature flag / env override.
+    from engines.llm_adaptation_mode import normalize_mode as _norm_adapt_mode
+
+    strict_llm_adaptation = (
+        _norm_adapt_mode(data.get("strict_llm_adaptation"))
+        if data.get("strict_llm_adaptation") not in (None, "")
+        else None
+    )
+
+    # ТЗ §3: adaptation speed/quality budget. Independent per-segment budget,
+    # never a single project-wide timer that skips later segments.
+    from engines.translation_adapt import normalize_speed_mode as _norm_speed_mode
+
+    adaptation_speed_mode = (
+        _norm_speed_mode(
+            data.get("adaptation_speed_mode") or data.get("dub_speed_mode")
+        )
+        if (data.get("adaptation_speed_mode") or data.get("dub_speed_mode"))
+        not in (None, "")
+        else None
+    )
+    if adaptation_speed_mode is None:
+        try:
+            from engines.llm_adaptation_mode import resolve_default_adaptation_speed_mode
+
+            adaptation_speed_mode = resolve_default_adaptation_speed_mode()
+        except Exception:
+            adaptation_speed_mode = _norm_speed_mode(None)
+
+    def _opt_float(val):
+        try:
+            f = float(val)
+            return f if f > 0 else None
+        except (TypeError, ValueError):
+            return None
+
+    adaptation_segment_budget_s = _opt_float(
+        data.get("adaptation_segment_budget_s")
+        or data.get("segment_budget_s")
+    )
+    adaptation_project_budget_s = _opt_float(
+        data.get("adaptation_project_budget_s")
+        or data.get("project_budget_s")
+    )
+
+    # Content Mode — determines dubbing behaviour (Movie, Blogger, Podcast…)
+    content_mode = (data.get("content_mode") or "movie").strip().lower()
+    try:
+        from engines.dubbing_engine.content_mode import ContentMode
+        content_mode = ContentMode.from_str(content_mode).value
+    except Exception:
+        content_mode = "movie"
+
+    skip_translate = bool(data.get("skip_translate"))
+    if skip_translate and not data.get("translated_segments"):
+        skip_translate = False
+
+    src_for_prepare = (data.get("source_lang") or "en").split("-")[0].lower()
+    tgt_for_prepare = (data.get("target_lang") or "ru").split("-")[0].lower()
+    ocr_flag = bool(data.get("ocr_enabled", False))
+    if not skip_translate:
+        from engines.model_manager import is_profile_ready
+
+        if not is_profile_ready(
+            APP_DIR,
+            src_for_prepare,
+            tgt_for_prepare,
+            whisper_size=model_size,
+            ocr_enabled=ocr_flag,
+            feature="dub",
+        ):
+            return jsonify(
+                {
+                    "error": "Сначала завершите подготовку компонентов для выбранных языков",
+                    "error_code": "prepare_required",
+                }
+            ), 409
+
+    task_id = uuid.uuid4().hex
+
+    preload = {}
+    if data.get("source_segments"):
+        preload["source_segments"] = data["source_segments"]
+    if skip_translate and data.get("translated_segments"):
+        preload["translated_segments"] = data["translated_segments"]
+    if data.get("timing_map"):
+        preload["timing_map"] = data["timing_map"]
+
+    task_payload = {
+        "status": "running",
+        "step": "preparing",
+        "progress": 0.0,
+        "ui_lang": ui_lang,
+        "steps_done": 0,
+        "errors": [],
+        "output_file": None,
+        "info": {
+            "segments_data": [],
+            "source_segments": [],
+            "timing_map_backup": [],
+            "timed_audio": None,
+            "skip_translate": skip_translate,
+            "preload": preload,
+            "dub_style": style_id,
+            "skip_tts": skip_tts,
+            "translation_review_before_tts": review_before_tts,
+            "tts_rate": tts_rate,
+            "tts_pitch": tts_pitch,
+            "tts_engine": (data.get("tts_engine") or "edge-offline").strip(),
+            "content_mode": content_mode,
+            "strict_llm_adaptation": strict_llm_adaptation,
+            "adaptation_speed_mode": adaptation_speed_mode,
+            "adaptation_segment_budget_s": adaptation_segment_budget_s,
+            "adaptation_project_budget_s": adaptation_project_budget_s,
+        },
+    }
+    _store_style_profile(task_payload["info"], resolved_style)
+    init_auto_task(task_id, task_payload)
+    with STATE_LOCK:
+        AUTO_TASK_CONTROLS[task_id] = {
+            "state": "running",
+            "editing": False,
+            "editor_error": False,
+            "current_segment": 0,
+            "stop_after_segment": bool(data.get("stop_after_segment")),
+            "awaiting_translation_review": False,
+        }
+
+    import threading
+
+    from engines.dub_task_state import register_pipeline_thread
+
+    t = threading.Thread(
+        target=_run_pipeline,
+        kwargs={
+            "task_id": task_id,
+            "video_path": str(video_path),
+            "target_lang": data.get("target_lang", "ru"),
+            "voice": data.get("voice", "ru-RU-DmitryNeural"),
+            "model_size": model_size,
+            "mix_mode": mix_mode,
+            "mix_volumes": mix_volumes,
+            "keep_original_track": keep_original_track,
+            "dub_mode": data.get("dub_mode", "replace"),
+            "mix_volume": float(data.get("mix_volume", 0.3)),
+            "source_lang": data.get("source_lang"),
+            "target_duration_ms": data.get("target_duration_ms"),
+            "skip_translate": skip_translate,
+            "ui_lang": ui_lang,
+            "segmentation_mode": (data.get("segmentation_mode") or "timing").strip().lower(),
+            "ocr_enabled": bool(data.get("ocr_enabled", False)),
+            "dub_style": style_id,
+            "skip_tts": skip_tts,
+            "tts_rate": tts_rate,
+            "tts_pitch": tts_pitch,
+            "content_mode": content_mode,
+        },
+        daemon=True,
+    )
+    register_pipeline_thread(task_id, t)
+    try:
+        from engines.pipeline_watchdog import start_pipeline_watchdog
+
+        start_pipeline_watchdog(task_id, app_dir=APP_DIR)
+    except Exception:
+        pass
+    t.start()
+    return jsonify({"task_id": task_id, "status": "running"})
+
+
+@bp.get("/api/auto_dub/styles")
+def api_auto_dub_styles():
+    """Style Packs: base + regional styles for target dubbing language."""
+    try:
+        from engines.dub_style_presets import (
+            DEFAULT_DUB_STYLE,
+            ORIGINAL_VOLUME_PRESETS,
+            list_dub_styles,
+            list_style_pack_meta,
+        )
+
+        target_lang = (request.args.get("target_lang") or "").strip()
+        local_only = request.args.get("local_only", "1").strip().lower() not in (
+            "0",
+            "false",
+            "no",
+            "off",
+        )
+
+        meta = list_style_pack_meta(target_lang or None, local_only=local_only)
+        return jsonify(
+            {
+                "styles": list_dub_styles(
+                    target_lang=target_lang or None,
+                    local_only=local_only,
+                ),
+                "default": DEFAULT_DUB_STYLE,
+                "original_volume_presets": [int(p * 100) for p in ORIGINAL_VOLUME_PRESETS],
+                **meta,
+            }
+        )
+    except Exception as exc:
+        logger.exception("api_auto_dub_styles failed")
+        return jsonify({"error": str(exc), "styles": []}), 500
+
+
+@bp.post("/api/auto_dub/preview_style")
+def api_preview_style():
+    """Короткая тестовая фраза выбранным стилем озвучки."""
+    data = request.get_json(silent=True) or {}
+    ui_lang = _resolve_ui_lang(data.get("ui_lang"))
+    from engines.dub_style_presets import (
+        get_preview_phrase,
+        normalize_style_id,
+        resolve_dub_style,
+    )
+
+    style_id = normalize_style_id(data.get("dub_style"))
+    resolved = resolve_dub_style(style_id)
+    if resolved.get("skip_tts"):
+        return jsonify({"error": "Стиль без озвучки"}), 400
+
+    voice = (data.get("voice") or "ru-RU-DmitryNeural").strip()
+    target_lang = (data.get("target_lang") or ui_lang or "ru").strip()
+    phrase = get_preview_phrase(style_id, target_lang)
+    if not phrase:
+        return jsonify({"error": "Нет фразы для предпрослушивания"}), 400
+
+    try:
+        from engines.tts import generate_audio
+        from engines.voice_style_fx import apply_voice_style_fx
+
+        raw = generate_audio(
+            text=phrase,
+            voice=voice,
+            segments=[phrase],
+            rate=resolved.get("tts_rate"),
+            pitch=resolved.get("tts_pitch"),
+        )
+        files = _normalize_tts_result(raw)
+        if not files:
+            return jsonify({"error": "TTS failed"}), 500
+        out_path = OUTPUT_DIR / files[0]
+        apply_voice_style_fx(out_path, resolved.get("voice_fx"), inplace=True)
+        return jsonify(
+            {
+                "ok": True,
+                "file": files[0],
+                "phrase": phrase,
+                "style_id": style_id,
+            }
+        )
+    except Exception as e:
+        logger.exception("preview_style failed")
+        return jsonify({"error": str(e)}), 500
+
+
+def _resolve_diagnostic_zip(task_id: str) -> tuple[dict | None, str | None]:
+    from engines.pipeline_integrity.passive_openddf import ensure_diagnostic_archive
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            logger.warning(
+                "[OpenDDF-Download] run_id=%s reason=task_not_found",
+                task_id,
+            )
+            return None, None
+        info = dict(task.get("info") or {})
+    zip_path = ensure_diagnostic_archive(task_id, task_info=info)
+    if not zip_path:
+        logger.warning(
+            "[OpenDDF-Download] run_id=%s reason=archive_not_created",
+            task_id,
+        )
+        return info, None
+    if not Path(zip_path).is_file():
+        logger.warning(
+            "[OpenDDF-Download] run_id=%s path=%s reason=path_not_found",
+            task_id,
+            zip_path,
+        )
+        return info, None
+    return info, zip_path
+
+
+@bp.get("/api/auto_dub/diagnostics/<task_id>/zip")
+def api_auto_dub_diagnostic_zip(task_id):
+    """Download OpenDDF passive diagnostic ZIP (creates archive if missing)."""
+    from flask import send_file
+
+    _info, zip_path = _resolve_diagnostic_zip(task_id)
+    if _info is None:
+        return jsonify({
+            "error": "Задача не найдена",
+            "diagnostic_zip_status": "failed",
+            "diagnostic_zip_reason_code": "task_not_found",
+            "diagnostic_zip_reason": "задача не найдена",
+        }), 404
+    if not zip_path:
+        return jsonify({
+            "error": "Diagnostic archive not available",
+            "diagnostic_zip_status": "failed",
+            "diagnostic_zip_reason_code": "archive_not_created",
+            "diagnostic_zip_reason": "архив не создан",
+        }), 404
+    return send_file(
+        zip_path,
+        as_attachment=True,
+        download_name=Path(zip_path).name,
+    )
+
+
+@bp.route("/api/auto_dub/diagnostics/<task_id>/zip", methods=["HEAD"])
+def api_auto_dub_diagnostic_zip_head(task_id):
+    """Ensure diagnostic ZIP exists (TZ §5 — «Сообщить об ошибке»)."""
+    _info, zip_path = _resolve_diagnostic_zip(task_id)
+    if _info is None:
+        return "", 404
+    if not zip_path:
+        return "", 404
+    return "", 200
+
+
+@bp.post("/api/auto_dub/diagnostics/<task_id>/save")
+def api_auto_dub_diagnostic_save(task_id):
+    """Save As dialog for Diagnostic ZIP — user picks folder and filename."""
+    import shutil as _shutil
+
+    _info, zip_path = _resolve_diagnostic_zip(task_id)
+    if _info is None:
+        return jsonify({
+            "error": "Задача не найдена",
+            "diagnostic_zip_status": "failed",
+            "diagnostic_zip_reason_code": "task_not_found",
+            "diagnostic_zip_reason": "задача не найдена",
+        }), 404
+    if not zip_path:
+        return jsonify({
+            "error": "Diagnostic archive not available",
+            "diagnostic_zip_status": "failed",
+            "diagnostic_zip_reason_code": "archive_not_created",
+            "diagnostic_zip_reason": "архив не создан",
+        }), 404
+
+    default_name = f"diagnostic_{task_id}.zip"
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        dest = filedialog.asksaveasfilename(
+            title="Сохранить диагностику",
+            defaultextension=".zip",
+            initialfile=default_name,
+            filetypes=[("ZIP archive", "*.zip"), ("All files", "*.*")],
+            parent=root,
+        )
+        root.destroy()
+    except Exception as exc:
+        logger.warning(
+            "[OpenDDF-Download] save dialog failed run_id=%s reason=api_error detail=%s",
+            task_id,
+            exc,
+        )
+        return jsonify({
+            "error": f"Диалог сохранения недоступен: {exc}",
+            "diagnostic_zip_status": "failed",
+            "diagnostic_zip_reason_code": "api_error",
+            "diagnostic_zip_reason": "ошибка API",
+        }), 500
+
+    if not dest:
+        return jsonify({"cancelled": True})
+
+    dest_path = Path(dest)
+    if dest_path.suffix.lower() != ".zip":
+        dest_path = dest_path.with_suffix(".zip")
+
+    try:
+        _shutil.copy2(str(zip_path), str(dest_path))
+    except PermissionError:
+        logger.warning(
+            "[OpenDDF-Download] save failed run_id=%s path=%s reason=permission_denied",
+            task_id,
+            dest_path,
+        )
+        return jsonify({
+            "error": "Недостаточно прав для записи в выбранную папку",
+            "diagnostic_zip_status": "failed",
+            "diagnostic_zip_reason_code": "permission_denied",
+            "diagnostic_zip_reason": "недостаточно прав доступа",
+        }), 500
+    except OSError as exc:
+        logger.warning(
+            "[OpenDDF-Download] save failed run_id=%s path=%s reason=write_error detail=%s",
+            task_id,
+            dest_path,
+            exc,
+        )
+        return jsonify({
+            "error": f"Ошибка копирования: {exc}",
+            "diagnostic_zip_status": "failed",
+            "diagnostic_zip_reason_code": "write_error",
+            "diagnostic_zip_reason": "ошибка записи",
+        }), 500
+
+    logger.info(
+        "[OpenDDF-Download] diagnostic zip saved run_id=%s path=%s",
+        task_id,
+        dest_path,
+    )
+    return jsonify({
+        "success": True,
+        "path": str(dest_path.resolve()),
+        "filename": dest_path.name,
+    })
+
+
+@bp.get("/api/ai_core/report/<task_id>")
+def api_ai_core_report(task_id: str):
+    """AI Core aggregated report (OpenDDF + LLM telemetry)."""
+    from engines.ai_core.report import build_ai_core_report_for_task, build_and_save_ai_core_report
+
+    safe = Path(task_id).name
+    if not safe or safe != task_id:
+        return jsonify({"ok": False, "error": "invalid task_id"}), 400
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(safe)
+        info = dict((task or {}).get("info") or {})
+
+    report = build_ai_core_report_for_task(safe, task_info=info)
+    if report.get("final_status") == "no_data":
+        path = OUTPUT_DIR / f"ai_core_report_{safe}.json"
+        if path.is_file():
+            try:
+                import json
+
+                with open(path, encoding="utf-8") as fh:
+                    report = json.load(fh)
+            except Exception:
+                return jsonify({"ok": False, "error": "report not found", "task_id": safe}), 404
+        else:
+            build_and_save_ai_core_report(safe, task_info=info)
+            report = build_ai_core_report_for_task(safe, task_info=info)
+
+    return jsonify({"ok": True, "task_id": safe, "report": report})
+
+
+@bp.get("/api/auto_dub/openddf_report/<task_id>")
+def api_auto_dub_openddf_report(task_id):
+    """Full OpenDDF diagnostic report JSON for UI viewer."""
+    from engines.segment_timing_qa import build_openddf_full_report
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"ok": False, "error": "Задача не найдена"}), 404
+        info = dict(task.get("info") or {})
+        info.setdefault("task_id", task_id)
+
+    report = info.get("openddf_full_report") or build_openddf_full_report(info)
+    return jsonify({"ok": True, "report": report, "task_id": task_id})
+
+
+@bp.post("/api/auto_dub/openddf_report/<task_id>/save")
+def api_auto_dub_openddf_report_save(task_id):
+    """Save As dialog for OpenDDF JSON — user picks folder and filename."""
+    import json as _json
+
+    from engines.segment_timing_qa import build_openddf_full_report
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = dict(task.get("info") or {})
+        info.setdefault("task_id", task_id)
+
+    report = info.get("openddf_full_report") or build_openddf_full_report(info)
+    default_name = f"openddf_report_{task_id}.json"
+
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        dest = filedialog.asksaveasfilename(
+            title="Сохранить OpenDDF",
+            defaultextension=".json",
+            initialfile=default_name,
+            filetypes=[("JSON", "*.json"), ("All files", "*.*")],
+            parent=root,
+        )
+        root.destroy()
+    except Exception as exc:
+        logger.warning(
+            "[OpenDDF-Save] dialog failed task=%s: %s",
+            task_id,
+            exc,
+        )
+        return jsonify({"error": f"Диалог сохранения недоступен: {exc}"}), 500
+
+    if not dest:
+        return jsonify({"cancelled": True})
+
+    dest_path = Path(dest)
+    if dest_path.suffix.lower() != ".json":
+        dest_path = dest_path.with_suffix(".json")
+
+    try:
+        dest_path.write_text(
+            _json.dumps(report, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        return jsonify({"error": f"Ошибка записи: {exc}"}), 500
+
+    logger.info("[OpenDDF-Save] task=%s path=%s", task_id, dest_path)
+    return jsonify({
+        "success": True,
+        "path": str(dest_path.resolve()),
+        "filename": dest_path.name,
+    })
+
+
+@bp.get("/api/auto_dub/debug_mode")
+def api_auto_dub_debug_mode():
+    """Return whether Debug/Learning mode is active."""
+    from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE
+
+    return jsonify({"enabled": IS_DEBUG_LEARNING_MODE()})
+
+
+@bp.get("/api/auto_dub/status/<task_id>")
+def api_auto_dub_status(task_id):
+    """Потокобезопасная отдача текущего состояния атомарной задачи."""
+    lite = request.args.get("lite", "").strip().lower() in ("1", "true", "yes", "on")
+    from engines.module_registry.registry import is_developer_session
+
+    dev_mode = is_developer_session(
+        request_headers=dict(request.headers),
+        request_cookies=dict(request.cookies),
+    )
+    architect_mode = dev_mode or os.getenv("VM_ARCHITECT_MODE", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+    build_preview = not lite and architect_mode
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not task:
+            return jsonify({"status": "error", "error": "Задача не найдена"}), 404
+        touch_task(task_id)
+
+        ui_lang = task.get("ui_lang") or _resolve_ui_lang(request.args.get("lang"))
+        step = task["step"]
+        if task["status"] == "done":
+            step = "done"
+        elif task["status"] == "studio_ready":
+            step = "studio"
+
+        detected = task.get("info", {}).get("detected_lang")
+        res = {
+            "status": task["status"],
+            "step": task["step"],
+            "step_label": _step_label(step, ui_lang),
+            "progress": task["progress"],
+            "steps_done": task["steps_done"],
+            "errors": task["errors"],
+            "output_file": task["output_file"],
+            "subtitle_file": task.get("info", {}).get("subtitle_file"),
+            "dub_style": task.get("info", {}).get("dub_style"),
+            "detected_lang": detected,
+            "detected_lang_name": LANG_CODE_TO_NAME.get(detected, detected) if detected else None,
+            "source_lang": task.get("info", {}).get("source_lang"),
+            "studio_url": task.get("info", {}).get("studio_url"),
+            "ddf_url": task.get("info", {}).get("ddf_url"),
+            "dev_diagnostics_available": dev_mode
+            and bool(task.get("info", {}).get("translation_diagnostics")),
+            "dev_inspector_available": dev_mode or architect_mode,
+            "progress_detail": task.get("info", {}).get("progress_detail") or {},
+            "translation_timing": task.get("info", {}).get("translation_timing_breakdown")
+            or task.get("info", {}).get("translation_timing"),
+            "tts_failures": task.get("info", {}).get("tts_failures") or [],
+            "last_tts_error": task.get("info", {}).get("last_tts_error"),
+            "pipeline_error": task.get("info", {}).get("pipeline_error"),
+            "runtime_diagnostics": task.get("info", {}).get("runtime_diagnostics") or [],
+            "openddf_run_id": task.get("info", {}).get("openddf_run_id"),
+            "checkpoint": task.get("info", {}).get("pipeline_checkpoint"),
+            "stall_info": task.get("info", {}).get("pipeline_stall"),
+            "watchdog": _watchdog_status_snapshot(task_id),
+            "pipeline_performance": task.get("info", {}).get("pipeline_performance"),
+            "pipeline_conveyor_timing": task.get("info", {}).get("pipeline_conveyor_timing"),
+            "full_conveyor": task.get("info", {}).get("full_conveyor"),
+        }
+        try:
+            from engines.ai_core.unified_diagnostics import build_unified_diagnostics
+
+            info = task.get("info") or {}
+            ai_diag = build_unified_diagnostics(task_id, app_dir=APP_DIR, task_info=info)
+            res["ai_core"] = {
+                "active_model": ai_diag.get("active_model"),
+                "pipeline_route_display": ai_diag.get("pipeline_route_display"),
+                "quality_score": ai_diag.get("quality_score"),
+                "status": ai_diag.get("status"),
+                "global_skill_version": ai_diag.get("global_skill_version"),
+            }
+        except Exception:
+            res["ai_core"] = None
+        from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE
+
+        res["debug_learning_mode"] = IS_DEBUG_LEARNING_MODE()
+        from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE
+
+        res["debug_learning_mode"] = IS_DEBUG_LEARNING_MODE()
+        from engines.pipeline_integrity.passive_openddf import diagnostic_status_for_task
+
+        res.update(diagnostic_status_for_task(task_id, task.get("info")))
+        if dev_mode:
+            res["last_tts_diagnostic"] = task.get("info", {}).get("last_tts_diagnostic")
+            res["last_pipeline_diagnostic"] = task.get("info", {}).get("last_pipeline_diagnostic")
+            res["pipeline_error_developer"] = task.get("info", {}).get("pipeline_error_developer")
+            res["openddf_artifacts"] = task.get("info", {}).get("openddf_artifacts")
+            res["passive_openddf"] = task.get("info", {}).get("passive_openddf")
+            res["openddf_run_id"] = task.get("info", {}).get("openddf_run_id")
+        if control:
+            res.update(
+                {
+                    "state": control["state"],
+                    "editing": control["editing"],
+                    "editor_error": control.get("editor_error", False),
+                    "awaiting_translation_review": control.get(
+                        "awaiting_translation_review", False
+                    ),
+                    "current_segment": control["current_segment"] + 1,
+                }
+            )
+        if build_preview:
+            preview_src = list(task.get("info", {}).get("source_segments", []))
+            preview_segs = list(task.get("info", {}).get("segments_data", []))
+            preview_audits = list(task.get("info", {}).get("translation_audits") or [])
+        else:
+            preview_src = preview_segs = preview_audits = None
+
+    segments_preview: list[dict] = []
+    if build_preview and preview_segs is not None:
+        audits_by_idx = {
+            int(a.get("index", -1)): a for a in (preview_audits or [])
+        }
+        for i, seg in enumerate(preview_segs[:50]):
+            audit = audits_by_idx.get(i, {})
+            preview = {
+                "original": preview_src[i] if i < len(preview_src) else "",
+                "translated": seg.get("text", ""),
+            }
+            if audit:
+                qd = audit.get("quality_details") or {}
+                preview.update(
+                    {
+                        "whisper": audit.get("whisper_text") or preview["original"],
+                        "raw_mt": audit.get("raw_translation") or "",
+                        "alternative": audit.get("alternative_translation") or "",
+                        "naturalized": audit.get("naturalized_text") or "",
+                        "final": audit.get("final_text") or preview["translated"],
+                        "tts": audit.get("tts_text") or preview["translated"],
+                        "engine": audit.get("engine") or "",
+                        "route": audit.get("route_label") or audit.get("route") or "",
+                        "router_reason": audit.get("router_reason") or "",
+                        "quality_score": audit.get("quality_score"),
+                        "mt_ms": audit.get("duration_ms"),
+                        "alternative_route": audit.get("alternative_route") or "",
+                        "alternative_engine": audit.get("alternative_engine") or "",
+                        "routes_tried": audit.get("routes_tried") or [],
+                        "pipeline_health": qd.get("pipeline_health") or {},
+                        "warnings": audit.get("validation_warnings") or [],
+                        "naturalizer_reasons": audit.get("naturalizer_reasons") or [],
+                        "enterprise": audit.get("enterprise") or False,
+                        "tournament_engines": audit.get("tournament_engines") or [],
+                        "tournament_scores": audit.get("tournament_scores") or {},
+                        "fusion_reason": audit.get("fusion_reason") or "",
+                    }
+                )
+                if audit.get("architect"):
+                    preview["architect"] = audit.get("architect")
+            segments_preview.append(preview)
+
+    res["segments_preview"] = segments_preview
+    if dev_mode:
+        from engines.developer_preview import build_status_payload
+
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(task_id)
+            info = dict((task or {}).get("info") or {})
+            prog = float((task or {}).get("progress") or 0)
+            step = (task or {}).get("step") or ""
+        res["developer_preview"] = build_status_payload(info, step=step, progress=prog)
+    return jsonify(res)
+
+
+@bp.get("/api/auto_dub/sso_report/<task_id>")
+def api_auto_dub_sso_report(task_id):
+    """Smart Segment Optimizer V2 dev report (Developer Mode)."""
+    import json
+
+    dev_mode = os.getenv("VM_DEV_MODE", "").strip().lower() in ("1", "true", "yes", "on")
+    if not dev_mode:
+        return jsonify({"error": "Developer mode required"}), 403
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        meta = dict(task.get("info", {}).get("smart_segment_optimizer") or {})
+        report_path = meta.get("dev_report_path") or task.get("info", {}).get("sso_dev_report")
+
+    if report_path and Path(report_path).is_file():
+        try:
+            data = json.loads(Path(report_path).read_text(encoding="utf-8"))
+            produb_path = (
+                (task.get("info") or {}).get("professional_dubbing") or {}
+            ).get("dev_report_path")
+            if produb_path and Path(produb_path).is_file():
+                produb = json.loads(Path(produb_path).read_text(encoding="utf-8"))
+                data["prosody_groups"] = produb.get("groups") or []
+                data["prosody_meta"] = produb.get("meta") or {}
+            return jsonify({"ok": True, "task_id": task_id, **data})
+        except Exception as e:
+            return jsonify({"error": str(e), "path": report_path}), 500
+
+    return jsonify({"ok": True, "task_id": task_id, "meta": meta, "segments": []})
+
+
+@bp.get("/api/auto_dub/translation_review/<task_id>")
+def api_translation_review(task_id):
+    """Полный путь текста для панели контроля перевода."""
+    from engines.translation_review import build_translation_review
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = copy.deepcopy(task.get("info") or {})
+        status = task.get("status")
+        output_name = task.get("output_file")
+        info["target_lang"] = info.get("target_lang") or request.args.get("target_lang")
+
+    cached = info.get("translation_review")
+    if cached and cached.get("segments"):
+        review = cached
+    else:
+        review = build_translation_review(info)
+
+    output_name = output_name or info.get("output_file")
+    if output_name and not review.get("segments"):
+        from engines.translation_quality import load_translation_review
+
+        loaded = load_translation_review(OUTPUT_DIR / output_name)
+        if loaded and loaded.get("segments"):
+            review = loaded
+
+    return jsonify(
+        {
+            "ok": True,
+            "task_id": task_id,
+            "status": status,
+            "awaiting_translation_review": status == "translation_review",
+            **review,
+        }
+    )
+
+
+@bp.post("/api/auto_dub/translation_review/<task_id>/apply")
+def api_translation_review_apply(task_id):
+    """Save pre-TTS text edit without regenerating audio."""
+    data = request.get_json(silent=True) or {}
+    try:
+        user_idx = int(data.get("segment_index", 1))
+    except (TypeError, ValueError):
+        return jsonify({"error": "invalid segment_index"}), 400
+
+    seg_idx = user_idx - 1
+    new_text = str(data.get("new_text") or "").strip()
+    if not new_text:
+        return jsonify({"error": "new_text is required"}), 400
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        segments_data = task.get("info", {}).get("segments_data") or []
+        if seg_idx < 0 or seg_idx >= len(segments_data):
+            return jsonify({"error": "invalid segment_index"}), 400
+        info = task.setdefault("info", {})
+
+    texts = _apply_translation_text_edits(
+        info,
+        edits=[{"index": user_idx, "text": new_text}],
+    )
+
+    with STATE_LOCK:
+        status = AUTO_TASKS.get(task_id, {}).get("status")
+
+    return jsonify(
+        {
+            "ok": True,
+            "segment_index": user_idx,
+            "status": status,
+            "segment_count": len(texts),
+        }
+    )
+
+
+@bp.post("/api/auto_dub/translation_review/<task_id>/approve")
+def api_translation_review_approve(task_id):
+    """Apply optional bulk edits and resume pipeline to TTS."""
+    data = request.get_json(silent=True) or {}
+    edits = data.get("edits")
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not task or not control:
+            return jsonify({"error": "Задача не найдена"}), 404
+        if task.get("status") != "translation_review":
+            return jsonify({"error": "Task is not awaiting translation review"}), 400
+        info = task.setdefault("info", {})
+
+    if edits:
+        _apply_translation_text_edits(info, edits=edits)
+
+    texts = _resume_from_translation_review(task_id)
+    if texts is None:
+        return jsonify({"error": "Задача не найдена"}), 404
+
+    return jsonify(
+        {
+            "ok": True,
+            "task_id": task_id,
+            "state": "running",
+            "segment_count": len(texts),
+        }
+    )
+
+
+@bp.get("/api/auto_dub/translation_review/<task_id>/export")
+def api_translation_review_export(task_id):
+    """Экспорт review в plain text."""
+    from engines.translation_review import build_translation_review, export_review_text
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = copy.deepcopy(task.get("info") or {})
+
+    review = info.get("translation_review") or build_translation_review(info)
+    body = export_review_text(review)
+    return jsonify({"ok": True, "text": body, "filename": f"tubedub_review_{task_id[:8]}.txt"})
+
+
+def _dev_diagnostics_allowed() -> bool:
+    from engines.translation_diagnostics import dev_diagnostics_enabled
+
+    return dev_diagnostics_enabled()
+
+
+@bp.get("/api/auto_dub/translation_diagnostics/<task_id>")
+def api_translation_diagnostics(task_id):
+    """Developer-only full pipeline diagnostics."""
+    if not _dev_diagnostics_allowed():
+        return jsonify({"error": "Developer mode required"}), 403
+
+    from engines.translation_diagnostics import build_developer_diagnostics
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = copy.deepcopy(task.get("info") or {})
+        info["task_id"] = task_id
+
+    diag = info.get("translation_diagnostics") or build_developer_diagnostics(info)
+    return jsonify({"ok": True, "task_id": task_id, "diagnostics": diag})
+
+
+@bp.get("/api/auto_dub/translation_diagnostics/<task_id>/export")
+def api_translation_diagnostics_export(task_id):
+    """Export diagnostics as translation_diagnostics.txt."""
+    if not _dev_diagnostics_allowed():
+        return jsonify({"error": "Developer mode required"}), 403
+
+    from engines.translation_diagnostics import (
+        build_developer_diagnostics,
+        export_diagnostics_text,
+    )
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = copy.deepcopy(task.get("info") or {})
+        info["task_id"] = task_id
+
+    diag = info.get("translation_diagnostics") or build_developer_diagnostics(info)
+    body = export_diagnostics_text(diag)
+    return jsonify(
+        {
+            "ok": True,
+            "text": body,
+            "filename": "translation_diagnostics.txt",
+        }
+    )
+
+
+def _dev_inspector_allowed() -> bool:
+    from engines.translation_inspector import inspector_enabled
+
+    return inspector_enabled()
+
+
+@bp.get("/api/auto_dub/translation_inspector/<task_id>")
+def api_translation_inspector(task_id):
+    """Developer-only per-stage translation inspector."""
+    if not _dev_inspector_allowed():
+        return jsonify({"error": "Developer mode required (VM_DEV_MODE=1)"}), 403
+
+    from engines.translation_inspector import build_translation_inspector
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = copy.deepcopy(task.get("info") or {})
+        info["task_id"] = task_id
+
+    report = info.get("translation_inspector") or build_translation_inspector(info)
+    return jsonify({"ok": True, "task_id": task_id, "inspector": report})
+
+
+@bp.get("/api/auto_dub/translation_inspector/<task_id>/export")
+def api_translation_inspector_export(task_id):
+    """Export inspector report as TXT."""
+    if not _dev_inspector_allowed():
+        return jsonify({"error": "Developer mode required (VM_DEV_MODE=1)"}), 403
+
+    from engines.translation_inspector import (
+        build_translation_inspector,
+        export_inspector_text,
+    )
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = copy.deepcopy(task.get("info") or {})
+        info["task_id"] = task_id
+
+    report = info.get("translation_inspector") or build_translation_inspector(info)
+    body = export_inspector_text(report)
+    return jsonify(
+        {
+            "ok": True,
+            "text": body,
+            "filename": f"translation_inspector_{task_id[:8]}.txt",
+        }
+    )
+
+
+@bp.get("/api/auto_dub/translation_inspector/<task_id>/json")
+def api_translation_inspector_json(task_id):
+    """Export full inspector JSON."""
+    if not _dev_inspector_allowed():
+        return jsonify({"error": "Developer mode required (VM_DEV_MODE=1)"}), 403
+
+    from engines.translation_inspector import (
+        build_translation_inspector,
+        export_inspector_json,
+    )
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        info = copy.deepcopy(task.get("info") or {})
+        info["task_id"] = task_id
+
+    report = info.get("translation_inspector") or build_translation_inspector(info)
+    return jsonify(
+        {
+            "ok": True,
+            "json": export_inspector_json(report),
+            "filename": f"translation_inspector_{task_id[:8]}.json",
+        }
+    )
+
+
+@bp.post("/api/auto_dub/cancel/<task_id>")
+def api_auto_cancel(task_id):
+    """Safely cancel autodub; preserves checkpoint for restart with new settings."""
+    from engines.dub_task_state import cancel_pipeline_runtime, request_cancel
+
+    request_cancel(task_id, reason="user")
+    runtime = cancel_pipeline_runtime(task_id, join_timeout=5.0)
+
+    with STATE_LOCK:
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        task = AUTO_TASKS.get(task_id)
+        if not control or not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+        if task.get("status") in ("done", "cancelled"):
+            return jsonify({"error": "Task already finished"}), 400
+
+        from engines.ai_core.architecture_validation import pipeline_checkpoint
+
+        info = task.setdefault("info", {})
+        checkpoint = pipeline_checkpoint(info)
+        info["pipeline_checkpoint"] = checkpoint
+        info["cancelled_at"] = time.time()
+        info["cancel_runtime"] = runtime
+        control["state"] = "cancelled"
+        task["status"] = "cancelled"
+
+        try:
+            from engines.ai_core.architecture_validation import merge_ux_event
+
+            merge_ux_event(task_id, event="cancel", checkpoint=checkpoint, app_dir=APP_DIR)
+        except Exception:
+            pass
+
+        return jsonify({
+            "ok": True,
+            "task_id": task_id,
+            "state": "cancelled",
+            "checkpoint": checkpoint,
+            "runtime": runtime,
+        })
+
+
+@bp.post("/api/auto_dub/restart/<task_id>")
+def api_auto_restart(task_id):
+    """Restart from last checkpoint (voice/lang changes) without full pipeline redo."""
+    data = request.get_json(silent=True) or {}
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"error": "Задача не найдена"}), 404
+
+        from engines.ai_core.architecture_validation import pipeline_checkpoint
+
+        info = task.setdefault("info", {})
+        checkpoint = info.get("pipeline_checkpoint") or pipeline_checkpoint(info)
+
+        from engines.developer_preview import resolve_restart_cache_plan
+
+        cache_plan = resolve_restart_cache_plan(info, data, checkpoint=checkpoint)
+        info["restart_cache_plan"] = cache_plan
+        if cache_plan.get("skip_translate"):
+            info["skip_translate"] = True
+            info["pre_translated"] = list(info.get("source_segments") or [])
+            translated = []
+            for seg in info.get("segments_data") or []:
+                translated.append(str(seg.get("text") or seg.get("plain_text") or ""))
+            if translated:
+                info["translated_segments"] = translated
+        else:
+            info.pop("skip_translate", None)
+
+        if data.get("target_lang"):
+            info["target_lang"] = str(data["target_lang"])
+        if data.get("voice"):
+            info["voice"] = str(data["voice"])
+        if data.get("tts_rate") is not None:
+            info["tts_rate"] = data["tts_rate"]
+        if data.get("tts_pitch") is not None:
+            info["tts_pitch"] = data["tts_pitch"]
+
+        info["restart_from_checkpoint"] = checkpoint
+        task["status"] = "running"
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not control:
+            AUTO_TASK_CONTROLS[task_id] = {
+                "state": "running",
+                "editing": False,
+                "editor_error": False,
+                "current_segment": 0,
+                "stop_after_segment": False,
+                "awaiting_translation_review": False,
+            }
+        else:
+            control["state"] = "running"
+            control["editor_error"] = False
+            control["editing"] = False
+
+        video_path = info.get("video_path") or task.get("video_path")
+        target_lang = info.get("target_lang", "ru")
+        voice = info.get("voice", "ru-RU-DmitryNeural")
+
+    try:
+        from engines.ai_core.architecture_validation import merge_ux_event
+
+        merge_ux_event(task_id, event="restart", checkpoint=checkpoint, app_dir=APP_DIR)
+    except Exception:
+        pass
+
+    import threading
+
+    from engines.dub_task_state import CANCEL_FLAGS, register_pipeline_thread
+
+    ev = CANCEL_FLAGS.get(task_id)
+    if ev:
+        ev.clear()
+
+    rt = threading.Thread(
+        target=_run_pipeline_from_checkpoint,
+        kwargs={
+            "task_id": task_id,
+            "video_path": str(video_path or ""),
+            "target_lang": target_lang,
+            "voice": voice,
+            "checkpoint": checkpoint,
+        },
+        daemon=True,
+    )
+    register_pipeline_thread(task_id, rt)
+    try:
+        from engines.pipeline_watchdog import start_pipeline_watchdog
+
+        start_pipeline_watchdog(task_id, app_dir=APP_DIR)
+    except Exception:
+        pass
+    rt.start()
+
+    return jsonify({"ok": True, "task_id": task_id, "checkpoint": checkpoint, "restarting": True, "cache_plan": cache_plan})
+
+
+def _run_pipeline_from_checkpoint(
+    task_id: str,
+    video_path: str,
+    target_lang: str,
+    voice: str,
+    checkpoint: str,
+) -> None:
+    """Resume autodub from checkpoint without redoing completed stages."""
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return
+        info = dict(task.get("info") or {})
+
+    if checkpoint == "post_ai_core_text":
+        info["quality_agent_path"] = False
+        info["reviewer_agent_path"] = False
+    elif checkpoint == "post_translation":
+        for key in (
+            "semantic_agent_path", "timing_agent_path", "grammar_agent_path",
+            "quality_agent_path", "reviewer_agent_path",
+        ):
+            info.pop(key, None)
+
+    with STATE_LOCK:
+        task["info"] = info
+
+    try:
+        _run_pipeline(
+            task_id=task_id,
+            video_path=video_path,
+            target_lang=target_lang,
+            voice=voice,
+            model_size=info.get("model_size", "medium"),
+            mix_mode=info.get("mix_mode", "replace"),
+            mix_volumes=info.get("mix_volumes"),
+            keep_original_track=bool(info.get("keep_original_track")),
+            dub_mode=info.get("dub_mode", "replace"),
+            mix_volume=float(info.get("mix_volume", 0.3)),
+            source_lang=info.get("source_lang"),
+            skip_translate=bool(info.get("skip_translate")),
+            ui_lang=info.get("ui_lang", "ru"),
+            skip_tts=checkpoint in ("post_voice", "post_mix"),
+        )
+    except Exception as exc:
+        logger.exception("Restart from checkpoint failed task=%s: %s", task_id, exc)
+
+
+@bp.post("/api/auto_dub/resume/<task_id>")
+def api_auto_resume(task_id):
+    """Потокобезопасный сброс флагов интерактива и возобновление пайплайна после паузы или ошибки."""
+    with STATE_LOCK:
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        task = AUTO_TASKS.get(task_id)
+        if not control:
+            return jsonify({"error": "Задача не найдена"}), 404
+
+        if task and task.get("status") == "translation_review":
+            return jsonify({"error": "Use translation_review approve endpoint"}), 400
+
+        control["editor_error"] = False
+        control["editing"] = False
+        control["state"] = "running"
+        control["stop_after_segment"] = False
+        control["awaiting_translation_review"] = False
+
+        return jsonify(
+            {
+                "task_id": task_id,
+                "state": "running",
+                "editing": False,
+                "editor_error": False,
+                "ok": True,
+            }
+        )
+
+
+@bp.get("/api/auto_dub/current_segment/<task_id>")
+def api_auto_current_segment(task_id):
+    """Отдача текущей реплики для UI."""
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not task or not control:
+            return jsonify({"error": "Задача не найдена"}), 404
+
+        curr_idx = control.get("current_segment")
+        if curr_idx is None or curr_idx < 0:
+            return jsonify(
+                {"index": 1, "original": "", "translated": "", "generated": False}
+            )
+
+        segments_data = task.get("info", {}).get("segments_data", [])
+        source_segments = task.get("info", {}).get("source_segments", [])
+
+        if curr_idx >= len(segments_data):
+            return jsonify(
+                {"index": 1, "original": "", "translated": "", "generated": False}
+            )
+
+        filename = segments_data[curr_idx].get("file")
+        is_generated = bool(filename and (OUTPUT_DIR / filename).exists())
+
+        return jsonify(
+            {
+                "index": curr_idx + 1,
+                "original": (
+                    source_segments[curr_idx] if curr_idx < len(source_segments) else ""
+                ),
+                "translated": segments_data[curr_idx].get("text", ""),
+                "generated": is_generated,
+            }
+        )
+
+
+@bp.post("/api/auto_dub/regen_segment")
+def api_regen_segment():
+    """Потокобезопасная атомарная регенерация сегмента."""
+    lp = _get_lp(request)
+    data = request.get_json(silent=True) or {}
+    task_id = data.get("task_id", "")
+
+    if not task_id or str(task_id).strip() == "":
+        return jsonify({"error": "task_id required"}), 400
+
+    try:
+        user_idx = int(data.get("segment_index", 1))
+    except (TypeError, ValueError):
+        return jsonify({"error": lp["invalid_idx"]}), 400
+
+    seg_idx = user_idx - 1
+    new_text = data.get("new_text", "")
+
+    if not isinstance(new_text, str) or not new_text.strip():
+        return jsonify({"error": "new_text is required"}), 400
+
+    voice = data.get("voice", "ru-RU-DmitryNeural")
+
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not task or not control:
+            return jsonify({"error": lp["not_found"]}), 404
+
+        segments_data = task.get("info", {}).get("segments_data", [])
+        if seg_idx < 0 or seg_idx >= len(segments_data):
+            return jsonify({"error": lp["invalid_idx"]}), 400
+
+    try:
+        from engines.tts import generate_audio
+
+        raw_files = generate_audio(
+            text=new_text, voice=voice, segments=[new_text],
+            rate=task.get("info", {}).get("tts_rate"),
+            pitch=task.get("info", {}).get("tts_pitch"),
+        )
+        new_files = _normalize_tts_result(raw_files)
+
+        if not new_files:
+            return jsonify({"error": lp["tts_failed"]}), 500
+
+        from engines.voice_style_fx import apply_voice_style_fx
+
+        style_cfg = _style_params_from_info(task.get("info"))
+        apply_voice_style_fx(OUTPUT_DIR / new_files[0], style_cfg.get("voice_fx"), inplace=True)
+
+        with STATE_LOCK:
+            old_file = segments_data[seg_idx].get("file")
+            segments_data[seg_idx]["text"] = new_text
+            segments_data[seg_idx]["file"] = new_files[0]
+
+            if old_file and old_file != new_files[0]:
+                (OUTPUT_DIR / old_file).unlink(missing_ok=True)
+
+            task["info"]["segments_data"] = segments_data
+            timing_map = task["info"].get("timing_map_backup", [])
+            target_duration = task["info"].get("target_duration_ms")
+
+        if not timing_map:
+            return jsonify(
+                {
+                    "ok": True,
+                    "segment_index": user_idx,
+                    "state": control["state"],
+                    "warning": "timing_map_backup missing",
+                }
+            )
+
+        timed_audio_obj, _ = _build_timed_dub_track(
+            segments_data,
+            timing_map,
+            target_duration,
+            task_id,
+            style_params=_style_params_from_info(task.get("info")),
+        )
+        if timed_audio_obj is None:
+            return jsonify({"error": lp["export_error"]}), 500
+
+        base_id = task["info"].get("mux_base_id") or task_id[:8]
+        timed_audio_path = str(_artifacts_dir(task.get("info")) / f"{base_id}_timed.mp3")
+
+        export_ok = _safe_export_audio(timed_audio_obj, timed_audio_path)
+        if not export_ok or not Path(timed_audio_path).exists():
+            return jsonify({"error": lp["export_error"]}), 500
+
+        remux_ok = True
+        remux_errors: list = []
+        new_output: str | None = None
+        with STATE_LOCK:
+            is_done = task.get("status") == "done"
+
+        if is_done:
+            remux_ok, new_output, remux_errors = _remux_done_output(task_id, timed_audio_path)
+
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(task_id)
+            if not task:
+                return jsonify({"error": lp["not_found"]}), 404
+            info = task["info"]
+            info["timed_audio"] = timed_audio_path
+            audits = info.get("translation_audits") or []
+            for row in audits:
+                if int(row.get("index", -1)) == seg_idx:
+                    row["tts_text"] = new_text
+                    row["user_edited"] = True
+            info["translation_audits"] = audits
+            from engines.translation_review import build_translation_review
+
+            info["translation_review"] = build_translation_review(info)
+            if is_done and remux_ok:
+                _persist_task_review(task)
+
+        resp: dict = {"ok": True, "segment_index": user_idx, "state": control["state"]}
+        if new_output:
+            resp["output_file"] = Path(new_output).name
+        if is_done and not remux_ok:
+            resp["warning"] = "segment_saved_remux_failed"
+            resp["remux_errors"] = remux_errors[:5]
+        return jsonify(resp)
+
+    except Exception as e:
+        return jsonify({"error": f"Сбой регенерации сегмента: {str(e)}"}), 500
+
+
+@bp.get("/api/auto_dub/preview_segment/<task_id>/<segment_index>")
+def api_auto_preview_segment(task_id, segment_index):
+    """Превью-доступ к сгенерированному файлу сегмента."""
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        if not task:
+            return jsonify({"exists": False, "audio": None}), 404
+        try:
+            seg_idx = int(segment_index) - 1
+            if seg_idx < 0:
+                return jsonify({"exists": False, "audio": None})
+
+            segments_data = task.get("info", {}).get("segments_data", [])
+            if seg_idx >= len(segments_data):
+                return jsonify({"exists": False, "audio": None})
+
+            filename = segments_data[seg_idx].get("file")
+            if filename and (OUTPUT_DIR / filename).exists():
+                return jsonify({"exists": True, "audio": Path(filename).name})
+        except Exception as e:
+            logger.exception("preview_segment error task=%s seg=%s: %s", task_id, segment_index, e)
+    return jsonify({"exists": False, "audio": None})
+
+
+# ─────────────────────────────────────────────
+#  Фоновый Асинхронный Пайплайн Обработки
+# ─────────────────────────────────────────────
+
+
+def _wait_for_control(task_id: str) -> bool:
+    """
+    Автомат состояний контроля выполнения пайплайна.
+    Держит поток в режиме ожидания при паузах и корректно выходит при аварийном останове.
+    """
+    from engines.dub_task_state import is_cancel_requested
+
+    while True:
+        if is_cancel_requested(task_id):
+            return False
+        with STATE_LOCK:
+            control = AUTO_TASK_CONTROLS.get(task_id)
+            if not control:
+                return False
+
+            state = control.get("state", "running")
+            editing = control.get("editing", False)
+            editor_error = control.get("editor_error", False)
+
+            if state == "cancelled":
+                return False
+
+            if state == "error" and not editing and not editor_error:
+                return False
+
+            if state == "paused" or editing or editor_error:
+                if control.get("awaiting_translation_review") and state == "paused":
+                    logger.debug(
+                        "Task %s: waiting in _wait_for_control for translation review approve",
+                        task_id,
+                    )
+            elif state == "running" and not editing:
+                return True
+
+        time.sleep(0.4)
+
+
+def _ensure_control(task_id: str, ui_lang: str = "ru") -> bool:
+    """
+    Проверяет, можно ли продолжать пайплайн.
+    При неожиданной остановке помечает задачу ошибкой (не оставляет «вечный» 65%).
+    """
+    from engines.dub_task_state import is_cancel_requested
+
+    if _wait_for_control(task_id):
+        return True
+
+    lp = LOCALIZATION.get(ui_lang, LOCALIZATION["ru"])
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(task_id)
+        control = AUTO_TASK_CONTROLS.get(task_id)
+        if not task:
+            return False
+        if task.get("status") in ("done", "error", "stalled", "cancelled"):
+            return False
+        if control and control.get("state") in ("cancelled", "stalled"):
+            return False
+        if is_cancel_requested(task_id):
+            cancel_reason = str((control or {}).get("cancel_reason") or "")
+            if cancel_reason in ("stalled", "cancel", "user"):
+                return False
+        if control and control.get("state") == "cancelled":
+            return False
+        if control and (
+            control.get("editing")
+            or control.get("state") == "paused"
+            or control.get("editor_error")
+        ):
+            return False
+        if task.get("status") == "running":
+            from engines.dubbing_engine.pipeline_failure_diag import (
+                STEP_TO_STAGE,
+                STAGE_AUDIO_EXTRACTION,
+            )
+
+            step = str(task.get("step") or "")
+            detail = (task.get("info") or {}).get("progress_detail") or {}
+            phase = str(detail.get("phase") or "")
+            stage_key = phase or step
+            if is_cancel_requested(task_id):
+                return False
+            resolved_stage = STEP_TO_STAGE.get(stage_key, STAGE_AUDIO_EXTRACTION)
+            _fail(
+                task_id,
+                [lp["pipeline_aborted"]],
+                stage=resolved_stage,
+                error_code="PIPELINE_ABORTED",
+            )
+    return False
+
+
+def _build_agent_segments(source_segments: list, timing_map: list) -> list[dict]:
+    """Build Translation Agent segment rows from STT output."""
+    segments: list[dict] = []
+    for i, raw in enumerate(source_segments):
+        text = str(raw or "").strip()
+        row: dict = {"index": i, "text": text}
+        if i < len(timing_map):
+            slot = timing_map[i] or {}
+            row["start"] = slot.get("start", slot.get("start_ms"))
+            row["end"] = slot.get("end", slot.get("end_ms"))
+            if slot.get("speaker") is not None:
+                row["speaker"] = slot.get("speaker")
+        segments.append(row)
+    return segments
+
+
+def _run_director_agent_path(
+    task_id: str,
+    manifest_path: str,
+    source_segments: list,
+    timing_map: list,
+    *,
+    source_lang: str = "en",
+) -> list[dict]:
+    """Director Agent v1.0 — creative briefs before translation (READ ONLY)."""
+    from engines.ai_core.director_agent import DirectorAgent
+    from engines.ai_core.translation_agent.agent import load_manifest
+
+    manifest = load_manifest(manifest_path)
+    state = {
+        "source_lang": source_lang,
+        "segments": _build_agent_segments(source_segments, timing_map),
+    }
+    agent = DirectorAgent()
+    result = agent.run(manifest, state, task_id)
+
+    segments = list(result.updated_state.get("segments") or [])
+    briefs = list(result.updated_state.get("creative_briefs") or [])
+
+    with STATE_LOCK:
+        if task_id in AUTO_TASKS:
+            info = AUTO_TASKS[task_id].setdefault("info", {})
+            info["director_agent_path"] = True
+            info["director_agent_status"] = result.status
+            info["director_report_path"] = result.updated_state.get("director_report_path")
+            info["creative_briefs"] = briefs
+            if segments:
+                info["segments_data"] = _segments_data_from_agent(segments, info)
+
+    return segments
+
+
+def _run_translation_agent_path(
+    task_id: str,
+    manifest_path: str,
+    source_segments: list,
+    timing_map: list,
+    translate_meta: list | None = None,
+) -> list[str]:
+    """Translation Agent v1.0 — raw MT only, no naturalizer/shortening."""
+    from engines.ai_core.translation_agent.agent import TranslationAgent, load_manifest
+
+    manifest = load_manifest(manifest_path)
+    director_segments = _run_director_agent_path(
+        task_id,
+        manifest_path,
+        source_segments,
+        timing_map,
+        source_lang=str(manifest.get("source_lang") or "en"),
+    )
+    state = {
+        "segments": director_segments
+        or _build_agent_segments(source_segments, timing_map),
+        "director_agent_status": "success",
+    }
+    agent = TranslationAgent()
+    result = agent.run(manifest, state, task_id)
+
+    segments_data = result.updated_state.get("segments") or []
+    translated = [
+        str(seg.get("translated_text") or seg.get("text") or "").strip()
+        for seg in segments_data
+    ]
+
+    meta = {
+        "pipeline": "translation_agent_v1",
+        "naturalizer_executed": False,
+        "naturalizer_applied": False,
+        "timing_aware_executed": False,
+        "timing_aware_applied": False,
+        "translation_agent": True,
+        "semantic_agent": False,
+        "translator_used": result.metrics.get("translator_used"),
+        "avg_confidence": result.metrics.get("avg_overall"),
+    }
+    if translate_meta is not None:
+        translate_meta.append(meta)
+
+    with STATE_LOCK:
+        if task_id in AUTO_TASKS:
+            info = AUTO_TASKS[task_id].setdefault("info", {})
+            info["translation_agent_path"] = True
+            info["translation_report_path"] = result.updated_state.get(
+                "translation_report_path"
+            )
+            info["segments_data"] = _segments_data_from_agent(segments_data, info)
+            info["translation_agent_status"] = result.status
+            info["translation_agent_metrics"] = result.metrics
+
+    return translated
+
+
+def _run_semantic_agent_path(
+    task_id: str,
+    manifest_path: str,
+    segments_data: list,
+    *,
+    translation_status: str | None = None,
+) -> list[str]:
+    """Semantic Agent v1.0 — natural rewrite; sets semantic_text for TTS."""
+    from engines.ai_core.semantic_agent.agent import SemanticAgent, load_manifest
+
+    manifest = load_manifest(manifest_path)
+
+    with STATE_LOCK:
+        source_segments = list(
+            (AUTO_TASKS.get(task_id, {}).get("info") or {}).get("source_segments") or []
+        )
+
+    agent_segments = []
+    for i, seg in enumerate(segments_data):
+        source_text = ""
+        if i < len(source_segments):
+            source_text = str(source_segments[i] or "").strip()
+        agent_segments.append(
+            {
+                "index": int(seg.get("index", i)),
+                "text": source_text,
+                "translated_text": str(
+                    seg.get("translated_text")
+                    or seg.get("translation_text")
+                    or seg.get("text")
+                    or ""
+                ).strip(),
+                "start": seg.get("start"),
+                "end": seg.get("end"),
+                "speaker": seg.get("speaker"),
+            }
+        )
+
+    state = {
+        "segments": agent_segments,
+        "translation_agent_status": translation_status or "success",
+    }
+    agent = SemanticAgent()
+    result = agent.run(manifest, state, task_id)
+
+    out_segments = result.updated_state.get("segments") or []
+    semantic_texts: list[str] = []
+
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return [
+                str(s.get("translated_text") or s.get("text") or "").strip()
+                for s in segments_data
+            ]
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        sd = info.get("segments_data") or segments_data
+        for i, seg in enumerate(out_segments):
+            semantic = str(seg.get("semantic_text") or "").strip()
+            if not semantic:
+                semantic = str(seg.get("translated_text") or "").strip()
+            semantic_texts.append(semantic)
+            if i < len(sd):
+                sd[i]["semantic_text"] = semantic
+                sd[i]["text_for_tts"] = semantic
+                sd[i]["text"] = semantic
+                sd[i]["plain_text"] = semantic
+        info["segments_data"] = sd
+        info["semantic_agent_path"] = True
+        info["semantic_report_path"] = result.updated_state.get("semantic_report_path")
+        info["semantic_quality_report_path"] = result.updated_state.get("semantic_quality_report_path")
+        info["semantic_quality_summary"] = result.updated_state.get("semantic_quality_summary")
+        info["semantic_agent_status"] = result.status
+        info["semantic_agent_metrics"] = result.metrics
+        info["semantic_naturalizer_shorten_disabled"] = True
+
+    return semantic_texts
+
+
+def _run_timing_agent_path(
+    task_id: str,
+    manifest_path: str,
+    segments_data: list,
+    *,
+    semantic_status: str | None = None,
+) -> list[str]:
+    """Timing Agent v1.0 — slot-fit text; sets timing_text for TTS."""
+    from engines.ai_core.timing_agent.agent import TimingAgent, load_manifest
+
+    manifest = load_manifest(manifest_path)
+
+    with STATE_LOCK:
+        source_segments = list(
+            (AUTO_TASKS.get(task_id, {}).get("info") or {}).get("source_segments") or []
+        )
+
+    agent_segments = []
+    for i, seg in enumerate(segments_data):
+        source_text = ""
+        if i < len(source_segments):
+            source_text = str(source_segments[i] or "").strip()
+        semantic = str(
+            seg.get("semantic_text")
+            or seg.get("translated_text")
+            or seg.get("text")
+            or ""
+        ).strip()
+        agent_segments.append(
+            {
+                "index": int(seg.get("index", i)),
+                "text": source_text,
+                "translated_text": str(
+                    seg.get("translated_text") or seg.get("translation_text") or ""
+                ).strip(),
+                "semantic_text": semantic,
+                "start": seg.get("start"),
+                "end": seg.get("end"),
+                "speaker": seg.get("speaker"),
+            }
+        )
+
+    state = {
+        "segments": agent_segments,
+        "semantic_agent_status": semantic_status or "success",
+    }
+    agent = TimingAgent()
+    result = agent.run(manifest, state, task_id)
+
+    out_segments = result.updated_state.get("segments") or []
+    timing_texts: list[str] = []
+
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return [
+                str(s.get("timing_text") or s.get("semantic_text") or s.get("text") or "").strip()
+                for s in segments_data
+            ]
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        sd = info.get("segments_data") or segments_data
+        for i, seg in enumerate(out_segments):
+            timing = str(seg.get("timing_text") or "").strip()
+            if not timing:
+                timing = str(seg.get("semantic_text") or "").strip()
+            timing_texts.append(timing)
+            if i < len(sd):
+                sd[i]["timing_text"] = timing
+                sd[i]["text_for_tts"] = timing
+                sd[i]["text"] = timing
+                sd[i]["plain_text"] = timing
+        info["segments_data"] = sd
+        info["timing_agent_path"] = True
+        info["timing_report_path"] = result.updated_state.get("timing_report_path")
+        info["timing_agent_status"] = result.status
+        info["timing_agent_metrics"] = result.metrics
+        info["timing_naturalizer_shorten_disabled"] = True
+
+    return timing_texts
+
+
+def _run_grammar_agent_path(
+    task_id: str,
+    manifest_path: str,
+    segments_data: list,
+    *,
+    timing_status: str | None = None,
+) -> list[str]:
+    """Grammar Agent v1.0 — grammar polish; sets grammar_text for TTS."""
+    from engines.ai_core.grammar_agent.agent import GrammarAgent, load_manifest
+
+    manifest = load_manifest(manifest_path)
+
+    with STATE_LOCK:
+        source_segments = list(
+            (AUTO_TASKS.get(task_id, {}).get("info") or {}).get("source_segments") or []
+        )
+
+    agent_segments = []
+    for i, seg in enumerate(segments_data):
+        source_text = ""
+        if i < len(source_segments):
+            source_text = str(source_segments[i] or "").strip()
+        timing = str(
+            seg.get("timing_text")
+            or seg.get("semantic_text")
+            or seg.get("translated_text")
+            or seg.get("text")
+            or ""
+        ).strip()
+        agent_segments.append(
+            {
+                "index": int(seg.get("index", i)),
+                "text": source_text,
+                "translated_text": str(
+                    seg.get("translated_text") or seg.get("translation_text") or ""
+                ).strip(),
+                "semantic_text": str(
+                    seg.get("semantic_text")
+                    or seg.get("translated_text")
+                    or ""
+                ).strip(),
+                "timing_text": timing,
+                "start": seg.get("start"),
+                "end": seg.get("end"),
+                "speaker": seg.get("speaker"),
+            }
+        )
+
+    state = {
+        "segments": agent_segments,
+        "timing_agent_status": timing_status or "success",
+    }
+    agent = GrammarAgent()
+    result = agent.run(manifest, state, task_id)
+
+    out_segments = result.updated_state.get("segments") or []
+    grammar_texts: list[str] = []
+
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return [
+                str(
+                    s.get("grammar_text")
+                    or s.get("timing_text")
+                    or s.get("semantic_text")
+                    or s.get("text")
+                    or ""
+                ).strip()
+                for s in segments_data
+            ]
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        sd = info.get("segments_data") or segments_data
+        for i, seg in enumerate(out_segments):
+            grammar = str(seg.get("grammar_text") or "").strip()
+            if not grammar:
+                grammar = str(seg.get("timing_text") or "").strip()
+            grammar_texts.append(grammar)
+            if i < len(sd):
+                sd[i]["grammar_text"] = grammar
+                sd[i]["text_for_tts"] = grammar
+                sd[i]["text"] = grammar
+                sd[i]["plain_text"] = grammar
+        info["segments_data"] = sd
+        info["grammar_agent_path"] = True
+        info["grammar_report_path"] = result.updated_state.get("grammar_report_path")
+        info["grammar_agent_status"] = result.status
+        info["grammar_agent_metrics"] = result.metrics
+        info["grammar_naturalizer_shorten_disabled"] = True
+
+    return grammar_texts
+
+
+def _run_quality_agent_path(
+    task_id: str,
+    manifest_path: str,
+    segments_data: list,
+    *,
+    grammar_status: str | None = None,
+) -> list[dict]:
+    """Quality Agent v1.0 — audit segments; gate TTS on quality_decision."""
+    from engines.ai_core.quality_agent.agent import QualityAgent, load_manifest
+
+    manifest = load_manifest(manifest_path)
+
+    with STATE_LOCK:
+        source_segments = list(
+            (AUTO_TASKS.get(task_id, {}).get("info") or {}).get("source_segments") or []
+        )
+        info = AUTO_TASKS.get(task_id, {}).get("info") or {}
+        timing_report_path = info.get("timing_report_path")
+        timing_metrics = info.get("timing_agent_metrics")
+
+    agent_segments = []
+    for i, seg in enumerate(segments_data):
+        source_text = ""
+        if i < len(source_segments):
+            source_text = str(source_segments[i] or "").strip()
+        agent_segments.append(
+            {
+                "index": int(seg.get("index", i)),
+                "text": source_text,
+                "translated_text": str(
+                    seg.get("translated_text") or seg.get("translation_text") or ""
+                ).strip(),
+                "semantic_text": str(
+                    seg.get("semantic_text")
+                    or seg.get("translated_text")
+                    or ""
+                ).strip(),
+                "timing_text": str(
+                    seg.get("timing_text")
+                    or seg.get("semantic_text")
+                    or seg.get("translated_text")
+                    or ""
+                ).strip(),
+                "grammar_text": str(
+                    seg.get("grammar_text")
+                    or seg.get("timing_text")
+                    or ""
+                ).strip(),
+                "start": seg.get("start"),
+                "end": seg.get("end"),
+                "speaker": seg.get("speaker"),
+            }
+        )
+
+    state = {
+        "segments": agent_segments,
+        "grammar_agent_status": grammar_status or "success",
+        "timing_report_path": timing_report_path,
+        "timing_agent_metrics": timing_metrics,
+    }
+    agent = QualityAgent()
+    result = agent.run(manifest, state, task_id)
+
+    out_segments = result.updated_state.get("segments") or []
+    quality_rows: list[dict] = []
+
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return out_segments
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        sd = info.get("segments_data") or segments_data
+        for i, seg in enumerate(out_segments):
+            quality_rows.append(
+                {
+                    "index": seg.get("index", i),
+                    "quality_decision": seg.get("quality_decision"),
+                    "quality_passed": seg.get("quality_passed"),
+                    "quality_scores": seg.get("quality_scores"),
+                    "quality_retry_count": seg.get("quality_retry_count"),
+                    "quality_routed_to_agent": seg.get("quality_routed_to_agent"),
+                    "quality_reasons": seg.get("quality_reasons"),
+                }
+            )
+            if i < len(sd):
+                for key in (
+                    "quality_decision",
+                    "quality_passed",
+                    "quality_scores",
+                    "quality_retry_count",
+                    "quality_routed_to_agent",
+                    "quality_reasons",
+                    "quality_fallback_text",
+                ):
+                    if key in seg:
+                        sd[i][key] = seg[key]
+                # TTS uses grammar_text for ACCEPT/WARNING/FALLBACK; block FAIL unless debug
+                decision = str(seg.get("quality_decision") or "ACCEPT").upper()
+                passed = bool(seg.get("quality_passed"))
+                if passed or result.metrics.get("debug_mode"):
+                    tts_text = str(
+                        seg.get("quality_fallback_text")
+                        or seg.get("grammar_text")
+                        or sd[i].get("grammar_text")
+                        or ""
+                    ).strip()
+                    if tts_text:
+                        sd[i]["text_for_tts"] = tts_text
+                        sd[i]["text"] = tts_text
+                        sd[i]["plain_text"] = tts_text
+                else:
+                    sd[i]["tts_blocked"] = True
+                    sd[i]["text_for_tts"] = ""
+        info["segments_data"] = sd
+        info["quality_agent_path"] = True
+        info["quality_report_path"] = result.updated_state.get("quality_report_path")
+        info["quality_agent_status"] = result.status
+        info["quality_agent_metrics"] = result.metrics
+        info["quality_summary"] = result.updated_state.get("quality_summary")
+
+    return quality_rows
+
+
+def _build_orchestrator_agent_segments(task_id: str, segments_data: list) -> list[dict]:
+    """Build agent segment rows for orchestrator state."""
+    with STATE_LOCK:
+        source_segments = list(
+            (AUTO_TASKS.get(task_id, {}).get("info") or {}).get("source_segments") or []
+        )
+    agent_segments = []
+    for i, seg in enumerate(segments_data):
+        source_text = ""
+        if i < len(source_segments):
+            source_text = str(source_segments[i] or "").strip()
+        agent_segments.append(
+            {
+                "index": int(seg.get("index", i)),
+                "text": source_text,
+                "translated_text": str(
+                    seg.get("translated_text")
+                    or seg.get("translation_text")
+                    or seg.get("text")
+                    or ""
+                ).strip(),
+                "semantic_text": str(seg.get("semantic_text") or "").strip(),
+                "timing_text": str(seg.get("timing_text") or "").strip(),
+                "grammar_text": str(seg.get("grammar_text") or "").strip(),
+                "start": seg.get("start"),
+                "end": seg.get("end"),
+                "speaker": seg.get("speaker"),
+            }
+        )
+    return agent_segments
+
+
+def _apply_orchestrator_segments_to_task(
+    task_id: str,
+    out_segments: list[dict],
+    *,
+    agent_name: str,
+) -> list[str]:
+    """Merge orchestrator segment output into task segments_data."""
+    field_chain = {
+        "semantic": ("semantic_text", "translated_text"),
+        "timing": ("timing_text", "semantic_text"),
+        "grammar": ("grammar_text", "timing_text"),
+        "quality": ("grammar_text",),
+    }
+    primary, *fallbacks = field_chain.get(agent_name, ("text",))
+
+    texts: list[str] = []
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return [
+                str(s.get(primary) or s.get("text") or "").strip() for s in out_segments
+            ]
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        sd = list(info.get("segments_data") or [])
+        for i, seg in enumerate(out_segments):
+            value = str(seg.get(primary) or "").strip()
+            if not value:
+                for fb in fallbacks:
+                    value = str(seg.get(fb) or "").strip()
+                    if value:
+                        break
+            texts.append(value)
+            if i < len(sd):
+                if agent_name in ("semantic", "timing", "grammar") and value:
+                    sd[i][primary] = value
+                    sd[i]["text_for_tts"] = value
+                    sd[i]["text"] = value
+                    sd[i]["plain_text"] = value
+                if agent_name == "quality":
+                    for key in (
+                        "quality_decision",
+                        "quality_passed",
+                        "quality_scores",
+                        "quality_retry_count",
+                        "quality_routed_to_agent",
+                        "quality_reasons",
+                        "quality_fallback_text",
+                    ):
+                        if key in seg:
+                            sd[i][key] = seg[key]
+        info["segments_data"] = sd
+    return texts
+
+
+def _run_orchestrator_text_agents(
+    task_id: str,
+    video_path: str,
+    manifest_path: str,
+    segments_data: list,
+) -> list[str] | None:
+    """Run semantic→quality via AICoreOrchestrator (manifest path)."""
+    from engines.ai_core.orchestrator import AICoreOrchestrator
+
+    with STATE_LOCK:
+        info = dict((AUTO_TASKS.get(task_id, {}) or {}).get("info") or {})
+
+    if info.get("quality_agent_path"):
+        return None
+
+    agent_segments = _build_orchestrator_agent_segments(task_id, segments_data)
+    state = {
+        "scope": "text",
+        "start_after": "translation",
+        "stop_before": "voice",
+        "segments": agent_segments,
+        "segments_data": segments_data,
+        "translation_agent_status": info.get("translation_agent_status") or "success",
+        "semantic_agent_path": bool(info.get("semantic_agent_path")),
+        "timing_agent_path": bool(info.get("timing_agent_path")),
+        "grammar_agent_path": bool(info.get("grammar_agent_path")),
+        "quality_agent_path": bool(info.get("quality_agent_path")),
+        "timing_report_path": info.get("timing_report_path"),
+        "timing_agent_metrics": info.get("timing_agent_metrics"),
+        "grammar_agent_status": info.get("grammar_agent_status") or "success",
+        "pipeline_mode": "streaming",
+    }
+
+    orch = AICoreOrchestrator(output_dir=OUTPUT_DIR)
+    with _blocking_progress_heartbeat(
+        task_id,
+        "ai_core",
+        interval=15.0,
+        messages=[
+            "AI Core: семантика и качество текста",
+            "AI Core: обработка сегментов (LLM)",
+            "AI Core: адаптация под тайминг",
+        ],
+    ):
+        result = orch.run_pipeline(task_id, video_path, manifest_path, state)
+
+    out_segments = list((result.updated_state or {}).get("segments") or agent_segments)
+    segments_texts = [
+        str(
+            s.get("grammar_text")
+            or s.get("timing_text")
+            or s.get("semantic_text")
+            or s.get("translated_text")
+            or s.get("text")
+            or ""
+        ).strip()
+        for s in out_segments
+    ]
+
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return segments_texts
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        for flag in (
+            "semantic_agent_path",
+            "timing_agent_path",
+            "grammar_agent_path",
+            "quality_agent_path",
+            "reviewer_agent_path",
+        ):
+            if result.updated_state.get(flag) or result.agent_results.get(
+                flag.replace("_agent_path", "")
+            ):
+                info[flag] = True
+        for key in (
+            "semantic_agent_status",
+            "timing_agent_status",
+            "grammar_agent_status",
+            "quality_agent_status",
+            "semantic_report_path",
+            "semantic_quality_report_path",
+            "semantic_quality_summary",
+            "timing_report_path",
+            "grammar_report_path",
+            "quality_report_path",
+            "quality_summary",
+            "reviewer_report_path",
+            "reviewer_report",
+            "reviewer_loop_log",
+        ):
+            if result.updated_state.get(key):
+                info[key] = result.updated_state[key]
+        info["orchestrator_text_result"] = {
+            "status": result.status,
+            "warnings": result.warnings,
+            "errors": result.errors,
+            "execution_time_ms": result.execution_time_ms,
+        }
+        info["pipeline_mode"] = str(
+            (result.updated_state or {}).get("pipeline_mode") or "streaming"
+        )
+        sd = info.get("segments_data") or segments_data
+        for i, seg in enumerate(out_segments):
+            if i >= len(sd):
+                continue
+            for field in (
+                "semantic_text",
+                "timing_text",
+                "grammar_text",
+                "quality_decision",
+                "quality_passed",
+                "slot_fit_score",
+                "grammar_score",
+                "grammar_scores",
+                "reviewer_approved",
+                "reviewer_issues",
+                "reviewer_retry_count",
+                "reviewer_route_to",
+                "final_text",
+                "voice_input",
+            ):
+                if field in seg:
+                    sd[i][field] = seg[field]
+            tts_text = str(
+                seg.get("grammar_text")
+                or seg.get("timing_text")
+                or seg.get("semantic_text")
+                or sd[i].get("text")
+                or ""
+            ).strip()
+            if tts_text:
+                sd[i]["text_for_tts"] = tts_text
+                sd[i]["text"] = tts_text
+                sd[i]["plain_text"] = tts_text
+        info["segments_data"] = sd
+        info["semantic_naturalizer_shorten_disabled"] = True
+        info["timing_naturalizer_shorten_disabled"] = True
+
+        from engines.translation_validation import (
+            build_validation_rows_from_info,
+            sync_final_text_to_task_info,
+            write_translation_validation_json,
+        )
+
+        sync_final_text_to_task_info(info)
+        try:
+            from engines.pipeline_language_gate import validate_segments_target_language
+            from engines.translation_validation import recover_mismatched_segments
+
+            tgt_lang = str(info.get("target_lang") or "uk")
+            src_rows = list(info.get("source_segments") or [])
+            lang_issues = validate_segments_target_language(
+                sd,
+                source_segments=src_rows,
+                target_lang=tgt_lang,
+            )
+            if lang_issues:
+                recovered, still_bad = recover_mismatched_segments(
+                    info,
+                    lang_issues,
+                    task_id=task_id,
+                    source_lang=str(info.get("source_lang") or ""),
+                    target_lang=tgt_lang,
+                    app_dir=APP_DIR,
+                )
+                sync_final_text_to_task_info(info)
+                bad_indices = {int(x.get("index", -1)) for x in still_bad}
+                for i, seg in enumerate(sd):
+                    if i in bad_indices:
+                        seg["requires_llm_adaptation"] = True
+                        seg["adaptation_status"] = "LANGUAGE_MISMATCH_PENDING"
+                info["post_orchestrator_lang_recovery"] = {
+                    "recovered": recovered,
+                    "remaining": len(still_bad),
+                }
+                logger.warning(
+                    "Task %s: post-orchestrator language recovery fixed=%d remaining=%d",
+                    task_id,
+                    recovered,
+                    len(still_bad),
+                )
+        except Exception as lang_exc:
+            logger.debug("post-orchestrator language recovery skipped: %s", lang_exc)
+        try:
+            project_uuid = str(
+                (result.updated_state or {}).get("project_uuid")
+                or info.get("project_uuid")
+                or ""
+            )
+            validation_rows = build_validation_rows_from_info(info)
+            write_translation_validation_json(
+                task_id,
+                validation_rows,
+                project_uuid=project_uuid,
+                app_dir=APP_DIR,
+            )
+            info["translation_validation_path"] = str(
+                APP_DIR / "output" / "diagnostics" / task_id / "translation_validation.json"
+            )
+        except Exception as val_exc:
+            logger.debug("translation_validation.json skipped: %s", val_exc)
+
+    try:
+        from engines.ai_core.report import build_and_save_ai_core_report
+
+        build_and_save_ai_core_report(task_id, task_info=info)
+    except Exception:
+        pass
+
+    return segments_texts
+
+
+def _streaming_segment_tts_handler(
+    list_index: int,
+    segment_index: int,
+    seg: dict,
+    manifest: dict,
+    state: dict,
+    task_id: str,
+) -> dict:
+    """Per-segment TTS for AI Core 4.2 streaming voice pool."""
+    from engines.pipeline_integrity.tts_segment_fields import (
+        apply_tts_synthesis_result,
+        measure_playback_duration_ms,
+        resolve_segment_text_for_tts,
+    )
+
+    out = dict(seg)
+    voice = str(state.get("voice") or "uk-UA-OstapNeural")
+    text = str(
+        out.get("text_for_tts")
+        or out.get("voice_input")
+        or resolve_segment_text_for_tts(out)
+        or ""
+    ).strip()
+    if not text:
+        apply_tts_synthesis_result(
+            out,
+            tts_text="",
+            tts_file_path=None,
+            status="empty",
+        )
+        return out
+
+    new_file = _regen_segment_tts_simple(
+        text,
+        voice,
+        tts_rate=state.get("tts_rate"),
+        tts_pitch=state.get("tts_pitch"),
+    )
+    if not new_file:
+        apply_tts_synthesis_result(
+            out,
+            tts_text=text,
+            tts_file_path=None,
+            status="empty",
+        )
+        return out
+
+    task_info = state.get("task_info") or {}
+    audio_path = _resolve_segment_audio_path(new_file, task_info)
+    duration = measure_playback_duration_ms(audio_path)
+    apply_tts_synthesis_result(
+        out,
+        tts_text=text,
+        tts_file_path=new_file,
+        playback_duration=duration or None,
+        status="generated",
+    )
+    return out
+
+
+def _run_streaming_voice_for_task(
+    task_id: str,
+    segments_data: list,
+    *,
+    voice: str,
+    target_lang: str,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    manifest_path: str = "",
+) -> bool:
+    """Parallel per-segment TTS — replaces batch synthesis when streaming mode is on."""
+    from engines.ai_core.streaming_pipeline.voice_stage import StreamingVoicePipeline
+    from engines.ai_core.translation_agent.agent import load_manifest
+
+    manifest: dict = {}
+    if manifest_path and Path(manifest_path).is_file():
+        try:
+            manifest = load_manifest(manifest_path)
+        except Exception:
+            manifest = {}
+    if not manifest:
+        manifest = {"target_lang": target_lang}
+
+    with STATE_LOCK:
+        info = dict((AUTO_TASKS.get(task_id, {}) or {}).get("info") or {})
+
+    agent_segments = _build_orchestrator_agent_segments(task_id, segments_data)
+    for i, row in enumerate(agent_segments):
+        if i < len(segments_data):
+            sd = segments_data[i]
+            for key in ("text", "text_for_tts", "plain_text", "voice_input", "final_text"):
+                if sd.get(key):
+                    row[key] = sd[key]
+
+    state = {
+        "segments": agent_segments,
+        "voice": voice,
+        "tts_rate": tts_rate,
+        "tts_pitch": tts_pitch,
+        "task_info": {**info, "task_id": task_id},
+        "segment_tts_handler": _streaming_segment_tts_handler,
+        "target_lang": target_lang,
+        "pipeline_mode": "streaming",
+    }
+
+    pipe = StreamingVoicePipeline(manifest, state, task_id, app_dir=APP_DIR)
+    result = pipe.run()
+    out_segments = list((result.updated_state or {}).get("segments") or agent_segments)
+
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return bool(result.updated_state.get("streaming_voice_done"))
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        info["streaming_voice_done"] = True
+        info["voice_agent_path"] = True
+        info["voice_agent_status"] = result.status
+        info["streaming_voice_metrics"] = dict(result.metrics or {})
+        sd = info.get("segments_data") or segments_data
+        for i, seg in enumerate(out_segments):
+            if i >= len(sd):
+                continue
+            for field in (
+                "tts_file_path",
+                "playback_duration",
+                "tts_text",
+                "status",
+            ):
+                if field in seg:
+                    sd[i][field] = seg[field]
+        info["segments_data"] = sd
+
+    logger.info(
+        "Task %s: streaming voice done — synthesized=%s failed=%s ms=%s",
+        task_id,
+        result.metrics.get("tts_segments_done"),
+        result.metrics.get("tts_segments_failed"),
+        result.execution_time_ms,
+    )
+    return bool(result.updated_state.get("streaming_voice_done"))
+
+
+def _run_voice_verification_for_task(
+    task_id: str,
+    segments_data: list,
+    task_info: dict,
+    *,
+    voice: str,
+    target_lang: str,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    manifest_path: str = "",
+) -> None:
+    """Run Voice Verification Agent after TTS — ASR check before Mix / Dub Studio."""
+    from engines.ai_core.voice_verification_agent import VoiceVerificationAgent
+    from engines.ai_core.translation_agent.agent import load_manifest
+    from engines.pipeline_integrity.tts_segment_fields import (
+        apply_tts_synthesis_result,
+        resolve_segment_text_for_tts,
+    )
+
+    manifest: dict = {}
+    if manifest_path and Path(manifest_path).is_file():
+        try:
+            manifest = load_manifest(manifest_path)
+        except Exception:
+            manifest = {}
+    if not manifest:
+        manifest = {
+            "source_lang": task_info.get("source_lang") or "en",
+            "target_lang": target_lang,
+            "project_uuid": task_info.get("project_uuid") or "",
+        }
+
+    agent_segments = _build_orchestrator_agent_segments(task_id, segments_data)
+    active_count = sum(
+        1 for s in segments_data if s.get("merged_into") is None
+    )
+    for i, seg in enumerate(segments_data):
+        if i >= len(agent_segments):
+            break
+        row = agent_segments[i]
+        row["file"] = seg.get("file") or seg.get("fitted_file")
+        row["tts_file_path"] = seg.get("tts_file_path") or row.get("file")
+        row["tts_text"] = seg.get("tts_text") or resolve_segment_text_for_tts(seg)
+        row["playback_duration"] = seg.get("playback_duration") or seg.get("tts_ms")
+        row["start_ms"] = seg.get("start_ms")
+        row["end_ms"] = seg.get("end_ms")
+        row["start"] = seg.get("start")
+        row["end"] = seg.get("end")
+
+    def _resolve_for_verification(seg: dict):
+        fn = seg.get("tts_file_path") or seg.get("file") or seg.get("fitted_file")
+        return _resolve_segment_audio_path(fn, task_info)
+
+    def _regen_for_verification(idx: int, seg: dict, reason: str):
+        _update_progress_detail(
+            task_id,
+            phase="voice_verification",
+            tts_substep="voice_verify",
+            current_segment=idx + 1,
+            total_segments=active_count or len(segments_data),
+            verification_route=reason,
+        )
+        text = resolve_segment_text_for_tts(seg)
+        if not text.strip():
+            return None
+        new_file = _regen_segment_tts_simple(
+            text,
+            voice,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+        )
+        if not new_file:
+            return None
+        try:
+            from pydub import AudioSegment
+
+            playback = int(len(AudioSegment.from_file(str(_artifacts_dir() / new_file))))
+        except Exception:
+            playback = 0
+        if idx < len(segments_data):
+            sd = segments_data[idx]
+            sd["file"] = new_file
+            sd["text_for_tts"] = text
+            apply_tts_synthesis_result(
+                sd,
+                tts_text=text,
+                tts_file_path=new_file,
+                playback_duration=playback,
+                status="generated",
+            )
+            seg = {**seg, **sd}
+        else:
+            apply_tts_synthesis_result(
+                seg,
+                tts_text=text,
+                tts_file_path=new_file,
+                playback_duration=playback,
+                status="generated",
+            )
+            seg["file"] = new_file
+        seg["voice_verification_regen_reason"] = reason
+        logger.info(
+            "Task %s: voice verification regen seg=%s reason=%s file=%s",
+            task_id,
+            idx,
+            reason,
+            new_file,
+        )
+        return seg
+
+    def _voice_verification_progress(
+        *,
+        segment_index: int,
+        position: int,
+        total: int,
+        attempt: int,
+        route: str,
+    ) -> None:
+        _update_progress_detail(
+            task_id,
+            phase="voice_verification",
+            tts_substep="voice_verify",
+            current_segment=position,
+            total_segments=total,
+            segments_done=max(0, position - 1),
+            verification_attempt=attempt or None,
+            verification_route=route or None,
+        )
+
+    _update_progress_detail(
+        task_id,
+        phase="voice_verification",
+        tts_substep="voice_verify",
+        total_segments=active_count or len(segments_data),
+        segments_done=0,
+        current_segment=0,
+    )
+
+    state = {
+        "segments": agent_segments,
+        "segments_data": segments_data,
+        "target_lang": target_lang,
+        "voice_verification_resolve_audio": _resolve_for_verification,
+        "voice_verification_regen": _regen_for_verification,
+        "voice_verification_progress": _voice_verification_progress,
+    }
+
+    agent = VoiceVerificationAgent(output_dir=OUTPUT_DIR)
+    result = agent.run(manifest, state, task_id)
+
+    out_segments = list((result.updated_state or {}).get("segments") or agent_segments)
+    for i, seg in enumerate(out_segments):
+        if i >= len(segments_data):
+            continue
+        for key in (
+            "semantic_text",
+            "timing_text",
+            "grammar_text",
+            "tts_text",
+            "file",
+            "tts_file_path",
+            "playback_duration",
+            "voice_verification_passed",
+            "voice_verification_metrics",
+            "voice_verification_issues",
+            "voice_verification_retry_count",
+            "voice_verification_asr_text",
+            "voice_verification_route_to",
+        ):
+            if key in seg:
+                segments_data[i][key] = seg[key]
+
+    task_info["voice_verification_agent_path"] = True
+    task_info["voice_verification_passed"] = bool(
+        (result.updated_state or {}).get("voice_verification_passed")
+    )
+    task_info["voice_verification_report_path"] = (result.updated_state or {}).get(
+        "voice_verification_report_path"
+    )
+    task_info["voice_verification_report"] = (result.updated_state or {}).get(
+        "voice_verification_report"
+    )
+    task_info["voice_verification_result"] = {
+        "status": result.status,
+        "warnings": result.warnings,
+        "errors": result.errors,
+    }
+
+
+def _segments_data_from_agent(segments_data: list[dict], info: dict) -> list[dict]:
+    """Map agent segments (translated_text) into pipeline segments_data rows."""
+    old_by_idx = {
+        int(s.get("index", i)): s for i, s in enumerate(info.get("segments_data") or [])
+    }
+    source_word_maps = info.get("source_word_maps") or []
+    source_segments = list(info.get("source_segments") or [])
+    out: list[dict] = []
+    for i, seg in enumerate(segments_data):
+        original = ""
+        if i < len(source_segments):
+            original = str(source_segments[i] or "").strip()
+        if not original:
+            original = str(seg.get("text") or "").strip()
+        working = str(seg.get("translated_text") or "").strip()
+        entry: dict = {
+            "index": i,
+            "original_text": original,
+            "text": working,
+            "plain_text": working,
+            "translation_text": working,
+            "translated_text": working,
+            "file": None,
+        }
+        old = old_by_idx.get(i) or {}
+        if old.get("segment_id"):
+            entry["segment_id"] = old["segment_id"]
+        if seg.get("start") is not None:
+            entry["start"] = seg["start"]
+        if seg.get("end") is not None:
+            entry["end"] = seg["end"]
+        if seg.get("speaker") is not None:
+            entry["speaker"] = seg["speaker"]
+        if i < len(source_word_maps):
+            entry["source_word_map"] = source_word_maps[i]
+        elif old.get("source_word_map"):
+            entry["source_word_map"] = old["source_word_map"]
+        if seg.get("confidence"):
+            entry["translation_confidence"] = seg["confidence"]
+        out.append(entry)
+    return out
+
+
+def _prepare_translated_segments(
+    task_id: str,
+    source_segments: list,
+    timing_map: list,
+    translation_source_lang: str,
+    target_lang: str,
+    ui_lang: str = "ru",
+    translate_meta: list | None = None,
+) -> list[str]:
+    """
+    Гибридный перевод: пакеты с контекстом + натурализация + выравнивание timing_map.
+    Никогда не бросает ValueError — только лог + авто-recovery.
+    """
+    from engines.cleaner import align_segments_to_timing_map, split_by_timing_map
+
+    lp = LOCALIZATION.get(ui_lang, LOCALIZATION["ru"])
+
+    if not source_segments:
+        logger.error("Task %s: source_segments empty before translate", task_id)
+        raise RuntimeError(lp["empty_stt"])
+
+    logger.info(
+        "Task %s: natural translate %d segments %s -> %s",
+        task_id,
+        len(source_segments),
+        translation_source_lang,
+        target_lang,
+    )
+
+    if translate_meta is None:
+        translate_meta = []
+
+    def _translate_progress(done: int, total: int) -> None:
+        frac = done / max(total, 1)
+        llm_meta: dict = {}
+        try:
+            from engines.llm_adaptation_mode import detect_capabilities
+
+            caps = detect_capabilities()
+            from engines.llm_diagnostics import format_model_display, provider_label
+
+            llm_meta = {
+                "llm_model": caps.get("model"),
+                "llm_provider": caps.get("provider"),
+                "llm_model_display": format_model_display(
+                    str(caps.get("model") or ""), provider=str(caps.get("provider") or "")
+                ),
+                "llm_provider_label": provider_label(str(caps.get("provider") or "")),
+            }
+        except Exception:
+            pass
+        with STATE_LOCK:
+            t = AUTO_TASKS.get(task_id)
+            if t and t.get("status") == "running":
+                t["progress"] = round(55.0 + frac * 8.0, 1)
+        _update_progress_detail(
+            task_id,
+            phase="translate",
+            segments_done=done,
+            total_segments=total,
+            current_segment=min(done + 1, total) if total else done,
+            operation="translation",
+            eta_sec=_estimate_eta_sec(task_id, frac),
+            live_message=None,
+            **llm_meta,
+        )
+
+    # Event Bus path (TZ Stage 1) — agents communicate only via publish/subscribe.
+    try:
+        from core.event_pipeline import event_bus_enabled, run_translation_chain_sync
+
+        if event_bus_enabled():
+            logger.info("Task %s: translation via Event Bus", task_id)
+            bus_result = run_translation_chain_sync(
+                task_id=task_id,
+                source_segments=source_segments,
+                timing_map=timing_map,
+                source_lang=translation_source_lang,
+                target_lang=target_lang,
+                app_dir=APP_DIR,
+                translate_meta=translate_meta,
+                progress_cb=_translate_progress,
+            )
+            if not bus_result.ok:
+                err = "; ".join(bus_result.errors) or "event_bus_translation_failed"
+                logger.error("Task %s: Event Bus translation failed: %s", task_id, err)
+                raise RuntimeError(err)
+            segments = list(bus_result.segments)
+            with STATE_LOCK:
+                if task_id in AUTO_TASKS:
+                    if bus_result.translation_audits:
+                        AUTO_TASKS[task_id]["info"]["translation_audits"] = (
+                            bus_result.translation_audits
+                        )
+                    meta = bus_result.translation_meta or {}
+                    if meta.get("translation_trace_log"):
+                        AUTO_TASKS[task_id]["info"]["translation_trace_log"] = meta[
+                            "translation_trace_log"
+                        ]
+                    AUTO_TASKS[task_id]["info"]["timing_aware_applied"] = bool(
+                        meta.get("timing_aware_applied")
+                    )
+                    AUTO_TASKS[task_id]["info"]["timing_aware_executed"] = bool(
+                        meta.get("timing_aware_executed")
+                    )
+                    AUTO_TASKS[task_id]["info"]["naturalizer_applied"] = bool(
+                        meta.get("naturalizer_applied")
+                    )
+                    AUTO_TASKS[task_id]["info"]["naturalizer_executed"] = bool(
+                        meta.get("naturalizer_executed")
+                    )
+                    AUTO_TASKS[task_id]["info"]["pipeline_stages"] = (
+                        meta.get("pipeline_stages") or {}
+                    )
+                    AUTO_TASKS[task_id]["info"]["timing_aware_records"] = (
+                        meta.get("timing_aware_records") or []
+                    )
+                    AUTO_TASKS[task_id]["info"]["event_bus"] = True
+            if timing_map and len(segments) != len(timing_map):
+                logger.error(
+                    "Task %s: segment alignment failed map=%d segments=%d",
+                    task_id,
+                    len(timing_map),
+                    len(segments),
+                )
+                raise RuntimeError(lp["segment_mismatch"])
+            logger.info(
+                "Task %s: prepared %d translated segments via Event Bus (timing_map=%d)",
+                task_id,
+                len(segments),
+                len(timing_map) if timing_map else 0,
+            )
+            return segments
+    except RuntimeError:
+        raise
+    except Exception:
+        logger.warning(
+            "Task %s: Event Bus translation unavailable, using legacy path",
+            task_id,
+            exc_info=True,
+        )
+
+    from engines.cleaner import align_segments_to_timing_map, split_by_timing_map
+    from engines.translation_pipeline import UniversalTranslationPipeline
+
+    _update_progress_detail(
+        task_id,
+        phase="translate",
+        live_message="Перевод: Marian MT → LLM адаптация…",
+        ai_core_timeout=None,
+        translation_subphase="marian_mt",
+    )
+
+    pipe = UniversalTranslationPipeline(app_dir=APP_DIR, task_id=task_id)
+
+    result = pipe.translate_segments(
+        source_segments,
+        timing_map,
+        translation_source_lang,
+        target_lang,
+        translate_meta_out=translate_meta,
+        progress_cb=_translate_progress,
+    )
+    translated_segments = result.segments
+    pipe.flush_quality_log(
+        src=translation_source_lang,
+        tgt=target_lang,
+        engines=result.meta.get("engines"),
+    )
+
+    with STATE_LOCK:
+        if task_id in AUTO_TASKS:
+            AUTO_TASKS[task_id]["info"]["translation_audits"] = pipe.quality_log.records_as_dicts()
+            if result.meta.get("translation_trace_log"):
+                AUTO_TASKS[task_id]["info"]["translation_trace_log"] = result.meta[
+                    "translation_trace_log"
+                ]
+            AUTO_TASKS[task_id]["info"]["timing_aware_applied"] = bool(
+                result.meta.get("timing_aware_applied")
+            )
+            AUTO_TASKS[task_id]["info"]["timing_aware_executed"] = bool(
+                result.meta.get("timing_aware_executed")
+            )
+            AUTO_TASKS[task_id]["info"]["naturalizer_applied"] = bool(
+                result.meta.get("naturalizer_applied")
+            )
+            AUTO_TASKS[task_id]["info"]["naturalizer_executed"] = bool(
+                result.meta.get("naturalizer_executed")
+            )
+            AUTO_TASKS[task_id]["info"]["pipeline_stages"] = (
+                result.meta.get("pipeline_stages") or {}
+            )
+            AUTO_TASKS[task_id]["info"]["timing_aware_records"] = (
+                result.meta.get("timing_aware_records") or []
+            )
+
+    segments = align_segments_to_timing_map(translated_segments, timing_map)
+
+    if timing_map and len(segments) != len(timing_map):
+        block_text = "\n".join(translated_segments)
+        segments = split_by_timing_map(block_text, timing_map)
+
+    if timing_map and len(segments) != len(timing_map):
+        logger.error(
+            "Task %s: segment alignment failed map=%d segments=%d",
+            task_id,
+            len(timing_map),
+            len(segments),
+        )
+        raise RuntimeError(lp["segment_mismatch"])
+
+    logger.info(
+        "Task %s: prepared %d translated segments (timing_map=%d)",
+        task_id,
+        len(segments),
+        len(timing_map) if timing_map else 0,
+    )
+    return segments
+
+
+def _run_pipeline(
+    task_id,
+    video_path,
+    target_lang,
+    voice,
+    model_size,
+    mix_mode,
+    mix_volumes,
+    keep_original_track,
+    dub_mode,
+    mix_volume,
+    source_lang,
+    target_duration_ms,
+    skip_translate=False,
+    ui_lang="ru",
+    segmentation_mode="timing",
+    ocr_enabled=False,
+    dub_style="modern",
+    skip_tts=False,
+    tts_rate=None,
+    tts_pitch=None,
+    content_mode="movie",
+):
+    lp = LOCALIZATION.get(ui_lang, LOCALIZATION["ru"])
+
+    # ── Project Session: isolation boundary for this dubbing run ─────────────
+    # Each task gets its own session. Old session (if any) for a previous run
+    # is NOT touched — this guarantees complete isolation between projects.
+    try:
+        from engines.dubbing_engine.project_session import create_session, finish_session
+        _session = create_session(
+            task_id=task_id,
+            output_dir=OUTPUT_DIR,
+            content_mode=content_mode,
+        )
+    except Exception as _sess_exc:
+        _session = None
+        logger.warning("[Session] could not create session: %s", _sess_exc)
+
+    profiler = None
+    from engines.model_manager.runtime import set_offline_only
+    from engines.dub_runtime import apply_ml_thread_limits
+
+    apply_ml_thread_limits()
+    set_offline_only(True)
+    _ctx_token = None
+    if _session:
+        from engines.dubbing_engine.session_adapter import _ACTIVE_ARTIFACTS
+
+        _ctx_token = _ACTIVE_ARTIFACTS.set(_session.session_dir)
+    try:
+        return _run_pipeline_inner(
+            task_id,
+            video_path,
+            target_lang,
+            voice,
+            model_size,
+            mix_mode,
+            mix_volumes,
+            keep_original_track,
+            dub_mode,
+            mix_volume,
+            source_lang,
+            target_duration_ms,
+            skip_translate=skip_translate,
+            ui_lang=ui_lang,
+            segmentation_mode=segmentation_mode,
+            ocr_enabled=ocr_enabled,
+            dub_style=dub_style,
+            skip_tts=skip_tts,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            lp=lp,
+            content_mode=content_mode,
+            project_session=_session,
+        )
+    finally:
+        set_offline_only(False)
+        if _ctx_token is not None:
+            from engines.dubbing_engine.session_adapter import _ACTIVE_ARTIFACTS
+
+            _ACTIVE_ARTIFACTS.reset(_ctx_token)
+        try:
+            if _session:
+                from engines.dubbing_engine.project_session import finish_session
+
+                finish_session(task_id)
+        except Exception:
+            pass
+
+
+def _run_agent_safe(task_id, agent_name, fn, *args, fallback_fn=None, segment_idx=None, record_success=True, **kwargs):
+    """Run agent fn; on error record to OpenDDF, use fallback or return None.
+
+    In Debug/Learning mode (IS_DEBUG_LEARNING_MODE) all agent errors are
+    downgraded to warnings and the pipeline continues. Outside debug mode the
+    behaviour is identical — callers still decide what to do with None/fallback.
+
+    Returns the function result on success, fallback_fn() result on error (if
+    provided), or None when both fail.
+    """
+    try:
+        result = fn(*args, **kwargs)
+        if record_success:
+            _open_ddf.record_agent(task_id, agent_name, called=True, success=True,
+                                   segment_idx=segment_idx)
+        return result
+    except Exception as exc:
+        _open_ddf.record_agent(task_id, agent_name, called=True, success=False,
+                               error=str(exc), fallback_used=fallback_fn is not None,
+                               segment_idx=segment_idx)
+        logger.warning("[DDF] Agent %s failed: %s — continuing", agent_name, exc)
+        if fallback_fn is not None:
+            try:
+                return fallback_fn(*args, **kwargs)
+            except Exception as fb_exc:
+                logger.warning("[DDF] Fallback for %s also failed: %s", agent_name, fb_exc)
+        return None
+
+
+def _run_ai_core_orchestrator(
+    task_id: str,
+    video_path: str,
+    manifest_path: str,
+    state: dict,
+    *,
+    agents: list[str],
+    hooks=None,
+) -> "PipelineResult":
+    """Run AI Core orchestrator subset; never raises."""
+    from engines.ai_core.orchestrator import AICoreOrchestrator, PipelineHooks
+
+    try:
+        orch = AICoreOrchestrator(hooks=hooks or PipelineHooks())
+        return orch.run_pipeline(
+            task_id,
+            video_path,
+            manifest_path,
+            state,
+            agents=agents,
+        )
+    except Exception as exc:
+        logger.warning("[Orchestrator] task %s failed: %s — continuing", task_id, exc)
+        from engines.ai_core.orchestrator import PipelineResult
+
+        return PipelineResult(
+            status="partial",
+            state=state,
+            warnings=[str(exc)],
+            errors=[str(exc)],
+        )
+
+
+def _sync_orchestrator_segments_to_task(task_id: str, state: dict, agent_name: str) -> None:
+    """Apply orchestrator segment state back to AUTO_TASKS info."""
+    segments = list(state.get("segments") or [])
+    if not segments:
+        return
+    with STATE_LOCK:
+        if task_id not in AUTO_TASKS:
+            return
+        info = AUTO_TASKS[task_id].setdefault("info", {})
+        info["segments_data"] = _segments_data_from_agent(segments, info)
+        info[f"{agent_name}_agent_path"] = True
+        info[f"{agent_name}_agent_status"] = "success"
+        if agent_name == "translation":
+            from engines.translation_validation import sync_final_text_to_task_info
+
+            sync_final_text_to_task_info(info)
+
+
+def _run_pipeline_inner(
+    task_id,
+    video_path,
+    target_lang,
+    voice,
+    model_size,
+    mix_mode,
+    mix_volumes,
+    keep_original_track,
+    dub_mode,
+    mix_volume,
+    source_lang,
+    target_duration_ms,
+    skip_translate=False,
+    ui_lang="ru",
+    segmentation_mode="timing",
+    ocr_enabled=False,
+    dub_style="modern",
+    skip_tts=False,
+    tts_rate=None,
+    tts_pitch=None,
+    lp=None,
+    content_mode="movie",
+    project_session=None,
+):
+    if lp is None:
+        lp = LOCALIZATION.get(ui_lang, LOCALIZATION["ru"])
+    profiler = None
+    pipeline_timer = None
+    try:
+        with STATE_LOCK:
+            task = AUTO_TASKS[task_id]
+            control = AUTO_TASK_CONTROLS[task_id]
+            if project_session:
+                from engines.dubbing_engine.session_adapter import SessionContextAdapter
+
+                _session_ctx = SessionContextAdapter(project_session)
+                _session_ctx.bind_task_info(task["info"])
+                project_session.set_launch_config(
+                    target_lang=target_lang,
+                    voice=voice,
+                    model_size=model_size,
+                    content_mode=content_mode,
+                    dub_style=dub_style,
+                )
+                base_id = _session_ctx.base_id
+            else:
+                base_id = uuid.uuid4().hex[:8]
+            task["info"]["content_mode"] = content_mode
+
+        from engines.dubbing_engine.pipeline_failure_diag import (
+            RuntimeDiagnosticsRecorder,
+            STAGE_AUDIO_EXTRACTION,
+            STAGE_AUDIO_MIX,
+            STAGE_FFMPEG,
+            STAGE_SOURCE_SEPARATION,
+            STAGE_STT,
+            STAGE_TIMING,
+            STAGE_TRANSLATION,
+            STAGE_TTS,
+        )
+
+        runtime_diag = RuntimeDiagnosticsRecorder(task_id)
+        try:
+            from engines.pipeline_integrity.passive_openddf import start_diagnostic_run
+
+            with STATE_LOCK:
+                task = AUTO_TASKS.get(task_id)
+                info = dict((task or {}).get("info") or {})
+            start_diagnostic_run(task_id, task_info=info)
+            with STATE_LOCK:
+                task = AUTO_TASKS.get(task_id)
+                if task:
+                    task.setdefault("info", {})["openddf_run_id"] = task_id
+                    task["info"]["passive_openddf"] = {
+                        "run_id": task_id,
+                        "mode": "passive",
+                    }
+        except ImportError:
+            pass
+        _set_step(task_id, "preparing", 1.0)
+        _update_progress_detail(task_id, phase="preparing", live_message="Подготовка пайплайна…")
+
+        with STATE_LOCK:
+            _pinfo = AUTO_TASKS[task_id].setdefault("info", {})
+            _pinfo["pipeline_started_at"] = time.time()
+            _pinfo["task_id"] = task_id
+            _pinfo["developer_preview_enabled"] = _dev_preview_enabled(_pinfo)
+            if _pinfo.get("developer_preview_enabled"):
+                from engines.developer_preview import record_agent_event
+
+                record_agent_event(_pinfo, "extract", "running")
+
+        # ── Planner Agent v3.0 (READ ONLY, before Whisper) ─────────────────
+        try:
+            from engines.ai_core.planner_agent import PlannerAgent
+            from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE
+
+            _update_progress_detail(task_id, phase="preparing", live_message="Планирование…")
+            planner = PlannerAgent()
+            with _blocking_progress_heartbeat(
+                task_id,
+                "preparing",
+                interval=25.0,
+                messages=[
+                    "Планирование…",
+                    "Анализ видео…",
+                    "Подготовка стратегии обработки…",
+                ],
+            ):
+                plan_result = planner.run(
+                    video_path, target_lang, source_lang, task_id=task_id
+                )
+            with STATE_LOCK:
+                task = AUTO_TASKS[task_id]
+                task["info"]["project_uuid"] = plan_result.updated_state["project_uuid"]
+                task["info"]["manifest_path"] = plan_result.updated_state["manifest_path"]
+                task["info"]["planner_report_path"] = plan_result.updated_state.get(
+                    "planner_report_path"
+                )
+                task["info"]["processing_strategy"] = plan_result.updated_state.get(
+                    "processing_strategy"
+                )
+                task["info"]["planner_status"] = plan_result.status
+            if plan_result.status == "error" and not IS_DEBUG_LEARNING_MODE():
+                critical = any(
+                    e.startswith("video_not_found") for e in plan_result.errors
+                )
+                if critical:
+                    return _fail(
+                        task_id,
+                        plan_result.errors,
+                        stage=STAGE_AUDIO_EXTRACTION,
+                        error_code="PLANNER_CRITICAL",
+                    )
+            elif plan_result.warnings:
+                logger.warning(
+                    "Task %s: planner warnings: %s", task_id, plan_result.warnings
+                )
+        except Exception as _planner_exc:
+            logger.warning("Task %s: planner agent skipped: %s", task_id, _planner_exc)
+
+        runtime_diag.stage_begin(STAGE_AUDIO_EXTRACTION)
+
+        from engines.dev_diagnostics import DevDiagnostics
+        from engines.timing_fit import cleanup_stale_work_dirs
+        from engines.pipeline_profiler import PipelineProfiler
+        from engines.pipeline_timer import PipelineTimer
+        from engines.hardware_probe import probe_hardware
+
+        _update_progress_detail(task_id, phase="preparing", live_message="Инициализация…")
+        with _blocking_progress_heartbeat(
+            task_id,
+            "preparing",
+            interval=25.0,
+            messages=[
+                "Инициализация…",
+                "Проверка оборудования…",
+                "Подготовка к извлечению аудио…",
+            ],
+        ):
+            dev_diag = DevDiagnostics(task_id, APP_DIR)
+            from engines.word_timing_map.config import current_phase_label, sync_mode
+            from engines.word_timing_map.phase0 import WtmCheckpointLog
+
+            wtm_cp_log = WtmCheckpointLog(task_id, APP_DIR)
+            pipeline_timer = None
+
+            def _timer_task_update(timing: dict) -> None:
+                with STATE_LOCK:
+                    t = AUTO_TASKS.get(task_id)
+                    if t:
+                        t.setdefault("info", {})["pipeline_timing"] = timing
+
+            pipeline_timer = PipelineTimer(task_id, APP_DIR, on_update=_timer_task_update)
+            profiler = pipeline_timer.profiler
+            profiler.set_meta(
+                hardware=probe_hardware(),
+                model_size=model_size,
+                target_lang=target_lang,
+                dub_style=dub_style,
+            )
+            cleanup_stale_work_dirs()
+
+        if segmentation_mode not in ("timing", "sentence"):
+            segmentation_mode = "timing"
+
+        with STATE_LOCK:
+            task = AUTO_TASKS[task_id]
+            task["info"]["segments_data"] = []
+            task["info"]["source_segments"] = []
+            task["info"]["timing_map_backup"] = []
+            task["info"]["timed_audio"] = None
+            task["info"]["dev_diagnostics"] = dev_diag.paths()
+
+        with STATE_LOCK:
+            task = AUTO_TASKS[task_id]
+            control = AUTO_TASK_CONTROLS[task_id]
+
+            task["info"].update(
+                {
+                    "video_path_backup": video_path,
+                    "mix_mode_backup": mix_mode,
+                    "mix_volumes_backup": mix_volumes,
+                    "keep_original_track": keep_original_track,
+                    "dub_mode_backup": dub_mode,
+                    "mix_volume_backup": mix_volume,
+                    "target_duration_ms": target_duration_ms,
+                    "dub_style": dub_style,
+                    "skip_tts": skip_tts,
+                    "tts_rate": tts_rate,
+                    "tts_pitch": tts_pitch,
+                }
+            )
+
+        # ══ ШАГ 1: Извлечение аудио ══════════════════════════════════════
+        _set_step(task_id, "extract_audio", 2.0)
+        profiler.start("ffmpeg")
+        pipeline_timer.start("extract")
+        runtime_diag.stage_begin(STAGE_AUDIO_EXTRACTION)
+
+        from engines.audio_extraction import (
+            error_code_for_result,
+            extract_audio_from_video,
+            record_audio_extraction_openddf,
+            user_friendly_extract_error,
+        )
+        from engines.dubbing_engine.pipeline_failure_diag import STAGE_AUDIO_EXTRACTION
+
+        with STATE_LOCK:
+            _project_uuid = (task.get("info") or {}).get("project_uuid")
+        _audio_out = _artifacts_dir(task.get("info")) / f"{base_id}_extracted.mp3"
+        _extract_result = extract_audio_from_video(
+            video_path,
+            str(_artifacts_dir(task.get("info"))),
+            task_id,
+            output_path=str(_audio_out),
+            max_retries=3,
+            app_dir=APP_DIR,
+        )
+        record_audio_extraction_openddf(
+            task_id,
+            _extract_result,
+            app_dir=APP_DIR,
+            project_uuid=_project_uuid,
+        )
+        audio_path = _extract_result.output_path
+        if not _extract_result.success:
+            _diag_hint = f" /api/auto_dub/diagnostics/{task_id}/zip"
+            _user_msg = user_friendly_extract_error(_extract_result)
+            _err_code = error_code_for_result(_extract_result)
+            return _fail(
+                task_id,
+                [
+                    f"{_user_msg}. Скачайте диагностику (ZIP){_diag_hint}",
+                ],
+                stage=STAGE_AUDIO_EXTRACTION,
+                exc=RuntimeError(_extract_result.error or _user_msg),
+                error_code=_err_code,
+            )
+
+        if not target_duration_ms:
+            vid_dur = _video_duration_ms(video_path)
+            if vid_dur:
+                target_duration_ms = vid_dur
+                with STATE_LOCK:
+                    task["info"]["target_duration_ms"] = target_duration_ms
+
+        if keep_original_track:
+            projects_dir = APP_DIR / "projects"
+            projects_dir.mkdir(parents=True, exist_ok=True)
+            stem = Path(video_path).stem
+            preserved = projects_dir / f"{stem}_{base_id}_original.mp3"
+            try:
+                shutil.copy2(audio_path, preserved)
+                with STATE_LOCK:
+                    task["info"]["original_audio_path"] = str(preserved)
+                logger.info("Task %s: original audio preserved at %s", task_id, preserved)
+            except Exception as copy_err:
+                logger.warning("Task %s: could not preserve original audio: %s", task_id, copy_err)
+
+        profiler.stop("ffmpeg")
+        if pipeline_timer is not None:
+            pipeline_timer.stop("extract")
+        _runtime_stage_record(task_id, runtime_diag, 1, STAGE_AUDIO_EXTRACTION)
+
+        # ══ Source separation (dialogue vs music+SFX) — before STT ═══════════
+        stt_audio_path = audio_path
+        try:
+            from engines.source_separation import try_separate_audio
+
+            runtime_diag.stage_begin(STAGE_SOURCE_SEPARATION)
+            sep_result = try_separate_audio(
+                video_path=video_path,
+                mono_audio_path=audio_path,
+                artifacts_dir=_artifacts_dir(task.get("info")),
+                base_id=base_id,
+                task_id=task_id,
+            )
+            with STATE_LOCK:
+                task["info"]["source_separation"] = sep_result.to_dict()
+            if sep_result.dialogue_stt_path and Path(sep_result.dialogue_stt_path).is_file():
+                stt_audio_path = sep_result.dialogue_stt_path
+            # Always surface the outcome — music in the final mix depends on it.
+            if sep_result.success:
+                logger.info(
+                    "Task %s: source separation SUCCESS method=%s accompaniment=%s "
+                    "(music/ambient WILL be mixed into final dub)",
+                    task_id,
+                    sep_result.method,
+                    sep_result.accompaniment_path,
+                )
+            else:
+                import shutil as _sh
+
+                hint = ""
+                if not _sh.which("demucs"):
+                    hint = (
+                        " — demucs not installed; install it for proper music/vocal "
+                        "separation (pip install demucs)"
+                    )
+                logger.warning(
+                    "Task %s: source separation FALLBACK reason=%s%s — final dub may "
+                    "lack original music/ambient. %s",
+                    task_id,
+                    sep_result.error or "unknown",
+                    hint,
+                    sep_result.warning or "",
+                )
+            _runtime_stage_record(task_id, runtime_diag, 2, STAGE_SOURCE_SEPARATION)
+        except Exception as sep_err:
+            logger.warning(
+                "Task %s: source separation hook failed, using legacy path: %s",
+                task_id,
+                sep_err,
+            )
+            with STATE_LOCK:
+                task["info"]["source_separation"] = {
+                    "enabled": True,
+                    "attempted": True,
+                    "success": False,
+                    "fallback_used": True,
+                    "warning": "Source separation hook error; legacy path used.",
+                    "error": str(sep_err),
+                }
+
+        # ══ ШАГ 2: STT (Whisper) ══════════════════════════════════════════
+        if not _ensure_control(task_id, ui_lang):
+            return
+
+        runtime_diag.stage_begin(STAGE_STT)
+
+        with STATE_LOCK:
+            preload = copy.deepcopy(task["info"].get("preload") or {})
+
+        pre_source = preload.get("source_segments") or []
+        pre_timing = preload.get("timing_map") or []
+        stt_word_timestamps = False
+        try:
+            from engines.core.feature_flags import is_enabled as _ff_enabled
+
+            stt_word_timestamps = _ff_enabled("word_timing", developer_session=True)
+        except Exception:
+            stt_word_timestamps = False
+
+        if pre_source:
+            source_text = "\n".join(str(s).strip() for s in pre_source if str(s).strip())
+            timing_map = copy.deepcopy(pre_timing)
+            detected_lang = source_lang or "auto"
+            logger.info(
+                "Task %s: using preloaded subtitles (%d segments)",
+                task_id,
+                len(pre_source),
+            )
+        else:
+            from engines.pipeline_cache import load_whisper_cache, save_whisper_cache
+
+            _set_step(task_id, "transcribe", 15.0)
+            profiler.start("whisper")
+            if pipeline_timer is not None:
+                pipeline_timer.start("whisper")
+            wh_hit = load_whisper_cache(
+                APP_DIR,
+                video_path,
+                model_size=model_size,
+                source_lang=source_lang,
+            )
+            if wh_hit:
+                source_text = str(wh_hit.get("source_text") or "")
+                timing_map = copy.deepcopy(wh_hit.get("timing_map") or [])
+                detected_lang = str(wh_hit.get("detected_lang") or source_lang or "en")
+                profiler.set_meta(whisper_cache="hit")
+            else:
+                from engines.stt_engine import transcribe
+
+                with _blocking_progress_heartbeat(
+                    task_id,
+                    "transcribe",
+                    interval=20.0,
+                    messages=[
+                        "Загрузка модели Whisper…",
+                        "Распознавание речи…",
+                        "Whisper обрабатывает аудио…",
+                    ],
+                ):
+                    source_text, _, timing_map, detected_lang = transcribe(
+                        stt_audio_path,
+                        language=source_lang,
+                        model_size=model_size,
+                        word_timestamps=stt_word_timestamps,
+                    )
+                save_whisper_cache(
+                    APP_DIR,
+                    video_path,
+                    model_size=model_size,
+                    source_lang=source_lang,
+                    source_text=source_text,
+                    timing_map=timing_map,
+                    detected_lang=detected_lang,
+                )
+                profiler.set_meta(whisper_cache="miss")
+            profiler.stop("whisper")
+            if pipeline_timer is not None:
+                pipeline_timer.stop("whisper")
+
+            logger.debug(
+                "STT completed lang=%s chars=%s",
+                detected_lang,
+                len(source_text) if isinstance(source_text, str) else 0,
+            )
+        _open_ddf.record_agent(
+            task_id, "Whisper/STT", called=True,
+            success=bool(source_text and source_text.strip()),
+            decision=f"detected_lang={detected_lang}",
+        )
+
+        if not source_text.strip():
+            from engines.dubbing_engine.pipeline_failure_diag import STAGE_STT
+
+            return _fail(task_id, [lp["empty_stt"]], stage=STAGE_STT, error_code="STT_EMPTY")
+
+        _runtime_stage_record(task_id, runtime_diag, 2, STAGE_STT)
+
+        raw_lines = [
+            line.strip()
+            for line in source_text.splitlines()
+            if line.strip()
+        ] or [str(s).strip() for s in pre_source if str(s).strip()]
+        raw_count = len(raw_lines)
+        raw_timing_backup = copy.deepcopy(timing_map)
+
+        text_source = (
+            "preloaded_subtitles" if pre_source else "whisper_stt"
+        )
+
+        ocr_result: dict = {"enabled": False, "segments": []}
+        if ocr_enabled:
+            from engines.ocr_engine import extract_video_text
+
+            ocr_result = extract_video_text(
+                video_path, enabled=True, sample_interval_sec=2.0
+            )
+            dev_diag.log_ocr(
+                text_source=text_source,
+                note=f"ocr_enabled=true lines={len(ocr_result.get('segments') or [])} "
+                f"(NOT merged into speech pipeline)",
+            )
+        else:
+            dev_diag.log_ocr(
+                text_source=text_source,
+                note="ocr_enabled=false — speech dub uses Whisper only",
+            )
+
+        profiler.start("segmentation")
+        if segmentation_mode == "sentence":
+            from engines.segment_merger import merge_stt_by_sentences
+
+            merged_lines, merged_timing = merge_stt_by_sentences(
+                raw_lines, raw_timing_backup
+            )
+        else:
+            from engines.segment_merger import merge_stt_segments
+
+            merged_lines, merged_timing = merge_stt_segments(raw_lines, timing_map)
+        seg_lines = merged_lines if merged_lines else raw_lines
+        seg_timing = merged_timing if merged_lines and merged_timing else raw_timing_backup
+        if not seg_timing and seg_lines:
+            from engines.segment_merger import ensure_timing_map_for_segments
+
+            seg_timing = ensure_timing_map_for_segments(
+                seg_lines,
+                seg_timing,
+                duration_ms=target_duration_ms or _video_duration_ms(video_path),
+            )
+            logger.warning(
+                "Task %s: rebuilt timing_map for %d segments (STT had no timing slots)",
+                task_id,
+                len(seg_lines),
+            )
+        if seg_lines:
+            source_text = "\n".join(seg_lines)
+            timing_map = seg_timing
+
+        profiler.stop("segmentation")
+
+        word_timing_enabled = stt_word_timestamps
+
+        if word_timing_enabled:
+            from engines.word_timing import (
+                build_from_whisper,
+                build_merged_maps,
+                persist_to_task_info,
+                sync_timing_map,
+            )
+            from engines.core.events import get_event_bus
+
+            raw_word_maps = build_from_whisper(raw_lines, raw_timing_backup)
+            seg_lines_wtm = merged_lines if merged_lines else raw_lines
+            seg_timing_wtm = (
+                merged_timing
+                if merged_lines and merged_timing
+                else (seg_timing if seg_lines else raw_timing_backup)
+            )
+            merged_word_maps = build_merged_maps(
+                raw_lines,
+                raw_timing_backup,
+                seg_lines_wtm,
+                seg_timing_wtm,
+                raw_maps=raw_word_maps,
+            )
+            if merged_word_maps:
+                timing_map = sync_timing_map(seg_timing_wtm, merged_word_maps)
+            get_event_bus().emit(
+                "word_timing",
+                {"segments": len(merged_word_maps), "task_id": task_id},
+            )
+        else:
+            merged_word_maps = []
+
+        dev_diag.log_segmentation(
+            raw_segments=raw_lines,
+            raw_timing=raw_timing_backup,
+            merged_segments=merged_lines,
+            merged_timing=merged_timing,
+            source=text_source,
+        )
+
+        with STATE_LOCK:
+            task["info"]["source_segments"] = list(seg_lines)
+            task["info"]["detected_lang"] = detected_lang
+            task["info"]["timing_map_backup"] = copy.deepcopy(timing_map)
+            if merged_word_maps and word_timing_enabled:
+                persist_to_task_info(
+                    task["info"],
+                    merged_word_maps,
+                    timing_map=timing_map,
+                )
+            task["info"]["wtm_sync_mode"] = sync_mode()
+            task["info"]["wtm_phase"] = current_phase_label()
+            task["info"]["stt_segment_count_raw"] = raw_count
+            task["info"]["stt_segment_count_merged"] = len(seg_lines)
+            task["info"]["text_source"] = text_source
+            task["info"]["segmentation_mode"] = segmentation_mode
+            task["info"]["ocr_enabled"] = ocr_enabled
+            task["info"]["ocr_result"] = ocr_result if ocr_enabled else None
+            task["info"]["dev_diagnostics"] = dev_diag.paths()
+
+        _wtm_record_checkpoint(wtm_cp_log, task_id, "post_merge")
+
+        # ══ ШАГ 3: Перевод (batch + контекст через naturalizer) ═══════════════
+        if not _ensure_control(task_id, ui_lang):
+            return
+        _set_step(task_id, "translate", 55.0)
+        runtime_diag.stage_begin(STAGE_TRANSLATION)
+
+        with STATE_LOCK:
+            source_segments_snapshot = list(task["info"].get("source_segments", []))
+            timing_map_for_translate = copy.deepcopy(
+                task["info"].get("timing_map_backup", [])
+            )
+            pre_translated = preload.get("translated_segments") or []
+            skip_translate_flag = bool(task["info"].get("skip_translate", skip_translate))
+
+        translation_source_lang = source_lang or detected_lang or "en"
+        translate_meta: list = []
+
+        if (
+            skip_translate_flag
+            and pre_translated
+            and len(pre_translated) == len(source_segments_snapshot)
+        ):
+            segments = [str(s).strip() for s in pre_translated]
+            translate_method = "preloaded_skip_translate"
+            from engines.translation_quality_log import synthesize_audits_from_segments
+
+            pre_audits = synthesize_audits_from_segments(
+                source_segments_snapshot,
+                segments,
+                translation_source_lang,
+                target_lang,
+                engine="preloaded",
+            )
+            with STATE_LOCK:
+                task["info"]["translation_audits"] = [a.__dict__ for a in pre_audits]
+            logger.info(
+                "Task %s: using preloaded translation (%d segments)",
+                task_id,
+                len(segments),
+            )
+        else:
+            from engines.pipeline_cache import load_translate_cache, save_translate_cache
+
+            cached_tr = load_translate_cache(
+                APP_DIR,
+                source_segments_snapshot,
+                translation_source_lang,
+                target_lang,
+            )
+            if cached_tr and len(cached_tr) == len(source_segments_snapshot):
+                segments = cached_tr
+                translate_method = "cache"
+                profiler.set_meta(translate_cache="hit")
+                from engines.translation_quality_log import synthesize_audits_from_segments
+
+                cached_audits = synthesize_audits_from_segments(
+                    source_segments_snapshot,
+                    segments,
+                    translation_source_lang,
+                    target_lang,
+                    engine="cache",
+                )
+                with STATE_LOCK:
+                    task["info"]["translation_audits"] = [
+                        {
+                            **{k: v for k, v in a.__dict__.items()},
+                        }
+                        for a in cached_audits
+                    ]
+                    from engines.translation_trace import TranslationTraceLog
+
+                    trace = TranslationTraceLog(APP_DIR, task_id=task_id)
+                    for a in cached_audits:
+                        trace.upsert_from_audit(a.__dict__)
+                    trace.flush(
+                        phase="post_cache",
+                        extra={
+                            "src": translation_source_lang,
+                            "tgt": target_lang,
+                            "pipeline": "cache_hit",
+                        },
+                    )
+                    task["info"]["translation_trace_log"] = trace.path
+            else:
+                with STATE_LOCK:
+                    _manifest_path = (AUTO_TASKS.get(task_id, {}).get("info") or {}).get(
+                        "manifest_path"
+                    )
+                if _manifest_path and Path(_manifest_path).is_file():
+                    _agent_segments = _build_agent_segments(
+                        source_segments_snapshot, timing_map_for_translate
+                    )
+                    _dir_segments = _run_agent_safe(
+                        task_id,
+                        "Director/v1",
+                        lambda: _run_director_agent_path(
+                            task_id,
+                            _manifest_path,
+                            source_segments_snapshot,
+                            timing_map_for_translate,
+                            source_lang=translation_source_lang,
+                        ),
+                        fallback_fn=lambda: _agent_segments,
+                        record_success=False,
+                    )
+                    if _dir_segments:
+                        _agent_segments = _dir_segments
+                    _orch_tr_state = {
+                        "video_path": video_path,
+                        "target_lang": target_lang,
+                        "source_lang": translation_source_lang,
+                        "segments": _agent_segments,
+                        "director_agent_status": (
+                            (AUTO_TASKS.get(task_id, {}).get("info") or {}).get(
+                                "director_agent_status"
+                            )
+                            or "success"
+                        ),
+                    }
+                    _tr_orch = _run_ai_core_orchestrator(
+                        task_id,
+                        video_path,
+                        _manifest_path,
+                        _orch_tr_state,
+                        agents=["translation"],
+                    )
+                    _tr_result = _tr_orch.agent_results.get("translation")
+                    if _tr_result and _tr_result.status in ("success", "warning"):
+                        _sync_orchestrator_segments_to_task(
+                            task_id, _tr_orch.state, "translation"
+                        )
+                        segments_data = _tr_orch.state.get("segments") or []
+                        segments = [
+                            str(s.get("translated_text") or s.get("text") or "").strip()
+                            for s in segments_data
+                        ]
+                        meta = {
+                            "pipeline": "translation_agent_v1",
+                            "naturalizer_executed": False,
+                            "naturalizer_applied": False,
+                            "timing_aware_executed": False,
+                            "timing_aware_applied": False,
+                            "translation_agent": True,
+                            "semantic_agent": False,
+                            "translator_used": (_tr_result.metrics or {}).get(
+                                "translator_used"
+                            ),
+                            "avg_confidence": (_tr_result.metrics or {}).get(
+                                "avg_overall"
+                            ),
+                        }
+                        if translate_meta is not None:
+                            translate_meta.append(meta)
+                        with STATE_LOCK:
+                            if task_id in AUTO_TASKS:
+                                info = AUTO_TASKS[task_id].setdefault("info", {})
+                                info["translation_agent_path"] = True
+                                info["translation_agent_status"] = _tr_result.status
+                                info["translation_agent_metrics"] = _tr_result.metrics
+                    else:
+                        segments = _run_agent_safe(
+                            task_id,
+                            "Translation/v1",
+                            lambda: _run_translation_agent_path(
+                                task_id,
+                                _manifest_path,
+                                source_segments_snapshot,
+                                timing_map_for_translate,
+                                translate_meta=translate_meta,
+                            ),
+                            fallback_fn=lambda: _prepare_translated_segments(
+                                task_id,
+                                source_segments_snapshot,
+                                timing_map_for_translate,
+                                translation_source_lang,
+                                target_lang,
+                                ui_lang,
+                                translate_meta=translate_meta,
+                            ),
+                            record_success=False,
+                        )
+                    with STATE_LOCK:
+                        _used_agent = bool(
+                            (AUTO_TASKS.get(task_id, {}).get("info") or {}).get(
+                                "translation_agent_path"
+                            )
+                        )
+                    translate_method = (
+                        "translation_agent_v1" if _used_agent else "naturalizer_per_group_fallback"
+                    )
+                    profiler.set_meta(translate_cache="agent")
+                else:
+                    _conveyor_done = False
+                    if not skip_tts:
+                        try:
+                            from engines.pipeline_orchestrator.dub_conveyor_bridge import (
+                                try_run_full_conveyor,
+                            )
+
+                            with STATE_LOCK:
+                                _tts_eng_fc = str(
+                                    task["info"].get("tts_engine") or "edge-offline"
+                                )
+                            _whisper_sec_fc = 0.0
+                            if pipeline_timer is not None:
+                                try:
+                                    _whisper_sec_fc = float(
+                                        (pipeline_timer._seconds or {}).get("whisper", 0)
+                                        or 0
+                                    )
+                                except Exception:
+                                    pass
+                            _fc = try_run_full_conveyor(
+                                task_id=task_id,
+                                source_segments=source_segments_snapshot,
+                                timing_map=timing_map_for_translate,
+                                source_lang=translation_source_lang,
+                                target_lang=target_lang,
+                                voice=voice,
+                                app_dir=APP_DIR,
+                                tts_rate=tts_rate,
+                                tts_pitch=tts_pitch,
+                                tts_engine=_tts_eng_fc,
+                                whisper_sec=_whisper_sec_fc,
+                            )
+                            if _fc:
+                                segments = list(_fc.segments)
+                                translate_method = "full_conveyor"
+                                _conveyor_done = True
+                                with STATE_LOCK:
+                                    info_fc = task.setdefault("info", {})
+                                    info_fc["segments_data"] = _fc.segments_data
+                                    info_fc["conveyor_tts_done"] = True
+                                    info_fc["tts_files"] = list(_fc.tts_files)
+                                    info_fc["full_conveyor"] = _fc.report
+                                    info_fc["translate_method"] = translate_method
+                                    info_fc["pipeline_conveyor_timing"] = {
+                                        "whisper_sec": _fc.whisper_sec,
+                                        "marian_sec": _fc.marian_sec,
+                                        "llm_sec": _fc.llm_sec,
+                                        "tts_sec": _fc.tts_sec,
+                                    }
+                                profiler.set_meta(translate_cache="full_conveyor")
+                                logger.info(
+                                    "Task %s: full conveyor translate+TTS (%d segs, %d files)",
+                                    task_id,
+                                    len(segments),
+                                    len(_fc.tts_files),
+                                )
+                        except Exception as _fc_exc:
+                            logger.warning(
+                                "Task %s: full conveyor skipped: %s", task_id, _fc_exc
+                            )
+                    if not _conveyor_done:
+                        try:
+                            segments = _prepare_translated_segments(
+                                task_id,
+                                source_segments_snapshot,
+                                timing_map_for_translate,
+                                translation_source_lang,
+                                target_lang,
+                                ui_lang,
+                                translate_meta=translate_meta,
+                            )
+                            translate_method = "naturalizer_per_group"
+                            with STATE_LOCK:
+                                _audits = (
+                                    AUTO_TASKS.get(task_id, {})
+                                    .get("info", {})
+                                    .get("translation_audits")
+                                    or []
+                                )
+                            _route = str(_audits[0].get("route_label") or "") if _audits else ""
+                            _engine = str(_audits[0].get("engine") or "") if _audits else ""
+                            _avg_q = (
+                                sum(float(a.get("quality_score") or 0) for a in _audits)
+                                / max(len(_audits), 1)
+                                if _audits
+                                else 0.0
+                            )
+                            save_translate_cache(
+                                APP_DIR,
+                                source_segments_snapshot,
+                                translation_source_lang,
+                                target_lang,
+                                segments,
+                                route_label=_route,
+                                engine=_engine,
+                                quality_score=_avg_q,
+                            )
+                            profiler.set_meta(translate_cache="miss")
+                        except Exception as tr_err:
+                            from engines.model_manager.runtime import OfflineOnlyError
+                            from engines.mt.translate_guard import TranslationTimeoutError
+                            from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE
+
+                            _open_ddf.record_agent(
+                                task_id, "Translation", called=True, success=False,
+                                error=str(tr_err), fallback_used=True,
+                                decision="fallback_to_source" if IS_DEBUG_LEARNING_MODE() else "pipeline_fail",
+                            )
+
+                            if IS_DEBUG_LEARNING_MODE():
+                                logger.warning(
+                                    "[DDF] Task %s: Translation FAILED (%s) — "
+                                    "Debug mode: using source segments as fallback.",
+                                    task_id, tr_err,
+                                )
+                                segments = list(source_segments_snapshot)
+                                translate_method = "debug_fallback_source"
+                            else:
+                                logger.exception("Task %s: translation failed", task_id)
+                                lp = LOCALIZATION.get(ui_lang, LOCALIZATION["ru"])
+                                if isinstance(tr_err, OfflineOnlyError):
+                                    msg = lp.get(
+                                        "translate_not_prepared",
+                                        "Модель перевода не подготовлена. Дождитесь завершения «Подготовка компонентов».",
+                                    )
+                                elif isinstance(tr_err, TranslationTimeoutError):
+                                    logger.warning("Task %s: translation timeout (dev): %s", task_id, tr_err)
+                                    msg = lp.get(
+                                        "long_processing",
+                                        "Выполняется длительная обработка. Пожалуйста, подождите.",
+                                    )
+                                else:
+                                    msg = lp.get(
+                                        "translate_failed",
+                                        "Ошибка перевода. Проверьте интернет или выберите язык вручную.",
+                                    )
+                                from engines.dubbing_engine.pipeline_failure_diag import STAGE_TRANSLATION
+
+                                _fail(
+                                    task_id,
+                                    [msg],
+                                    stage=STAGE_TRANSLATION,
+                                    exc=tr_err,
+                                    error_code=(
+                                        "TRANSLATION_MODEL_MISSING"
+                                        if isinstance(tr_err, OfflineOnlyError)
+                                        else (
+                                            "TRANSLATION_TIMEOUT"
+                                            if isinstance(tr_err, TranslationTimeoutError)
+                                            else "TRANSLATION_FAILED"
+                                        )
+                                    ),
+                                )
+                                return
+
+        if translate_meta:
+            meta0 = translate_meta[0]
+            profiler.add("translation", float(meta0.get("translation_sec") or meta0.get("marian_sec") or 0))
+            profiler.add("naturalizer", float(meta0.get("naturalizer_sec") or 0))
+            if pipeline_timer is not None:
+                marian_s = float(meta0.get("marian_sec") or meta0.get("translation_sec") or 0)
+                llm_s = float(meta0.get("llm_adaptation_sec") or 0)
+                val_s = float(meta0.get("validation_sec") or 0)
+                post_s = float(meta0.get("restore_sec") or 0) + float(
+                    meta0.get("timing_aware_sec") or 0
+                )
+                pipeline_timer.add("translation", marian_s)
+                pipeline_timer.add("natural", llm_s)
+                pipeline_timer.add("validation", val_s)
+                pipeline_timer.add("translation_post", post_s)
+                br = meta0.get("translation_timing_breakdown") or {}
+                if br and pipeline_timer is not None:
+                    pipeline_timer.set_translation_breakdown(br)
+                if br:
+                    with STATE_LOCK:
+                        t = AUTO_TASKS.get(task_id)
+                        if t:
+                            t.setdefault("info", {})["translation_timing"] = br
+                            t["info"]["translation_timing_breakdown"] = br
+            _ddf_agent = (
+                "Translation/v1"
+                if meta0.get("translation_agent") or translate_method == "translation_agent_v1"
+                else "Translation"
+            )
+            _open_ddf.record_agent(
+                task_id, _ddf_agent, called=True, success=True,
+                decision=translate_method,
+            )
+            _nat_executed = bool(meta0.get("naturalizer_executed"))
+            _nat_applied = bool(meta0.get("naturalizer_applied"))
+            if _nat_executed and not _nat_applied:
+                _open_ddf.record_agent(
+                    task_id, "NaturalTranslation/LLM", called=True, success=False,
+                    decision="LLM skipped - rule-based fallback used", fallback_used=True,
+                )
+            elif _nat_applied:
+                _open_ddf.record_agent(
+                    task_id, "NaturalTranslation/LLM", called=True, success=True,
+                    decision="naturalizer_applied",
+                )
+
+        with STATE_LOCK:
+            task["info"]["translate_meta"] = translate_meta[0] if translate_meta else {}
+            task["info"]["target_lang"] = target_lang
+            if translate_meta and translate_meta[0].get("pipeline"):
+                task["info"]["translation_quality_log"] = str(
+                    APP_DIR / "output" / "dev" / "translation_quality.log"
+                )
+
+        dev_diag.log_translation(
+            source_lang=translation_source_lang,
+            target_lang=target_lang,
+            source_segments=source_segments_snapshot,
+            translated_segments=segments,
+            skip_translate=skip_translate_flag and bool(pre_translated),
+            method=translate_method,
+        )
+        try:
+            from engines.translation_memory import memory_summary
+            from engines.translation_router import engine_rankings
+
+            with STATE_LOCK:
+                audits = list(task["info"].get("translation_audits") or [])
+                tmeta = (translate_meta[0] if translate_meta else {}) or {}
+            dev_diag.log_translation_pipeline_report(
+                source_lang=translation_source_lang,
+                target_lang=target_lang,
+                audits=audits,
+                translate_meta=tmeta,
+                router_summary={
+                    "rankings": [
+                        {"engine": e, "score": s, "reason": r}
+                        for e, s, r in engine_rankings(
+                            APP_DIR, translation_source_lang, target_lang
+                        )
+                    ],
+                    "memory": memory_summary(
+                        APP_DIR, translation_source_lang, target_lang
+                    ),
+                },
+            )
+        except Exception as rep_err:
+            logger.debug("translation_pipeline report skipped: %s", rep_err)
+        with STATE_LOCK:
+            task["info"]["dev_diagnostics"] = dev_diag.paths()
+        logger.debug(
+            "Task %s: translation done, segments=%d",
+            task_id,
+            len(segments),
+        )
+        _runtime_stage_record(
+            task_id,
+            runtime_diag,
+            3,
+            STAGE_TRANSLATION,
+            segments_ok=len(segments),
+        )
+        _wtm_record_checkpoint(wtm_cp_log, task_id, "post_translate")
+
+        with STATE_LOCK:
+            review_before_tts = bool(
+                task["info"].get("translation_review_before_tts", True)
+            )
+        _update_progress_detail(
+            task_id,
+            total_segments=len(segments),
+            segments_done=0,
+            phase="translation_review" if review_before_tts else "translate",
+        )
+
+        if review_before_tts and segments:
+            _populate_translation_review_data(task_id, segments)
+            if _translation_review_requires_manual_hold():
+                _enter_translation_review_pause(task_id)
+                logger.info(
+                    "Task %s: paused for manual pre-TTS translation review (%d segments)",
+                    task_id,
+                    len(segments),
+                )
+                if not _ensure_control(task_id, ui_lang):
+                    return
+            else:
+                _resume_from_translation_review(task_id)
+                logger.info(
+                    "Task %s: translation review auto-approved (%d segments); "
+                    "continuing pipeline (no manual hold)",
+                    task_id,
+                    len(segments),
+                )
+            with STATE_LOCK:
+                segments_data = task["info"].get("segments_data") or []
+                segments = [
+                    str(seg.get("text") or "").strip() for seg in segments_data
+                ]
+
+        # Semantic → Quality agents via orchestrator (manifest path)
+        with STATE_LOCK:
+            _manifest_path = (task.get("info") or {}).get("manifest_path")
+            _translation_status = (task.get("info") or {}).get("translation_agent_status")
+            _segments_data_snap = list(task["info"].get("segments_data") or [])
+            _quality_done = bool(task["info"].get("quality_agent_path"))
+        if (
+            not _quality_done
+            and _manifest_path
+            and Path(_manifest_path).is_file()
+            and _segments_data_snap
+            and any(
+                str(s.get("translated_text") or s.get("text") or "").strip()
+                for s in _segments_data_snap
+            )
+            and _translation_status in ("success", "warning", None)
+        ):
+            try:
+                from engines.ai_core.llm_bootstrap import prepare_llm_for_pipeline
+
+                with STATE_LOCK:
+                    _llm_info = dict(task.get("info") or {})
+                _llm_boot = prepare_llm_for_pipeline(
+                    task_id, _llm_info, app_dir=APP_DIR, phase="AI_CORE"
+                )
+                with STATE_LOCK:
+                    task["info"]["llm_bootstrap"] = _llm_boot
+            except Exception as _llm_boot_exc:
+                logger.debug("LLM bootstrap before text agents: %s", _llm_boot_exc)
+            _orch_segments = _run_agent_safe(
+                task_id,
+                "AI-Core/Orchestrator",
+                lambda: _run_orchestrator_text_agents(
+                    task_id,
+                    video_path,
+                    _manifest_path,
+                    _segments_data_snap,
+                ),
+                record_success=False,
+            )
+            if _orch_segments is not None:
+                segments = _orch_segments
+                logger.info(
+                    "Task %s: AI Core orchestrator text agents completed (%d segments)",
+                    task_id,
+                    len(segments),
+                )
+            # Peer Validation Pipeline — semantic/grammar/timing agents own their fields;
+            # post-hoc polish duplicated entity/grammar work (removed per AI Core Simplification TZ).
+
+        # Legacy per-agent path removed — orchestrator handles semantic→quality.
+
+        # ══ ШАГ 4: TTS или только субтитры ═══════════════════════════════
+        timed_audio_path = None
+        tts_files: list = []
+        timing_warnings: list = []
+        overlap_report: dict = {"ok": True}
+        sso_active = False
+
+        with STATE_LOCK:
+            current_timing_map_snapshot = copy.deepcopy(
+                task["info"]["timing_map_backup"]
+            )
+            from engines.cleaner import align_segments_to_timing_map
+            from engines.pipeline_integrity.tts_segment_fields import resolve_segment_text_for_tts
+            from engines.tts_text_path import final_texts_from_info
+
+            info_snapshot = copy.deepcopy(task.get("info") or {})
+            segments = final_texts_from_info(info_snapshot)
+            raw_mt_segments = _raw_mt_texts_from_info(info_snapshot)
+            if not any(segments):
+                segments = [
+                    resolve_segment_text_for_tts(seg)
+                    for seg in (info_snapshot.get("segments_data") or [])
+                ]
+            if not any(raw_mt_segments):
+                raw_mt_segments = list(segments)
+            segments = align_segments_to_timing_map(
+                segments, current_timing_map_snapshot
+            )
+            raw_mt_segments = align_segments_to_timing_map(
+                raw_mt_segments, current_timing_map_snapshot
+            )
+            tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+            _skip_timing_adapt = bool(task["info"].get("translation_agent_path"))
+            _skip_semantic_shorten = bool(task["info"].get("semantic_agent_path"))
+            _skip_timing_shorten = bool(task["info"].get("timing_agent_path"))
+            _skip_grammar_shorten = bool(task["info"].get("grammar_agent_path"))
+
+        _tat_records: list = []
+
+        if current_timing_map_snapshot and not _skip_timing_adapt:
+            from engines.ai_manager.installer import warmup_ai_for_dub
+            from engines.timing_aware_translation import (
+                adapt_segments_to_timing,
+                apply_records_to_audits,
+            )
+
+            runtime_diag.stage_begin("Timing-Aware Translation")
+            try:
+                from engines.ai_core.llm_bootstrap import prepare_llm_for_pipeline
+
+                with STATE_LOCK:
+                    _llm_info_tat = dict(task.get("info") or {})
+                _llm_tat = prepare_llm_for_pipeline(
+                    task_id, _llm_info_tat, app_dir=APP_DIR, phase="ADAPTATION"
+                )
+                with STATE_LOCK:
+                    task["info"]["llm_bootstrap_tat"] = _llm_tat
+                    if not _llm_tat.get("available"):
+                        _warns = task["info"].setdefault("user_warnings", [])
+                        _warns.append(
+                            {
+                                "stage": "ADAPTATION",
+                                "code": "LLM_MODEL_UNAVAILABLE",
+                                "message": (
+                                    "AI-модель недоступна (не установлена или не отвечает). "
+                                    "Адаптация текста выполняется в упрощённом режиме."
+                                ),
+                            }
+                        )
+            except Exception:
+                pass
+            warmup_ai_for_dub(APP_DIR)
+
+            with STATE_LOCK:
+                _adapt_speed_mode = (
+                    task["info"].get("adaptation_speed_mode")
+                    or task["info"].get("dub_speed_mode")
+                )
+                _adapt_seg_budget = task["info"].get("adaptation_segment_budget_s")
+                _adapt_proj_budget = task["info"].get("adaptation_project_budget_s")
+                _content_mode_hint = task["info"].get("content_mode")
+
+            def _adaptation_progress(done: int, total: int, strategy: str | None = None,
+                                     eta_s: float | None = None) -> None:
+                # "Адаптация текста... Сегмент N/M" + current strategy + ETA
+                # (Task 8): keep the UI alive and informative during adaptation.
+                shown = min(max(done, 0), total)
+                status = f"Адаптация текста... Сегмент {shown} / {total}"
+                if strategy:
+                    status += f" · {strategy}"
+                if eta_s is not None and eta_s > 0:
+                    status += f" · ~{int(eta_s)}s"
+                _update_progress_detail(
+                    task_id,
+                    phase="adaptation",
+                    timing_substep="adapt",
+                    total_segments=total,
+                    segments_done=done,
+                    adaptation_strategy=strategy,
+                    adaptation_eta_s=(int(eta_s) if eta_s else None),
+                    status_text=status,
+                )
+
+            # ── AI Core: single decision-making brain (ТЗ P0) ──────────────
+            # AI Core analyses the whole project, decides the strategy (variant
+            # counts, speed/quality mode, per-segment budget, voice delivery)
+            # and then drives the adaptive dubbing pipeline. Every LLM call
+            # flows through it. On any failure we fall back to the plain
+            # per-segment adaptation path so a dub is never blocked.
+            try:
+                from engines.ai_core import get_ai_core
+
+                _core = get_ai_core(task_id)
+                _profile = _core.analyze(
+                    source_segments=source_segments_snapshot,
+                    translated_segments=segments,
+                    timing_map=current_timing_map_snapshot,
+                    src_lang=translation_source_lang,
+                    tgt_lang=target_lang,
+                    content_mode_hint=_content_mode_hint,
+                )
+                _strategy = _core.plan(
+                    requested_mode=_adapt_speed_mode,
+                    per_segment_budget_s=_adapt_seg_budget,
+                    project_budget_s=_adapt_proj_budget,
+                )
+                _core_dict = _core.to_dict()
+                with STATE_LOCK:
+                    task["info"]["ai_core"] = _core_dict
+                segments, _tat_records = _core.adapt_segments(
+                    segments,
+                    current_timing_map_snapshot,
+                    source_segments_snapshot,
+                    src_lang=translation_source_lang,
+                    tgt_lang=target_lang,
+                    raw_mt_segments=raw_mt_segments,
+                    progress_cb=_adaptation_progress,
+                )
+            except Exception:
+                logger.exception(
+                    "[AICore] planning/adaptation failed — falling back to "
+                    "direct per-segment adaptation"
+                )
+                try:
+                    from engines.ai_adaptation_engine import (
+                        set_adaptation_profile_override,
+                    )
+
+                    set_adaptation_profile_override(None)
+                except Exception:
+                    pass
+                segments, _tat_records = adapt_segments_to_timing(
+                    segments,
+                    current_timing_map_snapshot,
+                    source_segments_snapshot,
+                    src_lang=translation_source_lang,
+                    tgt_lang=target_lang,
+                    task_id=task_id,
+                    raw_mt_segments=raw_mt_segments,
+                    speed_mode=_adapt_speed_mode,
+                    per_segment_budget_s=_adapt_seg_budget,
+                    project_budget_s=_adapt_proj_budget,
+                    progress_cb=_adaptation_progress,
+                )
+            with STATE_LOCK:
+                _audits_tat = task["info"].get("translation_audits") or []
+                apply_records_to_audits(_audits_tat, _tat_records)
+                task["info"]["translation_audits"] = _audits_tat
+                _segments_data_now = task["info"].get("segments_data") or []
+                _voice_by_idx: dict[int, dict] = {}
+                for _rec in (_tat_records or []):
+                    try:
+                        _idx = int(getattr(_rec, "index", -1))
+                    except Exception:
+                        _idx = -1
+                    _trace = dict(getattr(_rec, "ai_adaptation_trace", None) or {})
+                    _voice = dict(_trace.get("voice") or {})
+                    if _idx >= 0 and _voice:
+                        _voice_by_idx[_idx] = _voice
+                for _idx, _voice in _voice_by_idx.items():
+                    if 0 <= _idx < len(_segments_data_now):
+                        _segments_data_now[_idx]["ai_voice"] = _voice
+                        _segments_data_now[_idx].setdefault(
+                            "tts_emotion",
+                            {
+                                "emotion": _voice.get("emotion"),
+                                "intonation": _voice.get("intonation"),
+                                "rate": _voice.get("rate"),
+                                "pitch": _voice.get("pitch"),
+                            },
+                        )
+                        _segments_data_now[_idx].setdefault(
+                            "intonation",
+                            {"style": _voice.get("intonation"), "pause_scale": _voice.get("pause_scale")},
+                        )
+                task["info"]["segments_data"] = _segments_data_now
+                if _voice_by_idx:
+                    task["info"]["ai_voice_directions"] = _voice_by_idx
+                tat_applied = any(r.adapted for r in _tat_records)
+                task["info"]["timing_aware_applied"] = tat_applied
+                task["info"]["timing_aware_executed"] = True
+                task["info"]["timing_aware_records"] = [
+                    r.to_dict() for r in _tat_records
+                ]
+                stages = dict(task["info"].get("pipeline_stages") or {})
+                tat_stage = dict(stages.get("timing_aware_translation") or {})
+                tat_stage.update(
+                    {
+                        "enabled": True,
+                        "executed": True,
+                        "applied": tat_applied,
+                        "segments_adapted": sum(1 for r in _tat_records if r.adapted),
+                        "segments_total": len(_tat_records),
+                        "skip_reason": "fits_without_change" if not tat_applied else None,
+                    }
+                )
+                stages["timing_aware_translation"] = tat_stage
+                task["info"]["pipeline_stages"] = stages
+            try:
+                from engines.translation_adapt import get_llm_calls, get_llm_status
+
+                with STATE_LOCK:
+                    task["info"]["llm_calls"] = get_llm_calls()
+                    task["info"]["llm_status"] = get_llm_status()
+            except Exception:
+                pass
+            try:
+                from engines.pipeline_integrity.passive_openddf import observe_stage_success
+
+                observe_stage_success(task_id, "Timing-Aware Translation")
+            except ImportError:
+                pass
+
+        # ══════════════════════════════════════════════════════════════════════
+        # UNIFIED DUBBING ENGINE — Stress & Pronunciation (+ entity/punct gates)
+        _natural_pauses_for_timing: list[int] = []
+        _dub_engine_results: list | None = None
+        _segments_before_engine = list(segments)
+        _preserve_timing_text = any(
+            bool((getattr(r, "ai_adaptation_trace", None) or {}).get("agent_timeline"))
+            for r in (_tat_records or [])
+        )
+
+        try:
+            from engines.dubbing_engine import DubbingEngine as _DubbingEngine
+
+            _engine = _DubbingEngine(
+                lang=target_lang,
+                app_dir=APP_DIR,
+                task_id=task_id,
+                content_mode=content_mode,
+                skip_text_adaptation=_preserve_timing_text,
+            )
+            _dub_engine_results = _engine.process_all(
+                segments,
+                current_timing_map_snapshot,
+                source_hints=source_segments_snapshot,
+                natural_pauses_out=_natural_pauses_for_timing,
+            )
+            # Final texts — skip_tts segments become empty (TTS skips them)
+            segments = [
+                r.output_text if r.passed_validation and str(r.output_text or "").strip()
+                else (
+                    _segments_before_engine[r.index]
+                    if r.index < len(_segments_before_engine)
+                    else ""
+                )
+                for r in _dub_engine_results
+            ]
+            _engine_meta = {
+                "segments": len(_dub_engine_results),
+                "adapted": sum(
+                    1 for r in _dub_engine_results
+                    if r.recommended_strategy not in ("direct", "skip_tts")
+                ),
+                "skipped": sum(1 for r in _dub_engine_results if not r.passed_validation),
+                "strategies": {
+                    s: sum(1 for r in _dub_engine_results
+                           if r.recommended_strategy == s)
+                    for s in ("direct", "adapted", "video_adapt",
+                               "merge_next", "skip_tts", "delay_start")
+                },
+                "video_adapt_segments": [
+                    r.index for r in _dub_engine_results
+                    if r.recommended_strategy == "video_adapt"
+                ],
+            }
+            with STATE_LOCK:
+                task["info"]["dubbing_engine"] = _engine_meta
+                task["info"]["adaptive_dubbing_adapter"] = _engine_meta  # compat alias
+                # Sync engine output → translation_audits so UI matches TTS
+                _audits_now = task["info"].get("translation_audits") or []
+                _audit_by_idx_e = {int(a.get("index", -1)): a for a in _audits_now}
+                for r in _dub_engine_results:
+                    _orig_e = (_segments_before_engine[r.index]
+                               if r.index < len(_segments_before_engine) else "")
+                    if r.output_text and r.output_text != _orig_e:
+                        _row_e = _audit_by_idx_e.get(r.index)
+                        if _row_e is not None:
+                            _row_e["final_text"] = r.output_text
+                            _row_e["tts_text"] = r.output_text
+                            _row_e["dubbing_engine_strategy"] = r.recommended_strategy
+                            _row_e["semantic_adapted"] = True
+                    _sd_now = task["info"].get("segments_data") or []
+                    if r.index < len(_sd_now) and r.output_text:
+                        _sd_now[r.index]["text"] = r.output_text
+                        _sd_now[r.index]["plain_text"] = r.output_text
+                        _sd_now[r.index]["translation_text"] = r.output_text
+                task["info"]["translation_audits"] = _audits_now
+                from engines.translation_stage_log import log_translation_stage_batch
+
+                log_translation_stage_batch(
+                    task_id,
+                    stage="post_length_control",
+                    texts=[
+                        str(_dub_engine_results[i].output_text or "")
+                        for i in range(len(_dub_engine_results))
+                    ],
+                    target_lang=target_lang,
+                    detail="dubbing_engine",
+                )
+            _update_progress_detail(
+                task_id,
+                phase="dubbing_engine",
+                total_segments=len(segments),
+                segments_done=_engine_meta["adapted"],
+            )
+            logger.info(
+                "[DubEngine] Task %s: %d segs | %d adapted | %d skip_tts | %d video_adapt",
+                task_id, _engine_meta["segments"], _engine_meta["adapted"],
+                _engine_meta["skipped"], len(_engine_meta["video_adapt_segments"]),
+            )
+        except Exception as _engine_exc:
+            logger.warning(
+                "[DubEngine] engine error — falling back to raw segments: %s", _engine_exc,
+            )
+            _natural_pauses_for_timing = [160] * len(segments)
+
+        # ── Legacy SSO path (kept for compatibility when DubEngine is disabled) ──
+        from engines.smart_segment_optimizer import is_enabled as sso_enabled
+        from engines.smart_segment_optimizer import optimize_segments
+
+        sso_meta: dict = {}
+        sso_reports: list = []
+        # DubbingEngine already includes SSO internally; run standalone only if engine failed
+        sso_active = sso_enabled() and not skip_tts and _dub_engine_results is None
+        if sso_active:
+            segments, sso_reports, sso_meta = optimize_segments(
+                segments,
+                current_timing_map_snapshot,
+                source_segments=source_segments_snapshot,
+                tgt_lang=target_lang,
+                src_lang=translation_source_lang,
+                app_dir=APP_DIR,
+                task_id=task_id,
+            )
+            _update_progress_detail(
+                task_id,
+                phase="smart_segment_optimizer",
+                total_segments=len(segments),
+                segments_done=sso_meta.get("changed", 0),
+            )
+
+        # ── Adaptive Dubbing Adapter ──────────────────────────────────────────
+        # Sits between Natural Translation / SSO and TTS synthesis.
+        # Applies the 5-step decision tree (predict → reframe → synonyms →
+        # word order → remove secondary) to prepare text BEFORE TTS is called.
+        # No audio cutting / stretching happens here — only text adjustment.
+        #
+        # CRITICAL: after adaptation, translation_audits[i]["final_text"] MUST
+        # be updated to the adapted text so the TTS trace shows "OK" (no MISMATCH)
+        # and the UI reflects exactly what TTS will receive.
+        # ── ADA legacy path (only when DubbingEngine failed) ─────────────────
+        if _dub_engine_results is None:
+            try:
+                from engines.adaptive_dubbing_adapter import adapt_segments_for_tts as _ada_adapt
+                _segments_before_ada = list(segments)
+                segments, ada_meta = _ada_adapt(
+                    segments,
+                    timing_map=current_timing_map_snapshot,
+                    lang=target_lang,
+                    source_hints=source_segments_snapshot,
+                    app_dir=APP_DIR,
+                    task_id=task_id,
+                )
+                with STATE_LOCK:
+                    task["info"]["adaptive_dubbing_adapter"] = ada_meta
+                    _audits_fb = task["info"].get("translation_audits") or []
+                    _audit_fb_idx = {int(a.get("index", -1)): a for a in _audits_fb}
+                    for _i_fb, _adapted_fb in enumerate(segments):
+                        _orig_fb = _segments_before_ada[_i_fb] if _i_fb < len(_segments_before_ada) else ""
+                        if _adapted_fb and _adapted_fb != _orig_fb:
+                            _row_fb = _audit_fb_idx.get(_i_fb)
+                            if _row_fb is not None:
+                                _row_fb["final_text"] = _adapted_fb
+                                _row_fb["tts_text"] = _adapted_fb
+                    task["info"]["translation_audits"] = _audits_fb
+            except Exception as _ada_exc:
+                logger.warning("[ADA] legacy adapter skipped: %s", _ada_exc)
+
+        if _dub_engine_results is None:
+            try:
+                from engines.text_preparation import prepare_segments_for_tts
+
+                segments, prep_meta = prepare_segments_for_tts(
+                    segments,
+                    lang=target_lang,
+                    tts_engine_id=tts_engine_id,
+                    app_dir=APP_DIR,
+                    task_id=task_id,
+                )
+                with STATE_LOCK:
+                    task["info"]["text_preparation"] = prep_meta
+                    if sso_active:
+                        task["info"]["smart_segment_optimizer"] = sso_meta
+                        audits = task["info"].get("translation_audits") or []
+                        audit_by_idx = {int(a.get("index", -1)): a for a in audits}
+                        for rep in sso_reports:
+                            row = audit_by_idx.get(rep.index)
+                            if not row:
+                                continue
+                            if rep.changed:
+                                row["sso_optimized"] = rep.optimized
+                                row["sso_level"] = rep.level_used
+                            row["sso_skip_reason"] = rep.skip_reason
+                        task["info"]["translation_audits"] = audits
+            except Exception as _prep_exc:
+                logger.debug("[DubEngine] text_preparation skipped: %s", _prep_exc)
+
+        _wtm_record_checkpoint(wtm_cp_log, task_id, "post_dubbing_engine")
+
+        # Sentence & word integrity gate (TЗ §3/§4/§6): the LAST guard before
+        # TTS. No segment may be empty, NULL, space-only, cut mid-word, or an
+        # unfinished sentence. Broken text is reverted to the fullest COMPLETE
+        # translation instead (never clipped, never empty).
+        if not skip_tts:
+            try:
+                from engines.sentence_integrity import enforce_pre_tts_integrity
+
+                _integrity_audits = task["info"].get("translation_audits") or []
+                _integrity_src = task["info"].get("source_segments") or []
+                _integrity_tgt = str(task["info"].get("target_lang") or "ru")
+                segments, _integrity_report = enforce_pre_tts_integrity(
+                    segments,
+                    audits=_integrity_audits,
+                    source_segments=_integrity_src,
+                    target_lang=_integrity_tgt,
+                )
+                with STATE_LOCK:
+                    task["info"]["pre_tts_integrity"] = _integrity_report
+                if _integrity_report.get("fixed"):
+                    logger.warning(
+                        "[Integrity] task %s: repaired %d broken pre-TTS segment(s): %s",
+                        task_id,
+                        _integrity_report["fixed"],
+                        _integrity_report["fixed_indices"][:20],
+                    )
+            except Exception as _integ_exc:
+                logger.warning("[Integrity] pre-TTS integrity gate skipped: %s", _integ_exc)
+
+        # AI Adaptation hard gate (P0 §1/§2): NEVER send to TTS when a segment
+        # requires LLM adaptation but LLM was not called. This is a critical
+        # error — the pipeline MUST stop, not continue silently.
+        if not skip_tts:
+            try:
+                from engines.ai_adaptation_engine import enforce_adaptation_gate
+                from engines.translation_adapt import get_llm_calls, get_llm_status
+
+                _gate_records = task["info"].get("timing_aware_records") or []
+                _gate_segs_data = task["info"].get("segments_data") or []
+                _gate_result = enforce_adaptation_gate(
+                    segments,
+                    timing_records=_gate_records,
+                    llm_status=get_llm_status(),
+                    segments_data=_gate_segs_data,
+                    llm_calls=get_llm_calls(),
+                )
+                with STATE_LOCK:
+                    task["info"]["adaptation_gate"] = _gate_result.to_dict()
+                if not _gate_result.passed:
+                    from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE
+
+                    _violations = _gate_result.violations
+                    _vi_summary = "; ".join(
+                        f"#{v['index'] + 1}:{v.get('reason', '')}" for v in _violations[:10]
+                    )
+                    if IS_DEBUG_LEARNING_MODE():
+                        logger.warning(
+                            "[AdaptGate] task %s: %d LLM skip(s) — debug mode, continuing: %s",
+                            task_id,
+                            len(_violations),
+                            _vi_summary,
+                        )
+                    else:
+                        from engines.dubbing_engine.pipeline_failure_diag import fail_pipeline
+
+                        logger.error(
+                            "[AdaptGate] task %s BLOCKED: %d segment(s) require LLM but LLM not called: %s",
+                            task_id,
+                            len(_violations),
+                            _vi_summary,
+                        )
+                        fail_pipeline(
+                            task_id,
+                            f"AI Adaptation Engine: {len(_violations)} сегмент(ов) требуют "
+                            f"интеллектуальной адаптации, но LLM не была вызвана ({_vi_summary})",
+                            stage="AI Adaptation Gate",
+                            error_code="LLM_NOT_CALLED",
+                            ui_lang=ui_lang,
+                        )
+                        return
+            except Exception as _gate_exc:
+                if "LLM_NOT_CALLED" in str(_gate_exc):
+                    raise
+                logger.warning("[AdaptGate] pre-TTS adaptation gate skipped: %s", _gate_exc)
+
+        _update_progress_detail(
+            task_id,
+            total_segments=len(segments),
+            phase="text_preparation",
+        )
+
+        if skip_tts:
+            if not _ensure_control(task_id, ui_lang):
+                return
+            from engines.dub_style_presets import build_subtitle_segments
+            from engines.subtitle_formats import export_srt
+
+            video_stem = Path(video_path).stem
+            srt_name = f"{video_stem}_SUBS_{base_id}.srt"
+            sub_segs = build_subtitle_segments(segments, current_timing_map_snapshot)
+            (OUTPUT_DIR / srt_name).write_text(
+                export_srt(sub_segs), encoding="utf-8"
+            )
+            with STATE_LOCK:
+                task["info"]["subtitle_file"] = srt_name
+                task["info"]["segments_data"] = _segments_data_entries(
+                    segments, task["info"]
+                )
+                task["info"]["total_segments"] = len(segments)
+            _wtm_record_checkpoint(wtm_cp_log, task_id, "pre_tts")
+            logger.info(
+                "Task %s: subtitles_only — SRT %s (no TTS)",
+                task_id,
+                srt_name,
+            )
+        else:
+            if not _ensure_control(task_id, ui_lang):
+                return
+            from engines.pipeline_stage_flow import (
+                log_stage_begin,
+                log_stage_end,
+                log_stage_transition,
+            )
+
+            log_stage_transition(task_id, "TRANSLATION", "TTS_PREP")
+            log_stage_begin(task_id, "TTS_PREP")
+
+            with STATE_LOCK:
+                segments_data = _segments_data_entries(segments, task["info"])
+                _pi = _integrity_coordinator(task_id)
+                _pi.assign_segment_ids(segments_data)
+                if project_session:
+                    project_session.set_segments(segments_data)
+                    _pi.initialize_guard_context(
+                        project_session=project_session,
+                        segments_data=segments_data,
+                    )
+                task["info"]["segments_data"] = segments_data
+                task["info"]["total_segments"] = len(segments)
+
+            with STATE_LOCK:
+                _vp_manifest = (task.get("info") or {}).get("manifest_path")
+                _vp_segments = list(task["info"].get("segments_data") or [])
+            if _vp_manifest and Path(_vp_manifest).is_file() and _vp_segments:
+                _vp_orch = _run_ai_core_orchestrator(
+                    task_id,
+                    video_path,
+                    _vp_manifest,
+                    {
+                        "segments": _build_orchestrator_agent_segments(
+                            task_id, _vp_segments
+                        ),
+                    },
+                    agents=["voice_preparation"],
+                )
+                if _vp_orch.warnings:
+                    logger.debug(
+                        "Task %s: voice_preparation warnings: %s",
+                        task_id,
+                        _vp_orch.warnings,
+                    )
+
+            from engines.pipeline_language_gate import (
+                log_segment_pipeline_trace,
+                validate_segments_target_language,
+            )
+
+            pre_tts_rows = [
+                {"text": s, "plain_text": s}
+                if isinstance(s, str)
+                else {
+                    "text": str(s.get("text") or s.get("plain_text") or ""),
+                    "plain_text": str(s.get("plain_text") or s.get("text") or ""),
+                }
+                for s in segments
+            ]
+            log_segment_pipeline_trace(
+                task_id,
+                pre_tts_rows,
+                source_segments=source_segments_snapshot,
+                target_lang=target_lang,
+                audits=task.get("info", {}).get("translation_audits"),
+            )
+            pre_tts_lang_issues = validate_segments_target_language(
+                pre_tts_rows,
+                source_segments=source_segments_snapshot,
+                target_lang=target_lang,
+            )
+            if pre_tts_lang_issues:
+                from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE
+                from engines.translation_validation import (
+                    build_validation_rows_from_info,
+                    recover_mismatched_segments,
+                    sync_final_text_to_task_info,
+                    write_translation_validation_json,
+                )
+
+                with STATE_LOCK:
+                    _info_rec = task["info"]
+                    recovered, still_bad = recover_mismatched_segments(
+                        _info_rec,
+                        pre_tts_lang_issues,
+                        task_id=task_id,
+                        source_lang=translation_source_lang,
+                        target_lang=target_lang,
+                    )
+                    sync_final_text_to_task_info(_info_rec)
+                    try:
+                        validation_rows = build_validation_rows_from_info(_info_rec)
+                        write_translation_validation_json(
+                            task_id,
+                            validation_rows,
+                            project_uuid=str(_info_rec.get("project_uuid") or ""),
+                            app_dir=APP_DIR,
+                        )
+                    except Exception:
+                        pass
+                    if recovered:
+                        segments = [
+                            str(s.get("text") or s.get("plain_text") or "").strip()
+                            for s in (_info_rec.get("segments_data") or [])
+                        ]
+                        pre_tts_rows = [
+                            {"text": s, "plain_text": s} for s in segments if s
+                        ] or pre_tts_rows
+                        pre_tts_lang_issues = validate_segments_target_language(
+                            pre_tts_rows,
+                            source_segments=source_segments_snapshot,
+                            target_lang=target_lang,
+                        )
+                        still_bad = pre_tts_lang_issues
+
+                if still_bad:
+                    first = still_bad[0]
+                    from engines.dubbing_engine.pipeline_failure_diag import fail_pipeline
+                    from engines.pipeline_language_gate import (
+                        build_language_mismatch_report,
+                    )
+
+                    # TZ §4/§8: build a full per-stage RCA report so the failure is
+                    # never just "LANGUAGE_MISMATCH" without an explanation.
+                    _audits = task.get("info", {}).get("translation_audits") or []
+                    _audit_by_idx = {int(a.get("index", -1)): a for a in _audits}
+                    mismatch_reports = []
+                    for _issue in still_bad:
+                        _idx = int(_issue.get("index", -1))
+                        _seg = (
+                            segments[_idx]
+                            if 0 <= _idx < len(segments) and isinstance(segments[_idx], dict)
+                            else {}
+                        )
+                        if not _seg and 0 <= _idx < len(pre_tts_rows):
+                            _seg = pre_tts_rows[_idx]
+                        _orig = (
+                            source_segments_snapshot[_idx]
+                            if 0 <= _idx < len(source_segments_snapshot)
+                            else ""
+                        )
+                        mismatch_reports.append(
+                            build_language_mismatch_report(
+                                index=_idx,
+                                segment=_seg,
+                                audit=_audit_by_idx.get(_idx),
+                                original=_orig,
+                                target_lang=target_lang,
+                            )
+                        )
+                    with STATE_LOCK:
+                        task["info"]["language_mismatch_reports"] = mismatch_reports
+                    first_report = mismatch_reports[0] if mismatch_reports else {}
+                    diagnosis = str(first_report.get("diagnosis") or "")
+                    seg_msg = str(first.get("message") or first.get("code") or "")
+
+                    reason = (
+                        f"Критическая ошибка языка до TTS: сегмент #{first.get('index')} "
+                        f"({first.get('code')}) — ожидался {target_lang}, "
+                        f"обнаружен {first.get('detected_lang', 'en')}. "
+                        f"Превью: {str(first.get('final_preview') or '')[:120]}. "
+                        f"{seg_msg}. RCA: {diagnosis}"
+                    )
+                    if IS_DEBUG_LEARNING_MODE():
+                        logger.warning(
+                            "Task %s: LANGUAGE_MISMATCH after recovery — debug mode continues: %s",
+                            task_id,
+                            reason,
+                        )
+                    else:
+                        logger.error(
+                            "Task %s: pre-TTS language gate — %d issues after recovery, idx=%s code=%s | RCA: %s",
+                            task_id,
+                            len(still_bad),
+                            first.get("index"),
+                            first.get("code"),
+                            diagnosis,
+                        )
+                        for _rep in mismatch_reports:
+                            logger.error(
+                                "Task %s: LANGUAGE_MISMATCH chain idx=%s → %s",
+                                task_id,
+                                _rep.get("index"),
+                                _rep.get("transformation_chain"),
+                            )
+                        fail_pipeline(
+                            task_id,
+                            reason,
+                            stage="TRANSLATION",
+                            error_code="LANGUAGE_MISMATCH",
+                        )
+                        return
+                elif recovered:
+                    logger.info(
+                        "Task %s: pre-TTS language recovery fixed %d segment(s)",
+                        task_id,
+                        recovered,
+                    )
+
+            _wtm_record_checkpoint(wtm_cp_log, task_id, "pre_tts")
+
+            try:
+                from engines.core.feature_flags import is_enabled as _ff_enabled
+                from engines.emotion_tagger import classify_segments, is_emotion_tts_enabled
+
+                if _ff_enabled("emotion_tts", developer_session=True) or is_emotion_tts_enabled():
+                    with STATE_LOCK:
+                        _seg_rows = copy.deepcopy(task["info"].get("segments_data") or [])
+                    tgt_texts = [str(s.get("text") or "") for s in _seg_rows]
+                    with STATE_LOCK:
+                        _src_audio_em = task["info"].get("original_audio_path") or audio_path
+                    emotion_tags = classify_segments(
+                        tgt_texts,
+                        originals=source_segments_snapshot,
+                        audio_paths=[_src_audio_em] * len(tgt_texts),
+                        timing_map=current_timing_map_snapshot,
+                    )
+                    with STATE_LOCK:
+                        task["info"]["emotion_tags"] = [t.to_dict() for t in emotion_tags]
+                    for i, tag in enumerate(emotion_tags):
+                        if i < len(segments_data):
+                            segments_data[i]["emotion"] = tag.emotion
+                            segments_data[i]["tts_emotion"] = tag.to_dict()
+                            segments_data[i]["intonation"] = tag.intonation or {}
+            except Exception:
+                pass
+
+            from engines.translation_naturalizer import build_tts_groups
+            from engines.tts import generate_audio, generate_tts_groups_parallel
+            from engines.semantic_adaptation import prepare_tts_groups_semantic
+            from engines.tts_text_path import (
+                build_tts_trace_rows,
+                find_mismatches,
+                log_tts_trace,
+            )
+
+            with STATE_LOCK:
+                review_before_tts = bool(
+                    task["info"].get("translation_review_before_tts", True)
+                )
+                review_approved = bool(task["info"].get("translation_review_approved"))
+                timing_aware_applied = bool(task["info"].get("timing_aware_applied"))
+                translate_method_snap = task["info"].get("translate_method") or translate_method
+
+            # After review / timing-aware pass, TTS uses approved Final without extra rewrite.
+            adapt_tts_text = not (
+                review_before_tts
+                or review_approved
+                or sso_active
+                or timing_aware_applied
+                or _skip_timing_shorten
+                or _skip_grammar_shorten
+            )
+
+            tts_groups = build_tts_groups(segments, current_timing_map_snapshot)
+
+            tts_groups, semantic_log = prepare_tts_groups_semantic(
+                tts_groups,
+                source_segments=source_segments_snapshot,
+                src_lang=translation_source_lang,
+                tgt_lang=target_lang,
+                task_id=task_id,
+                app_dir=APP_DIR,
+                adapt_text=adapt_tts_text,
+            )
+            with STATE_LOCK:
+                style_cfg = _style_params_from_info(task.get("info"))
+                _voice_hints = {
+                    i: dict(seg.get("ai_voice") or {})
+                    for i, seg in enumerate(task.get("info", {}).get("segments_data") or [])
+                    if seg.get("ai_voice")
+                }
+
+            from engines.dub_style_presets import get_dub_style
+            from engines.professional_dubbing import prepare_tts_groups_prosody
+
+            _style_id = dub_style or "modern"
+            try:
+                _style_delivery = get_dub_style(_style_id).delivery
+            except Exception:
+                _style_delivery = ""
+            with STATE_LOCK:
+                _src_audio = task["info"].get("original_audio_path") or audio_path
+            tts_groups, produb_meta = prepare_tts_groups_prosody(
+                tts_groups,
+                lang=target_lang,
+                style_id=_style_id,
+                delivery=_style_delivery,
+                base_rate=tts_rate,
+                base_pitch=tts_pitch,
+                segment_voice_hints=_voice_hints,
+                app_dir=APP_DIR,
+                task_id=task_id,
+                source_audio_path=_src_audio,
+            )
+
+            # Build per-segment TTS input trace using plain_text (same as actual TTS input).
+            # group["text"] may be SSML; plain_text is what actually goes to edge_tts.
+            tts_inputs_by_seg: list[str] = list(segments)
+            for group in tts_groups:
+                plain = str(group.get("plain_text") or "").strip()
+                gtext_ssml = str(group.get("text") or "").strip()
+                gtext = plain if plain else gtext_ssml
+                if gtext.lstrip().startswith("<speak"):
+                    import re as _re
+                    gtext = _re.sub(r"<[^>]+>", " ", gtext).strip()
+                for idx in group.get("indices") or []:
+                    if 0 <= idx < len(tts_inputs_by_seg) and gtext:
+                        tts_inputs_by_seg[idx] = gtext
+
+            with STATE_LOCK:
+                info_for_trace = copy.deepcopy(task.get("info") or {})
+            trace_rows = build_tts_trace_rows(info_for_trace, tts_inputs_by_seg)
+            tts_trace_path = log_tts_trace(
+                APP_DIR, trace_rows, task_id=task_id, phase="pre_synthesis"
+            )
+            mismatches = find_mismatches(trace_rows)
+            if mismatches:
+                logger.warning(
+                    "Task %s: TTS input != Final for %d segments (see %s)",
+                    task_id,
+                    len(mismatches),
+                    tts_trace_path,
+                )
+            with STATE_LOCK:
+                task["info"]["tts_text_trace_log"] = tts_trace_path
+                task["info"]["tts_text_mismatches"] = len(mismatches)
+                task["info"]["translate_method"] = translate_method_snap
+                task["info"]["tts_semantic_adapt"] = adapt_tts_text
+                task["info"]["professional_dubbing"] = produb_meta
+            with STATE_LOCK:
+                task["info"]["semantic_adaptation_log"] = semantic_log.path
+                audits = task["info"].get("translation_audits") or []
+                from engines.translation_trace import TranslationTraceLog
+
+                trace = TranslationTraceLog(APP_DIR, task_id=task_id)
+                _sync_tts_audits_from_groups(
+                    audits,
+                    segments_data,
+                    tts_groups,
+                    trace=trace,
+                    prosody_only=not adapt_tts_text,
+                )
+                task["info"]["translation_audits"] = audits
+                trace.flush(phase="post_semantic", extra={"tgt": target_lang})
+                task["info"]["translation_trace_log"] = trace.path
+
+            from engines.pipeline_integrity.tts_segment_fields import (
+                apply_tts_group_merge_links,
+                resolve_tts_input_text,
+            )
+
+            with STATE_LOCK:
+                tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+
+            apply_tts_group_merge_links(segments_data, tts_groups)
+            _log_tts_synthesis_requests(
+                task_id,
+                tts_groups=tts_groups,
+                segments_data=segments_data,
+                voice=voice,
+                target_lang=target_lang,
+                provider=str(tts_engine_id or "edge-offline"),
+            )
+
+            log_stage_end(task_id, "TTS_PREP")
+            log_stage_transition(task_id, "TTS_PREP", "TTS")
+            _set_step(task_id, "tts", 65.0)
+            runtime_diag.stage_begin(STAGE_TTS)
+            log_stage_begin(task_id, "TTS")
+
+            _integrity_coordinator(task_id).begin_stage("tts", segments_data)
+
+            total_groups = max(len(tts_groups), 1)
+            tts_files = []
+            _update_progress_detail(
+                task_id,
+                total_segments=len(segments),
+                segments_done=0,
+                phase="tts",
+                tts_groups_total=total_groups,
+                tts_groups_done=0,
+            )
+
+            profiler.start("tts")
+            if pipeline_timer is not None:
+                pipeline_timer.start("tts")
+            with STATE_LOCK:
+                use_parallel_tts = not control.get("stop_after_segment")
+                tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+                _pipeline_mode = str(task["info"].get("pipeline_mode") or "")
+                _streaming_voice_done = bool(task["info"].get("streaming_voice_done"))
+                _manifest_vp = str(task["info"].get("manifest_path") or "")
+
+            _skip_batch_tts = _streaming_voice_done
+            with STATE_LOCK:
+                _conveyor_tts_done = bool(task["info"].get("conveyor_tts_done"))
+            if _conveyor_tts_done:
+                _skip_batch_tts = True
+                for seg in segments_data:
+                    f = seg.get("file")
+                    if f and f not in tts_files:
+                        tts_files.append(f)
+                logger.info(
+                    "Task %s: batch TTS skipped — full conveyor (%d files)",
+                    task_id,
+                    len(tts_files),
+                )
+            if _pipeline_mode == "streaming" and not _streaming_voice_done:
+                _skip_batch_tts = _run_streaming_voice_for_task(
+                    task_id,
+                    segments_data,
+                    voice=voice,
+                    target_lang=target_lang,
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                    manifest_path=_manifest_vp,
+                )
+
+            def _parallel_tts_progress(g_idx: int, groups_total: int, groups_done: int) -> None:
+                head_idx = 0
+                text = ""
+                if 0 <= g_idx < len(tts_groups):
+                    indices = tts_groups[g_idx].get("indices") or []
+                    head_idx = indices[0] if indices else 0
+                    text = resolve_tts_input_text(tts_groups[g_idx]) or ""
+                with STATE_LOCK:
+                    task["progress"] = round(
+                        65.0 + (groups_done / max(groups_total, 1)) * 15.0, 1
+                    )
+                _update_progress_detail(
+                    task_id,
+                    current_segment=head_idx + 1,
+                    total_segments=len(segments),
+                    segments_done=groups_done,
+                    phase="tts",
+                    operation="speech_generation",
+                    tts_groups_done=groups_done,
+                    tts_groups_total=groups_total,
+                    eta_sec=_estimate_eta_sec(
+                        task_id, groups_done / max(groups_total, 1)
+                    ),
+                    **_segment_tts_progress_meta(
+                        task_id,
+                        head_idx,
+                        segments_data,
+                        voice=voice,
+                        tts_engine_id=str(tts_engine_id or "edge-offline"),
+                        text=text,
+                    ),
+                )
+
+            if _skip_batch_tts:
+                for seg in segments_data:
+                    if seg.get("merged_into") is not None:
+                        continue
+                    fn = seg.get("file") or seg.get("tts_file_path")
+                    if fn and fn not in tts_files:
+                        tts_files.append(fn)
+                with STATE_LOCK:
+                    task["progress"] = round(80.0, 1)
+                _update_progress_detail(
+                    task_id,
+                    total_segments=len(segments),
+                    segments_done=len(tts_files),
+                    phase="tts",
+                    tts_groups_done=total_groups,
+                    tts_groups_total=total_groups,
+                )
+                logger.info(
+                    "Task %s: batch TTS skipped — streaming voice (%d files)",
+                    task_id,
+                    len(tts_files),
+                )
+            elif use_parallel_tts and len(tts_groups) > 1:
+                work_items = []
+                for g_idx, group in enumerate(tts_groups):
+                    indices = group["indices"]
+                    text = resolve_tts_input_text(group)
+                    if text:
+                        head_idx = indices[0] if indices else 0
+                        seg_id = str(segments_data[head_idx].get("segment_id") or "")
+                        expected_path = str(
+                            _artifacts_dir(task.get("info")) / f"{base_id}_g{g_idx:04d}.mp3"
+                        )
+                        work_items.append(
+                            {
+                                "g_idx": g_idx,
+                                "indices": indices,
+                                "text": text,
+                                "timing": group.get("timing"),
+                                "rate": group.get("prosody_rate") or tts_rate,
+                                "pitch": group.get("prosody_pitch") or tts_pitch,
+                                "tts_context": _tts_context_for_segment(
+                                    task_id=task_id,
+                                    segment_id=seg_id,
+                                    segment_index=head_idx,
+                                    current=head_idx + 1,
+                                    total=len(segments_data),
+                                    original_text=(
+                                        source_segments_snapshot[head_idx]
+                                        if head_idx < len(source_segments_snapshot)
+                                        else ""
+                                    ),
+                                    tts_text=text,
+                                    voice=voice,
+                                    target_lang=target_lang,
+                                    tts_file_path=expected_path,
+                                    engine_id=tts_engine_id,
+                                ),
+                            }
+                        )
+                parallel_results = generate_tts_groups_parallel(
+                    work_items,
+                    voice,
+                    rate=tts_rate,
+                    pitch=tts_pitch,
+                    engine_id=tts_engine_id,
+                    on_group_done=_parallel_tts_progress,
+                    output_dir=_artifacts_dir(task.get("info")),
+                    task_id=base_id,
+                )
+
+                for res in parallel_results:
+                    g_idx = int(res.get("g_idx", 0))
+                    indices = res.get("indices") or []
+                    text = str(res.get("text") or "").strip()
+                    one_files = [res["file"]] if res.get("file") else []
+                    head_idx = indices[0] if indices else 0
+                    if res.get("tts_failure"):
+                        for _seg_idx in (indices or []):
+                            _open_ddf.record_agent(
+                                task_id, "TTS", called=True, success=False,
+                                error=str(res["tts_failure"]),
+                                fallback_used=True,
+                                segment_idx=_seg_idx,
+                                decision="silence_gap",
+                            )
+                            _open_ddf.mark_segment_attention(task_id, _seg_idx, "tts_failed")
+                        _mark_tts_segment_skipped(
+                            task_id,
+                            segments_data,
+                            indices,
+                            res["tts_failure"],
+                            reason="tts_failure",
+                        )
+                        _commit_tts_group_result(
+                            segments_data,
+                            indices,
+                            tts_text=text,
+                            audio_filename=None,
+                            task_info=task.get("info") if task else None,
+                        )
+                        continue
+                    if one_files:
+                        tts_files.extend(one_files)
+                        with STATE_LOCK:
+                            _tts_info_local = dict(task.get("info") or {})
+                        _commit_tts_group_result(
+                            segments_data,
+                            indices,
+                            tts_text=text,
+                            audio_filename=one_files[0],
+                            task_info=_tts_info_local,
+                        )
+                    else:
+                        _commit_tts_group_result(
+                            segments_data,
+                            indices,
+                            tts_text=text,
+                            audio_filename=None,
+                            task_info=task.get("info") if task else None,
+                        )
+
+                with STATE_LOCK:
+                    task["progress"] = round(65.0 + 15.0, 1)
+            else:
+                from engines.pipeline_segment_watchdog import run_segment_bounded
+
+                for g_idx, group in enumerate(tts_groups):
+                    if not _ensure_control(task_id, ui_lang):
+                        profiler.stop("tts")
+                        return
+
+                    indices = group["indices"]
+                    text = resolve_tts_input_text(group)
+                    head_idx = indices[0]
+
+                    with STATE_LOCK:
+                        control["current_segment"] = head_idx
+                        task["progress"] = round(
+                            65.0 + (g_idx / total_groups) * 15.0, 1
+                        )
+                    try:
+                        from engines.pipeline_progress_tracker import record_segment_start
+
+                        record_segment_start(
+                            task_id,
+                            "tts",
+                            head_idx + 1,
+                            total_segments=len(segments),
+                            **_segment_tts_progress_meta(
+                                task_id,
+                                head_idx,
+                                segments_data,
+                                voice=voice,
+                                tts_engine_id=str(tts_engine_id or "edge-offline"),
+                                text=text,
+                            ),
+                        )
+                    except Exception:
+                        pass
+                    _update_progress_detail(
+                        task_id,
+                        current_segment=head_idx + 1,
+                        total_segments=len(segments),
+                        segments_done=g_idx,
+                        phase="tts",
+                        operation="speech_generation",
+                        tts_groups_done=g_idx,
+                        tts_groups_total=total_groups,
+                        eta_sec=_estimate_eta_sec(task_id, (g_idx + 1) / total_groups),
+                        **_segment_tts_progress_meta(
+                            task_id,
+                            head_idx,
+                            segments_data,
+                            voice=voice,
+                            tts_engine_id=str(tts_engine_id or "edge-offline"),
+                            text=text,
+                        ),
+                    )
+
+                    if not text:
+                        _commit_tts_group_result(
+                            segments_data,
+                            indices,
+                            tts_text="",
+                            audio_filename=None,
+                            task_info=task.get("info") if task else None,
+                        )
+                        continue
+
+                    logger.info(
+                        "Task %s: TTS group %d/%d indices=%s len=%d segment_id=%s",
+                        task_id,
+                        g_idx + 1,
+                        total_groups,
+                        indices,
+                        len(text),
+                        segments_data[head_idx].get("segment_id"),
+                    )
+                    expected_path = str(
+                        _artifacts_dir(task.get("info")) / f"{base_id}_seg0000.mp3"
+                    )
+                    tts_ctx = _tts_context_for_segment(
+                        task_id=task_id,
+                        segment_id=str(segments_data[head_idx].get("segment_id") or ""),
+                        segment_index=head_idx,
+                        current=head_idx + 1,
+                        total=len(segments_data),
+                        original_text=(
+                            source_segments_snapshot[head_idx]
+                            if head_idx < len(source_segments_snapshot)
+                            else ""
+                        ),
+                        tts_text=text,
+                        voice=voice,
+                        target_lang=target_lang,
+                        tts_file_path=expected_path,
+                        engine_id=tts_engine_id,
+                    )
+                    try:
+                        def _run_tts_group() -> list:
+                            raw = generate_audio(
+                                text=text,
+                                voice=voice,
+                                segments=[text],
+                                rate=group.get("prosody_rate") or tts_rate,
+                                pitch=group.get("prosody_pitch") or tts_pitch,
+                                engine_id=tts_engine_id,
+                                output_dir=_artifacts_dir(task.get("info")),
+                                task_id=base_id,
+                                context=tts_ctx,
+                            )
+                            return _normalize_tts_result(raw)
+
+                        watch = run_segment_bounded(
+                            task_id=task_id,
+                            phase="tts",
+                            segment_index=head_idx,
+                            stage="tts_synthesis",
+                            fn=_run_tts_group,
+                            fallback=lambda: [],
+                        )
+                        try:
+                            from engines.pipeline_progress_tracker import record_segment_end
+
+                            record_segment_end(
+                                task_id,
+                                "tts",
+                                head_idx + 1,
+                                cause="tts_timeout" if watch.timed_out else "",
+                                error=str(watch.error or ""),
+                            )
+                        except Exception:
+                            pass
+                        one_files = watch.value
+                        if watch.timed_out or watch.error:
+                            from engines.dubbing_engine.tts_failure_diag import (
+                                build_failure_report,
+                            )
+
+                            report = build_failure_report(
+                                RuntimeError(
+                                    watch.error or f"timeout_{watch.elapsed_sec:.0f}s"
+                                ),
+                                segment_id=str(
+                                    segments_data[head_idx].get("segment_id") or ""
+                                ),
+                                segment_index=head_idx,
+                                current=head_idx + 1,
+                                total=len(segments_data),
+                                original_text=(
+                                    source_segments_snapshot[head_idx]
+                                    if head_idx < len(source_segments_snapshot)
+                                    else ""
+                                ),
+                                tts_text=text,
+                                voice=voice,
+                                language=target_lang,
+                                tts_file_path=expected_path,
+                                duration_ms=watch.elapsed_sec * 1000.0,
+                                task_id=task_id,
+                                engine_id=tts_engine_id or "edge-offline",
+                            )
+                            _mark_tts_segment_skipped(
+                                task_id,
+                                segments_data,
+                                indices,
+                                report,
+                                reason=watch.error or "timeout",
+                            )
+                            one_files = []
+                    except Exception as te:
+                        from engines.dubbing_engine.tts_failure_diag import (
+                            VoiceGenerationError,
+                            build_failure_report,
+                        )
+
+                        if isinstance(te, VoiceGenerationError) and te.report:
+                            report = te.report
+                        else:
+                            report = build_failure_report(
+                                te,
+                                segment_id=str(segments_data[head_idx].get("segment_id") or ""),
+                                segment_index=head_idx,
+                                current=head_idx + 1,
+                                total=len(segments_data),
+                                original_text=(
+                                    source_segments_snapshot[head_idx]
+                                    if head_idx < len(source_segments_snapshot)
+                                    else ""
+                                ),
+                                tts_text=text,
+                                voice=voice,
+                                language=target_lang,
+                                tts_file_path=expected_path,
+                                duration_ms=0.0,
+                                task_id=task_id,
+                                engine_id=tts_engine_id or "edge-offline",
+                            )
+                        _mark_tts_segment_skipped(
+                            task_id,
+                            segments_data,
+                            indices,
+                            report,
+                            reason="tts_exception",
+                        )
+                        _commit_tts_group_result(
+                            segments_data,
+                            indices,
+                            tts_text=text,
+                            audio_filename=None,
+                            task_info=task.get("info") if task else None,
+                        )
+                        for _ddf_idx in (indices or []):
+                            _open_ddf.record_agent(
+                                task_id, "TTS", called=True, success=False,
+                                error=str(te), fallback_used=True,
+                                segment_idx=_ddf_idx, decision="silence_gap",
+                            )
+                            _open_ddf.mark_segment_attention(task_id, _ddf_idx, "tts_failed")
+                        continue
+
+                    with STATE_LOCK:
+                        if one_files:
+                            tts_files.extend(one_files)
+                            _tts_info_local = dict(task.get("info") or {})
+                            _commit_tts_group_result(
+                                segments_data,
+                                indices,
+                                tts_text=text,
+                                audio_filename=one_files[0],
+                                task_info=_tts_info_local,
+                            )
+                        else:
+                            logger.warning(
+                                "Task %s: TTS returned no file for group %d",
+                                task_id,
+                                g_idx + 1,
+                            )
+                            _commit_tts_group_result(
+                                segments_data,
+                                indices,
+                                tts_text=text,
+                                audio_filename=None,
+                                task_info=task.get("info") if task else None,
+                            )
+
+                    with STATE_LOCK:
+                        is_stop_triggered = control["stop_after_segment"]
+
+                    if is_stop_triggered:
+                        with STATE_LOCK:
+                            control.update(
+                                {
+                                    "editing": True,
+                                    "state": "paused",
+                                    "stop_after_segment": False,
+                                }
+                            )
+                        if not _ensure_control(task_id, ui_lang):
+                            profiler.stop("tts")
+                            return
+
+            profiler.stop("tts")
+            if pipeline_timer is not None:
+                pipeline_timer.stop("tts")
+            log_stage_end(task_id, "TTS")
+            log_stage_transition(task_id, "TTS", "POST_TTS_QA")
+            log_stage_begin(task_id, "POST_TTS_QA")
+            try:
+                from engines.ai_core.llm_bootstrap import prepare_llm_for_pipeline
+
+                with STATE_LOCK:
+                    _llm_post_info = dict(task.get("info") or {})
+                _llm_post = prepare_llm_for_pipeline(
+                    task_id,
+                    _llm_post_info,
+                    app_dir=APP_DIR,
+                    phase="POST_TTS_QA",
+                )
+                with STATE_LOCK:
+                    task["info"]["llm_bootstrap_post_tts"] = _llm_post
+            except Exception:
+                logger.debug("POST_TTS_QA LLM bootstrap skipped", exc_info=True)
+            _pi_tts = _integrity_coordinator(task_id)
+            _pi_tts.end_stage(
+                "tts",
+                segments_data,
+                timing_map=current_timing_map_snapshot,
+            )
+            from engines.pipeline_integrity.tts_segment_fields import sync_tts_legacy_fields
+
+            sync_tts_legacy_fields(segments_data)
+            with STATE_LOCK:
+                tts_ok = sum(
+                    1
+                    for s in (AUTO_TASKS.get(task_id, {}).get("info", {}).get("segments_data") or [])
+                    if (s.get("tts_file_path") or s.get("file"))
+                    and s.get("merged_into") is None
+                    and s.get("status") not in ("merged", "failed", "empty")
+                )
+            _runtime_stage_record(
+                task_id,
+                runtime_diag,
+                4,
+                STAGE_TTS,
+                segments_ok=tts_ok,
+            )
+            from engines.dubbing_engine.tts_handoff_diag import log_tts_generated
+
+            with STATE_LOCK:
+                _tts_info = dict(task.get("info") or {})
+            log_tts_generated(
+                task_id,
+                tts_files=tts_files,
+                segments_data=segments_data,
+                artifacts_dir=_artifacts_dir(_tts_info),
+            )
+            from engines.voice_style_fx import apply_voice_fx_to_segment_files
+
+            with STATE_LOCK:
+                style_cfg = _style_params_from_info(task.get("info"))
+            fx_count = apply_voice_fx_to_segment_files(
+                segments_data, OUTPUT_DIR, style_cfg.get("voice_fx")
+            )
+            if fx_count:
+                logger.info("Task %s: voice style FX applied to %d segments", task_id, fx_count)
+
+            _pi_tts.register_tts_artifacts(
+                segments_data,
+                resolve_path=_resolve_segment_audio_path,
+                task_info=_tts_info,
+            )
+
+            with STATE_LOCK:
+                timing_map_for_fit = copy.deepcopy(
+                    task["info"].get("timing_map_backup") or current_timing_map_snapshot
+                )
+
+            with STATE_LOCK:
+                _qa_info = dict(task.get("info") or {})
+            timing_map_for_fit, _post_tts_stats = _post_tts_timing_qa(
+                task_id,
+                segments_data,
+                timing_map_for_fit,
+                _qa_info,
+                voice=voice,
+                target_lang=target_lang,
+                src_lang=str(_qa_info.get("detected_lang") or _qa_info.get("source_lang") or "en"),
+                tts_rate=tts_rate,
+                tts_pitch=tts_pitch,
+            )
+            with STATE_LOCK:
+                task["info"]["timing_map_backup"] = timing_map_for_fit
+                task["info"]["post_tts_qa"] = _post_tts_stats
+                # _qa_info is a shallow copy of task["info"]; propagate the keys
+                # that _post_tts_timing_qa writes back onto the real task info so
+                # the OpenDDF report reflects the ACTUAL post-TTS LLM journal
+                # (otherwise llm_calls/llm_status stay empty → false
+                # LLM_NOT_CALLED / LLM_ADAPTATION_FAILED diagnostics).
+                for _k in ("llm_calls", "llm_status", "timing_joint_fixes"):
+                    if _k in _qa_info:
+                        task["info"][_k] = _qa_info[_k]
+
+            # TZ §1-§4: two explicit branches, NO hidden fallback.
+            #   • strict mode    → segments that still require LLM adaptation stop
+            #                      the pipeline with an actionable diagnostic.
+            #   • automatic mode → surface a user-visible quality warning and
+            #                      continue (overflow handled by gap/video-adapt,
+            #                      never silent truncation).
+            from engines.llm_adaptation_mode import (
+                MODE_STRICT,
+                build_stop_diagnostics,
+                detect_capabilities,
+                resolve_adaptation_mode,
+            )
+
+            _llm_gate = (_post_tts_stats or {}).get("requires_llm_adaptation") or {}
+            with STATE_LOCK:
+                _adapt_mode = resolve_adaptation_mode(task.get("info") or {})
+                task["info"]["adaptation_mode"] = _adapt_mode
+            if _llm_gate.get("count"):
+                _idxs = _llm_gate.get("segment_indices") or []
+                _caps = detect_capabilities()
+                _stop_diag = build_stop_diagnostics(
+                    mode=_adapt_mode,
+                    reason=str(_llm_gate.get("reason") or "requires_llm_adaptation"),
+                    pending_indices=list(_idxs),
+                    total_segments=len(segments_data),
+                    capabilities=_caps,
+                )
+                with STATE_LOCK:
+                    task["info"]["llm_gate_diagnostics"] = _stop_diag
+                if _adapt_mode == MODE_STRICT:
+                    from engines.dubbing_engine.pipeline_failure_diag import fail_pipeline
+
+                    reason = (
+                        f"Строгий режим: {_llm_gate.get('count')} сегмент(ов) требуют "
+                        f"интеллектуальной адаптации, но она не выполнена ({_llm_gate.get('reason')}). "
+                        f"Сегменты: {_idxs[:20]}. Передача неадаптированного текста в "
+                        f"TTS/Slot Fit запрещена."
+                    )
+                    logger.error(
+                        "Task %s: STRICT LLM gate blocked pipeline — %d segments "
+                        "require adaptation: %s",
+                        task_id,
+                        _llm_gate.get("count"),
+                        _idxs[:20],
+                    )
+                    fail_pipeline(
+                        task_id,
+                        reason,
+                        stage="POST_TTS_QA",
+                        error_code="REQUIRES_LLM_ADAPTATION",
+                    )
+                    return
+                # Automatic mode: explicit, user-visible degradation warning.
+                _warn = (
+                    f"{_llm_gate.get('count')} сегмент(ов) не удалось адаптировать "
+                    f"({_llm_gate.get('reason')}). Дубляж продолжен в упрощённом "
+                    f"режиме. Для максимального качества установите AI-модуль TubeDub "
+                    f"или включите строгий режим в настройках."
+                )
+                logger.warning("Task %s: AUTOMATIC mode degraded — %s", task_id, _warn)
+                with STATE_LOCK:
+                    _warns = task["info"].setdefault("user_warnings", [])
+                    _warns.append({"stage": "POST_TTS_QA", "code": "LLM_ADAPTATION_DEGRADED", "message": _warn})
+
+            log_stage_end(task_id, "POST_TTS_QA")
+            log_stage_transition(task_id, "POST_TTS_QA", "SLOT_FIT")
+            log_stage_begin(task_id, "SLOT_FIT")
+
+            _update_progress_detail(
+                task_id,
+                phase="slot_fit",
+                total_segments=len(segments_data),
+                segments_done=0,
+            )
+            slot_fit_stats = {
+                "total": 0,
+                "already_fit": 0,
+                "compressed": 0,
+                "overflow": 0,
+                "failed": 0,
+                "enabled": False,
+            }
+            # slot_fit is a core dubbing step — always enabled regardless of soft_sync/word_timing flags
+            slot_fit_enabled = True
+            _pi_sf = _integrity_coordinator(task_id)
+            _pi_sf.begin_stage("slot_fit", segments_data)
+
+            if slot_fit_enabled:
+                if pipeline_timer is not None:
+                    pipeline_timer.start("slot_fit")
+                with STATE_LOCK:
+                    _timing_agent_slot_fit = bool(
+                        (task.get("info") or {}).get("timing_agent_path")
+                    )
+                    _slot_fit_info = dict(task.get("info") or {})
+                slot_fit_stats = _pipeline_slot_fit_segments(
+                    segments_data,
+                    timing_map_for_fit,
+                    voice=voice,
+                    target_lang=target_lang,
+                    source_segments=source_segments_snapshot,
+                    tts_files=tts_files,
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                    max_attempts=3,
+                    task_id=task_id,
+                    task_info=_slot_fit_info,
+                    skip_text_compression=_timing_agent_slot_fit,
+                )
+                slot_fit_stats["enabled"] = True
+                if pipeline_timer is not None:
+                    pipeline_timer.stop("slot_fit")
+            logger.info(
+                "Task %s: slot_fit total=%d compressed=%d overflow=%d already_fit=%d",
+                task_id,
+                slot_fit_stats.get("total", 0),
+                slot_fit_stats.get("compressed", 0),
+                slot_fit_stats.get("overflow", 0),
+                slot_fit_stats.get("already_fit", 0),
+            )
+            _open_ddf.record_agent(
+                task_id, "SlotFit", called=True,
+                success=slot_fit_stats.get("failed", 0) == 0,
+                decision=(
+                    f"total={slot_fit_stats.get('total',0)} "
+                    f"compressed={slot_fit_stats.get('compressed',0)} "
+                    f"overflow={slot_fit_stats.get('overflow',0)}"
+                ),
+            )
+
+            log_stage_end(task_id, "SLOT_FIT")
+            log_stage_transition(task_id, "SLOT_FIT", "STUDIO")
+            log_stage_begin(task_id, "STUDIO")
+
+            # Collect video_stretch_segments for DubEngine (segments where video
+            # should be slowed to match longer-than-slot TTS audio).
+            video_stretch_segs: list[dict] = []
+            for idx, seg in enumerate(segments_data):
+                if seg.get("merged_into") is not None:
+                    continue
+                vsr = float(seg.get("video_stretch_ratio", 1.0))
+                if vsr > 1.01 and seg.get("video_adapt_mode"):
+                    s_ms = int(seg.get("start_ms", 0))
+                    e_ms = int(seg.get("end_ms", s_ms))
+                    video_stretch_segs.append({
+                        "start_ms": s_ms,
+                        "end_ms": e_ms,
+                        "stretch_ratio": round(vsr, 4),
+                    })
+
+            # ── Speech speed equalization ─────────────────────────────────────
+            # After slot_fit, normalize atempo across segments so no single
+            # segment sounds rushed while its neighbours are slow.
+            _equalize_speech_speeds(segments_data, timing_map_for_fit)
+
+            _pi_sf.end_stage(
+                "slot_fit",
+                segments_data,
+                timing_map=timing_map_for_fit,
+            )
+            with STATE_LOCK:
+                _handoff_info = dict(task.get("info") or {})
+            _pi_sf.validate_pipeline(
+                segments_data,
+                timing_map_for_fit,
+                stage="studio_handoff",
+                task_info=_handoff_info,
+                resolve_audio=_resolve_segment_audio_path,
+            )
+
+            with STATE_LOCK:
+                task["info"]["segments_data"] = segments_data
+                task["info"]["slot_fit_stats"] = slot_fit_stats
+                task["info"]["video_stretch_segments"] = video_stretch_segs
+                task["info"]["tts_files"] = list(dict.fromkeys(tts_files))
+                task["info"]["mux_base_id"] = base_id
+                task["info"]["extracted_audio_path"] = audio_path
+                task["info"]["pipeline_integrity"] = _pi_sf.to_dict()
+                touch_task(task_id)
+            if project_session:
+                project_session.store_pipeline_state(
+                    segments=segments_data,
+                    source_segments=source_segments_snapshot,
+                    timing_map=timing_map_for_fit,
+                    translations=segments,
+                )
+
+            from engines.dubbing_engine.tts_handoff_diag import log_pipeline_handoff
+
+            with STATE_LOCK:
+                _handoff_info = dict(task.get("info") or {})
+            log_pipeline_handoff(
+                task_id,
+                project_session=project_session,
+                task_info=_handoff_info,
+                segments_data=segments_data,
+            )
+
+            from engines.pipeline_language_gate import (
+                log_segment_pipeline_trace,
+                validate_segments_target_language,
+            )
+
+            log_segment_pipeline_trace(
+                task_id,
+                segments_data,
+                source_segments=source_segments_snapshot,
+                target_lang=target_lang,
+                audits=task.get("info", {}).get("translation_audits"),
+            )
+            lang_issues = validate_segments_target_language(
+                segments_data,
+                source_segments=source_segments_snapshot,
+                target_lang=target_lang,
+            )
+            if lang_issues:
+                first = lang_issues[0]
+                from engines.dubbing_engine.pipeline_failure_diag import fail_pipeline
+
+                reason = (
+                    f"Критическая ошибка языка: сегмент #{first.get('index')} "
+                    f"({first.get('code')}) — финальный текст не соответствует {target_lang}. "
+                    f"Превью: {str(first.get('final_preview') or '')[:120]}"
+                )
+                logger.error(
+                    "Task %s: language gate failed — %d issues, first idx=%s code=%s",
+                    task_id,
+                    len(lang_issues),
+                    first.get("index"),
+                    first.get("code"),
+                )
+                fail_pipeline(
+                    task_id,
+                    reason,
+                    stage="STUDIO",
+                    error_code="LANGUAGE_MISMATCH",
+                )
+                return
+
+            with STATE_LOCK:
+                _vv_info = dict(task.get("info") or {})
+            try:
+                _run_voice_verification_for_task(
+                    task_id=task_id,
+                    segments_data=segments_data,
+                    task_info=_vv_info,
+                    voice=voice,
+                    target_lang=target_lang,
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                    manifest_path=str(_vv_info.get("manifest_path") or ""),
+                )
+                with STATE_LOCK:
+                    task["info"].update(_vv_info)
+                    task["info"]["segments_data"] = segments_data
+            except Exception as vv_exc:
+                logger.warning(
+                    "Task %s: voice_verification skipped: %s", task_id, vv_exc
+                )
+
+            try:
+                from engines.autodub.project_package import build_autodub_project_package
+
+                with STATE_LOCK:
+                    _pkg_info = dict(task.get("info") or {})
+                build_autodub_project_package(APP_DIR, task_id, _pkg_info)
+                with STATE_LOCK:
+                    task["info"].update(_pkg_info)
+            except Exception as pkg_exc:
+                logger.debug("Task %s: project package skipped: %s", task_id, pkg_exc)
+
+            try:
+                from engines.pipeline_cleanup import cleanup_intermediate_work_dirs
+
+                cleanup_intermediate_work_dirs(
+                    _artifacts_dir(_handoff_info),
+                    keep_segment_audio=True,
+                )
+                cleanup_intermediate_work_dirs(
+                    APP_DIR / "output" / "slot_fit",
+                    keep_segment_audio=False,
+                )
+            except Exception as cleanup_err:
+                logger.debug(
+                    "Task %s: intermediate cleanup skipped: %s",
+                    task_id,
+                    cleanup_err,
+                )
+
+            tts_placed = []
+            for idx, seg in enumerate(segments_data):
+                if seg.get("merged_into") is not None:
+                    continue
+                tts_placed.append(
+                    {
+                        "index": idx,
+                        "file": seg.get("file"),
+                        "text_len": len(str(seg.get("text") or "")),
+                        "tts_timing": seg.get("tts_timing"),
+                    }
+                )
+            dev_diag.log_tts(voice=voice, groups=tts_groups, segment_files=tts_placed)
+
+            with STATE_LOCK:
+                _op_info = dict(task.get("info") or {})
+            try:
+                from engines.segment_timing_qa import build_openddf_full_report
+
+                _op_info["task_id"] = task_id
+                openddf_report = build_openddf_full_report(_op_info)
+                with STATE_LOCK:
+                    task["info"]["openddf_full_report"] = openddf_report
+            except Exception as odf_err:
+                logger.debug("Task %s: openddf_full_report skipped: %s", task_id, odf_err)
+
+            # ══ НОВЫЙ ПОРЯДОК ПАЙПЛАЙНА: остановка после TTS/slot_fit ════════
+            # Финальный микс запускается пользователем через кнопку «Свести проект»
+            # в Studio: POST /api/studio/mix/<task_id>
+
+            # ── OpenDDF: finalize report ──────────────────────────────────────
+            _open_ddf.record_agent(task_id, "StudioReady", called=True, success=True,
+                                   decision="pipeline_complete_before_mix")
+            _ddf_saved_path = _open_ddf.save(task_id)
+            _ddf_url = f"/api/ddf/{task_id}" if _ddf_saved_path else None
+            with STATE_LOCK:
+                _ddf_task = AUTO_TASKS.get(task_id)
+                if _ddf_task:
+                    _ddf_report = _open_ddf.get_report(task_id)
+                    _ddf_task.setdefault("info", {})["ddf_url"] = _ddf_url
+                    _ddf_task["info"]["ddf_warnings"] = (
+                        _ddf_report.get("summary", {}).get("warnings", 0)
+                    )
+                    _ddf_task["info"]["ddf_failed_agents"] = (
+                        _ddf_report.get("summary", {}).get("failed_agents", 0)
+                    )
+            # ─────────────────────────────────────────────────────────────────
+
+            try:
+                from api.studio_api import publish_studio_ready as _pub_studio_ready
+                _pub_studio_ready(task_id)
+                logger.info(
+                    "Task %s: pipeline → studio_ready. "
+                    "Финальный микс: POST /api/studio/mix/%s",
+                    task_id,
+                    task_id,
+                )
+            except Exception as studio_err:
+                logger.warning(
+                    "Task %s: publish_studio_ready failed: %s", task_id, studio_err
+                )
+                with STATE_LOCK:
+                    _st = AUTO_TASKS.get(task_id)
+                    if _st:
+                        _st["status"] = "studio_ready"
+                        _st["step"] = "studio"
+                        _st["progress"] = 80.0
+
+            _auto_mix_env = os.getenv("VM_AUTO_MIX", "").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+                "on",
+            )
+            try:
+                from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE as _idl
+
+                if _idl() or _auto_mix_env:
+                    from api.studio_api import run_studio_mix_internal
+
+                    _mix_ok, _mix_out, _mix_errs = run_studio_mix_internal(
+                        task_id, force=True
+                    )
+                    if _mix_ok and _mix_out:
+                        logger.info(
+                            "Task %s: debug/auto mix complete → %s",
+                            task_id,
+                            _mix_out,
+                        )
+                        with STATE_LOCK:
+                            _mt = AUTO_TASKS.get(task_id)
+                            if _mt:
+                                _mt["status"] = "done"
+                                _mt["step"] = "done"
+                                _mt["progress"] = 100.0
+                                _mt["output_file"] = _mix_out
+                        _open_ddf.save(task_id)
+                        log_stage_end(task_id, "STUDIO")
+                        log_stage_transition(task_id, "STUDIO", "MP4")
+                        _wtm_record_checkpoint(wtm_cp_log, task_id, "auto_mix_done")
+                        return
+                    if _mix_errs:
+                        logger.warning(
+                            "Task %s: debug/auto mix failed: %s",
+                            task_id,
+                            _mix_errs[0],
+                        )
+            except Exception as auto_mix_err:
+                logger.warning(
+                    "Task %s: debug/auto mix skipped: %s", task_id, auto_mix_err
+                )
+
+            log_stage_end(task_id, "STUDIO")
+            log_stage_transition(task_id, "STUDIO", "MP4")
+
+            _wtm_record_checkpoint(wtm_cp_log, task_id, "studio_ready")
+            return
+
+            # ══ ШАГ 5 (DEPRECATED): Timing Engine — перенесён в /api/studio/mix ═
+            if not _ensure_control(task_id, ui_lang):
+                return
+            _set_step(task_id, "timing", 82.0)
+            profiler.start("timing")
+            if pipeline_timer is not None:
+                pipeline_timer.start("timing")
+
+            with STATE_LOCK:
+                timed_audio_path = task["info"].get("timed_audio")
+                current_segments_snapshot = copy.deepcopy(task["info"]["segments_data"])
+                current_timing_map_snapshot = copy.deepcopy(
+                    task["info"]["timing_map_backup"]
+                )
+                style_cfg = _style_params_from_info(task["info"])
+                target_duration = task["info"].get("target_duration_ms")
+
+            timing_warnings = []
+            overlap_report = {"ok": True}
+
+            if not timed_audio_path:
+                from engines.overlap_quality import (
+                    analyze_placed_segments,
+                    build_quality_report,
+                )
+
+                placed_count = sum(
+                    1
+                    for s in current_segments_snapshot
+                    if s.get("file") and s.get("merged_into") is None
+                )
+                _update_progress_detail(
+                    task_id,
+                    phase="timing",
+                    timing_substep="adapt",
+                    total_segments=placed_count or len(current_segments_snapshot),
+                    segments_done=0,
+                )
+
+                pre_issues = analyze_placed_segments(
+                    current_segments_snapshot, current_timing_map_snapshot
+                )
+                with STATE_LOCK:
+                    slot_fit_meta = copy.deepcopy(task["info"].get("slot_fit_stats") or {})
+                slot_fit_ran = bool(slot_fit_meta.get("enabled"))
+                unresolved_pre = sum(
+                    1 for row in pre_issues if int(row.get("overflow_ms") or 0) > 40
+                )
+                if unresolved_pre > 0 and not slot_fit_ran:
+                    _adaptive_dub_resolve(
+                        current_segments_snapshot,
+                        current_timing_map_snapshot,
+                        voice,
+                        source_segments_snapshot,
+                        tts_files,
+                        tts_rate=tts_rate,
+                        tts_pitch=tts_pitch,
+                        semantic_log=semantic_log,
+                        tgt_lang=target_lang,
+                        src_lang=translation_source_lang,
+                        style_allow_atempo=bool(style_cfg.get("allow_atempo", True)),
+                        task_id=task_id,
+                    )
+                elif unresolved_pre > 0 and slot_fit_ran:
+                    logger.info(
+                        "Task %s: skipping post-slot-fit adaptive regen (%d unresolved pre-mix overflows)",
+                        task_id,
+                        unresolved_pre,
+                    )
+
+                try:
+                    from engines.overlap_quality import analyze_placed_segments as _aps
+
+                    for row in _aps(current_segments_snapshot, current_timing_map_snapshot):
+                        semantic_log.update_final_tts_ms(int(row["idx"]), int(row.get("tts_ms") or 0))
+                    semantic_log.flush(
+                        phase="post_tts_timing",
+                        src=translation_source_lang,
+                        tgt=target_lang,
+                    )
+                except Exception as sem_err:
+                    logger.debug("semantic_adaptation log flush: %s", sem_err)
+
+                def _timing_mix_progress(done: int, total: int) -> None:
+                    frac = done / max(total, 1)
+                    with STATE_LOCK:
+                        if task_id in AUTO_TASKS:
+                            AUTO_TASKS[task_id]["progress"] = round(90.0 + frac * 5.0, 1)
+                    _update_progress_detail(
+                        task_id,
+                        phase="timing",
+                        timing_substep="mix",
+                        current_segment=done,
+                        total_segments=total,
+                        segments_done=done,
+                    )
+
+                _update_progress_detail(
+                    task_id,
+                    phase="timing",
+                    timing_substep="mix",
+                    segments_done=0,
+                    total_segments=placed_count,
+                )
+
+                timed_audio_obj, timing_warnings, overlap_report = _build_timed_dub_track(
+                    current_segments_snapshot,
+                    current_timing_map_snapshot,
+                    target_duration,
+                    task_id,
+                    style_params=style_cfg,
+                    on_segment_progress=_timing_mix_progress,
+                )
+                if not overlap_report.get("ok"):
+                    logger.info(
+                        "Task %s: %d timing overlaps after mix (accepted)",
+                        task_id,
+                        overlap_report.get("fitted_overlap_count", 0),
+                    )
+
+                overlap_report = build_quality_report(
+                    pre_issues,
+                    overlap_report.get("unresolved_overlaps") or [],
+                    overlap_report.get("fitted_placements") or [],
+                )
+                dev_diag.log_overlap_quality(overlap_report)
+
+                if timed_audio_obj is not None:
+                    timed_audio_path = str(_artifacts_dir(task.get("info")) / f"{base_id}_timed.mp3")
+                    _update_progress_detail(
+                        task_id,
+                        phase="timing",
+                        timing_substep="export",
+                    )
+                    with STATE_LOCK:
+                        if task_id in AUTO_TASKS:
+                            AUTO_TASKS[task_id]["progress"] = 95.0
+
+                    export_ok = _safe_export_audio(timed_audio_obj, timed_audio_path)
+                    if not export_ok or not Path(timed_audio_path).exists():
+                        return _fail(
+                            task_id,
+                            [lp["export_error"]],
+                            stage=STAGE_TIMING,
+                            error_code="AUDIO_EXPORT_FAILED",
+                        )
+
+                    with STATE_LOCK:
+                        task["info"]["timed_audio"] = timed_audio_path
+                else:
+                    timed_audio_path = str(_artifacts_dir(task.get("info")) / f"{base_id}_timed.mp3")
+                    silent_segment = AudioSegment.silent(duration=1000)
+                    export_ok = _safe_export_audio(silent_segment, timed_audio_path)
+                    if not export_ok or not Path(timed_audio_path).exists():
+                        return _fail(
+                            task_id,
+                            [
+                                "Ошибка экспорта: Не удалось создать silent fallback timed.mp3"
+                            ],
+                            stage=STAGE_TIMING,
+                            error_code="AUDIO_EXPORT_FAILED",
+                        )
+
+                    with STATE_LOCK:
+                        task["info"]["timed_audio"] = timed_audio_path
+
+            profiler.stop("timing")
+            if pipeline_timer is not None:
+                pipeline_timer.stop("timing")
+            _runtime_stage_record(task_id, runtime_diag, 5, STAGE_TIMING)
+
+            try:
+                _publish_studio_session_keep_running(task_id, "timing")
+            except Exception as studio_refresh_err:
+                logger.debug(
+                    "Task %s: studio refresh post-timing skipped: %s",
+                    task_id,
+                    studio_refresh_err,
+                )
+
+            segment_texts = [
+                str(s.get("text") or "")
+                for s in current_segments_snapshot
+                if s.get("merged_into") is None
+            ]
+            dev_diag.log_timing_map(
+                timing_map=current_timing_map_snapshot,
+                segments=segment_texts,
+                video_duration_ms=target_duration,
+                timing_fit_warnings=timing_warnings,
+            )
+            with STATE_LOCK:
+                task["info"]["timing_warnings"] = list(timing_warnings)
+                task["info"]["overlap_quality"] = overlap_report
+                task["info"]["dev_diagnostics"] = dev_diag.paths()
+
+            try:
+                from engines.core.feature_flags import is_enabled as _ff_enabled
+                from engines.ai_director import (
+                    format_report,
+                    is_ai_director_enabled,
+                    validate_pipeline,
+                )
+                from engines.core.events import get_event_bus
+
+                if _ff_enabled("ai_director", developer_session=True) or is_ai_director_enabled():
+                    src_segs = list(source_segments_snapshot)
+                    tgt_segs = [
+                        str(s.get("text") or "")
+                        for s in current_segments_snapshot
+                        if s.get("merged_into") is None
+                    ]
+                    director_report = validate_pipeline(
+                        source_segments=src_segs,
+                        translated_segments=tgt_segs,
+                        timing_map=current_timing_map_snapshot,
+                        word_maps=task["info"].get("source_word_maps"),
+                        timing_warnings=timing_warnings,
+                    )
+                    with STATE_LOCK:
+                        task["info"]["ai_director_report"] = director_report.to_dict()
+                        task["info"]["ai_director_text"] = format_report(director_report)
+                        if director_report.block_export:
+                            task["info"]["ai_director_block_export"] = True
+                    get_event_bus().emit(
+                        "ai_director",
+                        {"score": director_report.score, "task_id": task_id},
+                    )
+                    try:
+                        from engines.project_format import autosave_from_task_info
+
+                        autosave_from_task_info(
+                            APP_DIR,
+                            task["info"],
+                            title=f"director-{task_id}",
+                        )
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
+        with STATE_LOCK:
+            segments_data = task["info"].get("segments_data") or []
+
+        from engines.ocr_engine import align_ocr_to_speech_slots
+
+        ocr_by_slot = (
+            align_ocr_to_speech_slots(
+                ocr_result.get("segments") or [],
+                current_timing_map_snapshot,
+            )
+            if ocr_enabled
+            else [""] * len(current_timing_map_snapshot)
+        )
+        audit_rows = []
+        for idx, seg in enumerate(segments_data):
+            if seg.get("merged_into") is not None:
+                continue
+            speech = (
+                source_segments_snapshot[idx]
+                if idx < len(source_segments_snapshot)
+                else ""
+            )
+            audit_rows.append(
+                {
+                    "segment_id": idx,
+                    "speech_text": speech,
+                    "ocr_text": ocr_by_slot[idx] if idx < len(ocr_by_slot) else "",
+                    "translated_text": seg.get("text") or (segments[idx] if idx < len(segments) else ""),
+                    "tts_text": seg.get("tts_text") or seg.get("text") or "",
+                }
+            )
+        dev_diag.log_pipeline_audit(
+            audit_rows,
+            extra={
+                "task_id": task_id,
+                "segmentation_mode": segmentation_mode,
+                "ocr_enabled": ocr_enabled,
+                "translate_method": translate_method,
+                "dub_style": dub_style,
+                "skip_tts": skip_tts,
+            },
+        )
+        with STATE_LOCK:
+            task["info"]["dev_diagnostics"] = dev_diag.paths()
+
+        # ══ ШАГ 6: Dub Engine ════════════════════════════════════════════
+        if not _ensure_control(task_id, ui_lang):
+            return
+        _set_step(task_id, "dub", 91.0)
+        profiler.start("mux")
+        if pipeline_timer is not None:
+            pipeline_timer.start("mux")
+
+        try:
+            from engines.ai_core import current_ai_core
+
+            _core_now = current_ai_core()
+            _mix_plan = _core_now.decide_mix_plan() if _core_now is not None else {}
+            if _core_now is not None:
+                with STATE_LOCK:
+                    task["info"]["ai_mix_plan"] = _mix_plan
+                    task["info"]["ai_core"] = _core_now.to_dict()
+        except Exception:
+            logger.debug("[AICore] mix plan unavailable", exc_info=True)
+
+        video_stem = Path(video_path).stem
+        output_name = f"{video_stem}_OUTPUT_{base_id}.mp4"
+        output_path = str(OUTPUT_DIR / output_name)
+
+        with STATE_LOCK:
+            target_duration = task["info"].get("target_duration_ms")
+
+        dub_timeout_sec = max(600, int((target_duration or 0) / 1000) + 300)
+        bg_path: str | None = None
+
+        if skip_tts:
+            from engines.dub_engine import mux_keep_original_audio
+
+            logger.info(
+                "Task %s: subtitles_only mux -> %s", task_id, output_path
+            )
+            ok, out_path, dub_errors = mux_keep_original_audio(
+                video_path, output_path, timeout_sec=dub_timeout_sec
+            )
+            raw_result = (ok, out_path, dub_errors)
+        else:
+            if not timed_audio_path or not Path(timed_audio_path).exists():
+                return _fail(
+                    task_id,
+                    [lp["timed_missing"]],
+                    stage=STAGE_TIMING,
+                    error_code="TIMED_AUDIO_MISSING",
+                )
+
+            from engines.dub_engine import DubEngine
+            from engines.source_separation import (
+                build_final_mix_diagnostics,
+                get_background_mix_params,
+            )
+
+            logger.info("Task %s: starting DubEngine -> %s", task_id, output_path)
+
+            with STATE_LOCK:
+                _vstretch_segs = (task.get("info") or {}).get("video_stretch_segments") or []
+                _sep_info = dict((task.get("info") or {}).get("source_separation") or {})
+            bg_path, bg_atten_db, sep_ok = get_background_mix_params(
+                {"source_separation": _sep_info}
+            )
+            if sep_ok and bg_path:
+                logger.info(
+                    "Task %s: mixing dubbed speech with accompaniment stem %s",
+                    task_id,
+                    bg_path,
+                )
+
+            raw_result = DubEngine(
+                video_path=video_path,
+                timed_audio=timed_audio_path,
+                video_stretch_segments=_vstretch_segs,
+                background_audio_path=bg_path or "",
+                background_attenuation_db=bg_atten_db,
+            ).run(
+                output_path=output_path,
+                mode=dub_mode,
+                mix_mode=mix_mode,
+                mix_volume=mix_volume,
+                original_volume=(mix_volumes or {}).get("original_volume"),
+                dub_volume=(mix_volumes or {}).get("dub_volume"),
+                background_volume=(mix_volumes or {}).get("background_volume"),
+                progress_callback=lambda pct: _set_step(
+                    task_id, "dub", 91.0 + _normalize_progress(pct) * 0.08
+                ),
+                timeout_sec=dub_timeout_sec,
+            )
+
+        if isinstance(raw_result, tuple) and len(raw_result) >= 3:
+            ok, out_path, dub_errors = raw_result[0], raw_result[1], raw_result[2]
+        elif isinstance(raw_result, tuple) and len(raw_result) == 2:
+            ok, out_path, dub_errors = raw_result[0], raw_result[1], []
+        else:
+            return _fail(
+                task_id,
+                [lp["contract_broken"]],
+                stage=STAGE_FFMPEG,
+                error_code="INTEGRITY_CONTRACT_BROKEN",
+            )
+
+        profiler.stop("mux")
+        if pipeline_timer is not None:
+            pipeline_timer.stop("mux")
+            pipeline_timer.start("export")
+            pipeline_timer.stop("export")
+        _runtime_stage_record(task_id, runtime_diag, 6, STAGE_FFMPEG)
+
+        if not ok:
+            err_list = (
+                dub_errors
+                if isinstance(dub_errors, list) and dub_errors
+                else [str(dub_errors) if dub_errors else lp.get("dub_errors", "DubEngine failed")]
+            )
+            return _fail(
+                task_id,
+                err_list,
+                stage=STAGE_FFMPEG,
+                error_code="FFMPEG_RENDER_FAILED",
+            )
+
+        final_output = out_path or output_path
+        if not final_output or not Path(final_output).exists():
+            return _fail(
+                task_id,
+                [lp["dub_missing"]],
+                stage=STAGE_FFMPEG,
+                error_code="OUTPUT_MISSING",
+            )
+
+        try:
+            from engines.source_separation import build_final_mix_diagnostics
+
+            with STATE_LOCK:
+                _mix_sep = dict((task.get("info") or {}).get("source_separation") or {})
+            mix_diag = build_final_mix_diagnostics(
+                separation_info=_mix_sep,
+                final_mp4_path=str(final_output),
+                mix_success=True,
+                used_stem_mix=bool(bg_path) if not skip_tts else False,
+            )
+            with STATE_LOCK:
+                task["info"]["final_mix"] = mix_diag.to_dict()
+        except Exception as mix_diag_err:
+            logger.debug("Task %s: final mix diagnostics skipped: %s", task_id, mix_diag_err)
+
+        from engines.video_integrity import verify_video_integrity
+
+        integrity = verify_video_integrity(video_path, final_output)
+        dev_diag.log_video_integrity(integrity)
+        if not integrity.get("ok"):
+            logger.warning(
+                "Task %s: video integrity warnings: %s",
+                task_id,
+                integrity.get("warnings") or integrity.get("errors"),
+            )
+
+        with STATE_LOCK:
+            task["info"]["video_integrity"] = integrity
+            task["info"]["dev_diagnostics"] = dev_diag.paths()
+
+        with STATE_LOCK:
+            is_editing = control.get("editing", False)
+
+        if not is_editing:
+            keep_assets = bool(task.get("info", {}).get("keep_studio_assets"))
+            if not keep_assets:
+                for f in set(tts_files):
+                    (OUTPUT_DIR / f).unlink(missing_ok=True)
+            if not keep_original_track:
+                Path(audio_path).unlink(missing_ok=True)
+            if timed_audio_path and Path(timed_audio_path).exists() and not keep_assets:
+                Path(timed_audio_path).unlink(missing_ok=True)
+
+            if not keep_assets:
+                from engines.storage_cleanup import cleanup_after_dub_with_report
+
+                with STATE_LOCK:
+                    _cleanup_info = dict(task.get("info") or {})
+                session_dir = _cleanup_info.get("session_dir")
+                _storage_report = cleanup_after_dub_with_report(
+                    APP_DIR,
+                    APP_DIR / "output",
+                    Path(session_dir) if session_dir else None,
+                    keep_names={Path(final_output).name},
+                )
+                with STATE_LOCK:
+                    task["info"]["storage_cleanup"] = _storage_report.to_dict()
+                    task["info"]["storage_report"] = _storage_report.to_dict()
+
+        with STATE_LOCK:
+            task.update(
+                {
+                    "status": "done",
+                    "step": "dub",
+                    "steps_done": len(PIPELINE_STEPS),
+                    "progress": 100.0,
+                    "output_file": Path(final_output).name,
+                }
+            )
+            from engines.translation_review import build_translation_review
+
+            info = task.get("info") or {}
+            info["target_lang"] = target_lang
+            info["mux_base_id"] = base_id
+            info["output_path_full"] = str(final_output)
+            from engines.segment_timing_qa import build_final_dub_qa_report
+
+            dub_qa = build_final_dub_qa_report(info)
+            info["final_dub_qa"] = dub_qa
+            try:
+                from engines.dub_quality_stabilization import write_dub_quality_report_json
+
+                write_dub_quality_report_json(
+                    APP_DIR,
+                    info,
+                    task_id=task_id,
+                    project_uuid=str(info.get("project_uuid") or ""),
+                )
+            except Exception as dq_err:
+                logger.debug("Task %s: dub_quality_report skipped: %s", task_id, dq_err)
+            from engines.segment_timing_qa import build_openddf_full_report
+
+            info["task_id"] = task_id
+            info["openddf_full_report"] = build_openddf_full_report(info)
+            task["info"]["translation_review"] = build_translation_review(info)
+            _persist_task_review(task)
+            try:
+                from engines.pipeline_integrity.passive_openddf import ensure_session
+
+                openddf = ensure_session(task_id, task_info=info)
+                if openddf:
+                    qa_artifacts = openddf.persist_project_qa_bundle(info, qa_report=dub_qa)
+                    info["final_dub_qa_artifacts"] = qa_artifacts
+                    if not dub_qa.get("ok"):
+                        logger.warning(
+                            "Task %s: final dub QA found %d issues — OpenDDF report written",
+                            task_id,
+                            dub_qa.get("issue_count", 0),
+                        )
+            except Exception as qa_err:
+                logger.debug("final dub QA OpenDDF bundle skipped: %s", qa_err)
+
+        try:
+            from engines.tts_text_path import write_tts_path_work_report
+
+            info_rep = AUTO_TASKS.get(task_id, {}).get("info") or {}
+            tts_inputs = [
+                str(s.get("text") or "")
+                for s in (info_rep.get("segments_data") or [])
+                if s.get("merged_into") is None
+            ]
+            write_tts_path_work_report(
+                APP_DIR,
+                task_id=task_id,
+                info=info_rep,
+                tts_inputs=tts_inputs,
+                adapt_tts_text=bool(info_rep.get("tts_semantic_adapt", False)),
+                translate_method=str(info_rep.get("translate_method") or ""),
+                success=True,
+            )
+            from engines.word_timing_map.pipeline import (
+                save_word_timing_dev_report,
+                word_maps_from_task_info,
+            )
+
+            wtm_maps = word_maps_from_task_info(info_rep)
+            if wtm_maps:
+                save_word_timing_dev_report(
+                    APP_DIR,
+                    wtm_maps,
+                    task_id=task_id,
+                    extra=info_rep.get("word_timing_meta"),
+                )
+            _wtm_record_checkpoint(wtm_cp_log, task_id, "final")
+            with STATE_LOCK:
+                task = AUTO_TASKS.get(task_id)
+                if task:
+                    task["info"]["word_timing_checkpoints"] = wtm_cp_log.to_dict()
+                    phase0_path = wtm_cp_log.flush()
+                    task["info"]["word_timing_phase0_report"] = phase0_path
+                    dev_diag.log_word_timing(task["info"])
+                    task["info"]["dev_diagnostics"] = dev_diag.paths()
+        except Exception as rep_err:
+            logger.debug("TTS path work report skipped: %s", rep_err)
+
+        try:
+            from engines.translation_quality_log import (
+                SegmentTranslationAudit,
+                TranslationQualityLog,
+            )
+
+            info = AUTO_TASKS.get(task_id, {}).get("info", {})
+            raw_audits = info.get("translation_audits") or []
+            seg_data = info.get("segments_data") or []
+            if raw_audits and seg_data:
+                tql = TranslationQualityLog(APP_DIR)
+                for row in raw_audits:
+                    rec = SegmentTranslationAudit(**row)
+                    if rec.index < len(seg_data):
+                        tts = str(seg_data[rec.index].get("tts_text") or "").strip()
+                        rec.tts_text = tts or rec.tts_text
+                    tql.add(rec)
+                tql.flush(task_id=task_id, extra={"phase": "tts_final"})
+        except Exception as tql_err:
+            logger.debug("translation_quality tts_final skipped: %s", tql_err)
+
+        try:
+            from engines.dub_quality_report import write_post_dub_work_report
+
+            write_post_dub_work_report(
+                APP_DIR,
+                task_id=task_id,
+                info=AUTO_TASKS.get(task_id, {}).get("info") or {},
+                success=True,
+            )
+        except Exception as rep_err:
+            logger.debug("Post-dub work report skipped: %s", rep_err)
+
+    except Exception as e:
+        logger.exception("Pipeline failed task=%s", task_id)
+        from engines.dubbing_engine.pipeline_failure_diag import (
+            STEP_TO_STAGE,
+            STAGE_AUDIO_EXTRACTION,
+            STAGE_TIMING,
+            STAGE_TTS,
+            fail_pipeline,
+        )
+        from engines.pipeline_integrity.exceptions import (
+            PipelineIntegrityError,
+            StageSnapshotIntegrityError,
+        )
+
+        if isinstance(e, StageSnapshotIntegrityError):
+            fail_pipeline(
+                task_id,
+                e.format_user_reason(),
+                stage=e.stage or STAGE_TTS,
+                exc=e,
+                error_code="STAGE_SNAPSHOT_INTEGRITY",
+            )
+        elif isinstance(e, PipelineIntegrityError):
+            fail_pipeline(
+                task_id,
+                str(e),
+                stage=e.stage or STAGE_TIMING,
+                exc=e,
+                error_code=getattr(e, "code", "PIPELINE_INTEGRITY").upper(),
+            )
+        else:
+            with STATE_LOCK:
+                _crash_task = AUTO_TASKS.get(task_id)
+                _crash_step = _crash_task.get("step") if _crash_task else None
+            _fail(
+                task_id,
+                [f"Критическая ошибка пайплайна: {str(e)}"],
+                stage=STEP_TO_STAGE.get(_crash_step or "", STAGE_AUDIO_EXTRACTION),
+                exc=e,
+                error_code="PIPELINE_CRITICAL",
+            )
+    finally:
+        try:
+            from engines.pipeline_progress_tracker import save_performance_diagnostics
+
+            save_performance_diagnostics(task_id, app_dir=APP_DIR)
+        except Exception:
+            pass
+        try:
+            from engines.pipeline_watchdog import stop_pipeline_watchdog
+
+            stop_pipeline_watchdog(task_id)
+        except Exception:
+            pass
+        if profiler is not None or pipeline_timer is not None:
+            try:
+                with STATE_LOCK:
+                    final_status = AUTO_TASKS.get(task_id, {}).get("status")
+                    timing_br_raw = (
+                        (AUTO_TASKS.get(task_id, {}).get("info") or {}).get(
+                            "translation_timing_breakdown"
+                        )
+                        or {}
+                    )
+                if pipeline_timer is not None:
+                    json_path, report_path = pipeline_timer.finalize(
+                        video_path=video_path,
+                        success=(final_status == "done"),
+                    )
+                    summary = pipeline_timer.summary_lines()
+                    logger.info(
+                        "Task %s pipeline timing:\n%s",
+                        task_id,
+                        "\n".join(summary),
+                    )
+                    try:
+                        from engines.translation_timing import (
+                            TranslationTimingBreakdown,
+                            log_pipeline_timing_summary,
+                        )
+
+                        br_raw = timing_br_raw or (
+                            (pipeline_timer.to_dict().get("meta") or {}).get(
+                                "translation_breakdown"
+                            )
+                            or {}
+                        )
+                        buckets = br_raw.get("ui_buckets") or {}
+                        breakdown = TranslationTimingBreakdown(
+                            marian_sec=float(buckets.get("marian_mt") or 0),
+                            llm_adaptation_sec=float(buckets.get("llm_adaptation") or 0),
+                            validation_sec=float(br_raw.get("validation_sec") or 0),
+                        )
+                        stages = pipeline_timer.to_dict().get("stages") or {}
+                        log_pipeline_timing_summary(
+                            APP_DIR,
+                            task_id,
+                            whisper_sec=float(stages.get("whisper") or 0),
+                            breakdown=breakdown,
+                            tts_sec=float(stages.get("tts") or 0),
+                        )
+                    except Exception as timing_log_err:
+                        logger.debug(
+                            "Translation timing log skipped task=%s: %s",
+                            task_id,
+                            timing_log_err,
+                        )
+                elif profiler is not None:
+                    report_path = profiler.finalize(
+                        video_path=video_path,
+                        success=(final_status == "done"),
+                    )
+                    json_path = None
+                with STATE_LOCK:
+                    if task_id in AUTO_TASKS:
+                        info = AUTO_TASKS[task_id].setdefault("info", {})
+                        if pipeline_timer is not None:
+                            info["pipeline_timing_json"] = json_path
+                            info["pipeline_timing"] = pipeline_timer.to_dict()
+                        info["performance_report"] = report_path
+                try:
+                    from engines.pipeline_performance_artifacts import write_performance_artifacts
+
+                    with STATE_LOCK:
+                        task_snapshot = dict(AUTO_TASKS.get(task_id) or {})
+                        info_snapshot = dict(task_snapshot.get("info") or {})
+                    timer_dict = (
+                        pipeline_timer.to_dict()
+                        if pipeline_timer is not None
+                        else info_snapshot.get("pipeline_timing")
+                    )
+                    artifact_paths = write_performance_artifacts(
+                        task_id,
+                        app_dir=APP_DIR,
+                        task_info=info_snapshot,
+                        pipeline_timer_dict=timer_dict,
+                        success=(final_status == "done"),
+                        video_path=video_path,
+                    )
+                    with STATE_LOCK:
+                        if task_id in AUTO_TASKS:
+                            AUTO_TASKS[task_id].setdefault("info", {}).update(artifact_paths)
+                    logger.info(
+                        "Task %s: performance artifacts -> %s",
+                        task_id,
+                        artifact_paths.get("performance_report_json"),
+                    )
+                except Exception as artifact_err:
+                    logger.warning(
+                        "Performance artifacts failed task=%s: %s", task_id, artifact_err
+                    )
+                logger.info("Task %s: performance report -> %s", task_id, report_path)
+            except Exception as perf_err:
+                logger.warning("Performance report failed task=%s: %s", task_id, perf_err)
+
+        with STATE_LOCK:
+            current_control = AUTO_TASK_CONTROLS.get(task_id)
+            current_status = AUTO_TASKS.get(task_id, {}).get("status")
+            is_editing = (
+                current_control.get("editing", False) if current_control else False
+            )
+
+            if (
+                current_control
+                and current_status in ("done", "error")
+                and not is_editing
+            ):
+                AUTO_TASK_CONTROLS.pop(task_id, None)
+
+        evict_expired_auto_tasks()
+
+
+def _set_step(t_id, step, prog):
+    try:
+        from engines.pipeline_progress_tracker import record_stage_end, record_stage_start
+        from engines.pipeline_watchdog import watchdog_stage_start
+
+        with STATE_LOCK:
+            prev_step = AUTO_TASKS.get(t_id, {}).get("step")
+        if prev_step and prev_step != step:
+            record_stage_end(t_id, prev_step)
+        record_stage_start(t_id, step)
+        watchdog_stage_start(t_id, step, progress_pct=float(prog or 0))
+    except Exception:
+        pass
+    _STEP_AGENT = {
+        "preparing": "extract",
+        "extract_audio": "extract",
+        "transcribe": "whisper",
+        "translate": "translation",
+        "tts": "tts",
+        "timing": "timing",
+        "dub": "mux",
+        "studio": "mix",
+        "done": "export",
+    }
+    with STATE_LOCK:
+        if t_id in AUTO_TASKS:
+            try:
+                s_idx = PIPELINE_STEPS.index(step)
+            except ValueError:
+                s_idx = AUTO_TASKS[t_id].get("steps_done", 0)
+
+            AUTO_TASKS[t_id].update(
+                {"step": step, "progress": prog, "steps_done": s_idx}
+            )
+            info = AUTO_TASKS[t_id].setdefault("info", {})
+            info["step_started_at"] = time.time()
+            if step == "tts":
+                info["tts_stage_started_at"] = time.time()
+            if info.get("developer_preview_enabled"):
+                from engines.developer_preview import record_agent_event
+
+                agent = _STEP_AGENT.get(step)
+                if agent:
+                    prev = info.get("developer_timeline_active")
+                    if prev and prev != agent:
+                        record_agent_event(info, prev, "done")
+                    record_agent_event(info, agent, "running")
+            _update_progress_detail(t_id, phase=step)
+
+
+def _fail(t_id, errs, *, stage=None, exc=None, error_code=None):
+    """
+    Fail-fast with structured pipeline diagnostics (Error Diagnostics v1.0).
+    Editing mode: non-terminal pause unless exc is critical.
+    """
+    from engines.dubbing_engine.pipeline_failure_diag import (
+        STEP_TO_STAGE,
+        STAGE_AUDIO_EXTRACTION,
+        fail_pipeline,
+    )
+
+    msg = errs[0] if errs else "Unknown error"
+    with STATE_LOCK:
+        task = AUTO_TASKS.get(t_id)
+        step = task.get("step") if task else None
+        editing = bool(
+            AUTO_TASK_CONTROLS.get(t_id, {}).get("editing")
+        )
+    resolved_stage = stage or STEP_TO_STAGE.get(step or "", STAGE_AUDIO_EXTRACTION)
+    fail_pipeline(
+        t_id,
+        msg,
+        stage=resolved_stage,
+        exc=exc,
+        error_code=error_code,
+        editing_pause=editing,
+    )
+
+
+# === КОНЕЦ ФАЙЛА ===

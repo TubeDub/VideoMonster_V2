@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Pipeline Inspector — TubeDub Dev{% endblock %}
+{% block extra_head %}
+<style>
+.pp-wrap { display:flex; gap:16px; align-items:flex-start; }
+.pp-sidebar { width:220px; flex-shrink:0; }
+.pp-main { flex:1; min-width:0; }
+.pp-mod { padding:8px 10px; border-radius:6px; margin-bottom:6px; font-size:12px; border:1px solid var(--border); cursor:pointer; }
+.pp-mod.stable { border-left:3px solid #3ecf8e; }
+.pp-mod.dev { border-left:3px solid #f56565; }
+.pp-seg { margin-bottom:16px; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.pp-seg-h { padding:10px 12px; background:var(--card); font-weight:600; font-size:13px; }
+.pp-stage { border-top:1px solid var(--border); }
+.pp-stage-h { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; cursor:pointer; font-size:12px; }
+.pp-stage-h:hover { background:rgba(255,255,255,0.03); }
+.pp-stage-b { display:none; padding:8px 12px 12px; font-size:11px; font-family:monospace; background:#0d0d0d; }
+.pp-stage.open .pp-stage-b { display:block; }
+.pp-diff-add { color:#3ecf8e; }
+.pp-diff-del { color:#f56565; text-decoration:line-through; }
+.pp-toolbar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.pp-log-area { width:100%; min-height:120px; font-family:monospace; font-size:11px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🔬 Pipeline Inspector</h1>
+  <p class="subtitle">Developer Mode — полный trace каждого сегмента (TubeDub Platform)</p>
+</div>
+
+<div id="pp-blocked" class="card" style="display:none;padding:20px;">
+  <p>Доступно только в <strong>режиме разработчика</strong> (🔧 Dev).</p>
+</div>
+
+<div id="pp-panel" style="display:none;">
+  <div class="pp-toolbar">
+    <input id="pp-task-id" class="form-input" placeholder="Task ID (auto-dub)" style="max-width:280px;">
+    <button class="btn btn-primary" id="pp-load">Загрузить trace</button>
+    <button class="btn" id="pp-test">Тест сегмента</button>
+    <button class="btn" id="pp-copy">📋 Копировать весь лог</button>
+  </div>
+
+  <div class="pp-wrap">
+    <div class="pp-sidebar card" style="padding:10px;">
+      <h3 style="margin:0 0 8px;font-size:13px;">Модули</h3>
+      <div id="pp-modules"></div>
+    </div>
+    <div class="pp-main">
+      <div id="pp-segments"></div>
+      <div class="card" style="padding:12px;margin-top:12px;">
+        <h3 style="margin:0 0 8px;font-size:13px;">Полный лог</h3>
+        <textarea id="pp-log" class="pp-log-area" readonly></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/pipeline_dev.js"></script>
+{% endblock %}

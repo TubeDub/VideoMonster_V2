@@ -1,0 +1,12 @@
+flask>=3.0.0
+edge-tts>=6.1.9
+deep-translator>=1.11.4
+langdetect>=1.0.9
+pydub>=0.25.1
+audioop-lts; python_version >= '3.13'
+ffmpeg-python>=0.2.0
+faster-whisper>=1.0.0
+gunicorn>=21.2.0
+# transformers + torch — MarianMT / NLLB offline engines (optional, recommended)
+# pip install transformers torch
+# argostranslate — опционально для офлайн-перевода (может не ставиться на Python 3.13)

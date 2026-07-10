@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "name_jr",
+      "source_pattern": "\\b([A-Z][a-z]+)\\s+Jr\\.?\\b",
+      "target_pattern": "\\b([A-Z][a-z]+)\\s+Jr\\.?\\b",
+      "anti_match_source": false,
+      "replacement": "\\1 молодший",
+      "confidence": 0.98,
+      "category": "context_name"
+    },
+    {
+      "id": "junior_title",
+      "source_pattern": "\\bJunior\\s+(\\w+)",
+      "target_pattern": "\\bJunior\\s+\\w+",
+      "anti_match_source": true,
+      "replacement": "молодший \\1",
+      "confidence": 0.92,
+      "category": "context_title"
+    }
+  ]
+}

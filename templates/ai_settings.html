@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}AI Settings — TubeDub{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>⚙️ AI Settings</h1>
+  <p class="subtitle">Провайдер, модель, API, параметры генерации. Локальный режим бесплатен.</p>
+</div>
+
+<div class="settings-grid">
+  <div class="settings-card">
+    <h2>Режим качества</h2>
+    <select id="quality-mode" class="select-control">
+      <option value="fast">Fast — максимальная скорость</option>
+      <option value="balanced">Balanced — баланс</option>
+      <option value="max_quality">Maximum Quality — максимум качества</option>
+    </select>
+  </div>
+
+  <div class="settings-card">
+    <h2>Источник и провайдер</h2>
+    <div class="field-group">
+      <label>Source</label>
+      <select id="source-mode" class="select-control">
+        <option value="local">Local AI (Free)</option>
+        <option value="user_api">My API</option>
+        <option value="tubedub_cloud">TubeDub Cloud</option>
+        <option value="future">Future AI</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Provider</label>
+      <select id="provider" class="select-control">
+        <option value="ollama">Ollama</option>
+        <option value="lmstudio">LM Studio</option>
+        <option value="vllm">vLLM</option>
+        <option value="openai">OpenAI</option>
+        <option value="anthropic">Anthropic</option>
+        <option value="openrouter">OpenRouter</option>
+        <option value="github">GitHub Models</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Model</label>
+      <input id="model" class="select-control" placeholder="qwen2.5:14b / gpt-4o-mini">
+    </div>
+    <div class="field-group">
+      <label>Base URL</label>
+      <input id="base-url" class="select-control" placeholder="http://127.0.0.1:11434/v1">
+    </div>
+    <div class="field-group">
+      <label>API Key (My API)</label>
+      <input id="api-key" class="select-control" type="password" placeholder="не обязателен для Local">
+    </div>
+    <div class="field-group">
+      <label>Models folder (вне папки TubeDub)</label>
+      <input id="models-dir" class="select-control" placeholder="D:\\AI Models">
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <h2>Параметры</h2>
+    <div class="field-group"><label>Temperature</label><input id="temperature" class="select-control" type="number" step="0.05" min="0" max="2" value="0.2"></div>
+    <div class="field-group"><label>Max Tokens</label><input id="max-tokens" class="select-control" type="number" value="1024"></div>
+    <div class="field-group"><label>Context</label><input id="context-tokens" class="select-control" type="number" value="8192"></div>
+    <div class="field-group"><label><input type="checkbox" id="streaming"> Streaming</label></div>
+    <div class="field-group"><label><input type="checkbox" id="reasoning"> Reasoning</label></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <button class="btn btn-primary" onclick="saveSettings()">Сохранить</button>
+      <button class="btn btn-secondary" onclick="testConn()">Проверка соединения</button>
+      <a class="btn btn-secondary" href="/ai/sources">AI Sources</a>
+    </div>
+    <div id="settings-msg" style="margin-top:10px;font-size:12px;color:var(--text2);"></div>
+  </div>
+
+  <div class="settings-card">
+    <h2>Рекомендация железа</h2>
+    <pre id="rec-box" style="font-size:12px;white-space:pre-wrap;background:var(--panel2);padding:12px;border-radius:8px;"></pre>
+  </div>
+</div>
+
+<script>
+async function load() {
+  const r = await fetch('/api/ai/settings');
+  const d = await r.json();
+  if (!d.ok) return;
+  const s = d.settings || {};
+  document.getElementById('quality-mode').value = s.quality_mode || 'max_quality';
+  document.getElementById('source-mode').value = s.source_mode || 'local';
+  document.getElementById('provider').value = s.provider || 'ollama';
+  document.getElementById('model').value = s.model || '';
+  document.getElementById('base-url').value = s.base_url || '';
+  document.getElementById('models-dir').value = s.models_dir || '';
+  document.getElementById('temperature').value = s.temperature ?? 0.2;
+  document.getElementById('max-tokens').value = s.max_tokens ?? 1024;
+  document.getElementById('context-tokens').value = s.context_tokens ?? 8192;
+  document.getElementById('streaming').checked = !!s.streaming;
+  document.getElementById('reasoning').checked = !!s.reasoning;
+  document.getElementById('rec-box').textContent = JSON.stringify(d.recommended || {}, null, 2);
+}
+
+async function saveSettings() {
+  const body = {
+    source_mode: document.getElementById('source-mode').value,
+    quality_mode: document.getElementById('quality-mode').value,
+    provider: document.getElementById('provider').value,
+    model: document.getElementById('model').value.trim(),
+    base_url: document.getElementById('base-url').value.trim(),
+    models_dir: document.getElementById('models-dir').value.trim(),
+    temperature: parseFloat(document.getElementById('temperature').value || '0.2'),
+    max_tokens: parseInt(document.getElementById('max-tokens').value || '1024', 10),
+    context_tokens: parseInt(document.getElementById('context-tokens').value || '8192', 10),
+    streaming: document.getElementById('streaming').checked,
+    reasoning: document.getElementById('reasoning').checked,
+  };
+  const key = document.getElementById('api-key').value.trim();
+  if (key) body.api_key = key;
+  const r = await fetch('/api/ai/settings', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  document.getElementById('settings-msg').textContent = d.ok ? 'Сохранено. ' + JSON.stringify(d.active_route||{}) : (d.error||'Ошибка');
+}
+
+async function testConn() {
+  document.getElementById('settings-msg').textContent = 'Проверка…';
+  const r = await fetch('/api/ai/settings/test', { method: 'POST' });
+  const d = await r.json();
+  document.getElementById('settings-msg').textContent = d.ok
+    ? (d.connected ? ('OK: ' + (d.reply||'')) : (d.message || 'LLM недоступен — MT бесплатно'))
+    : (d.error || 'Ошибка');
+}
+
+load();
+</script>
+{% endblock %}

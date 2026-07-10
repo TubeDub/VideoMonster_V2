@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "622868c73552419c9587697a6119e354",
+  "created_at": "2026-07-01T13:27:42.968849+00:00",
+  "task_id": "622868c73552419c9587697a6119e354",
+  "stage": "AI Adaptation Gate",
+  "developer": {
+    "error_code": "RUNTIMEERROR",
+    "stage": "AI Adaptation Gate",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "AI Adaptation Gate",
+    "task_id": "622868c73552419c9587697a6119e354",
+    "error_type": "RuntimeError",
+    "message": "AI Adaptation Engine: 11 сегмент(ов) требуют интеллектуальной адаптации, но LLM не была вызвана (#9:budget_exhausted; #10:budget_exhausted; #11:budget_exhausted; #12:budget_exhausted; #13:budget_exhausted; #14:budget_exhausted; #16:budget_exhausted; #17:budget_exhausted; #18:budget_exhausted; #19:budget_exhausted)"
+  },
+  "exception": {
+    "type": "RuntimeError",
+    "message": "AI Adaptation Engine: 11 сегмент(ов) требуют интеллектуальной адаптации, но LLM не была вызвана (#9:budget_exhausted; #10:budget_exhausted; #11:budget_exhausted; #12:budget_exhausted; #13:budget_exhausted; #14:budget_exhausted; #16:budget_exhausted; #17:budget_exhausted; #18:budget_exhausted; #19:budget_exhausted)"
+  },
+  "timeline_event_count": 18
+}

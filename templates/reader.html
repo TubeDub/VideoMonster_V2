@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Чтение книги — TubeDub</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Reader-specific styles ── */
+    :root {
+      --reader-bg: #12121e;
+      --reader-panel: #1a1a30;
+      --reader-border: #2a2a45;
+      --reader-text: #e8e8f5;
+      --reader-text2: #9090b8;
+      --reader-accent: #6b7eff;
+      --reader-highlight: rgba(107, 126, 255, 0.18);
+      --reader-bookmark: #ff7e6b;
+      --reader-font-size: 17px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--reader-bg); color: var(--reader-text); font-family: 'Inter', sans-serif; overflow: hidden; }
+
+    /* ─── TOP BAR ─── */
+    .reader-topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 52px;
+      background: var(--reader-panel); border-bottom: 1px solid var(--reader-border);
+      display: flex; align-items: center; gap: 10px; padding: 0 16px; z-index: 200;
+      transition: transform .3s;
+    }
+    .reader-topbar.hidden { transform: translateY(-100%); }
+    .reader-topbar .logo { font-size: 14px; font-weight: 700; color: var(--reader-accent); margin-right: 8px; white-space: nowrap; }
+    .reader-topbar .btn-icon { background: none; border: 1px solid var(--reader-border); color: var(--reader-text2); border-radius: 7px; padding: 6px 10px; font-size: 13px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+    .reader-topbar .btn-icon:hover { background: var(--reader-border); color: var(--reader-text); }
+    .reader-topbar .btn-icon.active { background: var(--reader-accent); border-color: var(--reader-accent); color: #fff; }
+    .reader-topbar .spacer { flex: 1; }
+    .topbar-title { font-size: 13px; color: var(--reader-text2); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .font-controls { display: flex; align-items: center; gap: 6px; }
+    .font-controls span { font-size: 12px; color: var(--reader-text2); min-width: 26px; text-align: center; }
+
+    /* ─── PROGRESS BAR ─── */
+    .reader-progress {
+      position: fixed; top: 52px; left: 0; right: 0; height: 3px;
+      background: var(--reader-border); z-index: 199;
+    }
+    .reader-progress-fill { height: 100%; background: var(--reader-accent); width: 0%; transition: width .2s; }
+
+    /* ─── MAIN AREA ─── */
+    .reader-main {
+      position: fixed; top: 55px; left: 0; right: 0; bottom: 52px;
+      overflow: hidden; display: flex;
+    }
+    .reader-main.fullscreen { top: 0; bottom: 0; }
+
+    /* ─── PANE (source / translated) ─── */
+    .reader-pane {
+      flex: 1; overflow-y: auto; padding: 28px 5%;
+      border-right: 1px solid var(--reader-border);
+      scroll-behavior: smooth;
+    }
+    .reader-pane:last-child { border-right: none; }
+    .reader-pane.hidden { display: none; }
+    .reader-pane.single { flex: none; width: 100%; }
+    .pane-label { font-size: 11px; color: var(--reader-text2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--reader-border); }
+
+    /* ─── PARAGRAPHS ─── */
+    .reader-para {
+      font-size: var(--reader-font-size);
+      font-family: 'Crimson Text', serif;
+      line-height: 1.75;
+      margin-bottom: 18px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background .15s, border-color .15s;
+      position: relative;
+    }
+    .reader-para:hover { background: var(--reader-highlight); }
+    .reader-para.current {
+      background: var(--reader-highlight);
+      border-left-color: var(--reader-accent);
+    }
+    .reader-para.bookmarked { border-left-color: var(--reader-bookmark); }
+    .reader-para.bookmarked.current { border-left-color: var(--reader-accent); }
+
+    .bookmark-dot {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      width: 8px; height: 8px; background: var(--reader-bookmark); border-radius: 50%;
+      opacity: 0; transition: opacity .2s;
+    }
+    .reader-para.bookmarked .bookmark-dot { opacity: 1; }
+
+    /* ─── BOTTOM BAR ─── */
+    .reader-bottombar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 52px;
+      background: var(--reader-panel); border-top: 1px solid var(--reader-border);
+      display: flex; align-items: center; gap: 10px; padding: 0 16px; z-index: 200;
+      transition: transform .3s;
+    }
+    .reader-bottombar.hidden { transform: translateY(100%); }
+    .position-info { font-size: 12px; color: var(--reader-text2); }
+    .bookmark-count { font-size: 12px; color: var(--reader-bookmark); }
+
+    /* ─── BOOKMARKS PANEL ─── */
+    .bookmarks-panel {
+      position: fixed; right: 0; top: 55px; bottom: 52px;
+      width: 280px; background: var(--reader-panel);
+      border-left: 1px solid var(--reader-border);
+      overflow-y: auto; padding: 12px;
+      transform: translateX(100%); transition: transform .25s; z-index: 150;
+    }
+    .bookmarks-panel.open { transform: translateX(0); }
+    .bookmarks-panel h3 { font-size: 13px; color: var(--reader-text2); margin-bottom: 10px; }
+    .bookmark-item {
+      padding: 8px 10px; margin-bottom: 6px; border-radius: 6px;
+      background: var(--reader-bg); border: 1px solid var(--reader-border);
+      cursor: pointer; font-size: 13px; line-height: 1.4;
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .bookmark-item:hover { border-color: var(--reader-accent); }
+    .bookmark-item .bm-index { color: var(--reader-bookmark); font-weight: 700; flex-shrink: 0; }
+    .bookmark-item .bm-text { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .bookmark-item .bm-del { margin-left: auto; color: var(--reader-text2); font-size: 15px; flex-shrink: 0; }
+    .bookmark-item .bm-del:hover { color: #f56565; }
+    .no-bookmarks { font-size: 12px; color: var(--reader-text2); text-align: center; padding: 20px 0; }
+
+    /* ─── LOAD SCREEN ─── */
+    .reader-load {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: 16px; text-align: center; padding: 32px;
+    }
+    .reader-load h2 { font-size: 20px; font-weight: 700; }
+    .reader-load p { color: var(--reader-text2); font-size: 14px; max-width: 360px; }
+    .reader-load .btn-load { background: var(--reader-accent); border: none; color: #fff; padding: 12px 28px; font-size: 15px; border-radius: 9px; cursor: pointer; font-weight: 600; }
+    .reader-load .btn-load:hover { opacity: .9; }
+    .reader-load .btn-paste { background: none; border: 1px solid var(--reader-border); color: var(--reader-text2); padding: 9px 20px; font-size: 13px; border-radius: 7px; cursor: pointer; }
+    .reader-load .btn-paste:hover { color: var(--reader-text); border-color: var(--reader-accent); }
+    .fmt-badge { background: rgba(255,255,255,.06); border: 1px solid var(--reader-border); border-radius: 5px; padding: 3px 9px; font-size: 11px; font-weight: 700; letter-spacing: .5px; color: var(--reader-text2); }
+    .reader-load .file-hint { font-size: 11px; color: var(--reader-text2); }
+    .status-msg { font-size: 13px; color: var(--reader-accent); min-height: 20px; }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<div class="reader-topbar" id="topbar">
+  <span class="logo">📖 Книга</span>
+  <button class="btn-icon" onclick="history.back()" title="Вернуться в приложение">← Назад</button>
+  <span class="topbar-title" id="doc-title">Нет документа</span>
+  <div class="spacer"></div>
+
+  <div class="font-controls">
+    <button class="btn-icon" onclick="changeFontSize(-1)">A−</button>
+    <span id="font-size-label">17</span>
+    <button class="btn-icon" onclick="changeFontSize(1)">A+</button>
+  </div>
+
+  <button class="btn-icon" id="btn-src" onclick="togglePane('source')" title="Исходный текст">📝 Исходный</button>
+  <button class="btn-icon active" id="btn-trans" onclick="togglePane('translated')" title="Перевод">🌍 Перевод</button>
+  <button class="btn-icon" id="btn-both" onclick="togglePane('both')" title="Оба текста">⊞ Оба</button>
+
+  <button class="btn-icon" id="btn-bm" onclick="toggleBookmarksPanel()">🔖 <span id="bm-count">0</span></button>
+  <button class="btn-icon" onclick="toggleFullscreen()" id="btn-fs" title="Полноэкранный режим">⛶ Полный экран</button>
+  <button class="btn-icon" onclick="savePosition()" title="Сохранить позицию">💾 Позиция</button>
+
+  <input type="file" id="vmr-input" accept=".vmr" style="display:none" onchange="loadVMRFile(this)"/>
+  <input type="file" id="import-input" accept=".vmr,.txt,.srt,.sub,.epub,.pdf,.docx,.doc"
+         style="display:none" onchange="importFile(this)"/>
+  <button class="btn-icon" onclick="document.getElementById('vmr-input').click()">📂 VMR</button>
+  <button class="btn-icon" onclick="document.getElementById('import-input').click()" title="Импортировать TXT / SRT / EPUB / PDF / DOCX">📥 Импорт</button>
+</div>
+
+<!-- ── PROGRESS ── -->
+<div class="reader-progress"><div class="reader-progress-fill" id="progress-fill"></div></div>
+
+<!-- ── MAIN ── -->
+<div class="reader-main" id="reader-main">
+  <!-- Экран загрузки (виден по умолчанию) -->
+  <div class="reader-load" id="load-screen">
+    <div style="font-size:48px;margin-bottom:4px;">📖</div>
+    <h2>Чтение книги</h2>
+    <p style="color:var(--text2);margin-bottom:16px;">Откройте файл или вставьте текст для чтения</p>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:12px;">
+      <button class="btn-load" onclick="document.getElementById('vmr-input').click()">📂 Открыть VMR</button>
+      <button class="btn-load" onclick="document.getElementById('import-input').click()" style="background:var(--panel2);">📥 Импортировать файл</button>
+      <button class="btn-paste" onclick="pasteAndLoad()">📋 Вставить текст</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;">
+      <span class="fmt-badge">TXT</span>
+      <span class="fmt-badge">SRT</span>
+      <span class="fmt-badge">EPUB</span>
+      <span class="fmt-badge">PDF</span>
+      <span class="fmt-badge">DOCX</span>
+      <span class="fmt-badge" style="background:rgba(107,126,255,.2);color:var(--accent);">VMR</span>
+    </div>
+    <span class="file-hint">VMR — формат TubeDub. TXT, SRT, EPUB, PDF, DOCX — импорт</span>
+    <div class="status-msg" id="load-status"></div>
+  </div>
+
+  <!-- Левая панель — исходный текст -->
+  <div class="reader-pane hidden" id="pane-source">
+    <div class="pane-label">Исходный текст</div>
+    <div id="source-content"></div>
+  </div>
+
+  <!-- Правая панель — перевод -->
+  <div class="reader-pane hidden" id="pane-translated">
+    <div class="pane-label">Перевод</div>
+    <div id="translated-content"></div>
+  </div>
+</div>
+
+<!-- ── BOOKMARKS PANEL ── -->
+<div class="bookmarks-panel" id="bookmarks-panel">
+  <h3>🔖 Закладки</h3>
+  <div id="bookmarks-list"><p class="no-bookmarks">Нет закладок</p></div>
+</div>
+
+<!-- ── BOTTOM BAR ── -->
+<div class="reader-bottombar" id="bottombar">
+  <span class="position-info" id="position-info">Параграф 0 / 0</span>
+  <span class="bookmark-count" id="bookmark-info"></span>
+  <div class="spacer"></div>
+  <button class="btn-icon" onclick="prevParagraph()">↑ Пред.</button>
+  <button class="btn-icon" onclick="nextParagraph()">↓ След.</button>
+  <button class="btn-icon" onclick="toggleBookmark()">🔖 Закладка</button>
+  <button class="btn-icon" id="btn-hide-bars" onclick="toggleBars()" title="Скрыть панели">⊙ Читать</button>
+</div>
+
+<script>
+/* ─── STATE ─── */
+const state = {
+  paragraphs: [],          // [{source, translated}]
+  currentIndex: 0,
+  bookmarks: new Set(),    // индексы
+  fontSize: 17,
+  paneMode: "translated",  // "source" | "translated" | "both"
+  barsHidden: false,
+  fullscreen: false,
+  currentFile: null,       // имя VMR файла на сервере
+  docTitle: "Нет документа",
+};
+
+/* ─── CSS переменная шрифта ─── */
+function applyFontSize() {
+  document.documentElement.style.setProperty("--reader-font-size", state.fontSize + "px");
+  document.getElementById("font-size-label").textContent = state.fontSize;
+}
+
+function changeFontSize(delta) {
+  state.fontSize = Math.max(13, Math.min(28, state.fontSize + delta));
+  applyFontSize();
+}
+
+/* ─── ЗАГРУЗКА ─── */
+function setLoadStatus(msg) {
+  const el = document.getElementById("load-status");
+  if (el) el.textContent = msg;
+}
+
+async function pasteAndLoad() {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text.trim()) { setLoadStatus("Буфер обмена пуст"); return; }
+    loadText(text, "");
+  } catch {
+    setLoadStatus("Нажмите Ctrl+V и вставьте в текстовое поле — или откройте VMR файл");
+  }
+}
+
+function loadVMRFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  setLoadStatus("Загрузка...");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  fetch("/api/load_vmr", { method: "POST", body: formData })
+    .then(r => r.json())
+    .then(doc => {
+      if (doc.error) { setLoadStatus("Ошибка: " + doc.error); return; }
+      applyDocument(doc);
+    })
+    .catch(e => setLoadStatus("Ошибка загрузки: " + e));
+
+  input.value = "";
+}
+
+function loadText(sourceText, translatedText) {
+  const doc = {
+    source_text: sourceText,
+    translated_text: translatedText,
+    reading_position: 0,
+    bookmarks: [],
+  };
+  applyDocument(doc);
+}
+
+function applyDocument(doc) {
+  const srcRaw = doc.source_text || "";
+  const trRaw = doc.translated_text || doc.processed_text || "";
+  let sourceLines = srcRaw.split("\n").filter(l => l.trim());
+  let transLines = trRaw.split("\n").filter(l => l.trim());
+  if (srcRaw.includes("\n\n") || trRaw.includes("\n\n")) {
+    sourceLines = srcRaw.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+    transLines = trRaw.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  }
+  const count = Math.max(sourceLines.length, transLines.length, 1);
+
+  state.paragraphs = [];
+  for (let i = 0; i < count; i++) {
+    state.paragraphs.push({
+      source: sourceLines[i] || "",
+      translated: transLines[i] || "",
+    });
+  }
+
+  state.currentIndex = doc.reading_position || 0;
+  state.bookmarks = new Set(doc.bookmarks || []);
+  state.docTitle = doc.title || doc.format || "Документ";
+  state.currentFile = doc.filename || doc._filename || null;
+
+  renderPanes();
+  document.getElementById("load-screen").style.display = "none";
+  document.getElementById("pane-source").classList.remove("hidden");
+  document.getElementById("pane-translated").classList.remove("hidden");
+  applyPaneMode(state.paneMode);
+  scrollToCurrent();
+  updateUI();
+  document.getElementById("doc-title").textContent = state.docTitle;
+}
+
+async function loadVmrFromServer(filename) {
+  if (!filename) return;
+  setLoadStatus("Загрузка " + filename + "…");
+  try {
+    const r = await fetch("/api/reader/document/" + encodeURIComponent(filename));
+    const doc = await r.json();
+    if (!r.ok || doc.error) throw new Error(doc.error || "load failed");
+    doc._filename = filename;
+    applyDocument(doc);
+    setLoadStatus("✅ " + (doc.title || filename));
+  } catch (e) {
+    setLoadStatus("❌ " + e.message);
+  }
+}
+
+/* ─── РЕНДЕР ─── */
+function renderPanes() {
+  const sc = document.getElementById("source-content");
+  const tc = document.getElementById("translated-content");
+  sc.innerHTML = "";
+  tc.innerHTML = "";
+
+  state.paragraphs.forEach((para, i) => {
+    sc.appendChild(makePara(para.source || "—", i));
+    tc.appendChild(makePara(para.translated || para.source || "—", i));
+  });
+}
+
+function makePara(text, index) {
+  const div = document.createElement("div");
+  div.className = "reader-para";
+  div.dataset.index = index;
+  div.textContent = text;
+
+  const dot = document.createElement("span");
+  dot.className = "bookmark-dot";
+  div.appendChild(dot);
+
+  div.addEventListener("click", () => {
+    state.currentIndex = index;
+    updateCurrentHighlight();
+    updateUI();
+  });
+  div.addEventListener("dblclick", () => toggleBookmarkAt(index));
+  return div;
+}
+
+/* ─── НАВИГАЦИЯ ─── */
+function prevParagraph() {
+  if (state.currentIndex > 0) {
+    state.currentIndex--;
+    scrollToCurrent();
+    updateUI();
+  }
+}
+
+function nextParagraph() {
+  if (state.currentIndex < state.paragraphs.length - 1) {
+    state.currentIndex++;
+    scrollToCurrent();
+    updateUI();
+  }
+}
+
+function scrollToCurrent() {
+  updateCurrentHighlight();
+  const paras = document.querySelectorAll(".reader-para");
+  for (const el of paras) {
+    if (parseInt(el.dataset.index) === state.currentIndex) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      break;
+    }
+  }
+}
+
+function updateCurrentHighlight() {
+  document.querySelectorAll(".reader-para").forEach(el => {
+    const i = parseInt(el.dataset.index);
+    el.classList.toggle("current", i === state.currentIndex);
+    el.classList.toggle("bookmarked", state.bookmarks.has(i));
+  });
+}
+
+/* ─── ЗАКЛАДКИ ─── */
+function toggleBookmark() {
+  toggleBookmarkAt(state.currentIndex);
+}
+
+function toggleBookmarkAt(index) {
+  if (state.bookmarks.has(index)) {
+    state.bookmarks.delete(index);
+  } else {
+    state.bookmarks.add(index);
+  }
+  updateCurrentHighlight();
+  renderBookmarksList();
+  updateUI();
+}
+
+function renderBookmarksList() {
+  const list = document.getElementById("bookmarks-list");
+  const sorted = Array.from(state.bookmarks).sort((a, b) => a - b);
+  if (sorted.length === 0) {
+    list.innerHTML = '<p class="no-bookmarks">Нет закладок</p>';
+    return;
+  }
+  list.innerHTML = "";
+  sorted.forEach(i => {
+    const para = state.paragraphs[i];
+    if (!para) return;
+    const text = para.translated || para.source || "";
+    const item = document.createElement("div");
+    item.className = "bookmark-item";
+    item.innerHTML = `
+      <span class="bm-index">#${i + 1}</span>
+      <span class="bm-text">${text.slice(0, 100)}</span>
+      <span class="bm-del" onclick="toggleBookmarkAt(${i}); event.stopPropagation()">×</span>
+    `;
+    item.addEventListener("click", () => {
+      state.currentIndex = i;
+      scrollToCurrent();
+      updateUI();
+    });
+    list.appendChild(item);
+  });
+}
+
+function toggleBookmarksPanel() {
+  const panel = document.getElementById("bookmarks-panel");
+  panel.classList.toggle("open");
+  document.getElementById("btn-bm").classList.toggle("active", panel.classList.contains("open"));
+  renderBookmarksList();
+}
+
+/* ─── РЕЖИМЫ ПАНЕЛЕЙ ─── */
+function togglePane(mode) {
+  state.paneMode = mode;
+  applyPaneMode(mode);
+  document.getElementById("btn-src").classList.toggle("active", mode === "source");
+  document.getElementById("btn-trans").classList.toggle("active", mode === "translated");
+  document.getElementById("btn-both").classList.toggle("active", mode === "both");
+}
+
+function applyPaneMode(mode) {
+  const src = document.getElementById("pane-source");
+  const trans = document.getElementById("pane-translated");
+  if (mode === "source") {
+    src.classList.remove("hidden"); trans.classList.add("hidden");
+  } else if (mode === "translated") {
+    trans.classList.remove("hidden"); src.classList.add("hidden");
+  } else {
+    src.classList.remove("hidden"); trans.classList.remove("hidden");
+  }
+}
+
+/* ─── ПОЛНЫЙ ЭКРАН ─── */
+function toggleFullscreen() {
+  state.fullscreen = !state.fullscreen;
+  const main = document.getElementById("reader-main");
+  const topbar = document.getElementById("topbar");
+  const bottombar = document.getElementById("bottombar");
+  const fs = document.getElementById("btn-fs");
+  if (state.fullscreen) {
+    document.documentElement.requestFullscreen?.();
+    main.classList.add("fullscreen");
+    topbar.classList.add("hidden");
+    bottombar.classList.add("hidden");
+    fs.textContent = "⛶ Выйти";
+    state.barsHidden = true;
+  } else {
+    document.exitFullscreen?.();
+    main.classList.remove("fullscreen");
+    topbar.classList.remove("hidden");
+    bottombar.classList.remove("hidden");
+    fs.textContent = "⛶ Полный экран";
+    state.barsHidden = false;
+  }
+}
+
+/* ─── СКРЫТЬ ПАНЕЛИ (режим чтения) ─── */
+function toggleBars() {
+  state.barsHidden = !state.barsHidden;
+  document.getElementById("topbar").classList.toggle("hidden", state.barsHidden);
+  document.getElementById("bottombar").classList.toggle("hidden", state.barsHidden);
+  document.getElementById("reader-main").classList.toggle("fullscreen", state.barsHidden);
+  document.getElementById("btn-hide-bars").classList.toggle("active", state.barsHidden);
+
+  if (state.barsHidden) {
+    document.addEventListener("keydown", exitReadingMode);
+  } else {
+    document.removeEventListener("keydown", exitReadingMode);
+  }
+}
+
+function exitReadingMode(e) {
+  if (e.key === "Escape" && state.barsHidden) toggleBars();
+}
+
+/* ─── ПРОГРЕСС ─── */
+function updateProgress() {
+  const total = state.paragraphs.length;
+  const pct = total > 0 ? ((state.currentIndex + 1) / total * 100) : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+}
+
+/* ─── ОБНОВЛЕНИЕ UI ─── */
+function updateUI() {
+  const total = state.paragraphs.length;
+  document.getElementById("position-info").textContent =
+    `Параграф ${state.currentIndex + 1} / ${total}`;
+  document.getElementById("bm-count").textContent = state.bookmarks.size;
+  const bmInfo = state.bookmarks.size > 0 ? `🔖 ${state.bookmarks.size} закладок` : "";
+  document.getElementById("bookmark-info").textContent = bmInfo;
+  updateProgress();
+}
+
+/* ─── СОХРАНЕНИЕ ПОЗИЦИИ ─── */
+function savePosition() {
+  if (!state.currentFile) {
+    localStorage.setItem("vm_reader_position", JSON.stringify({
+      pos: state.currentIndex,
+      bookmarks: Array.from(state.bookmarks),
+    }));
+    showToast("Позиция сохранена локально");
+    return;
+  }
+  fetch("/api/reader/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      filename: state.currentFile,
+      reading_position: state.currentIndex,
+      bookmarks: Array.from(state.bookmarks),
+    }),
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) showToast("Позиция сохранена в VMR");
+      else showToast("Ошибка сохранения: " + (d.error || ""));
+    });
+}
+
+/* ─── TOAST ─── */
+function showToast(msg) {
+  let t = document.getElementById("toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "toast";
+    Object.assign(t.style, {
+      position: "fixed", bottom: "70px", left: "50%", transform: "translateX(-50%)",
+      background: "rgba(20,20,40,.95)", color: "#e2e8f0", padding: "8px 18px",
+      borderRadius: "20px", fontSize: "13px", zIndex: "9999",
+      transition: "opacity .3s", whiteSpace: "nowrap",
+    });
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = "1";
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = "0"; }, 2200);
+}
+
+/* ─── КЛАВИАТУРА ─── */
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
+    e.preventDefault(); nextParagraph();
+  } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+    e.preventDefault(); prevParagraph();
+  } else if (e.key === "b" || e.key === "B") {
+    toggleBookmark();
+  } else if (e.key === "Escape") {
+    if (state.fullscreen) toggleFullscreen();
+    else if (state.barsHidden) toggleBars();
+  } else if (e.key === "f" || e.key === "F") {
+    toggleFullscreen();
+  }
+});
+
+/* ─── ПРОКРУТКА → позиция ─── */
+function findVisibleIndex(paneId) {
+  const pane = document.getElementById(paneId);
+  if (!pane || pane.classList.contains("hidden")) return -1;
+  const paneTop = pane.getBoundingClientRect().top;
+  const paras = pane.querySelectorAll(".reader-para");
+  for (const el of paras) {
+    const rect = el.getBoundingClientRect();
+    if (rect.top - paneTop > -10) return parseInt(el.dataset.index);
+  }
+  return -1;
+}
+
+let scrollTimer = null;
+["pane-source", "pane-translated"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("scroll", () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        const idx = findVisibleIndex(id);
+        if (idx >= 0 && idx !== state.currentIndex) {
+          state.currentIndex = idx;
+          updateCurrentHighlight();
+          updateUI();
+        }
+      }, 80);
+    });
+  }
+});
+
+/* ─── ВОССТАНОВЛЕНИЕ ПОЗИЦИИ (localStorage) ─── */
+function restoreLocalPosition() {
+  try {
+    const saved = localStorage.getItem("vm_reader_position");
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    if (data.pos) state.currentIndex = data.pos;
+    if (data.bookmarks) state.bookmarks = new Set(data.bookmarks);
+  } catch {}
+}
+
+/* ─── ИМПОРТ ФАЙЛОВ (TXT / SRT / EPUB / PDF / DOCX) ─── */
+async function importFile(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  input.value = '';
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  // VMR → обычный loadVMRFile
+  if (ext === 'vmr') { loadVMRFile({ files: [file] }); return; }
+
+  const loadStatus = document.getElementById('load-status');
+  if (loadStatus) { loadStatus.textContent = `⏳ Импорт ${file.name}…`; loadStatus.style.color = 'var(--text2)'; }
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  try {
+    const r = await fetch('/api/reader/import', { method: 'POST', body: fd });
+    const d = await r.json();
+
+    if (d.error) {
+      if (loadStatus) { loadStatus.textContent = '❌ ' + d.error; loadStatus.style.color = 'var(--danger)'; }
+      vmNotify('❌ ' + d.error, 'error');
+      return;
+    }
+
+    if (d.warning) vmNotify('⚠ ' + d.warning, 'info', 5000);
+
+    // Собираем VMR-документ из импортированного текста
+    const text   = (d.text || '').trim();
+    const title  = d.title || file.name.replace(/\.[^.]+$/, '');
+    const chunks = text.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+
+    const doc = {
+      title,
+      format:   d.format || ext,
+      created:  new Date().toISOString(),
+      chunks,
+      words: text.split(/\s+/).filter(Boolean).length,
+      reading_position: 0,
+      bookmarks: [],
+    };
+
+    // Загружаем в Reader
+    applyDocument(doc);
+
+    if (loadStatus) { loadStatus.textContent = `✅ Импортировано: ${title}`; loadStatus.style.color = 'var(--success)'; }
+    vmNotify(`📖 Загружен файл: ${title} (${chunks.length} абз.)`, 'success', 4000);
+
+  } catch(e) {
+    if (loadStatus) { loadStatus.textContent = '❌ Ошибка: ' + e; loadStatus.style.color = 'var(--danger)'; }
+    vmNotify('❌ Ошибка импорта: ' + e, 'error');
+  }
+}
+
+/* ─── INIT ─── */
+applyFontSize();
+restoreLocalPosition();
+(function _readerQueryBoot() {
+  const params = new URLSearchParams(window.location.search);
+  const vmr = params.get("vmr");
+  if (vmr) loadVmrFromServer(vmr);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "id": "modern",
+  "pack": "base",
+  "mix_mode": "full_dub",
+  "original_volume": 0.0,
+  "dub_volume": 1.0,
+  "background_volume": 0.0,
+  "tts_rate": "-5%",
+  "tts_pitch": null,
+  "i18n_key": "dub.style_modern",
+  "order": 1,
+  "delivery": "natural_modern",
+  "intonation_range": "wide",
+  "preview_phrases": {
+    "default": "This is how the modern dubbing style sounds.",
+    "ru": "Так звучит современный дубляж — естественная речь без фона оригинала.",
+    "uk": "Так звучить сучасний дубляж — природна мова без фону оригіналу.",
+    "en": "Modern dubbing — clear, natural speech without the original track.",
+    "ja": "現代的な吹き替えスタイルのサンプルです。",
+    "de": "So klingt moderner Synchronstil — natürliche Sprache ohne Original.",
+    "fr": "Voici le style de doublage moderne — voix naturelle, sans piste originale."
+  }
+}

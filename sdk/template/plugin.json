@@ -1,0 +1,19 @@
+{
+  "name": "my_plugin",
+  "version": "0.1.0",
+  "author": "Your Name",
+  "description": "Short description of what this plugin does",
+  "minimum_api": "1.0.0",
+  "dependencies": [],
+  "capabilities": ["utility"],
+  "permissions": {
+    "file": false,
+    "network": false,
+    "gpu": false,
+    "audio": false,
+    "video": false,
+    "memory": false
+  },
+  "entry_point": "plugin.py",
+  "execution_mode": "local"
+}

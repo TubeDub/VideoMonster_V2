@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}{{ mod.name.ru }} — TubeDub{% endblock %}
+
+{% block extra_head %}
+<style>
+.soon-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 140px);
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.soon-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px 40px;
+  max-width: 560px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  animation: fadeUp .4s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.soon-icon {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 16px;
+  filter: grayscale(20%);
+}
+
+.soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(251,191,36,.14);
+  border: 1px solid rgba(251,191,36,.35);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f6ad55;
+  letter-spacing: .04em;
+  margin-bottom: 20px;
+}
+
+.soon-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+
+.soon-tagline {
+  font-size: 14px;
+  color: var(--text2);
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+
+.soon-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px;
+  text-align: left;
+}
+
+.soon-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.soon-features li:last-child {
+  border-bottom: none;
+}
+
+.soon-features li::before {
+  content: "✦";
+  color: #6366f1;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.soon-note {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  background: rgba(99,102,241,.08);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+}
+
+.soon-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text2);
+  font-size: 13px;
+  text-decoration: none;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all .2s;
+}
+
+.soon-back:hover {
+  color: var(--text);
+  border-color: var(--text2);
+  background: var(--hover);
+}
+
+@media (max-width: 600px) {
+  .soon-card { padding: 32px 20px; }
+  .soon-title { font-size: 22px; }
+  .soon-icon { font-size: 48px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="soon-page">
+  <div class="soon-card">
+    <div class="soon-icon">{{ mod.icon }}</div>
+
+    <div class="soon-badge">
+      <span>🚧</span>
+      <span data-i18n="soon.badge">Разрабатывается</span>
+    </div>
+
+    <h1 class="soon-title soon-mod-name">{{ mod.name.ru }}</h1>
+
+    <p class="soon-tagline soon-mod-tagline">{{ mod.tagline.ru }}</p>
+
+    <ul class="soon-features soon-mod-features">
+      {% for f in mod.features.ru %}
+      <li>{{ f }}</li>
+      {% endfor %}
+    </ul>
+
+    <div class="soon-note" data-i18n="soon.note">
+      Этот модуль появится в одном из следующих обновлений TubeDub.
+      Мы работаем над его созданием — следите за обновлениями!
+    </div>
+
+    <a href="/" class="soon-back">
+      <span>←</span>
+      <span data-i18n="soon.back">На главную</span>
+    </a>
+  </div>
+</div>
+
+<script>
+(function () {
+  const mod = {{ mod | tojson }};
+
+  function applyLang(lang) {
+    const l = (lang || 'ru').split('-')[0].toLowerCase();
+
+    const nameEl = document.querySelector('.soon-mod-name');
+    if (nameEl && mod.name) nameEl.textContent = mod.name[l] || mod.name.ru || '';
+
+    const taglineEl = document.querySelector('.soon-mod-tagline');
+    if (taglineEl && mod.tagline) taglineEl.textContent = mod.tagline[l] || mod.tagline.ru || '';
+
+    const features = (mod.features && (mod.features[l] || mod.features.ru)) || [];
+    const ul = document.querySelector('.soon-mod-features');
+    if (ul) {
+      ul.innerHTML = features.map(f => `<li>${f}</li>`).join('');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const savedLang = localStorage.getItem('vm_ui_lang') || 'ru';
+    applyLang(savedLang);
+  });
+
+  const origLoadI18n = window.loadI18n;
+  window.loadI18n = async function (lang) {
+    if (origLoadI18n) await origLoadI18n(lang);
+    applyLang(lang);
+  };
+})();
+</script>
+{% endblock %}

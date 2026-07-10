@@ -1,0 +1,37 @@
+{
+  "id": "radio90",
+  "pack": "regional",
+  "region_pack": "us",
+  "mix_mode": "custom",
+  "original_volume": 0.32,
+  "dub_volume": 0.94,
+  "background_volume": 0.32,
+  "tts_rate": "-7%",
+  "tts_pitch": "-2Hz",
+  "i18n_key": "dub.style_radio90",
+  "order": 102,
+  "reply_start_delay_ms": 160,
+  "reply_start_delay_jitter_ms": 40,
+  "max_atempo": 1.10,
+  "allow_atempo": false,
+  "prefer_semantic_adapt": true,
+  "sync_mode": "relaxed",
+  "delivery": "radio_storyteller_90s",
+  "intonation_range": "narrow",
+  "voice_fx": {
+    "highpass_hz": 110,
+    "low_shelf_cut_hz": 220,
+    "low_shelf_gain_db": -3.5,
+    "mid_peak_hz": 2400,
+    "mid_peak_gain_db": 2.2,
+    "lowpass_hz": 11000,
+    "compressor_ratio": 2.4,
+    "compressor_threshold_db": -21,
+    "volume_gain_db": -1.2
+  },
+  "preview_phrases": {
+    "default": "90s radio storyteller — intimate warm narration.",
+    "en": "90s radio storyteller — warm, intimate voice over the original track.",
+    "ru": "Радио-рассказчик девяностых — тёплая интимная подача поверх оригинала."
+  }
+}

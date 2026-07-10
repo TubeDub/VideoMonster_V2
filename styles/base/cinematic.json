@@ -1,0 +1,32 @@
+{
+  "id": "cinematic",
+  "pack": "base",
+  "mix_mode": "full_dub",
+  "original_volume": 0.0,
+  "dub_volume": 1.0,
+  "background_volume": 0.0,
+  "tts_rate": "-4%",
+  "tts_pitch": "-1Hz",
+  "i18n_key": "dub.style_cinematic",
+  "order": 4,
+  "max_atempo": 1.16,
+  "delivery": "theatrical_clear",
+  "intonation_range": "medium",
+  "voice_fx": {
+    "highpass_hz": 80,
+    "mid_peak_hz": 2000,
+    "mid_peak_gain_db": 1.2,
+    "compressor_ratio": 2.2,
+    "compressor_threshold_db": -19,
+    "volume_gain_db": 0.5
+  },
+  "preview_phrases": {
+    "default": "Cinematic dubbing — clear theatrical delivery.",
+    "ru": "Кинематографический дубляж — чёткая, выразительная подача для фильма.",
+    "uk": "Кінематографічний дубляж — чітка, виразна подача для фільму.",
+    "en": "Cinematic dub — clear, expressive delivery for film.",
+    "ja": "シネマ吹き替え — 映画向けのはっきりした演技声です。",
+    "de": "Kino-Synchronisation — klare, ausdrucksstarke Filmstimme.",
+    "fr": "Doublage cinéma — voix claire et expressive pour le film."
+  }
+}
