@@ -1,0 +1,23 @@
+{
+  "segment_id": "ec5653a68d1746118006497d376099d5",
+  "index": 15,
+  "src": "c:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\66651127645a43958106ccd4d700fb9c\\closed_loop\\66651127645a43958106ccd4d700fb9c\\pause\\pause_run_ec5653a68d17_20260713_190113_5842e094.wav",
+  "start_ms": 127920,
+  "end_ms": 138800,
+  "next_start": 138800,
+  "slot_ms": 10880,
+  "raw_audio_ms": 15561,
+  "old_policy": {
+    "no_speech_trim": true,
+    "fitted_ms": 15526,
+    "bleed_ms": 4646,
+    "strategy": "pause_compress+no_trim_overflow+overflow"
+  },
+  "new_policy": {
+    "no_speech_trim": false,
+    "fitted_ms": 10880,
+    "bleed_ms": 0,
+    "strategy": "pause_compress+trim_overlap"
+  },
+  "fix_ok": true
+}

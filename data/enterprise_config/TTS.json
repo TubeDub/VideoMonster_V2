@@ -1,0 +1,15 @@
+{
+  "domain": "TTS",
+  "configuration_uuid": "da3e1f43-bfd0-4f21-afbc-410c9d767d28",
+  "version": "1.0.0",
+  "created": 1783881030.1184454,
+  "updated": 1783881030.1184459,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "provider": "edge-offline",
+    "platform": "voice_platform"
+  }
+}

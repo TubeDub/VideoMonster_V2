@@ -165,7 +165,11 @@ def contains_foreign_script(text: str, tgt_lang: str | None) -> bool:
 
 
 def validate_tts_text(
-    text: str, *, min_chars: int = _MIN_SENTENCE_CHARS, tgt_lang: str | None = None
+    text: str,
+    *,
+    min_chars: int = _MIN_SENTENCE_CHARS,
+    tgt_lang: str | None = None,
+    is_source_segment_incomplete: bool = False,
 ) -> tuple[bool, list[str]]:
     """Validate one final TTS string. Returns (ok, issues).
 
@@ -222,10 +226,12 @@ def validate_tts_text(
         issues.append("dangling_connector")
 
     # Real sentence with no terminal punctuation → likely clipped.
+    # Skip when source ASR cut is incomplete (avoids false Review warnings).
     if (
         not has_terminal
         and len(stripped) >= min_chars
         and len(words) >= _MIN_SENTENCE_WORDS
+        and not is_source_segment_incomplete
     ):
         issues.append("incomplete_sentence")
 

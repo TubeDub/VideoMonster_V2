@@ -21,6 +21,25 @@ _MID_CLAUSE = re.compile(
     r"(?:,\s*|;\s*|\band\b\s*|\bbut\b\s*|\bbecause\b\s*|\bwhile\b\s*)$",
     re.I,
 )
+# False sentence ends: George Jr. / Mr. / Dr. / U.S. — Whisper often cuts here
+_ABBREV_END_RE = re.compile(
+    r"(?i)\b(?:"
+    r"mr|mrs|ms|dr|prof|jr|sr|vs|etc|st|ave|"
+    r"u\.s|u\.k|e\.g|i\.e|"
+    r"ім|т\.д|т\.п"
+    r")\.\s*$"
+)
+_TRUE_SENTENCE_END_RE = re.compile(r"[.!?…][\"”»)]*\s*$")
+
+
+def ends_true_sentence(text: str) -> bool:
+    """True only for real sentence ends — not Jr./Mr./U.S. periods."""
+    p = str(text or "").rstrip()
+    if not p or not _TRUE_SENTENCE_END_RE.search(p):
+        return False
+    if _ABBREV_END_RE.search(p):
+        return False
+    return True
 
 
 def would_break_forbidden(prev: str, nxt: str) -> tuple[bool, str]:
@@ -30,17 +49,31 @@ def would_break_forbidden(prev: str, nxt: str) -> tuple[bool, str]:
     if not p or not n:
         return False, ""
 
-    # Mid-sentence: previous does not end with sentence punctuation.
-    if not re.search(r"[.!?…][\"”»)]*\s*$", p):
+    # Continuation after false abbrev period: "George Jr." + "could not help…"
+    first = n[0]
+    if first.islower() or first in ",;:—–-":
+        return True, "lowercase_continuation"
+    if _ABBREV_END_RE.search(p) and (
+        first.islower()
+        or re.match(
+            r"^(?:could|would|was|were|had|has|have|is|are|and|but|that|"
+            r"who|which|when|where|about|from|to|of)\b",
+            n,
+            re.I,
+        )
+    ):
+        return True, "abbrev_false_boundary"
+
+    # Mid-sentence: previous does not end with *true* sentence punctuation.
+    if not ends_true_sentence(p):
         # Number + unit split
-        join_probe = p + " " + n
         if _UNIT_RE.search(p[-12:] + " " + n[:12]) or (
             re.search(r"\d+\s*$", p) and re.match(r"(?i)(km|m|kg|%|°|mph|ms|sec|min)\b", n)
         ):
             return True, "number_unit"
         # Name + surname across boundary
-        tail = re.search(r"([A-Z][a-z]+)\s*$", p)
-        head = re.match(r"^([A-Z][a-z]+)\b", n)
+        tail = re.search(r"([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ]+)\s*$", p)
+        head = re.match(r"^([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ]+)\b", n)
         if tail and head:
             return True, "name_surname"
         # Open quote without close
@@ -48,8 +81,8 @@ def would_break_forbidden(prev: str, nxt: str) -> tuple[bool, str]:
             return True, "quote"
         if _MID_CLAUSE.search(p):
             return True, "logical_clause"
-        # Generic mid-sentence
-        if not re.search(r"[.!?…]\s*$", p):
+        # Generic mid-sentence (incl. after Jr. false period)
+        if not ends_true_sentence(p):
             return True, "mid_sentence"
     return False, ""
 
@@ -84,7 +117,7 @@ def enforce_smart_boundaries(
             continue
         must, _reason = would_break_forbidden(buf, n)
         joined = (buf + " " + n).strip()
-        if must or (len(buf) < 40 and not re.search(r"[.!?…]\s*$", buf)):
+        if must or (len(buf) < 40 and not ends_true_sentence(buf)):
             if len(joined) <= limit * 1.35:
                 buf = joined
                 continue

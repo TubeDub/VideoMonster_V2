@@ -31,9 +31,11 @@ def polish_segment_v2(
     app_dir=None,
     use_llm: bool = True,
     entity_token_map: dict[str, str] | None = None,
+    slot_ms: int = 0,
+    reserve_ms: int | None = None,
 ) -> dict[str, Any]:
     """
-    V2 naturalization: rule pass → quality check → LLM rewrite → retry if needed.
+    V2 naturalization: rule pass → quality check → LLM rewrite → CATP length gate.
     Returns dict compatible with NaturalizerResult extension.
     """
     from engines.translation_naturalizer import NaturalizerResult, _polish_v1_rules
@@ -50,6 +52,8 @@ def polish_segment_v2(
     retry_reason = ""
     restored: list[str] = []
     fix_count = 0
+    catp_meta: dict[str, Any] = {}
+    literary_candidate = ""
 
     # Phase 1 — rule-based pass (V1)
     v1: NaturalizerResult = _polish_v1_rules(
@@ -65,6 +69,8 @@ def polish_segment_v2(
     reasons.extend(v1.reasons)
     if v1.reasons != ["no_changes"]:
         fix_count += len(v1.reasons)
+    # Snapshot before literary (Safe Polish baseline for CATP)
+    safe_baseline = current
 
     # Phase 2 — punctuation
     punct = clean_punctuation(current)
@@ -101,14 +107,89 @@ def polish_segment_v2(
     report = _validate(current)
     mixed_pct = report.mixed_language_pct
 
-    def _needs_rewrite(q) -> bool:
-        return q.needs_retry or has_bad_mt(current)
+    lang = (tgt_lang or "uk").split("-")[0].lower()
 
-    # Phase 5 — LLM full rewrite when quality bad
+    # Phase 4b — offline literary candidate (UK). Not committed until CATP.
+    if lang == "uk":
+        from engines.naturalizer_v2.literary_uk import apply_literary_uk
+
+        lit, lit_codes = apply_literary_uk(current, original=original)
+        if lit != current and lit_codes:
+            accepted_lit = accept_naturalizer_change(raw, lit, original=original)
+            if accepted_lit != current:
+                literary_candidate = accepted_lit
+                # Tentatively apply; CATP may roll back
+                current = accepted_lit
+                reasons.append("literary_uk")
+                fix_count += 1
+                report = _validate(current)
+                mixed_pct = report.mixed_language_pct
+
+    def _catp_mode_allows_extended() -> bool:
+        try:
+            from engines.naturalizer_v2.catp import compute_budget
+
+            b = compute_budget(
+                slot_ms=slot_ms,
+                reserve_ms=reserve_ms,
+                baseline_text=safe_baseline or current,
+                lang=lang,
+            )
+            return b.mode == "extended"
+        except Exception:
+            return False
+
+    def _needs_rewrite(q) -> bool:
+        if q.needs_retry or has_bad_mt(current):
+            return True
+        if lang == "uk":
+            try:
+                from engines.naturalizer_v2.literary_uk import should_force_literary_llm
+
+                # Literary LLM only when Extended reserve OR quality still bad
+                if should_force_literary_llm(
+                    current,
+                    original=original,
+                    quality_needs_retry=bool(q.needs_retry),
+                ):
+                    if q.needs_retry or has_bad_mt(current) or _catp_mode_allows_extended():
+                        return True
+            except Exception:
+                pass
+        try:
+            from engines.mt.dirty_mt import compute_dirty_mt_score
+
+            if compute_dirty_mt_score(original, current, tgt_lang=tgt_lang).dirty:
+                return True
+            # Raw was dirty and rules only cosmetically touched it
+            if (
+                compute_dirty_mt_score(original, raw, tgt_lang=tgt_lang).dirty
+                and current.strip()
+                and (
+                    current == raw
+                    or abs(len(current) - len(raw)) < max(12, int(len(raw) * 0.08))
+                )
+            ):
+                return True
+        except Exception:
+            pass
+        return False
+
+    # Phase 5 — LLM full rewrite when quality bad OR UK literary stiffness (Extended)
     if use_llm and _needs_rewrite(report):
         from engines.proper_nouns_dict import extra_preserved_tokens
 
         preserved = extra_preserved_tokens(original, app_dir=base_dir) if original else []
+        problems = list(report.problems or [])
+        if lang == "uk":
+            try:
+                from engines.naturalizer_v2.literary_uk import detect_stiffness
+
+                stiff = detect_stiffness(current)
+                if stiff:
+                    problems = problems + [f"literary_stiff:{c}" for c in stiff[:6]]
+            except Exception:
+                pass
         llm_out = rewrite_segment_llm(
             current,
             original=original,
@@ -116,13 +197,15 @@ def polish_segment_v2(
             tgt_lang=tgt_lang,
             src_lang=src_lang,
             prev_context=prev_context,
-            problems=report.problems,
+            problems=problems,
             preserved_entities=preserved,
+            literary=lang == "uk" and _catp_mode_allows_extended(),
         )
         if llm_out:
             accepted = accept_naturalizer_change(raw, llm_out, original=original)
             if accepted != raw:
                 current = clean_punctuation(accepted)
+                literary_candidate = literary_candidate or current
                 reasons.append("llm_full_rewrite")
                 fix_count += 1
                 retry_reason = report.retry_reason or "quality"
@@ -145,6 +228,7 @@ def polish_segment_v2(
             problems=report.problems + ["retry_pass"],
             preserved_entities=extra_preserved_tokens(original, app_dir=base_dir) if original else [],
             force=True,
+            literary=lang == "uk",
         )
         if llm_out2:
             accepted2 = accept_naturalizer_change(raw, llm_out2, original=original)
@@ -191,6 +275,53 @@ def polish_segment_v2(
                     reasons.append("fixed_named_entities")
                     fix_count += 1
 
+    # Phase 7 — CATP: Meaning Polish + Length Predictor gate (variants A/B/C)
+    if lang == "uk":
+        try:
+            from engines.naturalizer_v2.catp import polish_with_budget, try_dsal_compress
+
+            lit_for_catp = literary_candidate or (
+                current if current != safe_baseline else None
+            )
+            catp = polish_with_budget(
+                baseline=raw,
+                safe=safe_baseline,
+                literary=lit_for_catp if lit_for_catp != safe_baseline else None,
+                slot_ms=int(slot_ms or 0),
+                reserve_ms=reserve_ms,
+                lang=lang,
+            )
+            catp_meta = catp.to_dict()
+            if catp.text and catp.text != current:
+                if catp.rollback_due_to_length:
+                    reasons.append("catp_rollback_length")
+                reasons.append(f"catp_{catp.selected_variant}")
+                reasons.extend([r for r in catp.reasons if r.startswith("catp_")])
+                current = catp.text
+                fix_count += 1
+            elif catp.selected_variant:
+                reasons.append(f"catp_{catp.selected_variant}")
+                reasons.extend(list(catp.reasons[:4]))
+
+            if catp.handoff_to_dsal and int(slot_ms or 0) > 0:
+                compressed, ok = try_dsal_compress(
+                    current,
+                    slot_ms=int(slot_ms),
+                    lang=lang,
+                    source_hint=original,
+                )
+                if ok and compressed != current:
+                    current = compressed
+                    reasons.append("catp_dsal_handoff")
+                    catp_meta["dsal_handoff_applied"] = True
+                    fix_count += 1
+                else:
+                    catp_meta["dsal_handoff_applied"] = False
+                    warnings.append("catp_handoff_to_dsal")
+        except Exception as exc:
+            logger.debug("CATP skipped: %s", exc)
+            warnings.append(f"catp_error:{exc}")
+
     if current == raw and not reasons:
         reasons = ["no_changes"]
 
@@ -206,6 +337,7 @@ def polish_segment_v2(
         "warnings": warnings,
         "retried": retried,
         "needs_retry": report.needs_retry,
+        "catp": catp_meta,
     }
 
 
@@ -222,4 +354,5 @@ def _result(text: str, reasons: list[str], *, meta_only: bool = False) -> dict[s
         "warnings": [],
         "retried": False,
         "needs_retry": False,
+        "catp": {},
     }

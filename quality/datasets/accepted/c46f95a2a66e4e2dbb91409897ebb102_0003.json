@@ -1,0 +1,189 @@
+{
+  "index": 3,
+  "status": "PASS",
+  "overall_confidence": 0.985,
+  "explanation": "PASS",
+  "retry_strategy": "none",
+  "original": "Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera. So since his near-death experience, George Jr. had realized that really has dad had been kind of right that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+  "translation": "Два роки джордж-молодший. який за цією точкою був повністю відновлений від своїх ушкоджень, стояв на фінішній прямій на гончарному треку і підняв його камеру. з того часу, як його найближчий досвід, джордж єр. зрозумів, що його батько був певною мірою правий був своєрідним правом, що в деяких випадках він був його потенціалом. так джордж-молодший. вирішив, що він дійсно більше не хоче займатися автогонками.",
+  "allowed_for_tts": true,
+  "reports": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 1.29,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "entities_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 8.29,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 0.52,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "WARN",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "broken_sentence_boundary",
+          "severity": "major",
+          "detail": "lowercase after period"
+        }
+      ],
+      "explanation": "broken_sentence_boundary",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 0.39,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.94
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 0.6,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.94
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "WARN",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "too_long_for_slot",
+          "severity": "major",
+          "detail": "est_ms=34166 slot_ms=18711 ratio=1.83"
+        }
+      ],
+      "explanation": "too_long_for_slot",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3,
+        "slot_ms": 18711
+      },
+      "review_time_ms": 0.08,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.97
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 0.7,
+        "overall_confidence": 0.97
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 0.08,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ]
+}

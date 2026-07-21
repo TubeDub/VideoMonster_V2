@@ -29,11 +29,28 @@ def translation_confidence(
 ) -> float:
     if not success or not str(translated or "").strip():
         return 0.0
+    # Severe coverage collapse must NEVER look like a confident success
+    # (Argos often returns a short fragment of a long paragraph).
+    try:
+        from engines.mt.sentence_split import is_severe_mt_collapse
+
+        if is_severe_mt_collapse(source, translated):
+            return 0.05
+    except Exception:
+        pass
+    src_w = len(str(source or "").split())
+    tr_w = len(str(translated or "").split())
     base = 0.85 if translator_name == "cloud" else 0.75
     if translator_name == "deep-translator":
         base = 0.72
     if str(translated).strip() == str(source or "").strip():
         base *= 0.5
+    if src_w >= 15 and tr_w > 0:
+        ratio = tr_w / max(src_w, 1)
+        if ratio < 0.45:
+            base *= 0.35
+        elif ratio < 0.60:
+            base *= 0.7
     attempt_penalty = max(0.0, (attempt - 1) * 0.05)
     return round(max(0.0, min(1.0, base - attempt_penalty)), 4)
 

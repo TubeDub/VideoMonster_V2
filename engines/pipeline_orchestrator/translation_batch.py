@@ -141,6 +141,25 @@ def split_batch_translation(
             out[idx] = part
         return out
 
+    # Source-aware debleed for 2-slot incomplete cuts (one UK blob → two EN).
+    if len(batch.segment_indices) == 2:
+        try:
+            from engines.translation_naturalizer import debleed_adjacent_batch_copies
+
+            split_pair = debleed_adjacent_batch_copies(
+                list(batch.source_texts),
+                [combined, combined],
+            )
+            if (
+                split_pair[0] != combined
+                or split_pair[1] != combined
+            ) and (split_pair[0] or split_pair[1]):
+                for idx, part in zip(batch.segment_indices, split_pair):
+                    out[idx] = part
+                return out
+        except Exception:
+            pass
+
     # Proportional split by source char length when delimiter merge failed.
     src_lens = [max(1, len(t)) for t in batch.source_texts]
     total = sum(src_lens)
@@ -156,6 +175,12 @@ def split_batch_translation(
         chunk = " ".join(words[pos : pos + n_words]).strip()
         pos += n_words
         out[idx] = chunk
+
+    # Ensure last segment gets any leftover words.
+    if batch.segment_indices and pos < len(words):
+        last = batch.segment_indices[-1]
+        tail = " ".join(words[pos:]).strip()
+        out[last] = (out.get(last, "") + " " + tail).strip()
 
     if fallback_per_segment:
         for j, idx in enumerate(batch.segment_indices):

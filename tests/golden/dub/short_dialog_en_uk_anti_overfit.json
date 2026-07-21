@@ -1,0 +1,26 @@
+{
+  "id": "short_dialog_en_uk_anti_overfit",
+  "source_lang": "en",
+  "target_lang": "uk",
+  "notes": "Anti-overfit suite — short everyday dialog (not George Lucas). Hotfixes must not regress this.",
+  "segments": [
+    {
+      "index": 1,
+      "en": "Good morning. How are you today?",
+      "uk_must_not": ["dreading", "Жр", "Джер"],
+      "uk_should_contain_any": ["ранок", "добр", "як"]
+    },
+    {
+      "index": 2,
+      "en": "I am fine, thank you. Where is the train station?",
+      "uk_must_not": ["dreading", "Жр"],
+      "uk_should_contain_any": ["вокзал", "станці", "дякую", "добре"]
+    },
+    {
+      "index": 3,
+      "en": "Turn left at the next intersection and you will see it.",
+      "uk_must_not": ["Жр", "Джер", "Єр"],
+      "uk_should_contain_any": ["ліворуч", "перехрест", "побач"]
+    }
+  ]
+}

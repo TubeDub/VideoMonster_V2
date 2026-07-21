@@ -42,17 +42,27 @@
             <option value="audiobook" data-i18n="dub.mode_audiobook">📖 Аудиокнига</option>
         </select>
         <select id="segmentation-mode" class="select-control">
-            <option value="timing" selected>timing</option>
+            <option value="adaptive" selected>adaptive</option>
+            <option value="timing">timing</option>
             <option value="sentence">sentence</option>
         </select>
+        <!-- Adaptive Segmentation 2.0 settings (TZ §13) -->
+        <input type="checkbox" id="adaptive-seg-enabled" checked />
+        <input type="number" id="adaptive-seg-min-s" min="1" max="30" step="0.5" value="4.5" />
+        <input type="number" id="adaptive-seg-max-s" min="5" max="60" step="0.5" value="16" />
+        <input type="number" id="adaptive-seg-preferred-s" min="2" max="40" step="0.5" value="9" />
+        <input type="range" id="adaptive-seg-aggressiveness" min="0" max="100" step="5" value="65" />
+        <input type="checkbox" id="adaptive-seg-meaning" checked />
+        <input type="checkbox" id="adaptive-seg-tts-forecast" checked />
         <div id="dub-style-list"></div>
         <input type="checkbox" id="dub-styles-local-only" checked />
-        <input type="range" id="original-volume" min="0" max="100" value="0" />
-        <span id="original-volume-label">0%</span>
+        <input type="range" id="original-volume" min="0" max="100" value="20" step="10" />
+        <span id="original-volume-label">20%</span>
         <div id="volume-presets" class="volume-presets">
             <button type="button" class="vol-preset" data-pct="0"></button>
+            <button type="button" class="vol-preset" data-pct="10"></button>
             <button type="button" class="vol-preset" data-pct="20"></button>
-            <button type="button" class="vol-preset" data-pct="38"></button>
+            <button type="button" class="vol-preset" data-pct="30"></button>
             <button type="button" class="vol-preset" data-pct="40"></button>
             <button type="button" class="vol-preset" data-pct="50"></button>
             <button type="button" class="vol-preset" data-pct="70"></button>
@@ -132,6 +142,23 @@
                 <h2 class="wizard-step-title" data-i18n="dub.wizard_style_title">Стиль дубляжа</h2>
                 <p class="wizard-step-sub" data-i18n="dub.wizard_style_sub">Как должна звучать озвучка?</p>
                 <div id="wizard-style-grid" class="wizard-tile-grid wizard-tile-grid--style"></div>
+                <div class="wizard-original-mix" id="wizard-original-mix">
+                    <label class="wizard-original-mix-label" for="wizard-original-volume"
+                        data-i18n="dub.review_original_voice">Оригинал на фоне</label>
+                    <div class="wizard-original-mix-row">
+                        <input type="range" id="wizard-original-volume" min="0" max="100" value="20" step="5" />
+                        <span id="wizard-original-volume-label">20%</span>
+                    </div>
+                    <div class="wizard-vol-presets">
+                        <button type="button" class="btn btn-secondary btn-sm wiz-vol-preset" data-pct="0">0</button>
+                        <button type="button" class="btn btn-secondary btn-sm wiz-vol-preset" data-pct="10">10</button>
+                        <button type="button" class="btn btn-secondary btn-sm wiz-vol-preset" data-pct="20">20</button>
+                        <button type="button" class="btn btn-secondary btn-sm wiz-vol-preset" data-pct="30">30</button>
+                        <button type="button" class="btn btn-secondary btn-sm wiz-vol-preset" data-pct="50">50</button>
+                        <button type="button" class="btn btn-secondary btn-sm wiz-vol-preset" data-pct="70">70</button>
+                        <button type="button" class="btn btn-secondary btn-sm wiz-vol-preset" data-pct="100">100</button>
+                    </div>
+                </div>
             </section>
 
             <!-- Шаг 6: Запуск -->
@@ -139,6 +166,22 @@
                 <h2 class="wizard-step-title" data-i18n="dub.wizard_ready_title">Всё готово</h2>
                 <p class="wizard-step-sub" data-i18n="dub.wizard_ready_sub">Проверьте параметры и запустите дубляж</p>
                 <div class="wizard-summary" id="wizard-summary"></div>
+                <details class="wizard-adaptive-seg" id="wizard-adaptive-seg">
+                    <summary data-i18n="dub.adaptive_seg_title">Adaptive Segmentation</summary>
+                    <div class="wizard-adaptive-seg-grid">
+                        <label><input type="checkbox" id="adaptive-seg-enabled-ui" checked /> <span data-i18n="dub.adaptive_seg_use">Использовать адаптивную сегментацию</span></label>
+                        <label><span data-i18n="dub.adaptive_seg_min">Мин. длина (с)</span>
+                            <input type="number" id="adaptive-seg-min-s-ui" min="1" max="30" step="0.5" value="4.5" /></label>
+                        <label><span data-i18n="dub.adaptive_seg_max">Макс. длина (с)</span>
+                            <input type="number" id="adaptive-seg-max-s-ui" min="5" max="60" step="0.5" value="16" /></label>
+                        <label><span data-i18n="dub.adaptive_seg_pref">Предпочтительная (с)</span>
+                            <input type="number" id="adaptive-seg-preferred-s-ui" min="2" max="40" step="0.5" value="9" /></label>
+                        <label><span data-i18n="dub.adaptive_seg_agg">Агрессивность</span>
+                            <input type="range" id="adaptive-seg-aggressiveness-ui" min="0" max="100" step="5" value="65" /></label>
+                        <label><input type="checkbox" id="adaptive-seg-meaning-ui" checked /> <span data-i18n="dub.adaptive_seg_meaning">Учитывать смысл</span></label>
+                        <label><input type="checkbox" id="adaptive-seg-tts-forecast-ui" checked /> <span data-i18n="dub.adaptive_seg_forecast">Учитывать прогноз TTS</span></label>
+                    </div>
+                </details>
                 <div class="wizard-start-row">
                     <button type="button" class="btn btn-primary wizard-start-btn" id="btn-start-dub" disabled
                         data-i18n="dub.wizard_start">НАЧАТЬ ДУБЛЯЖ</button>
@@ -411,6 +454,20 @@
                         title="A">A</button>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="setReviewFontSize(20)"
                         title="A+">A+</button>
+                </div>
+                <div class="tr-original-mix" title="Original Voice">
+                    <span class="char-count" data-i18n="dub.review_original_voice">Оригинал на фоне</span>
+                    <input type="range" id="tr-original-volume" min="0" max="100" value="20" step="5" />
+                    <span id="tr-original-volume-label">20%</span>
+                    <div class="tr-vol-presets">
+                        <button type="button" class="btn btn-secondary btn-sm tr-vol-preset" data-pct="0">0</button>
+                        <button type="button" class="btn btn-secondary btn-sm tr-vol-preset" data-pct="10">10</button>
+                        <button type="button" class="btn btn-secondary btn-sm tr-vol-preset" data-pct="20">20</button>
+                        <button type="button" class="btn btn-secondary btn-sm tr-vol-preset" data-pct="30">30</button>
+                        <button type="button" class="btn btn-secondary btn-sm tr-vol-preset" data-pct="50">50</button>
+                        <button type="button" class="btn btn-secondary btn-sm tr-vol-preset" data-pct="70">70</button>
+                        <button type="button" class="btn btn-secondary btn-sm tr-vol-preset" data-pct="100">100</button>
+                    </div>
                 </div>
                 <input type="search" id="tr-search" placeholder="Поиск…" oninput="filterReviewSegments(this.value)" />
                 <input type="text" id="tr-replace-from" placeholder="Заменить…" style="max-width:120px;" />

@@ -1,0 +1,363 @@
+{
+  "ok": false,
+  "issue_count": 43,
+  "issues": [
+    {
+      "index": 0,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 1,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 1,
+      "code": "duration_overflow",
+      "tts_ms": 6527,
+      "slot_ms": 6320,
+      "window_ms": 6320,
+      "overflow_ms": 207,
+      "index": 1,
+      "severity": "warning"
+    },
+    {
+      "idx": 1,
+      "code": "overlap_with_next",
+      "overlap_ms": 207,
+      "next_index": 2,
+      "tts_ms": 6527,
+      "window_ms": 6320,
+      "index": 1,
+      "severity": "warning"
+    },
+    {
+      "index": 2,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 3,
+      "code": "meaning_preserved_token",
+      "severity": "error",
+      "hints": [
+        "Fiat"
+      ]
+    },
+    {
+      "idx": 3,
+      "code": "duration_overflow",
+      "tts_ms": 9063,
+      "slot_ms": 8880,
+      "window_ms": 8880,
+      "overflow_ms": 183,
+      "index": 3,
+      "severity": "warning"
+    },
+    {
+      "idx": 3,
+      "code": "overlap_with_next",
+      "overlap_ms": 183,
+      "next_index": 4,
+      "tts_ms": 9063,
+      "window_ms": 8880,
+      "index": 3,
+      "severity": "warning"
+    },
+    {
+      "index": 4,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 5,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 6,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 6,
+      "code": "duration_overflow",
+      "tts_ms": 6932,
+      "slot_ms": 5600,
+      "window_ms": 5600,
+      "overflow_ms": 1332,
+      "index": 6,
+      "severity": "warning"
+    },
+    {
+      "idx": 6,
+      "code": "overlap_with_next",
+      "overlap_ms": 1332,
+      "next_index": 7,
+      "tts_ms": 6932,
+      "window_ms": 5600,
+      "index": 6,
+      "severity": "warning"
+    },
+    {
+      "index": 7,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 7,
+      "code": "duration_overflow",
+      "tts_ms": 11447,
+      "slot_ms": 10800,
+      "window_ms": 10800,
+      "overflow_ms": 647,
+      "index": 7,
+      "severity": "warning"
+    },
+    {
+      "idx": 7,
+      "code": "overlap_with_next",
+      "overlap_ms": 647,
+      "next_index": 8,
+      "tts_ms": 11447,
+      "window_ms": 10800,
+      "index": 7,
+      "severity": "warning"
+    },
+    {
+      "index": 8,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 9,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 10,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 10,
+      "code": "duration_overflow",
+      "tts_ms": 14719,
+      "slot_ms": 12658,
+      "window_ms": 12658,
+      "overflow_ms": 2061,
+      "index": 10,
+      "severity": "warning"
+    },
+    {
+      "idx": 10,
+      "code": "overlap_with_next",
+      "overlap_ms": 2061,
+      "next_index": 11,
+      "tts_ms": 14719,
+      "window_ms": 12658,
+      "index": 10,
+      "severity": "warning"
+    },
+    {
+      "index": 11,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 12,
+      "code": "meaning_preserved_token",
+      "severity": "error",
+      "hints": [
+        "University",
+        "Southern",
+        "California"
+      ]
+    },
+    {
+      "index": 12,
+      "code": "preserved_token",
+      "tokens": "****** [REDACTED BY OPENDDF] ******",
+      "stage": "final",
+      "severity": "warning"
+    },
+    {
+      "idx": 12,
+      "code": "duration_overflow",
+      "tts_ms": 14541,
+      "slot_ms": 10080,
+      "window_ms": 10080,
+      "overflow_ms": 4461,
+      "index": 12,
+      "severity": "warning"
+    },
+    {
+      "idx": 12,
+      "code": "overlap_with_next",
+      "overlap_ms": 4461,
+      "next_index": 13,
+      "tts_ms": 14541,
+      "window_ms": 10080,
+      "index": 12,
+      "severity": "warning"
+    },
+    {
+      "index": 13,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 13,
+      "code": "duration_overflow",
+      "tts_ms": 5571,
+      "slot_ms": 4320,
+      "window_ms": 4320,
+      "overflow_ms": 1251,
+      "index": 13,
+      "severity": "warning"
+    },
+    {
+      "idx": 13,
+      "code": "overlap_with_next",
+      "overlap_ms": 1251,
+      "next_index": 14,
+      "tts_ms": 5571,
+      "window_ms": 4320,
+      "index": 13,
+      "severity": "warning"
+    },
+    {
+      "index": 14,
+      "code": "meaning_preserved_token",
+      "severity": "error",
+      "hints": [
+        "Haskell",
+        "Wexler"
+      ]
+    },
+    {
+      "index": 14,
+      "code": "preserved_token",
+      "tokens": "****** [REDACTED BY OPENDDF] ******",
+      "stage": "final",
+      "severity": "warning"
+    },
+    {
+      "idx": 14,
+      "code": "duration_overflow",
+      "tts_ms": 11771,
+      "slot_ms": 10960,
+      "window_ms": 10960,
+      "overflow_ms": 811,
+      "index": 14,
+      "severity": "warning"
+    },
+    {
+      "idx": 14,
+      "code": "overlap_with_next",
+      "overlap_ms": 811,
+      "next_index": 15,
+      "tts_ms": 11771,
+      "window_ms": 10960,
+      "index": 14,
+      "severity": "warning"
+    },
+    {
+      "index": 15,
+      "code": "meaning_preserved_token",
+      "severity": "error",
+      "hints": [
+        "USC"
+      ]
+    },
+    {
+      "idx": 15,
+      "code": "duration_overflow",
+      "tts_ms": 17313,
+      "slot_ms": 10880,
+      "window_ms": 10880,
+      "overflow_ms": 6433,
+      "index": 15,
+      "severity": "warning"
+    },
+    {
+      "idx": 15,
+      "code": "overlap_with_next",
+      "overlap_ms": 6433,
+      "next_index": 16,
+      "tts_ms": 17313,
+      "window_ms": 10880,
+      "index": 15,
+      "severity": "warning"
+    },
+    {
+      "index": 16,
+      "code": "meaning_preserved_token",
+      "severity": "error",
+      "hints": [
+        "USC"
+      ]
+    },
+    {
+      "index": 16,
+      "code": "preserved_token",
+      "tokens": "****** [REDACTED BY OPENDDF] ******",
+      "stage": "final",
+      "severity": "warning"
+    },
+    {
+      "idx": 16,
+      "code": "duration_overflow",
+      "tts_ms": 14861,
+      "slot_ms": 10650,
+      "window_ms": 10650,
+      "overflow_ms": 4211,
+      "index": 16,
+      "severity": "warning"
+    },
+    {
+      "idx": 16,
+      "code": "overlap_with_next",
+      "overlap_ms": 4211,
+      "next_index": 17,
+      "tts_ms": 14861,
+      "window_ms": 10650,
+      "index": 16,
+      "severity": "warning"
+    },
+    {
+      "index": 17,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 18,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 19,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    }
+  ],
+  "overlap_count": 0,
+  "split_sentence_count": 0,
+  "long_pause_count": 0
+}

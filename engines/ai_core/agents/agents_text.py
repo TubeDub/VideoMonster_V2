@@ -106,7 +106,11 @@ class TranslationAgent(Agent):
             f"lengthen, restructure or add anything. Return ONLY the translation.\n\n"
             f"{ctx.source_text}"
         )
-        out = llm_gateway.chat(prompt, max_tokens=256, temperature=0.0)
+        out = llm_gateway.chat(
+            prompt,
+            max_tokens=max(512, len(str(ctx.source_text or "").split()) * 4),
+            temperature=0.0,
+        )
         text = str(out or "").strip().strip('"').strip()
         if not text:
             return AgentResult(
@@ -740,7 +744,11 @@ class GrammarAgent(Agent):
             f"Do NOT change the meaning, do not add or remove information, keep all "
             f"names and numbers. Return ONLY the corrected line.\n\n{text}"
         )
-        out = llm_gateway.chat(prompt, max_tokens=256, temperature=0.1)
+        out = llm_gateway.chat(
+            prompt,
+            max_tokens=max(512, len(str(text or "").split()) * 4),
+            temperature=0.1,
+        )
         return str(out or "").strip().strip('"').strip(), llm_gateway.active_model()
 
     @staticmethod

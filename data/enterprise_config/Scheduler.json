@@ -1,0 +1,15 @@
+{
+  "domain": "Scheduler",
+  "configuration_uuid": "b4f0a320-53eb-4cc2-b0a4-a7b8d2a3f585",
+  "version": "1.0.0",
+  "created": 1783881030.1184006,
+  "updated": 1783881030.118401,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "owner": "scheduler",
+    "api": "update_audio_time"
+  }
+}

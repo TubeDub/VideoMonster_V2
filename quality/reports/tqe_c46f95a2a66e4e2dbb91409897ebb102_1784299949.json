@@ -1,0 +1,2121 @@
+{
+  "task_id": "c46f95a2a66e4e2dbb91409897ebb102",
+  "passed": 8,
+  "rejected": 3,
+  "overall_confidence": 0.9847,
+  "gate_passed": false,
+  "blocked_indices": [
+    0,
+    1,
+    7
+  ],
+  "analytics": {
+    "segments_total": 11,
+    "passed": 8,
+    "rejected": 3,
+    "retry_count": 3,
+    "retry_average": 0.273,
+    "average_review_time_ms": 15.78,
+    "average_confidence": 0.9847,
+    "entity_loss": 6,
+    "meaning_loss": 1,
+    "grammar_errors": 0,
+    "timing_errors": 10,
+    "narrative_errors": 0,
+    "llm_usage": 0,
+    "retry_success_rate": 0.0,
+    "fallback_usage": 0,
+    "gate_passed": false
+  },
+  "explanations": [
+    "Segment #1\nStatus: REJECT\nAllowed for TTS: NO\nOverall Confidence: 0.97\nMissing Entity: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}, George\nRetry: Entity Correction Strategy\nDetail: EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:George; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: George",
+    "Segment #2\nStatus: REJECT\nAllowed for TTS: NO\nOverall Confidence: 0.95\nMissing Entity: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'Fiat', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}, Fiat\nRetry: Completion Strategy\nDetail: FastQAReviewer: word_loop; FastQAReviewer/word_loop: він; EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Fiat', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:Fiat; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'Fiat', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: Fiat",
+    "Segment #3\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.98",
+    "Segment #4\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.98",
+    "Segment #5\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #6\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #7\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #8\nStatus: REJECT\nAllowed for TTS: NO\nOverall Confidence: 0.98\nMissing Entity: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}, USC\nRetry: Entity Correction Strategy\nDetail: EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:USC; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: USC",
+    "Segment #9\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #10\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 1.00",
+    "Segment #11\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99"
+  ],
+  "decisions": [
+    {
+      "index": 0,
+      "status": "REJECT",
+      "overall_confidence": 0.9683,
+      "explanation": "EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:George; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: George",
+      "retry_strategy": "Entity Correction Strategy",
+      "original": "An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner.",
+      "translation": "18-річному хлопчику ім. Георга Жр. проїжджав через своє рідне місто дорогою додому.",
+      "allowed_for_tts": false,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 31.49,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_missing",
+              "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+              "severity": "critical"
+            },
+            {
+              "code": "preserved_token",
+              "token": "George",
+              "severity": "major"
+            }
+          ],
+          "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:George",
+          "retry_strategy": "Entity Correction Strategy",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 17.12,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.9
+          ],
+          "confidence": {
+            "entity_preservation": 0.5,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.9
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 3.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "broken_sentence_boundary",
+              "severity": "major",
+              "detail": "lowercase after period"
+            }
+          ],
+          "explanation": "broken_sentence_boundary",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 3.13,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.94
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 0.6,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.94
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=6916 slot_ms=3241 ratio=2.13"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0,
+            "slot_ms": 3241
+          },
+          "review_time_ms": 0.1,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 0.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "status": "REJECT",
+      "overall_confidence": 0.9483,
+      "explanation": "FastQAReviewer: word_loop; FastQAReviewer/word_loop: він; EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Fiat', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:Fiat; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'Fiat', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: Fiat",
+      "retry_strategy": "Completion Strategy",
+      "original": "But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars. And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat, he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black.",
+      "translation": "Але, як він їхав, Джордж-молодший не може допомогти, але відчувати себе, як він був дійсно dreading насправді отримати там. Так Джордж Джр. був дуже розумним малюком, але він також захопився дуже легко і через це, він дійсно не мав нічого, що серйозно, окрім автомобілів. І в той момент його батько фактично купив його невеликою італійською машиною, яка називається Фіат, але батько, незважаючи на те, що той, хто буквально дав йому Фіат, він просто не отримав сина обсесії з автомобілями, Чому ти не можеш прийняти це фокус і застосувати його на інші речі, тому ми отримаємо вашу реальну роботу. І так в основному кожна вечеря в ці дні, якщо він прийшов цей величезний аргумент між батьком і сином. І він під'їхав до перехрестя, яке було прямо біля його будинку, і він почав повертати, коли почув дуже гучний скрип, а потім все потемніло.",
+      "allowed_for_tts": false,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "REJECT",
+          "metrics": {
+            "error_count": 1
+          },
+          "errors": [
+            {
+              "code": "word_loop",
+              "token": "він",
+              "severity": "critical"
+            }
+          ],
+          "explanation": "word_loop",
+          "retry_strategy": "Completion Strategy",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 1.62,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.88
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 0.2,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.88
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_missing",
+              "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Fiat', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+              "severity": "critical"
+            },
+            {
+              "code": "preserved_token",
+              "token": "Fiat",
+              "severity": "critical"
+            }
+          ],
+          "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Fiat', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:Fiat",
+          "retry_strategy": "Entity Correction Strategy",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 20.01,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.9
+          ],
+          "confidence": {
+            "entity_preservation": 0.5,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.9
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 1.37,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "broken_sentence_boundary",
+              "severity": "major",
+              "detail": "lowercase after period"
+            }
+          ],
+          "explanation": "broken_sentence_boundary",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 0.49,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.94
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 0.6,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.94
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=69916 slot_ms=44069 ratio=1.59"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 1,
+            "slot_ms": 44069
+          },
+          "review_time_ms": 0.09,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 0.23,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "status": "PASS",
+      "overall_confidence": 0.9767,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital. So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard that George Jr. was ejected from the car but he had survived.",
+      "translation": "Через два тижні Джордж-молодший прокладався в стаціонарному комплексі в місцевій лікарні. Так як два тижні раніше, коли Джордж зробив це, а потім щось сталося, добре що це ще один автомобіль на великій швидкості промчала дорогою і розім'ятити в машину Джорджа так важко, що Джордж Джр. був виведений з автомобіля, але він був пережили.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.94,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 6.86,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "event_missing",
+              "detail": "\\bcrashed?\\b|\\bsmashed?\\b|\\bcollision\\b",
+              "severity": "major"
+            }
+          ],
+          "explanation": "event_missing",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.42,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 0.8,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "broken_sentence_boundary",
+              "severity": "major",
+              "detail": "lowercase after period"
+            }
+          ],
+          "explanation": "broken_sentence_boundary",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.24,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.94
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 0.6,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.94
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=27916 slot_ms=17205 ratio=1.62"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2,
+            "slot_ms": 17205
+          },
+          "review_time_ms": 0.07,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.07,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "status": "PASS",
+      "overall_confidence": 0.985,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera. So since his near-death experience, George Jr. had realized that really has dad had been kind of right that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+      "translation": "Два роки джордж-молодший. який за цією точкою був повністю відновлений від своїх ушкоджень, стояв на фінішній прямій на гончарному треку і підняв його камеру. з того часу, як його найближчий досвід, джордж єр. зрозумів, що його батько був певною мірою правий був своєрідним правом, що в деяких випадках він був його потенціалом. так джордж-молодший. вирішив, що він дійсно більше не хоче займатися автогонками.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 1.29,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 8.29,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 0.52,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "broken_sentence_boundary",
+              "severity": "major",
+              "detail": "lowercase after period"
+            }
+          ],
+          "explanation": "broken_sentence_boundary",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 0.39,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.94
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 0.6,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.94
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=34166 slot_ms=18711 ratio=1.83"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3,
+            "slot_ms": 18711
+          },
+          "review_time_ms": 0.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 0.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "status": "PASS",
+      "overall_confidence": 0.995,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "Instead, he had picked up this camera and really gotten back into his old hobby of photography.",
+      "translation": "Замість цього він узяв камеру і дійсно знову захопився своїм колишнім хобі— фотографією.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.45,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 6.19,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.43,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.24,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=7333 slot_ms=3996 ratio=1.84"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4,
+            "slot_ms": 3996
+          },
+          "review_time_ms": 0.18,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.1,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "status": "PASS",
+      "overall_confidence": 0.995,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "In fact, George Jr. had applied to the prestigious cinematography program at the University of Southern California, but after sending off his application, he was pretty sure he would not get in.",
+      "translation": "Насправді, По суті, Джордж-молодший звернувся до престижної програми кінематографітеки з Університету Південної Каліфорнії, але після відправки його заявки він був досить впевненим, що він не отримає.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.76,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 10.1,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.35,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.19,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=16666 slot_ms=9261 ratio=1.80"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5,
+            "slot_ms": 9261
+          },
+          "review_time_ms": 0.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "status": "PASS",
+      "overall_confidence": 0.995,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "Now, George Jr. walked over to the podium to take some photos of the winning drive. But as he walked over there, the smithelaged man came up beside him and just asked George Jr. about his photography and then at some point the man actually formally introduced himself as Haskell Wexler. And he said that he was actually a cinematographer in Hollywood. And George Jr. told Haskell about how he had recently applied to USC to try to get into their cinematography program. And when Haskell heard this, he said, George, I know people at USC.",
+      "translation": "Тепер Джордж-молодший пішов над подіумом, щоб взяти деякі фотографії виграшного приводу. Але, як він прогулявся там, чоловік середнього віку прийшов назустріч йому і просто попросив Джорджа-молодшого про свою фотографію, а потім в деякій точці людина фактично формально представила себе як Хаскелл Векслер. І сказав він, що він був кінооператором в Голлівуді. Про те, як він нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. А коли Хаскелл чув це, він сказав, Джордж, я знаю людей до Університету Південної Каліфорнії.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 1.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 15.33,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.65,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.39,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=48333 slot_ms=25015 ratio=1.93"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6,
+            "slot_ms": 25015
+          },
+          "review_time_ms": 0.13,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.16,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "status": "REJECT",
+      "overall_confidence": 0.9783,
+      "explanation": "EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:USC; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: USC",
+      "retry_strategy": "Entity Correction Strategy",
+      "original": "Let me make some calls. And sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school. But this moment in George Jr's life did not just alter George's life forever.",
+      "translation": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довгати після цього долі наради, Джордж-молодший отримає прийомний лист з кіношколи США. Але цей момент у житті Джорджа-молодшого не просто змінив життя Джорджа назавжди.",
+      "allowed_for_tts": false,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.57,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_missing",
+              "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+              "severity": "critical"
+            },
+            {
+              "code": "preserved_token",
+              "token": "USC",
+              "severity": "critical"
+            }
+          ],
+          "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:USC",
+          "retry_strategy": "Entity Correction Strategy",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 9.31,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.9
+          ],
+          "confidence": {
+            "entity_preservation": 0.5,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.9
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.38,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.2,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=18666 slot_ms=11337 ratio=1.65"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7,
+            "slot_ms": 11337
+          },
+          "review_time_ms": 0.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "status": "PASS",
+      "overall_confidence": 0.995,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "It also would go on to completely alter cinema in general forever. Because about 13 years later, George Jr. would go on to create one of the most groundbreaking films in history.",
+      "translation": "Це також повністю змінити кіно. А через 13 років, Джордж-молодший відправиться на створення одного з найземніших фільмів в історії.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.74,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 11.01,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.47,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.21,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=10916 slot_ms=7224 ratio=1.51"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8,
+            "slot_ms": 7224
+          },
+          "review_time_ms": 0.11,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.09,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "status": "PASS",
+      "overall_confidence": 1.0,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "His movie would go on to become part of the most successful movie franchise of all time.",
+      "translation": "Його фільм стане частиною найбільш успішної кінофраншизи всього часу.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.5,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 5.93,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.4,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.18,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "timing_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9,
+            "slot_ms": 4193
+          },
+          "review_time_ms": 0.07,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.05,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "status": "PASS",
+      "overall_confidence": 0.995,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "George Jr. is better known today as George Lucas and his film franchise will star wars.",
+      "translation": "Георгій Жр, відомий сьогодні, як Джордж Лукас і його кінофраншиза стане «Зоряними війнами».",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.52,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "entities_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 7.23,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.21,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.14,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=7583 slot_ms=4582 ratio=1.65"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10,
+            "slot_ms": 4582
+          },
+          "review_time_ms": 0.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    }
+  ]
+}

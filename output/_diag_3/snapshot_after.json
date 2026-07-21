@@ -1,0 +1,3356 @@
+[
+  {
+    "index": 0,
+    "text": "18-річний Джордж-молодший їхав рідним містом додому на вечерю.",
+    "file": "tts_c1b00815_17ec82b28425_20260721_171145_0b15809f.mp3",
+    "start_ms": 0,
+    "end_ms": 4543,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_536d4b29059a_20260721_171109_915fb52e.wav",
+    "tts_ms": 4496,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 4543,
+      "fitted_ms": 4496,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 4496,
+      "slot_fit_key": "297793634b5fc883"
+    },
+    "actual_start_ms": 0,
+    "actual_end_ms": 4496,
+    "slot_ms": 4543,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "0",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 47,
+      "original_duration_ms": 4543,
+      "tts_duration_ms": 4496,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557328,
+        "index": 0
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557330,
+        "index": 0
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557331,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557328,
+          "index": 0
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557330,
+          "index": 0
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557331,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 1,
+    "text": "Але у той момент, коли він їхав, Джорджу-молодшому зовсім не хотілося їхати додому",
+    "file": "tts_5484d71c_9e9caaf62c7d_20260721_171205_4cc84dea.mp3",
+    "start_ms": 4960,
+    "end_ms": 10493,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_742fdadfe947_20260721_171109_82dbb20c.wav",
+    "tts_ms": 5314,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 5533,
+      "fitted_ms": 5314,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 5314,
+      "slot_fit_key": "06528c130f393dae"
+    },
+    "actual_start_ms": 4960,
+    "actual_end_ms": 10274,
+    "slot_ms": 5533,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "1",
+      "index": 1,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 219,
+      "original_duration_ms": 5533,
+      "tts_duration_ms": 5314,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557335,
+        "index": 1
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557336,
+        "index": 1
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557337,
+        "index": 1
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557335,
+          "index": 1
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557336,
+          "index": 1
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557337,
+          "index": 1
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 2,
+    "text": "Джордж-молодший був розумним хлопцем, але він також легко відволікався і через це, він майже нічого серйозно не робив, окрім автомобілів",
+    "file": "tts_a56600b3_476f506c68cb_20260721_171227_1885aa32.mp3",
+    "start_ms": 10493,
+    "end_ms": 19347,
+    "allow_atempo": true,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_204b0acda29e_20260721_171111_b87b2319.wav",
+    "tts_ms": 9182,
+    "overflow_pct": 0.7,
+    "container_status": "yellow",
+    "timing_meta": {
+      "slot_ms": 8854,
+      "slot_limit_ms": 8929,
+      "tts_ms": 9182,
+      "fitted_ms": 8992,
+      "atempo": 1.02,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 17,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 63,
+      "slot_fit_tts_ms": 9182,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 8992,
+          "atempo": 1.02
+        }
+      ],
+      "slot_fit_key": "753539bc7214c852"
+    },
+    "actual_start_ms": 10493,
+    "actual_end_ms": 19675,
+    "slot_ms": 8854,
+    "overflow_ms": 328,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "2",
+      "index": 2,
+      "overflow_ms": 328,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 328,
+      "original_duration_ms": 8854,
+      "tts_duration_ms": 9182,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 328,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557341,
+        "index": 2
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 328
+        },
+        "ts_ms": 1784646557343,
+        "index": 2
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 328,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557345,
+        "index": 2
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=328 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=328",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=328 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 328,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557341,
+          "index": 2
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 328
+          },
+          "ts_ms": 1784646557343,
+          "index": 2
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 328,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557345,
+          "index": 2
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=328 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=328",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=328 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 328,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 3,
+    "text": "І в той момент його батько купив йому італійський Фіат,",
+    "file": "tts_4252f301_a91ffa4a5359_20260721_171248_7e79132f.mp3",
+    "start_ms": 19347,
+    "end_ms": 23636,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_d3963a1f21eb_20260721_171111_37afb7cd.wav",
+    "tts_ms": 3147,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 4289,
+      "fitted_ms": 3147,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 3147,
+      "slot_fit_key": "b89d96cee58a30be"
+    },
+    "actual_start_ms": 19347,
+    "actual_end_ms": 22494,
+    "slot_ms": 4289,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1142)",
+    "adaptation_decision": {
+      "segment_id": "3",
+      "index": 3,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1142,
+      "original_duration_ms": 4289,
+      "tts_duration_ms": 3147,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557350,
+        "index": 3
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557352,
+        "index": 3
+      },
+      {
+        "stage": "final_result",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557353,
+        "index": 3
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557350,
+          "index": 3
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557352,
+          "index": 3
+        },
+        {
+          "stage": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557353,
+          "index": 3
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 4,
+    "text": "але батько його, хоч подарував йому Фіат, він не розумів потягу сина, «Чому ти не можеш зосередитися на цьому і застосувати це до інших речей, отримаєш справжню роботу».",
+    "file": "tts_a95a12f1_faf8072f470c_20260721_171305_206f20bb.mp3",
+    "start_ms": 23636,
+    "end_ms": 34841,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_4c20186ce4da_20260721_171111_2b2344d5.wav",
+    "tts_ms": 10867,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 11205,
+      "fitted_ms": 10867,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 10867,
+      "slot_fit_key": "dbf9ba587141e13d"
+    },
+    "actual_start_ms": 23636,
+    "actual_end_ms": 34503,
+    "slot_ms": 11205,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "4",
+      "index": 4,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 338,
+      "original_duration_ms": 11205,
+      "tts_duration_ms": 10867,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557358,
+        "index": 4
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557360,
+        "index": 4
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557362,
+        "index": 4
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557358,
+          "index": 4
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557360,
+          "index": 4
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557362,
+          "index": 4
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 5,
+    "text": "Тож кожна вечеря в ці дні перетворювалася на величезну сварку між батьком і сином.",
+    "file": "tts_452fda7b_494a6c1a7eaa_20260721_171326_c594988b.mp3",
+    "start_ms": 34841,
+    "end_ms": 39620,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_add6647c1e0c_20260721_171111_a6a7c0f0.wav",
+    "tts_ms": 4684,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 4779,
+      "fitted_ms": 4684,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 4684,
+      "slot_fit_key": "62829692256d4107"
+    },
+    "actual_start_ms": 34841,
+    "actual_end_ms": 39525,
+    "slot_ms": 4779,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "5",
+      "index": 5,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 95,
+      "original_duration_ms": 4779,
+      "tts_duration_ms": 4684,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557366,
+        "index": 5
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557367,
+        "index": 5
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557368,
+        "index": 5
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557366,
+          "index": 5
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557367,
+          "index": 5
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557368,
+          "index": 5
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 6,
+    "text": "І він під'їхав до перехрестя, яке було прямо біля його будинку, і він почав повертати, коли почув дуже гучний скрип, а потім все потемніло.",
+    "file": "tts_c54489cf_951ec476a244_20260721_171348_30d0610c.mp3",
+    "start_ms": 39620,
+    "end_ms": 49029,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_b0d0c5ea5104_20260721_171111_22e9d0c4.wav",
+    "tts_ms": 9260,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 9409,
+      "fitted_ms": 9260,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 9260,
+      "slot_fit_key": "d97a5d88ab1c252d"
+    },
+    "actual_start_ms": 39620,
+    "actual_end_ms": 48880,
+    "slot_ms": 9409,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "6",
+      "index": 6,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 149,
+      "original_duration_ms": 9409,
+      "tts_duration_ms": 9260,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557372,
+        "index": 6
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557374,
+        "index": 6
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557375,
+        "index": 6
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557372,
+          "index": 6
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557374,
+          "index": 6
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557375,
+          "index": 6
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 7,
+    "text": "Через два тижні Джордж-молодший лежав у реанімації місцевої лікарні",
+    "file": "tts_5248453b_b07028095efe_20260721_171409_3d5eb2bf.mp3",
+    "start_ms": 56720,
+    "end_ms": 61973,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_90c83d3bd1da_20260721_171112_0a9e1a54.wav",
+    "tts_ms": 4272,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 5253,
+      "fitted_ms": 4272,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 4272,
+      "slot_fit_key": "950574e514ae92db"
+    },
+    "actual_start_ms": 56720,
+    "actual_end_ms": 60992,
+    "slot_ms": 5253,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=981)",
+    "adaptation_decision": {
+      "segment_id": "7",
+      "index": 7,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 981,
+      "original_duration_ms": 5253,
+      "tts_duration_ms": 4272,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557380,
+        "index": 7
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557381,
+        "index": 7
+      },
+      {
+        "stage": "final_result",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557383,
+        "index": 7
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557380,
+          "index": 7
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557381,
+          "index": 7
+        },
+        {
+          "stage": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557383,
+          "index": 7
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 8,
+    "text": "Два тижні раніше, коли Джордж повертав, а потім щось відбулося, а саме — інший автомобіль на великій швидкості промчав дорогою і врізався в машину Джорджа так сильно, що Джордж-молодший вилетів з машини, але вижив",
+    "file": "tts_521d22d6_a3d68d4085a5_20260721_171432_703f9653.mp3",
+    "start_ms": 61973,
+    "end_ms": 74317,
+    "allow_atempo": true,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_f2fea67482b1_20260721_171115_71a2bffb.wav",
+    "tts_ms": 13639,
+    "overflow_pct": 4.6,
+    "container_status": "yellow",
+    "timing_meta": {
+      "slot_ms": 11944,
+      "slot_limit_ms": 12019,
+      "tts_ms": 13639,
+      "fitted_ms": 12986,
+      "atempo": 1.05,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 19,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 967,
+      "slot_fit_tts_ms": 13639,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 12986,
+          "atempo": 1.05
+        }
+      ],
+      "slot_fit_key": "313baadd1848fe81",
+      "speed_outlier": true,
+      "atempo_vs_median": 0.05
+    },
+    "actual_start_ms": 61973,
+    "actual_end_ms": 75612,
+    "slot_ms": 12344,
+    "overflow_ms": 1295,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1295)",
+    "adaptation_decision": {
+      "segment_id": "8",
+      "index": 8,
+      "overflow_ms": 1295,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1295,
+      "original_duration_ms": 12344,
+      "tts_duration_ms": 13639,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 1295,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557389,
+        "index": 8
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 1295
+        },
+        "ts_ms": 1784646557390,
+        "index": 8
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 1295,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557391,
+        "index": 8
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=1295 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=1295",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=1295 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 1295,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557389,
+          "index": 8
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 1295
+          },
+          "ts_ms": 1784646557390,
+          "index": 8
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 1295,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557391,
+          "index": 8
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=1295 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=1295",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=1295 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 1295,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 9,
+    "text": "Через два роки Джордж-молодший, який уже повністю одужав, стояв на фініші треку з камерою",
+    "file": "tts_3e51219c_b747b223fbbf_20260721_171454_0b61bf4e.mp3",
+    "start_ms": 76880,
+    "end_ms": 84219,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_82e240e01126_20260721_171115_d287dbdc.wav",
+    "tts_ms": 5956,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 7339,
+      "fitted_ms": 5956,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 5956,
+      "slot_fit_key": "2c74e81047aa4802"
+    },
+    "actual_start_ms": 76880,
+    "actual_end_ms": 82836,
+    "slot_ms": 7339,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1383)",
+    "adaptation_decision": {
+      "segment_id": "9",
+      "index": 9,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1383,
+      "original_duration_ms": 7339,
+      "tts_duration_ms": 5956,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557396,
+        "index": 9
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557397,
+        "index": 9
+      },
+      {
+        "stage": "final_result",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557399,
+        "index": 9
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557396,
+          "index": 9
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557397,
+          "index": 9
+        },
+        {
+          "stage": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557399,
+          "index": 9
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 10,
+    "text": "Після майже смертельного досвіду, Джордж-молодший зрозумів, що його батько мав рацію: місцями він марнував свій потенціал",
+    "file": "tts_b05b3d76_4dded06ea21b_20260721_171517_9ae7ba02.mp3",
+    "start_ms": 84219,
+    "end_ms": 91657,
+    "allow_atempo": true,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_1e794f0581e8_20260721_171117_21500362.wav",
+    "tts_ms": 7596,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 7438,
+      "slot_limit_ms": 7513,
+      "tts_ms": 7596,
+      "fitted_ms": 7438,
+      "atempo": 1.0191,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 15,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 7596,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 7438,
+          "atempo": 1.0191
+        }
+      ],
+      "slot_fit_key": "91a6ab8c7f66abb1"
+    },
+    "actual_start_ms": 84219,
+    "actual_end_ms": 91815,
+    "slot_ms": 7438,
+    "overflow_ms": 158,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "10",
+      "index": 10,
+      "overflow_ms": 158,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 158,
+      "original_duration_ms": 7438,
+      "tts_duration_ms": 7596,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 158,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557402,
+        "index": 10
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 158
+        },
+        "ts_ms": 1784646557404,
+        "index": 10
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 158,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557406,
+        "index": 10
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=158 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=158",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=158 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 158,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557402,
+          "index": 10
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 158
+          },
+          "ts_ms": 1784646557404,
+          "index": 10
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 158,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557406,
+          "index": 10
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=158 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=158",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=158 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 158,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 11,
+    "text": "Тож Джордж-молодший вирішив, що він не хоче займатися автогонками",
+    "file": "tts_f1d978a1_e890ec7f2912_20260721_171538_45266cab.mp3",
+    "start_ms": 91657,
+    "end_ms": 95679,
+    "allow_atempo": true,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_59eeaa59a4d2_20260721_171118_bddde69e.wav",
+    "tts_ms": 4102,
+    "overflow_pct": 0.0,
+    "container_status": "yellow",
+    "timing_meta": {
+      "slot_ms": 3670,
+      "slot_limit_ms": 3745,
+      "tts_ms": 4102,
+      "fitted_ms": 3893,
+      "atempo": 1.05,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 11,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 148,
+      "slot_fit_tts_ms": 4102,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 3893,
+          "atempo": 1.05
+        }
+      ],
+      "slot_fit_key": "256e0b5d919c6dec",
+      "speed_outlier": true,
+      "atempo_vs_median": 0.05
+    },
+    "actual_start_ms": 91657,
+    "actual_end_ms": 95759,
+    "slot_ms": 4022,
+    "overflow_ms": 80,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "11",
+      "index": 11,
+      "overflow_ms": 80,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 80,
+      "original_duration_ms": 4022,
+      "tts_duration_ms": 4102,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 80,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557410,
+        "index": 11
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 80
+        },
+        "ts_ms": 1784646557411,
+        "index": 11
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 80,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557412,
+        "index": 11
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=80 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=80",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=80 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 80,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557410,
+          "index": 11
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 80
+          },
+          "ts_ms": 1784646557411,
+          "index": 11
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 80,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557412,
+          "index": 11
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=80 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=80",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=80 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 80,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 12,
+    "text": "Замість цього він узяв камеру і захопився своїм колишнім хобі — фотографією",
+    "file": "tts_6273f4a9_ebcf1b9b7c98_20260721_171547_251837c8.mp3",
+    "start_ms": 97280,
+    "end_ms": 102283,
+    "allow_atempo": true,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_89a41a74ddd2_20260721_171119_2c313c4a.wav",
+    "tts_ms": 5131,
+    "overflow_pct": 0.0,
+    "container_status": "yellow",
+    "timing_meta": {
+      "slot_ms": 4603,
+      "slot_limit_ms": 4678,
+      "tts_ms": 5131,
+      "fitted_ms": 4887,
+      "atempo": 1.05,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 4,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 209,
+      "slot_fit_tts_ms": 5131,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 4887,
+          "atempo": 1.05
+        }
+      ],
+      "slot_fit_key": "464e59f05efe7525",
+      "speed_outlier": true,
+      "atempo_vs_median": 0.05
+    },
+    "actual_start_ms": 97280,
+    "actual_end_ms": 102411,
+    "slot_ms": 5003,
+    "overflow_ms": 128,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "12",
+      "index": 12,
+      "overflow_ms": 128,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 128,
+      "original_duration_ms": 5003,
+      "tts_duration_ms": 5131,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 128,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557417,
+        "index": 12
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 128
+        },
+        "ts_ms": 1784646557418,
+        "index": 12
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 128,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557420,
+        "index": 12
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=128 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=128",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=128 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 128,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557417,
+          "index": 12
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 128
+          },
+          "ts_ms": 1784646557418,
+          "index": 12
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 128,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557420,
+          "index": 12
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=128 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=128",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=128 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 128,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 13,
+    "text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі,",
+    "file": "tts_6c5b59a0_d7f81e9916de_20260721_171609_4a7fdda5.mp3",
+    "start_ms": 102560,
+    "end_ms": 108078,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_ccc28676dc25_20260721_171119_05643443.wav",
+    "tts_ms": 5425,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 5518,
+      "fitted_ms": 5425,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 5425,
+      "slot_fit_key": "3c7de61dbec52644"
+    },
+    "actual_start_ms": 102560,
+    "actual_end_ms": 107985,
+    "slot_ms": 5518,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "13",
+      "index": 13,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 93,
+      "original_duration_ms": 5518,
+      "tts_duration_ms": 5425,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557424,
+        "index": 13
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557426,
+        "index": 13
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557427,
+        "index": 13
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557424,
+          "index": 13
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557426,
+          "index": 13
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557427,
+          "index": 13
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 14,
+    "text": "але після того, як надіслав заявку був майже впевнений, що його не візьмуть",
+    "file": "tts_679e4590_6dc3984b9a89_20260721_171638_21d15c8e.mp3",
+    "start_ms": 108078,
+    "end_ms": 112241,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_4479a8b3c025_20260721_171120_3d37ea16.wav",
+    "tts_ms": 4991,
+    "overflow_pct": 15.8,
+    "container_status": "red",
+    "timing_meta": {
+      "slot_ms": 3743,
+      "slot_limit_ms": 3818,
+      "tts_ms": 4991,
+      "fitted_ms": 4894,
+      "atempo": 1.0,
+      "tail_trim_ms": 89,
+      "pause_compressed_ms": 7,
+      "strategy": "tail_trim+pause_compress",
+      "overflow_ms": 1076,
+      "slot_fit_tts_ms": 4991,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "b1637acf041fddf0",
+      "crossfade_ms": 12
+    },
+    "actual_start_ms": 108078,
+    "actual_end_ms": 113069,
+    "slot_ms": 4163,
+    "overflow_ms": 828,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=828)",
+    "adaptation_decision": {
+      "segment_id": "14",
+      "index": 14,
+      "overflow_ms": 828,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 828,
+      "original_duration_ms": 4163,
+      "tts_duration_ms": 4991,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 828,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557432,
+        "index": 14
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 828
+        },
+        "ts_ms": 1784646557433,
+        "index": 14
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 828,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557435,
+        "index": 14
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=828 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=828",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=828 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 828,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557432,
+          "index": 14
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 828
+          },
+          "ts_ms": 1784646557433,
+          "index": 14
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 828,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557435,
+          "index": 14
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=828 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=828",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=828 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 828,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 15,
+    "text": "Тепер Джордж-молодший пішов до подіуму сфотографувати переможця",
+    "file": "tts_26664b7f_fa1977b00d45_20260721_171659_256c8dab.mp3",
+    "start_ms": 112660,
+    "end_ms": 116729,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_1f71e09127a4_20260721_171120_87edc171.wav",
+    "tts_ms": 3854,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 4089,
+      "fitted_ms": 3854,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 3854,
+      "slot_fit_key": "768d3ee821cd6303"
+    },
+    "actual_start_ms": 112660,
+    "actual_end_ms": 116514,
+    "slot_ms": 4069,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "15",
+      "index": 15,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 215,
+      "original_duration_ms": 4069,
+      "tts_duration_ms": 3854,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557439,
+        "index": 15
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557440,
+        "index": 15
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557442,
+        "index": 15
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557439,
+          "index": 15
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557440,
+          "index": 15
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557442,
+          "index": 15
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 16,
+    "text": "Поки він ішов туди, чоловік середнього віку прийшов назустріч йому і заговорив із Джорджем-молодшим про фотографію, а потім чоловік офіційно представився як Хаскелл Векслер",
+    "file": "tts_d040097b_1b6f585e7542_20260721_171722_bce81201.mp3",
+    "start_ms": 116729,
+    "end_ms": 126681,
+    "allow_atempo": true,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_745016199b73_20260721_171122_2f1ec1a7.wav",
+    "tts_ms": 10956,
+    "overflow_pct": 4.1,
+    "container_status": "yellow",
+    "timing_meta": {
+      "slot_ms": 9952,
+      "slot_limit_ms": 10027,
+      "tts_ms": 10956,
+      "fitted_ms": 10438,
+      "atempo": 1.05,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 8,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 411,
+      "slot_fit_tts_ms": 10956,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 10438,
+          "atempo": 1.05
+        }
+      ],
+      "slot_fit_key": "b7c366b49a59b97b",
+      "speed_outlier": true,
+      "atempo_vs_median": 0.05
+    },
+    "actual_start_ms": 116729,
+    "actual_end_ms": 127685,
+    "slot_ms": 9952,
+    "overflow_ms": 1004,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1004)",
+    "adaptation_decision": {
+      "segment_id": "16",
+      "index": 16,
+      "overflow_ms": 1004,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1004,
+      "original_duration_ms": 9952,
+      "tts_duration_ms": 10956,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 1004,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557447,
+        "index": 16
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 1004
+        },
+        "ts_ms": 1784646557448,
+        "index": 16
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 1004,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557450,
+        "index": 16
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=1004 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=1004",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=1004 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 1004,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557447,
+          "index": 16
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 1004
+          },
+          "ts_ms": 1784646557448,
+          "index": 16
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 1004,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557450,
+          "index": 16
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=1004 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=1004",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=1004 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 1004,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 17,
+    "text": "Він сказав, що був кінооператором в Голлівуді. Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до Ю Ес Сі, щоб спробувати потрапити в програму кінематографії",
+    "file": "tts_028dae12_72f8368656b3_20260721_171745_949b151e.mp3",
+    "start_ms": 126681,
+    "end_ms": 135598,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_bd697d45dd07_20260721_171123_80b51d74.wav",
+    "tts_ms": 11230,
+    "overflow_pct": 24.8,
+    "container_status": "red",
+    "timing_meta": {
+      "slot_ms": 8917,
+      "slot_limit_ms": 8992,
+      "tts_ms": 11230,
+      "fitted_ms": 11204,
+      "atempo": 1.0,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 24,
+      "strategy": "pause_compress",
+      "overflow_ms": 2212,
+      "slot_fit_tts_ms": 11230,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "f6ec38ef4a0eb280",
+      "crossfade_ms": 12
+    },
+    "actual_start_ms": 126681,
+    "actual_end_ms": 137911,
+    "slot_ms": 8917,
+    "overflow_ms": 2313,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=2313)",
+    "adaptation_decision": {
+      "segment_id": "17",
+      "index": 17,
+      "overflow_ms": 2313,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 2313,
+      "original_duration_ms": 8917,
+      "tts_duration_ms": 11230,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 2313,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557455,
+        "index": 17
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 2313
+        },
+        "ts_ms": 1784646557457,
+        "index": 17
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 2313,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557459,
+        "index": 17
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=2313 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=2313",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=2313 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 2313,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557455,
+          "index": 17
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 2313
+          },
+          "ts_ms": 1784646557457,
+          "index": 17
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 2313,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557459,
+          "index": 17
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=2313 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=2313",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=2313 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 2313,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 18,
+    "text": "Хаскелл сказав: Джордж, я знаю людей в Ю Ес Сі",
+    "file": "tts_c732cb30_4c91f9937528_20260721_171807_482462c7.mp3",
+    "start_ms": 135598,
+    "end_ms": 139165,
+    "allow_atempo": true,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_b37d8765ab57_20260721_171124_ada56371.wav",
+    "tts_ms": 3647,
+    "overflow_pct": 0.0,
+    "container_status": "yellow",
+    "timing_meta": {
+      "slot_ms": 3304,
+      "slot_limit_ms": 3379,
+      "tts_ms": 3647,
+      "fitted_ms": 3477,
+      "atempo": 1.05,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 11,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 98,
+      "slot_fit_tts_ms": 3647,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 3477,
+          "atempo": 1.05
+        }
+      ],
+      "slot_fit_key": "ec280a68cb95b1f8",
+      "speed_outlier": true,
+      "atempo_vs_median": 0.05
+    },
+    "actual_start_ms": 135598,
+    "actual_end_ms": 139245,
+    "slot_ms": 3567,
+    "overflow_ms": 80,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "18",
+      "index": 18,
+      "overflow_ms": 80,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 80,
+      "original_duration_ms": 3567,
+      "tts_duration_ms": 3647,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 80,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557463,
+        "index": 18
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 80
+        },
+        "ts_ms": 1784646557464,
+        "index": 18
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 80,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557466,
+        "index": 18
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=80 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=80",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=80 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 80,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557463,
+          "index": 18
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 80
+          },
+          "ts_ms": 1784646557464,
+          "index": 18
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 80,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557466,
+          "index": 18
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=80 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=80",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=80 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 80,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 19,
+    "text": "Я зроблю кілька дзвінків. І справді, незабаром після цієї доленосної зустрічі, Джордж-молодший отримав лист про зарахування з кіношколи Ю Ес Сі.",
+    "file": "tts_dfb98106_0e52cfa67cbb_20260721_171829_43f9eb6b.mp3",
+    "start_ms": 140893,
+    "end_ms": 148315,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_c60da985b704_20260721_171125_a4cb1878.wav",
+    "tts_ms": 9332,
+    "overflow_pct": 24.7,
+    "container_status": "red",
+    "timing_meta": {
+      "slot_ms": 7422,
+      "slot_limit_ms": 7497,
+      "tts_ms": 9332,
+      "fitted_ms": 9327,
+      "atempo": 1.0,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 4,
+      "strategy": "pause_compress",
+      "overflow_ms": 1830,
+      "slot_fit_tts_ms": 9332,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "01a131988e91abd6",
+      "crossfade_ms": 12
+    },
+    "actual_start_ms": 140893,
+    "actual_end_ms": 150225,
+    "slot_ms": 7422,
+    "overflow_ms": 1910,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1910)",
+    "adaptation_decision": {
+      "segment_id": "19",
+      "index": 19,
+      "overflow_ms": 1910,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1910,
+      "original_duration_ms": 7422,
+      "tts_duration_ms": 9332,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 1910,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557470,
+        "index": 19
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 1910
+        },
+        "ts_ms": 1784646557471,
+        "index": 19
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 1910,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557473,
+        "index": 19
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=1910 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=1910",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=1910 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 1910,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557470,
+          "index": 19
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 1910
+          },
+          "ts_ms": 1784646557471,
+          "index": 19
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 1910,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557473,
+          "index": 19
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=1910 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=1910",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=1910 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 1910,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 20,
+    "text": "Але цей момент у житті Джорджа-молодшого не просто змінив його життя назавжди",
+    "file": "tts_f54f10be_02c64c3a2b68_20260721_171850_d124a471.mp3",
+    "start_ms": 148315,
+    "end_ms": 152630,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_2ccdedaf3b07_20260721_171126_ba8844d6.wav",
+    "tts_ms": 4745,
+    "overflow_pct": 8.2,
+    "container_status": "red",
+    "timing_meta": {
+      "slot_ms": 3915,
+      "slot_limit_ms": 3990,
+      "tts_ms": 4745,
+      "fitted_ms": 4745,
+      "atempo": 1.0,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 0,
+      "strategy": "none",
+      "overflow_ms": 755,
+      "slot_fit_tts_ms": 4745,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "f165ef2d9880750e"
+    },
+    "actual_start_ms": 148315,
+    "actual_end_ms": 153060,
+    "slot_ms": 4315,
+    "overflow_ms": 430,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "20",
+      "index": 20,
+      "overflow_ms": 430,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 430,
+      "original_duration_ms": 4315,
+      "tts_duration_ms": 4745,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 430,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557478,
+        "index": 20
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 430
+        },
+        "ts_ms": 1784646557479,
+        "index": 20
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 430,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557481,
+        "index": 20
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=430 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=430",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=430 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 430,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557478,
+          "index": 20
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 430
+          },
+          "ts_ms": 1784646557479,
+          "index": 20
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 430,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557481,
+          "index": 20
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=430 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=430",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=430 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 430,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 21,
+    "text": "Це також назавжди змінить кіно. А через 13 років, Джордж-молодший створить один з найбільш новаторських фільмів в історії",
+    "file": "tts_e22682e9_f65219210caf_20260721_171912_bfde52ea.mp3",
+    "start_ms": 154320,
+    "end_ms": 163296,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_a515f4d41e27_20260721_171126_b4049169.wav",
+    "tts_ms": 8019,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 8976,
+      "fitted_ms": 8019,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 8019,
+      "slot_fit_key": "23e1286e53ea240b"
+    },
+    "actual_start_ms": 154320,
+    "actual_end_ms": 162339,
+    "slot_ms": 8976,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=957)",
+    "adaptation_decision": {
+      "segment_id": "21",
+      "index": 21,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 957,
+      "original_duration_ms": 8976,
+      "tts_duration_ms": 8019,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557486,
+        "index": 21
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557487,
+        "index": 21
+      },
+      {
+        "stage": "final_result",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557488,
+        "index": 21
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557486,
+          "index": 21
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557487,
+          "index": 21
+        },
+        {
+          "stage": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557488,
+          "index": 21
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 22,
+    "text": "Його фільм стане частиною найбільш успішної кінофраншизи всіх часів",
+    "file": "tts_8bd0ac43_d684a872349d_20260721_171933_a3ae88dc.mp3",
+    "start_ms": 166824,
+    "end_ms": 171444,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_f04d050b8ce3_20260721_171126_b3828ef5.wav",
+    "tts_ms": 4404,
+    "overflow_pct": 0.0,
+    "container_status": "green",
+    "timing_meta": {
+      "slot_ms": 4620,
+      "fitted_ms": 4404,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 4404,
+      "slot_fit_key": "23909de4da2a8947"
+    },
+    "actual_start_ms": 166824,
+    "actual_end_ms": 171228,
+    "slot_ms": 4620,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": false,
+    "adaptation_decision": {
+      "segment_id": "22",
+      "index": 22,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 216,
+      "original_duration_ms": 4620,
+      "tts_duration_ms": 4404,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "need_adaptation": false,
+          "overflow_ms": 0,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557492,
+        "index": 22
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784646557493,
+        "index": 22
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "fits",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557495,
+        "index": 22
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+      "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557492,
+          "index": 22
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784646557493,
+          "index": 22
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557495,
+          "index": 22
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 0,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  },
+  {
+    "index": 23,
+    "text": "Сьогодні Джорджа-молодшого знають як Джорджа Лукаса і його кінофраншиза — це «Зоряні війни».",
+    "file": "tts_e7200e4d_b7b07302f80d_20260721_171954_185a2372.mp3",
+    "start_ms": 172841,
+    "end_ms": 177453,
+    "allow_atempo": false,
+    "place_delay_ms": 0,
+    "lead_in_ms": 0,
+    "fitted_file": "slot_fit_a5de597d_b89a13126c72_20260721_171126_fc618c47.wav",
+    "tts_ms": 5471,
+    "overflow_pct": 17.0,
+    "container_status": "red",
+    "timing_meta": {
+      "slot_ms": 4612,
+      "slot_limit_ms": 4687,
+      "tts_ms": 5471,
+      "fitted_ms": 5469,
+      "atempo": 1.0,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 2,
+      "strategy": "pause_compress",
+      "overflow_ms": 782,
+      "slot_fit_tts_ms": 5471,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "6aafb2037daebaf2"
+    },
+    "actual_start_ms": 172841,
+    "actual_end_ms": 178312,
+    "slot_ms": 4612,
+    "overflow_ms": 859,
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=859)",
+    "adaptation_decision": {
+      "segment_id": "23",
+      "index": 23,
+      "overflow_ms": 859,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 859,
+      "original_duration_ms": 4612,
+      "tts_duration_ms": 5471,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": [
+      {
+        "stage": "need_adaptation",
+        "status": "SUCCESS",
+        "reason": "",
+        "detail": {
+          "need_adaptation": true,
+          "overflow_ms": 859,
+          "underflow_ms": 0
+        },
+        "ts_ms": 1784646557500,
+        "index": 23
+      },
+      {
+        "stage": "decision_engine",
+        "status": "SKIPPED",
+        "reason": "FitsNoChange",
+        "detail": {
+          "overflow_ms": 859
+        },
+        "ts_ms": 1784646557501,
+        "index": 23
+      },
+      {
+        "stage": "final_result",
+        "status": "FAILED",
+        "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+        "detail": {
+          "overflow_ms": 859,
+          "duration_ms": 0
+        },
+        "ts_ms": 1784646557503,
+        "index": 23
+      }
+    ],
+    "decision_transitions": [
+      "need_adaptation = SUCCESS | overflow_ms=859 | underflow_ms=0",
+      "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=859",
+      "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=859 | duration_ms=0"
+    ],
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 859,
+            "underflow_ms": 0
+          },
+          "ts_ms": 1784646557500,
+          "index": 23
+        },
+        {
+          "stage": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 859
+          },
+          "ts_ms": 1784646557501,
+          "index": 23
+        },
+        {
+          "stage": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 859,
+            "duration_ms": 0
+          },
+          "ts_ms": 1784646557503,
+          "index": 23
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=859 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=859",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=859 | duration_ms=0"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "residual_overflow_ms": 859,
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "algorithm_reason": "AudioStrategyNoTextRewrite"
+  }
+]

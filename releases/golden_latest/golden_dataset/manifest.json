@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "targets": {
+    "films": 20,
+    "interviews": 100,
+    "dialogs": 1000,
+    "segments": 10000
+  },
+  "entries": []
+}

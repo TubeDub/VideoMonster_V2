@@ -1,0 +1,55 @@
+{
+  "task_id": "ed4098575cc3483686757de5a2a60106",
+  "created_at": "2026-07-14T18:15:41+00:00",
+  "agents": [
+    {
+      "agent_name": "Planner/v3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "LOCAL_ONLY",
+      "fallback_used": true,
+      "timestamp": "2026-07-14T18:15:41+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "AudioExtraction",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "extracted",
+      "fallback_used": false,
+      "timestamp": "2026-07-14T18:15:44+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 2996.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_0964d7b55d.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\ed4098575cc3483686757de5a2a60106\\ed409857_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\ed4098575cc3483686757de5a2a60106\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    }
+  ],
+  "segment_attention": [],
+  "summary": {
+    "total_agents": 2,
+    "failed_agents": 0,
+    "fallback_used": 1,
+    "warnings": 0,
+    "total_execution_time_ms": 2996.0,
+    "total_llm_calls": 0
+  },
+  "saved_at": "2026-07-14T18:15:44+00:00"
+}

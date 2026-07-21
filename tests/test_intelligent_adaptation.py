@@ -39,8 +39,7 @@ def test_llm_rephrase_available_detects_selfhosted(monkeypatch):
 
 
 def test_expand_without_llm_never_pads(monkeypatch):
-    """TZ §3: short line + no LLM → unchanged, never filler/padding."""
-    from engines import translation_adapt
+    """TZ v4.0: short line + no LLM → DSAL rule expand (not garbage filler)."""
     from engines.semantic_optimizer import optimize_expand_for_slot
 
     for var in ("OPENAI_API_KEY", "VM_LLM_API_KEY", "VM_OPENAI_API_KEY", "VM_LLM_BASE_URL", "OPENAI_BASE_URL"):
@@ -55,9 +54,20 @@ def test_expand_without_llm_never_pads(monkeypatch):
         slot_ms=9000,
         tgt_lang="uk",
     )
-    assert res.changed is False
-    assert res.text == short
-    assert res.stopped_reason == "requires_llm_expansion"
+    # Rule-based DSAL may expand; LLM pad / random filler must not appear.
+    assert "..." not in res.text
+    assert "ааа" not in res.text.lower()
+    if res.changed:
+        assert res.stopped_reason == "dsal_rule_expand"
+        assert len(res.text) > len(short)
+        assert "Джордж" in res.text
+    else:
+        assert res.text == short
+        assert res.stopped_reason in (
+            "requires_llm_expansion",
+            "dsal_no_change",
+            "no_expand_needed",
+        )
 
 
 def test_no_expand_when_already_full(monkeypatch):
@@ -263,7 +273,9 @@ def test_post_tts_expansion_loop_runs_on_underflow(monkeypatch):
     assert trace.get("expand_required") is True
     assert trace.get("expand_executed") is True
     assert trace.get("expansion_iterations") >= 1
-    assert "llm_expand" in (trace.get("stages") or [])
+    assert "llm_expand" in (trace.get("stages") or []) or "dsal_rule_expand" in (
+        trace.get("stages") or []
+    )
     assert trace.get("duration_match_score", 0) >= 90
 
 

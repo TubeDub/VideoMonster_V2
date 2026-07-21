@@ -1,0 +1,158 @@
+{
+  "domains": {
+    "Pipeline": {
+      "domain": "Pipeline",
+      "configuration_uuid": "4582876a-aec9-4cfe-8944-7100ec8dc6ee",
+      "version": "1.0.0",
+      "created": 1783881030.1183147,
+      "updated": 1783881030.1183155,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "mode": "semantic_v3",
+        "native_te": true
+      }
+    },
+    "Translation": {
+      "domain": "Translation",
+      "configuration_uuid": "bb144d4b-bccd-4531-b0c1-2bed73d66f2c",
+      "version": "1.0.0",
+      "created": 1783881030.1183486,
+      "updated": 1783881030.118349,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "backend": "heuristic",
+        "min_similarity": 0.55
+      }
+    },
+    "Dub": {
+      "domain": "Dub",
+      "configuration_uuid": "911bf46b-aa4b-4e4a-8d3f-9fe0145f7c76",
+      "version": "1.0.0",
+      "created": 1783881030.118378,
+      "updated": 1783881030.1183784,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "engine": "dub_engine_v2",
+        "require_wav": false
+      }
+    },
+    "Scheduler": {
+      "domain": "Scheduler",
+      "configuration_uuid": "b4f0a320-53eb-4cc2-b0a4-a7b8d2a3f585",
+      "version": "1.0.0",
+      "created": 1783881030.1184006,
+      "updated": 1783881030.118401,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "owner": "scheduler",
+        "api": "update_audio_time"
+      }
+    },
+    "Decision": {
+      "domain": "Decision",
+      "configuration_uuid": "068a70ce-cd58-4385-b85e-637ede0ca3d9",
+      "version": "1.0.0",
+      "created": 1783881030.1184237,
+      "updated": 1783881030.1184244,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "profile": "Movie"
+      }
+    },
+    "TTS": {
+      "domain": "TTS",
+      "configuration_uuid": "da3e1f43-bfd0-4f21-afbc-410c9d767d28",
+      "version": "1.0.0",
+      "created": 1783881030.1184454,
+      "updated": 1783881030.1184459,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "provider": "edge-offline",
+        "platform": "voice_platform"
+      }
+    },
+    "Diagnostics": {
+      "domain": "Diagnostics",
+      "configuration_uuid": "481b05cc-e97f-44fc-bc36-e29c4f3df0c7",
+      "version": "1.0.0",
+      "created": 1783881030.118468,
+      "updated": 1783881030.1184685,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "studio_qa": true,
+        "openddf": true
+      }
+    },
+    "Studio": {
+      "domain": "Studio",
+      "configuration_uuid": "812564fc-9650-47e6-9c15-cc3da50a8570",
+      "version": "1.0.0",
+      "created": 1783881030.1184895,
+      "updated": 1783881030.1184897,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "views": [
+          "pipeline",
+          "timeline",
+          "review",
+          "decision"
+        ]
+      }
+    },
+    "Plugins": {
+      "domain": "Plugins",
+      "configuration_uuid": "afd7af0c-86ff-4dab-bb1a-faf6920c7ec1",
+      "version": "1.0.0",
+      "created": 1783881030.11851,
+      "updated": 1783881030.1185105,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "enabled": true,
+        "sandbox": true
+      }
+    },
+    "Cloud": {
+      "domain": "Cloud",
+      "configuration_uuid": "2e5cd598-f4de-4ecc-926e-2c8260017907",
+      "version": "1.0.0",
+      "created": 1783881030.1185312,
+      "updated": 1783881030.1185315,
+      "migration_version": 1,
+      "compatibility": ">=6.0.0",
+      "rollback_point": "",
+      "profile": "default",
+      "data": {
+        "mode": "local",
+        "backup": true
+      }
+    }
+  },
+  "updated": 1783881030.1187694
+}

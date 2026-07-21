@@ -1,0 +1,22 @@
+{
+  "segment_id": "ec5653a68d1746118006497d376099d5",
+  "start_ms": 127920,
+  "end_ms": 138800,
+  "tts_ms": 15561,
+  "fitted_ms": 15541,
+  "fitted_file": "slot_fit_66651127_ec5653a68d17_20260713_190137_b74b40bb.wav",
+  "file": "tts_2a4fd553_88bd85a1e99b_20260713_190852_9df82b39.mp3",
+  "overflow_ms": 4586,
+  "slot_overflow": null,
+  "video_adapt_mode": null,
+  "adaptation_executed": null,
+  "adaptation_status": null,
+  "adaptation_decision": null,
+  "overflow_decision": null,
+  "playback_duration": null,
+  "actual_duration_ms": null,
+  "slot_ms": null,
+  "merge_adjusted_start": null,
+  "place_start": null,
+  "container_status": "red"
+}

@@ -1,0 +1,15 @@
+{
+  "domain": "Translation",
+  "configuration_uuid": "bb144d4b-bccd-4531-b0c1-2bed73d66f2c",
+  "version": "1.0.0",
+  "created": 1783881030.1183486,
+  "updated": 1783881030.118349,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "backend": "heuristic",
+    "min_similarity": 0.55
+  }
+}

@@ -1,0 +1,1002 @@
+{
+  "project_id": "6ace9e1f-04c1-5bb5-8892-6e56070a6ebb",
+  "title": "6ace9e1f-04c1-5bb5-8892-6e56070a6ebb",
+  "storage_version": 1,
+  "created_at": 1783890444.332972,
+  "updated_at": 1783890444.3484654,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "ea324d7b83bf44c9af1ae6d5a55129cd",
+  "legacy_project_uuid": "",
+  "studio_session": {
+    "session_id": "ea324d7b83bf44c9af1ae6d5a55129cd",
+    "task_id": "ea324d7b83bf44c9af1ae6d5a55129cd",
+    "segments": [
+      {
+        "id": "6cea08ff99dd43e7a140553abfeda21d",
+        "index": 0,
+        "segment_id": "6cea08ff99dd43e7a140553abfeda21d",
+        "text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+        "original": "An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner.",
+        "start_ms": 0,
+        "end_ms": 4960,
+        "file": "regen_0_251638b3.mp3",
+        "fitted_file": "regen_0_d4ce1ece_fit.wav",
+        "tts_ms": 6264,
+        "fitted_ms": 4960,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 4960,
+          "tts_ms": 6264,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 4960
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "c513ed913f1c40b994236c710c410c70",
+        "index": 1,
+        "segment_id": "c513ed913f1c40b994236c710c410c70",
+        "text": "Але́ коли́ Джордж їхав за кермом, ві́н його́ не полишала тривога, що йому справді страшно туди дістатися.",
+        "original": "But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there.",
+        "start_ms": 4960,
+        "end_ms": 11280,
+        "file": "regen_1_3a080226.mp3",
+        "fitted_file": "regen_1_d3a4b38c_fit.wav",
+        "tts_ms": 7920,
+        "fitted_ms": 6320,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 6320,
+          "tts_ms": 7920,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 6320
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "30247d71d04f47d1b5b6a550975d0349",
+        "index": 2,
+        "segment_id": "30247d71d04f47d1b5b6a550975d0349",
+        "text": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікався, і че́рез це ві́н справді не займався чимось серйозним, окрім автомобілів.",
+        "original": "So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars.",
+        "start_ms": 11280,
+        "end_ms": 22800,
+        "file": "regen_2_c95ce0d7.mp3",
+        "fitted_file": "regen_2_6f5f7f8f_fit.wav",
+        "tts_ms": 11520,
+        "fitted_ms": 11520,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 11520,
+          "tts_ms": 11520,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 11520
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "23a799fb246e4722a8a8087e235a3dee",
+        "index": 3,
+        "segment_id": "23a799fb246e4722a8a8087e235a3dee",
+        "text": "І тоді́ його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто буквально дав йому Фіат",
+        "original": "And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat,",
+        "start_ms": 22800,
+        "end_ms": 31680,
+        "file": "regen_3_dd127d9b.mp3",
+        "fitted_file": "regen_3_008e7dc0_fit.wav",
+        "tts_ms": 10872,
+        "fitted_ms": 8880,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 8880,
+          "tts_ms": 10872,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 8880
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "80928ad391f045e28003e2234601f422",
+        "index": 4,
+        "segment_id": "80928ad391f045e28003e2234601f422",
+        "text": "Ві́н про́сто не розумів одержимості свого сина автомобілями, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, отримаєш справжню роботу",
+        "original": "he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument",
+        "start_ms": 31680,
+        "end_ms": 44400,
+        "file": "regen_4_4f0ad0b3.mp3",
+        "fitted_file": "regen_4_9f5ad7e8_fit.wav",
+        "tts_ms": 11328,
+        "fitted_ms": 11448,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 12720,
+          "tts_ms": 11328,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 120,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 11448
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "7894f0256e34426f96e1f9b301afed38",
+        "index": 5,
+        "segment_id": "7894f0256e34426f96e1f9b301afed38",
+        "text": "Між батьком і сином, Джордж під'їхав до перехрестя, де ві́н був біля його́ дому, і ві́н почав повертати, коли́ ві́н почув цей ду́же гучний звук і по́тім все́ потемніло.",
+        "original": "between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black.",
+        "start_ms": 44400,
+        "end_ms": 56560,
+        "file": "regen_5_a302ae76.mp3",
+        "fitted_file": "regen_5_7f6255f8_fit.wav",
+        "tts_ms": 12120,
+        "fitted_ms": 12160,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 12160,
+          "tts_ms": 12120,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 40,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 12160
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "1e27b31da2df4ecd808e7af3fedf7b9c",
+        "index": 6,
+        "segment_id": "1e27b31da2df4ecd808e7af3fedf7b9c",
+        "text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+        "original": "Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital.",
+        "start_ms": 56720,
+        "end_ms": 62320,
+        "file": "regen_6_f82295e1.mp3",
+        "fitted_file": "regen_6_a328cc45_fit.wav",
+        "tts_ms": 8256,
+        "fitted_ms": 5600,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 5600,
+          "tts_ms": 8256,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 5600
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "bc5340df4ef9491aa205f20843435ed8",
+        "index": 7,
+        "segment_id": "bc5340df4ef9491aa205f20843435ed8",
+        "text": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і врізалася в машину Джорджа так важко",
+        "original": "So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard",
+        "start_ms": 62320,
+        "end_ms": 73120,
+        "file": "regen_7_1eee5429.mp3",
+        "fitted_file": "regen_7_a5cfc864_fit.wav",
+        "tts_ms": 13200,
+        "fitted_ms": 10800,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 10800,
+          "tts_ms": 13200,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 10800
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "cc5f20d8a25b4c3aa9a96f230f2c89c6",
+        "index": 8,
+        "segment_id": "cc5f20d8a25b4c3aa9a96f230f2c89c6",
+        "text": "Що Джорджа-молодшого викинуло з машини, але́ ві́н вижив.",
+        "original": "that George Jr. was ejected from the car but he had survived.",
+        "start_ms": 73120,
+        "end_ms": 76880,
+        "file": "regen_8_99d4574e.mp3",
+        "fitted_file": "regen_8_117e9115_fit.wav",
+        "tts_ms": 4896,
+        "fitted_ms": 3760,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 3760,
+          "tts_ms": 4896,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 3760
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "0ffac6b0577a4808ba829858b0d8848f",
+        "index": 9,
+        "segment_id": "0ffac6b0577a4808ba829858b0d8848f",
+        "text": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+        "original": "Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera.",
+        "start_ms": 76880,
+        "end_ms": 84720,
+        "file": "regen_9_621b5b4e.mp3",
+        "fitted_file": "regen_9_14d34fe8_fit.wav",
+        "tts_ms": 9144,
+        "fitted_ms": 7840,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 7840,
+          "tts_ms": 9144,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 7840
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "d88762536f06437bb60b22313e4835b5",
+        "index": 10,
+        "segment_id": "d88762536f06437bb60b22313e4835b5",
+        "text": "Так, пі́сля свого досвіду на межі смерті, Джордж-молодший зрозумів, що його́ батько був певною мірою правий, що в деяких випадках ві́н марнував свій потенціал. Тож Джордж-молодший бі́льше не хоче займатися автогонками.",
+        "original": "So since his near-death experience, George Jr. had realized that really has dad had been kind of right that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+        "start_ms": 84720,
+        "end_ms": 97378,
+        "file": "regen_10_4f2fad11.mp3",
+        "fitted_file": "regen_10_43f18bd2_fit.wav",
+        "tts_ms": 15936,
+        "fitted_ms": 12658,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 12658,
+          "tts_ms": 15936,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 12658
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "b5a40737d1de457aa1d8f3da6db69eed",
+        "index": 11,
+        "segment_id": "b5a40737d1de457aa1d8f3da6db69eed",
+        "text": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+        "original": "Instead, he had picked up this camera and really gotten back into his old hobby of photography.",
+        "start_ms": 97378,
+        "end_ms": 102560,
+        "file": "regen_11_9f8fb943.mp3",
+        "fitted_file": "regen_11_539f0c1b_fit.wav",
+        "tts_ms": 6480,
+        "fitted_ms": 5182,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 5182,
+          "tts_ms": 6480,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 5182
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "53cf43f16f8149f9bfa087278b90cb16",
+        "index": 12,
+        "segment_id": "53cf43f16f8149f9bfa087278b90cb16",
+        "text": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з Університету Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї.",
+        "original": "In fact, George Jr. had applied to the prestigious cinematography program at the University of Southern California, but after sending off his application, he was pretty sure he would not get in.",
+        "start_ms": 102560,
+        "end_ms": 112640,
+        "file": "regen_12_f3cbbfcb.mp3",
+        "fitted_file": "regen_12_7b6ea34f_fit.wav",
+        "tts_ms": 14616,
+        "fitted_ms": 10080,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 10080,
+          "tts_ms": 14616,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 10080
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "0b29082e899e4cb2859e52d32a05c5f8",
+        "index": 13,
+        "segment_id": "0b29082e899e4cb2859e52d32a05c5f8",
+        "text": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду.",
+        "original": "Now, George Jr. walked over to the podium to take some photos of the winning drive.",
+        "start_ms": 112640,
+        "end_ms": 116960,
+        "file": "regen_13_be29f34f.mp3",
+        "fitted_file": "regen_13_02591f5e_fit.wav",
+        "tts_ms": 6912,
+        "fitted_ms": 4320,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 4320,
+          "tts_ms": 6912,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 4320
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "8a05f112165549df97f2485449409489",
+        "index": 14,
+        "segment_id": "8a05f112165549df97f2485449409489",
+        "text": "Але́ коли́ ві́н йшов туди, чоловік середнього віку підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а по́тім в якийсь момент людина представився як Хаскел Уекслер.",
+        "original": "But as he walked over there, the smithelaged man came up beside him and just asked George Jr. about his photography and then at some point the man actually formally introduced himself as Haskell Wexler.",
+        "start_ms": 116960,
+        "end_ms": 127920,
+        "file": "regen_14_1ea35317.mp3",
+        "fitted_file": "regen_14_8a135137_fit.wav",
+        "tts_ms": 12816,
+        "fitted_ms": 10960,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 10960,
+          "tts_ms": 12816,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 10960
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "62202b9e24a242eba4b25678d550d4bc",
+        "index": 15,
+        "segment_id": "62202b9e24a242eba4b25678d550d4bc",
+        "text": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший розповів Хаскелу про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. І коли́ Хаскел почув це",
+        "original": "And he said that he was actually a cinematographer in Hollywood. And George Jr. told Haskell about how he had recently applied to USC to try to get into their cinematography program. And when Haskell heard this,",
+        "start_ms": 127920,
+        "end_ms": 138800,
+        "file": "regen_15_462e4026.mp3",
+        "fitted_file": "regen_15_c5e22e01_fit.wav",
+        "tts_ms": 18768,
+        "fitted_ms": 10880,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 10880,
+          "tts_ms": 18768,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 10880
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "e8bac6aef3334f01a2133b132fee8818",
+        "index": 16,
+        "segment_id": "e8bac6aef3334f01a2133b132fee8818",
+        "text": "Джордж, я знаю людей з Університету Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́сля цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до Університету Південної Каліфорнії.",
+        "original": "he said, George, I know people at USC. Let me make some calls. And sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school.",
+        "start_ms": 138800,
+        "end_ms": 149450,
+        "file": "regen_16_27ded7eb.mp3",
+        "fitted_file": "regen_16_cf9717bc_fit.wav",
+        "tts_ms": 16104,
+        "fitted_ms": 10650,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 10650,
+          "tts_ms": 16104,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 0,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 10650
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "9ff1e88b6a0b499497b8e9a6a5af5bcf",
+        "index": 17,
+        "segment_id": "9ff1e88b6a0b499497b8e9a6a5af5bcf",
+        "text": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди.",
+        "original": "But this moment in George Jr's life did not just alter George's life forever.",
+        "start_ms": 149450,
+        "end_ms": 154320,
+        "file": "regen_17_352de5a1.mp3",
+        "fitted_file": "regen_17_c5346e58_fit.wav",
+        "tts_ms": 5616,
+        "fitted_ms": 4870,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 4870,
+          "tts_ms": 5616,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 36,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 4870
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "ba8b7f29c0e74f41bc361d81a4d50af1",
+        "index": 18,
+        "segment_id": "ba8b7f29c0e74f41bc361d81a4d50af1",
+        "text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії. Його́ фільм бу́де",
+        "original": "It also would go on to completely alter cinema in general forever. Because about 13 years later, George Jr. would go on to create one of the most groundbreaking films in history. His movie would",
+        "start_ms": 154320,
+        "end_ms": 167760,
+        "file": "regen_18_b213c97c.mp3",
+        "fitted_file": "regen_18_0e1a82a5_fit.wav",
+        "tts_ms": 12648,
+        "fitted_ms": 12768,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 13440,
+          "tts_ms": 12648,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 120,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 12768
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      },
+      {
+        "id": "cbb7de7257a34a79bc81ff92ca123012",
+        "index": 19,
+        "segment_id": "cbb7de7257a34a79bc81ff92ca123012",
+        "text": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Джордж-молодший. Сьогодні Джордж Лукас і його́ кінофраншиза стане «Зоряними війнами»",
+        "original": "go on to become part of the most successful movie franchise of all time. George Jr. is better known today as George Lucas and his film franchise will star wars.",
+        "start_ms": 167840,
+        "end_ms": 180720,
+        "file": "regen_19_c14692a8.mp3",
+        "fitted_file": "regen_19_cfe02a67_fit.wav",
+        "tts_ms": 13512,
+        "fitted_ms": 11219,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "ok",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "strategy": "hard_anchor+fit",
+          "slot_ms": 12880,
+          "tts_ms": 13512,
+          "anchor_ms": 0,
+          "stretch_ratio": 1.0,
+          "pause_added_ms": 120,
+          "overflow_ms": 0,
+          "atempo": 1.0,
+          "fitted_ms": 11219
+        },
+        "repair_polish": true,
+        "tts_outdated": false,
+        "tts_emotion": {
+          "emotion": "neutral",
+          "tts": {
+            "rate": "-5%",
+            "pitch": "+0Hz",
+            "volume": "default"
+          }
+        },
+        "intonation": {}
+      }
+    ],
+    "timing_map": [
+      {
+        "start": 0,
+        "end": 4960
+      },
+      {
+        "start": 4960,
+        "end": 11280
+      },
+      {
+        "start": 11280,
+        "end": 22800
+      },
+      {
+        "start": 22800,
+        "end": 31680
+      },
+      {
+        "start": 31680,
+        "end": 44400
+      },
+      {
+        "start": 44400,
+        "end": 56560
+      },
+      {
+        "start": 56720,
+        "end": 62320
+      },
+      {
+        "start": 62320,
+        "end": 73120
+      },
+      {
+        "start": 73120,
+        "end": 76880
+      },
+      {
+        "start": 76880,
+        "end": 84720
+      },
+      {
+        "start": 84720,
+        "end": 97378
+      },
+      {
+        "start": 97378,
+        "end": 102560
+      },
+      {
+        "start": 102560,
+        "end": 112640
+      },
+      {
+        "start": 112640,
+        "end": 116960
+      },
+      {
+        "start": 116960,
+        "end": 127920
+      },
+      {
+        "start": 127920,
+        "end": 138800
+      },
+      {
+        "start": 138800,
+        "end": 149450
+      },
+      {
+        "start": 149450,
+        "end": 154320
+      },
+      {
+        "start": 154320,
+        "end": 167760
+      },
+      {
+        "start": 167840,
+        "end": 180720
+      }
+    ],
+    "source_segments": [
+      "An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner.",
+      "But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there.",
+      "So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars.",
+      "And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat,",
+      "he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument",
+      "between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black.",
+      "Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital.",
+      "So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard",
+      "that George Jr. was ejected from the car but he had survived.",
+      "Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera.",
+      "So since his near-death experience, George Jr. had realized that really has dad had been kind of right that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+      "Instead, he had picked up this camera and really gotten back into his old hobby of photography.",
+      "In fact, George Jr. had applied to the prestigious cinematography program at the University of Southern California, but after sending off his application, he was pretty sure he would not get in.",
+      "Now, George Jr. walked over to the podium to take some photos of the winning drive.",
+      "But as he walked over there, the smithelaged man came up beside him and just asked George Jr. about his photography and then at some point the man actually formally introduced himself as Haskell Wexler.",
+      "And he said that he was actually a cinematographer in Hollywood. And George Jr. told Haskell about how he had recently applied to USC to try to get into their cinematography program. And when Haskell heard this,",
+      "he said, George, I know people at USC. Let me make some calls. And sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school.",
+      "But this moment in George Jr's life did not just alter George's life forever.",
+      "It also would go on to completely alter cinema in general forever. Because about 13 years later, George Jr. would go on to create one of the most groundbreaking films in history. His movie would",
+      "go on to become part of the most successful movie franchise of all time. George Jr. is better known today as George Lucas and his film franchise will star wars."
+    ],
+    "tracks": {
+      "original": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Original Voice",
+        "i18n_key": "studio.track.original",
+        "color": "#22c55e"
+      },
+      "user_voice": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "User Voice",
+        "i18n_key": "studio.track.user_voice",
+        "color": "#ec4899"
+      },
+      "music": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Music",
+        "i18n_key": "studio.track.music",
+        "color": "#a855f7"
+      },
+      "sfx": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "SFX",
+        "i18n_key": "studio.track.sfx",
+        "color": "#64748b"
+      },
+      "tts": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Dub Voice",
+        "i18n_key": "studio.track.dub",
+        "color": "#f59e0b"
+      }
+    },
+    "voice": "uk-UA-OstapNeural",
+    "lang": "uk",
+    "plugin_order": [
+      "eq",
+      "compressor"
+    ],
+    "duration_ms": 181220,
+    "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_4b833b566f.mp4",
+    "video_preview": "video_4b833b566f.mp4",
+    "original_audio": null,
+    "task_status": "running",
+    "output_file": "video_4b833b566f_OUTPUT_ea324d7b.mp4",
+    "studio_url": "/studio?task_id=ea324d7b83bf44c9af1ae6d5a55129cd",
+    "updated_ms": 1783887992638
+  },
+  "tdproj": {},
+  "metadata": {},
+  "source": "legacy_studio_session",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\studio_sessions\\ea324d7b83bf44c9af1ae6d5a55129cd.json"
+}

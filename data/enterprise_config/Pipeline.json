@@ -1,0 +1,15 @@
+{
+  "domain": "Pipeline",
+  "configuration_uuid": "4582876a-aec9-4cfe-8944-7100ec8dc6ee",
+  "version": "1.0.0",
+  "created": 1783881030.1183147,
+  "updated": 1783881030.1183155,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "mode": "semantic_v3",
+    "native_te": true
+  }
+}

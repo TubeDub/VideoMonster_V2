@@ -1,0 +1,107 @@
+{
+  "project_id": "default",
+  "source_lang": "en",
+  "target_lang": "uk",
+  "notes": "Default en→uk glossary. George Lucas film terms live here (config), not in engine hardcode. Override via projects/{id}/glossary.json.",
+  "entries": [
+    {
+      "source": "George Jr.",
+      "aliases": ["George Jr", "George Junior"],
+      "canonical": "Джордж-молодший",
+      "kind": "PERSON",
+      "acceptable": ["Джорджа-молодшого", "Джорджу-молодшому", "Джордж молодший"],
+      "critical": true
+    },
+    {
+      "source": "George Lucas",
+      "aliases": [],
+      "canonical": "Джордж Лукас",
+      "kind": "PERSON",
+      "acceptable": ["Джорджа Лукаса", "Лукас"],
+      "critical": true
+    },
+    {
+      "source": "Haskell Wexler",
+      "aliases": ["Wexler"],
+      "canonical": "Хаскелл Векслер",
+      "kind": "PERSON",
+      "acceptable": ["Хаскел Векслер", "Векслер", "Wexler"],
+      "critical": true
+    },
+    {
+      "source": "University of Southern California",
+      "aliases": [],
+      "canonical": "USC",
+      "kind": "ORG",
+      "acceptable": ["USC", "Університет Південної Каліфорнії"],
+      "critical": true
+    },
+    {
+      "source": "USC",
+      "aliases": ["U.S.C."],
+      "canonical": "USC",
+      "kind": "ORG",
+      "acceptable": ["USC"],
+      "critical": true
+    },
+    {
+      "source": "Star Wars",
+      "aliases": [],
+      "canonical": "Зоряні війни",
+      "kind": "TITLE",
+      "acceptable": ["Зоряні Війни", "Star Wars"],
+      "critical": true
+    },
+    {
+      "source": "Fiat",
+      "aliases": ["FIAT"],
+      "canonical": "Фіат",
+      "kind": "CAR",
+      "acceptable": ["Фіат", "Fiat", "FIAT"],
+      "critical": true
+    },
+    {
+      "source": "Hollywood",
+      "aliases": [],
+      "canonical": "Голлівуд",
+      "kind": "PLACE",
+      "acceptable": ["Hollywood", "Голлівуд"],
+      "critical": false
+    },
+    {
+      "source": "intensive care unit",
+      "aliases": ["ICU", "intensive care"],
+      "canonical": "відділення інтенсивної терапії",
+      "kind": "TERM",
+      "acceptable": [
+        "реанімація",
+        "інтенсивна терапія",
+        "ICU",
+        "відділенні інтенсивної терапії",
+        "відділення інтенсивної терапії"
+      ],
+      "critical": true
+    },
+    {
+      "source": "race track",
+      "aliases": ["racetrack"],
+      "canonical": "гоночний трек",
+      "kind": "TERM",
+      "acceptable": ["гоночна траса", "гоночного треку", "гоночному треку", "трек"],
+      "critical": true
+    },
+    {
+      "source": "hometown",
+      "aliases": [],
+      "canonical": "рідне місто",
+      "kind": "TERM",
+      "acceptable": [
+        "рідного міста",
+        "рідному місті",
+        "рідним містом",
+        "рідного міста"
+      ],
+      "critical": true
+    }
+  ]
+}

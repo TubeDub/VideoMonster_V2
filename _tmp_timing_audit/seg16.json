@@ -1,0 +1,146 @@
+{
+  "segment_id": "ec5653a68d1746118006497d376099d5",
+  "adaptation_executed": true,
+  "adaptation_status": "ADAPTATION EXECUTED",
+  "adaptation_skip_reason": "",
+  "adaptation_decision": {
+    "segment_id": "ec5653a68d1746118006497d376099d5",
+    "index": 0,
+    "overflow_ms": 2271,
+    "underflow_ms": 0,
+    "need_adaptation": true,
+    "translation_locked": false,
+    "llm_available": false,
+    "rule_adapter_enabled": true,
+    "semantic_adapter_enabled": true,
+    "decision": "pause_optimization",
+    "adaptation_executed": true,
+    "skip_reason": ""
+  },
+  "decision_trace": {
+    "title": "Decision Trace",
+    "stages": [
+      {
+        "stage_index": 1,
+        "name": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']",
+        "detail": {
+          "chosen": "pause_optimization",
+          "why": "min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']",
+          "cost": 2.0,
+          "overflow_ms": 2271
+        }
+      },
+      {
+        "stage_index": 2,
+        "name": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']",
+        "detail": {
+          "chosen": "pause_optimization",
+          "cost": 2.0,
+          "overflow_ms": 2271
+        }
+      },
+      {
+        "stage_index": 3,
+        "name": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']",
+        "detail": {
+          "chosen": "pause_optimization",
+          "stages": [
+            "overflow_strategy:pause_optimization"
+          ]
+        }
+      },
+      {
+        "stage_index": 4,
+        "name": "final_result",
+        "status": "SUCCESS",
+        "reason": "pause_optimization",
+        "detail": {
+          "overflow_ms": 2271,
+          "duration_ms": 15561
+        }
+      },
+      {
+        "stage_index": 5,
+        "name": "tts_duration",
+        "status": "SKIPPED",
+        "reason": "AudioStrategyNoTextRewrite",
+        "detail": {
+          "requires_re_tts": false
+        }
+      },
+      {
+        "stage_index": 6,
+        "name": "scheduler",
+        "status": "SUCCESS",
+        "reason": "strategy_queued:pause_optimization",
+        "detail": {
+          "chosen": "pause_optimization"
+        }
+      }
+    ],
+    "transitions": [
+      "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+      "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=15610",
+      "decision_engine = SUCCESS (trim_silence) | chosen=trim_silence | overflow_ms=4586",
+      "chosen_strategy = SUCCESS (trim_silence) | chosen=trim_silence | overflow_ms=4586",
+      "strategy_result = SUCCESS (trim_silence) | chosen=trim_silence",
+      "final_result = SUCCESS (trim_silence) | overflow_ms=4586 | duration_ms=15561",
+      "decision_engine = SUCCESS (min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) | chosen=pause_optimization | overflow_ms=2271",
+      "chosen_strategy = SUCCESS (min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) | chosen=pause_optimization | overflow_ms=2271",
+      "strategy_result = SUCCESS (min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) | chosen=pause_optimization",
+      "tts_duration = SKIPPED (AudioStrategyNoTextRewrite)",
+      "scheduler = SUCCESS (strategy_queued:pause_optimization) | chosen=pause_optimization",
+      "decision_engine = SUCCESS (min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) | chosen=pause_optimization | overflow_ms=2271",
+      "chosen_strategy = SUCCESS (min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) | chosen=pause_optimization | overflow_ms=2271",
+      "strategy_result = SUCCESS (min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) | chosen=pause_optimization",
+      "final_result = SUCCESS (pause_optimization) | overflow_ms=2271 | duration_ms=15561"
+    ],
+    "summary": "decision_engine=SUCCESS(min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) → chosen_strategy=SUCCESS(min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) → strategy_result=SUCCESS(min_cost=2.0 among quality-ok; next_in_chain=pause_optimization; applied=['semantic_rewrite', 'trim_silence']) → final_result=SUCCESS(pause_optimization) → tts_duration=SKIPPED(AudioStrategyNoTextRewrite) → scheduler=SUCCESS(strategy_queued:pause_optimization)"
+  },
+  "overlap_info": {
+    "overflow_ms": 4730,
+    "overflow_pct": 43.5,
+    "slot_overflow": true,
+    "merge_adjusted_start": null
+  },
+  "start_time_ms": 127920,
+  "end_time_ms": 138800,
+  "slot_ms": 10880,
+  "final_tts_duration_ms": 15610,
+  "actual_duration_ms": 15610,
+  "original_duration_ms": 10880,
+  "first_tts_duration_ms": 0,
+  "gap_absorb": {
+    "mode": null,
+    "video_stretch_ratio": null
+  },
+  "block_merge": {
+    "merge_adjusted_start": null,
+    "merge_adjusted_slot_ms": null,
+    "block_merged_with_next": null
+  },
+  "merge_info": {
+    "merged_into": null,
+    "merged_into_id": null,
+    "block_merged_with_next": null
+  },
+  "adaptation_stages": [
+    "dsal_rule_compress",
+    "trim_silence",
+    "overflow_strategy:pause_optimization"
+  ],
+  "algorithm_reason": "post_tts_text_adaptation: semantic shorten + TTS regen until slot fit",
+  "speech_difference_ms": -4730,
+  "tts_speech_end_ms": 143530,
+  "original_speech_end_ms": 138800,
+  "path_chain": [],
+  "warnings": []
+}

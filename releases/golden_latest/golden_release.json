@@ -1,0 +1,48 @@
+{
+  "label": "latest",
+  "promoted_at": "2026-07-11T20:20:08Z",
+  "versions": {
+    "system_version": "2.0.0-rc1",
+    "translation_engine_version": "1.0.0",
+    "dub_engine_version": "1.0.0",
+    "contract_versions": {
+      "translation_contract_version": 1,
+      "dub_contract_version": 1,
+      "scheduler_contract_version": 1,
+      "studio_contract_version": 1,
+      "tts_contract_version": 1
+    },
+    "performance_budgets_ms": {
+      "scheduler": 20.0,
+      "merge": 30.0,
+      "alignment": 50.0,
+      "runtime_integrity": 10.0,
+      "diagnostics": 5.0
+    }
+  },
+  "quality_metrics": {
+    "overflow_count": 0,
+    "overlap_count": 0,
+    "sync_score": 1.0,
+    "translation_quality_score": 1.0,
+    "processing_ms": 9.408,
+    "deterministic_fingerprint": "87121f7f3d90fbd5e783d142a432fc5c8cd00cf9714994cfc812e44113ee137f",
+    "runtime_integrity_errors": 0,
+    "segment_count": 40
+  },
+  "performance_budget": {
+    "scheduler": 20.0,
+    "merge": 30.0,
+    "alignment": 50.0,
+    "runtime_integrity": 10.0,
+    "diagnostics": 5.0
+  },
+  "regression_report": {
+    "status": "bootstrap"
+  },
+  "architecture_report": {
+    "status": "bootstrap"
+  },
+  "config_freeze": "config_freeze.json",
+  "golden_dataset": "golden_dataset"
+}

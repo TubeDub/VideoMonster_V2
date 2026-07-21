@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "profiles": {
+    "Documentary": {
+      "speech_rate": 0.95,
+      "emotion_default": "calm",
+      "diction": "clear",
+      "pause_scale": 1.15,
+      "prosody_intensity": 0.35,
+      "pitch_bias": 0.0
+    },
+    "News": {
+      "speech_rate": 1.08,
+      "emotion_default": "calm",
+      "diction": "energetic",
+      "pause_scale": 0.85,
+      "prosody_intensity": 0.55,
+      "pitch_bias": 1.0
+    },
+    "Anime": {
+      "speech_rate": 1.12,
+      "emotion_default": "joy",
+      "diction": "expressive",
+      "pause_scale": 0.9,
+      "prosody_intensity": 0.9,
+      "pitch_bias": 2.0
+    },
+    "Movie": {
+      "speech_rate": 1.0,
+      "emotion_default": "calm",
+      "diction": "soft",
+      "pause_scale": 1.0,
+      "prosody_intensity": 0.65,
+      "pitch_bias": 0.0
+    },
+    "Interview": {
+      "speech_rate": 1.02,
+      "emotion_default": "calm",
+      "diction": "clear",
+      "pause_scale": 1.05,
+      "prosody_intensity": 0.45,
+      "pitch_bias": 0.0
+    },
+    "Podcast": {
+      "speech_rate": 1.05,
+      "emotion_default": "calm",
+      "diction": "soft",
+      "pause_scale": 1.1,
+      "prosody_intensity": 0.5,
+      "pitch_bias": 0.0
+    }
+  }
+}

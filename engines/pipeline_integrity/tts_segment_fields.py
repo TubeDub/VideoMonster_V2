@@ -12,8 +12,11 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
 
 
 def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
-    """Priority: grammar_text > timing_text > semantic_text > translated_text > text."""
-    return str(
+    """Priority: authoritative final (semantic over stale raw) then legacy fields."""
+    from engines.translation_validation import resolve_post_quality_text
+
+    owned = resolve_post_quality_text(seg)
+    text = owned or str(
         seg.get("grammar_text")
         or seg.get("timing_text")
         or seg.get("semantic_text")
@@ -21,6 +24,22 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
         or seg.get("text")
         or ""
     ).strip()
+    if not text:
+        return ""
+    try:
+        from engines.semantic_meaning import restore_terminal_close
+
+        original = str(
+            seg.get("original")
+            or seg.get("original_text")
+            or seg.get("whisper_text")
+            or seg.get("source_text")
+            or ""
+        )
+        text = restore_terminal_close(text, original=original)
+    except Exception:
+        pass
+    return text
 
 
 def resolve_tts_input_text(group: dict[str, Any]) -> str:
@@ -95,7 +114,9 @@ def mark_merged_tts_children(
 
 def sync_tts_legacy_fields(segments_data: list[dict[str, Any]]) -> None:
     """Map canonical TTS fields to legacy keys for slot_fit / studio (after TTS guard)."""
-    for seg in segments_data:
+    from engines.dub_engine_v2.adaptation_decision import stamp_need_adaptation_gate
+
+    for i, seg in enumerate(segments_data):
         tfp = seg.get("tts_file_path")
         if tfp:
             name = Path(str(tfp)).name
@@ -108,6 +129,9 @@ def sync_tts_legacy_fields(segments_data: list[dict[str, Any]]) -> None:
         st = seg.get("status")
         if st:
             seg["tts_status"] = st
+        # Recognize need_adaptation as soon as measured TTS duration exists.
+        if int(seg.get("tts_ms") or seg.get("playback_duration") or 0) > 0:
+            stamp_need_adaptation_gate(seg, index=i, source="post_tts_sync")
 
 
 def measure_playback_duration_ms(audio_path: str | Path | None) -> int:

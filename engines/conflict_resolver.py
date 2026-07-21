@@ -29,7 +29,8 @@ MAX_LOCAL_SHIFT_MS = 250
 MAX_EARLY_START_MS = 120
 MAX_LATE_START_MS = 180
 SAFE_ATEMPO_MAX = 1.05
-SAFE_ATEMPO_MIN = 0.92
+SAFE_ATEMPO_MIN = 0.95  # TZ v4.0 P2: ±5%
+EMERGENCY_ATEMPO_MAX = 1.12  # red overflow after DSAL exhausted
 MAX_REFLOW_MS = 185
 LOCAL_WINDOW_NEIGHBORS = 1
 
@@ -239,11 +240,16 @@ def _try_safe_stretch(seg: SegmentPlacement, nxt: SegmentPlacement, overlap: int
     if need <= 1.001:
         seg.decision_path.append("safe_stretch:skip(already_fits)")
         return False
-    if need > SAFE_ATEMPO_MAX:
-        seg.decision_path.append(f"safe_stretch:skip(need={need:.3f}>{SAFE_ATEMPO_MAX})")
+    cap = SAFE_ATEMPO_MAX
+    # Severe overflow vs available window → emergency ±12% before Studio mark.
+    if need > SAFE_ATEMPO_MAX and need <= EMERGENCY_ATEMPO_MAX:
+        cap = EMERGENCY_ATEMPO_MAX
+        seg.decision_path.append(f"safe_stretch:emergency_cap={cap}")
+    if need > cap:
+        seg.decision_path.append(f"safe_stretch:skip(need={need:.3f}>{cap})")
         return False
-    seg.atempo = min(SAFE_ATEMPO_MAX, max(seg.atempo, need))
-    seg.strategy = "safe_stretch"
+    seg.atempo = min(cap, max(seg.atempo, need))
+    seg.strategy = "safe_stretch" if cap <= SAFE_ATEMPO_MAX else "safe_stretch_emergency"
     seg.status = "stretch"
     seg.decision_path.append(f"safe_stretch:atempo={seg.atempo:.3f}")
     return _overlap_ms(seg, nxt) <= OVERLAP_TOLERANCE_MS
@@ -478,7 +484,17 @@ def apply_resolver_to_fitted(
     for i, row in enumerate(fitted_placements):
         idx = int(row.get("idx", i))
         if idx in idx_to_start:
-            row["place_start"] = idx_to_start[idx]
+            place = idx_to_start[idx]
+            sid = str(row.get("segment_id") or "").strip()
+            if sid:
+                from engines.scheduler import update_time
+
+                update_time([row], sid, place_start=place)
+            else:
+                # Intermediate mix row without identity — place_start only until
+                # segment_id is bound; architecture tests allow this path via
+                # conflict_resolver intermediate tables.
+                row["place_start"] = place
             meta = idx_to_meta.get(idx)
             if meta:
                 row["conflict_strategy"] = meta.strategy

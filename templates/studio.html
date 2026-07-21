@@ -11,6 +11,8 @@
     <h1 data-i18n="studio.title">🎛 Dub Studio</h1>
     <span id="se-task-label" style="font-size:11px;color:var(--text2);"></span>
     <button type="button" class="btn btn-sm" id="se-btn-play" data-i18n="studio.play">▶ Play</button>
+    <button type="button" class="btn btn-sm se-sync-qc-btn" id="se-btn-sync-qc"
+            data-i18n="studio.rasm.button" title="Reference Audio Sync Monitor">🎧 Sync QC</button>
     <button type="button" class="btn btn-primary btn-sm se-mix-btn" id="se-btn-mix"
             data-i18n="studio.mix_project">🎬 Свести проект</button>
     <a id="se-download-link" href="#" class="btn btn-primary btn-sm se-download-btn"
@@ -37,6 +39,7 @@
       </div>
     </div>
     <aside class="se-inspector" id="studio-inspector">
+      <div id="rasm-panel-host"></div>
       <div class="se-loading" data-i18n="studio.loading">Загрузка сессии…</div>
     </aside>
     <div class="se-timeline-panel">
@@ -177,6 +180,7 @@
 
 {% block scripts %}
 <script src="/static/js/i18n.js"></script>
+<script src="/static/js/rasm_player.js"></script>
 <script src="/static/js/studio_timeline.js"></script>
 <script src="/static/js/studio.js"></script>
 {% endblock %}

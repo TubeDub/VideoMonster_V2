@@ -1,0 +1,6 @@
+{
+  "stage": "studio_handoff",
+  "task_id": "79e4407c2afb45ae80da9e92adf00829",
+  "error_type": "RuntimeIntegrityError",
+  "message": "TTS file not found for segment b59625b1aecb4f40b2801b755e60ba75: pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav"
+}

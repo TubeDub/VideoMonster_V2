@@ -165,27 +165,32 @@ def test_step_change_resets_idle_timer(task_env):
     assert not wd._stall_reported
 
 
-def test_voice_verification_phase_uses_longer_threshold(task_env):
-    from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
-    from engines.pipeline_watchdog import PipelineWatchdog, STALL_IDLE_SEC
+def test_translation_review_pause_never_stalls(task_env):
+    """TPS Manual Review waits for user — must not PIPELINE_STALLED after 2 min."""
+    from engines.dub_task_state import AUTO_TASK_CONTROLS, AUTO_TASKS, STATE_LOCK
+    from engines.pipeline_watchdog import PipelineWatchdog
 
     task_id, _, _ = task_env
     with STATE_LOCK:
-        AUTO_TASKS[task_id]["step"] = "tts"
-        AUTO_TASKS[task_id]["info"]["progress_detail"] = {
-            "phase": "voice_verification",
-            "tts_substep": "voice_verify",
-            "last_heartbeat_at": time.time(),
+        AUTO_TASKS[task_id]["status"] = "translation_review"
+        AUTO_TASKS[task_id]["step"] = "translation_review"
+        AUTO_TASKS[task_id]["progress"] = 60.0
+        AUTO_TASK_CONTROLS[task_id] = {
+            "state": "paused",
+            "awaiting_translation_review": True,
+            "editing": False,
+            "editor_error": False,
+            "current_segment": 0,
         }
 
     wd = PipelineWatchdog(task_id)
-    wd.stage_start("tts")
+    wd.stage_start("translation_review")
     wd._ticks = 5
-    wd._stage.last_progress_at = time.time() - 120.0
-
+    # Simulate 10 minutes idle — still must not stall
+    wd._stage.last_progress_at = time.time() - 600.0
     wd._tick()
     assert not wd._stall_reported
-    assert STALL_IDLE_SEC["voice_verification"] > STALL_IDLE_SEC["tts"]
+    assert wd._stage.idle_sec() < 5.0
 
 
 def test_voice_verification_heartbeat_prevents_tts_stall(task_env):

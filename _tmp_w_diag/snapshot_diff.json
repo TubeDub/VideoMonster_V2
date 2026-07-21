@@ -1,0 +1,347 @@
+{
+  "final_dub_qa": {
+    "ok": false,
+    "issue_count": 27,
+    "issues": [
+      {
+        "index": 0,
+        "code": "split_sentence",
+        "segment_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто",
+        "next_segment_text": "між батьком і сином, Джордж-молодший був ду́же розумною дитиною, але́ ві́н тако́ж відволікся ду́же легко, і че́рез це ві",
+        "severity": "error"
+      },
+      {
+        "index": 2,
+        "code": "split_sentence",
+        "segment_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у реанімації місцевої лікарні",
+        "next_segment_text": "Два роки джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат, дос",
+        "severity": "error"
+      },
+      {
+        "index": 5,
+        "code": "split_sentence",
+        "segment_text": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з Університету Південної Каліфорнії, але́ ",
+        "next_segment_text": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але́ як ві́н йшов туди, чолові",
+        "severity": "error"
+      },
+      {
+        "index": 6,
+        "code": "split_sentence",
+        "segment_text": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але́ як ві́н йшов туди, чолові",
+        "next_segment_text": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довге пі́сля цієї долі наради, Джордж-молодший отримає прийомний л",
+        "severity": "error"
+      },
+      {
+        "index": 7,
+        "code": "split_sentence",
+        "segment_text": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довге пі́сля цієї долі наради, Джордж-молодший отримає прийомний л",
+        "next_segment_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в істо",
+        "severity": "error"
+      },
+      {
+        "index": 8,
+        "code": "split_sentence",
+        "segment_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в істо",
+        "next_segment_text": "Його́ фільм стане частиною найбільш успішної кінофраншизи всього часу",
+        "severity": "error"
+      },
+      {
+        "index": 9,
+        "code": "split_sentence",
+        "segment_text": "Його́ фільм стане частиною найбільш успішної кінофраншизи всього часу",
+        "next_segment_text": "Сьогодні Джорджа-молодшого бі́льше знають як Джорджа Лукаса і його́ кінофраншиза стане «Зоряними війнами»",
+        "severity": "error"
+      },
+      {
+        "index": 10,
+        "code": "incomplete_sentence",
+        "segment_text": "Сьогодні Джорджа-молодшого бі́льше знають як Джорджа Лукаса і його́ кінофраншиза стане «Зоряними війнами»",
+        "severity": "error"
+      },
+      {
+        "index": 0,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "idx": 0,
+        "code": "duration_overflow",
+        "tts_ms": 4986,
+        "slot_ms": 3591,
+        "window_ms": 3591,
+        "overflow_ms": 1395,
+        "index": 0,
+        "severity": "warning"
+      },
+      {
+        "idx": 0,
+        "code": "overlap_with_next",
+        "overlap_ms": 1395,
+        "next_index": 1,
+        "tts_ms": 4986,
+        "window_ms": 3591,
+        "index": 0,
+        "severity": "warning"
+      },
+      {
+        "index": 1,
+        "code": "meaning_preserved_token",
+        "severity": "error",
+        "hints": [
+          "Italian",
+          "Fiat"
+        ]
+      },
+      {
+        "index": 1,
+        "code": "preserved_token",
+        "tokens": "****** [REDACTED BY OPENDDF] ******",
+        "stage": "final",
+        "severity": "warning"
+      },
+      {
+        "index": 2,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 4,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 5,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "idx": 5,
+        "code": "duration_overflow",
+        "tts_ms": 13001,
+        "slot_ms": 10545,
+        "window_ms": 10545,
+        "overflow_ms": 2456,
+        "index": 5,
+        "severity": "warning"
+      },
+      {
+        "idx": 5,
+        "code": "overlap_with_next",
+        "overlap_ms": 2456,
+        "next_index": 6,
+        "tts_ms": 13001,
+        "window_ms": 10545,
+        "index": 5,
+        "severity": "warning"
+      },
+      {
+        "index": 6,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "idx": 6,
+        "code": "duration_overflow",
+        "tts_ms": 39676,
+        "slot_ms": 26078,
+        "window_ms": 26078,
+        "overflow_ms": 13598,
+        "index": 6,
+        "severity": "warning"
+      },
+      {
+        "idx": 6,
+        "code": "overlap_with_next",
+        "overlap_ms": 13598,
+        "next_index": 7,
+        "tts_ms": 39676,
+        "window_ms": 26078,
+        "index": 6,
+        "severity": "warning"
+      },
+      {
+        "index": 7,
+        "code": "meaning_preserved_token",
+        "severity": "error",
+        "hints": [
+          "USC"
+        ]
+      },
+      {
+        "index": 7,
+        "code": "preserved_token",
+        "tokens": "****** [REDACTED BY OPENDDF] ******",
+        "stage": "final",
+        "severity": "warning"
+      },
+      {
+        "index": 8,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 9,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 10,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "idx": 10,
+        "code": "duration_overflow",
+        "tts_ms": 6189,
+        "slot_ms": 5750,
+        "window_ms": 5750,
+        "overflow_ms": 439,
+        "index": 10,
+        "severity": "warning"
+      }
+    ],
+    "overlap_count": 0,
+    "split_sentence_count": 7,
+    "long_pause_count": 0
+  },
+  "segment_diagnostics_count": 11,
+  "runtime_pipeline_summary": [
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Whisper STT",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Translation",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Natural Translation",
+      "enabled": true,
+      "executed": true,
+      "applied": false,
+      "status": "skipped",
+      "skip_reason": "no_changes_needed",
+      "segments_changed": 0,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Semantic Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Timing-Aware Translation",
+      "enabled": true,
+      "executed": false,
+      "applied": false,
+      "status": "not_run",
+      "skip_reason": "empty_input",
+      "segments_changed": null,
+      "segments_adapted": 0
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "QA Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "TTS",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "SSML / Prosody",
+      "enabled": false,
+      "executed": false,
+      "applied": false,
+      "status": "disabled",
+      "skip_reason": "not_reached",
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Phoneme Support",
+      "enabled": false,
+      "executed": false,
+      "applied": false,
+      "status": "disabled",
+      "skip_reason": "not_reached",
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Slot Fit",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Timing Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    }
+  ],
+  "openddf_summary": {
+    "segment_count": 11,
+    "skipped_count": 0,
+    "overlap_count": 7,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "overlap_status": "OVERLAP DETECTED",
+    "timing_status": "TIMING OK"
+  }
+}

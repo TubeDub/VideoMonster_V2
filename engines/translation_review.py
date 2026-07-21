@@ -40,33 +40,128 @@ def _dedupe_warnings(warnings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
-def _resolve_final_text(seg: dict, audit: dict) -> str:
-    final = str(audit.get("final_text") or "").strip()
-    if final and not _is_ssml(final):
-        return final
-    for key in ("plain_text", "translation_text"):
-        val = str(seg.get(key) or "").strip()
+def _first_plain_text(*sources: dict[str, Any], keys: tuple[str, ...]) -> str:
+    for source in sources:
+        if not source:
+            continue
+        for key in keys:
+            val = str(source.get(key) or "").strip()
+            if val and not _is_ssml(val):
+                return val
+    return ""
+
+
+def _resolve_semantic_text(seg: dict, audit: dict) -> str:
+    """Post-MT semantic polish — audits use semantic_text; diagnostics use semantic_engine_text."""
+    semantic = _first_plain_text(
+        audit,
+        seg,
+        keys=("semantic_engine_text", "semantic_text"),
+    )
+    if semantic:
+        return semantic
+    chain = (audit.get("quality_details") or {}).get("transformation_chain") or {}
+    for key in ("semantic", "baseline", "semantic_text"):
+        val = str(chain.get(key) or "").strip()
         if val and not _is_ssml(val):
             return val
+    return ""
+
+
+def _resolve_final_text(seg: dict, audit: dict) -> str:
+    from engines.translation_validation import (
+        prefer_semantic_authority,
+        resolve_post_quality_text,
+        texts_equivalent_for_ownership,
+    )
+
+    nat = str(
+        (audit or {}).get("naturalized_text")
+        or (seg or {}).get("naturalized_text")
+        or ""
+    ).strip()
+
+    def _heal(text: str) -> str:
+        try:
+            from engines.trh import heal_truncated_final
+
+            return heal_truncated_final(text, nat)
+        except Exception:
+            return text
+
+    # TPS Single Approved Text
+    approved = str(
+        (seg or {}).get("approved_text") or audit.get("approved_text") or ""
+    ).strip()
+    if approved and not _is_ssml(approved):
+        return _heal(approved)
+
+    raw = str(audit.get("raw_translation") or "").strip()
+    semantic = _resolve_semantic_text(seg, audit)
+    merged = dict(seg or {})
+    if semantic and not merged.get("semantic_text"):
+        merged["semantic_text"] = semantic
+    if semantic and not merged.get("semantic_engine_text"):
+        merged["semantic_engine_text"] = semantic
+    final = resolve_post_quality_text(merged, audit)
+    if final:
+        return _heal(final)
+    # Fallback for sparse segment rows without post-quality fields.
+    legacy = _first_plain_text(
+        audit,
+        seg,
+        keys=("final_text", "pre_tts_text", "voice_input"),
+    )
+    if legacy:
+        if prefer_semantic_authority(semantic=semantic, candidate=legacy, raw_mt=raw):
+            return _heal(semantic)
+        if raw and texts_equivalent_for_ownership(legacy, raw) and semantic and not texts_equivalent_for_ownership(semantic, raw):
+            return _heal(semantic)
+        return _heal(legacy)
+    if semantic:
+        return _heal(semantic)
+    for key in ("plain_text", "translation_text", "translated_text", "grammar_text", "timing_text"):
+        val = str(seg.get(key) or "").strip()
+        if val and not _is_ssml(val):
+            if prefer_semantic_authority(semantic=semantic, candidate=val, raw_mt=raw):
+                return _heal(semantic)
+            return _heal(val)
     val = str(seg.get("text") or "").strip()
     if val and not _is_ssml(val):
-        return val
-    nat = str(audit.get("naturalized_text") or "").strip()
+        return _heal(val)
     return nat if nat and not _is_ssml(nat) else ""
 
 
 def _resolve_text_for_tts(seg: dict, audit: dict, *, final: str, tts_synthesized: bool) -> str:
-    """UI/TTS bound text — before synthesis equals final; after synthesis equals spoken text."""
+    """UI/TTS bound text — before synthesis equals final; after synthesis equals spoken text.
+
+    Never return SSML markup to the Review UI (it confuses operators and is not
+    the spoken plain string). Stress marks are stripped for display.
+    """
+    def _clean(val: str) -> str:
+        s = str(val or "").strip()
+        if not s:
+            return ""
+        if s.lstrip().startswith("<speak") or "<" in s and "emphasis" in s:
+            import re
+
+            s = re.sub(r"<[^>]+>", " ", s)
+            s = re.sub(r"[ \t]+", " ", s).strip()
+        try:
+            from engines.stress_marks import strip_stress_marks
+
+            s = strip_stress_marks(s)
+        except Exception:
+            pass
+        return s
+
     if not tts_synthesized:
-        return final
-    for key in ("tts_text",):
-        val = str(audit.get(key) or seg.get(key) or "").strip()
+        return _clean(final) or final
+    for key in ("tts_text", "plain_text"):
+        val = _clean(str(audit.get(key) or seg.get(key) or ""))
         if val and not _is_ssml(val):
             return val
-    ssml = str(audit.get("tts_text") or seg.get("text") or "").strip()
-    if ssml.lstrip().startswith("<speak"):
-        return ssml
-    return final
+    return _clean(final) or final
 
 
 def _resolve_review_warnings(
@@ -231,17 +326,16 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
         audit = audit_by_idx.get(i, {})
         seg = segments_data[i] if i < len(segments_data) else {}
         raw = str(audit.get("raw_translation") or "")
+        semantic = _resolve_semantic_text(seg, audit)
         final = _resolve_final_text(seg, audit)
-        naturalized = str(audit.get("naturalized_text") or final or "")
+        naturalized = str(audit.get("naturalized_text") or "").strip()
         if _is_ssml(naturalized):
-            naturalized = final
-        # Prefer post-semantic text when naturalizer left Marian unchanged —
-        # Review "Naturalized" should not look identical to Raw MT if later
-        # polish already improved the line.
-        semantic = str(audit.get("semantic_engine_text") or "").strip()
-        if (
+            naturalized = ""
+        if not naturalized:
+            naturalized = semantic or final
+        elif (
             semantic
-            and not _is_ssml(semantic)
+            and raw.strip()
             and naturalized.strip() == raw.strip()
             and semantic != raw.strip()
         ):
@@ -289,6 +383,49 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
 
         quality_score = float(audit.get("quality_score") or qd.get("quality_score") or 0)
 
+        slot_ms_val = float(seg.get("slot_ms") or audit.get("duration_ms") or 0)
+        playback_ms_val = float(
+            seg.get("playback_duration") or seg.get("tts_ms") or 0
+        )
+        try:
+            from engines.translation_review_diagnostics import (
+                build_segment_diagnostics,
+                quality_breakdown,
+            )
+
+            diagnostics = build_segment_diagnostics(
+                seg=seg,
+                audit=audit,
+                text=final or text_for_tts,
+                original=original,
+                slot_ms=slot_ms_val,
+                tts_ms=playback_ms_val,
+                tgt_lang=str(tgt_lang or "uk"),
+                warnings=warnings,
+            )
+            entity_ok = not diagnostics.get("entity_risk")
+            q_break = quality_breakdown(
+                quality_score=quality_score,
+                quality_analysis=quality_analysis if isinstance(quality_analysis, dict) else {},
+                duration_match_score=int(
+                    seg.get("duration_match_score")
+                    or (seg.get("text_adaptation_trace") or {}).get("duration_match_score")
+                    or 0
+                ),
+                qd=qd if isinstance(qd, dict) else {},
+                entity_ok=entity_ok,
+            )
+        except Exception:
+            diagnostics = {}
+            q_break = {
+                "translation": round(quality_score, 1),
+                "naturalness": round(quality_score, 1),
+                "entities": 100.0,
+                "timing": 0.0,
+                "tts": 0.0,
+                "overall": round(quality_score, 1),
+            }
+
         rows.append(
             {
                 "index": i + 1,
@@ -306,10 +443,165 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
                 "text_for_tts": text_for_tts,
                 "tts_text": text_for_tts,
                 "ui_matches_tts": final == text_for_tts or not tts_synthesized,
-                "playback_duration_ms": float(
-                    seg.get("playback_duration") or seg.get("tts_ms") or 0
+                "playback_duration_ms": playback_ms_val,
+                "slot_ms": slot_ms_val,
+                "diagnostics": diagnostics,
+                "fill_pct": diagnostics.get("fill_pct", 0),
+                "fill_status": diagnostics.get("fill_status", "green"),
+                "status_label": diagnostics.get("status_label", ""),
+                "seg_advice": diagnostics.get("seg_advice", ""),
+                "seg_status": diagnostics.get("seg_status", ""),
+                "expected_tts_ms": diagnostics.get("expected_tts_ms", 0)
+                or int(seg.get("predicted_tts_ms") or 0),
+                "word_count": diagnostics.get("word_count", 0),
+                "overflow_ms": diagnostics.get("overflow_ms", 0)
+                or int(seg.get("predicted_overflow_ms") or 0),
+                "tts_ms": diagnostics.get("tts_ms", int(playback_ms_val)),
+                "slot_budget_ms": int(
+                    (seg.get("slot_budget") or {}).get("slot_ms")
+                    or slot_ms_val
+                    or 0
                 ),
-                "slot_ms": float(seg.get("slot_ms") or audit.get("duration_ms") or 0),
+                "safety_margin_ms": int(
+                    seg.get("safety_margin_ms")
+                    or (seg.get("slot_budget") or {}).get("safety_margin_ms")
+                    or max(
+                        0,
+                        int(slot_ms_val)
+                        - int(
+                            diagnostics.get("expected_tts_ms")
+                            or seg.get("predicted_tts_ms")
+                            or playback_ms_val
+                            or 0
+                        ),
+                    )
+                ),
+                "original_char_len": len(original),
+                "translation_char_len": len(final or text_for_tts or ""),
+                "estimated_speech_ms": int(
+                    diagnostics.get("expected_tts_ms")
+                    or seg.get("predicted_tts_ms")
+                    or diagnostics.get("tts_ms")
+                    or 0
+                ),
+                "sync_status": str(seg.get("sync_status") or ""),
+                "text_adaptation_reason": str(
+                    seg.get("text_adaptation_reason") or ""
+                ),
+                "audio_strategy_reason": str(
+                    seg.get("audio_strategy_reason") or ""
+                ),
+                "residual_overflow_ms": int(
+                    seg.get("residual_overflow_ms")
+                    or (
+                        max(
+                            0,
+                            int(
+                                seg.get("playback_duration")
+                                or seg.get("tts_ms")
+                                or 0
+                            )
+                            - int(seg.get("slot_ms") or 0),
+                        )
+                        if int(seg.get("slot_ms") or 0) > 0
+                        else int(seg.get("predicted_overflow_ms") or 0)
+                    )
+                ),
+                "slot_strategy_reason": str(
+                    seg.get("slot_strategy_reason")
+                    or (seg.get("slot_budget") or {}).get("reason")
+                    or ""
+                ),
+                "scheduler_reason": str(seg.get("scheduler_reason") or ""),
+                "adaptation_uuid": str(seg.get("adaptation_uuid") or ""),
+                "translation_uuid": str(seg.get("translation_uuid") or ""),
+                "segment_id": str(seg.get("segment_id") or ""),
+                "text_fits": diagnostics.get("text_fits", final),
+                "text_overflow": diagnostics.get("text_overflow", ""),
+                "algorithms": diagnostics.get("algorithms") or [],
+                "quality_breakdown": q_break,
+                "speech_end": diagnostics.get("speech_end") or {},
+                "meaning_loss_risk": bool(diagnostics.get("meaning_loss_risk")),
+                "entity_risk": bool(diagnostics.get("entity_risk")),
+                "voice_truncated": bool(diagnostics.get("voice_truncated")),
+                "voice_finished_naturally": bool(
+                    diagnostics.get("voice_finished_naturally", True)
+                ),
+                "manual_review_required": bool(
+                    diagnostics.get("manual_review_required")
+                    or seg.get("needs_manual_review")
+                ),
+                "dsal_delta_ms": int(
+                    seg.get("dsal_delta_ms")
+                    or (seg.get("text_adaptation_trace") or {}).get("speech_difference_ms")
+                    or 0
+                ),
+                "dsal_band": str(
+                    seg.get("dsal_band")
+                    or (seg.get("text_adaptation_trace") or {}).get("dsal_band")
+                    or ""
+                ),
+                "dsal_applied": bool(
+                    seg.get("dsal_applied")
+                    or (seg.get("text_adaptation_trace") or {}).get("executed")
+                    or any(
+                        str(stage).startswith("dsal")
+                        for stage in (seg.get("adaptation_stages") or [])
+                    )
+                ),
+                "meaning_fit_applied": bool(seg.get("meaning_fit_applied")),
+                "meaning_fit_attempted": bool(seg.get("meaning_fit_attempted")),
+                "meaning_fit_status": str(seg.get("meaning_fit_status") or ""),
+                "meaning_fit_reason": str(
+                    seg.get("meaning_fit_reason")
+                    or seg.get("text_adaptation_reason")
+                    or ""
+                ),
+                "dsal_skip_reason": str(
+                    seg.get("dsal_skip_reason")
+                    or (seg.get("text_adaptation_trace") or {}).get("dsal_skip_reason")
+                    or task_info.get("dsal_skip_reason")
+                    or ""
+                ),
+                "trh": seg.get("trh") or audit.get("trh") or {},
+                "dirty_mt_score": audit.get("dirty_mt_score")
+                or (seg.get("trh") or {}).get("dirty_mt_score"),
+                "naturalizer_skip_reason": str(
+                    audit.get("naturalizer_skip_reason")
+                    or (seg.get("trh") or {}).get("naturalizer_skip_reason")
+                    or ""
+                ),
+                "retry_count": int(
+                    audit.get("retry_count")
+                    or (seg.get("trh") or {}).get("retry_count")
+                    or 0
+                ),
+                "judge_used": bool(
+                    audit.get("judge_used")
+                    or (seg.get("trh") or {}).get("judge_used")
+                ),
+                "duration_match_score": int(
+                    seg.get("duration_match_score")
+                    or (seg.get("text_adaptation_trace") or {}).get("duration_match_score")
+                    or 0
+                ),
+                "clause_coverage": float(seg.get("clause_coverage") or 0),
+                "expand_required": bool(seg.get("expand_required")),
+                "needs_studio": bool(
+                    seg.get("needs_studio") or task_info.get("needs_studio")
+                ),
+                "needs_manual_review": bool(
+                    seg.get("needs_manual_review")
+                    or diagnostics.get("manual_review_required")
+                    or diagnostics.get("voice_truncated")
+                    or i in set(task_info.get("tps_manual_indices") or [])
+                ),
+                "tqe_status": str(seg.get("tqe_status") or audit.get("tqe_status") or ""),
+                "tps_path": str(seg.get("tps_path") or audit.get("tps_path") or ""),
+                "approved_text": str(seg.get("approved_text") or "").strip(),
+                "lock_gate_ok": seg.get("lock_gate_ok"),
+                "lock_gate_failed": seg.get("lock_gate_failed"),
+                "translation_locked": bool(seg.get("translation_locked")),
                 "post_tts_retries": int(
                     (seg.get("post_tts_retry") or {}).get("attempts") or 0
                 ),
@@ -375,6 +667,11 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
         "trace_log": task_info.get("translation_trace_log"),
         "final_dub_qa": task_info.get("final_dub_qa"),
         "post_tts_qa": task_info.get("post_tts_qa"),
+        "needs_studio": bool(task_info.get("needs_studio")),
+        "translation_lock_deferred": bool(task_info.get("translation_lock_deferred")),
+        "tps": bool(task_info.get("tps")),
+        "tps_manual_indices": list(task_info.get("tps_manual_indices") or []),
+        "tps_metrics": task_info.get("tps_metrics"),
         "segments": rows,
     }
 
@@ -444,6 +741,25 @@ def export_review_text(review: dict[str, Any]) -> str:
             lines.append(f"Engine:        {row.get('engine')}")
         if row.get("quality_score") is not None:
             lines.append(f"Quality Score: {row.get('quality_score')}")
+        if row.get("slot_ms"):
+            lines.append(
+                f"Slot/Delta/Band: {int(row.get('slot_ms') or 0)}ms / "
+                f"{int(row.get('dsal_delta_ms') or 0)}ms / "
+                f"{row.get('dsal_band') or '—'}"
+            )
+        if row.get("dsal_applied") is not None or row.get("meaning_fit_attempted"):
+            lines.append(
+                f"DSAL: applied={row.get('dsal_applied')} "
+                f"match={row.get('duration_match_score')} "
+                f"clause={row.get('clause_coverage')} "
+                f"expand_required={row.get('expand_required')}"
+            )
+        if row.get("meaning_fit_attempted") or row.get("meaning_fit_status"):
+            lines.append(
+                f"Meaning Fit: applied={row.get('meaning_fit_applied')} "
+                f"status={row.get('meaning_fit_status') or '—'} "
+                f"reason={row.get('meaning_fit_reason') or '—'}"
+            )
         if row.get("english_word_count"):
             lines.append(f"English words: {row.get('english_word_count')} ({row.get('english_word_pct')}%)")
         if row.get("mixed_language_pct"):

@@ -191,25 +191,40 @@ def test_format_runtime_pipeline_block_skip_reasons():
     assert "skip_reason=fits_without_change" in text
 
 
-def test_build_quality_analysis_over_shortening_detail():
-    long_raw = (
-        "Але, коли він їхав, Джордж-молодший не міг позбутися відчуття, "
-        "що йому справді страшно їхати туди, і це його дуже турбувало."
-    )
-    short_final = "Але, коли він їхав, Джордж-молодший не міг позбутися відчуття."
+def test_build_quality_analysis_en_uk_word_count_is_info_only():
+    """Final v3.0 Q1: en vs uk word-count must NOT raise «Сокращено X%» warning/error."""
     qa = build_quality_analysis(
-        original="But, as he was driving, George Jr. could not help but feel dread.",
-        raw=long_raw,
-        naturalized=long_raw,
-        final=short_final,
-        tts_text=short_final,
+        original="But, as he was driving, George Jr. could not help but feel dread about going there.",
+        raw="Але, коли він їхав, Джордж-молодший не міг позбутися відчуття страху.",
+        naturalized="Але, коли він їхав, Джордж-молодший не міг позбутися відчуття страху.",
+        final="Але, коли він їхав, Джордж-молодший не міг позбутися відчуття страху.",
+        tts_text="Але, коли він їхав, Джордж-молодший не міг позбутися відчуття страху.",
         source_lang="en",
         target_lang="uk",
     )
     over = [r for r in qa["reasons"] if r["code"] == "over_shortening"]
-    assert over
-    assert "Сокращено" in over[0]["summary"]
-    assert "meaning_loss_risk" in over[0]["detail"]
+    assert not over
+    infos = [r for r in qa["reasons"] if r["code"] == "word_count_info"]
+    # May or may not emit INFO depending on delta; never WARNING with «Сокращено»
+    for r in qa["reasons"]:
+        assert "Сокращено" not in r.get("summary", "")
+        if r["code"] == "word_count_info":
+            assert r["severity"] == "info"
+
+
+def test_build_quality_analysis_meaning_loss_still_flagged():
+    qa = build_quality_analysis(
+        original="George Lucas studied film at USC and later created Star Wars.",
+        raw="Джордж.",
+        naturalized="Джордж.",
+        final="Джордж.",
+        tts_text="Джордж.",
+        source_lang="en",
+        target_lang="uk",
+    )
+    meaning = [r for r in qa["reasons"] if r["code"] == "meaning_or_clause_loss"]
+    assert meaning
+    assert meaning[0]["severity"] in {"warning", "error"}
 
 
 def test_build_pipeline_stage_report_natural_and_timing():

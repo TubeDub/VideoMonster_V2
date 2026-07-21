@@ -228,4 +228,11 @@ class TranslationQualityLog:
         return self.path
 
     def records_as_dicts(self) -> list[dict[str, Any]]:
-        return [asdict(r) for r in self._records]
+        rows: list[dict[str, Any]] = []
+        for rec in self._records:
+            row = asdict(rec)
+            sem = str(row.get("semantic_text") or "").strip()
+            if sem and not row.get("semantic_engine_text"):
+                row["semantic_engine_text"] = sem
+            rows.append(row)
+        return rows

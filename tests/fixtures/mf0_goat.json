@@ -1,0 +1,40 @@
+{
+  "phase": "MF0",
+  "name": "goat",
+  "description": "Meaning Fit red fixture: paraphrase OK vs truncate/audio-trim BAD",
+  "en_slot_text": "The goat was grazing on that hill and eating grass",
+  "slot_ms": 2500,
+  "long_uk": "Коза паслась на тій горі і їла траву",
+  "short_paraphrase_uk": "Коза паслась там на лугу",
+  "bad_truncate_uk": "Коза паслась на тій",
+  "bad_outcomes": {
+    "overflow_without_paraphrase": {
+      "text_uk": "Коза паслась на тій горі і їла траву",
+      "slot_ms": 2500,
+      "estimated_ms": 3300,
+      "residual_overflow_ms": 800,
+      "status": "SUCCESS",
+      "success": true,
+      "text_adaptation_reason": "",
+      "meaning_fit_status": "",
+      "paraphrase_applied": false
+    },
+    "truncate_as_meaning_fit_success": {
+      "text_uk": "Коза паслась на тій",
+      "source_uk": "Коза паслась на тій горі і їла траву",
+      "slot_ms": 2500,
+      "method": "truncate_to_n_chars",
+      "meaning_fit_status": "success",
+      "text_adaptation_reason": "semantic_paraphrase",
+      "success": true
+    },
+    "audio_trim_as_semantic_paraphrase": {
+      "text_uk": "Коза паслась на тій горі і їла траву",
+      "text_unchanged": true,
+      "audio_strategy_reason": "trim",
+      "text_adaptation_reason": "semantic_paraphrase",
+      "meaning_fit_status": "success",
+      "success": true
+    }
+  }
+}

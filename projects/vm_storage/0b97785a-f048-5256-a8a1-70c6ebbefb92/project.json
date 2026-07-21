@@ -1,0 +1,78 @@
+{
+  "project_id": "0b97785a-f048-5256-a8a1-70c6ebbefb92",
+  "title": "0b97785a-f048-5256-a8a1-70c6ebbefb92",
+  "storage_version": 1,
+  "created_at": 1783998051.35579,
+  "updated_at": 1783998051.379599,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "447cb500de734c9c8c3fd5e82d0ad47b",
+  "legacy_project_uuid": "",
+  "studio_session": {
+    "session_id": "447cb500de734c9c8c3fd5e82d0ad47b",
+    "task_id": "447cb500de734c9c8c3fd5e82d0ad47b",
+    "segments": [],
+    "timing_map": [],
+    "source_segments": [],
+    "tracks": {
+      "original": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Original Voice",
+        "i18n_key": "studio.track.original",
+        "color": "#22c55e"
+      },
+      "user_voice": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "User Voice",
+        "i18n_key": "studio.track.user_voice",
+        "color": "#ec4899"
+      },
+      "music": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Music",
+        "i18n_key": "studio.track.music",
+        "color": "#a855f7"
+      },
+      "sfx": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "SFX",
+        "i18n_key": "studio.track.sfx",
+        "color": "#64748b"
+      },
+      "tts": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Dub Voice",
+        "i18n_key": "studio.track.dub",
+        "color": "#f59e0b"
+      }
+    },
+    "voice": "ru-RU-DmitryNeural",
+    "lang": "ru",
+    "plugin_order": [
+      "eq",
+      "compressor"
+    ],
+    "duration_ms": 120000,
+    "video_path": "",
+    "video_preview": null,
+    "original_audio": null,
+    "task_status": "running",
+    "output_file": null,
+    "studio_url": "/studio?task_id=447cb500de734c9c8c3fd5e82d0ad47b"
+  },
+  "tdproj": {},
+  "metadata": {},
+  "source": "legacy_studio_session",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\studio_sessions\\447cb500de734c9c8c3fd5e82d0ad47b.json"
+}

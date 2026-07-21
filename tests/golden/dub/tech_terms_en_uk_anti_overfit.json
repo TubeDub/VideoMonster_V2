@@ -1,0 +1,20 @@
+{
+  "id": "tech_terms_en_uk_anti_overfit",
+  "source_lang": "en",
+  "target_lang": "uk",
+  "notes": "Anti-overfit — tech/domain terms unrelated to George Lucas film.",
+  "segments": [
+    {
+      "index": 1,
+      "en": "The API server returned a 500 error after the database timeout.",
+      "uk_must_not": ["Жр", "Джордж", "Lucas", "гончар"],
+      "uk_should_contain_any": ["сервер", "помилк", "баз", "таймаут", "API"]
+    },
+    {
+      "index": 2,
+      "en": "Please restart the application and clear the browser cache.",
+      "uk_must_not": ["Жр", "Джер", "міст"],
+      "uk_should_contain_any": ["перезапуст", "кеш", "застосунок", "браузер"]
+    }
+  ]
+}

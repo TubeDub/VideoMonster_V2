@@ -1,0 +1,15 @@
+{
+  "domain": "Cloud",
+  "configuration_uuid": "2e5cd598-f4de-4ecc-926e-2c8260017907",
+  "version": "1.0.0",
+  "created": 1783881030.1185312,
+  "updated": 1783881030.1185315,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "mode": "local",
+    "backup": true
+  }
+}

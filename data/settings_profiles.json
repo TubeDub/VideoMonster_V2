@@ -1,0 +1,50 @@
+{
+  "profiles": {
+    "Movie": {
+      "style": "Movie",
+      "tempo": 1.0,
+      "emotion": "calm",
+      "dub_mode": "cinema"
+    },
+    "Anime": {
+      "style": "Anime",
+      "tempo": 1.12,
+      "emotion": "joy",
+      "dub_mode": "expressive"
+    },
+    "Podcast": {
+      "style": "Podcast",
+      "tempo": 1.05,
+      "emotion": "calm",
+      "dub_mode": "talk"
+    },
+    "YouTube": {
+      "style": "News",
+      "tempo": 1.08,
+      "emotion": "calm",
+      "dub_mode": "web"
+    },
+    "Interview": {
+      "style": "Interview",
+      "tempo": 1.02,
+      "emotion": "calm",
+      "dub_mode": "dialogue"
+    },
+    "Kids": {
+      "style": "Anime",
+      "tempo": 1.0,
+      "emotion": "joy",
+      "dub_mode": "kids"
+    },
+    "Documentary": {
+      "style": "Documentary",
+      "tempo": 0.95,
+      "emotion": "calm",
+      "dub_mode": "doc"
+    },
+    "CustomTest": {
+      "style": "Movie",
+      "tempo": 1.0
+    }
+  }
+}

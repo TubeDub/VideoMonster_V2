@@ -1,4 +1,4 @@
-"""Argos Translate wrapper — delegates to engines/translation.py."""
+"""Argos Translate wrapper — calls ArgosEngine directly (sentence-safe)."""
 
 from __future__ import annotations
 
@@ -21,18 +21,28 @@ class ArgosTranslator(BaseTranslator):
             return False
 
     def translate(self, text: str, source: str, target: str) -> str:
-        from engines.translation import translate_text
-
         clean = str(text or "").strip()
         if not clean:
             return ""
         try:
-            return translate_text(clean, source, target)
+            from engines.mt.argos_engine import ArgosEngine
+
+            result = ArgosEngine().translate(clean, source, target)
+            out = str(result.text or "").strip()
+            if out:
+                return out
+            if result.error:
+                logger.warning("ArgosEngine empty: %s", result.error)
         except Exception as exc:
-            logger.warning("Argos translate failed: %s", exc)
+            logger.warning("ArgosEngine failed: %s", exc)
+
+        # Fallback: legacy translate_text path
+        try:
+            from engines.translation import translate_text
+
+            return str(translate_text(clean, source, target) or "").strip()
+        except Exception as exc:
+            logger.warning("Argos legacy translate failed: %s", exc)
             from engines.mt.argos_engine import translate_argos
 
-            result = translate_argos(clean, source, target)
-            if result:
-                return result
-            raise
+            return str(translate_argos(clean, source, target) or "").strip()

@@ -43,12 +43,20 @@ def test_resolve_model_falls_back_to_qwen(app_dir, monkeypatch):
     assert model == "qwen2.5:3b"
 
 
-def test_resolve_model_honors_env_override(app_dir, monkeypatch):
+def test_resolve_model_honors_env_override_when_installed(app_dir, monkeypatch):
     from engines.llm_providers.registry import resolve_model
 
     monkeypatch.setenv("VM_TRANSLATE_MODEL", "llama3.1:8b")
-    model = resolve_model([], app_dir=app_dir)
+    model = resolve_model(["llama3.1:8b", "qwen2.5:7b"], app_dir=app_dir)
     assert model == "llama3.1:8b"
+
+
+def test_resolve_model_rejects_unverified_env_without_tags(app_dir, monkeypatch):
+    from engines.llm_providers.registry import resolve_model
+
+    monkeypatch.setenv("VM_TRANSLATE_MODEL", "llama3.1:8b")
+    model = resolve_model([], provider="ollama", app_dir=app_dir)
+    assert model == ""
 
 
 def test_resolve_model_uses_persisted_provider(app_dir, monkeypatch):

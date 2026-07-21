@@ -1,0 +1,14 @@
+{
+  "domain": "Decision",
+  "configuration_uuid": "068a70ce-cd58-4385-b85e-637ede0ca3d9",
+  "version": "1.0.0",
+  "created": 1783881030.1184237,
+  "updated": 1783881030.1184244,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "profile": "Movie"
+  }
+}

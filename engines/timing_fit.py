@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 # ─── Quality-first constants ──────────────────────────────────────────────────
 # atempo is the LAST RESORT — listener must not hear unnatural speed.
 # Priority: natural speech > stress marks > lip sync > exact duration match.
-_ATEMPO_MIN = 0.92
+_ATEMPO_MIN = 0.95  # TZ v4.0 P2: ±5% audio fit after LOCK
 _ATEMPO_ABSOLUTE_MAX = 1.05      # hard ceiling — was 1.18; capped at barely-noticeable
+_ATEMPO_EMERGENCY_MAX = 1.12     # red overflow >15% after DSAL exhausted
 DUB_MAX_ATEMPO = 1.05            # per-segment cap  — was 1.15
 DUB_SLOT_TOLERANCE_MS = 75
 
@@ -210,6 +211,70 @@ def trim_trailing_silence(
     return audio[:last_end], trimmed_ms
 
 
+def trim_audio_to_cap_word_safe(
+    audio: AudioSegment,
+    hard_cap_ms: int,
+    *,
+    lookback_ms: int = 520,
+    min_keep_ms: int = 180,
+    silence_thresh: int = _PAUSE_COMPRESS_THRESH,
+    min_silence_len: int = 55,
+    fade_ms: int = 45,
+) -> tuple[AudioSegment, str]:
+    """Cap overflow audio at a silence / word boundary — avoid mid-phoneme chops.
+
+    Hard ``audio[:hard_cap]`` cuts spoken syllables in half (user hears «маши»,
+    «історі», «зосередитис»). Prefer the end of the last nonsilent chunk that
+    finishes before the cap; only fall back to a raw hard cut when no pause
+    exists in the lookback window.
+    """
+    cap = max(0, int(hard_cap_ms))
+    if cap <= 0:
+        return AudioSegment.silent(duration=0), "trim_overlap_empty"
+    if len(audio) <= cap:
+        return audio, "none"
+
+    window_start = max(int(min_keep_ms), cap - max(80, int(lookback_ms)))
+    head = audio[:cap]
+    ranges = detect_nonsilent(
+        head, min_silence_len=min_silence_len, silence_thresh=silence_thresh
+    )
+    cut_at = cap
+    tag = "trim_overlap_hard"
+    if ranges:
+        last_start, last_end = int(ranges[-1][0]), int(ranges[-1][1])
+        # Silence already at the tail of the cap window — cut after speech.
+        if last_end < cap - 12 and last_end >= min_keep_ms:
+            cut_at = last_end
+            tag = "trim_overlap_silence"
+        else:
+            # Speech crosses the boundary: drop the overflowing chunk, keep
+            # the previous complete nonsilent span ending inside lookback.
+            cut_candidate: int | None = None
+            for i in range(len(ranges) - 1, -1, -1):
+                _s, end_i = int(ranges[i][0]), int(ranges[i][1])
+                if end_i <= cap and end_i >= window_start and end_i >= min_keep_ms:
+                    # If this chunk itself runs into the cap, prefer previous.
+                    if end_i >= cap - 12 and i > 0:
+                        prev_end = int(ranges[i - 1][1])
+                        if prev_end >= min_keep_ms:
+                            cut_candidate = prev_end
+                            break
+                    cut_candidate = end_i
+                    break
+            if cut_candidate is None and last_start >= min_keep_ms and last_start < cap:
+                # Cut at the start of the overflowing word/chunk.
+                cut_candidate = last_start
+            if cut_candidate is not None and cut_candidate >= min_keep_ms:
+                cut_at = cut_candidate
+                tag = "trim_overlap_word_boundary"
+
+    out = audio[: max(min_keep_ms, min(cut_at, cap))]
+    if fade_ms > 0 and len(out) > fade_ms + 30:
+        out = out.fade_out(min(int(fade_ms), max(20, len(out) // 5)))
+    return out, tag
+
+
 def prepare_dub_segment_audio(
     tts_path: str | Path,
     slot_ms: int,
@@ -324,27 +389,31 @@ def compress_internal_pauses(
     return out, saved
 
 
+def _atempo_hard_cap(max_atempo: float) -> float:
+    """Allow up to emergency 1.12 when caller requests it; else ±5%."""
+    requested = float(max_atempo)
+    if requested > _ATEMPO_ABSOLUTE_MAX + 0.001:
+        return max(1.0, min(_ATEMPO_EMERGENCY_MAX, requested))
+    return max(1.0, min(_ATEMPO_ABSOLUTE_MAX, requested))
+
+
 def _gentle_atempo_factor(need: float, *, max_atempo: float = _ATEMPO_ABSOLUTE_MAX) -> float:
     """
-    Minimal speech speed-up — LAST RESORT; never exceed 1.05x.
-    need = tts_ms / slot_ms (>1 means doesn't fit).
-    Gentle curve: at 1.10 overflow we still only apply 1.04x
-    so the listener never perceives a "rushed" delivery.
+    Minimal speech speed-up — LAST RESORT.
+    Default ±5%; emergency path may request up to 1.12 for red overflow >15%.
     """
-    cap = max(1.0, min(_ATEMPO_ABSOLUTE_MAX, float(max_atempo)))
+    cap = _atempo_hard_cap(max_atempo)
     if need <= 1.0:
         return 1.0
-    # Very soft ramp: stay under 1.03 for small overflows
     if need <= 1.04:
         return min(need, min(1.02, cap))
     if need <= 1.08:
         return min(need, min(1.04, cap))
-    # For anything larger: apply cap (1.05) and let gap_absorb or shorten handle the rest
     return min(need, cap)
 
 
 def _atempo(in_path: Path, tempo: float, out_path: Path, *, max_atempo: float = _ATEMPO_ABSOLUTE_MAX) -> None:
-    cap = max(_ATEMPO_MIN, min(_ATEMPO_ABSOLUTE_MAX, float(max_atempo)))
+    cap = max(_ATEMPO_MIN, _atempo_hard_cap(max_atempo))
     tempo = max(_ATEMPO_MIN, min(cap, tempo))
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
@@ -450,18 +519,25 @@ def fit_segment_audio(
 
     if cur_ms > effective_slot and allow_atempo:
         need = cur_ms / max(effective_slot, 1)
-        atempo = _gentle_atempo_factor(need, max_atempo=max_atempo)
+        overflow_pct = (cur_ms - effective_slot) / max(effective_slot, 1)
+        effective_max = float(max_atempo)
+        # After DSAL: red overflow >15% may use emergency ±12% audio fit.
+        if overflow_pct > 0.15:
+            effective_max = max(effective_max, _ATEMPO_EMERGENCY_MAX)
+        atempo = _gentle_atempo_factor(need, max_atempo=effective_max)
         if atempo > 1.001:
             tmp = work / f"{src.stem}_spd.wav"
-            _atempo(cur, atempo, tmp, max_atempo=max_atempo)
+            _atempo(cur, atempo, tmp, max_atempo=effective_max)
             cur, audio, cur_ms = (
                 tmp,
                 AudioSegment.from_file(str(tmp)),
                 len(AudioSegment.from_file(str(tmp))),
             )
-            strategy = "atempo_gentle" if strategy == "none" else strategy + "+atempo_gentle"
+            tag = "atempo_emergency" if effective_max > _ATEMPO_ABSOLUTE_MAX + 0.001 else "atempo_gentle"
+            strategy = tag if strategy == "none" else strategy + f"+{tag}"
             logger.info(
-                "timing_fit: gentle atempo=%.3f (need=%.3f, slot=%dms, tts=%dms)",
+                "timing_fit: %s atempo=%.3f (need=%.3f, slot=%dms, tts=%dms)",
+                tag,
                 atempo,
                 need,
                 effective_slot,
@@ -480,9 +556,42 @@ def fit_segment_audio(
     if next_start is not None:
         hard_cap = min(hard_cap, max(180, next_start - slot_start))
     if fitted_ms > hard_cap and not no_speech_trim:
-        audio = audio[:hard_cap]
-        fitted_ms = len(audio)
-        strategy = strategy + "+trim_overlap" if strategy != "none" else "trim_overlap"
+        # Before chopping speech: emergency atempo toward hard_cap so we cut
+        # fewer trailing words (and avoid mid-syllable hard clips).
+        need_cap = fitted_ms / max(hard_cap, 1)
+        if need_cap > 1.02:
+            emergency = _gentle_atempo_factor(
+                need_cap, max_atempo=_ATEMPO_EMERGENCY_MAX
+            )
+            if emergency > 1.001:
+                tmp_em = work / f"{src.stem}_spd_cap.wav"
+                try:
+                    _atempo(cur, emergency, tmp_em, max_atempo=_ATEMPO_EMERGENCY_MAX)
+                    cur = tmp_em
+                    audio = AudioSegment.from_file(str(tmp_em))
+                    fitted_ms = len(audio)
+                    atempo = max(float(atempo), float(emergency))
+                    tag = "atempo_pre_trim"
+                    strategy = tag if strategy == "none" else strategy + f"+{tag}"
+                except Exception as exc:
+                    logger.debug("timing_fit: emergency atempo before trim failed: %s", exc)
+        if fitted_ms > hard_cap:
+            audio, trim_tag = trim_audio_to_cap_word_safe(audio, hard_cap)
+            fitted_ms = len(audio)
+            # Always keep legacy "trim_overlap" token for callers/tests.
+            extra = trim_tag if trim_tag != "trim_overlap_hard" else "trim_overlap"
+            if strategy == "none":
+                strategy = extra if extra == "trim_overlap" else f"trim_overlap+{extra}"
+            else:
+                strategy = strategy + "+trim_overlap"
+                if extra != "trim_overlap":
+                    strategy = strategy + f"+{extra}"
+            logger.info(
+                "timing_fit: %s hard_cap=%dms fitted=%dms (was overflow)",
+                trim_tag,
+                hard_cap,
+                fitted_ms,
+            )
     elif fitted_ms > hard_cap and no_speech_trim:
         strategy = strategy + "+no_trim_overflow" if strategy != "none" else "no_trim_overflow"
         logger.debug(

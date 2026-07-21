@@ -271,10 +271,19 @@ def guarantee_translation_completeness(
 
         if translated:
             bad, code = is_critical_language_mismatch(translated, target_lang=tgt, original=original)
-            if not bad:
+            collapsed = False
+            try:
+                from engines.mt.sentence_split import is_severe_mt_collapse
+
+                collapsed = is_severe_mt_collapse(original, translated)
+            except Exception:
+                collapsed = False
+            if not bad and not collapsed:
                 rows.append(row)
                 continue
-            row["fallback_reason"] = code or "language_mismatch"
+            row["fallback_reason"] = (
+                "severe_mt_collapse" if collapsed else (code or "language_mismatch")
+            )
 
         text, attempts = retry_segment_translation(
             original,

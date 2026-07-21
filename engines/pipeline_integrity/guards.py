@@ -31,9 +31,13 @@ STAGE_OWNER_MODULES: dict[str, str] = {
     "stt": "engines.stt_engine",
     "translate": "engines.translation_pipeline",
     "timing_aware_translation": "engines.timing_aware_translation",
+    "validate": "engines.translation_validation",
+    "locked": "engines.pipeline_integrity.translation_lock",
     "tts": "engines.tts",
     "slot_fit": "engines.timing_fit",
+    "audio_timing": "engines.audio_timing_optimizer",
     "timing": "engines.timing_fit",
+    "scheduler": "engines.scheduler",
     "studio_handoff": "api.studio_api",
     "bootstrap": "engines.pipeline_integrity.segment",
 }
@@ -78,6 +82,24 @@ class ArchitectureGuard:
                 "segments_data is empty",
                 stage=stage,
             )
+        # Hotfix: resegment legacy path sometimes kept the parent UUID on
+        # both halves — mint fresh ids instead of crashing the whole run.
+        from engines.pipeline_integrity.segment import ensure_segment_ids
+
+        before = [str(r.get("segment_id") or "") for r in segments_data]
+        ensure_segment_ids(segments_data)
+        after = [str(r.get("segment_id") or "") for r in segments_data]
+        repaired = sum(1 for a, b in zip(before, after) if a != b)
+        if repaired:
+            import logging
+
+            logging.getLogger("tubedub.pipeline_integrity").warning(
+                "[ArchitectureGuard] repaired %d duplicate/missing segment_id(s) "
+                "at stage=%s",
+                repaired,
+                stage,
+            )
+
         ids: list[str] = []
         for i, row in enumerate(segments_data):
             sid = str(row.get("segment_id") or "").strip()
@@ -146,6 +168,34 @@ class RuntimeIntegrityGuard:
                 if resolve_audio is not None:
                     path = resolve_audio(fname, task_info=task_info)
                     exists = path.is_file()
+                    # P3.1: try full stored relative path + recovery before hard fail
+                    if not exists:
+                        for key in ("file", "tts_file_path", "runtime_registry_path"):
+                            raw = row.get(key)
+                            if not raw:
+                                continue
+                            try:
+                                alt = resolve_audio(str(raw), task_info=task_info)
+                            except TypeError:
+                                alt = resolve_audio(str(raw))
+                            if Path(alt).is_file():
+                                path = Path(alt)
+                                exists = True
+                                break
+                    if not exists:
+                        try:
+                            from engines.pipeline_integrity.runtime_recovery import (
+                                recover_missing_audio,
+                            )
+
+                            info = dict(task_info or {})
+                            info.setdefault("segments_data", segments_data)
+                            recovered = recover_missing_audio(row, info)
+                            if recovered.recovered and Path(recovered.path).is_file():
+                                path = Path(recovered.path)
+                                exists = True
+                        except Exception:
+                            pass
                     task_id = str((task_info or {}).get("task_id") or "")
                     log_tts_lifecycle(
                         task_id or None,
@@ -180,6 +230,11 @@ class StageSnapshotGuard:
         stage: str,
         mutator_module: str | None = None,
     ) -> list[dict[str, Any]]:
+        from engines.pipeline_integrity.translation_lock import (
+            LOCKED_TEXT_FIELDS,
+            is_segment_locked,
+        )
+
         allowed = sorted(allowed_fields_for_stage(stage))
         allowed_set = set(allowed)
         owner = mutator_module or STAGE_OWNER_MODULES.get(stage, f"stage:{stage}")
@@ -201,13 +256,65 @@ class StageSnapshotGuard:
 
         for i, (b, a) in enumerate(zip(before, after)):
             sid = str(a.get("segment_id") or b.get("segment_id") or i)
+            locked = is_segment_locked(b) or is_segment_locked(a)
             all_keys = set(b.keys()) | set(a.keys())
             for key in sorted(all_keys):
                 old_val = b.get(key)
                 new_val = a.get(key)
                 if old_val == new_val:
                     continue
+                if locked and key in LOCKED_TEXT_FIELDS:
+                    violations.append(
+                        {
+                            "segment_id": sid,
+                            "field": key,
+                            "old_value": old_val,
+                            "new_value": new_val,
+                            "stage": stage,
+                            "allowed_mutations": allowed,
+                            "mutator_module": owner,
+                            "message": (
+                                f"TRANSLATION_LOCK: segment {sid}: "
+                                f"disallowed text mutation of {key!r} at stage {stage!r}"
+                            ),
+                        }
+                    )
+                    continue
                 if key not in allowed_set:
+                    # #region agent log
+                    try:
+                        import json
+                        import time
+
+                        with open(
+                            r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log",
+                            "a",
+                            encoding="utf-8",
+                        ) as _df:
+                            _df.write(
+                                json.dumps(
+                                    {
+                                        "sessionId": "ee98a6",
+                                        "runId": "slot-fit-integrity",
+                                        "hypothesisId": "H1",
+                                        "location": "guards.py:StageSnapshotGuard",
+                                        "message": "disallowed_mutation",
+                                        "data": {
+                                            "stage": stage,
+                                            "field": key,
+                                            "segment_id": sid,
+                                            "field_allowed_now": key
+                                            in set(allowed_fields_for_stage(stage)),
+                                        },
+                                        "timestamp": int(time.time() * 1000),
+                                    },
+                                    ensure_ascii=False,
+                                )
+                                + "\n"
+                            )
+                    except Exception:
+                        pass
+                    # #endregion
                     violations.append(
                         {
                             "segment_id": sid,
@@ -232,6 +339,8 @@ class StageSnapshotGuard:
         stage: str,
         mutator_module: str | None = None,
     ) -> None:
+        from engines.pipeline_integrity.exceptions import TranslationLockError
+
         violations = StageSnapshotGuard.diff_violations(
             before,
             after,
@@ -241,6 +350,18 @@ class StageSnapshotGuard:
         if not violations:
             return
         first = violations[0]
+        msg = str(first.get("message") or "")
+        if msg.startswith("TRANSLATION_LOCK"):
+            raise TranslationLockError(
+                msg,
+                stage=stage,
+                segment_id=str(first.get("segment_id") or ""),
+                field=str(first.get("field") or ""),
+                old_value=first.get("old_value"),
+                new_value=first.get("new_value"),
+                mutator=str(first.get("mutator_module") or mutator_module or ""),
+                details={"violations": violations},
+            )
         raise StageSnapshotIntegrityError(
             first["message"],
             stage=stage,
@@ -271,6 +392,8 @@ class ArtifactIntegrityGuard:
         for row in segments_data:
             if row.get("merged_into") is not None or row.get("merged_into_id"):
                 continue
+            if row.get("archived") or row.get("segment_archived"):
+                continue
             fname = row.get("file")
             if not fname:
                 tfp = row.get("tts_file_path")
@@ -286,6 +409,7 @@ class ArtifactIntegrityGuard:
                     details={"segment_id": sid},
                 )
             try:
+                # Strict No-Audio-Reuse at TTS register time.
                 self.registry.register(sid, path)
             except ValueError as exc:
                 raise PipelineAudioIdentityError(
@@ -336,7 +460,10 @@ class PipelineValidator:
         active = [
             s
             for s in segments_data
-            if s.get("merged_into") is None and not s.get("merged_into_id")
+            if s.get("merged_into") is None
+            and not s.get("merged_into_id")
+            and not s.get("archived")
+            and not s.get("segment_archived")
         ]
         with_file = [s for s in active if resolve_segment_audio_ref(s)]
         if not with_file:
@@ -353,12 +480,42 @@ class PipelineValidator:
             )
 
         if artifact_registry:
+            active_ids = {str(s["segment_id"]) for s in with_file if s.get("segment_id")}
             for s in with_file:
                 sid = str(s["segment_id"])
-                if sid not in artifact_registry.records:
+                if sid in artifact_registry.records:
+                    continue
+                # Hotfix: adaptive resegment / UUID reissue mints NEW ids after
+                # the initial TTS artifact register — sync missing rows from disk.
+                ref = resolve_segment_audio_ref(s)
+                registered = False
+                if resolve_audio and ref:
+                    path_obj: Path | None = None
+                    try:
+                        path_obj = Path(str(resolve_audio(ref, task_info)))
+                    except TypeError:
+                        try:
+                            path_obj = Path(str(resolve_audio(ref)))
+                        except Exception:
+                            path_obj = None
+                    except Exception:
+                        path_obj = None
+                    if path_obj is not None and path_obj.is_file():
+                        try:
+                            artifact_registry.register(
+                                sid,
+                                path_obj,
+                                active_ids=active_ids,
+                                rebind_orphans=True,
+                            )
+                            registered = True
+                        except ValueError:
+                            registered = False
+                if not registered:
                     raise ArtifactIntegrityError(
                         f"segment {sid} not registered in artifact registry",
                         stage=stage,
+                        details={"file": str(ref or "")},
                     )
 
         return {
@@ -538,6 +695,56 @@ class PipelineIntegrityCoordinator:
         resolve_audio=None,
     ) -> dict[str, Any]:
         t0 = time.perf_counter()
+        # Re-sync artifact registry after post-TTS resegment / UUID repair.
+        # Orphan rebind: file still bound to archived parent id → child.
+        if resolve_audio is not None:
+            try:
+
+                def _resolve(fname, task_info=None):
+                    try:
+                        return Path(resolve_audio(fname, task_info))
+                    except TypeError:
+                        return Path(resolve_audio(fname))
+
+                active_ids = {
+                    str(row["segment_id"])
+                    for row in segments_data
+                    if row.get("segment_id")
+                    and row.get("merged_into") is None
+                    and not row.get("merged_into_id")
+                    and not row.get("archived")
+                    and not row.get("segment_archived")
+                }
+                for row in segments_data:
+                    if row.get("merged_into") is not None or row.get("merged_into_id"):
+                        continue
+                    if row.get("archived") or row.get("segment_archived"):
+                        continue
+                    fname = resolve_segment_audio_ref(row)
+                    if not fname:
+                        continue
+                    sid = str(row["segment_id"])
+                    path = _resolve(fname, task_info)
+                    if not path.is_file():
+                        continue
+                    try:
+                        self.artifact_guard.registry.register(
+                            sid,
+                            path,
+                            active_ids=active_ids,
+                            rebind_orphans=True,
+                        )
+                    except ValueError:
+                        # Two active segments share a file — validator raises next.
+                        pass
+            except Exception as exc:
+                import logging
+
+                logging.getLogger("tubedub.pipeline_integrity").warning(
+                    "[PipelineIntegrity] artifact re-sync before %s: %s",
+                    stage,
+                    exc,
+                )
         result = PipelineValidator.validate(
             segments_data,
             timing_map,

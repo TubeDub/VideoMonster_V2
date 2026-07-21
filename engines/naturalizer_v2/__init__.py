@@ -11,4 +11,11 @@ __all__ = [
     "mask_segments",
     "restore_entities",
     "polish_segment_v2",
+    "catp_enabled",
 ]
+
+
+def catp_enabled() -> bool:
+    from engines.naturalizer_v2.catp import catp_enabled as _en
+
+    return _en()

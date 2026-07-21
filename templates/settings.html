@@ -72,6 +72,31 @@
     <div id="beta-diagnostics-box" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;min-height:48px;"></div>
   </div>
 
+  <!-- ── ДУБЛЯЖ / ОРИГИНАЛ ───────────────── -->
+  <div class="settings-card">
+    <h2>🎙 Дубляж — оригинальный голос</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">
+      Громкость английской (исходной) речи на фоне готового дубляжа. 0% — только дубляж.
+    </p>
+    <div class="field-group">
+      <label for="s-original-volume">Оригинал на фоне</label>
+      <div class="row-group" style="align-items:center;gap:12px;">
+        <input type="range" id="s-original-volume" min="0" max="100" value="20" step="5"
+          style="flex:1;min-width:160px;" oninput="onSettingsOriginalVolumeInput(this.value)" />
+        <span id="s-original-volume-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">20%</span>
+      </div>
+      <div class="row-group" style="flex-wrap:wrap;gap:6px;margin-top:8px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="setSettingsOriginalVolume(0)">0%</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="setSettingsOriginalVolume(10)">10%</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="setSettingsOriginalVolume(20)">20%</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="setSettingsOriginalVolume(30)">30%</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="setSettingsOriginalVolume(50)">50%</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="setSettingsOriginalVolume(70)">70%</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="setSettingsOriginalVolume(100)">100%</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── TTS ─────────────────────────────── -->
   <div class="settings-card">
     <h2>🔊 Озвучка (TTS)</h2>
@@ -510,9 +535,23 @@
   }
 
   /* ── НАСТРОЙКИ ── */
+  function onSettingsOriginalVolumeInput(val) {
+    const v = Math.max(0, Math.min(100, Number(val) || 0));
+    const lbl = document.getElementById('s-original-volume-label');
+    if (lbl) lbl.textContent = v + '%';
+  }
+
+  function setSettingsOriginalVolume(pct) {
+    const el = document.getElementById('s-original-volume');
+    const v = Math.max(0, Math.min(100, Number(pct) || 0));
+    if (el) el.value = String(v);
+    onSettingsOriginalVolumeInput(v);
+  }
+
   function saveSettings() {
     const prev = JSON.parse(localStorage.getItem('vm_settings') || '{}');
     const strictEl = document.getElementById('s-strict-llm-adaptation');
+    const origVolEl = document.getElementById('s-original-volume');
     const settings = {
       ...prev,
       voice: document.getElementById('s-voice').value,
@@ -521,6 +560,7 @@
       translateMode: document.getElementById('s-translate-mode').value,
       uiSounds: document.getElementById('s-ui-sounds').checked,
       strictLlmAdaptation: strictEl ? strictEl.value : (prev.strictLlmAdaptation || 'automatic'),
+      originalVolume: origVolEl ? Math.max(0, Math.min(100, Number(origVolEl.value) || 0)) : (prev.originalVolume ?? 20),
     };
     localStorage.setItem('vm_settings', JSON.stringify(settings));
     vmNotify('Настройки сохранены ✓', 'success', 2500);
@@ -1264,6 +1304,8 @@
     refreshLlmCapabilityLine();
     const uiSoundsEl = document.getElementById('s-ui-sounds');
     if (uiSoundsEl) uiSoundsEl.checked = saved.uiSounds !== false;
+    const origVol = saved.originalVolume != null ? Number(saved.originalVolume) : 20;
+    setSettingsOriginalVolume(Number.isFinite(origVol) ? origVol : 20);
     const uiLang = localStorage.getItem('vm_ui_lang') || 'ru';
     const uiSel = document.getElementById('settings-ui-lang');
     if (uiSel) uiSel.value = uiLang;

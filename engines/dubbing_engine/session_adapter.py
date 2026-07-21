@@ -152,13 +152,48 @@ def resolve_session_audio(
     default_dir: Path | None = None,
     segment_index: int | None = None,
 ) -> Path:
-    """Locate a segment audio file (session dir first, then legacy output/)."""
+    """Locate a segment audio file (session dir first, then legacy output/).
+
+    Accepts basename OR relative/absolute paths (e.g. output/sessions/.../pause/*.wav).
+    """
     if not filename:
         return Path()
-    name = Path(str(filename)).name
-    out_dir = default_dir or _DEFAULT_OUTPUT
+    raw = Path(str(filename))
+    name = raw.name
+    out_dir = Path(default_dir or _DEFAULT_OUTPUT)
     session_base = get_active_artifacts_dir(out_dir, task_info=task_info)
+    project_root = out_dir.parent if out_dir.name.lower() == "output" else out_dir
 
+    # 1) Absolute / already-valid path
+    if raw.is_file():
+        return raw.resolve()
+
+    # 2) Relative path with directories (pause/closed_loop/session layouts)
+    path_candidates: list[Path] = []
+    if len(raw.parts) > 1:
+        path_candidates.extend(
+            [
+                project_root / raw,
+                Path.cwd() / raw,
+                out_dir / raw,
+            ]
+        )
+        parts = raw.parts
+        if parts and parts[0].lower() == "output":
+            # output/sessions/... → <project>/output/sessions/... already covered;
+            # also try relative to out_dir by stripping the leading output/
+            path_candidates.append(out_dir / Path(*parts[1:]))
+            path_candidates.append(project_root / Path(*parts))
+        else:
+            path_candidates.append(session_base / raw)
+    for cand in path_candidates:
+        try:
+            if cand.is_file():
+                return cand.resolve()
+        except OSError:
+            continue
+
+    # 3) Basename in known roots
     search_dirs: list[Path] = []
     for directory in (session_base, out_dir):
         if directory not in search_dirs:
@@ -169,14 +204,52 @@ def resolve_session_audio(
         if candidate.is_file():
             return candidate
 
+    # 4) Recursive search under session (pause/, closed_loop/, post_tts_retry/, …)
+    search_roots: list[Path] = []
     if task_info:
         raw_session = task_info.get("session_dir")
         if raw_session:
-            retry_root = Path(str(raw_session)) / "post_tts_retry"
-            if retry_root.is_dir():
-                for hit in retry_root.rglob(name):
-                    if hit.is_file():
-                        return hit
+            search_roots.append(Path(str(raw_session)))
+        arts = task_info.get("artifacts_dir")
+        if arts:
+            search_roots.append(Path(str(arts)))
+    search_roots.extend([session_base, out_dir / "sessions", out_dir])
+    seen_roots: set[str] = set()
+    for root in search_roots:
+        key = str(root)
+        if key in seen_roots or not root.exists():
+            continue
+        seen_roots.add(key)
+        try:
+            for hit in root.rglob(name):
+                if hit.is_file() and hit.stat().st_size > 0:
+                    return hit.resolve()
+        except OSError:
+            continue
+
+    # 5) Segment row may still hold a full relative path — try it directly
+    if task_info:
+        for seg in task_info.get("segments_data") or []:
+            if not isinstance(seg, dict):
+                continue
+            for key in ("file", "fitted_file", "tts_file_path", "runtime_registry_path"):
+                alt = seg.get(key)
+                if not alt:
+                    continue
+                if Path(str(alt)).name != name:
+                    continue
+                alt_path = Path(str(alt))
+                if alt_path.is_file():
+                    return alt_path.resolve()
+                for base in (project_root, Path.cwd(), out_dir):
+                    cand = base / alt_path
+                    if cand.is_file():
+                        return cand.resolve()
+                    parts = alt_path.parts
+                    if parts and parts[0].lower() == "output":
+                        cand2 = out_dir / Path(*parts[1:])
+                        if cand2.is_file():
+                            return cand2.resolve()
 
     seg_idx = segment_index
     if seg_idx is None:
@@ -192,7 +265,7 @@ def resolve_session_audio(
         for seg in task_info.get("segments_data") or []:
             if int(seg.get("index", -1)) != seg_idx:
                 continue
-            for key in ("file", "fitted_file"):
+            for key in ("file", "fitted_file", "tts_file_path"):
                 alt_name = seg.get(key)
                 if not alt_name:
                     continue

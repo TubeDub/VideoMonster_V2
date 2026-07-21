@@ -44,6 +44,24 @@ class PipelineIdentityError(PipelineIntegrityError):
     code = "pipeline_identity"
 
 
+class IdentityMismatchError(PipelineIdentityError):
+    """v2.0 IdentityGuard chain mismatch — abort pipeline."""
+
+    code = "identity_mismatch"
+
+
+class SegmentImmutabilityError(PipelineIdentityError):
+    """PSA3 — text move/swap between existing segment_id values is forbidden."""
+
+    code = "segment_immutability"
+
+
+class RevisionManagerError(PipelineIdentityError):
+    """PSA5 — revision UUID / in-place mutate / sidecar mismatch."""
+
+    code = "revision_manager"
+
+
 class PipelineAudioIdentityError(PipelineIntegrityError):
     """One TTS file bound to multiple segment_id values (No Audio Reuse)."""
 
@@ -133,3 +151,97 @@ class PipelineValidationError(PipelineIntegrityError):
     """Final pipeline validator rejected project state."""
 
     code = "pipeline_validation"
+
+
+class PipelineStateError(PipelineIntegrityError):
+    """Illegal or reverse pipeline state transition."""
+
+    code = "pipeline_state"
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        stage: str = "",
+        from_state: str = "",
+        to_state: str = "",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        merged = dict(details or {})
+        if from_state:
+            merged.setdefault("from_state", from_state)
+        if to_state:
+            merged.setdefault("to_state", to_state)
+        super().__init__(message, stage=stage or "pipeline_state", details=merged)
+        self.from_state = from_state
+        self.to_state = to_state
+
+
+class ContractVersionError(PipelineIntegrityError):
+    """Contract version missing or mismatched."""
+
+    code = "contract_version"
+
+
+class TranslationLockError(PipelineIntegrityError):
+    """Attempt to mutate locked translation text after TRANSLATION LOCK."""
+
+    code = "translation_lock"
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        stage: str = "translation_lock",
+        segment_id: str = "",
+        field: str = "",
+        old_value: Any = None,
+        new_value: Any = None,
+        mutator: str = "",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        merged = dict(details or {})
+        merged.setdefault("segment_id", segment_id)
+        merged.setdefault("field", field)
+        merged.setdefault("old_value", old_value)
+        merged.setdefault("new_value", new_value)
+        merged.setdefault("mutator", mutator)
+        super().__init__(message, stage=stage, details=merged)
+        self.segment_id = segment_id
+        self.field = field
+        self.old_value = old_value
+        self.new_value = new_value
+        self.mutator = mutator
+
+
+class ArchitectureViolation(PipelineIntegrityError):
+    """MASTER TZ v3.0 — explicit architecture boundary breach (no silent fix).
+
+    Raised for ownership, LOCK, contract, or FSM violations when a dedicated
+    typed error is not already more specific. Prefer subclassing for domains;
+    this type is the TZ-named catch-all for governance and tests.
+    """
+
+    code = "architecture_violation"
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        stage: str = "architecture",
+        rule: str = "",
+        segment_id: str = "",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        merged = dict(details or {})
+        if rule:
+            merged.setdefault("rule", rule)
+        if segment_id:
+            merged.setdefault("segment_id", segment_id)
+        super().__init__(message, stage=stage, details=merged)
+        self.rule = rule
+        self.segment_id = segment_id
+
+
+# Alias: LOCK text mutations are architecture violations under TZ naming.
+ArchitectureViolation.TranslationLock = TranslationLockError  # type: ignore[attr-defined]

@@ -486,6 +486,24 @@ class UniversalTranslationPipeline:
             elif timing_map:
                 sub_timing = [timing_map[i] for i in group if i < len(timing_map)]
                 sub_parts = split_by_timing_map(tr_phrase, sub_timing)
+                # Prefer source-proportional split when sentence-safe split left
+                # empty tails (1 UK sentence → N Whisper fragments).
+                nonempty = sum(1 for p in sub_parts if str(p or "").strip())
+                if nonempty < len(group) and len(group) >= 2:
+                    from engines.pipeline_orchestrator.translation_batch import (
+                        TranslationBatch,
+                        split_batch_translation,
+                    )
+
+                    batch = TranslationBatch(
+                        batch_id=-1,
+                        segment_indices=list(group),
+                        source_texts=[
+                            str(source_segments[i] or "") for i in group
+                        ],
+                    )
+                    split_map = split_batch_translation(batch, tr_phrase)
+                    sub_parts = [split_map.get(i, "") for i in group]
                 for j, idx in enumerate(group):
                     part = sub_parts[j].strip() if j < len(sub_parts) else ""
                     raw_by_index[idx] = part
@@ -548,6 +566,21 @@ class UniversalTranslationPipeline:
             src_lang=src,
             tgt_lang=tgt,
         )
+
+        # Debleed identical batch MT on incomplete EN cuts (Fiat, / but …).
+        try:
+            from engines.translation_naturalizer import debleed_adjacent_batch_copies
+
+            _raw_list = [str(raw_by_index.get(i) or "") for i in range(len(segments))]
+            _debleeded = debleed_adjacent_batch_copies(
+                [str(source_segments[i] or "") for i in range(len(segments))],
+                _raw_list,
+            )
+            for i, text in enumerate(_debleeded):
+                if text != _raw_list[i]:
+                    raw_by_index[i] = text
+        except Exception as _debleed_exc:
+            logger.debug("raw debleed skipped: %s", _debleed_exc)
 
         from engines.translation_quality import diagnose_raw_mt
 
@@ -1061,6 +1094,15 @@ class UniversalTranslationPipeline:
                 )
                 recovery = "kept_semantic"
                 needs_llm = True
+                from engines.semantic_meaning import should_prefer_semantic_over_raw_mt
+
+                prefer_semantic = should_prefer_semantic_over_raw_mt(
+                    semantic=cur,
+                    raw_mt=raw_mt,
+                    source=src_text,
+                    fail_reason=str(fail.get("reason") or ""),
+                    app_dir=self.app_dir,
+                )
 
                 if raw_mt:
                     raw_bad, _ = is_critical_language_mismatch(
@@ -1074,7 +1116,10 @@ class UniversalTranslationPipeline:
                         source=src_text,
                         app_dir=self.app_dir,
                     )
-                    if not raw_bad and raw_ok:
+                    if prefer_semantic:
+                        recovery = "kept_semantic_over_short_raw_mt"
+                        needs_llm = True
+                    elif not raw_bad and raw_ok:
                         naturalized[idx] = raw_mt
                         recovery = "raw_mt_fallback"
                         needs_llm = False

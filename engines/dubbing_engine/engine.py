@@ -21,7 +21,7 @@ import logging
 import time
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from engines.dubbing_engine.types import (
     DubbingResult,
@@ -86,12 +86,18 @@ class DubbingEngine:
         task_id: str = "",
         content_mode: str = "movie",
         skip_text_adaptation: bool = False,
+        adapt_fn: Callable[..., str] | None = None,
+        duration_adapt_fn: Callable[..., str] | None = None,
     ) -> None:
         self.lang = lang
         self.app_dir = app_dir or Path(__file__).resolve().parent.parent.parent
         self.task_id = task_id
         self._run_id = uuid.uuid4().hex[:8]
         self._skip_text_adaptation = bool(skip_text_adaptation)
+        # Freeze P1: adapters are injected by Translation layer — Dub Engine
+        # must not import translation_adapt / SSO / ADA / ai_core itself.
+        self._adapt_fn = adapt_fn
+        self._duration_adapt_fn = duration_adapt_fn
 
         # Load mode profile
         try:
@@ -408,7 +414,7 @@ class DubbingEngine:
         stage_log: list[StageLog],
         round_: int = 1,
     ) -> str:
-        """Stage 2: text adaptation via SSO + ADA decision tree."""
+        """Stage 2: text adaptation via injected Translation-layer adapter (Freeze P1)."""
         t0 = time.perf_counter()
         if not text or slot_ms <= 0:
             stage_log.append(
@@ -451,43 +457,22 @@ class DubbingEngine:
         adapted = text
         method = "none"
 
-        # 2a. SSO (Smart Segment Optimizer) — rule-based shortening
-        # Only run if overflow is significant enough to justify restructuring
-        try:
-            from engines.smart_segment_optimizer import optimize_segment
-
-            result = optimize_segment(
-                text,
-                timing={"start": 0, "end": slot_ms},
-                source_hint=source_hint,
-                tgt_lang=self.lang,
-                src_lang="en",
-                max_level=5,
-            )
-            if result and result.changed and result.optimized:
-                adapted = result.optimized
-                method = f"sso_L{result.level_used}"
-        except Exception as exc:
-            logger.debug("[DubEngine] SSO error: %s", exc)
-
-        # 2b. ADA (Adaptive Dubbing Adapter) — 5-step semantic tree with 85% guard
-        if _predict_ms(adapted, self.lang) > pass_limit:
+        # Freeze P1: text adaptation only via injected Translation-layer adapter.
+        # Dub Engine must not import SSO / ADA / translation_adapt.
+        if self._adapt_fn is not None:
             try:
-                from engines.adaptive_dubbing_adapter import adapt_segment
-
-                # Use index from round_ as approximation (caller should pass real index)
-                result_ada = adapt_segment(
-                    adapted,
+                candidate = self._adapt_fn(
+                    text,
                     slot_ms=slot_ms,
-                    lang=self.lang,
                     source_hint=source_hint,
-                    segment_index=round_,
+                    lang=self.lang,
+                    round_=round_,
                 )
-                if result_ada.changed:
-                    adapted = result_ada.text
-                    method = f"{method}+ada" if method != "none" else "ada"
+                if candidate and candidate != text:
+                    adapted = str(candidate)
+                    method = "injected_adapt"
             except Exception as exc:
-                logger.debug("[DubEngine] ADA error: %s", exc)
+                logger.debug("[DubEngine] injected adapt error: %s", exc)
 
         applied = adapted != text
         stage_log.append(
@@ -642,44 +627,44 @@ class DubbingEngine:
                 self._max_atempo,
             )
             improved = False
-            try:
-                from engines.translation_adapt import adapt_for_duration
-
-                target_ms = int(slot_ms * _MAX_ATEMPO * 0.92)
-                candidate = adapt_for_duration(
-                    current,
-                    predicted,
-                    target_ms,
-                    source_hint,
-                    stage="strong",
-                    tgt_lang=self.lang,
-                )
-                if candidate and candidate != current:
-                    retention = _word_retention(text, candidate)
-                    if retention >= self._min_word_retention:
-                        # Accept — restore punctuation after adaptation
-                        candidate = _restore_punct(candidate)
-                        stage_log.append(
-                            StageLog(
-                                stage="voice",
-                                applied=True,
-                                before=current,
-                                after=candidate,
-                                note=f"round={round_} atempo={ratio:.2f}→re-adapted retention={retention:.2f}",
-                                elapsed_ms=(time.perf_counter() - t0) * 1000,
+            if self._duration_adapt_fn is not None:
+                try:
+                    target_ms = int(slot_ms * _MAX_ATEMPO * 0.92)
+                    candidate = self._duration_adapt_fn(
+                        current,
+                        predicted,
+                        target_ms,
+                        source_hint,
+                        lang=self.lang,
+                    )
+                    if candidate and candidate != current:
+                        retention = _word_retention(text, candidate)
+                        if retention >= self._min_word_retention:
+                            candidate = _restore_punct(str(candidate))
+                            stage_log.append(
+                                StageLog(
+                                    stage="voice",
+                                    applied=True,
+                                    before=current,
+                                    after=candidate,
+                                    note=(
+                                        f"round={round_} atempo={ratio:.2f}→re-adapted "
+                                        f"retention={retention:.2f}"
+                                    ),
+                                    elapsed_ms=(time.perf_counter() - t0) * 1000,
+                                )
                             )
-                        )
-                        current = candidate
-                        applied_any = True
-                        improved = True
-                    else:
-                        logger.debug(
-                            "[DubEngine] Stage 5 round %d: retention=%.2f < 0.60 — reject",
-                            round_,
-                            retention,
-                        )
-            except Exception as exc:
-                logger.debug("[DubEngine] Stage 5 adapt error: %s", exc)
+                            current = candidate
+                            applied_any = True
+                            improved = True
+                        else:
+                            logger.debug(
+                                "[DubEngine] Stage 5 round %d: retention=%.2f < 0.60 — reject",
+                                round_,
+                                retention,
+                            )
+                except Exception as exc:
+                    logger.debug("[DubEngine] Stage 5 adapt error: %s", exc)
             if not improved:
                 # No safe adaptation — signal timing stage to use video_adapt
                 stage_log.append(

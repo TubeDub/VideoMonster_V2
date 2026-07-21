@@ -1,0 +1,3 @@
+[2026-07-12T00:34:53.335754+00:00] stage_snapshot_check -> Status: OK | Meta: {'stage': 'tts'}
+[2026-07-12T00:36:20.780471+00:00] stage_snapshot_check -> Status: OK | Meta: {'stage': 'slot_fit'}
+2026-07-12 03:34:53 [INFO] tubedub.tts_handoff: [TTS] task=08ce44c0abd04dbc9a1eb330b5aeb03f

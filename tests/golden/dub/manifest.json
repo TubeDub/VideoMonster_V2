@@ -1,0 +1,77 @@
+{
+
+  "version": 1,
+
+  "targets": {
+
+    "films": 20,
+
+    "interviews": 100,
+
+    "dialogs": 1000,
+
+    "segments": 10000
+
+  },
+
+  "entries": [
+
+    {
+
+      "id": "george_lucas_en_uk_20",
+
+      "path": "george_lucas_en_uk_20.json",
+
+      "kind": "dialog",
+
+      "source_lang": "en",
+
+      "target_lang": "uk",
+
+      "segments": 20,
+
+      "suite": "dsal_v4_p1"
+
+    },
+
+    {
+
+      "id": "short_dialog_en_uk_anti_overfit",
+
+      "path": "short_dialog_en_uk_anti_overfit.json",
+
+      "kind": "dialog",
+
+      "source_lang": "en",
+
+      "target_lang": "uk",
+
+      "segments": 3,
+
+      "suite": "anti_overfit"
+
+    },
+
+    {
+
+      "id": "tech_terms_en_uk_anti_overfit",
+
+      "path": "tech_terms_en_uk_anti_overfit.json",
+
+      "kind": "dialog",
+
+      "source_lang": "en",
+
+      "target_lang": "uk",
+
+      "segments": 2,
+
+      "suite": "anti_overfit"
+
+    }
+
+  ]
+
+}
+
+

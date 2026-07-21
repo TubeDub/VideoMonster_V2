@@ -19,12 +19,18 @@ except Exception:
 
 NATURALIZER_VERSION = 2
 
+try:
+    from engines.tps.version import TPS_PIPELINE_VERSION
+except Exception:
+    TPS_PIPELINE_VERSION = 1
+
 
 def cache_versions() -> dict[str, int | str]:
     return {
         "v": CACHE_VERSION,
         "router_v": ROUTER_VERSION,
         "naturalizer_v": NATURALIZER_VERSION,
+        "tps_v": TPS_PIPELINE_VERSION,
     }
 
 
@@ -76,6 +82,8 @@ def _read_json(path: Path) -> dict[str, Any] | None:
         if int(data.get("router_v", 0)) != ROUTER_VERSION:
             return None
         if int(data.get("naturalizer_v", 0)) != NATURALIZER_VERSION:
+            return None
+        if int(data.get("tps_v", 0)) != int(TPS_PIPELINE_VERSION):
             return None
         return data
     except Exception as e:

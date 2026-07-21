@@ -1,0 +1,19 @@
+{
+  "domain": "Studio",
+  "configuration_uuid": "812564fc-9650-47e6-9c15-cc3da50a8570",
+  "version": "1.0.0",
+  "created": 1783881030.1184895,
+  "updated": 1783881030.1184897,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "views": [
+      "pipeline",
+      "timeline",
+      "review",
+      "decision"
+    ]
+  }
+}

@@ -84,7 +84,14 @@ class ArgosEngine(BaseMTEngine):
             return MTResult(text="", engine_id=self.id, error="no_model", offline=True)
 
         clean = " ".join(str(text or "").split())
-        parts = re.split(r"(?<=[.!?])\s+", clean)
+        from engines.mt.sentence_split import split_mt_sentences
+
+        parts = split_mt_sentences(clean)
+        # Long paragraphs: always sentence-chunk (Argos truncates mega-blobs)
+        if len(clean.split()) >= 40 and len(parts) == 1:
+            # Soft-split on commas/semicolons for runaway ASR blobs
+            soft = re.split(r"(?<=[,;:])\s+", clean)
+            parts = [p.strip() for p in soft if p.strip()] or parts
         out: list[str] = []
         for s in parts:
             if not s.strip():

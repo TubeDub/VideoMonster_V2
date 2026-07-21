@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 7410, in _run_pipeline_inner
+    persist_to_task_info(
+    ^^^^^^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'persist_to_task_info' where it is not associated with a value

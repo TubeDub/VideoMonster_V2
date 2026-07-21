@@ -1,4 +1,4 @@
-.PHONY: help install install-dev run test lint zip clean
+.PHONY: help install install-dev run test lint zip clean harden harden-long certify dsal-bench
 
 PY ?= python
 ROOT := $(CURDIR)
@@ -11,6 +11,10 @@ help:
 	@echo "  make test         - pytest tests/"
 	@echo "  make test-all     - pytest + all scripts/test_*.py"
 	@echo "  make lint         - ruff check"
+	@echo "  make harden       - P16 Production Hardening (fast)"
+	@echo "  make harden-long  - P16 long-run 30 min sample"
+	@echo "  make dsal-bench   - P5 DSAL George Lucas benchmark (LLM off)"
+	@echo "  make certify      - P17 Release Certificate (+ DSAL P5)"
 	@echo "  make zip          - release ZIP (no cache/models)"
 	@echo "  make clean        - remove __pycache__, .pytest_cache"
 
@@ -31,6 +35,18 @@ test-all:
 
 lint:
 	ruff check api engines tests
+
+harden:
+	VM_DEV_MODE=1 $(PY) scripts/run_p16_hardening.py --long-run-sec 5
+
+harden-long:
+	VM_DEV_MODE=1 $(PY) scripts/run_p16_hardening.py --long-run-sec 1800 --no-pytest
+
+dsal-bench:
+	VM_DEV_MODE=1 $(PY) scripts/run_p5_dsal_benchmark.py
+
+certify:
+	VM_DEV_MODE=1 $(PY) scripts/run_p17_certify.py --p16-long-run-sec 2
 
 zip:
 	$(PY) scripts/run_master_checks.py

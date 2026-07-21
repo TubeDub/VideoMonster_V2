@@ -337,6 +337,11 @@ def _integrity_checks(seg: dict[str, Any], target_lang: str) -> list[dict[str, A
     original = str(seg.get("original_text") or "")
     translated = str(seg.get("translated_text") or "")
     slot_ms = int(seg.get("slot_ms") or seg.get("original_duration_ms") or 0)
+    if slot_ms <= 0:
+        start = int(seg.get("start_time_ms") or seg.get("start_ms") or 0)
+        end = int(seg.get("end_time_ms") or seg.get("end_ms") or 0)
+        if end > start:
+            slot_ms = end - start
     playback = int(seg.get("final_tts_duration_ms") or seg.get("actual_duration_ms") or 0)
     overflow = _overflow_pct(slot_ms, playback)
 
@@ -414,6 +419,11 @@ def _enrich_segment(
 ) -> dict[str, Any]:
     qd = audit.get("quality_details") or {}
     slot_ms = int(seg.get("slot_ms") or seg.get("original_duration_ms") or 0)
+    if slot_ms <= 0:
+        start = int(seg.get("start_time_ms") or seg.get("start_ms") or 0)
+        end = int(seg.get("end_time_ms") or seg.get("end_ms") or 0)
+        if end > start:
+            slot_ms = end - start
     playback = int(seg.get("final_tts_duration_ms") or seg.get("actual_duration_ms") or 0)
     overflow = _overflow_pct(slot_ms, playback)
     enriched = dict(seg)

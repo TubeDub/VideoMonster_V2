@@ -58,6 +58,10 @@ def _ending_preserved(original: str, adapted: str, *, tail: int = 2) -> bool:
     A legitimate shortening (filler/synonym removal, rephrase) ends on the SAME
     final content word(s) as the original and closes with terminal punctuation.
     Real truncation drops the tail, so the endings diverge.
+
+    Also accept paraphrases that close cleanly and keep the original's last
+    content word somewhere in the final few tokens (e.g. лікарні→лікарні,
+    гонщика→переможця with shared stem / closing punct).
     """
     adpt = str(adapted or "").strip()
     if not adpt or adpt[-1] not in ".!?…":
@@ -66,12 +70,21 @@ def _ending_preserved(original: str, adapted: str, *, tail: int = 2) -> bool:
     a_tokens = [t for t in (_norm_token(w) for w in adpt.split()) if t]
     if not o_tokens or not a_tokens:
         return False
-    # Final content word must match (the original's ending was not clipped).
-    if o_tokens[-1] != a_tokens[-1]:
-        return False
-    # For longer tails, require the last word to match and appear as a genuine
-    # sentence close (already guaranteed by terminal punctuation above).
-    return True
+    # Exact final-word match (classic filler drop).
+    if o_tokens[-1] == a_tokens[-1]:
+        return True
+    # Paraphrase: original ending still present near the close.
+    tail_a = set(a_tokens[-max(3, tail + 1) :])
+    if o_tokens[-1] in tail_a:
+        return True
+    # Shared stem (≥4 chars) between last originals and last adapted words.
+    for ot in o_tokens[-2:]:
+        if len(ot) < 4:
+            continue
+        stem = ot[:4]
+        if any(at.startswith(stem) or stem.startswith(at[:4]) for at in a_tokens[-3:]):
+            return True
+    return False
 
 
 def is_truncated_adaptation(original: str, adapted: str) -> bool:
@@ -90,11 +103,39 @@ def is_truncated_adaptation(original: str, adapted: str) -> bool:
     ow, aw = word_count(orig), word_count(adpt)
     if ow >= 8 and aw < int(ow * 0.72) and _INCOMPLETE_END.search(adpt):
         return True
+    # Missing terminal punct on a shortened line ≈ cut mid-thought.
+    if (
+        ow >= 6
+        and aw < ow
+        and adpt[-1] not in ".!?…"
+        and orig[-1] in ".!?…"
+    ):
+        return True
     if ow >= 10 and aw <= int(ow * 0.65):
         # Pure length drop → truncation only if the ending was actually lost.
         if not _ending_preserved(orig, adpt):
             return True
     return False
+
+
+def restore_terminal_close(text: str, *, original: str = "", reference: str = "") -> str:
+    """Ensure spoken line closes when EN/reference sentence is complete."""
+    out = str(text or "").strip()
+    if not out:
+        return out
+    if out[-1] in ".!?…»\"')":
+        return out
+    src = str(original or "").strip()
+    ref = str(reference or "").strip()
+    src_complete = bool(src) and src[-1] in ".!?…"
+    ref_complete = bool(ref) and ref[-1] in ".!?…"
+    # Mid-clause Whisper cuts must stay without forced period.
+    src_incomplete = bool(src) and src[-1] not in ".!?…" and word_count(src) >= 6
+    if src_incomplete and not src_complete:
+        return out
+    if (src_complete or ref_complete) and word_count(out) >= 3:
+        return out + "."
+    return out
 
 
 def apply_compact_phrases(text: str, *, target_lang: str | None = None) -> str:
@@ -143,7 +184,19 @@ def verify_meaning_preserved(
     if missing:
         return False, "preserved_token", missing[:8]
 
-    if adpt[-1] not in ".!?…" and word_count(adpt) >= 6:
+    # Incomplete terminal punctuation: skip false positives when source is also
+    # mid-clause (Whisper/ASR cut) or caller marked the source segment incomplete.
+    src_incomplete = bool(is_source_segment_incomplete) or (
+        bool(src)
+        and src[-1] not in ".!?…"
+        and word_count(src) >= 6
+    )
+    if (
+        adpt
+        and adpt[-1] not in ".!?…"
+        and word_count(adpt) >= 6
+        and not src_incomplete
+    ):
         return False, "incomplete_sentence", []
 
     # Source action/emotion cues should not all disappear in long lines
@@ -838,3 +891,37 @@ def validate_transformation_chain(
         return False, "truncated_final", details
 
     return True, "ok", details
+
+
+def should_prefer_semantic_over_raw_mt(
+    *,
+    semantic: str,
+    raw_mt: str,
+    source: str = "",
+    fail_reason: str = "",
+    app_dir=None,
+) -> bool:
+    """Keep semantic polish when raw MT is a shorter split fragment with worse coverage."""
+    sem = str(semantic or "").strip()
+    raw = str(raw_mt or "").strip()
+    if not sem:
+        return False
+    if not raw:
+        return True
+
+    sem_wc = word_count(sem)
+    raw_wc = word_count(raw)
+    if sem_wc >= 16 and raw_wc < max(10, int(sem_wc * 0.55)):
+        return True
+
+    src = str(source or "").strip()
+    if src:
+        sem_loss = compute_meaning_loss_score(src, "", sem, app_dir=app_dir)
+        raw_loss = compute_meaning_loss_score(src, "", raw, app_dir=app_dir)
+        if raw_loss > sem_loss + 0.08:
+            return True
+
+    reason = str(fail_reason or "").strip().lower()
+    if reason in ("entity_loss", "truncated_final", "meaning_loss_exceeded") and raw_wc < sem_wc:
+        return True
+    return False

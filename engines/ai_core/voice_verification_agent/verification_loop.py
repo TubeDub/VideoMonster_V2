@@ -240,9 +240,19 @@ def run_voice_verification_loop(
 
         seg["voice_verification_passed"] = metrics.passed
         seg["voice_verification_metrics"] = metrics.to_dict()
+        trunc_issues = {"truncated_words", "truncated_sentence", "audio_incomplete"}
+        if trunc_issues & set(metrics.issues or []):
+            seg["voice_truncated"] = True
+            seg["voice_finished_naturally"] = False
+            retry_meta = seg.setdefault("post_tts_retry", {"attempts": 0, "reasons": []})
+            retry_meta["truncated"] = True
+        else:
+            seg.setdefault("voice_finished_naturally", True)
         if not metrics.passed:
             seg["voice_verification_issues"] = metrics.issues
             seg["voice_verification_route_to"] = metrics.route_to
+            if trunc_issues & set(metrics.issues or []):
+                seg["needs_manual_review"] = True
 
         loop_log.append(
             {

@@ -9,11 +9,26 @@ from typing import Any
 
 
 def final_texts_from_info(info: dict[str, Any]) -> list[str]:
-    """Per-segment Final text for TTS — agent pipeline fields take precedence."""
+    """Per-segment Final text for TTS — agent pipeline fields take precedence.
+
+    TPS: when approved_text is set, it is the single source of truth (Review == TTS).
+    """
     from engines.translation_validation import resolve_final_text
 
     segments_data = info.get("segments_data") or []
     audits = info.get("translation_audits") or []
+
+    # TPS Single Approved Text
+    if info.get("tps") and segments_data:
+        from engines.tps.approved_text import get_approved_text
+
+        out = []
+        for s in segments_data:
+            approved = get_approved_text(s if isinstance(s, dict) else {})
+            out.append(approved or resolve_final_text(s if isinstance(s, dict) else {}))
+        if any(out):
+            return out
+
     agent_pipeline = bool(
         info.get("quality_agent_path")
         or info.get("grammar_agent_path")

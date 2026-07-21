@@ -18,8 +18,19 @@ _MAX_MEM = 4096
 _TTL_S = 86400.0
 
 
+def _tps_version() -> int:
+    try:
+        from engines.tps.version import TPS_PIPELINE_VERSION
+
+        return int(TPS_PIPELINE_VERSION)
+    except Exception:
+        return 1
+
+
 def _cache_key(text: str, src: str, tgt: str, *, context: str = "") -> str:
-    raw = f"{src}|{tgt}|{context}|{text}".encode("utf-8", errors="replace")
+    raw = f"tps{_tps_version()}|{src}|{tgt}|{context}|{text}".encode(
+        "utf-8", errors="replace"
+    )
     return hashlib.sha256(raw).hexdigest()
 
 

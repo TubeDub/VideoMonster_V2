@@ -304,7 +304,26 @@ def optimize_rule_based_only(
             min(0.98, budget.target_ms / max(budget.tts_estimated_ms, 1)),
         )
 
-    # Rule-based could not fit — do NOT keep partial cuts; mark for LLM.
+    # Keep meaning-safe partial compression (each stage already verified).
+    # Discarding progress forced DSAL to hand overflow to ±5% atempo / LLM.
+    if current != original:
+        budget = compute_time_budget(current, slot_ms, tgt_lang=tgt_lang)
+        return SemanticOptimizationResult(
+            text=current,
+            changed=True,
+            budget=budget,
+            stages=stages,
+            stopped_reason="partial_rule_compress",
+            meaning_loss_score=compute_meaning_loss_score(
+                source_hint, original, current
+            ),
+            entity_preservation_score=compute_entity_preservation_score(
+                source_hint, current
+            ),
+            compression_ratio=round(
+                word_count(current) / max(word_count(original), 1), 3
+            ),
+        )
     return SemanticOptimizationResult(
         text=original,
         changed=False,
@@ -468,10 +487,10 @@ def optimize_expand_for_slot(
     max_rounds: int = 2,
     current_ms: int | None = None,
 ) -> SemanticOptimizationResult:
-    """Lengthen a too-short line via natural rephrase (TZ §3) — no fillers.
+    """Lengthen a too-short line via natural rephrase / DSAL rule expand.
 
-    Only acts when the estimated (or measured post-TTS) speech is well under the
-    slot and an LLM endpoint is available. Otherwise returns the text unchanged.
+    Prefers LLM when available; TZ v4.0 falls back to rule-based DSAL when LLM
+    is unavailable (no fillers; clause restore + elaborations).
     """
     from engines.semantic_adaptation import estimate_tts_duration_ms
     from engines.semantic_meaning import (
@@ -511,14 +530,63 @@ def optimize_expand_for_slot(
         return SemanticOptimizationResult(
             text=original, changed=False, budget=budget, stopped_reason="no_expand_needed"
         )
-    if not llm_rephrase_available():
-        # Natural lengthening is impossible without an LLM; never pad with fillers.
-        return SemanticOptimizationResult(
-            text=original, changed=False, budget=budget, stopped_reason="requires_llm_expansion"
+    # TZ v4.0 P3: always rule DSAL first; LLM is optional polish after.
+    from engines.dsal import adapt_duration_semantic
+
+    dsal = adapt_duration_semantic(
+        original,
+        source_hint=source_hint,
+        slot_ms=slot_ms,
+        tgt_lang=tgt_lang,
+        actual_tts_ms=measured_ms if measured_ms > 0 else None,
+        allow_llm=False,
+    )
+    current = dsal.text if dsal.changed else original
+    stages: list[StageLogEntry] = []
+    if dsal.changed:
+        stages.append(
+            StageLogEntry(
+                stage="dsal_rule_expand",
+                stage_num=1,
+                text_before=original,
+                text_after=dsal.text,
+                words_before=word_count(original),
+                words_after=word_count(dsal.text),
+                estimated_ms_before=measured_ms or budget.tts_estimated_ms,
+                estimated_ms_after=dsal.analysis.predicted_tts_ms,
+                applied=True,
+                reason=dsal.method,
+            )
         )
 
-    current = original
-    stages: list[StageLogEntry] = []
+    still_short = True
+    if dsal.changed:
+        still_short = dsal.analysis.expand_required or dsal.analysis.band in (
+            "yellow",
+            "red",
+        )
+
+    if not llm_rephrase_available() or not still_short:
+        if dsal.changed:
+            return SemanticOptimizationResult(
+                text=dsal.text,
+                changed=True,
+                budget=compute_time_budget(dsal.text, slot_ms, tgt_lang=tgt_lang),
+                stages=stages,
+                meaning_loss_score=0.0,
+                entity_preservation_score=1.0,
+                compression_ratio=round(
+                    word_count(dsal.text) / max(1, word_count(original)), 3
+                ),
+                stopped_reason="dsal_rule_expand",
+            )
+        return SemanticOptimizationResult(
+            text=original,
+            changed=False,
+            budget=budget,
+            stopped_reason="dsal_no_change",
+        )
+
     stopped = "requires_llm_expansion"
     for round_ in range(1, max(1, max_rounds) + 1):
         if current_ms and current_ms > 0:
@@ -533,7 +601,6 @@ def optimize_expand_for_slot(
         if candidate == current:
             stopped = "llm_no_change"
             break
-        # Reject weak-model corruption (foreign script leaking into a non-CJK dub).
         try:
             from engines.sentence_integrity import contains_foreign_script
 
@@ -550,14 +617,13 @@ def optimize_expand_for_slot(
             break
         est_before = estimate_tts_duration_ms(current, tgt_lang)
         est_after = estimate_tts_duration_ms(candidate, tgt_lang)
-        # Do not overshoot the slot — keep within fit tolerance.
         if est_after > int(target_ms * FIT_TOLERANCE):
             stopped = "expand_would_overflow"
             break
         stages.append(
             StageLogEntry(
                 stage="llm_expand",
-                stage_num=round_,
+                stage_num=round_ + 1,
                 text_before=current,
                 text_after=candidate,
                 words_before=word_count(current),
@@ -569,22 +635,29 @@ def optimize_expand_for_slot(
             )
         )
         current = candidate
-        budget = compute_time_budget(current, slot_ms, tgt_lang=tgt_lang)
-        stopped = "expanded_to_fit"
-        if budget.tts_estimated_ms >= int(target_ms * EXPAND_TRIGGER_RATIO):
+        stopped = "llm_expand"
+        if est_after >= int(target_ms * 0.92):
             break
 
-    ow = word_count(original)
-    cw = word_count(current)
+    if current != original:
+        return SemanticOptimizationResult(
+            text=current,
+            changed=True,
+            budget=compute_time_budget(current, slot_ms, tgt_lang=tgt_lang),
+            stages=stages,
+            meaning_loss_score=0.0,
+            entity_preservation_score=1.0,
+            compression_ratio=round(
+                word_count(current) / max(1, word_count(original)), 3
+            ),
+            stopped_reason=stopped,
+        )
     return SemanticOptimizationResult(
-        text=current,
-        changed=current != original,
+        text=original,
+        changed=False,
         budget=budget,
         stages=stages,
-        meaning_loss_score=compute_meaning_loss_score(source_hint, original, current),
-        entity_preservation_score=compute_entity_preservation_score(source_hint, current),
-        compression_ratio=round(cw / ow, 3) if ow else 1.0,
-        stopped_reason=stopped,
+        stopped_reason=stopped if stages else "dsal_no_change",
     )
 
 

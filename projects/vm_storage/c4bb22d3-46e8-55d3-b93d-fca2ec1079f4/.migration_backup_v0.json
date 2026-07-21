@@ -1,0 +1,3616 @@
+{
+  "project_id": "c4bb22d3-46e8-55d3-b93d-fca2ec1079f4",
+  "title": "autodub-2ec2f545abdc4c358916fae74e1e91fd",
+  "storage_version": 0,
+  "tdproj": {
+    "format": "tubedub-project",
+    "version": 1,
+    "project_id": "6f2453dc-2581-4df2-8e5f-a8dc3fa470ff",
+    "title": "autodub-2ec2f545abdc4c358916fae74e1e91fd",
+    "created_ms": 1783853536283,
+    "updated_ms": 1783853536303,
+    "src_lang": "en",
+    "tgt_lang": "uk",
+    "modules": {},
+    "pipeline": {
+      "trace_id": "",
+      "last_run_ms": 0,
+      "stages": [],
+      "segments": [
+        {
+          "index": 0,
+          "text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "plain_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "translation_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "file": "tts_bf6800b6_2fd73ea709e7_20260712_134430_d478c829.mp3",
+          "segment_id": "eb0ab01dd106485ea489832e0666d5f5",
+          "tts_file_path": "tts_bf6800b6_2fd73ea709e7_20260712_134430_d478c829.mp3",
+          "playback_duration": 0,
+          "tts_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "status": "generated",
+          "tts_ms": 4986,
+          "tts_status": "generated",
+          "actual_duration_ms": 4986,
+          "first_tts_duration_ms": 6192,
+          "segment_uuid": "eb0ab01dd106485ea489832e0666d5f5",
+          "audio_bound_uuid": "eb0ab01dd106485ea489832e0666d5f5",
+          "pause_engine": {
+            "before_ms": 6192,
+            "after_ms": 4986,
+            "saved_ms": 1206,
+            "stages": [
+              "lead_trim:218",
+              "tail_trim:988"
+            ],
+            "slot_ms": 4960
+          },
+          "timing_budget": {
+            "index": 0,
+            "slot_start": 0,
+            "slot_end": 4960,
+            "slot_duration": 4960,
+            "tts_duration": 4986,
+            "measured_duration": 4986,
+            "delta": 26,
+            "overflow": 26,
+            "underflow": 0,
+            "status": "ok",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1206,
+            "pause_stages": [
+              "lead_trim:218",
+              "tail_trim:988"
+            ],
+            "timing_score": 99.5,
+            "rewrite_reason": "fits_after_pause",
+            "final_status": "ok",
+            "original_duration": 6192,
+            "provider_fatal": false
+          },
+          "timing_score": 99.5,
+          "fitted_file": "slot_fit_2ec2f545_eb0ab01dd106_20260712_134355_08f2837d.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 4986,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 4960,
+            "fitted_ms": 4986,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 4986,
+            "slot_fit_key": "65a08ecb11369558"
+          },
+          "start_ms": 0,
+          "end_ms": 4960,
+          "slot_ms": 4960,
+          "slot_fit_attempts": 0,
+          "silence_trim": 26.0,
+          "translation_uuid": "527f245597b5817af5ff3a7c9ed6e69c",
+          "tts_uuid": "3b1a2a18cfa349d7895542671dc79366",
+          "audio_uuid": "b8213ed3c99149869f1baeafcd91168a",
+          "merge_uuid": "ea4bdd7260d649cfb978c5f80a2412d5",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_eb0ab01dd106_20260712_134149_2bbfed21.wav",
+          "text_for_tts": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто.",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.8276,
+            "missing_words": [
+              "18-річний",
+              "джордж-молодший",
+              "додому",
+              "вечерю",
+              "че",
+              "рез"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.2419,
+            "asr_confidence": 0.75,
+            "recognized_text": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне місто.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Вісім на цять, річний Джорж Молодший поїхав до Дому навичерю через рідне місто.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 1,
+          "text": "Але́ коли́ Джордж їхав за кермом, ві́н його́ не полишала тривога, що йому справді страшно туди дістатися",
+          "plain_text": "Але́ коли́ Джордж їхав за кермом, ві́н його́ не полишала тривога, що йому справді страшно туди дістатися",
+          "translation_text": "Але́ коли́ Джордж їхав за кермом, ві́н його́ не полишала тривога, що йому справді страшно туди дістатися",
+          "file": "tts_df63b8a4_60ab2ad9b488_20260712_134452_a03db9fe.mp3",
+          "segment_id": "a948b5def0504859a74449982d5ab0ec",
+          "tts_file_path": "tts_df63b8a4_60ab2ad9b488_20260712_134452_a03db9fe.mp3",
+          "playback_duration": 0,
+          "tts_text": "Але́ коли́ Джордж їхав за кермом, ві́н його́ не полишала тривога, що йому справді страшно туди дістатися",
+          "status": "generated",
+          "tts_ms": 6527,
+          "tts_status": "generated",
+          "actual_duration_ms": 6527,
+          "first_tts_duration_ms": 7848,
+          "segment_uuid": "a948b5def0504859a74449982d5ab0ec",
+          "audio_bound_uuid": "a948b5def0504859a74449982d5ab0ec",
+          "pause_engine": {
+            "before_ms": 6543,
+            "after_ms": 6527,
+            "saved_ms": 16,
+            "stages": [
+              "pause_compress:16"
+            ],
+            "slot_ms": 6320
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 1,
+            "slot_start": 4960,
+            "slot_end": 11280,
+            "slot_duration": 6320,
+            "tts_duration": 6527,
+            "measured_duration": 6527,
+            "delta": 207,
+            "overflow": 207,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 16,
+            "pause_stages": [
+              "pause_compress:16"
+            ],
+            "timing_score": 92.2,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 7848,
+            "provider_fatal": false
+          },
+          "timing_score": 92.2,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 16,
+            "timing_score": 92.2,
+            "actual_duration_ms": 6527,
+            "slot_duration": 6320,
+            "delta": 207
+          },
+          "video_stretch_ratio": 1.032,
+          "video_adapt_mode": "video_adapt",
+          "fitted_file": "slot_fit_2ec2f545_a948b5def050_20260712_134356_2e90bb05.wav",
+          "container_status": "yellow",
+          "slot_overflow": false,
+          "fitted_ms": 6522,
+          "overflow_ms": 127,
+          "overflow_pct": 2.0,
+          "timing_meta": {
+            "slot_ms": 6320,
+            "slot_limit_ms": 6395,
+            "tts_ms": 6527,
+            "fitted_ms": 6522,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 5,
+            "strategy": "pause_compress",
+            "overflow_ms": 127,
+            "slot_fit_tts_ms": 6527,
+            "slot_fit_key": "7c707089b77e8631"
+          },
+          "start_ms": 4960,
+          "end_ms": 11280,
+          "slot_ms": 6320,
+          "slot_fit_attempts": 0,
+          "silence_trim": 80.0,
+          "playback_rate": 1.0200949367088608,
+          "translation_uuid": "35a09db593fb0ae8ca6d721793fd34f3",
+          "tts_uuid": "44d74029775a4f318e41f031f1dda738",
+          "audio_uuid": "c76e56fbe89e4e5eb9de25223655ec01",
+          "merge_uuid": "54ddb13863d249008723f14d5af11f2b",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_a948b5def050_20260712_134335_cd41016e.wav",
+          "text_for_tts": "Але́ коли́ Джордж їхав за кермом, ві́н його́ не полишала тривога, що йому справді страшно туди дістатися",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9388,
+            "missing_words": [
+              "джордж",
+              "ві",
+              "н",
+              "полишала",
+              "тривога"
+            ],
+            "truncated_words": [
+              "дістатися"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2418,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли Джорч їхав за кермом, вен його не повишала трьвого, що йому справді страшно туди дістатися.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Але коли Джорч їхав за кермом, вен його не повишала трьвого, що йому справді страшно туди дістатися.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 2,
+          "text": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікався, і че́рез це ві́н справді не займався чимось серйозним, окрім автомобілів саме в цей момент",
+          "plain_text": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікався, і че́рез це ві́н справді не займався чимось серйозним, окрім автомобілів саме в цей момент",
+          "translation_text": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікався, і че́рез це ві́н справді не займався чимось серйозним, окрім автомобілів саме в цей момент",
+          "file": "tts_f223f71d_65b2ab2041ed_20260712_134516_5bb19813.mp3",
+          "segment_id": "c6407b3d567548b781f85be601a9e091",
+          "tts_file_path": "tts_f223f71d_65b2ab2041ed_20260712_134516_5bb19813.mp3",
+          "playback_duration": 0,
+          "tts_text": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікався, і че́рез це ві́н справді не займався чимось серйозним, окрім автомобілів саме в цей момент",
+          "status": "generated",
+          "tts_ms": 10843,
+          "tts_status": "generated",
+          "actual_duration_ms": 10843,
+          "first_tts_duration_ms": 11400,
+          "segment_uuid": "c6407b3d567548b781f85be601a9e091",
+          "audio_bound_uuid": "c6407b3d567548b781f85be601a9e091",
+          "pause_engine": {
+            "before_ms": 12408,
+            "after_ms": 10843,
+            "saved_ms": 1565,
+            "stages": [
+              "lead_trim:204",
+              "tail_trim:1038",
+              "pause_compress:322"
+            ],
+            "slot_ms": 11520
+          },
+          "adaptation_executed": true,
+          "expand_required": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 2,
+            "slot_start": 11280,
+            "slot_end": 22800,
+            "slot_duration": 11520,
+            "tts_duration": 10843,
+            "measured_duration": 10843,
+            "delta": -677,
+            "overflow": 0,
+            "underflow": 677,
+            "status": "underflow",
+            "rewrite_iterations": 1,
+            "pause_adjustments_ms": 3088,
+            "pause_stages": [
+              "lead_trim:203",
+              "tail_trim:1041",
+              "pause_compress:278",
+              "lead_trim:204",
+              "tail_trim:1038",
+              "pause_compress:322"
+            ],
+            "timing_score": 96.1,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 11400,
+            "provider_fatal": false
+          },
+          "timing_score": 96.1,
+          "closed_loop": {
+            "iterations": 1,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 3088,
+            "timing_score": 96.1,
+            "actual_duration_ms": 10843,
+            "slot_duration": 11520,
+            "delta": -677
+          },
+          "fitted_file": "slot_fit_2ec2f545_c6407b3d5675_20260712_134356_89dc7668.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 10843,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 11520,
+            "fitted_ms": 10843,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 10843,
+            "slot_fit_key": "2e9001f253a17b92"
+          },
+          "start_ms": 11280,
+          "end_ms": 22800,
+          "slot_ms": 11520,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "db9124c88ef9df4d73e0deb9b0b589b2",
+          "tts_uuid": "aa31dcc0fd684c029740f74d3b45769b",
+          "audio_uuid": "b85a0883f08443c888c1e985621bbcdb",
+          "merge_uuid": "d5ab432cb5304fdba0356182fd9d90db",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_c6407b3d5675_20260712_134200_644ee8c4.wav",
+          "text_for_tts": "Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ві́н ду́же легко відволікався, і че́рез це ві́н справді не займався чимось серйозним, окрім автомобілів саме в цей момент",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9128,
+            "missing_words": [
+              "джордж-молодший",
+              "ду",
+              "же",
+              "дитиною",
+              "тако",
+              "ж",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "че",
+              "рез",
+              "це",
+              "ві",
+              "н",
+              "серйозним",
+              "окрім",
+              "автомобілів"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "саме",
+              "в",
+              "цей",
+              "момент"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.0771,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж Молодший був дуже розумною дитину, але також і віенд дуже легко відволікався, і через цивіен справді не займався чимось серьезним, окремав тому білів саме в цей момент.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Джордж Молодший був дуже розумною дитину, але також і віенд дуже легко відволікався, і через цивіен справді не займався чимось серьезним, окремав тому білів саме в цей момент.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 3,
+          "text": "І тоді́ його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто буквально дав йому Фіат",
+          "plain_text": "І тоді́ його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто буквально дав йому Фіат",
+          "translation_text": "І тоді́ його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто буквально дав йому Фіат",
+          "file": "tts_fc2bf780_2e31bd5c2785_20260712_134540_0cb80fab.mp3",
+          "segment_id": "894bf78d47a148519dc310b78ad546cd",
+          "tts_file_path": "tts_fc2bf780_2e31bd5c2785_20260712_134540_0cb80fab.mp3",
+          "playback_duration": 0,
+          "tts_text": "І тоді́ його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто буквально дав йому Фіат",
+          "status": "generated",
+          "tts_ms": 9063,
+          "tts_status": "generated",
+          "actual_duration_ms": 9063,
+          "first_tts_duration_ms": 10752,
+          "segment_uuid": "894bf78d47a148519dc310b78ad546cd",
+          "audio_bound_uuid": "894bf78d47a148519dc310b78ad546cd",
+          "pause_engine": {
+            "before_ms": 9098,
+            "after_ms": 9063,
+            "saved_ms": 35,
+            "stages": [
+              "pause_compress:34"
+            ],
+            "slot_ms": 8880
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 3,
+            "slot_start": 22800,
+            "slot_end": 31680,
+            "slot_duration": 8880,
+            "tts_duration": 9063,
+            "measured_duration": 9063,
+            "delta": 183,
+            "overflow": 183,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 35,
+            "pause_stages": [
+              "pause_compress:34"
+            ],
+            "timing_score": 95.2,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 10752,
+            "provider_fatal": false
+          },
+          "timing_score": 95.2,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 35,
+            "timing_score": 95.2,
+            "actual_duration_ms": 9063,
+            "slot_duration": 8880,
+            "delta": 183
+          },
+          "video_stretch_ratio": 1.0184,
+          "video_adapt_mode": "video_adapt",
+          "fitted_file": "slot_fit_2ec2f545_894bf78d47a1_20260712_134357_4c8a7f9d.wav",
+          "container_status": "yellow",
+          "slot_overflow": false,
+          "fitted_ms": 9043,
+          "overflow_ms": 88,
+          "overflow_pct": 1.0,
+          "timing_meta": {
+            "slot_ms": 8880,
+            "slot_limit_ms": 8955,
+            "tts_ms": 9063,
+            "fitted_ms": 9043,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 19,
+            "strategy": "pause_compress",
+            "overflow_ms": 88,
+            "slot_fit_tts_ms": 9063,
+            "slot_fit_key": "3b2284d7fa32631b"
+          },
+          "start_ms": 22800,
+          "end_ms": 31680,
+          "slot_ms": 8880,
+          "slot_fit_attempts": 0,
+          "silence_trim": 80.0,
+          "playback_rate": 1.011599099099099,
+          "translation_uuid": "98df82b1880759972ced6364f2736bda",
+          "tts_uuid": "2a9b248bdbc74733806ac6f227f3e3ae",
+          "audio_uuid": "99f2169abfd84b3bac1005776730e942",
+          "merge_uuid": "781cdc51895c4b8a9732fd826a404dea",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_894bf78d47a1_20260712_134337_4caf8869.wav",
+          "text_for_tts": "І тоді́ його́ батько купив йому маленьку італійську машину Фіат, але́ його́ батько, незважаючи на те, що ві́н був тим, хто буквально дав йому Фіат",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9286,
+            "missing_words": [
+              "тоді",
+              "маленьку",
+              "італійську",
+              "фіат",
+              "незважаючи",
+              "ві",
+              "н",
+              "буквально",
+              "дав",
+              "фіат"
+            ],
+            "truncated_words": [
+              "тоді"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2108,
+            "asr_confidence": 0.75,
+            "recognized_text": "І то діє його батько купив йому маленькую і талійську машину фет, але його батько, не зважаючи на те, що він був тим, хто був квально до вьому фет.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "І то діє його батько купив йому маленькую і талійську машину фет, але його батько, не зважаючи на те, що він був тим, хто був квально до вьому фет.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 4,
+          "text": "Ві́н про́сто не розумів одержимості свого сина автомобілями, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, отримаєш справжню роботу, і за кожною вечерею, і велика суперечка",
+          "plain_text": "Ві́н про́сто не розумів одержимості свого сина автомобілями, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, отримаєш справжню роботу, і за кожною вечерею, і велика суперечка",
+          "translation_text": "Ві́н про́сто не розумів одержимості свого сина автомобілями, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, отримаєш справжню роботу, і за кожною вечерею, і велика суперечка",
+          "file": "tts_cc2f0061_a44c5ad92dd6_20260712_134605_70072b38.mp3",
+          "segment_id": "beda56684e4c490db71e9081d4e0bc9c",
+          "tts_file_path": "tts_cc2f0061_a44c5ad92dd6_20260712_134605_70072b38.mp3",
+          "playback_duration": 0,
+          "tts_text": "Ві́н про́сто не розумів одержимості свого сина автомобілями, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, отримаєш справжню роботу, і за кожною вечерею, і велика суперечка",
+          "status": "generated",
+          "tts_ms": 12694,
+          "tts_status": "generated",
+          "actual_duration_ms": 12694,
+          "first_tts_duration_ms": 11208,
+          "segment_uuid": "beda56684e4c490db71e9081d4e0bc9c",
+          "audio_bound_uuid": "beda56684e4c490db71e9081d4e0bc9c",
+          "pause_engine": {
+            "before_ms": 14208,
+            "after_ms": 12694,
+            "saved_ms": 1514,
+            "stages": [
+              "lead_trim:214",
+              "tail_trim:965",
+              "pause_compress:334"
+            ],
+            "slot_ms": 12720
+          },
+          "adaptation_executed": true,
+          "timing_budget": {
+            "index": 4,
+            "slot_start": 31680,
+            "slot_end": 44400,
+            "slot_duration": 12720,
+            "tts_duration": 12694,
+            "measured_duration": 12694,
+            "delta": -26,
+            "overflow": 0,
+            "underflow": 26,
+            "status": "ok",
+            "rewrite_iterations": 1,
+            "pause_adjustments_ms": 2866,
+            "pause_stages": [
+              "lead_trim:209",
+              "tail_trim:968",
+              "pause_compress:174",
+              "lead_trim:214",
+              "tail_trim:965",
+              "pause_compress:334"
+            ],
+            "timing_score": 100.0,
+            "rewrite_reason": "duration_underflow:smart_expansion",
+            "final_status": "ok",
+            "original_duration": 11208,
+            "provider_fatal": false
+          },
+          "timing_score": 100.0,
+          "closed_loop": {
+            "iterations": 1,
+            "final_status": "ok",
+            "rewrite_reason": "duration_underflow:smart_expansion",
+            "pause_adjustments_ms": 2866,
+            "timing_score": 100.0,
+            "actual_duration_ms": 12694,
+            "slot_duration": 12720,
+            "delta": -26
+          },
+          "fitted_file": "slot_fit_2ec2f545_beda56684e4c_20260712_134357_0ed0daa8.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 12694,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 12720,
+            "fitted_ms": 12694,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 12694,
+            "slot_fit_key": "d16fa5ac7a3db3cd"
+          },
+          "start_ms": 31680,
+          "end_ms": 44400,
+          "slot_ms": 12720,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "bf47c7238cf3add6956c704d317d7d1e",
+          "tts_uuid": "3c9c418c39d14ad3bb190daa2cfe79fc",
+          "audio_uuid": "714205eb9e9046678390b1a0bb7e8c1c",
+          "merge_uuid": "b52a6d2947724d0eb9a846487dd27623",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_beda56684e4c_20260712_134212_79967681.wav",
+          "text_for_tts": "Ві́н про́сто не розумів одержимості свого сина автомобілями, як чому б тобі не взяти фокус і не застосувати його́ до інших речей, отримаєш справжню роботу, і за кожною вечерею, і велика суперечка",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9551,
+            "missing_words": [
+              "ві",
+              "н",
+              "про",
+              "сто",
+              "б",
+              "застосувати",
+              "справжню",
+              "за",
+              "кожною",
+              "вечерею"
+            ],
+            "truncated_words": [
+              "і",
+              "велика",
+              "суперечка"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.117,
+            "asr_confidence": 0.75,
+            "recognized_text": "Він просто на розумів одержимості свого сина автомобілями, як чому п тобі не взяти фокус і не застовувати його до інших речей.\nОтримаєш справжні роботу і закожниваю вечерою, і велика суперечка.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Він просто на розумів одержимості свого сина автомобілями, як чому п тобі не взяти фокус і не застовувати його до інших речей.\nОтримаєш справжні роботу і закожниваю вечерою, і велика суперечка.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 5,
+          "text": "Джордж під'їхав до перехрестя, де ві́н був біля його́ дому, і ві́н почав повертати, у той момент, коли́ ві́н почув цей ду́же гучний звук і по́тім все́ потемніло, між батьком і сином.",
+          "plain_text": "Джордж під'їхав до перехрестя, де ві́н був біля його́ дому, і ві́н почав повертати, у той момент, коли́ ві́н почув цей ду́же гучний звук і по́тім все́ потемніло, між батьком і сином.",
+          "translation_text": "Джордж під'їхав до перехрестя, де ві́н був біля його́ дому, і ві́н почав повертати, у той момент, коли́ ві́н почув цей ду́же гучний звук і по́тім все́ потемніло, між батьком і сином.",
+          "file": "tts_25c692d2_02c5f080b1a0_20260712_134629_277f0dbd.mp3",
+          "segment_id": "3eeb01ff6b934fcb9772dfe511de0b41",
+          "tts_file_path": "tts_25c692d2_02c5f080b1a0_20260712_134629_277f0dbd.mp3",
+          "playback_duration": 0,
+          "tts_text": "Джордж під'їхав до перехрестя, де ві́н був біля його́ дому, і ві́н почав повертати, у той момент, коли́ ві́н почув цей ду́же гучний звук і по́тім все́ потемніло, між батьком і сином.",
+          "status": "generated",
+          "tts_ms": 11600,
+          "tts_status": "generated",
+          "actual_duration_ms": 11600,
+          "first_tts_duration_ms": 10584,
+          "segment_uuid": "3eeb01ff6b934fcb9772dfe511de0b41",
+          "audio_bound_uuid": "3eeb01ff6b934fcb9772dfe511de0b41",
+          "pause_engine": {
+            "before_ms": 13152,
+            "after_ms": 11600,
+            "saved_ms": 1552,
+            "stages": [
+              "lead_trim:208",
+              "tail_trim:982",
+              "pause_compress:360"
+            ],
+            "slot_ms": 12160
+          },
+          "adaptation_executed": true,
+          "expand_required": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 5,
+            "slot_start": 44400,
+            "slot_end": 56560,
+            "slot_duration": 12160,
+            "tts_duration": 11600,
+            "measured_duration": 11600,
+            "delta": -560,
+            "overflow": 0,
+            "underflow": 560,
+            "status": "underflow",
+            "rewrite_iterations": 2,
+            "pause_adjustments_ms": 4415,
+            "pause_stages": [
+              "lead_trim:205",
+              "tail_trim:957",
+              "pause_compress:260",
+              "lead_trim:204",
+              "tail_trim:994",
+              "pause_compress:240",
+              "lead_trim:208",
+              "tail_trim:982",
+              "pause_compress:360"
+            ],
+            "timing_score": 97.4,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 10584,
+            "provider_fatal": false
+          },
+          "timing_score": 97.4,
+          "closed_loop": {
+            "iterations": 2,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 4415,
+            "timing_score": 97.4,
+            "actual_duration_ms": 11600,
+            "slot_duration": 12160,
+            "delta": -560
+          },
+          "fitted_file": "slot_fit_2ec2f545_3eeb01ff6b93_20260712_134358_ba7aa2e7.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 11600,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 12160,
+            "fitted_ms": 11600,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 11600,
+            "slot_fit_key": "6972681b9e456013"
+          },
+          "start_ms": 44400,
+          "end_ms": 56560,
+          "slot_ms": 12160,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "8d6b8489eb4e5bdcd70be5e6be5b991b",
+          "tts_uuid": "36476ecf27a74a23aaa376f377f75395",
+          "audio_uuid": "259089a6d9d44d468b686edbc97e2391",
+          "merge_uuid": "64ea908a6afd4cb18916c891649bde59",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_3eeb01ff6b93_20260712_134222_f4fc5c3a.wav",
+          "text_for_tts": "Джордж під'їхав до перехрестя, де ві́н був біля його́ дому, і ві́н почав повертати, у той момент, коли́ ві́н почув цей ду́же гучний звук і по́тім все́ потемніло, між батьком і сином.",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9123,
+            "missing_words": [
+              "джордж",
+              "під'їхав",
+              "перехрестя",
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "повертати",
+              "ві",
+              "н",
+              "ду",
+              "же",
+              "гучний",
+              "по",
+              "тім",
+              "потемніло",
+              "сином"
+            ],
+            "truncated_words": [
+              "сином"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.0816,
+            "asr_confidence": 0.75,
+            "recognized_text": "Жор ж під їхав до парах рестя, де вен був біля його дому, і вен почав повартати, у той момент, коли вен почув цей дуже вучний звук і потім все потім ніло, між батьком і сыном.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Жор ж під їхав до парах рестя, де вен був біля його дому, і вен почав повартати, у той момент, коли вен почув цей дуже вучний звук і потім все потім ніло, між батьком і сыном.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 6,
+          "text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні",
+          "plain_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні",
+          "translation_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні",
+          "file": "tts_b34d4815_558aeae49413_20260712_134652_79ee0922.mp3",
+          "segment_id": "1e2226da85d249fa8e42ba34e24cc196",
+          "tts_file_path": "tts_b34d4815_558aeae49413_20260712_134652_79ee0922.mp3",
+          "playback_duration": 0,
+          "tts_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні",
+          "status": "generated",
+          "tts_ms": 6932,
+          "tts_status": "generated",
+          "actual_duration_ms": 6932,
+          "first_tts_duration_ms": 8160,
+          "segment_uuid": "1e2226da85d249fa8e42ba34e24cc196",
+          "audio_bound_uuid": "1e2226da85d249fa8e42ba34e24cc196",
+          "pause_engine": {
+            "before_ms": 8160,
+            "after_ms": 6932,
+            "saved_ms": 1228,
+            "stages": [
+              "lead_trim:227",
+              "tail_trim:1001"
+            ],
+            "slot_ms": 5600
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 6,
+            "slot_start": 56720,
+            "slot_end": 62320,
+            "slot_duration": 5600,
+            "tts_duration": 6932,
+            "measured_duration": 6932,
+            "delta": 1332,
+            "overflow": 1332,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 0,
+            "pause_stages": [],
+            "timing_score": 39.0,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 8160,
+            "provider_fatal": false
+          },
+          "timing_score": 39.0,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 0,
+            "timing_score": 39.0,
+            "actual_duration_ms": 6932,
+            "slot_duration": 5600,
+            "delta": 1332
+          },
+          "fitted_file": "slot_fit_2ec2f545_1e2226da85d2_20260712_134358_a547822c.wav",
+          "container_status": "red",
+          "slot_overflow": true,
+          "fitted_ms": 6932,
+          "overflow_ms": 213,
+          "overflow_pct": 3.8,
+          "timing_meta": {
+            "slot_ms": 5600,
+            "slot_limit_ms": 5675,
+            "tts_ms": 6932,
+            "fitted_ms": 6932,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 0,
+            "strategy": "none",
+            "overflow_ms": 1257,
+            "slot_fit_tts_ms": 6932,
+            "slot_fit_iterations": [
+              {
+                "action": "overflow_text_only",
+                "note": "no_atempo"
+              }
+            ],
+            "slot_fit_key": "e467cf0d72efe223",
+            "crossfade_ms": 12
+          },
+          "start_ms": 56720,
+          "end_ms": 62320,
+          "slot_ms": 5600,
+          "slot_fit_attempts": 1,
+          "silence_trim": 80.0,
+          "playback_rate": 1.12,
+          "stretch_factor": 1.05,
+          "overflow": true,
+          "translation_uuid": "99e933b45f2f7166c5b50e5c67538a59",
+          "tts_uuid": "a2571b33847d44409745bed3d16ceba9",
+          "audio_uuid": "c0d0046f7c3447ccbb9929b38a1eb4a0",
+          "merge_uuid": "77188e6e50f84f108c2ae09f1e5f67f8",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_1e2226da85d2_20260712_134226_7f3fc0f1.wav",
+          "text_for_tts": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9577,
+            "missing_words": [
+              "че",
+              "рез",
+              "джордж-молодший",
+              "лежав",
+              "ліжку",
+              "відділенні"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.4571,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+            "issues": [
+              "missing_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "duration_overflow"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Через два тижні Джордж Молодший Лажав у лікарняному лішку у віділені інтенсивної терапії місцевої лікарні.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 7,
+          "text": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і врізалася в машину Джорджа так важко",
+          "plain_text": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і врізалася в машину Джорджа так важко",
+          "translation_text": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і врізалася в машину Джорджа так важко",
+          "file": "tts_938d9c2f_5ce445b911fc_20260712_134717_f5a7e0c3.mp3",
+          "segment_id": "a2779b9bfc9c499db21c23bfbf821bf3",
+          "tts_file_path": "tts_938d9c2f_5ce445b911fc_20260712_134717_f5a7e0c3.mp3",
+          "playback_duration": 0,
+          "tts_text": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і врізалася в машину Джорджа так важко",
+          "status": "generated",
+          "tts_ms": 11447,
+          "tts_status": "generated",
+          "actual_duration_ms": 11447,
+          "first_tts_duration_ms": 13056,
+          "segment_uuid": "a2779b9bfc9c499db21c23bfbf821bf3",
+          "audio_bound_uuid": "a2779b9bfc9c499db21c23bfbf821bf3",
+          "pause_engine": {
+            "before_ms": 11490,
+            "after_ms": 11447,
+            "saved_ms": 43,
+            "stages": [
+              "pause_compress:41"
+            ],
+            "slot_ms": 10800
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 7,
+            "slot_start": 62320,
+            "slot_end": 73120,
+            "slot_duration": 10800,
+            "tts_duration": 11447,
+            "measured_duration": 11447,
+            "delta": 647,
+            "overflow": 647,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 43,
+            "pause_stages": [
+              "pause_compress:41"
+            ],
+            "timing_score": 84.9,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 13056,
+            "provider_fatal": false
+          },
+          "timing_score": 84.9,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 43,
+            "timing_score": 84.9,
+            "actual_duration_ms": 11447,
+            "slot_duration": 10800,
+            "delta": 647
+          },
+          "video_stretch_ratio": 1.0594,
+          "video_adapt_mode": "video_adapt",
+          "fitted_file": "slot_fit_2ec2f545_a2779b9bfc9c_20260712_134359_d031113d.wav",
+          "container_status": "yellow",
+          "slot_overflow": false,
+          "fitted_ms": 11441,
+          "overflow_ms": 566,
+          "overflow_pct": 5.2,
+          "timing_meta": {
+            "slot_ms": 10800,
+            "slot_limit_ms": 10875,
+            "tts_ms": 11447,
+            "fitted_ms": 11441,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 4,
+            "strategy": "pause_compress",
+            "overflow_ms": 566,
+            "slot_fit_tts_ms": 11447,
+            "slot_fit_key": "003a6b99e8669b4e"
+          },
+          "start_ms": 62320,
+          "end_ms": 73120,
+          "slot_ms": 10800,
+          "slot_fit_attempts": 0,
+          "silence_trim": 80.0,
+          "playback_rate": 1.05,
+          "stretch_factor": 1.0023148148148149,
+          "translation_uuid": "6a8093a64503483f9fd61f26b876bcf9",
+          "tts_uuid": "7126f6cef967498e8b67a6d715f4a483",
+          "audio_uuid": "91abe720b47b4eb494109b8b23a92b4d",
+          "merge_uuid": "1d3a42e1f71d417f9abd2a3ef0ad902e",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_a2779b9bfc9c_20260712_134340_29054843.wav",
+          "text_for_tts": "Так як два тижні раніше, коли́ Джордж зробив це, а по́тім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і врізалася в машину Джорджа так важко",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9602,
+            "missing_words": [
+              "по",
+              "тім",
+              "відбулося",
+              "що",
+              "врізалася"
+            ],
+            "truncated_words": [
+              "так",
+              "важко"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2089,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, як два тижні раніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидкості,\nпромчала дорогою і вризилася в машину Джорджа так важко.",
+            "issues": [
+              "truncated_words"
+            ],
+            "route_to": "grammar",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Так, як два тижні раніше, коли Джордж зробив це.\nА потім щось відболосі, добре щось ще один автомобіль на великій швидкості,\nпромчала дорогою і вризилася в машину Джорджа так важко.",
+          "voice_verification_route_to": "grammar"
+        },
+        {
+          "index": 8,
+          "text": "Що Джорджа-молодшого викинуло з машини, але́ ві́н вижив.",
+          "plain_text": "Що Джорджа-молодшого викинуло з машини, але́ ві́н вижив.",
+          "translation_text": "Що Джорджа-молодшого викинуло з машини, але́ ві́н вижив.",
+          "file": "tts_d3584a6d_71f3c6aa9e64_20260712_134739_5cfb6ba9.mp3",
+          "segment_id": "a06e676101c44f8bad56f476e821d315",
+          "tts_file_path": "tts_d3584a6d_71f3c6aa9e64_20260712_134739_5cfb6ba9.mp3",
+          "playback_duration": 0,
+          "tts_text": "Що Джорджа-молодшого викинуло з машини, але́ ві́н вижив.",
+          "status": "generated",
+          "tts_ms": 3542,
+          "tts_status": "generated",
+          "actual_duration_ms": 3542,
+          "first_tts_duration_ms": 4848,
+          "segment_uuid": "a06e676101c44f8bad56f476e821d315",
+          "audio_bound_uuid": "a06e676101c44f8bad56f476e821d315",
+          "pause_engine": {
+            "before_ms": 4848,
+            "after_ms": 3542,
+            "saved_ms": 1306,
+            "stages": [
+              "lead_trim:236",
+              "tail_trim:1029",
+              "pause_compress:41"
+            ],
+            "slot_ms": 3760
+          },
+          "timing_budget": {
+            "index": 8,
+            "slot_start": 73120,
+            "slot_end": 76880,
+            "slot_duration": 3760,
+            "tts_duration": 3542,
+            "measured_duration": 3542,
+            "delta": -218,
+            "overflow": 0,
+            "underflow": 218,
+            "status": "ok",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1306,
+            "pause_stages": [
+              "lead_trim:236",
+              "tail_trim:1029",
+              "pause_compress:41"
+            ],
+            "timing_score": 97.7,
+            "rewrite_reason": "fits_after_pause",
+            "final_status": "ok",
+            "original_duration": 4848,
+            "provider_fatal": false
+          },
+          "timing_score": 97.7,
+          "fitted_file": "slot_fit_2ec2f545_a06e676101c4_20260712_134359_560e5e74.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 3542,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 3760,
+            "fitted_ms": 3542,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 3542,
+            "slot_fit_key": "97a652ef28c8c433"
+          },
+          "start_ms": 73120,
+          "end_ms": 76880,
+          "slot_ms": 3760,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "9aa75860d2447622cb517dae4f18b164",
+          "tts_uuid": "e560e9678f4e438ebafe6001eeabfb6c",
+          "audio_uuid": "d37e249446754028b6ace509f8094027",
+          "merge_uuid": "b1ca29e470c547ac8670e8cfbdf4363d",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_a06e676101c4_20260712_134234_90fdea0a.wav",
+          "text_for_tts": "Що Джорджа-молодшого викинуло з машини, але́ ві́н вижив.",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9333,
+            "missing_words": [
+              "джорджа-молодшого",
+              "ві",
+              "н"
+            ],
+            "truncated_words": [
+              "джорджа-молодшого"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2894,
+            "asr_confidence": 0.75,
+            "recognized_text": "Що джорджа молочого викинуло з машини, але віен вижив.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Що джорджа молочого викинуло з машини, але віен вижив.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 9,
+          "text": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+          "plain_text": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+          "translation_text": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+          "file": "tts_bb2d9f07_c21ab84496e0_20260712_134802_4f9b8fff.mp3",
+          "segment_id": "dca7e32ab670475ba6b20a7f9fb04091",
+          "tts_file_path": "tts_bb2d9f07_c21ab84496e0_20260712_134802_4f9b8fff.mp3",
+          "playback_duration": 0,
+          "tts_text": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+          "status": "generated",
+          "tts_ms": 7663,
+          "tts_status": "generated",
+          "actual_duration_ms": 7663,
+          "first_tts_duration_ms": 9048,
+          "segment_uuid": "dca7e32ab670475ba6b20a7f9fb04091",
+          "audio_bound_uuid": "dca7e32ab670475ba6b20a7f9fb04091",
+          "pause_engine": {
+            "before_ms": 9048,
+            "after_ms": 7663,
+            "saved_ms": 1385,
+            "stages": [
+              "lead_trim:217",
+              "tail_trim:1021",
+              "pause_compress:146"
+            ],
+            "slot_ms": 7840
+          },
+          "timing_budget": {
+            "index": 9,
+            "slot_start": 76880,
+            "slot_end": 84720,
+            "slot_duration": 7840,
+            "tts_duration": 7663,
+            "measured_duration": 7663,
+            "delta": -177,
+            "overflow": 0,
+            "underflow": 177,
+            "status": "ok",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1385,
+            "pause_stages": [
+              "lead_trim:217",
+              "tail_trim:1021",
+              "pause_compress:146"
+            ],
+            "timing_score": 99.1,
+            "rewrite_reason": "fits_after_pause",
+            "final_status": "ok",
+            "original_duration": 9048,
+            "provider_fatal": false
+          },
+          "timing_score": 99.1,
+          "fitted_file": "slot_fit_2ec2f545_dca7e32ab670_20260712_134359_1bf4189e.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 7663,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 7840,
+            "fitted_ms": 7663,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 7663,
+            "slot_fit_key": "a637168029314b76"
+          },
+          "start_ms": 76880,
+          "end_ms": 84720,
+          "slot_ms": 7840,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "d23dfdd238bf18503cff784acfd13b89",
+          "tts_uuid": "8a185dd5d6ad4b9a80ca471e21eab7f6",
+          "audio_uuid": "a8ee6a682a334f88a6b2dbf44f575183",
+          "merge_uuid": "597b48d31b1b4c25b40d12bc504a7e1a",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_dca7e32ab670_20260712_134237_1fcd9d40.wav",
+          "text_for_tts": "Че́рез два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9205,
+            "missing_words": [
+              "че",
+              "рез",
+              "два",
+              "роки",
+              "джордж-молодший",
+              "одужав",
+              "прямій",
+              "фотоапарат"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.1541,
+            "asr_confidence": 0.75,
+            "recognized_text": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Через дворок і Джорч Молодший повністю дуже від травм.\nСтояв на фінішній премій на гоночному треку і підняв фотоаппарат.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 10,
+          "text": "Так, пі́сля свого досвіду на межі смерті, Джордж-молодший зрозумів, що його́ батько був певною мірою правий, що в деяких випадках ві́н марнував свій потенціал. Тож Джордж-молодший Ві́н бі́льше не хоче займатися автогонками.",
+          "plain_text": "Так, пі́сля свого досвіду на межі смерті, Джордж-молодший зрозумів, що його́ батько був певною мірою правий, що в деяких випадках ві́н марнував свій потенціал. Тож Джордж-молодший Ві́н бі́льше не хоче займатися автогонками.",
+          "translation_text": "Так, пі́сля свого досвіду на межі смерті, Джордж-молодший зрозумів, що його́ батько був певною мірою правий, що в деяких випадках ві́н марнував свій потенціал. Тож Джордж-молодший Ві́н бі́льше не хоче займатися автогонками.",
+          "file": "tts_f0befbb5_f78b39bf0c33_20260712_134831_12a5eec2.mp3",
+          "segment_id": "9186dc6218c041d7ac4663e5f72038c4",
+          "tts_file_path": "tts_f0befbb5_f78b39bf0c33_20260712_134831_12a5eec2.mp3",
+          "playback_duration": 0,
+          "tts_text": "Так, пі́сля свого досвіду на межі смерті, Джордж-молодший зрозумів, що його́ батько був певною мірою правий, що в деяких випадках ві́н марнував свій потенціал. Тож Джордж-молодший Ві́н бі́льше не хоче займатися автогонками.",
+          "status": "generated",
+          "tts_ms": 13722,
+          "tts_status": "generated",
+          "actual_duration_ms": 13722,
+          "first_tts_duration_ms": 16032,
+          "segment_uuid": "9186dc6218c041d7ac4663e5f72038c4",
+          "audio_bound_uuid": "9186dc6218c041d7ac4663e5f72038c4",
+          "pause_engine": {
+            "before_ms": 13761,
+            "after_ms": 13722,
+            "saved_ms": 39,
+            "stages": [
+              "pause_compress:37"
+            ],
+            "slot_ms": 12560
+          },
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 10,
+            "slot_start": 84720,
+            "slot_end": 97280,
+            "slot_duration": 12560,
+            "tts_duration": 13722,
+            "measured_duration": 13722,
+            "delta": 1162,
+            "overflow": 1162,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 39,
+            "pause_stages": [
+              "pause_compress:37"
+            ],
+            "timing_score": 76.3,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 16032,
+            "provider_fatal": false
+          },
+          "timing_score": 76.3,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 39,
+            "timing_score": 76.3,
+            "actual_duration_ms": 13722,
+            "slot_duration": 12560,
+            "delta": 1162
+          },
+          "video_stretch_ratio": 1.0907,
+          "video_adapt_mode": "video_adapt",
+          "fitted_file": "slot_fit_2ec2f545_9186dc6218c0_20260712_134401_9e60e189.wav",
+          "container_status": "yellow",
+          "slot_overflow": false,
+          "fitted_ms": 13699,
+          "overflow_ms": 1064,
+          "overflow_pct": 8.5,
+          "timing_meta": {
+            "slot_ms": 12560,
+            "slot_limit_ms": 12635,
+            "tts_ms": 13722,
+            "fitted_ms": 13699,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 21,
+            "strategy": "pause_compress",
+            "overflow_ms": 1064,
+            "slot_fit_tts_ms": 13722,
+            "slot_fit_key": "d1bebd3f73bba50a"
+          },
+          "start_ms": 84720,
+          "end_ms": 97280,
+          "slot_ms": 12560,
+          "slot_fit_attempts": 0,
+          "silence_trim": 80.0,
+          "playback_rate": 1.05,
+          "stretch_factor": 1.0343949044585987,
+          "translation_uuid": "ebe2991ca9ace39f5bda0bab366246e7",
+          "tts_uuid": "69098445602046f29e63318dd63259dd",
+          "audio_uuid": "fd82d778b28e4bdaa0fce24d376f474e",
+          "merge_uuid": "61090deea0874b96a8cd7dd1cf585cc4",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_9186dc6218c0_20260712_134343_eecc69cd.wav",
+          "text_for_tts": "Так, пі́сля свого досвіду на межі смерті, Джордж-молодший зрозумів, що його́ батько був певною мірою правий, що в деяких випадках ві́н марнував свій потенціал. Тож Джордж-молодший Ві́н бі́льше не хоче займатися автогонками.",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.5302,
+            "missing_words": [
+              "пі",
+              "сля",
+              "межі",
+              "джордж-молодший",
+              "певною",
+              "мірою",
+              "ві",
+              "н",
+              "марнував",
+              "потенціал",
+              "джордж-молодший",
+              "ві",
+              "н",
+              "бі",
+              "льше",
+              "автогонками"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.2764,
+            "asr_confidence": 0.75,
+            "recognized_text": "Так, після свого досвіду на майже смерті, Джорж Молодчий зрозумів, що його батько був певну і мірую правий, що в деяких випадках вен марновав свій потенцял.\nТож Джорж Молодчий вен більше не хоче займатися в того, Гонками.",
+            "issues": [
+              "missing_words",
+              "truncated_sentence",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_sentence",
+            "low_similarity"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Так, після свого досвіду на майже смерті, Джорж Молодчий зрозумів, що його батько був певну і мірую правий, що в деяких випадках вен марновав свій потенцял.\nТож Джорж Молодчий вен більше не хоче займатися в того, Гонками.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 11,
+          "text": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+          "plain_text": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+          "translation_text": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+          "file": "tts_efc568fd_24cf945e26c1_20260712_134854_8298fbd8.mp3",
+          "segment_id": "0cd601ccbc434b2ab4af74c75b2a44ee",
+          "tts_file_path": "tts_efc568fd_24cf945e26c1_20260712_134854_8298fbd8.mp3",
+          "playback_duration": 0,
+          "tts_text": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+          "status": "generated",
+          "tts_ms": 5182,
+          "tts_status": "generated",
+          "actual_duration_ms": 5182,
+          "first_tts_duration_ms": 6408,
+          "segment_uuid": "0cd601ccbc434b2ab4af74c75b2a44ee",
+          "audio_bound_uuid": "0cd601ccbc434b2ab4af74c75b2a44ee",
+          "pause_engine": {
+            "before_ms": 6408,
+            "after_ms": 5182,
+            "saved_ms": 1226,
+            "stages": [
+              "lead_trim:215",
+              "tail_trim:999",
+              "pause_compress:12"
+            ],
+            "slot_ms": 5280
+          },
+          "timing_budget": {
+            "index": 11,
+            "slot_start": 97280,
+            "slot_end": 102560,
+            "slot_duration": 5280,
+            "tts_duration": 5182,
+            "measured_duration": 5182,
+            "delta": -98,
+            "overflow": 0,
+            "underflow": 98,
+            "status": "ok",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1226,
+            "pause_stages": [
+              "lead_trim:215",
+              "tail_trim:999",
+              "pause_compress:12"
+            ],
+            "timing_score": 100.0,
+            "rewrite_reason": "fits_after_pause",
+            "final_status": "ok",
+            "original_duration": 6408,
+            "provider_fatal": false
+          },
+          "timing_score": 100.0,
+          "fitted_file": "slot_fit_2ec2f545_0cd601ccbc43_20260712_134401_32006842.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 5182,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 5280,
+            "fitted_ms": 5182,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 5182,
+            "slot_fit_key": "bf539cc5cd24d040"
+          },
+          "start_ms": 97280,
+          "end_ms": 102560,
+          "slot_ms": 5280,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "e1e19f42aabc9aae8b51caf7d8690965",
+          "tts_uuid": "d9323a22a7f4489f8167eb853c15e27e",
+          "audio_uuid": "6f1bbecc55834621a99b16762a295ff5",
+          "merge_uuid": "ecb28b91f2ee4e7e875decbfc8d24d2c",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_0cd601ccbc43_20260712_134242_e42c9440.wav",
+          "text_for_tts": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9211,
+            "missing_words": [
+              "натомість",
+              "ві",
+              "н",
+              "старе",
+              "хобі",
+              "фотографії"
+            ],
+            "truncated_words": [
+              "натомість",
+              "фотографії"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.2136,
+            "asr_confidence": 0.75,
+            "recognized_text": "На тому, він взяв цю камеру, і дійсно повернувся в своє старих обіфотографії.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "На тому, він взяв цю камеру, і дійсно повернувся в своє старих обіфотографії.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 12,
+          "text": ", Джордж-молодший подав заяву на престижну програму з кінематографії з Університет Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+          "plain_text": ", Джордж-молодший подав заяву на престижну програму з кінематографії з Університет Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+          "translation_text": ", Джордж-молодший подав заяву на престижну програму з кінематографії з Університет Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+          "file": "tts_2930e12f_20773b2f8b9c_20260712_134918_aa014473.mp3",
+          "segment_id": "9fbd2e6c544f4bdca52ded049a5a3aaf",
+          "tts_file_path": "tts_2930e12f_20773b2f8b9c_20260712_134918_aa014473.mp3",
+          "playback_duration": 0,
+          "tts_text": ", Джордж-молодший подав заяву на престижну програму з кінематографії з Університет Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+          "status": "generated",
+          "tts_ms": 12220,
+          "tts_status": "generated",
+          "actual_duration_ms": 12220,
+          "first_tts_duration_ms": 14424,
+          "segment_uuid": "9fbd2e6c544f4bdca52ded049a5a3aaf",
+          "audio_bound_uuid": "9fbd2e6c544f4bdca52ded049a5a3aaf",
+          "pause_engine": {
+            "before_ms": 12257,
+            "after_ms": 12220,
+            "saved_ms": 37,
+            "stages": [
+              "pause_compress:36"
+            ],
+            "slot_ms": 10080
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 12,
+            "slot_start": 102560,
+            "slot_end": 112640,
+            "slot_duration": 10080,
+            "tts_duration": 12220,
+            "measured_duration": 12220,
+            "delta": 2140,
+            "overflow": 2140,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 37,
+            "pause_stages": [
+              "pause_compress:36"
+            ],
+            "timing_score": 45.3,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 14424,
+            "provider_fatal": false
+          },
+          "timing_score": 45.3,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 37,
+            "timing_score": 45.3,
+            "actual_duration_ms": 12220,
+            "slot_duration": 10080,
+            "delta": 2140
+          },
+          "fitted_file": "slot_fit_2ec2f545_9fbd2e6c544f_20260712_134403_da7a9045.wav",
+          "container_status": "red",
+          "slot_overflow": true,
+          "fitted_ms": 12215,
+          "overflow_ms": 230,
+          "overflow_pct": 2.3,
+          "timing_meta": {
+            "slot_ms": 10080,
+            "slot_limit_ms": 10155,
+            "tts_ms": 12220,
+            "fitted_ms": 12215,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 4,
+            "strategy": "pause_compress",
+            "overflow_ms": 2060,
+            "slot_fit_tts_ms": 12220,
+            "slot_fit_iterations": [
+              {
+                "action": "overflow_text_only",
+                "note": "no_atempo"
+              }
+            ],
+            "slot_fit_key": "82c4da55f00d07eb",
+            "crossfade_ms": 12
+          },
+          "start_ms": 102560,
+          "end_ms": 112640,
+          "slot_ms": 10080,
+          "slot_fit_attempts": 1,
+          "silence_trim": 80.0,
+          "playback_rate": 1.12,
+          "stretch_factor": 1.05,
+          "overflow": true,
+          "translation_uuid": "385e12532d9e51a7aac247a7e93dc12d",
+          "tts_uuid": "4de2a7982453425e86f7c39adbe08d10",
+          "audio_uuid": "73df0a16b85441e5ae62bcfdb68ca981",
+          "merge_uuid": "3077bb130f764c7981cc3157b7828fb2",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_9fbd2e6c544f_20260712_134345_bd4758a4.wav",
+          "text_for_tts": ", Джордж-молодший подав заяву на престижну програму з кінематографії з Університет Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.893,
+            "missing_words": [
+              "джордж-молодший",
+              "престижну",
+              "програму",
+              "з",
+              "кінематографії",
+              "з",
+              "університет",
+              "південної",
+              "каліфорнії",
+              "пі",
+              "сля",
+              "надіслав",
+              "ві",
+              "н",
+              "неї"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "неї"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.3643,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж Молодший подав заяву на простижну программу скинаматографії Зуніварсетет Південу і Калifornії.\nАле після того, як на деслав заяву, Він був цілком упевнений, що його не приймуть до ней.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Джордж Молодший подав заяву на простижну программу скинаматографії Зуніварсетет Південу і Калifornії.\nАле після того, як на деслав заяву, Він був цілком упевнений, що його не приймуть до ней.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 13,
+          "text": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду",
+          "plain_text": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду",
+          "translation_text": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду",
+          "file": "tts_537dd457_ebcd4793ffc1_20260712_134941_0c5b9f5b.mp3",
+          "segment_id": "e4504d5b6c7d4a20821a5dcca581dd61",
+          "tts_file_path": "tts_537dd457_ebcd4793ffc1_20260712_134941_0c5b9f5b.mp3",
+          "playback_duration": 0,
+          "tts_text": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду",
+          "status": "generated",
+          "tts_ms": 5571,
+          "tts_status": "generated",
+          "actual_duration_ms": 5571,
+          "first_tts_duration_ms": 6840,
+          "segment_uuid": "e4504d5b6c7d4a20821a5dcca581dd61",
+          "audio_bound_uuid": "e4504d5b6c7d4a20821a5dcca581dd61",
+          "pause_engine": {
+            "before_ms": 5587,
+            "after_ms": 5571,
+            "saved_ms": 16,
+            "stages": [
+              "pause_compress:15"
+            ],
+            "slot_ms": 4320
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 13,
+            "slot_start": 112640,
+            "slot_end": 116960,
+            "slot_duration": 4320,
+            "tts_duration": 5571,
+            "measured_duration": 5571,
+            "delta": 1251,
+            "overflow": 1251,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 16,
+            "pause_stages": [
+              "pause_compress:15"
+            ],
+            "timing_score": 25.8,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 6840,
+            "provider_fatal": false
+          },
+          "timing_score": 25.8,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 16,
+            "timing_score": 25.8,
+            "actual_duration_ms": 5571,
+            "slot_duration": 4320,
+            "delta": 1251
+          },
+          "fitted_file": "slot_fit_2ec2f545_e4504d5b6c7d_20260712_134404_08141de5.wav",
+          "container_status": "red",
+          "slot_overflow": true,
+          "fitted_ms": 5561,
+          "overflow_ms": 336,
+          "overflow_pct": 7.8,
+          "timing_meta": {
+            "slot_ms": 4320,
+            "slot_limit_ms": 4395,
+            "tts_ms": 5571,
+            "fitted_ms": 5561,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 9,
+            "strategy": "pause_compress",
+            "overflow_ms": 1166,
+            "slot_fit_tts_ms": 5571,
+            "slot_fit_iterations": [
+              {
+                "action": "overflow_text_only",
+                "note": "no_atempo"
+              }
+            ],
+            "slot_fit_key": "45126e34d90c9d17",
+            "crossfade_ms": 12
+          },
+          "start_ms": 112640,
+          "end_ms": 116960,
+          "slot_ms": 4320,
+          "slot_fit_attempts": 1,
+          "silence_trim": 80.0,
+          "playback_rate": 1.12,
+          "stretch_factor": 1.05,
+          "overflow": true,
+          "translation_uuid": "45bdf4a4073d08ebed40ddc8ec0f058e",
+          "tts_uuid": "799c2b64476047d1977f700bbff0712d",
+          "audio_uuid": "eeeb3596f31c420296b9de14a39bb464",
+          "merge_uuid": "b8e2c77f46e04b77a1f23211aa09358d",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_e4504d5b6c7d_20260712_134346_45cd160a.wav",
+          "text_for_tts": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9101,
+            "missing_words": [
+              "джордж-молодший",
+              "до",
+              "подіуму",
+              "щоб",
+              "кілька",
+              "фотографій"
+            ],
+            "truncated_words": [
+              "джордж-молодший",
+              "щоб"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5833,
+            "asr_confidence": 0.75,
+            "recognized_text": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Тепер Джордж молодший підійшов доподью, що б зробити тільки фотографії переможного заїзду.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 14,
+          "text": "Але́ коли́ ві́н йшов туди, чоловік середнього віку підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а по́тім в якийсь момент людина насправді представився як Хаскела Уекслера",
+          "plain_text": "Але́ коли́ ві́н йшов туди, чоловік середнього віку підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а по́тім в якийсь момент людина насправді представився як Хаскела Уекслера",
+          "translation_text": "Але́ коли́ ві́н йшов туди, чоловік середнього віку підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а по́тім в якийсь момент людина насправді представився як Хаскела Уекслера",
+          "file": "tts_7e1868e1_0fe7a4a0abf2_20260712_135005_3dcf2f5c.mp3",
+          "segment_id": "51e9d95dfaed47228191883aaa8c9e75",
+          "tts_file_path": "tts_7e1868e1_0fe7a4a0abf2_20260712_135005_3dcf2f5c.mp3",
+          "playback_duration": 0,
+          "tts_text": "Але́ коли́ ві́н йшов туди, чоловік середнього віку підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а по́тім в якийсь момент людина насправді представився як Хаскела Уекслера",
+          "status": "generated",
+          "tts_ms": 11771,
+          "tts_status": "generated",
+          "actual_duration_ms": 11771,
+          "first_tts_duration_ms": 13176,
+          "segment_uuid": "51e9d95dfaed47228191883aaa8c9e75",
+          "audio_bound_uuid": "51e9d95dfaed47228191883aaa8c9e75",
+          "pause_engine": {
+            "before_ms": 11787,
+            "after_ms": 11771,
+            "saved_ms": 16,
+            "stages": [
+              "pause_compress:15"
+            ],
+            "slot_ms": 10960
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 14,
+            "slot_start": 116960,
+            "slot_end": 127920,
+            "slot_duration": 10960,
+            "tts_duration": 11771,
+            "measured_duration": 11771,
+            "delta": 811,
+            "overflow": 811,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 16,
+            "pause_stages": [
+              "pause_compress:15"
+            ],
+            "timing_score": 81.2,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 13176,
+            "provider_fatal": false
+          },
+          "timing_score": 81.2,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 16,
+            "timing_score": 81.2,
+            "actual_duration_ms": 11771,
+            "slot_duration": 10960,
+            "delta": 811
+          },
+          "video_stretch_ratio": 1.074,
+          "video_adapt_mode": "video_adapt",
+          "fitted_file": "slot_fit_2ec2f545_51e9d95dfaed_20260712_134405_5417fae0.wav",
+          "container_status": "yellow",
+          "slot_overflow": false,
+          "fitted_ms": 11771,
+          "overflow_ms": 736,
+          "overflow_pct": 6.7,
+          "timing_meta": {
+            "slot_ms": 10960,
+            "slot_limit_ms": 11035,
+            "tts_ms": 11771,
+            "fitted_ms": 11771,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 0,
+            "strategy": "none",
+            "overflow_ms": 736,
+            "slot_fit_tts_ms": 11771,
+            "slot_fit_key": "f14260117eb400a9"
+          },
+          "start_ms": 116960,
+          "end_ms": 127920,
+          "slot_ms": 10960,
+          "slot_fit_attempts": 0,
+          "silence_trim": 80.0,
+          "playback_rate": 1.05,
+          "stretch_factor": 1.015875912408759,
+          "translation_uuid": "145fa6b8e58f652890d15d6c0ff833b2",
+          "tts_uuid": "aa59ef5377ca4e088f532578108c2796",
+          "audio_uuid": "ebd1b38b3b9d46efb818cb30e2531578",
+          "merge_uuid": "ac103d87cfa34e30853f150fba9e20df",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_51e9d95dfaed_20260712_134349_ad8b888b.wav",
+          "text_for_tts": "Але́ коли́ ві́н йшов туди, чоловік середнього віку підійшов до нього і запитав Джорджа-молодшого про його́ фотографію, а по́тім в якийсь момент людина насправді представився як Хаскела Уекслера",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9521,
+            "missing_words": [
+              "ві",
+              "н",
+              "йшов",
+              "туди",
+              "джорджа-молодшого",
+              "по",
+              "тім",
+              "хаскела",
+              "уекслера"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.2022,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але коли віяний шов тут, чоловік середнього віку підійшов до нього і запитав Джорджа Молодчого про його фотографію, а потім в якийсь момент людина насправді представився як хаскелу у екслера.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Але коли віяний шов тут, чоловік середнього віку підійшов до нього і запитав Джорджа Молодчого про його фотографію, а потім в якийсь момент людина насправді представився як хаскелу у екслера.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 15,
+          "text": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший Про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. І коли́ Haskell почув це",
+          "plain_text": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший Про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. І коли́ Haskell почув це",
+          "translation_text": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший Про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. І коли́ Haskell почув це",
+          "file": "tts_6377fd6c_17f5b93afcbc_20260712_135033_5ad688fc.mp3",
+          "segment_id": "83ddd4f991794482a66eb1928c502eaa",
+          "tts_file_path": "tts_6377fd6c_17f5b93afcbc_20260712_135033_5ad688fc.mp3",
+          "playback_duration": 0,
+          "tts_text": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший Про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. І коли́ Haskell почув це",
+          "status": "generated",
+          "tts_ms": 14592,
+          "tts_status": "generated",
+          "actual_duration_ms": 14592,
+          "first_tts_duration_ms": 18072,
+          "segment_uuid": "83ddd4f991794482a66eb1928c502eaa",
+          "audio_bound_uuid": "83ddd4f991794482a66eb1928c502eaa",
+          "pause_engine": {
+            "before_ms": 14648,
+            "after_ms": 14592,
+            "saved_ms": 56,
+            "stages": [
+              "pause_compress:54"
+            ],
+            "slot_ms": 10880
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 15,
+            "slot_start": 127920,
+            "slot_end": 138800,
+            "slot_duration": 10880,
+            "tts_duration": 14592,
+            "measured_duration": 14592,
+            "delta": 3712,
+            "overflow": 3712,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 56,
+            "pause_stages": [
+              "pause_compress:54"
+            ],
+            "timing_score": 12.2,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 18072,
+            "provider_fatal": false
+          },
+          "timing_score": 12.2,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 56,
+            "timing_score": 12.2,
+            "actual_duration_ms": 14592,
+            "slot_duration": 10880,
+            "delta": 3712
+          },
+          "fitted_file": "slot_fit_2ec2f545_83ddd4f99179_20260712_134407_24811f2e.wav",
+          "container_status": "red",
+          "slot_overflow": true,
+          "fitted_ms": 14576,
+          "overflow_ms": 1448,
+          "overflow_pct": 13.3,
+          "timing_meta": {
+            "slot_ms": 10880,
+            "slot_limit_ms": 10955,
+            "tts_ms": 14592,
+            "fitted_ms": 14576,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 14,
+            "strategy": "pause_compress",
+            "overflow_ms": 3621,
+            "slot_fit_tts_ms": 14592,
+            "slot_fit_iterations": [
+              {
+                "action": "overflow_text_only",
+                "note": "no_atempo"
+              }
+            ],
+            "slot_fit_key": "d3daa376b915c1ac",
+            "crossfade_ms": 12
+          },
+          "start_ms": 127920,
+          "end_ms": 138800,
+          "slot_ms": 10880,
+          "slot_fit_attempts": 1,
+          "silence_trim": 80.0,
+          "playback_rate": 1.12,
+          "stretch_factor": 1.05,
+          "overflow": true,
+          "translation_uuid": "82121df66f08bcab1a926f177fa707fe",
+          "tts_uuid": "75d651dcadb44711963048f4f3e7e44f",
+          "audio_uuid": "2ef6d5a6da144eb392d4920d02335940",
+          "merge_uuid": "da1559f2af86484a8d3ee924ccdc0bce",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_83ddd4f99179_20260712_134351_38c59bb8.wav",
+          "text_for_tts": "І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший Про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. І коли́ Haskell почув це",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.3041,
+            "missing_words": [
+              "ві",
+              "н",
+              "ві",
+              "н",
+              "кінооператором",
+              "голлівуді",
+              "джордж-молодший",
+              "про",
+              "те",
+              "ві",
+              "н",
+              "нещодавно",
+              "університету",
+              "південної",
+              "каліфорнії",
+              "кінематографі",
+              "haskell"
+            ],
+            "truncated_words": [
+              "каліфорнії"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.6147,
+            "asr_confidence": 0.75,
+            "recognized_text": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Джордж Молодший проте, як він, не щодавно подав заявку до университету південну і каліфорні, щоб спробувати потрапити в програму кіно-мотографі.\nІ коли Хескал почув це.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "І сказав, він, що він був кіноопаратом в Голлі Вуді.\nІ Джордж Молодший проте, як він, не щодавно подав заявку до университету південну і каліфорні, щоб спробувати потрапити в програму кіно-мотографі.\nІ коли Хескал почув це.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 16,
+          "text": "Джордж, я знаю людей з Університету Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́сля цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до Університету Південної Каліфорнії",
+          "plain_text": "Джордж, я знаю людей з Університету Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́сля цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до Університету Південної Каліфорнії",
+          "translation_text": "Джордж, я знаю людей з Університету Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́сля цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до Університету Південної Каліфорнії",
+          "file": "tts_6c467dff_f9a8411bf843_20260712_135108_49e7c99c.mp3",
+          "segment_id": "3208ae6234384881b7e72634b80f9582",
+          "tts_file_path": "tts_6c467dff_f9a8411bf843_20260712_135108_49e7c99c.mp3",
+          "playback_duration": 0,
+          "tts_text": "Джордж, я знаю людей з Університету Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́сля цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до Університету Південної Каліфорнії",
+          "status": "generated",
+          "tts_ms": 14417,
+          "tts_status": "generated",
+          "actual_duration_ms": 14417,
+          "first_tts_duration_ms": 15936,
+          "segment_uuid": "3208ae6234384881b7e72634b80f9582",
+          "audio_bound_uuid": "3208ae6234384881b7e72634b80f9582",
+          "pause_engine": {
+            "before_ms": 14463,
+            "after_ms": 14417,
+            "saved_ms": 46,
+            "stages": [
+              "pause_compress:44"
+            ],
+            "slot_ms": 10400
+          },
+          "adaptation_executed": true,
+          "dsal_applied": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 16,
+            "slot_start": 138800,
+            "slot_end": 149200,
+            "slot_duration": 10400,
+            "tts_duration": 14417,
+            "measured_duration": 14417,
+            "delta": 4017,
+            "overflow": 4017,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 46,
+            "pause_stages": [
+              "pause_compress:44"
+            ],
+            "timing_score": 5.9,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 15936,
+            "provider_fatal": false
+          },
+          "timing_score": 5.9,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 46,
+            "timing_score": 5.9,
+            "actual_duration_ms": 14417,
+            "slot_duration": 10400,
+            "delta": 4017
+          },
+          "fitted_file": "slot_fit_2ec2f545_3208ae623438_20260712_134409_c5581f9d.wav",
+          "container_status": "red",
+          "slot_overflow": true,
+          "fitted_ms": 14389,
+          "overflow_ms": 1778,
+          "overflow_pct": 17.1,
+          "timing_meta": {
+            "slot_ms": 10400,
+            "slot_limit_ms": 10475,
+            "tts_ms": 14417,
+            "fitted_ms": 14389,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 26,
+            "strategy": "pause_compress",
+            "overflow_ms": 3914,
+            "slot_fit_tts_ms": 14417,
+            "slot_fit_iterations": [
+              {
+                "action": "overflow_text_only",
+                "note": "no_atempo"
+              }
+            ],
+            "slot_fit_key": "176cf9cc9a124e73",
+            "crossfade_ms": 12
+          },
+          "start_ms": 138800,
+          "end_ms": 149200,
+          "slot_ms": 10400,
+          "slot_fit_attempts": 1,
+          "silence_trim": 80.0,
+          "playback_rate": 1.12,
+          "stretch_factor": 1.05,
+          "overflow": true,
+          "translation_uuid": "532aa601b7887cd5ab181b8aa7440b51",
+          "tts_uuid": "b7306b3b815b4c18ab9aeb4424f9c46c",
+          "audio_uuid": "6222c7e25f9f4b9ba974cb8675571dc0",
+          "merge_uuid": "15706a37192b4d54899573a8492cf796",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_3208ae623438_20260712_134354_ca3eafdf.wav",
+          "text_for_tts": "Джордж, я знаю людей з Університету Південної Каліфорнії, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром пі́сля цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до Університету Південної Каліфорнії",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.5765,
+            "missing_words": [
+              "південної",
+              "каліфорнії",
+              "дозвольте",
+              "дзвінків",
+              "і",
+              "незабаром",
+              "пі",
+              "сля",
+              "фатальної",
+              "джордж-молодший",
+              "південної",
+              "каліфорнії"
+            ],
+            "truncated_words": [
+              "дозвольте",
+              "джордж-молодший"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.5323,
+            "asr_confidence": 0.75,
+            "recognized_text": "Джордж, я знаю людей з університету південої каліфорній, до звольте мені зробити кілька звінків, звичайно.\nНа забаром після цієї фатальну зустрічі Джордж молодший отримає лист про зарахування до університету південої каліфорній.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "truncated_sentence",
+              "duration_overflow",
+              "low_similarity"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words",
+            "truncated_sentence",
+            "duration_overflow",
+            "low_similarity"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Джордж, я знаю людей з університету південої каліфорній, до звольте мені зробити кілька звінків, звичайно.\nНа забаром після цієї фатальну зустрічі Джордж молодший отримає лист про зарахування до університету південої каліфорній.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 17,
+          "text": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди саме в цей момент",
+          "plain_text": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди саме в цей момент",
+          "translation_text": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди саме в цей момент",
+          "file": "output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_0f927638b799_20260712_134321_ec5e0a9d.wav",
+          "segment_id": "0f927638b79946b2b521b71dc84963ca",
+          "tts_file_path": "output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_0f927638b799_20260712_134321_ec5e0a9d.wav",
+          "playback_duration": 5322,
+          "tts_text": "Але́ цей момент життя Джорджа-молодшого не змінив життя Джорджа назавжди саме в цей момент",
+          "status": "generated",
+          "tts_ms": 5322,
+          "tts_status": "generated",
+          "actual_duration_ms": 5322,
+          "first_tts_duration_ms": 5568,
+          "segment_uuid": "0f927638b79946b2b521b71dc84963ca",
+          "audio_bound_uuid": "0f927638b79946b2b521b71dc84963ca",
+          "pause_engine": {
+            "before_ms": 6576,
+            "after_ms": 5322,
+            "saved_ms": 1254,
+            "stages": [
+              "lead_trim:225",
+              "tail_trim:1029"
+            ],
+            "slot_ms": 5120
+          },
+          "adaptation_executed": true,
+          "timing_budget": {
+            "index": 17,
+            "slot_start": 149200,
+            "slot_end": 154320,
+            "slot_duration": 5120,
+            "tts_duration": 5322,
+            "measured_duration": 5322,
+            "delta": 202,
+            "overflow": 202,
+            "underflow": 0,
+            "status": "overflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 0,
+            "pause_stages": [],
+            "timing_score": 90.7,
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 5568,
+            "provider_fatal": false
+          },
+          "timing_score": 90.7,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_overflow:no_rewrite",
+            "pause_adjustments_ms": 0,
+            "timing_score": 90.7,
+            "actual_duration_ms": 5322,
+            "slot_duration": 5120,
+            "delta": 202
+          },
+          "requires_llm_adaptation": false,
+          "video_stretch_ratio": 1.0395,
+          "video_adapt_mode": "video_adapt",
+          "fitted_file": "slot_fit_2ec2f545_0f927638b799_20260712_134410_59c651b8.wav",
+          "container_status": "yellow",
+          "slot_overflow": false,
+          "fitted_ms": 5322,
+          "overflow_ms": 127,
+          "overflow_pct": 2.5,
+          "timing_meta": {
+            "slot_ms": 5120,
+            "slot_limit_ms": 5195,
+            "tts_ms": 5322,
+            "fitted_ms": 5322,
+            "atempo": 1.0,
+            "tail_trim_ms": 0,
+            "pause_compressed_ms": 0,
+            "strategy": "none",
+            "overflow_ms": 127,
+            "slot_fit_tts_ms": 5322,
+            "slot_fit_key": "9a8b5ab50e429f40"
+          },
+          "start_ms": 149200,
+          "end_ms": 154320,
+          "slot_ms": 5120,
+          "slot_fit_attempts": 0,
+          "silence_trim": 80.0,
+          "playback_rate": 1.023828125,
+          "translation_uuid": "9d83065903d18ec10f4bdb380dd5248e",
+          "tts_uuid": "370209e15d5740a7b3231b5a7553d839",
+          "audio_uuid": "c2102972de304942afa5578e230c3a63",
+          "merge_uuid": "b15a99613d17472da245f1c5b1f51f20",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_0f927638b799_20260712_134321_ec5e0a9d.wav",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": true,
+          "voice_verification_metrics": {
+            "similarity": 0.9091,
+            "missing_words": [
+              "цей",
+              "джорджа-молодшого",
+              "цей"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.0395,
+            "asr_confidence": 0.75,
+            "recognized_text": "Але цим момент життя, джорджом лочого не змінив життя, джорджа назавжди саме в цим момент.",
+            "issues": [],
+            "route_to": "voice",
+            "pass": true
+          },
+          "voice_verification_asr_text": "Але цим момент життя, джорджом лочого не змінив життя, джорджа назавжди саме в цим момент."
+        },
+        {
+          "index": 18,
+          "text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії. Його́ фільм бу́де саме в цей момент насправді у той самий час",
+          "plain_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії. Його́ фільм бу́де саме в цей момент насправді у той самий час",
+          "translation_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії. Його́ фільм бу́де саме в цей момент насправді у той самий час",
+          "file": "tts_4f1dc3af_0d1a99f65c5b_20260712_135139_8c98f5b8.mp3",
+          "segment_id": "75a287a122464d8e8715c1f9a76d9954",
+          "tts_file_path": "tts_4f1dc3af_0d1a99f65c5b_20260712_135139_8c98f5b8.mp3",
+          "playback_duration": 0,
+          "tts_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії. Його́ фільм бу́де саме в цей момент насправді у той самий час",
+          "status": "generated",
+          "tts_ms": 12276,
+          "tts_status": "generated",
+          "actual_duration_ms": 12276,
+          "first_tts_duration_ms": 12528,
+          "segment_uuid": "75a287a122464d8e8715c1f9a76d9954",
+          "audio_bound_uuid": "75a287a122464d8e8715c1f9a76d9954",
+          "pause_engine": {
+            "before_ms": 15240,
+            "after_ms": 12276,
+            "saved_ms": 2964,
+            "stages": [
+              "lead_trim:233",
+              "tail_trim:949",
+              "pause_compress:1781"
+            ],
+            "slot_ms": 13440
+          },
+          "adaptation_executed": true,
+          "expand_required": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 18,
+            "slot_start": 154320,
+            "slot_end": 167760,
+            "slot_duration": 13440,
+            "tts_duration": 12276,
+            "measured_duration": 12276,
+            "delta": -1164,
+            "overflow": 0,
+            "underflow": 1164,
+            "status": "underflow",
+            "rewrite_iterations": 1,
+            "pause_adjustments_ms": 5973,
+            "pause_stages": [
+              "lead_trim:233",
+              "tail_trim:993",
+              "pause_compress:1782",
+              "lead_trim:233",
+              "tail_trim:949",
+              "pause_compress:1781"
+            ],
+            "timing_score": 92.3,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 12528,
+            "provider_fatal": false
+          },
+          "timing_score": 92.3,
+          "closed_loop": {
+            "iterations": 1,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 5973,
+            "timing_score": 92.3,
+            "actual_duration_ms": 12276,
+            "slot_duration": 13440,
+            "delta": -1164
+          },
+          "fitted_file": "slot_fit_2ec2f545_75a287a12246_20260712_134410_36b45453.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 12276,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 13440,
+            "fitted_ms": 12276,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 12276,
+            "slot_fit_key": "59802af096a71f52"
+          },
+          "start_ms": 154320,
+          "end_ms": 167760,
+          "slot_ms": 13440,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "7d3c9279edc24ed46774a0162cec1cc2",
+          "tts_uuid": "95d87a2a2b8c44df8397c257a1f8ee9d",
+          "audio_uuid": "3b85196c7bc24222ac6f9cae83ddf80d",
+          "merge_uuid": "9f24a779f3c747d3b7232d3c7a22dc50",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_75a287a12246_20260712_134328_b229bc90.wav",
+          "text_for_tts": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії. Його́ фільм бу́де саме в цей момент насправді у той самий час",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9556,
+            "missing_words": [
+              "тако",
+              "ж",
+              "че",
+              "рез",
+              "джордж-молодший",
+              "революційних",
+              "історії",
+              "його",
+              "фільм",
+              "бу",
+              "де"
+            ],
+            "truncated_words": [
+              "той",
+              "самий",
+              "час"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.1339,
+            "asr_confidence": 0.75,
+            "recognized_text": "Це такожа повністю змінити кіно.\nЧерез 13 років, Джорж Молодший створить одного з найбільш роволюційних фільмів в висторії.\nЄгофільм буде саме в цей момент насправді у той самий час.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Це такожа повністю змінити кіно.\nЧерез 13 років, Джорж Молодший створить одного з найбільш роволюційних фільмів в висторії.\nЄгофільм буде саме в цей момент насправді у той самий час.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 19,
+          "text": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Джордж-молодший Сьогодні Джордж Лукас і його́ кінофраншиза стане «Зоряними війнами» саме в цей момент насправді",
+          "plain_text": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Джордж-молодший Сьогодні Джордж Лукас і його́ кінофраншиза стане «Зоряними війнами» саме в цей момент насправді",
+          "translation_text": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Джордж-молодший Сьогодні Джордж Лукас і його́ кінофраншиза стане «Зоряними війнами» саме в цей момент насправді",
+          "file": "tts_ed51c5ce_ae7fe4b3102a_20260712_135208_0df0d86f.mp3",
+          "segment_id": "1e17d54cb303400ab11cc07cea36e3d0",
+          "tts_file_path": "tts_ed51c5ce_ae7fe4b3102a_20260712_135208_0df0d86f.mp3",
+          "playback_duration": 0,
+          "tts_text": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Джордж-молодший Сьогодні Джордж Лукас і його́ кінофраншиза стане «Зоряними війнами» саме в цей момент насправді",
+          "status": "generated",
+          "tts_ms": 11815,
+          "tts_status": "generated",
+          "actual_duration_ms": 11815,
+          "first_tts_duration_ms": 12120,
+          "segment_uuid": "1e17d54cb303400ab11cc07cea36e3d0",
+          "audio_bound_uuid": "1e17d54cb303400ab11cc07cea36e3d0",
+          "pause_engine": {
+            "before_ms": 13776,
+            "after_ms": 11815,
+            "saved_ms": 1961,
+            "stages": [
+              "lead_trim:213",
+              "tail_trim:977",
+              "pause_compress:770"
+            ],
+            "slot_ms": 12880
+          },
+          "adaptation_executed": true,
+          "expand_required": true,
+          "requires_llm_adaptation": false,
+          "timing_budget": {
+            "index": 19,
+            "slot_start": 167840,
+            "slot_end": 180720,
+            "slot_duration": 12880,
+            "tts_duration": 11815,
+            "measured_duration": 11815,
+            "delta": -1065,
+            "overflow": 0,
+            "underflow": 1065,
+            "status": "underflow",
+            "rewrite_iterations": 1,
+            "pause_adjustments_ms": 3932,
+            "pause_stages": [
+              "lead_trim:213",
+              "tail_trim:989",
+              "pause_compress:768",
+              "lead_trim:213",
+              "tail_trim:977",
+              "pause_compress:770"
+            ],
+            "timing_score": 92.9,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "dsal_exhausted_audio_fit",
+            "original_duration": 12120,
+            "provider_fatal": false
+          },
+          "timing_score": 92.9,
+          "closed_loop": {
+            "iterations": 1,
+            "final_status": "dsal_exhausted_audio_fit",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 3932,
+            "timing_score": 92.9,
+            "actual_duration_ms": 11815,
+            "slot_duration": 12880,
+            "delta": -1065
+          },
+          "fitted_file": "slot_fit_2ec2f545_1e17d54cb303_20260712_134410_082c63ee.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 11815,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 12880,
+            "fitted_ms": 11815,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 11815,
+            "slot_fit_key": "8981af535a855478"
+          },
+          "start_ms": 167840,
+          "end_ms": 180720,
+          "slot_ms": 12880,
+          "slot_fit_attempts": 0,
+          "translation_uuid": "f8ef4d937aee2b2a85de22081386e8d7",
+          "tts_uuid": "6094a6e427b744638c7cacc2a4373e72",
+          "audio_uuid": "c0e8b518d33043cc9fa7f24a00730fab",
+          "merge_uuid": "ee2076254bb748b0b0e4128a67a8f9f6",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2ec2f545abdc4c358916fae74e1e91fd"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2ec2f545abdc4c358916fae74e1e91fd\\closed_loop\\2ec2f545abdc4c358916fae74e1e91fd\\pause\\pause_run_1e17d54cb303_20260712_134334_532419f6.wav",
+          "text_for_tts": "Намагатися стати частиною найбільш успішної кінофраншизи в будь-яки́й час. Джордж-молодший Сьогодні Джордж Лукас і його́ кінофраншиза стане «Зоряними війнами» саме в цей момент насправді",
+          "semantic_text": "",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9091,
+            "missing_words": [
+              "намагатися",
+              "частиною",
+              "кінофраншизи",
+              "будь-яки",
+              "й",
+              "час",
+              "джордж-молодший",
+              "сьогодні",
+              "кінофраншиза",
+              "зоряними",
+              "війнами"
+            ],
+            "truncated_words": [
+              "намагатися"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.0696,
+            "asr_confidence": 0.75,
+            "recognized_text": "На Махатися стати частиную найбільш успішної кінофранше зибудь, як і очас.\nДжордж молодшийся годні Джордж Лукас і його кінофранше за стане зоринами війними саме в цей момент насправді.",
+            "issues": [
+              "missing_words",
+              "truncated_words"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "truncated_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "На Махатися стати частиную найбільш успішної кінофранше зибудь, як і очас.\nДжордж молодшийся годні Джордж Лукас і його кінофранше за стане зоринами війними саме в цей момент насправді.",
+          "voice_verification_route_to": "semantic"
+        }
+      ]
+    },
+    "assets": [
+      {
+        "asset_id": "video",
+        "path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_84ed4dbcfa.mp4",
+        "kind": "video",
+        "meta": {}
+      }
+    ],
+    "meta": {}
+  },
+  "legacy_task_id": "",
+  "legacy_project_uuid": "",
+  "created_at": 1783853536.283,
+  "updated_at": 1783857728.511755,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "source": "legacy_tdproj",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\projects\\tdproj\\6f2453dc-2581-4df2-8e5f-a8dc3fa470ff\\autodub-2ec2f545abdc4c358916fae74e1e91fd.tdproj"
+}

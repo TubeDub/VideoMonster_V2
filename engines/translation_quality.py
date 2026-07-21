@@ -38,6 +38,7 @@ _COMMON_NON_NAMES = frozenset(
         "thank",
         "please",
         "sorry",
+        "let",
         "это",
         "этот",
         "эта",
@@ -106,6 +107,8 @@ _DISCOURSE_MARKERS = frozenset(
         "said",
         "got",
         "get",
+        "let",
+        "make",
         "yesterday",
         "today",
         "tomorrow",
@@ -371,18 +374,35 @@ def missing_preserved_tokens(
             return True
         if key == "italian" and "італ" in tr_lower:
             return True
-        if key == "fiat" and "fiat" in tr_lower:
+        if key == "fiat" and ("fiat" in tr_lower or "фіат" in tr_lower or "фиат" in tr_lower):
             return True
         if key == "his" and "його" in tr_lower:
             return True
         if "молодш" in key and "молодш" in tr_lower:
             return True
+        # Compact USC / phonetic TTS form «Ю Ес Сі» satisfies university entities
+        _usc_phonetic = (
+            "ю ес сі" in tr_lower
+            or "юессі" in tr_lower.replace(" ", "")
+            or "ю ес си" in tr_lower
+        )
         if key in {"university", "southern", "california"}:
+            if "usc" in tr_lower or _usc_phonetic:
+                return True
             if "університет" in tr_lower and (
                 "південн" in tr_lower or "каліфорн" in tr_lower
             ):
                 return True
+        if "universityofsoutherncalifornia" in key.replace(".", "") or (
+            "university" in key and "southern" in key and "california" in key
+        ):
+            if "usc" in tr_lower or _usc_phonetic or (
+                "університет" in tr_lower and "каліфорн" in tr_lower
+            ):
+                return True
         if key == "usc":
+            if "usc" in tr_lower or _usc_phonetic:
+                return True
             if "університет" in tr_lower and "каліфорн" in tr_lower:
                 return True
         if key == "let" and ("давай" in tr_lower or "дозвол" in tr_lower):
@@ -536,10 +556,13 @@ def build_quality_analysis(
     ow = word_count(src)
     bw = word_count(baseline)
     sw = word_count(spoken_plain)
-    # Reference should be original word count for comparison with LLM translation
-    reference = ow
-    words_lost = max(0, reference - sw)
-    pct_shortened = round(100.0 * words_lost / reference, 1) if reference else 0.0
+    # Cross-language EN↔UK word delta is informational only (Final v3.0 Q1).
+    # Never treat en_words vs uk_words as WARNING/ERROR by itself.
+    en_uk_delta = max(0, ow - sw)
+    en_uk_pct = round(100.0 * en_uk_delta / ow, 1) if ow else 0.0
+    # Same-language compression (baseline UK → spoken UK) for clause coverage.
+    same_lang_lost = max(0, bw - sw) if bw else 0
+    same_lang_pct = round(100.0 * same_lang_lost / bw, 1) if bw else 0.0
 
     meaning_score = compute_meaning_loss_score(src, "", spoken_plain)
     entity_errors = check_critical_entities(src, spoken_plain)
@@ -550,6 +573,19 @@ def build_quality_analysis(
             p = part.strip()
             if len(p.split()) >= 3 and p.lower() not in spoken_plain.lower():
                 removed_constructs += 1
+    # Clause coverage vs source: crude split on punctuation for meaning QA.
+    src_clauses = [c.strip() for c in re.split(r"[,;:.!?—–]", src) if len(c.split()) >= 2]
+    covered = 0
+    for clause in src_clauses:
+        # token overlap heuristic in target (latin tokens / proper names)
+        tokens = [t for t in re.findall(r"[A-Za-zА-Яа-яЇїІіЄєҐґ']+", clause) if len(t) > 2]
+        if not tokens:
+            covered += 1
+            continue
+        hits = sum(1 for t in tokens if t.lower() in spoken_plain.lower())
+        if hits >= max(1, len(tokens) // 2):
+            covered += 1
+    clause_coverage = round(covered / len(src_clauses), 3) if src_clauses else 1.0
 
     reasons: list[dict[str, Any]] = []
     raw_diag = diagnose_raw_mt(
@@ -569,23 +605,49 @@ def build_quality_analysis(
             }
         )
 
-    if pct_shortened >= 15 or words_lost >= 3:
+    # Q1: en_words vs uk_words — INFO only (never WARNING/ERROR).
+    if ow > 0 and (en_uk_pct >= 15 or en_uk_delta >= 3):
         reasons.append(
             {
-                "code": "over_shortening",
-                "severity": "error" if pct_shortened >= 30 else "warning",
+                "code": "word_count_info",
+                "severity": "info",
                 "summary": (
-                    f"Сокращено на {pct_shortened}%; потеряно {words_lost} слов; "
-                    f"удалено {removed_constructs} смысловых конструкций; "
-                    f"риск потери смысла: {meaning_loss_risk(meaning_score)}"
+                    f"INFO word-count: en_words={ow}, uk/tts_words={sw}, "
+                    f"delta={en_uk_delta} ({en_uk_pct}%) — not a quality failure"
                 ),
                 "detail": {
-                    "shortened_pct": pct_shortened,
-                    "words_lost": words_lost,
-                    "removed_constructs": removed_constructs,
+                    "en_words": ow,
+                    "uk_words": sw,
+                    "delta": en_uk_delta,
+                    "pct": en_uk_pct,
+                },
+            }
+        )
+
+    # Primary QA: meaning_loss_score + clause coverage (+ same-lang clause removal).
+    meaning_risk = meaning_loss_risk(meaning_score)
+    meaning_bad = meaning_risk in {"high", "critical"} or float(meaning_score) >= 0.35
+    coverage_bad = clause_coverage < 0.55
+    constructs_bad = removed_constructs >= 1 and same_lang_pct >= 20
+    if meaning_bad or coverage_bad or constructs_bad:
+        severity = "error" if (meaning_bad and coverage_bad) or float(meaning_score) >= 0.5 else "warning"
+        reasons.append(
+            {
+                "code": "meaning_or_clause_loss",
+                "severity": severity,
+                "summary": (
+                    f"Риск потери смысла: {meaning_risk} "
+                    f"(score={round(float(meaning_score), 3)}); "
+                    f"clause_coverage={clause_coverage}; "
+                    f"удалено конструкций={removed_constructs}"
+                ),
+                "detail": {
                     "meaning_loss_score": meaning_score,
-                    "meaning_loss_risk": meaning_loss_risk(meaning_score),
-                    "original_words": ow,
+                    "meaning_loss_risk": meaning_risk,
+                    "clause_coverage": clause_coverage,
+                    "removed_constructs": removed_constructs,
+                    "same_lang_shortened_pct": same_lang_pct,
+                    "en_words": ow,
                     "baseline_words": bw,
                     "tts_words": sw,
                 },

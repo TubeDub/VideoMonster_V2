@@ -1,0 +1,246 @@
+{
+  "project_id": "1c99ecdf-b58e-5da1-9e17-11a1fbe48a74",
+  "title": "1c99ecdf-b58e-5da1-9e17-11a1fbe48a74",
+  "storage_version": 1,
+  "created_at": 1784043262.030407,
+  "updated_at": 1784043262.0556242,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "2737679d506244a2bb41e50d8d0a9fb1",
+  "legacy_project_uuid": "",
+  "studio_session": {
+    "session_id": "2737679d506244a2bb41e50d8d0a9fb1",
+    "task_id": "2737679d506244a2bb41e50d8d0a9fb1",
+    "segments": [
+      {
+        "id": "574a1ed9ae314479a9d17d92e82056d1",
+        "index": 0,
+        "segment_id": "574a1ed9ae314479a9d17d92e82056d1",
+        "text": "Ну, Ну, далі, знаєте, знаєте?",
+        "original": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了",
+        "start_ms": 1200,
+        "end_ms": 11000,
+        "file": "tts_6e236a1d_65ea9c272300_20260714_182714_9827603b.mp3",
+        "fitted_file": "slot_fit_2737679d_574a1ed9ae31_20260714_182659_08a82f23.wav",
+        "tts_ms": 2731,
+        "fitted_ms": 2731,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "generated",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "slot_ms": 9800,
+          "fitted_ms": 2731,
+          "atempo": 1.0,
+          "strategy": "none",
+          "overflow_ms": 0,
+          "slot_fit_tts_ms": 2731,
+          "slot_fit_key": "b89ec79ebbfbd57c"
+        }
+      },
+      {
+        "id": "bc59069c5a794b09a31c397996f5c8cd",
+        "index": 1,
+        "segment_id": "bc59069c5a794b09a31c397996f5c8cd",
+        "text": "Далі, розумієте, знаєте, розумієте?",
+        "original": "妈 若是我一生的 无论是你 不能想",
+        "start_ms": 11100,
+        "end_ms": 18460,
+        "file": "tts_0016f644_c64d54efd55b_20260714_182734_34a078ec.mp3",
+        "fitted_file": "slot_fit_2737679d_bc59069c5a79_20260714_182659_f2b22768.wav",
+        "tts_ms": 2978,
+        "fitted_ms": 2978,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "generated",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "slot_ms": 7360,
+          "fitted_ms": 2978,
+          "atempo": 1.0,
+          "strategy": "none",
+          "overflow_ms": 0,
+          "slot_fit_tts_ms": 2978,
+          "slot_fit_key": "4fa9159b91844711"
+        }
+      },
+      {
+        "id": "671badd129854e9f8d53e55bbfa7b9ca",
+        "index": 2,
+        "segment_id": "671badd129854e9f8d53e55bbfa7b9ca",
+        "text": "Ну, ⇩, розумієте, знаєте, розумієте?",
+        "original": "就怀孕了",
+        "start_ms": 18460,
+        "end_ms": 35340,
+        "file": "tts_7cb3d603_a3901a09a8b0_20260714_182753_756275c6.mp3",
+        "fitted_file": "slot_fit_2737679d_671badd12985_20260714_182659_d23c8119.wav",
+        "tts_ms": 2790,
+        "fitted_ms": 2790,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "generated",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "slot_ms": 16880,
+          "fitted_ms": 2790,
+          "atempo": 1.0,
+          "strategy": "none",
+          "overflow_ms": 0,
+          "slot_fit_tts_ms": 2790,
+          "slot_fit_key": "a76bd5c0f1684f78"
+        }
+      },
+      {
+        "id": "3121c8dc88c74bd2bc678e2d061f3581",
+        "index": 3,
+        "segment_id": "3121c8dc88c74bd2bc678e2d061f3581",
+        "text": "Далі, розумієте, знаєте, розумієте?",
+        "original": "我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的",
+        "start_ms": 35340,
+        "end_ms": 49020,
+        "file": "tts_2f1c953f_9b257a182872_20260714_182812_a3516575.mp3",
+        "fitted_file": "slot_fit_2737679d_3121c8dc88c7_20260714_182659_8ede1eb7.wav",
+        "tts_ms": 2980,
+        "fitted_ms": 2980,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "generated",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "slot_ms": 13680,
+          "fitted_ms": 2980,
+          "atempo": 1.0,
+          "strategy": "none",
+          "overflow_ms": 0,
+          "slot_fit_tts_ms": 2980,
+          "slot_fit_key": "c6f05335f47b9204"
+        }
+      },
+      {
+        "id": "a8cc60535c934a799332782f95401d0f",
+        "index": 4,
+        "segment_id": "a8cc60535c934a799332782f95401d0f",
+        "text": "Ну, дальше, розумієте, знаєте, розумієте?",
+        "original": "你跟月子前的意外 这孩子是绑费的",
+        "start_ms": 49120,
+        "end_ms": 66220,
+        "file": "tts_0268dde1_275119690c77_20260714_182832_9f1205b4.mp3",
+        "fitted_file": "slot_fit_2737679d_a8cc60535c93_20260714_182659_834162cf.wav",
+        "tts_ms": 3517,
+        "fitted_ms": 3517,
+        "overflow_ms": 0,
+        "overflow_pct": 0.0,
+        "container_status": "green",
+        "tts_status": "generated",
+        "tts_error": null,
+        "emotion": "neutral",
+        "timing_meta": {
+          "slot_ms": 17100,
+          "fitted_ms": 3517,
+          "atempo": 1.0,
+          "strategy": "none",
+          "overflow_ms": 0,
+          "slot_fit_tts_ms": 3517,
+          "slot_fit_key": "1d0d304d84d101ea"
+        }
+      }
+    ],
+    "timing_map": [
+      {
+        "start": 1200,
+        "end": 11000
+      },
+      {
+        "start": 11100,
+        "end": 18460
+      },
+      {
+        "start": 18460,
+        "end": 35340
+      },
+      {
+        "start": 35340,
+        "end": 49020
+      },
+      {
+        "start": 49120,
+        "end": 66220
+      }
+    ],
+    "source_segments": [
+      "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了",
+      "妈 若是我一生的 无论是你 不能想",
+      "就怀孕了",
+      "我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的",
+      "你跟月子前的意外 这孩子是绑费的"
+    ],
+    "tracks": {
+      "original": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Original Voice",
+        "i18n_key": "studio.track.original",
+        "color": "#22c55e"
+      },
+      "user_voice": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "User Voice",
+        "i18n_key": "studio.track.user_voice",
+        "color": "#ec4899"
+      },
+      "music": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Music",
+        "i18n_key": "studio.track.music",
+        "color": "#a855f7"
+      },
+      "sfx": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "SFX",
+        "i18n_key": "studio.track.sfx",
+        "color": "#64748b"
+      },
+      "tts": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Dub Voice",
+        "i18n_key": "studio.track.dub",
+        "color": "#f59e0b"
+      }
+    },
+    "voice": "ru-RU-DmitryNeural",
+    "lang": "uk",
+    "plugin_order": [
+      "eq",
+      "compressor"
+    ],
+    "duration_ms": 68333,
+    "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_46b2777cc5.mp4",
+    "video_preview": "video_46b2777cc5.mp4",
+    "original_audio": null,
+    "task_status": "running",
+    "output_file": "video_46b2777cc5_OUTPUT_2737679d.mp4",
+    "studio_url": "/studio?task_id=2737679d506244a2bb41e50d8d0a9fb1"
+  },
+  "tdproj": {},
+  "metadata": {},
+  "source": "legacy_studio_session",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\studio_sessions\\2737679d506244a2bb41e50d8d0a9fb1.json"
+}

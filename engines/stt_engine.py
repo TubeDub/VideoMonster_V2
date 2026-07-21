@@ -59,6 +59,30 @@ def transcribe(
         )
     except ImportError:
         pass
+    except RuntimeError as exc:
+        # mkl_malloc / OOM — retry with tiny after clearing cache
+        msg = str(exc).lower()
+        if any(t in msg for t in ("mkl_malloc", "failed to allocate", "out of memory", "oom")):
+            logger.error("[STT] Whisper OOM on %s: %s — retry tiny", model_size, exc)
+            try:
+                from engines.model_manager.downloader import clear_whisper_cache
+
+                clear_whisper_cache()
+                _MODEL_CACHE.clear()
+            except Exception:
+                _MODEL_CACHE.clear()
+            if model_size != "tiny":
+                try:
+                    return _transcribe_faster_whisper(
+                        audio_path,
+                        language,
+                        "tiny",
+                        word_timestamps=word_timestamps,
+                    )
+                except Exception as retry_exc:
+                    logger.error("[STT] tiny retry failed: %s", retry_exc)
+            raise
+        raise
 
     try:
         return _transcribe_openai_whisper(

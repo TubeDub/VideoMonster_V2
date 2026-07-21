@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 9343, in _run_pipeline_inner
+    _pi_sf.validate_pipeline(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        segments_data,
+        ^^^^^^^^^^^^^^
+    ...<3 lines>...
+        resolve_audio=_resolve_segment_audio_path,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 581, in validate_pipeline
+    result = PipelineValidator.validate(
+        segments_data,
+    ...<4 lines>...
+        resolve_audio=resolve_audio,
+    )
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 367, in validate
+    RuntimeIntegrityGuard.check(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        segments_data,
+        ^^^^^^^^^^^^^^
+    ...<4 lines>...
+        resolve_audio=resolve_audio,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 169, in check
+    raise RuntimeIntegrityError(
+    ...<2 lines>...
+    )
+engines.pipeline_integrity.exceptions.RuntimeIntegrityError: TTS file not found for segment b59625b1aecb4f40b2801b755e60ba75: pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav

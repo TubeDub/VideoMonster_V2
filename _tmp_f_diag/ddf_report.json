@@ -1,0 +1,547 @@
+{
+  "task_id": "ddb6ab86db63404d8c8c5709c5b5664c",
+  "created_at": "2026-07-10T17:57:31+00:00",
+  "agents": [
+    {
+      "agent_name": "Planner/v3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "BALANCED",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T17:57:31+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "AudioExtraction",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "extracted",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T17:57:35+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 3354.1,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_83f0301a56.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\ddb6ab86db63404d8c8c5709c5b5664c\\ddb6ab86_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\ddb6ab86db63404d8c8c5709c5b5664c\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    {
+      "agent_name": "Whisper/STT",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "detected_lang=en",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T17:58:29+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Director/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "creative_briefs_ready",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T17:58:29+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 672.6,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 20,
+      "input_metrics": {
+        "segment_count": 20
+      },
+      "output_metrics": {
+        "brief_count": 20,
+        "llm_used_count": 0,
+        "rule_only_count": 0
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "llm",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:05:54+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "translation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:05:54+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 444533.9,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 20
+      },
+      "output_metrics": {
+        "execution_time_ms": 444533.9,
+        "segment_count": 20,
+        "success_count": 39,
+        "retries": 0,
+        "fallback_used": false,
+        "translator_used": "argos",
+        "per_segment_confidence": [
+          {
+            "translation": 0.75,
+            "entity": 0.5,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.6161
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 1.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.7411
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.3333,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5744
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.3333,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.5744
+          },
+          {
+            "translation": 0.75,
+            "entity": 0.0,
+            "terminology": 0.1429,
+            "language": 1.0,
+            "overall": 0.4911
+          }
+        ],
+        "avg_overall": 0.5182,
+        "avg_translation": 0.5182,
+        "avg_entity": 0.9083,
+        "avg_terminology": 0.1429,
+        "avg_language": 1.0
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:05:54+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 0,
+        "active_agents": 1,
+        "contract_violations": 20,
+        "ux_validation_passed": true
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "translation_agent_v1",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:05:55+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "StreamingPipeline/4.2",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:12:05+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "success": true,
+        "completed_segments": 20,
+        "total_elapsed_ms": 361490.3,
+        "throughput_segments_per_sec": 0.055,
+        "peer_returns_total": 0,
+        "retries_total": 0
+      }
+    },
+    {
+      "agent_name": "streaming_text",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:12:06+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 361490.3,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 20
+      },
+      "output_metrics": {
+        "pipeline_mode": "streaming",
+        "ai_core_version": "4.3",
+        "segment_count": 20,
+        "execution_time_ms": 361490.3,
+        "throughput_sps": 0.055,
+        "stage_utilization": {
+          "semantic": 1.0,
+          "timing": 0.7449,
+          "grammar": 0.397,
+          "quality": 0.9941,
+          "reviewer": 0.0302,
+          "voice_preparation": 0.0017
+        }
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:12:06+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 0,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    },
+    {
+      "agent_name": "VoicePrep/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "voice_prep_validated",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:12:18+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 270.4,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segment_count": 20
+      },
+      "output_metrics": {
+        "ready_count": 20
+      }
+    },
+    {
+      "agent_name": "voice_preparation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:12:18+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 270.4,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 20
+      },
+      "output_metrics": {
+        "ready_count": 20,
+        "segment_count": 20,
+        "input_summary": {
+          "segment_count": 20
+        },
+        "output_summary": {
+          "ready_count": 20
+        }
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:12:18+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 60,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    },
+    {
+      "agent_name": "SlotFit",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "total=20 compressed=14 overflow=6",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:13:30+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "VoiceVerification/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "passed=0/20",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:22:46+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 60,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "segment_count": 20,
+        "passed_count": 0,
+        "failed_count": 20,
+        "retries": 60
+      }
+    },
+    {
+      "agent_name": "StudioReady",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "pipeline_complete_before_mix",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:22:57+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Mix",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "output=video_83f0301a56_OUTPUT_ddb6ab86.mp4",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:24:28+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Mix",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "output=video_83f0301a56_OUTPUT_ddb6ab86.mp4",
+      "fallback_used": false,
+      "timestamp": "2026-07-10T18:25:55+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    }
+  ],
+  "segment_attention": [],
+  "summary": {
+    "total_agents": 19,
+    "failed_agents": 0,
+    "fallback_used": 0,
+    "warnings": 0,
+    "total_execution_time_ms": 810591.7,
+    "total_llm_calls": 20
+  },
+  "saved_at": "2026-07-10T18:25:55+00:00"
+}

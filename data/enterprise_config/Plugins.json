@@ -1,0 +1,15 @@
+{
+  "domain": "Plugins",
+  "configuration_uuid": "afd7af0c-86ff-4dab-bb1a-faf6920c7ec1",
+  "version": "1.0.0",
+  "created": 1783881030.11851,
+  "updated": 1783881030.1185105,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "enabled": true,
+    "sandbox": true
+  }
+}

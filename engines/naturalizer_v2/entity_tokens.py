@@ -36,10 +36,27 @@ def _catalog_entities(app_dir: Path | None) -> list[tuple[str, str, str]]:
         transliterate_names,
     )
 
-    out: list[tuple[str, str, str]] = list(_BUILTIN_ENTITIES)
+    out: list[tuple[str, str, str]] = []
     seen: set[str] = set()
-    for label, _, tok in out:
-        seen.add(label.lower())
+
+    # HF2: project glossary first (canonical source of entities — not engine hardcode)
+    try:
+        from engines.project_glossary import load_project_glossary
+
+        gloss = load_project_glossary(app_dir=app_dir)
+        for label, kind, tok in gloss.entities_for_mask():
+            key = label.lower()
+            if key not in seen:
+                out.append((label, kind, tok))
+                seen.add(key)
+    except Exception:
+        pass
+
+    # Builtin fallback only for labels not already in glossary
+    for label, kind, tok in _BUILTIN_ENTITIES:
+        if label.lower() not in seen:
+            out.append((label, kind, tok))
+            seen.add(label.lower())
 
     base = app_dir or Path(__file__).resolve().parent.parent.parent
     for latin in keep_latin_tokens(base):
@@ -174,6 +191,17 @@ def _target_form(
     lang = (tgt_lang or "uk").split("-")[0].lower()
     src = str(original or "")
 
+    # HF2: project glossary canonical wins
+    try:
+        from engines.project_glossary import load_project_glossary
+
+        gloss = load_project_glossary(app_dir=app_dir)
+        can = gloss.canonical_for(entity)
+        if can:
+            return can
+    except Exception:
+        pass
+
     if entity.lower() not in src.lower():
         from engines.naturalizer_v2.entity_fixup import sanitize_wrong_entity_substitutions
 
@@ -194,7 +222,7 @@ def _target_form(
             return "Голлівуд"
     if entity == "University of Southern California":
         if lang == "uk":
-            return "Університет Південної Каліфорнії"
+            return "USC"  # glossary default; full name acceptable via glossary.acceptable
         if lang == "ru":
             return "Университет Южной Калифорнии"
     if entity in ("George Jr.", "George Jr") and lang == "uk":

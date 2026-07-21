@@ -62,10 +62,60 @@
     this._previewReady = false;
     this._exporting = false;
     this._dirty = false;
+    this._rasm = null;
     this._renderShell();
     this._bindTransport();
     this._bindZoom();
-  }
+    this._initRasm();
+  };
+
+  StudioTimeline.prototype._initRasm = function () {
+    const self = this;
+    if (!this.editorMode || !global.RasmPlayer) return;
+    this._rasm = new global.RasmPlayer({
+      taskId: this.taskId,
+      videoEl: this.videoEl,
+      getDubAudio: function () { return self._previewAudio; },
+    });
+    const host = document.getElementById("rasm-panel-host");
+    this._rasm.loadSettings().then(function () {
+      if (host) self._rasm.mountPanel(host);
+      self._rasm.bindAbHotkey();
+    });
+    const btn = document.getElementById("se-btn-sync-qc");
+    if (btn) {
+      btn.onclick = function () {
+        if (!self._rasm) return;
+        const on = self._rasm.toggle();
+        btn.classList.toggle("active", on);
+        if (on) {
+          self._rasm.fetchStatus().then(function (st) {
+            if (!st) return;
+            if (!st.original_available) {
+              self._rasm.setHint(
+                _t(
+                  "studio.rasm.no_original",
+                  "Original audio unavailable — re-run dub (RASM keeps reference track)."
+                )
+              );
+            } else {
+              self._rasm.setHint(
+                _t(
+                  "studio.rasm.hint_r0",
+                  "Sync QC: Dual listen · Heatmap · Next Red · Report. Hold B = A/B."
+                )
+              );
+            }
+          });
+          self._syncPreviewAudio(false).then(function () {
+            if (self.videoEl && !self.videoEl.paused) {
+              self._rasm.syncPlay(true);
+            }
+          });
+        }
+      };
+    }
+  };
 
   StudioTimeline.prototype._trackLabel = function (track) {
     return _t(track.i18n_key, track.label);
@@ -170,12 +220,19 @@
       btnPlay.onclick = function () {
         if (video.paused) {
           self._syncPreviewAudio(true).then(function () {
+            if (self._rasm && self._rasm.active) {
+              return self._rasm.syncPlay(true).then(function () {
+                video.play();
+                btnPlay.textContent = _t("studio.pause", "⏸ Pause");
+              });
+            }
             video.play();
             btnPlay.textContent = _t("studio.pause", "⏸ Pause");
           });
         } else {
           video.pause();
           if (self._previewAudio) self._previewAudio.pause();
+          if (self._rasm) self._rasm.pause();
           btnPlay.textContent = _t("studio.play", "▶ Play");
         }
       };
@@ -184,13 +241,17 @@
     if (video) {
       video.muted = true;
       video.addEventListener("play", function () {
-        self._syncPreviewAudio(true);
+        self._syncPreviewAudio(true).then(function () {
+          if (self._rasm && self._rasm.active) self._rasm.syncPlay(true);
+        });
       });
       video.addEventListener("pause", function () {
         if (self._previewAudio) self._previewAudio.pause();
+        if (self._rasm) self._rasm.pause();
       });
       video.addEventListener("seeked", function () {
         self._alignPreviewToVideo();
+        if (self._rasm && self._rasm.active) self._rasm.alignToMaster();
       });
       video.addEventListener("timeupdate", function () {
         self.playheadMs = Math.round(video.currentTime * 1000);
@@ -250,6 +311,7 @@
     if (Math.abs(this._previewAudio.currentTime - t) > 0.15) {
       this._previewAudio.currentTime = t;
     }
+    if (this._rasm && this._rasm.active) this._rasm.alignToMaster();
   };
 
   StudioTimeline.prototype._syncPreviewAudio = function (play) {

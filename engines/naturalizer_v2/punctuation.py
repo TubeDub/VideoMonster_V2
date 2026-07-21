@@ -14,6 +14,10 @@ def clean_punctuation(text: str) -> str:
     out = re.sub(r"\s+", " ", out)
     # Double/triple dots
     out = re.sub(r"\.{2,}", ".", out)
+    # TZ v4.0 P2: «Фіат,.» / duplicated punct
+    out = re.sub(r"([,;:])\s*\.", ".", out)
+    out = re.sub(r"\.\s*([,;:])", ".", out)
+    out = re.sub(r"([,.!?;:])\1+", r"\1", out)
     # Space before punctuation
     out = re.sub(r"\s+([,.!?;:])", r"\1", out)
     # Missing space after punctuation

@@ -119,6 +119,19 @@ def validate_naturalized_quality(
         report.needs_retry = True
         report.retry_reason = report.retry_reason or "unchanged_bad_mt"
 
+    # Dirty-MT detector (Argos calques / broken morphology) — force rewrite
+    try:
+        from engines.mt.dirty_mt import compute_dirty_mt_score
+
+        dirty = compute_dirty_mt_score(original, tr, tgt_lang=lang)
+        if dirty.dirty:
+            score -= min(40, int(dirty.score * 50))
+            report.problems.append(f"dirty_mt:{','.join(dirty.reasons[:4])}")
+            report.needs_retry = True
+            report.retry_reason = report.retry_reason or "dirty_mt"
+    except Exception:
+        pass
+
     report.score = max(0.0, min(100.0, round(score, 1)))
     if report.score < threshold and not report.needs_retry:
         report.needs_retry = True

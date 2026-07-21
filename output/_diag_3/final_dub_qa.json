@@ -1,0 +1,501 @@
+{
+  "ok": false,
+  "issue_count": 63,
+  "issues": [
+    {
+      "index": 6,
+      "code": "long_pause",
+      "gap_ms": 7691,
+      "prev_end_ms": 49029,
+      "next_start_ms": 56720,
+      "severity": "warning"
+    },
+    {
+      "index": 8,
+      "code": "long_pause",
+      "gap_ms": 2563,
+      "prev_end_ms": 74317,
+      "next_start_ms": 76880,
+      "severity": "warning"
+    },
+    {
+      "index": 11,
+      "code": "long_pause",
+      "gap_ms": 1601,
+      "prev_end_ms": 95679,
+      "next_start_ms": 97280,
+      "severity": "warning"
+    },
+    {
+      "index": 18,
+      "code": "long_pause",
+      "gap_ms": 1728,
+      "prev_end_ms": 139165,
+      "next_start_ms": 140893,
+      "severity": "warning"
+    },
+    {
+      "index": 20,
+      "code": "long_pause",
+      "gap_ms": 1690,
+      "prev_end_ms": 152630,
+      "next_start_ms": 154320,
+      "severity": "warning"
+    },
+    {
+      "index": 21,
+      "code": "long_pause",
+      "gap_ms": 3528,
+      "prev_end_ms": 163296,
+      "next_start_ms": 166824,
+      "severity": "warning"
+    },
+    {
+      "index": 22,
+      "code": "long_pause",
+      "gap_ms": 1397,
+      "prev_end_ms": 171444,
+      "next_start_ms": 172841,
+      "severity": "warning"
+    },
+    {
+      "index": 1,
+      "code": "split_sentence",
+      "segment_text": "Але у той момент, коли він їхав, Джорджу-молодшому зовсім не хотілося їхати додому",
+      "next_segment_text": "Джордж-молодший був розумним хлопцем, але він також легко відволікався і через це, він майже нічого серйозно не робив, о",
+      "severity": "error"
+    },
+    {
+      "index": 2,
+      "code": "split_sentence",
+      "segment_text": "Джордж-молодший був розумним хлопцем, але він також легко відволікався і через це, він майже нічого серйозно не робив, о",
+      "next_segment_text": "І в той момент його батько купив йому італійський Фіат,",
+      "severity": "error"
+    },
+    {
+      "index": 3,
+      "code": "split_sentence",
+      "segment_text": "І в той момент його батько купив йому італійський Фіат,",
+      "next_segment_text": "але батько його, хоч подарував йому Фіат, він не розумів потягу сина, «Чому ти не можеш зосередитися на цьому і застосув",
+      "severity": "error"
+    },
+    {
+      "index": 7,
+      "code": "split_sentence",
+      "segment_text": "Через два тижні Джордж-молодший лежав у реанімації місцевої лікарні",
+      "next_segment_text": "Два тижні раніше, коли Джордж повертав, а потім щось відбулося, а саме — інший автомобіль на великій швидкості промчав д",
+      "severity": "error"
+    },
+    {
+      "index": 8,
+      "code": "split_sentence",
+      "segment_text": "Два тижні раніше, коли Джордж повертав, а потім щось відбулося, а саме — інший автомобіль на великій швидкості промчав д",
+      "next_segment_text": "Через два роки Джордж-молодший, який уже повністю одужав, стояв на фініші треку з камерою",
+      "severity": "error"
+    },
+    {
+      "index": 9,
+      "code": "split_sentence",
+      "segment_text": "Через два роки Джордж-молодший, який уже повністю одужав, стояв на фініші треку з камерою",
+      "next_segment_text": "Після майже смертельного досвіду, Джордж-молодший зрозумів, що його батько мав рацію: місцями він марнував свій потенціа",
+      "severity": "error"
+    },
+    {
+      "index": 10,
+      "code": "split_sentence",
+      "segment_text": "Після майже смертельного досвіду, Джордж-молодший зрозумів, що його батько мав рацію: місцями він марнував свій потенціа",
+      "next_segment_text": "Тож Джордж-молодший вирішив, що він не хоче займатися автогонками",
+      "severity": "error"
+    },
+    {
+      "index": 11,
+      "code": "split_sentence",
+      "segment_text": "Тож Джордж-молодший вирішив, що він не хоче займатися автогонками",
+      "next_segment_text": "Замість цього він узяв камеру і захопився своїм колишнім хобі — фотографією",
+      "severity": "error"
+    },
+    {
+      "index": 12,
+      "code": "split_sentence",
+      "segment_text": "Замість цього він узяв камеру і захопився своїм колишнім хобі — фотографією",
+      "next_segment_text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі,",
+      "severity": "error"
+    },
+    {
+      "index": 13,
+      "code": "split_sentence",
+      "segment_text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі,",
+      "next_segment_text": "але після того, як надіслав заявку був майже впевнений, що його не візьмуть",
+      "severity": "error"
+    },
+    {
+      "index": 14,
+      "code": "split_sentence",
+      "segment_text": "але після того, як надіслав заявку був майже впевнений, що його не візьмуть",
+      "next_segment_text": "Тепер Джордж-молодший пішов до подіуму сфотографувати переможця",
+      "severity": "error"
+    },
+    {
+      "index": 15,
+      "code": "split_sentence",
+      "segment_text": "Тепер Джордж-молодший пішов до подіуму сфотографувати переможця",
+      "next_segment_text": "Поки він ішов туди, чоловік середнього віку прийшов назустріч йому і заговорив із Джорджем-молодшим про фотографію, а по",
+      "severity": "error"
+    },
+    {
+      "index": 16,
+      "code": "split_sentence",
+      "segment_text": "Поки він ішов туди, чоловік середнього віку прийшов назустріч йому і заговорив із Джорджем-молодшим про фотографію, а по",
+      "next_segment_text": "Він сказав, що був кінооператором в Голлівуді. Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до Ю Ес Сі, ",
+      "severity": "error"
+    },
+    {
+      "index": 17,
+      "code": "split_sentence",
+      "segment_text": "Він сказав, що був кінооператором в Голлівуді. Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до Ю Ес Сі, ",
+      "next_segment_text": "Хаскелл сказав: Джордж, я знаю людей в Ю Ес Сі",
+      "severity": "error"
+    },
+    {
+      "index": 18,
+      "code": "split_sentence",
+      "segment_text": "Хаскелл сказав: Джордж, я знаю людей в Ю Ес Сі",
+      "next_segment_text": "Я зроблю кілька дзвінків. І справді, незабаром після цієї доленосної зустрічі, Джордж-молодший отримав лист про зарахува",
+      "severity": "error"
+    },
+    {
+      "index": 20,
+      "code": "split_sentence",
+      "segment_text": "Але цей момент у житті Джорджа-молодшого не просто змінив його життя назавжди",
+      "next_segment_text": "Це також назавжди змінить кіно. А через 13 років, Джордж-молодший створить один з найбільш новаторських фільмів в історі",
+      "severity": "error"
+    },
+    {
+      "index": 21,
+      "code": "split_sentence",
+      "segment_text": "Це також назавжди змінить кіно. А через 13 років, Джордж-молодший створить один з найбільш новаторських фільмів в історі",
+      "next_segment_text": "Його фільм стане частиною найбільш успішної кінофраншизи всіх часів",
+      "severity": "error"
+    },
+    {
+      "index": 22,
+      "code": "split_sentence",
+      "segment_text": "Його фільм стане частиною найбільш успішної кінофраншизи всіх часів",
+      "next_segment_text": "Сьогодні Джорджа-молодшого знають як Джорджа Лукаса і його кінофраншиза — це «Зоряні війни».",
+      "severity": "error"
+    },
+    {
+      "index": 0,
+      "code": "meaning_truncated_tail",
+      "severity": "error",
+      "hints": [
+        "ellipsis_or_incomplete"
+      ]
+    },
+    {
+      "index": 1,
+      "code": "meaning_truncated_tail",
+      "severity": "error",
+      "hints": [
+        "ellipsis_or_incomplete"
+      ]
+    },
+    {
+      "index": 2,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 2,
+      "code": "duration_overflow",
+      "tts_ms": 9182,
+      "slot_ms": 8854,
+      "window_ms": 8854,
+      "overflow_ms": 328,
+      "index": 2,
+      "severity": "warning"
+    },
+    {
+      "idx": 2,
+      "code": "overlap_with_next",
+      "overlap_ms": 328,
+      "next_index": 3,
+      "tts_ms": 9182,
+      "window_ms": 8854,
+      "index": 2,
+      "severity": "warning"
+    },
+    {
+      "index": 3,
+      "code": "text_tts_mismatch",
+      "spoken": "І в той момент його батько купив йому невеликий італійський автомобіль під назвою Фіат, але батько його, хоч і сам подарував йому Фіат, він просто не розумів потягу сина, «Чому ти не можеш зосередитис",
+      "canonical": "І в той момент його батько купив йому італійський Фіат,",
+      "severity": "error"
+    },
+    {
+      "index": 4,
+      "code": "text_tts_mismatch",
+      "spoken": "І в той момент його батько купив йому невеликий італійський автомобіль під назвою Фіат, але батько його, хоч і сам подарував йому Фіат, він просто не розумів потягу сина, «Чому ти не можеш зосередитис",
+      "canonical": "але батько його, хоч подарував йому Фіат, він не розумів потягу сина, «Чому ти не можеш зосередитися на цьому і застосувати це до інших речей, отримаєш справжню роботу».",
+      "severity": "error"
+    },
+    {
+      "index": 6,
+      "code": "meaning_preserved_token",
+      "severity": "error",
+      "hints": [
+        "George"
+      ]
+    },
+    {
+      "index": 6,
+      "code": "preserved_token",
+      "tokens": "****** [REDACTED BY OPENDDF] ******",
+      "stage": "final",
+      "severity": "warning"
+    },
+    {
+      "index": 7,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 8,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 8,
+      "code": "duration_overflow",
+      "tts_ms": 13639,
+      "slot_ms": 12344,
+      "window_ms": 12344,
+      "overflow_ms": 1295,
+      "index": 8,
+      "severity": "warning"
+    },
+    {
+      "index": 9,
+      "code": "meaning_truncated_tail",
+      "severity": "error",
+      "hints": [
+        "ellipsis_or_incomplete"
+      ]
+    },
+    {
+      "index": 10,
+      "code": "meaning_truncated_tail",
+      "severity": "error",
+      "hints": [
+        "ellipsis_or_incomplete"
+      ]
+    },
+    {
+      "idx": 10,
+      "code": "duration_overflow",
+      "tts_ms": 7596,
+      "slot_ms": 7438,
+      "window_ms": 7438,
+      "overflow_ms": 158,
+      "index": 10,
+      "severity": "warning"
+    },
+    {
+      "idx": 10,
+      "code": "overlap_with_next",
+      "overlap_ms": 158,
+      "next_index": 11,
+      "tts_ms": 7596,
+      "window_ms": 7438,
+      "index": 10,
+      "severity": "warning"
+    },
+    {
+      "index": 11,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 12,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 12,
+      "code": "duration_overflow",
+      "tts_ms": 5131,
+      "slot_ms": 5003,
+      "window_ms": 5003,
+      "overflow_ms": 128,
+      "index": 12,
+      "severity": "warning"
+    },
+    {
+      "index": 13,
+      "code": "text_tts_mismatch",
+      "spoken": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі, але після того, як надіслав заявку він був майже впевнений, що його не візьмуть.",
+      "canonical": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі,",
+      "severity": "error"
+    },
+    {
+      "index": 14,
+      "code": "meaning_truncated_tail",
+      "severity": "error",
+      "hints": [
+        "ellipsis_or_incomplete"
+      ]
+    },
+    {
+      "idx": 14,
+      "code": "duration_overflow",
+      "tts_ms": 4991,
+      "slot_ms": 4163,
+      "window_ms": 4163,
+      "overflow_ms": 828,
+      "index": 14,
+      "severity": "warning"
+    },
+    {
+      "idx": 14,
+      "code": "overlap_with_next",
+      "overlap_ms": 409,
+      "next_index": 15,
+      "tts_ms": 4991,
+      "window_ms": 4163,
+      "index": 14,
+      "severity": "warning"
+    },
+    {
+      "index": 15,
+      "code": "meaning_truncated_tail",
+      "severity": "error",
+      "hints": [
+        "ellipsis_or_incomplete"
+      ]
+    },
+    {
+      "index": 16,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 16,
+      "code": "duration_overflow",
+      "tts_ms": 10956,
+      "slot_ms": 9952,
+      "window_ms": 9952,
+      "overflow_ms": 1004,
+      "index": 16,
+      "severity": "warning"
+    },
+    {
+      "idx": 16,
+      "code": "overlap_with_next",
+      "overlap_ms": 1004,
+      "next_index": 17,
+      "tts_ms": 10956,
+      "window_ms": 9952,
+      "index": 16,
+      "severity": "warning"
+    },
+    {
+      "index": 17,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 17,
+      "code": "duration_overflow",
+      "tts_ms": 11230,
+      "slot_ms": 8917,
+      "window_ms": 8917,
+      "overflow_ms": 2313,
+      "index": 17,
+      "severity": "warning"
+    },
+    {
+      "idx": 17,
+      "code": "overlap_with_next",
+      "overlap_ms": 2313,
+      "next_index": 18,
+      "tts_ms": 11230,
+      "window_ms": 8917,
+      "index": 17,
+      "severity": "warning"
+    },
+    {
+      "index": 18,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 19,
+      "code": "duration_overflow",
+      "tts_ms": 9332,
+      "slot_ms": 7422,
+      "window_ms": 7422,
+      "overflow_ms": 1910,
+      "index": 19,
+      "severity": "warning"
+    },
+    {
+      "idx": 19,
+      "code": "overlap_with_next",
+      "overlap_ms": 1910,
+      "next_index": 20,
+      "tts_ms": 9332,
+      "window_ms": 7422,
+      "index": 19,
+      "severity": "warning"
+    },
+    {
+      "index": 20,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 20,
+      "code": "duration_overflow",
+      "tts_ms": 4745,
+      "slot_ms": 4315,
+      "window_ms": 4315,
+      "overflow_ms": 430,
+      "index": 20,
+      "severity": "warning"
+    },
+    {
+      "index": 21,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "index": 22,
+      "code": "meaning_incomplete_sentence",
+      "severity": "error",
+      "hints": []
+    },
+    {
+      "idx": 23,
+      "code": "duration_overflow",
+      "tts_ms": 5471,
+      "slot_ms": 4612,
+      "window_ms": 4612,
+      "overflow_ms": 859,
+      "index": 23,
+      "severity": "warning"
+    }
+  ],
+  "overlap_count": 0,
+  "split_sentence_count": 18,
+  "long_pause_count": 7
+}

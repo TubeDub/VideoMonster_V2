@@ -11,6 +11,7 @@ from typing import Any
 from engines.tts_engines.base import TTSEngineInfo, TTSResult
 from engines.tts_engines.edge_engine import EdgeTTSEngine
 from engines.tts_engines.online_stubs import stub_engines
+from engines.tts_engines.providers import provider_engines
 
 logger = logging.getLogger("tubedub.engines.tts_engines.registry")
 
@@ -53,6 +54,8 @@ def list_engine_infos(app_dir: Path | None = None) -> list[TTSEngineInfo]:
 
 def _all_engine_instances():
     yield EdgeTTSEngine()
+    for eng in provider_engines():
+        yield eng
     for stub in stub_engines():
         yield stub
 

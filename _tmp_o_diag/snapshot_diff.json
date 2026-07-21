@@ -1,0 +1,2270 @@
+{
+  "stage": "slot_fit",
+  "task_id": "847b3fa894544602bfb3bd0c69f4d1b6",
+  "segment_id": "3c65db464aea4112a7e9d8fc910e5546",
+  "violations": [
+    {
+      "segment_id": "3c65db464aea4112a7e9d8fc910e5546",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 3c65db464aea4112a7e9d8fc910e5546: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "3e53aded6f9f4b47a21b6600d2bb7f04",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 3e53aded6f9f4b47a21b6600d2bb7f04: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "1159a803011443dc9a2cc310fba607a4",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 1159a803011443dc9a2cc310fba607a4: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "01b1ecf979154beaa03c2911b744a882",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 01b1ecf979154beaa03c2911b744a882: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "8e3a00f97ae44064981a952b6350b6a3",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 8e3a00f97ae44064981a952b6350b6a3: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "ca4c791b692948208a484445cabbe5d3",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment ca4c791b692948208a484445cabbe5d3: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "f3f96c09d01e462095c2f01593d40e97",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment f3f96c09d01e462095c2f01593d40e97: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "4939df908d12406080d141815a751329",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 4939df908d12406080d141815a751329: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "9b8c7ecb2d954627836a710d783c4752",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 9b8c7ecb2d954627836a710d783c4752: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "6d1b5841f6f84d1cb1b99e1b521ad826",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 6d1b5841f6f84d1cb1b99e1b521ad826: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "909cb59e6bf34624b1d04ec3277ee236",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 909cb59e6bf34624b1d04ec3277ee236: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "b1a30902fba7491aa241e7dd03731eaa",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment b1a30902fba7491aa241e7dd03731eaa: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "4a69f8e50f4e4dc8a0d994c46c348c1c",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 4a69f8e50f4e4dc8a0d994c46c348c1c: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "0436bceed8e74cd8ac27b9b0e9613389",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 0436bceed8e74cd8ac27b9b0e9613389: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "4f76b2d5cda9436792bbca488b2a160e",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 4f76b2d5cda9436792bbca488b2a160e: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "61e60428aea2434e933594526963af52",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 61e60428aea2434e933594526963af52: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "3e6dc17bff15468a9189f9b719224d9e",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 3e6dc17bff15468a9189f9b719224d9e: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "f6c52274913b46abbb231c597c0b8f83",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment f6c52274913b46abbb231c597c0b8f83: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "59f418ee2e0940d79428d02fc76f3293",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 59f418ee2e0940d79428d02fc76f3293: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    },
+    {
+      "segment_id": "4e4cff6460514b01b78fc512684d8ff9",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "stage": "slot_fit",
+      "allowed_mutations": [
+        "allow_atempo",
+        "audio_uuid",
+        "block_merged_with_next",
+        "container_status",
+        "file",
+        "fitted_file",
+        "fitted_ms",
+        "index",
+        "lead_in_ms",
+        "merge_adjusted_slot_ms",
+        "merge_adjusted_start",
+        "merge_uuid",
+        "overflow",
+        "overflow_ms",
+        "overflow_pct",
+        "place_delay_ms",
+        "playback_rate",
+        "segment_id",
+        "segment_uuid",
+        "silence_trim",
+        "slot_fit_attempts",
+        "slot_overflow",
+        "stretch_factor",
+        "timing_meta",
+        "translation_uuid",
+        "tts_lifecycle",
+        "tts_uuid",
+        "video_adapt_mode",
+        "video_stretch_ratio"
+      ],
+      "mutator_module": "engines.timing_fit",
+      "message": "segment 4e4cff6460514b01b78fc512684d8ff9: disallowed mutation of 'runtime_history' at stage 'slot_fit'"
+    }
+  ],
+  "structured_diff": [
+    {
+      "segment_id": "3c65db464aea4112a7e9d8fc910e5546",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "3e53aded6f9f4b47a21b6600d2bb7f04",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "1159a803011443dc9a2cc310fba607a4",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "01b1ecf979154beaa03c2911b744a882",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "8e3a00f97ae44064981a952b6350b6a3",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "ca4c791b692948208a484445cabbe5d3",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "f3f96c09d01e462095c2f01593d40e97",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "4939df908d12406080d141815a751329",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "9b8c7ecb2d954627836a710d783c4752",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "6d1b5841f6f84d1cb1b99e1b521ad826",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "909cb59e6bf34624b1d04ec3277ee236",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "b1a30902fba7491aa241e7dd03731eaa",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "4a69f8e50f4e4dc8a0d994c46c348c1c",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "0436bceed8e74cd8ac27b9b0e9613389",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "4f76b2d5cda9436792bbca488b2a160e",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "61e60428aea2434e933594526963af52",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "3e6dc17bff15468a9189f9b719224d9e",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "f6c52274913b46abbb231c597c0b8f83",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "59f418ee2e0940d79428d02fc76f3293",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    },
+    {
+      "segment_id": "4e4cff6460514b01b78fc512684d8ff9",
+      "field": "runtime_history",
+      "old_value": null,
+      "new_value": [
+        {
+          "event": "lifecycle",
+          "from": "Created",
+          "to": "Queued",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Queued",
+          "to": "Synthesized",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Synthesized",
+          "to": "Verified",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Verified",
+          "to": "Stored",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        },
+        {
+          "event": "lifecycle",
+          "from": "Stored",
+          "to": "Scheduled",
+          "task_id": "847b3fa894544602bfb3bd0c69f4d1b6"
+        }
+      ],
+      "structured_diff": {
+        "field": "runtime_history",
+        "old": "null",
+        "new": "[{\"event\": \"lifecycle\", \"from\": \"Created\", \"to\": \"Queued\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Queued\", \"to\": \"Synthesized\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Synthesized\", \"to\": \"Verified\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Verified\", \"to\": \"Stored\", \"task_id\": \"847b3fa894544602bfb3bd0c69f4d1b6\"}, {\"event\": \"lifecycle\", \"from\": \"Stored\", \"to\": \"Scheduled\", \"..."
+      }
+    }
+  ],
+  "traceback": "Traceback (most recent call last):\n  File \"<USER>\\Desktop\\VideoMonster_V2\\engines\\pipeline_integrity\\openddf_diagnostics.py\", line 571, in guard_check_with_diagnostics\n    StageSnapshotGuard.check(\n    ~~~~~~~~~~~~~~~~~~~~~~~~^\n        before,\n        ^^^^^^^\n    ...<2 lines>...\n        mutator_module=mutator_module,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<USER>\\Desktop\\VideoMonster_V2\\engines\\pipeline_integrity\\guards.py\", line 284, in check\n    raise StageSnapshotIntegrityError(\n    ...<9 lines>...\n    )\nengines.pipeline_integrity.exceptions.StageSnapshotIntegrityError: segment 3c65db464aea4112a7e9d8fc910e5546: disallowed mutation of 'runtime_history' at stage 'slot_fit'\n"
+}

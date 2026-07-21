@@ -1,0 +1,15 @@
+{
+  "domain": "Diagnostics",
+  "configuration_uuid": "481b05cc-e97f-44fc-bc36-e29c4f3df0c7",
+  "version": "1.0.0",
+  "created": 1783881030.118468,
+  "updated": 1783881030.1184685,
+  "migration_version": 1,
+  "compatibility": ">=6.0.0",
+  "rollback_point": "",
+  "profile": "default",
+  "data": {
+    "studio_qa": true,
+    "openddf": true
+  }
+}

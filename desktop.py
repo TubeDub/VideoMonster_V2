@@ -122,9 +122,11 @@ def _open_in_browser(url: str) -> None:
 
 def main() -> None:
     port = find_free_port()
-    print(f"TubeDub: запуск сервера на порту {port}…")
+    print(f"TubeDub: запуск сервера на порту {port}...")
 
-    flask_thread = threading.Thread(target=run_flask, args=(port,), daemon=True)
+    # Non-daemon: closing the WebView must NOT kill Flask mid-dub
+    # (otherwise UI shows «Нет связи с сервером»).
+    flask_thread = threading.Thread(target=run_flask, args=(port,), daemon=False)
     flask_thread.start()
 
     ready = wait_for_server(port)
@@ -151,11 +153,42 @@ def main() -> None:
     if not url.startswith("http"):
         url = f"http://127.0.0.1:{port}{url}"
 
-    print(f"TubeDub: сервер готов → {url}")
+    print(f"TubeDub: сервер готов -> {url}")
 
     if os.environ.get("VM_BROWSER_ONLY", "").strip() in ("1", "true", "yes"):
         _open_in_browser(url)
         return
+
+    # Low free RAM → skip WebView2 (often dies with OutOfMemoryException).
+    try:
+        import ctypes
+
+        class _MEM(ctypes.Structure):
+            _fields_ = [
+                ("dwLength", ctypes.c_ulong),
+                ("dwMemoryLoad", ctypes.c_ulong),
+                ("ullTotalPhys", ctypes.c_ulonglong),
+                ("ullAvailPhys", ctypes.c_ulonglong),
+                ("ullTotalPageFile", ctypes.c_ulonglong),
+                ("ullAvailPageFile", ctypes.c_ulonglong),
+                ("ullTotalVirtual", ctypes.c_ulonglong),
+                ("ullAvailVirtual", ctypes.c_ulonglong),
+                ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+            ]
+
+        m = _MEM()
+        m.dwLength = ctypes.sizeof(_MEM)
+        if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m)):
+            free_gb = m.ullAvailPhys / (1024**3)
+            if free_gb < 2.5:
+                print(
+                    f"TubeDub: мало свободной RAM ({free_gb:.1f} GB) — "
+                    "открываю браузер вместо WebView."
+                )
+                _open_in_browser(url)
+                return
+    except Exception:
+        pass
 
     try:
         import webview
@@ -171,10 +204,52 @@ def main() -> None:
         webview.start()
     except ImportError:
         _open_in_browser(url)
+        return
     except Exception as e:
         _write_error(traceback.format_exc())
-        print(f"Окно WebView недоступно ({e}), открываю браузер…")
+        print(f"Окно WebView недоступно ({e}), открываю браузер...")
         _open_in_browser(url)
+        return
+
+    # WebView closed — keep API alive so remux/diagnostics still work.
+    print(
+        f"TubeDub: окно закрыто, сервер продолжает работу -> "
+        f"http://127.0.0.1:{port}/dub\n"
+        "Остановите сервер: Ctrl+C в этом окне терминала."
+    )
+    # #region agent log
+    try:
+        import json as _json
+
+        with open(
+            r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log",
+            "a",
+            encoding="utf-8",
+        ) as _df:
+            _df.write(
+                _json.dumps(
+                    {
+                        "sessionId": "ee98a6",
+                        "runId": "server-down",
+                        "hypothesisId": "H7",
+                        "location": "desktop.py:main",
+                        "message": "webview_closed_flask_kept_alive",
+                        "data": {"port": port, "flask_alive": flask_thread.is_alive()},
+                        "timestamp": int(time.time() * 1000),
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+    except Exception:
+        pass
+    # #endregion
+    try:
+        while flask_thread.is_alive():
+            flask_thread.join(timeout=1.0)
+    except KeyboardInterrupt:
+        print("TubeDub: остановка...")
+
 
 
 if __name__ == "__main__":

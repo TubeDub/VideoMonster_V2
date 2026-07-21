@@ -1,6 +1,6 @@
 # VideoMonster V2 Architecture
 
-*Auto-generated: 2026-07-08 09:25*
+*Auto-generated: 2026-07-14 05:47*
 
 ## Platform Layers (Stages 1–10)
 
@@ -55,8 +55,11 @@
 
 ## Core Modules
 
-- `core/__init__.py` (203 lines, stage 0)
+- `core/__init__.py` (211 lines, stage 0)
+- `core/ai_benchmark.py` (188 lines, stage 0)
 - `core/ai_memory.py` (667 lines, stage 6)
+- `core/ai_router.py` (370 lines, stage 0)
+- `core/ai_sources.py` (369 lines, stage 0)
 - `core/analytics_db.py` (210 lines, stage 8)
 - `core/architecture_engine.py` (225 lines, stage 10)
 - `core/benchmark.py` (237 lines, stage 7)
@@ -72,7 +75,7 @@
 - `core/event_bus.py` (207 lines, stage 1)
 - `core/event_pipeline.py` (449 lines, stage 1)
 - `core/event_types.py` (172 lines, stage 1)
-- `core/hardware_profiler.py` (478 lines, stage 7)
+- `core/hardware_profiler.py` (501 lines, stage 7)
 - `core/knowledge_base.py` (179 lines, stage 0)
 - `core/llm_dispatcher.py` (446 lines, stage 3)
 - `core/micro_validator.py` (255 lines, stage 5)
@@ -90,14 +93,17 @@
 - `core/report_exporter.py` (205 lines, stage 0)
 - `core/resource_monitor.py` (123 lines, stage 2)
 - `core/semantic_cache.py` (349 lines, stage 6)
+- `core/semantic_retry.py` (207 lines, stage 0)
 - `core/task_planner.py` (166 lines, stage 10)
 - `core/technical_debt.py` (173 lines, stage 10)
 
 ## Dependency Graph (core/)
 
 ```
-core/__init__.py → core.event_bus, core.event_pipeline, core.event_types, core.orchestrator, core.llm_dispatcher, core.model_registry, core.chunk_manager, core.pipeline_engine, core.micro_validator, core.recovery_manager, core.semantic_cache, core.ai_memory, core.hardware_profiler, core.benchmark, core.performance_optimizer, core.performance_monitor, core.analytics_db, core.monitoring_center, core.diagnostics, core.bottleneck_analyzer, core.report_exporter, core.plugin_api, core.plugin_manager, core.dev_assistant, core.architecture_engine
+core/__init__.py → core.event_bus, core.event_pipeline, core.event_types, core.orchestrator, core.llm_dispatcher, core.model_registry, core.chunk_manager, core.pipeline_engine, core.micro_validator, core.recovery_manager, core.semantic_cache, core.ai_memory, core.hardware_profiler, core.benchmark, core.performance_optimizer, core.performance_monitor, core.analytics_db, core.monitoring_center, core.diagnostics, core.bottleneck_analyzer, core.report_exporter, core.plugin_api, core.plugin_manager, core.dev_assistant, core.architecture_engine, core.ai_router, core.ai_sources
+core/ai_benchmark.py → core.ai_router
 core/ai_memory.py → core.semantic_cache
+core/ai_router.py → core.ai_sources, core.hardware_profiler, core.ai_sources, core.ai_sources
 core/bottleneck_analyzer.py → core.performance_optimizer
 core/change_impact.py → core.architecture_engine
 core/chunk_manager.py → core.resource_monitor

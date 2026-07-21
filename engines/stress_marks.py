@@ -217,6 +217,13 @@ def _accent_monosyllables(text: str) -> str:
 
 # ─── Public API ───────────────────────────────────────────────────────────────
 
+def strip_stress_marks(text: str) -> str:
+    """Remove combining acute accents (U+0301) for UI / review / storage."""
+    if not text:
+        return text
+    return str(text).replace(_ACCENT, "")
+
+
 def add_stress_marks(text: str, lang: str = "uk") -> str:
     """
     Add Unicode stress marks (U+0301) to text before Edge TTS synthesis.

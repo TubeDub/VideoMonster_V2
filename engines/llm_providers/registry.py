@@ -158,9 +158,15 @@ def resolve_model(
       5. Auto fallback chain: DeepSeek → Qwen → Llama → legacy heuristics
     """
     env_model = (env_override or os.getenv("VM_TRANSLATE_MODEL") or "").strip()
-    if env_model and (not available or env_model in available):
+    if env_model and available and env_model in available:
         logger.info("[LLM] Loaded model: %s (env override)", env_model)
         return env_model
+    if env_model and available and env_model not in available:
+        logger.warning(
+            "[LLM] Env model %s not installed — selecting from %d local tag(s)",
+            env_model,
+            len(available),
+        )
 
     persisted = load_persisted_selection(app_dir)
     quality_mode = str(persisted.get("quality_mode") or "max_quality")
@@ -177,8 +183,8 @@ def resolve_model(
             return quality_pick
 
     persisted_model = persisted.get("model") or ""
-    if persisted_model and (not available or persisted_model in available):
-        if prefer_speed or _model_is_adequate(persisted_model) or not available:
+    if persisted_model and available and persisted_model in available:
+        if prefer_speed or _model_is_adequate(persisted_model):
             logger.info("[LLM] Loaded model: %s (persisted)", persisted_model)
             return persisted_model
         upgraded = _pick_quality_model(available, prefer_speed=False)
@@ -189,9 +195,22 @@ def resolve_model(
                 upgraded,
             )
             return upgraded
+    elif persisted_model and available and persisted_model not in available:
+        logger.warning(
+            "[LLM] Persisted model %s not installed — remapping via provider chain",
+            persisted_model,
+        )
 
     preferred_id = str(persisted.get("provider") or DEFAULT_FAMILY_ID).lower()
     order = _family_resolution_order(preferred_id)
+
+    if not available:
+        if env_model or persisted_model:
+            logger.error(
+                "[LLM] No installed models detected — configured %s cannot be verified",
+                env_model or persisted_model,
+            )
+        return ""
 
     if prefer_speed and available:
         speed_pick = _pick_quality_model(available, prefer_speed=True)
@@ -233,10 +252,9 @@ def resolve_model(
         picked = _pick_quality_model(available, prefer_speed=prefer_speed)
         if picked:
             return picked
+        return available[0]
 
-    fallback = env_model or persisted_model or DEEPSEEK.default_model
-    logger.warning("[LLM] No local model matched — using configured default: %s", fallback)
-    return fallback
+    return ""
 
 
 def _family_resolution_order(preferred_id: str) -> tuple[str, ...]:

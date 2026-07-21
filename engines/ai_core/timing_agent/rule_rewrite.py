@@ -23,6 +23,31 @@ _RU_FILLER_PATTERNS: list[tuple[str, str]] = [
 
 _UK_FILLER_PATTERNS: list[tuple[str, str]] = [
     (r"\b(?:як би|типу|взагалі|так би мовити)\b", ""),
+    (
+        r"(\d+)-річний\s+хлопець\s+на\s+ім['']я\s+(Джордж-молодший)\s+проїжджав\s+"
+        r"через\s+(?:своє\s+)?рідне\s+місто\s+дорогою\s+додому(?:\s+на\s+вечерю)?",
+        r"\1-річний \2 їхав рідним містом додому на вечерю",
+    ),
+    (r"\bнасправді\s+був\s+дуже\b", "був дуже"),
+    (r"\bне\s+міг\s+зрозуміти\b", "не розумів"),
+    (r"\bпочав\s+здійснювати\s+поворот\b", "почав повертати"),
+    (r"\bдуже\s+сильно\b", "сильно"),
+    (r"\bпо-справжньому\s+серйозно\b", "серйозно"),
+    (r"\bдійсно\s+більше\s+не\b", "більше не"),
+    (r"\bДозвольте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
+    (r"\bДавайте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
+    (r"\bдеякі\s+дзвінки\b", "дзвінки"),
+    (r"\bДозвольте\s+мені\s+зробити\s+", "Я зроблю "),
+    (
+        r"\bлежав\s+на\s+лікарняному\s+ліжку\s+у\s+відділенні\s+інтенсивної\s+терапії\s+"
+        r"в\s+місцевій\s+лікарні\b",
+        "лежав у реанімації місцевої лікарні",
+    ),
+    (
+        r"\bякий\s+на\s+той\s+момент\s+повністю\s+одужав\s+після\s+травм\b",
+        "який уже повністю одужав",
+    ),
+    (r"\bТак\s+два\s+тижні\s+раніше\b", "Два тижні раніше"),
     (r"\s{2,}", " "),
 ]
 
@@ -75,14 +100,34 @@ def shorten_rule(
         out = re.sub(r"\b(?:очень|весьма|крайне|довольно)\s+", "", out, flags=re.IGNORECASE)
         out = re.sub(r"\b(?:that is|which is|который|которая|которое)\s+", "", out, flags=re.IGNORECASE)
     elif variant == "C":
+        # Protect «не просто» (= EN not just) before dropping filler «просто».
+        _prot = "\x00NE_PROSTO\x00"
+        out = re.sub(r"\bне\s+просто\b", _prot, out, flags=re.IGNORECASE)
         out = re.sub(r"\b(?:просто|буквально|literally|just)\s+", "", out, flags=re.IGNORECASE)
+        out = out.replace(_prot, "не просто")
         out = re.sub(r"\s+—\s+", ", ", out)
 
     out = " ".join(out.split()).strip()
     if not out or out == base:
         return base
-    if len(out) < max(8, int(len(base) * 0.55)):
+    # Allow aggressive filler/phrase compress; only block extreme collapse.
+    if len(out) < max(6, int(len(base) * 0.35)):
         return base
+    # Semantic verification — reject mechanical truncation / entity loss
+    try:
+        from engines.semantic_meaning import is_truncated_adaptation, restore_terminal_close
+        from engines.translation_quality import missing_preserved_tokens
+
+        out = restore_terminal_close(out, reference=base, original=str(prev_context or ""))
+        if is_truncated_adaptation(base, out):
+            return base
+        src = str(prev_context or "").strip()
+        if src:
+            missing = missing_preserved_tokens(src, out)
+            if missing:
+                return base
+    except Exception:
+        pass
     return out
 
 

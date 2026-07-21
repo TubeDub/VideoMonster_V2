@@ -96,3 +96,46 @@ def test_build_openddf_segment_diagnostics_fields():
     assert row["final_tts_text"] == "Привет."
     assert row["actual_duration_ms"] == 800
     assert row["voice"] == "ru-RU-DmitryNeural"
+
+
+def test_openddf_derives_slot_ms_from_start_end_when_missing():
+    """Regression: slot_ms=0 with valid start/end caused false massive overflows."""
+    task_info = {
+        "source_segments": ["An 18-year-old boy named George."],
+        "segments_data": [
+            {
+                "index": 0,
+                "segment_id": "seg-geo",
+                "text": "uk text",
+                "plain_text": "uk text",
+                "playback_duration": 4986,
+                "slot_ms": 0,
+                "overflow_ms": 4234,
+                "overflow_pct": 0.0,
+                "slot_overflow": True,
+                "text_adaptation_trace": {
+                    "executed": False,
+                    "start_time_ms": 0,
+                    "end_time_ms": 4960,
+                    "final_tts_duration_ms": 4986,
+                    "timing_source": "timing_map",
+                },
+            }
+        ],
+        "translation_audits": [
+            {
+                "index": 0,
+                "whisper_text": "An 18-year-old boy named George.",
+                "raw_translation": "uk text",
+                "final_text": "uk text",
+            }
+        ],
+        "timing_map": [],  # missing — must still derive from adapt_trace start/end
+        "target_lang": "uk",
+    }
+    rows = build_openddf_segment_diagnostics(task_info)
+    assert rows[0]["slot_ms"] == 4960
+    assert rows[0]["overlap_info"]["overflow_ms"] == 26  # 4986 - 4960
+    assert rows[0]["overlap_info"]["slot_overflow"] is False  # within 100ms tolerance
+    assert task_info["segments_data"][0]["slot_ms"] == 4960
+

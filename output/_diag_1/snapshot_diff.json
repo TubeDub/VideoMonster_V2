@@ -1,0 +1,495 @@
+{
+  "final_dub_qa": {
+    "ok": false,
+    "issue_count": 51,
+    "issues": [
+      {
+        "index": 5,
+        "code": "long_pause",
+        "gap_ms": 7691,
+        "prev_end_ms": 49029,
+        "next_start_ms": 56720,
+        "severity": "warning"
+      },
+      {
+        "index": 8,
+        "code": "long_pause",
+        "gap_ms": 2555,
+        "prev_end_ms": 74325,
+        "next_start_ms": 76880,
+        "severity": "warning"
+      },
+      {
+        "index": 12,
+        "code": "long_pause",
+        "gap_ms": 1284,
+        "prev_end_ms": 101276,
+        "next_start_ms": 102560,
+        "severity": "warning"
+      },
+      {
+        "index": 18,
+        "code": "long_pause",
+        "gap_ms": 2838,
+        "prev_end_ms": 138055,
+        "next_start_ms": 140893,
+        "severity": "warning"
+      },
+      {
+        "index": 20,
+        "code": "long_pause",
+        "gap_ms": 1797,
+        "prev_end_ms": 152523,
+        "next_start_ms": 154320,
+        "severity": "warning"
+      },
+      {
+        "index": 21,
+        "code": "long_pause",
+        "gap_ms": 4880,
+        "prev_end_ms": 161944,
+        "next_start_ms": 166824,
+        "severity": "warning"
+      },
+      {
+        "index": 22,
+        "code": "long_pause",
+        "gap_ms": 1693,
+        "prev_end_ms": 171148,
+        "next_start_ms": 172841,
+        "severity": "warning"
+      },
+      {
+        "index": 0,
+        "code": "split_sentence",
+        "segment_text": "18-річний Джордж-молодший їхав рідним містом додому на вечерю. Але у той момент, коли він їхав, Джорджу-молодшому зовсім",
+        "next_segment_text": "Джордж-молодший був розумним хлопцем, але він також легко відволікався і через це, він майже нічого серйозно не робив, о",
+        "severity": "error"
+      },
+      {
+        "index": 1,
+        "code": "split_sentence",
+        "segment_text": "Джордж-молодший був розумним хлопцем, але він також легко відволікався і через це, він майже нічого серйозно не робив, о",
+        "next_segment_text": "І в той момент його батько купив йому італійський Фіат,",
+        "severity": "error"
+      },
+      {
+        "index": 2,
+        "code": "split_sentence",
+        "segment_text": "І в той момент його батько купив йому італійський Фіат,",
+        "next_segment_text": "але батько його, хоч подарував йому Фіат, він не розумів потягу сина, «Чому ти не можеш зосередитися на цьому і застосув",
+        "severity": "error"
+      },
+      {
+        "index": 5,
+        "code": "split_sentence",
+        "segment_text": "І він під'їхав до перехрестя, яке було прямо біля його будинку, і він почав повертати, коли почув дуже гучний скрип, а п",
+        "next_segment_text": "Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії в місцевій лікарні",
+        "severity": "error"
+      },
+      {
+        "index": 6,
+        "code": "split_sentence",
+        "segment_text": "Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії в місцевій лікарні",
+        "next_segment_text": "Так два тижні раніше,",
+        "severity": "error"
+      },
+      {
+        "index": 7,
+        "code": "split_sentence",
+        "segment_text": "Так два тижні раніше,",
+        "next_segment_text": "коли Джордж повертав, а потім щось відбулося, а саме — інший автомобіль на великій швидкості промчав дорогою і врізався ",
+        "severity": "error"
+      },
+      {
+        "index": 8,
+        "code": "split_sentence",
+        "segment_text": "коли Джордж повертав, а потім щось відбулося, а саме — інший автомобіль на великій швидкості промчав дорогою і врізався ",
+        "next_segment_text": "Через два роки Джордж-молодший, який на той момент повністю одужав після травм, стояв на фінішній прямій гоночного треку",
+        "severity": "error"
+      },
+      {
+        "index": 9,
+        "code": "split_sentence",
+        "segment_text": "Через два роки Джордж-молодший, який на той момент повністю одужав після травм, стояв на фінішній прямій гоночного треку",
+        "next_segment_text": "Після майже смертельного досвіду, Джордж-молодший зрозумів, що його батько був певною мірою правий, що в деяких випадках",
+        "severity": "error"
+      },
+      {
+        "index": 10,
+        "code": "split_sentence",
+        "segment_text": "Після майже смертельного досвіду, Джордж-молодший зрозумів, що його батько був певною мірою правий, що в деяких випадках",
+        "next_segment_text": "Тож Джордж-молодший вирішив, що він не хоче займатися автогонками.",
+        "severity": "error"
+      },
+      {
+        "index": 13,
+        "code": "split_sentence",
+        "segment_text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі, але після того, як надіслав заявк",
+        "next_segment_text": "Тепер Джордж-молодший пішов до подіуму, щоб зробити кілька фото переможного гонщика",
+        "severity": "error"
+      },
+      {
+        "index": 14,
+        "code": "split_sentence",
+        "segment_text": "Тепер Джордж-молодший пішов до подіуму, щоб зробити кілька фото переможного гонщика",
+        "next_segment_text": "Поки він ішов туди, чоловік середнього віку прийшов назустріч йому",
+        "severity": "error"
+      },
+      {
+        "index": 15,
+        "code": "split_sentence",
+        "segment_text": "Поки він ішов туди, чоловік середнього віку прийшов назустріч йому",
+        "next_segment_text": "і заговорив із Джорджем-молодшим про фотографію, а потім чоловік офіційно представився як Хаскелл Векслер",
+        "severity": "error"
+      },
+      {
+        "index": 16,
+        "code": "split_sentence",
+        "segment_text": "і заговорив із Джорджем-молодшим про фотографію, а потім чоловік офіційно представився як Хаскелл Векслер",
+        "next_segment_text": "Він сказав, що був кінооператором в Голлівуді. Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до Ю Ес Сі, ",
+        "severity": "error"
+      },
+      {
+        "index": 17,
+        "code": "split_sentence",
+        "segment_text": "Він сказав, що був кінооператором в Голлівуді. Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до Ю Ес Сі, ",
+        "next_segment_text": "А коли Хаскелл почув це, він сказав, Джордж, я знаю людей в Ю Ес Сі",
+        "severity": "error"
+      },
+      {
+        "index": 18,
+        "code": "split_sentence",
+        "segment_text": "А коли Хаскелл почув це, він сказав, Джордж, я знаю людей в Ю Ес Сі",
+        "next_segment_text": "Я зроблю кілька дзвінків. І справді, незабаром після цієї доленосної зустрічі, Джордж-молодший отримав лист про зарахува",
+        "severity": "error"
+      },
+      {
+        "index": 19,
+        "code": "split_sentence",
+        "segment_text": "Я зроблю кілька дзвінків. І справді, незабаром після цієї доленосної зустрічі, Джордж-молодший отримав лист про зарахува",
+        "next_segment_text": "Але цей момент у житті Джорджа-молодшого не змінив його життя назавжди",
+        "severity": "error"
+      },
+      {
+        "index": 20,
+        "code": "split_sentence",
+        "segment_text": "Але цей момент у житті Джорджа-молодшого не змінив його життя назавжди",
+        "next_segment_text": "Це також назавжди змінить кіно. А через 13 років, Джордж-молодший створить один з найбільш новаторських фільмів в історі",
+        "severity": "error"
+      },
+      {
+        "index": 21,
+        "code": "split_sentence",
+        "segment_text": "Це також назавжди змінить кіно. А через 13 років, Джордж-молодший створить один з найбільш новаторських фільмів в історі",
+        "next_segment_text": "Його фільм стане частиною найбільш успішної кінофраншизи всіх часів",
+        "severity": "error"
+      },
+      {
+        "index": 22,
+        "code": "split_sentence",
+        "segment_text": "Його фільм стане частиною найбільш успішної кінофраншизи всіх часів",
+        "next_segment_text": "Сьогодні Джорджа-молодшого знають як Джорджа Лукаса і його кінофраншиза — це «Зоряні війни»",
+        "severity": "error"
+      },
+      {
+        "index": 23,
+        "code": "incomplete_sentence",
+        "segment_text": "Сьогодні Джорджа-молодшого знають як Джорджа Лукаса і його кінофраншиза — це «Зоряні війни»",
+        "severity": "error"
+      },
+      {
+        "index": 0,
+        "code": "meaning_truncated_tail",
+        "severity": "error",
+        "hints": [
+          "ellipsis_or_incomplete"
+        ]
+      },
+      {
+        "index": 1,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 2,
+        "code": "text_tts_mismatch",
+        "spoken": "І в той момент його батько купив йому невеликий італійський автомобіль під назвою Фіат, але батько його, хоч і сам подарував йому Фіат, він просто не розумів потягу сина, «Чому ти не можеш зосередитис",
+        "canonical": "І в той момент його батько купив йому італійський Фіат,",
+        "severity": "error"
+      },
+      {
+        "index": 3,
+        "code": "text_tts_mismatch",
+        "spoken": "І в той момент його батько купив йому невеликий італійський автомобіль під назвою Фіат, але батько його, хоч і сам подарував йому Фіат, він просто не розумів потягу сина, «Чому ти не можеш зосередитис",
+        "canonical": "але батько його, хоч подарував йому Фіат, він не розумів потягу сина, «Чому ти не можеш зосередитися на цьому і застосувати її до інших речей, отримаєш справжню роботу».",
+        "severity": "error"
+      },
+      {
+        "index": 5,
+        "code": "meaning_preserved_token",
+        "severity": "error",
+        "hints": [
+          "George"
+        ]
+      },
+      {
+        "index": 5,
+        "code": "preserved_token",
+        "tokens": "****** [REDACTED BY OPENDDF] ******",
+        "stage": "final",
+        "severity": "warning"
+      },
+      {
+        "index": 6,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 7,
+        "code": "text_tts_mismatch",
+        "spoken": "Так два тижні раніше, коли Джордж повертав, а потім щось відбулося, а саме — інший автомобіль на великій швидкості промчав дорогою і врізався в машину Джорджа так сильно, що Джордж-молодший вилетів з ",
+        "canonical": "Так два тижні раніше,",
+        "severity": "error"
+      },
+      {
+        "index": 8,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 9,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 10,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 11,
+        "code": "text_tts_mismatch",
+        "spoken": "Тож Джордж-молодший вирішив, що він дійсно більше не хоче займатися автогонками. Замість цього він узяв камеру і знову захопився своїм колишнім хобі — фотографією.",
+        "canonical": "Тож Джордж-молодший вирішив, що він не хоче займатися автогонками.",
+        "severity": "error"
+      },
+      {
+        "index": 12,
+        "code": "text_tts_mismatch",
+        "spoken": "Тож Джордж-молодший вирішив, що він дійсно більше не хоче займатися автогонками. Замість цього він узяв камеру і знову захопився своїм колишнім хобі — фотографією.",
+        "canonical": "Замість цього він узяв камеру і захопився своїм колишнім хобі — фотографією.",
+        "severity": "error"
+      },
+      {
+        "index": 13,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 14,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 15,
+        "code": "text_tts_mismatch",
+        "spoken": "Поки він ішов туди, чоловік середнього віку прийшов назустріч йому і заговорив із Джорджем-молодшим про фотографію, а потім чоловік офіційно представився як Хаскелл Векслер.",
+        "canonical": "Поки він ішов туди, чоловік середнього віку прийшов назустріч йому",
+        "severity": "error"
+      },
+      {
+        "index": 16,
+        "code": "meaning_truncated_tail",
+        "severity": "error",
+        "hints": [
+          "ellipsis_or_incomplete"
+        ]
+      },
+      {
+        "index": 17,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 18,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 19,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 20,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 21,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 22,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      },
+      {
+        "index": 23,
+        "code": "meaning_incomplete_sentence",
+        "severity": "error",
+        "hints": []
+      }
+    ],
+    "overlap_count": 0,
+    "split_sentence_count": 19,
+    "long_pause_count": 7
+  },
+  "segment_diagnostics_count": 24,
+  "runtime_pipeline_summary": [
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Whisper STT",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Translation",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Natural Translation",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": 24,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Semantic Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Timing-Aware Translation",
+      "enabled": true,
+      "executed": false,
+      "applied": false,
+      "status": "not_run",
+      "skip_reason": "empty_input",
+      "segments_changed": null,
+      "segments_adapted": 0
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "QA Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "TTS",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "SSML / Prosody",
+      "enabled": false,
+      "executed": false,
+      "applied": false,
+      "status": "disabled",
+      "skip_reason": "not_reached",
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Phoneme Support",
+      "enabled": false,
+      "executed": false,
+      "applied": false,
+      "status": "disabled",
+      "skip_reason": "not_reached",
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Slot Fit",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    },
+    {
+      "key": "****** [REDACTED BY OPENDDF] ******",
+      "label": "Timing Engine",
+      "enabled": true,
+      "executed": true,
+      "applied": true,
+      "status": "applied",
+      "skip_reason": null,
+      "segments_changed": null,
+      "segments_adapted": null
+    }
+  ],
+  "openddf_summary": {
+    "segment_count": 24,
+    "skipped_count": 0,
+    "overlap_count": 26,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "overlap_status": "OVERLAP DETECTED",
+    "timing_status": "TIMING OK"
+  }
+}

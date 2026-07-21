@@ -1,15 +1,32 @@
-"""Pipeline data integrity contract — public API (Stage 3A.1)."""
+"""Pipeline data integrity contract — public API (Stage 3A.1 + Freeze P0 + Part 1)."""
 
 from engines.pipeline_integrity.artifact_registry import ArtifactRegistry, sha256_file
+from engines.pipeline_integrity.contract_versions import (
+    DUB_CONTRACT_VERSION,
+    RECOGNITION_CONTRACT_VERSION,
+    SENTENCE_CONTRACT_VERSION,
+    TRANSLATION_CONTRACT_VERSION,
+    contract_catalog,
+    require_contract_versions,
+    stamp_contract_versions,
+)
 from engines.pipeline_integrity.exceptions import (
+    ArchitectureViolation,
     ArtifactIntegrityError,
+    ContractVersionError,
+    IdentityMismatchError,
+    SegmentImmutabilityError,
+    RevisionManagerError,
     PipelineAudioIdentityError,
     PipelineIdentityError,
     PipelineIntegrityError,
+    PipelineStateError,
     PipelineValidationError,
     RuntimeIntegrityError,
     StageSnapshotIntegrityError,
+    TranslationLockError,
 )
+from engines.pipeline_integrity.foundations import foundations_report
 from engines.pipeline_integrity.guards import (
     ArchitectureGuard,
     ArtifactIntegrityGuard,
@@ -21,6 +38,14 @@ from engines.pipeline_integrity.guards import (
     enforce_or_raise,
     validation_always_enabled,
 )
+from engines.pipeline_integrity.pipeline_state import (
+    ALLOWED_TRANSITIONS,
+    PART1_CANONICAL_PATH,
+    PipelineState,
+    advance_pipeline_state,
+    assert_transition,
+    get_pipeline_state,
+)
 from engines.pipeline_integrity.rollback import StageTransaction, run_stage_atomic
 from engines.pipeline_integrity.segment import (
     Segment,
@@ -30,8 +55,23 @@ from engines.pipeline_integrity.segment import (
     segments_by_id,
 )
 from engines.pipeline_integrity.stage_contracts import (
+    POST_LOCK_STAGES,
+    POST_LOCK_TIMING_AUDIO_FIELDS,
     STAGE_ALLOWED_MUTATIONS,
     allowed_fields_for_stage,
+)
+from engines.pipeline_integrity.translation_lock import (
+    FIELD_OWNERS,
+    IMMUTABLE_SEGMENT_ALLOWED_FIELDS,
+    LOCKED_TEXT_FIELDS,
+    OWNER_FIELD_GROUPS,
+    assert_owner_may_write,
+    assert_segments_text_immutable,
+    assert_text_field_writable,
+    is_project_locked,
+    is_segment_locked,
+    lock_segments,
+    owner_of,
 )
 
 from engines.pipeline_integrity.openddf_diagnostics import (
@@ -52,25 +92,51 @@ from engines.pipeline_integrity.passive_openddf import (
 )
 
 __all__ = [
+    "ALLOWED_TRANSITIONS",
     "ArchitectureGuard",
+    "ArchitectureViolation",
     "ArtifactIntegrityError",
     "ArtifactIntegrityGuard",
     "ArtifactRegistry",
+    "ContractVersionError",
+    "DUB_CONTRACT_VERSION",
+    "FIELD_OWNERS",
     "GuardProfile",
+    "IMMUTABLE_SEGMENT_ALLOWED_FIELDS",
+    "LOCKED_TEXT_FIELDS",
+    "OWNER_FIELD_GROUPS",
+    "PART1_CANONICAL_PATH",
+    "POST_LOCK_STAGES",
+    "POST_LOCK_TIMING_AUDIO_FIELDS",
+    "IdentityMismatchError",
+    "SegmentImmutabilityError",
+    "RevisionManagerError",
     "PipelineAudioIdentityError",
     "PipelineIdentityError",
     "PipelineIntegrityCoordinator",
     "PipelineIntegrityError",
+    "PipelineState",
+    "PipelineStateError",
     "PipelineValidationError",
     "PipelineValidator",
+    "RECOGNITION_CONTRACT_VERSION",
     "RuntimeIntegrityError",
     "RuntimeIntegrityGuard",
+    "SENTENCE_CONTRACT_VERSION",
     "Segment",
     "StageSnapshotGuard",
     "StageSnapshotIntegrityError",
     "StageTransaction",
     "STAGE_ALLOWED_MUTATIONS",
+    "TRANSLATION_CONTRACT_VERSION",
+    "TranslationLockError",
+    "advance_pipeline_state",
     "allowed_fields_for_stage",
+    "assert_owner_may_write",
+    "assert_segments_text_immutable",
+    "assert_text_field_writable",
+    "assert_transition",
+    "contract_catalog",
     "ensure_segment_ids",
     "enforce_or_raise",
     "enrich_stage_snapshot_error",
@@ -78,17 +144,25 @@ __all__ = [
     "capture_pipeline_exception",
     "ensure_diagnostic_archive",
     "ensure_session",
+    "foundations_report",
+    "get_pipeline_state",
     "get_session",
     "guard_check_with_diagnostics",
+    "is_project_locked",
+    "is_segment_locked",
+    "lock_segments",
     "observe_guard_context_ready",
     "observe_stage_begin",
+    "owner_of",
     "passive_metadata",
     "start_diagnostic_run",
     "new_segment_id",
     "release_summary_from_exc",
+    "require_contract_versions",
     "resolve_head_segment",
     "run_stage_atomic",
     "segments_by_id",
     "sha256_file",
+    "stamp_contract_versions",
     "validation_always_enabled",
 ]

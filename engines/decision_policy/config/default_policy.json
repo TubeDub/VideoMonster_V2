@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "contract": "decision_policy_v1",
+  "min_strategies": 4,
+    "costs": {
+    "trim_silence": 1,
+    "pause_optimization": 2,
+    "prosody": 2.5,
+    "tempo": 2,
+    "stretch": 4,
+    "borrow_time": 6,
+    "sentence_merge": 10,
+    "semantic_rewrite": 20,
+    "manual_review": 100,
+    "ready": 0
+  },
+  "score_weights": {
+    "meaning": 0.22,
+    "naturalness": 0.12,
+    "timing": 0.18,
+    "lip_sync": 0.08,
+    "context": 0.08,
+    "emotion": 0.05,
+    "style": 0.05,
+    "prosody": 0.07,
+    "speech_flow": 0.05,
+    "runtime_cost": 0.05,
+    "prediction_confidence": 0.05
+  },
+  "profiles": {
+    "Movie": {
+      "prefer": ["trim_silence", "tempo", "borrow_time", "sentence_merge"],
+      "avoid": ["semantic_rewrite"],
+      "max_tempo": 1.12,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.05
+    },
+    "Series": {
+      "prefer": ["trim_silence", "pause_optimization", "tempo", "borrow_time"],
+      "avoid": ["semantic_rewrite"],
+      "max_tempo": 1.10,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.04
+    },
+    "Anime": {
+      "prefer": ["trim_silence", "prosody", "tempo", "stretch"],
+      "avoid": [],
+      "max_tempo": 1.15,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.02
+    },
+    "Documentary": {
+      "prefer": ["pause_optimization", "prosody", "tempo", "borrow_time"],
+      "avoid": ["semantic_rewrite", "stretch"],
+      "max_tempo": 1.08,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.06
+    },
+    "Interview": {
+      "prefer": ["trim_silence", "pause_optimization", "borrow_time", "tempo"],
+      "avoid": ["semantic_rewrite"],
+      "max_tempo": 1.08,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.05
+    },
+    "Podcast": {
+      "prefer": ["pause_optimization", "tempo", "borrow_time", "trim_silence"],
+      "avoid": ["stretch"],
+      "max_tempo": 1.10,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.04
+    },
+    "Kids": {
+      "prefer": ["trim_silence", "prosody", "tempo", "pause_optimization"],
+      "avoid": ["semantic_rewrite", "stretch"],
+      "max_tempo": 1.06,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.03
+    },
+    "Gaming": {
+      "prefer": ["trim_silence", "tempo", "stretch", "borrow_time"],
+      "avoid": [],
+      "max_tempo": 1.18,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.02
+    },
+    "Lecture": {
+      "prefer": ["pause_optimization", "prosody", "tempo", "borrow_time"],
+      "avoid": ["semantic_rewrite", "stretch"],
+      "max_tempo": 1.07,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.06
+    },
+    "YouTube": {
+      "prefer": ["trim_silence", "tempo", "pause_optimization", "borrow_time"],
+      "avoid": ["semantic_rewrite"],
+      "max_tempo": 1.14,
+      "allow_rewrite": false,
+      "timing_weight_boost": 0.03
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "require_contract_match": true
+  }
+}

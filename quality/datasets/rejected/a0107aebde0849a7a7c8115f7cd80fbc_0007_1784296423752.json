@@ -1,0 +1,207 @@
+{
+  "task_id": "a0107aebde0849a7a7c8115f7cd80fbc",
+  "index": 7,
+  "original": "Let me make some calls. And sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school. But this moment in George Jr's life did not just alter George's life forever.",
+  "translation": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довге після цієї долі наради, Джордж-молодший отримає прийомний лист з кіношколи США. Але цей момент у житті Джорджа-молодшого не просто змінив життя Джорджа назавжди.",
+  "reason": "GrammarReviewer: orphan_clause_glue; orphan_clause_glue; GrammarReviewer/orphan_clause_glue: \\bне довге\\b; GrammarReviewer/orphan_clause_glue: \\bвистачить,\\s*не довге\\b",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 7
+      },
+      "review_time_ms": 0.97,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "entity_check_error",
+          "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "severity": "warn"
+        }
+      ],
+      "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 7
+      },
+      "review_time_ms": 0.23,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.95
+      ],
+      "confidence": {
+        "entity_preservation": 0.75,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.95
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 7
+      },
+      "review_time_ms": 0.49,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "orphan_clause_glue",
+          "detail": "\\bне довге\\b",
+          "severity": "critical"
+        },
+        {
+          "code": "orphan_clause_glue",
+          "detail": "\\bвистачить,\\s*не довге\\b",
+          "severity": "critical"
+        }
+      ],
+      "explanation": "orphan_clause_glue; orphan_clause_glue",
+      "retry_strategy": "Grammar Strategy",
+      "metadata": {
+        "index": 7
+      },
+      "review_time_ms": 0.21,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.85
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 0.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.85
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "WARN",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "too_long_for_slot",
+          "severity": "major",
+          "detail": "est_ms=18416 slot_ms=11337 ratio=1.62"
+        }
+      ],
+      "explanation": "too_long_for_slot",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 7,
+        "slot_ms": 11337
+      },
+      "review_time_ms": 0.13,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.97
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 0.7,
+        "overall_confidence": 0.97
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 7
+      },
+      "review_time_ms": 0.07,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.9617,
+  "retry_history": [
+    {
+      "ok": false,
+      "reason": "cannot import name 'chat_completion' from 'engines.llm_adaptation_mode' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\llm_adaptation_mode.py)"
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Grammar Strategy",
+  "ts": 1784296423752
+}

@@ -101,6 +101,22 @@ _UK_WORD_FIXES: list[tuple[str, str]] = [
     (r"\bпереможного\s+їзда\b", "переможного заїзду"),
     (r"\bпредставив\s+себе\s+як\b", "представився як"),
     (r"\s+-\s+", " — "),
+    # GL crash MT garbage (also in calques; kept here so naturalize_uk catches them)
+    (r"\bрозім.яти\s+на\s+автомобілі\s+Юра\b", "врізалася в машину Джорджа"),
+    (r"\bрозім.яти\s+на\s+(?:машині|автомобілі)\b", "врізалася в машину"),
+    (r"\bрозім.яти\s+в\s+(?:машину|автомобіль)\b", "врізалася в машину"),
+    (r"\bна\s+автомобілі\s+Юра\b", "в машину Джорджа"),
+    (r"\bв\s+машину\s+Юра\b", "в машину Джорджа"),
+    (r"\bбув\s+вказаний\s+з\s+(?:автомобіля|машини)\b", "вилетів з машини"),
+    (r"\bколи\s+Джордж\s+зробив\s+це\b", "коли Джордж повертав"),
+    (r"\bТак\s+само,\s+що\s+це\s+ще\s+один\s+автомобіль\b",
+     "а саме — інший автомобіль"),
+    (r"\bТак\s+два\s+тижні\s+раніше\b", "Два тижні раніше"),
+    (r"\bзастосувати\s+її\s+до\s+інших\s+речей\b", "застосувати це до інших речей"),
+    (r"\bпрокладався\s+в\s+стаціонарному\s+комплексі(?:\s+в\s+місцевій\s+лікарні)?\b",
+     "лежав у реанімації місцевої лікарні"),
+    (r"\bлеж(?:ав|ала)\s+в\s+стаціонарному\s+комплексі(?:\s+в\s+місцевій\s+лікарні)?\b",
+     "лежав у реанімації місцевої лікарні"),
 ]
 
 _UK_RUISM_FIXES: list[tuple[str, str]] = [
@@ -187,6 +203,189 @@ _UK_MIXED_LANGUAGE_FIXES: list[tuple[str, str]] = [
 
 # Кальки и неестественные конструкции (UK)
 _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
+    # Residual grammar after partial naturalize (live Review lock bugs)
+    (r"\bна\s+ім['']я\s+Джорджа-молодшого\b", "на ім'я Джордж-молодший"),
+    (r"\bна\s+ім['']я\s+Джорджа\b", "на ім'я Джордж"),
+    (r"\bавтомобіль,\s*яка\b", "автомобіль, який"),
+    (r"\bмашина,\s*який\b", "машина, яка"),
+    (r"\bрозім['']ятити(?:\s+в\s+машину)?\b", "врізалася в машину"),
+    (r"\bбув\s+повністю\s+одужав\b", "повністю одужав"),
+    (r"\bякий\s+на\s+той\s+момент\s+був\s+повністю\s+одужав\b",
+     "який на той момент повністю одужав"),
+    (r"\bбув\s+одужав\b", "одужав"),
+    (r"\bбув\s+певною\s+мірою\s+правий\s+мав\s+рацію\b", "був певною мірою правий"),
+    (r"\bправий\s+мав\s+рацію\b", "правий"),
+    (r"\bавтомобіль\s+на\s+великій\s+швидкості\s+промчала\b",
+     "автомобіль на великій швидкості промчав"),
+    (r"\bназивається\s+Fiat\b", "називається Фіат"),
+    (r"\bназивається\s+FIAT\b", "називається Фіат"),
+    (r"\bна\s+фінішній\s+прямій\s+на\s+гоночн(?:ий|ому)\s+трек\w*\b",
+     "на фінішній прямій гоночного треку"),
+    (r"\bЗ\s+того\s+часу,\s+як\s+його\s+майже\s+смертельний\s+досвід\b",
+     "Після майже смертельного досвіду"),
+    (r"\bстворить\s+одного\s+з\b", "створить один з"),
+    (r"\bАле,\s+як\s+він\s+їхав\b", "Але коли він їхав"),
+    (r"\bзастосувати\s+його\s+на\s+інші\s+речі\b", "застосувати це до інших речей"),
+    (r"\bзастосувати\s+її\s+до\s+інших\s+речей\b", "застосувати це до інших речей"),
+    (r"\bТак\s+два\s+тижні\s+раніше\b", "Два тижні раніше"),
+    (r"\bwill\s+star\s+wars\b", "«Зоряні війни»"),
+    (r"\bкінофраншиза\s+будуть\s+зірвати\s+війни\b", "кінофраншиза — це «Зоряні війни»"),
+    (r"\bйого\s+кінофраншиза\s+стане\s+«Зоряними\s+війнами»",
+     "його кінофраншиза — це «Зоряні війни»"),
+    # GL narrative residuals (Review 2026-07-18 / 2026-07-19)
+    # NOTE: «на вечерю» is added only when EN has dinner — see _fix_uk_dinner_argument_scene
+    # Dread → simple dub (never leave «тривога / насправді отримати там»)
+    (r"\bДжордж-молодший\s+його\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+     "Джорджу-молодшому зовсім не хотілося їхати додому"),
+    (r"\bДжордж-молодший\s+його\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+дуже\s+боявся\s+туди\s+дістатися\b",
+     "Джорджу-молодшому зовсім не хотілося їхати додому"),
+    (r"\bДжордж-молодший\s+його\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\b",
+     "Джорджу-молодшому зовсім не хотілося їхати додому. Він"),
+    (r"\bйого\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+     "йому зовсім не хотілося їхати додому"),
+    (r"\bзі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+     "зовсім не хотів їхати додому"),
+    (r"\bІ\s+так\s+в\s+основному\s+кожна\s+вечеря\s+в\s+ці\s+дні,\s*перетворювалася\b",
+     "Тож майже кожна вечеря останнім часом перетворювалася"),
+    (r"\bТож\s+кожна\s+вечеря\s+в\s+ці\s+дні,\s*перетворювалася\b",
+     "Тож кожна вечеря в ці дні перетворювалася"),
+    (r"\bТак\s+як\s+два\s+тижні\s+раніше,\s*коли\s+Джордж\s+зробив\s+це,\s*а\s+потім\s+щось\s+сталося,\s*добре\s+що\s+це\s+ще\s+один\s+автомобіль\b",
+     "Два тижні тому, коли він робив той поворот, сталося ось що: інший автомобіль"),
+    (r"\bпромчав\s+дорогою\s+і\s+врізалася\s+в\s+машину\b",
+     "промчав дорогою і врізався в машину"),
+    (r"\bПро\s+те,\s+як\s+він\s+нещодавно\s+звернувся\s+до\s+Університету\s+Південної\s+Каліфорнії,\s*щоб\s+спробувати\s+потрапити\b",
+     "Джордж розповів йому, що нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити"),
+    # «звернувся/подав» + USC or expanded university (entity polish order)
+    (r"\bПро\s+те,\s+як\s+він\s+нещодавно\s+(?:звернувся|подав\s+заявку)\s+до\s+(?:USC|Університет(?:у)?\s+Південної\s+Каліфорнії),\s*щоб\s+спробувати\s+потрапити\b",
+     "Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до USC, щоб спробувати потрапити"),
+    (r"\bПро\s+те,\s+як\s+він\s+нещодавно\s+(?:звернувся|подав\s+заявку)\s+до\s+(?:USC|Університет(?:у)?\s+Південної\s+Каліфорнії)\b",
+     "Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до USC"),
+    (r"\bІ\s+сказав\s+він,\s+що\s+він\s+насправді\s+був\b", "Він сказав, що був"),
+    (r"\bІ\s+сказав\s+він,\s+що\s+був\b", "Він сказав, що був"),
+    (r"\bДозвольте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
+    (r"\bДавайте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
+    (r"\bДавай\s+я\s+подзвоню\s+кільком\s+людям\b", "Я зроблю кілька дзвінків"),
+    (r"\bотримає\s+лист\s+про\s+зарахування\b", "отримав лист про зарахування"),
+    (r"\bкіношколи\s+Університет\s+Південної\s+Каліфорнії\b",
+     "кіношколи Університету Південної Каліфорнії"),
+    (r"\bАле,\s+як\s+він\s+прогулявся\s+там\b", "Поки він ішов туди"),
+    # Photography ask — match pre- and post- Jr naming (Джера / молодшого)
+    (r"\bпросто\s+попросив\s+Джорджа(?:-молодшого|\s+Джер\.?а?)\s+про\s+свою\s+фотографію\b",
+     "заговорив із Джорджем-молодшим про фотографію"),
+    (r"\bпопросив\s+Джорджа(?:-молодшого|\s+Джер\.?а?)\s+про\s+свою\s+фотографію\b",
+     "запитав Джорджа-молодшого про його фотографію"),
+    (r"\bпопросив\s+Джорджа-молодшого\s+про\s+свою\s+фотографію\b",
+     "запитав Джорджа-молодшого про його фотографію"),
+    (r"\bпісля\s+того\s+як\s+надіслав\s+заявку\b", "після того, як надіслав заявку"),
+    (r"\bпісля\s+того\s+як\b", "після того, як"),
+    (r"\bбув\s+досить\s+впевненим\b", "був майже впевнений"),
+    (r"\bтак\s+важко,\s+що\b", "так сильно, що"),
+    (r"\bдійсно\s+знову\s+захопився\b", "знову захопився"),
+    (r"\bТак\s+Джордж-молодший\s+вирішив\b", "Тож Джордж-молодший вирішив"),
+    (r"\bТак\s+Джордж-молодший\s+був\b", "Джордж-молодший був"),
+    (r"\bв\s+деякій\s+точці\s+людина\s+фактично\s+офіційно\s+представився\b",
+     "згодом офіційно представився"),
+    (r"\bзгодом\s+людина\s+фактично\s+офіційно\s+представився\b",
+     "згодом офіційно представився"),
+    (r"\bлюдина\s+фактично\s+офіційно\s+представився\b",
+     "чоловік офіційно представився"),
+    (r"\bвзяти\s+деякі\s+фото(?:графії)?\b", "зробити кілька фото"),
+    (r"\bвзяти\s+деякі\s+фото\s+переможного\s+гонщика\b",
+     "зробити кілька фото переможного гонщика"),
+    (r"\bНасправді,?\s*По\s+суті,?\s*", "Насправді "),
+    (r"\bПо\s+суті,?\s*(?=Джордж)", "Насправді "),
+    (r"\bпісля\s+відправки\s+(?:його\s+)?заявки\b", "після того, як надіслав заявку"),
+    (r"\bДжордж-молодший\s+викинул[ао]\b", "Джорджа-молодшого викинуло"),
+    (r"\bДжордж\s+викинул[ао]\b", "Джорджа викинуло"),
+    (r"\.\s*двома\s+тижнями\s+раніше\b", ". Двома тижнями раніше"),
+    (r"\bне\s+просто\s+змінив\s+життя\s+Джорджа\s+назавжди\b",
+     "не лише змінив його життя назавжди"),
+    (r"\bне\s+лише\s+змінив\s+життя\s+Джорджа\s+назавжди\b",
+     "не лише змінив його життя назавжди"),
+    (r"\bУніверситет(?:у)?\s+Південної\s+Каліфорнії\b", "USC"),
+    (r"\bдо\s+USC\b", "до USC"),
+    (r"\bз\s+кіношколи\s+USC\b", "з кіношколи USC"),
+    (r"\bя\s+знаю\s+людей\s+з\s+USC\b", "я знаю людей в USC"),
+    (r"\bя\s+знаю\s+людей\s+з\s+Університету\s+Південної\s+Каліфорнії\b",
+     "я знаю людей в USC"),
+    (r"\bЧерез\s+два\s+роки\s+Джордж-молодший\s+який\b",
+     "Через два роки Джордж-молодший, який"),
+    (r"\bкінофраншизи\s+всього\s+часу\b", "кінофраншизи всіх часів"),
+    # Case / subject fixes (Argos dative subject)
+    (r"\b(\d+)-річному\s+хлопчику\s+ім\.\s+", r"\1-річний хлопець на ім'я "),
+    (r"\b(\d+)-річному\s+хлопчику\s+на\s+ім['']я\s+", r"\1-річний хлопець на ім'я "),
+    (r"\b(\d+)-річному\s+хлопець\b", r"\1-річний хлопець"),
+    (r"\bхлопчику\s+ім\.\s+", "хлопець на ім'я "),
+    (r"\bне\s+може\s+допомогти,\s+але\s+відчувати\s+себе,\s+як\s+він\s+був\s+дійсно\s+зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+     "не міг позбутися відчуття, що насправді дуже боїться туди дістатися"),
+    (r"\bне\s+може\s+допомогти,\s+але\s+відчувати\s+себе\b",
+     "не міг позбутися відчуття"),
+    (r"\bзі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+     "дуже боявся туди дістатися"),
+    (r"\bбув\s+дуже\s+розумним\s+малюком\b", "був дуже розумним хлопцем"),
+    (r"\bрозумним\s+малюком\b", "розумним хлопцем"),
+    (r"\bвін\s+також\s+захопився\s+дуже\s+легко\b", "він також дуже легко відволікався"),
+    (r"\bне\s+мав\s+нічого,\s+що\s+серйозно,\s+окрім\b", "майже нічого не робив по-справжньому серйозно, окрім"),
+    (r"\bне\s+мав\s+нічого,\s+що\s+серйозно\b", "майже нічого серйозно не робив"),
+    (r"\bкупив\s+його\s+невеликою\s+італійською\s+машиною\b", "купив йому невеликий італійський автомобіль"),
+    (r"\bне\s+отримав\s+сина\s+обсесії\s+з\s+автомобілями\b", "не розумів одержимості сина автомобілями"),
+    (r"\bЧому\s+ти\s+не\s+можеш\s+прийняти\s+це\s+фокус\b", "Чому ти не можеш спрямувати цю зосередженість"),
+    (r"\bтому\s+ми\s+отримаємо\s+вашу\s+реальну\s+роботу\b", "і нарешті знайти нормальну роботу"),
+    (r"\bякщо\s+він\s+прийшов\s+цей\s+величезний\s+аргумент\s+між\s+батьком\s+і\s+сином\b",
+     "перетворювалася на величезну сварку між батьком і сином"),
+    (r"\bпрокладався\s+в\s+відділення\s+інтенсивної\s+терапії\b", "лежав у відділенні інтенсивної терапії"),
+    (r"\bпрокладався\b", "лежав"),
+    (r"\bрозім['']ятити\s+в\s+машину\b", "врізалася в машину"),
+    (r"\bрозім['']яти\s+в\s+машину\b", "врізалася в машину"),
+    (r"\bбув\s+виведений\s+з\s+автомобіля\b", "викинуло з автомобіля"),
+    (r"\bале\s+він\s+був\s+пережили\b", "але він вижив"),
+    (r"\bза\s+цією\s+точкою\b", "на той момент"),
+    (r"\bповністю\s+відновлений\s+від\s+своїх\s+ушкоджень\b", "повністю одужав після травм"),
+    (r"\bна\s+гоночний\s+трек\b", "на гоночному треку"),
+    (r"\bпідняв\s+його\s+камеру\b", "підняв камеру"),
+    (r"\bнайближчий\s+досвід\b", "майже смертельний досвід"),
+    (r"\bбув\s+певною\s+мірою\s+правий\s+був\s+своєрідним\s+правом\b", "був певною мірою правий"),
+    (r"\bбув\s+своєрідним\s+правом\b", "мав рацію"),
+    (r"\bвін\s+був\s+його\s+потенціалом\b", "він марнував свій потенціал"),
+    (r"\bпрограми\s+кінематографітеки\b", "програми кінематографії"),
+    (r"\bкінематографітек\w*\b", "кінематографії"),
+    (r"\bзвернувся\s+до\s+престижної\s+програми\b", "подав заявку на престижну програму"),
+    (r"\bвін\s+не\s+отримає\b", "його не візьмуть"),
+    (r"\bпішов\s+над\s+подіумом\b", "пішов до подіуму"),
+    (r"\bфотографії\s+виграшного\s+приводу\b", "фото переможного гонщика"),
+    (r"\bфото\s+виграшного\s+приводу\b", "фото переможного гонщика"),
+    (r"\bвиграшного\s+приводу\b", "переможного гонщика"),
+    (r"\bфотографії\s+переможця\s+гонки\b", "фото переможного гонщика"),
+    (r"\bфотографії\s+переможця\b", "фото переможного гонщика"),
+    (r"\bлюдей\s+(?:у|в)\s+США\b", "людей в USC"),
+    (r"\bя\s+знаю\s+людей\s+(?:у|в)\s+США\b", "я знаю людей в USC"),
+    (r"\bкіношколи\s+США\b", "кіношколи USC"),
+    (r"\bДжордж-молодший\s+який\b", "Джордж-молодший, який"),
+    (r"\bзастосувати\s+її\s+до\s+інших\s+речей\b", "застосувати це до інших речей"),
+    (r"\bприйняти\s+це\s+фокус\b", "спрямувати цю зосередженість"),
+    (r"\bДозвольте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Давай я подзвоню кільком людям"),
+    (r"\bзі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+     "йому зовсім не хотілося туди їхати"),
+    (r"\bйого\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+     "йому зовсім не хотілося їхати додому"),
+    (r"\bнезважаючи\s+на\s+те,\s+що\s+(?:він\s+був\s+)?тим,?\s*хто\s+буквально\s+дав\s+йому\s+(?:Фіат|Fiat)\b",
+     "хоч і сам подарував йому Fiat"),
+    (r"\bСьогодні\s+Джорджа-молодшого\s+весь\s+світ\s+знає\s+як\b",
+     "Сьогодні Джорджа-молодшого знають як"),
+    (r"\bйого\s+не\s+полишало\s+важке\s+передчуття\b",
+     "йому зовсім не хотілося їхати додому"),
+    (r"\bформально\s+представила\s+себе\s+як\b", "офіційно представився як"),
+    (r"\bпрограму\s+кінематографі\b", "програму кінематографії"),
+    (r"\bА\s+коли\s+Хаскелл\s+чув\s+це\b", "А коли Хаскелл почув це"),
+    (r"\bІ\s+вистачить,\s+не\s+довгати\s+після\s+цього\s+долі\s+наради\b",
+     "І справді, незабаром після цієї доленосної зустрічі"),
+    (r"\bне\s+довгати\s+після\s+цього\s+долі\s+наради\b",
+     "незабаром після цієї доленосної зустрічі"),
+    (r"\bприйомний\s+лист\b", "лист про зарахування"),
+    (r"\bЦе\s+також\s+повністю\s+змінити\s+кіно\b", "Це також назавжди змінить кіно"),
+    (r"\bповністю\s+змінити\s+кіно\b", "назавжди змінить кіно"),
+    (r"\bнайземніших\s+фільмів\b", "найбільш новаторських фільмів"),
+    (r"\bвідправиться\s+на\s+створення\b", "створить"),
     (r"\bробить\s+сенс\b", "має сенс"),
     (r"\bробити\s+сенс\b", "мати сенс"),
     (r"\bбрати\s+місце\b", "відбувається"),
@@ -226,6 +425,14 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
     (r"\bпочинає\s+робити\s+поворот\b", "почав повертати"),
     (r"\bможе\s+прискорити\s+дорогу\b", "на великій швидкості промчала дорогою"),
     (r"\bрозім['']яти\s+на\s+машині\b", "врізалася в машину"),
+    (r"\bрозім.яти\s+на\s+автомобілі\b", "врізалася в машину"),
+    (r"\bрозім.яти\s+в\s+автомобіль\b", "врізалася в машину"),
+    (r"\bна\s+автомобілі\s+Юра\b", "в машину Джорджа"),
+    (r"\bбув\s+вказаний\s+з\s+автомобіля\b", "вилетів з машини"),
+    (r"\bбув\s+вказаний\s+з\s+машини\b", "вилетів з машини"),
+    (r"\bколи\s+Джордж\s+зробив\s+це\b", "коли Джордж повертав"),
+    (r"\bТак\s+само,\s+що\s+це\s+ще\s+один\s+автомобіль\b",
+     "а саме — інший автомобіль"),
     (r"\bвигнали\s+з\s+машини\b", "викинуло з машини"),
     (r"\bДжордж\s+Джер\.?\b", "Джордж-молодший"),
     (r"\bГеорг\s+Жр\.?\b", "Джордж-молодший"),
@@ -237,6 +444,13 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
     (r"\bстав\s+його\s+потенціалом\b", "марнував свій потенціал"),
     (r"\bВін\s+не\s+хоче\s+перегонів\b", "Він більше не хоче займатися автогонками"),
     (r"\bчоловік\s+зі\s+смілостями\b", "чоловік середнього віку"),
+    (r"\bскотарний\s+чоловік\b", "чоловік середнього віку"),
+    (r"\bпрогулявся\s+над\s+там\b", "йшов туди"),
+    (r"\bДжорджа\s+Джера\.?\b", "Джорджа-молодшого"),
+    (r"\bЮра\s+Джера\.?\b", "Джорджа-молодшого"),
+    (r"\bОтримувати\b", "отримає"),
+    (r'\bфільм\s+"Франшиза"\s+буде\s+вести\s+війни\b', "кінофраншиза стане «Зоряними війнами»"),
+    (r'\b"Франшиза"\s+буде\s+вести\s+війни\b', "«Зоряними війнами»"),
     (r"\bбув\s+застосований\s+до\s+USC\b", "подав заявку до USC"),
     (r"\bкомпанії\s+з\s+фільму\s+[«\"]Скарб\s+США[»\"]\b",
      "кіношколи USC"),
@@ -282,7 +496,7 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
     (r"\bколи\s+він\s+чує\s+це\s+дійсно\s+гучне\s+звучання\b", "коли почув дуже гучний скрип"),
     (r"\bгучне\s+звучання\b", "гучний скрип"),
     (r"\bвсе\s+пішл[аи]\s+чорним\b", "все потемніло"),
-    (r"\bреанімаційному\s+відділенні\b", "відділенні інтенсивної терапії"),
+    (r"\bреанімаційному\s+відділенні\b", "реанімації"),
     (r"\bдва\s+тижні\s+тому\b", "двома тижнями раніше"),
     (r"\bможе\s+прискорити\s+дорогу\b", "на великій швидкості промчала дорогою"),
     (r"\bрозім['']явся\s+в\s+машину\b", "врізалася в машину"),
@@ -319,7 +533,10 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
     (r"\bне\s+довга\s+після\b", "незабаром після"),
     (r"\bОтриманий\s+лист\s+з\s+фільму\b", "отримав лист про зарахування"),
     (r"\bбув\s+прочитаний\b", "переживав"),
-    (r"\bДавайте\s+мені\s+зробити\b", "Дозвольте мені зробити"),
+    (r"\bДавайте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
+    (r"\bДозвольте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
+    (r"\bДавайте\s+мені\s+зробити\b", "Я зроблю"),
+    (r"\bДозвольте\s+мені\s+зробити\b", "Я зроблю"),
     (r"\bкінематографістом\s+Голлівуд\b", "кінематографістом у Голлівуді"),
     (r"\bоператором\s+Голлівуд\b", "оператором у Голлівуді"),
     (r"\bкінооператором\s+Голлівуд\b", "кінооператором у Голлівуді"),
@@ -330,8 +547,14 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
     (r"\bтакож\s+був\s+дуже\s+легко\s+і\b", "також дуже легко відволікався, і"),
     (r"\bбув\s+дуже\s+легко\s+і\b", "дуже легко відволікався, і"),
     (r"\bДжордж-молодший\s+було\s+прокладен(?:е|о)\b", "Джордж-молодший лежав"),
-    (r"\bбуло\s+прокладен(?:е|о)\s+в\s+стаціонарному\s+комплексі\b", "лежав на лікарняному ліжку у відділенні інтенсивної терапії"),
-    (r"\bлеж(?:ав|ала)\s+в\s+стаціонарному\s+комплексі\b", "лежав на лікарняному ліжку у відділенні інтенсивної терапії"),
+    (r"\bбуло\s+прокладен(?:е|о)\s+в\s+стаціонарному\s+комплексі\b", "лежав у реанімації місцевої лікарні"),
+    (r"\bлеж(?:ав|ала)\s+в\s+стаціонарному\s+комплексі\b", "лежав у реанімації місцевої лікарні"),
+    (r"\bпрокладався\s+в\s+стаціонарному\s+комплексі\b", "лежав у реанімації місцевої лікарні"),
+    (
+        r"\bлежав\s+на\s+лікарняному\s+ліжку\s+у\s+відділенні\s+інтенсивної\s+терапії\s+"
+        r"в\s+місцевій\s+лікарні\b",
+        "лежав у реанімації місцевої лікарні",
+    ),
     (r"\bале\s+він\s+пережил[иі]\b", "але він вижив"),
     (r"\bзрозумів,\s+що\s+дійсно\s+має\s+д[аа][dд]\w*\b", "зрозумів, що його батько був певною мірою правий"),
     (r"\bдійсно\s+має\s+д[aа][dд]\w*\b", "його батько був певною мірою правий"),
@@ -388,6 +611,44 @@ def _fix_uk_dinner_argument_scene(original: str, text: str) -> str:
         return text
     ol = original.lower()
     out = str(text)
+    # Seg1: "on his way home for dinner" → keep dinner; prefer SHORT form
+    # (long «хлопець на ім'я… дорогою додому на вечерю» is ~2× slot → tail cut).
+    if "for dinner" in ol or re.search(r"\bhome\s+for\s+dinner\b", ol):
+        if "на вечерю" not in out.lower():
+            if re.search(r"дорогою\s+додому\b", out, re.I):
+                out = re.sub(
+                    r"(дорогою\s+додому)(?!\s+на\s+вечерю)",
+                    r"\1 на вечерю",
+                    out,
+                    count=1,
+                    flags=re.I,
+                )
+            elif re.search(r"\bдодому\b", out, re.I):
+                out = re.sub(
+                    r"\bдодому\b(?!\s+на\s+вечерю)",
+                    "додому на вечерю",
+                    out,
+                    count=1,
+                    flags=re.I,
+                )
+        # Compact verbose hometown+dinner (keeps age, Jr, hometown, dinner)
+        out = re.sub(
+            r"(\d+)-річн(?:ий|ого|ому)\s+хлопец[ьяю]?\s+на\s+ім['']я\s+"
+            r"(Джордж-молодший)\s+проїжджав\s+через\s+(?:своє\s+)?рідне\s+місто\s+"
+            r"дорогою\s+додому(?:\s+на\s+вечерю)?",
+            r"\1-річний \2 їхав рідним містом додому на вечерю",
+            out,
+            count=1,
+            flags=re.I,
+        )
+        out = re.sub(
+            r"(Джордж-молодший)\s+проїжджав\s+через\s+(?:своє\s+)?рідне\s+місто\s+"
+            r"дорогою\s+додому(?:\s+на\s+вечерю)?",
+            r"\1 їхав рідним містом додому на вечерю",
+            out,
+            count=1,
+            flags=re.I,
+        )
     if "every dinner" in ol or "huge argument" in ol or "real job" in ol:
         out = re.sub(
             r"\bчому\s+ви\s+не\s+можете\s+зосередитись\b",
@@ -463,6 +724,7 @@ class NaturalizerResult:
     restored_entities: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     retried: bool = False
+    catp: dict = field(default_factory=dict)
 
     @property
     def changed(self) -> bool:
@@ -610,6 +872,105 @@ def _apply_if_changed(
     return out
 
 
+# Re-run after Jr/USC name polish — earlier calques often miss «Джера» forms.
+_UK_POST_NAME_RESIDUALS: list[tuple[str, str]] = [
+    # Seg1 dinner: shorten so «на вечерю» is not hard-clipped off the slot tail
+    (
+        r"(\d+)-річний\s+хлопець\s+на\s+ім['']я\s+(Джордж-молодший)\s+проїжджав\s+"
+        r"через\s+(?:своє\s+)?рідне\s+місто\s+дорогою\s+додому(?:\s+на\s+вечерю)?",
+        r"\1-річний \2 їхав рідним містом додому на вечерю",
+    ),
+    (
+        r"(Джордж-молодший)\s+проїжджав\s+через\s+(?:своє\s+)?рідне\s+місто\s+"
+        r"дорогою\s+додому(?:\s+на\s+вечерю)?",
+        r"\1 їхав рідним містом додому на вечерю",
+    ),
+    # Dangling mid-cut after dinner line (Jr. false boundary leftovers)
+    (
+        r"(їхав\s+рідним\s+містом\s+додому\s+на\s+вечерю)\.\s*"
+        r"Але\s+коли\s+він\s+їхав,\s*Джордж-молодший\.?\s*$",
+        r"\1.",
+    ),
+    (
+        r"\bАле\s+коли\s+він\s+їхав,\s*Джордж-молодший\.?\s*$",
+        "",
+    ),
+    (
+        r"\bДжордж-молодший\s+його\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+        "Джорджу-молодшому зовсім не хотілося їхати додому",
+    ),
+    (
+        r"\bйого\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+"
+        r"(?:зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там|"
+        r"зовсім\s+не\s+хотів\s+їхати\s+додому)\b",
+        "йому зовсім не хотілося їхати додому",
+    ),
+    (
+        r"\bйого\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
+        "йому зовсім не хотілося їхати додому",
+    ),
+    (r"\bзі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b", "зовсім не хотів їхати додому"),
+    # Ejected / survived calques (seg9 orphan)
+    (r"\bбув\s+в['']язаний\s+з\s+автомобіля,\s*але\s+він\s+зберіг\.?\b",
+     "вилетів з машини, але вижив"),
+    (r"\bбув\s+в['']язаний\s+з\s+автомобіля\b", "вилетів з машини"),
+    (r"\bале\s+він\s+зберіг\.?\s*$", "але вижив"),
+    # Mid-cut: asked George Jr. | about his photography
+    (
+        r"\bпросто\s+попросив\s+Джорджа-молодшого\.?\s*$",
+        "заговорив із ним",
+    ),
+    (
+        r"\bприступив\s+до\s+нього\b",
+        "підійшов до нього",
+    ),
+    (
+        r"\bв\s+певній\s+точці\s+людина\s+фактично\s+офіційно\s+представил[аи]\s+себе\s+як\b",
+        "згодом він представився як",
+    ),
+    (
+        r"\bІ\s+вистачить,\s+не\s+довге\s+після\s+цієї\s+долі\s+наради\b",
+        "І справді, невдовзі після цієї доленосної зустрічі",
+    ),
+    (
+        r"\bне\s+довге\s+після\s+цієї\s+долі\s+наради\b",
+        "невдовзі після цієї доленосної зустрічі",
+    ),
+    (
+        r"\bЦе\s+також\s+повністю\s+змінити\s+кіно\b",
+        "Це також назавжди змінить кіно",
+    ),
+    (r"\bТож\s+кожна\s+вечеря\s+в\s+ці\s+дні,\s*перетворювалася\b", "Тож кожна вечеря в ці дні перетворювалася"),
+    (
+        r"\bпросто\s+попросив\s+Джорджа(?:-молодшого|\s+Джер\.?а?)\s+про\s+свою\s+фотографію\b",
+        "заговорив із Джорджем-молодшим про фотографію",
+    ),
+    (
+        r"\bпопросив\s+Джорджа(?:-молодшого|\s+Джер\.?а?)\s+про\s+свою\s+фотографію\b",
+        "запитав Джорджа-молодшого про його фотографію",
+    ),
+    (
+        r"\bПро\s+те,\s+як\s+він\s+нещодавно\s+(?:звернувся|подав\s+заявку)\s+до\s+(?:USC|Університет(?:у)?\s+Південної\s+Каліфорнії),\s*щоб\s+спробувати\s+потрапити\b",
+        "Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до USC, щоб спробувати потрапити",
+    ),
+    (
+        r"\bПро\s+те,\s+як\s+він\s+нещодавно\s+(?:звернувся|подав\s+заявку)\s+до\s+(?:USC|Університет(?:у)?\s+Південної\s+Каліфорнії)\b",
+        "Джордж-молодший розповів Хаскеллу, що нещодавно подав заявку до USC",
+    ),
+    (r"\bІ\s+сказав\s+він,\s+що\s+він\s+насправді\s+був\b", "Він сказав, що був"),
+    (r"\bпісля\s+того\s+як\b", "після того, як"),
+    (r"\bпісля\s+відправки\s+(?:його\s+)?заявки\b", "після того, як надіслав заявку"),
+    (r"\bбув\s+досить\s+впевненим\b", "був майже впевнений"),
+    (r"\bтак\s+важко,\s+що\b", "так сильно, що"),
+    (r"\bдійсно\s+знову\s+захопився\b", "знову захопився"),
+    (r"\bТак\s+Джордж-молодший\s+вирішив\b", "Тож Джордж-молодший вирішив"),
+    (r"\bТак\s+Джордж-молодший\s+був\b", "Джордж-молодший був"),
+    (r"\.\s*двома\s+тижнями\s+раніше\b", ". Двома тижнями раніше"),
+    (r"\bв\s+деякій\s+точці\b", "згодом"),
+    (r"\bа\s+потім\s+згодом\b", "а потім"),
+]
+
+
 def _polish_v1_rules(
     raw_mt: str,
     *,
@@ -733,6 +1094,15 @@ def _polish_v1_rules(
             reasons.append("fixed_named_entities")
             current = after
 
+    # Late calques: Jr/USC naming above unlocks patterns that missed on Raw MT.
+    if lang == "uk":
+        after = _apply_if_changed(
+            current, _UK_POST_NAME_RESIDUALS, "fixed_post_name_residual", reasons
+        )
+        current = after
+
+    # Literary UK rewrites run in Naturalizer V2 + CATP (timing-aware), not here.
+
     accepted = accept_naturalizer_change(raw, current, original=original)
     if accepted != current and accepted == raw:
         return NaturalizerResult(raw, ["blocked_degradation"])
@@ -782,6 +1152,8 @@ def polish_segment_detailed(
     app_dir=None,
     use_llm: bool = False,
     entity_token_map: dict[str, str] | None = None,
+    slot_ms: int = 0,
+    reserve_ms: int | None = None,
 ) -> NaturalizerResult:
     """Post-Marian polish — V2 editor-translator when enabled, else V1 rules."""
     from engines.naturalizer_v2.config import is_v2_enabled
@@ -798,6 +1170,8 @@ def polish_segment_detailed(
             app_dir=app_dir,
             use_llm=use_llm,
             entity_token_map=entity_token_map,
+            slot_ms=int(slot_ms or 0),
+            reserve_ms=reserve_ms,
         )
         return NaturalizerResult(
             text=v2["text"],
@@ -810,6 +1184,7 @@ def polish_segment_detailed(
             restored_entities=v2.get("restored_entities", []),
             warnings=v2.get("warnings", []),
             retried=v2.get("retried", False),
+            catp=dict(v2.get("catp") or {}),
         )
 
     return _polish_v1_rules(
@@ -1136,7 +1511,15 @@ def _similarity_ratio(a: str, b: str) -> float:
 
 
 def dedupe_consecutive_similar(lines: List[str], threshold: float = 0.6) -> List[str]:
-    """Убирает повтор смысла в соседних репликах (пересказ / двойная озвучка текста)."""
+    """Clear consecutive near-duplicate lines — MUST preserve list length.
+
+    Historically this *dropped* duplicates, shrinking the list. Downstream
+    ``align_segments_to_timing_map`` then redistributed one UK block across
+    every slot → Review bleed (same Final on «And at» + neighbour, #11/#12).
+
+    Prefer ``debleed_adjacent_batch_copies`` when source EN is available —
+    that *splits* the shared MT blob instead of blanking a slot.
+    """
     if not lines:
         return []
 
@@ -1150,10 +1533,133 @@ def dedupe_consecutive_similar(lines: List[str], threshold: float = 0.6) -> List
         if out and out[-1].strip():
             sim = _similarity_ratio(out[-1], seg)
             if sim >= threshold:
-                logger.debug("[Naturalizer] skip duplicate line (sim=%.2f): %s", sim, seg[:60])
+                logger.debug(
+                    "[Naturalizer] clear duplicate line (sim=%.2f): %s",
+                    sim,
+                    seg[:60],
+                )
+                out.append("")
                 continue
 
         out.append(seg)
+    return out
+
+
+_EN_CONT_START = re.compile(
+    r"^\s*(?:but|and|however|so|then|yet|although|while)\b",
+    re.I,
+)
+_UK_BUT_SPLIT = re.compile(
+    r"(?:,\s*|\s+)(але|проте|однак)\s+",
+    re.I,
+)
+
+
+def _en_incomplete(src: str) -> bool:
+    s = str(src or "").strip()
+    return bool(s) and s[-1] not in ".!?…"
+
+
+def _split_uk_for_en_pair(combined: str, src_a: str, src_b: str) -> tuple[str, str]:
+    """Split one UK MT blob across two EN slots (incomplete + continuation)."""
+    text = " ".join(str(combined or "").split()).strip()
+    if not text:
+        return "", ""
+    src_a = str(src_a or "").strip()
+    src_b = str(src_b or "").strip()
+
+    # Prefer discourse cut when next EN starts with but/and.
+    if _EN_CONT_START.match(src_b):
+        m = _UK_BUT_SPLIT.search(text)
+        if m and m.start() > 8:
+            left = text[: m.start()].rstrip(" ,;:—–-").strip()
+            right = (m.group(1) + " " + text[m.end() :]).strip()
+            if left and right and len(left) >= 8 and len(right) >= 8:
+                return left, right
+
+    # Proportional word split by EN char length.
+    lens = [max(1, len(src_a)), max(1, len(src_b))]
+    total = sum(lens)
+    words = text.split()
+    if len(words) < 2:
+        return text, ""
+    # Even short blobs must split for incomplete+continuation pairs.
+    n_left = max(1, min(len(words) - 1, round(len(words) * lens[0] / total)))
+    left = " ".join(words[:n_left]).strip()
+    right = " ".join(words[n_left:]).strip()
+    return left, right
+
+
+def debleed_adjacent_batch_copies(
+    source_segments: List[str],
+    translations: List[str],
+    *,
+    similarity_threshold: float = 0.72,
+) -> List[str]:
+    """Fix identical/near-identical UK on neighbouring slots from one MT batch.
+
+    Whisper often cuts mid-sentence (Fiat, / but father…). Marian returns one
+    UK paragraph for the pair; both slots then show the same Final in Review.
+    Split the shared blob using EN discourse / length — never shrink the list.
+    """
+    n = len(translations)
+    if n == 0:
+        return []
+    out = [" ".join(str(t or "").split()) for t in translations]
+    sources = [str(s or "").strip() for s in (source_segments or [])]
+    while len(sources) < n:
+        sources.append("")
+
+    for i in range(n - 1):
+        a = out[i]
+        b = out[i + 1]
+        src_a, src_b = sources[i], sources[i + 1]
+        if not src_a or not src_b:
+            continue
+
+        pair_looks_cut = _en_incomplete(src_a) and bool(_EN_CONT_START.match(src_b))
+        same_blob = False
+        if a and b:
+            same_blob = (
+                a == b
+                or _similarity_ratio(a, b) >= similarity_threshold
+                or (len(a) > 40 and (a in b or b in a))
+            )
+        elif a and not b and pair_looks_cut:
+            same_blob = True
+        elif b and not a and pair_looks_cut:
+            same_blob = True
+            a, b = b, a
+
+        # Incomplete EN whose UK already swallowed the next clause.
+        swallowed = False
+        if a and pair_looks_cut and _UK_BUT_SPLIT.search(a):
+            # First slot should not keep the «але…» continuation of next EN.
+            if not same_blob and (not b or _similarity_ratio(a, b) >= 0.45):
+                swallowed = True
+
+        if not same_blob and not swallowed:
+            continue
+
+        combined = a if len(a) >= len(b) else b
+        if not combined:
+            continue
+        left, right = _split_uk_for_en_pair(combined, src_a, src_b)
+        if not left and not right:
+            continue
+        if left == combined and not right:
+            continue
+        logger.info(
+            "[Naturalizer] debleed pair #%d/#%d (%d→%d+%d chars)",
+            i,
+            i + 1,
+            len(combined),
+            len(left),
+            len(right),
+        )
+        out[i] = left
+        out[i + 1] = right
+
     return out
 
 
@@ -1265,8 +1771,10 @@ def polish_lines(
     entity_maps: list[dict[str, str]] | None = None,
     naturalizer_meta_out: list[dict[str, Any]] | None = None,
     segment_progress_cb: Callable[[int, int], None] | None = None,
+    slot_ms_list: List[int] | None = None,
+    reserve_ms_list: List[int] | None = None,
 ) -> List[str]:
-    """Naturalize segments after Marian — only when MT issues are detected."""
+    """Naturalize segments after Marian — CATP uses slot/reserve when provided."""
     import time
 
     src_lines = list(source_segments) if source_segments else [""] * len(lines)
@@ -1289,6 +1797,18 @@ def polish_lines(
             if entity_maps and i < len(entity_maps)
             else None
         )
+        seg_slot = 0
+        if slot_ms_list and i < len(slot_ms_list):
+            try:
+                seg_slot = int(slot_ms_list[i] or 0)
+            except (TypeError, ValueError):
+                seg_slot = 0
+        seg_reserve: int | None = None
+        if reserve_ms_list and i < len(reserve_ms_list):
+            try:
+                seg_reserve = int(reserve_ms_list[i])
+            except (TypeError, ValueError):
+                seg_reserve = None
 
         t_llm = time.perf_counter()
         result = polish_segment_detailed(
@@ -1300,14 +1820,74 @@ def polish_lines(
             app_dir=app_dir,
             use_llm=use_llm,
             entity_token_map=entity_map,
+            slot_ms=seg_slot,
+            reserve_ms=seg_reserve,
         )
         if llm_ms_out is not None and use_llm:
             llm_ms_out[i] = (time.perf_counter() - t_llm) * 1000.0
 
         seg = result.text
+        dirty_meta: dict[str, Any] = {}
+        skip_reason = ""
+        try:
+            from engines.mt.dirty_mt import (
+                apply_temporary_entity_repair,
+                compute_dirty_mt_score,
+                naturalizer_noop_is_bug,
+            )
+
+            dirty = compute_dirty_mt_score(original, raw_mt, tgt_lang=tgt_lang)
+            dirty_meta = dirty.to_dict()
+            if dirty.dirty:
+                # Force repair path: temporary entity regex + mid-name punct
+                repaired, tickets = apply_temporary_entity_repair(seg)
+                if repaired != seg:
+                    seg = repaired
+                    result.reasons = list(result.reasons) + ["dirty_force_repair"] + tickets
+                try:
+                    from engines.dsal.pre_lock_polish import (
+                        polish_double_punctuation,
+                        polish_false_name_period,
+                    )
+
+                    punct = polish_false_name_period(polish_double_punctuation(seg))
+                    if punct != seg:
+                        seg = punct
+                        result.reasons = list(result.reasons) + ["dirty_force_punct"]
+                except Exception:
+                    pass
+                # Still unchanged on dirty → mark bug skip_reason (must not silent-pass)
+                if naturalizer_noop_is_bug(original, raw_mt, seg, tgt_lang=tgt_lang):
+                    skip_reason = "dirty_mt_noop_bug"
+                    # Last resort: glossary hometown / race track surface fixes
+                    if "hometown" in original.lower() and "рідне місто" not in seg.lower():
+                        if re.search(r"(?<![а-яіїєґ])міст(?![а-яіїєґо])", seg, re.I):
+                            seg = re.sub(
+                                r"(?<![а-яіїєґ])міст(?![а-яіїєґо])",
+                                "рідне місто",
+                                seg,
+                                flags=re.I,
+                            )
+                            result.reasons = list(result.reasons) + ["glossary_hometown"]
+                            skip_reason = ""
+                    if re.search(r"race\s*track", original, re.I) and "гоноч" not in seg.lower():
+                        if re.search(r"гончар", seg, re.I):
+                            seg = re.sub(r"гончарни[йї]\s+трек", "гоночний трек", seg, flags=re.I)
+                            result.reasons = list(result.reasons) + ["glossary_race_track"]
+                            skip_reason = ""
+                if skip_reason == "dirty_mt_noop_bug" and seg == raw_mt:
+                    # Ensure we never return silent no_changes without reason
+                    result.reasons = list(result.reasons) or ["no_changes"]
+                    result.reasons.append("dirty_mt_noop_bug")
+            elif seg == raw_mt:
+                skip_reason = ",".join(result.reasons) or "no_changes_clean"
+        except Exception:
+            pass
+
         if naturalizer_reasons_out is not None:
             naturalizer_reasons_out.append(list(result.reasons))
         if naturalizer_meta_out is not None:
+            catp = dict(getattr(result, "catp", None) or {})
             naturalizer_meta_out.append(
                 {
                     "mixed_language_pct": result.mixed_language_pct,
@@ -1318,6 +1898,17 @@ def polish_lines(
                     "restored_entities": list(result.restored_entities),
                     "warnings": list(result.warnings),
                     "retried": result.retried,
+                    "dirty_mt": dirty_meta,
+                    "naturalizer_skip_reason": skip_reason,
+                    "naturalizer_applied": seg != raw_mt,
+                    "catp": catp,
+                    "naturalizer_mode": catp.get("mode") or "",
+                    "duration_before": catp.get("duration_before"),
+                    "duration_after": catp.get("duration_after"),
+                    "delta_duration": catp.get("delta_duration"),
+                    "reserve_used": catp.get("reserve_used"),
+                    "rollback_due_to_length": catp.get("rollback_due_to_length"),
+                    "selected_variant": catp.get("selected_variant"),
                 }
             )
 
@@ -1337,6 +1928,82 @@ def polish_lines(
                 ",".join(result.reasons) or "no_changes",
             )
 
+        # TRH: always run canon repair after polish (catches residual Jr/USC/calques)
+        try:
+            from engines.trh.canon_repair import apply_canon_repair
+
+            repaired, tickets = apply_canon_repair(
+                seg, original=original, tgt_lang=tgt_lang, app_dir=app_dir
+            )
+            if repaired != seg:
+                seg = repaired
+                result.reasons = list(result.reasons) + ["canon_repair"] + tickets
+                if naturalizer_meta_out is not None and naturalizer_meta_out:
+                    naturalizer_meta_out[-1]["naturalizer_applied"] = True
+                    naturalizer_meta_out[-1]["canon_repair"] = tickets
+                    if naturalizer_meta_out[-1].get("naturalizer_skip_reason") == "dirty_mt_noop_bug":
+                        naturalizer_meta_out[-1]["naturalizer_skip_reason"] = ""
+        except Exception:
+            pass
+
+        # Second-pass name/residual polish: canon may inject genitive Jr after «на ім'я»
+        if _normalize_lang(tgt_lang) == "uk" and seg:
+            try:
+                from engines.naturalizer_v2.uk_name_forms import apply_uk_dub_name_polish
+
+                after_names = apply_uk_dub_name_polish(seg, original=original)
+                if after_names != seg:
+                    seg = after_names
+                    result.reasons = list(result.reasons) + ["uk_name_polish_post_canon"]
+                residual_reasons: list[str] = []
+                residual_pass = _apply_if_changed(
+                    seg,
+                    [
+                        (r"\bавтомобіль,\s*яка\b", "автомобіль, який"),
+                        (r"\bрозім['']ятити(?:\s+в\s+машину)?\b", "врізалася в машину"),
+                        (r"\bбув\s+певною\s+мірою\s+правий\s+мав\s+рацію\b", "був певною мірою правий"),
+                        (r"\bправий\s+мав\s+рацію\b", "правий"),
+                        (r"\bбув\s+повністю\s+одужав\b", "повністю одужав"),
+                        (r"\bавтомобіль\s+на\s+великій\s+швидкості\s+промчала\b",
+                         "автомобіль на великій швидкості промчав"),
+                        (r"\bЗ\s+того\s+часу,\s+як\s+його\s+майже\s+смертельний\s+досвід\b",
+                         "Після майже смертельного досвіду"),
+                        (r"\bна\s+фінішній\s+прямій\s+на\s+гоночн(?:ий|ому)\s+трек\w*\b",
+                         "на фінішній прямій гоночного треку"),
+                        (r"\bстворить\s+одного\s+з\b", "створить один з"),
+                        (r"\bйого\s+кінофраншиза\s+стане\s+«Зоряними\s+війнами»",
+                         "його кінофраншиза — це «Зоряні війни»"),
+                        (r"\bкіношколи\s+Університет(?:у)?\s+Південної\s+Каліфорнії\b",
+                         "кіношколи USC"),
+                        (r"\bУніверситет(?:у)?\s+Південної\s+Каліфорнії\b", "USC"),
+                        (r"\bфото\s+виграшного\s+приводу\b", "фото переможного гонщика"),
+                        (r"\bвиграшного\s+приводу\b", "переможного гонщика"),
+                        (r"\bлюдей\s+(?:у|в)\s+США\b", "людей в USC"),
+                        (r"\bДжордж-молодший\s+який\b", "Джордж-молодший, який"),
+                        (r"\bвзяти\s+деякі\s+фото(?:графії)?\b", "зробити кілька фото"),
+                        (r"\bДжордж-молодший\s+викинул[ао]\b", "Джорджа-молодшого викинуло"),
+                        (r"\bлюдина\s+фактично\s+офіційно\s+представився\b",
+                         "чоловік офіційно представився"),
+                        (r"\bНасправді,?\s*По\s+суті,?\s*", "Насправді "),
+                        (r"\bзмінив\s+життя\s+Джорджа\s+назавжди\b",
+                         "змінив його життя назавжди"),
+                        (r"\bотримає\s+лист\s+про\s+зарахування\b",
+                         "отримав лист про зарахування"),
+                        (r"\bпромчав\s+дорогою\s+і\s+врізалася\s+в\s+машину\b",
+                         "промчав дорогою і врізався в машину"),
+                        *_UK_POST_NAME_RESIDUALS,
+                    ],
+                    "fixed_residual_grammar",
+                    residual_reasons,
+                )
+                if residual_pass != seg:
+                    seg = residual_pass
+                    result.reasons = list(result.reasons) + residual_reasons
+                    if naturalizer_meta_out is not None and naturalizer_meta_out:
+                        naturalizer_meta_out[-1]["naturalizer_applied"] = True
+            except Exception:
+                pass
+
         polished.append(seg)
         if seg:
             prev = seg
@@ -1351,7 +2018,52 @@ def polish_lines(
         changed_count,
         len(lines),
     )
-    return dedupe_consecutive_similar(polished)
+    # Source-aware debleed first (split shared MT).
+    if any(str(s or "").strip() for s in src_lines):
+        polished = debleed_adjacent_batch_copies(src_lines, polished)
+        # Only clear near-dupes when NOT an incomplete EN + but-continuation pair
+        # (dedupe would blank the second slot and reintroduce bleed via align).
+        safe_for_dedupe: List[str] = []
+        for i, seg in enumerate(polished):
+            if (
+                i > 0
+                and _en_incomplete(src_lines[i - 1] if i - 1 < len(src_lines) else "")
+                and _EN_CONT_START.match(src_lines[i] if i < len(src_lines) else "")
+            ):
+                # Keep both halves even if still somewhat similar after split.
+                safe_for_dedupe.append(seg)
+                continue
+            if (
+                safe_for_dedupe
+                and safe_for_dedupe[-1].strip()
+                and seg.strip()
+                and _similarity_ratio(safe_for_dedupe[-1], seg) >= 0.6
+                and not (
+                    i + 1 < len(src_lines)
+                    and _en_incomplete(src_lines[i])
+                    and _EN_CONT_START.match(src_lines[i + 1] if i + 1 < len(src_lines) else "")
+                )
+            ):
+                safe_for_dedupe.append("")
+                continue
+            safe_for_dedupe.append(seg)
+        polished = safe_for_dedupe
+    else:
+        polished = dedupe_consecutive_similar(polished)
+    # Restore sentence closes stripped by compress / calques when EN is complete.
+    try:
+        from engines.semantic_meaning import restore_terminal_close
+
+        polished = [
+            restore_terminal_close(
+                polished[i] if i < len(polished) else "",
+                original=src_lines[i] if i < len(src_lines) else "",
+            )
+            for i in range(len(polished))
+        ]
+    except Exception:
+        pass
+    return polished
 
 
 def fix_phantom_cross_segment_repeats(

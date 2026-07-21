@@ -127,6 +127,14 @@ class SegmentAdaptationTrace:
     requires_llm: bool = False
     llm_called: bool = False
     llm_skip_reason: str = ""
+    provider_fatal: bool = False
+    provider: str = ""
+    model: str = ""
+    rewrite_reason: str = ""
+    original_duration_ms: float = 0.0
+    rewritten_duration_ms: float = 0.0
+    duration_delta_ms: float = 0.0
+    compression_ratio: float = 0.0
     rule_fallback_applied: bool = False
     iterations: int = 0
     validation_passed: bool = False
@@ -157,6 +165,14 @@ class SegmentAdaptationTrace:
             "requires_llm": self.requires_llm,
             "llm_called": self.llm_called,
             "llm_skip_reason": self.llm_skip_reason,
+            "provider_fatal": self.provider_fatal,
+            "provider": self.provider,
+            "model": self.model,
+            "rewrite_reason": self.rewrite_reason,
+            "original_duration_ms": round(self.original_duration_ms, 1),
+            "rewritten_duration_ms": round(self.rewritten_duration_ms, 1),
+            "duration_delta_ms": round(self.duration_delta_ms, 1),
+            "compression_ratio": round(self.compression_ratio, 3),
             "rule_fallback_applied": self.rule_fallback_applied,
             "iterations": self.iterations,
             "validation_passed": self.validation_passed,
@@ -755,6 +771,27 @@ def adapt_segment_ai(
     mark_llm_needed(segment=index)
     set_llm_context(segment=index, stage="ai_adaptation_engine")
 
+    try:
+        from pathlib import Path
+
+        from engines.llm_callable import ensure_llm_callable, get_run_state
+
+        _callable = ensure_llm_callable(
+            app_dir=Path(__file__).resolve().parents[1],
+            max_attempts=3,
+        )
+        _state = get_run_state()
+        trace.provider = str(_state.get("provider") or _callable.get("provider") or "")
+        trace.model = str(_state.get("model") or _callable.get("model") or "")
+        trace.original_duration_ms = float(budget.tts_estimated_ms)
+        if not _callable.get("callable"):
+            trace.provider_fatal = True
+            trace.llm_skip_reason = str(
+                _callable.get("fatal_reason") or "provider_fatal"
+            )
+    except Exception:
+        pass
+
     if not llm_rephrase_available():
         record_llm_skip("no_endpoint")
         trace.llm_skip_reason = "no_endpoint"
@@ -909,6 +946,26 @@ def adapt_segment_ai(
         trace.chosen_text = prep_text or original
         trace.chosen_reason = "llm_exhausted_kept_prep"
 
+    chosen_budget = compute_time_budget(trace.chosen_text, slot_ms, tgt_lang=tgt_lang)
+    trace.rewritten_duration_ms = float(chosen_budget.tts_estimated_ms)
+    trace.duration_delta_ms = float(chosen_budget.delta_ms)
+    if trace.original_duration_ms > 0:
+        trace.compression_ratio = round(
+            trace.rewritten_duration_ms / trace.original_duration_ms, 3
+        )
+    if trace.chosen_reason:
+        trace.rewrite_reason = trace.chosen_reason
+    if trace.llm_called:
+        try:
+            from engines.translation_adapt import get_llm_calls
+
+            recent = get_llm_calls()[-trace.llm_calls :]
+            if recent:
+                trace.provider = trace.provider or str(recent[-1].get("provider") or "")
+                trace.model = trace.model or str(recent[-1].get("model") or "")
+        except Exception:
+            pass
+
     if trace.requires_llm and not trace.llm_called:
         from engines.translation_adapt import get_llm_status
         from engines.ai_core.llm_gateway import RULE_FALLBACK_REASONS
@@ -955,6 +1012,8 @@ def adapt_segment_ai(
     still_needs = trace.requires_llm and (
         (not trace.llm_called) or (not chosen_budget.fits) or (not trace.validation_passed)
     )
+    if trace.provider_fatal and trace.requires_llm and not trace.llm_called:
+        still_needs = True
     if trace.rule_fallback_applied and trace.chosen_text.strip():
         still_needs = False
 
@@ -1080,6 +1139,11 @@ def enforce_adaptation_gate(
                 st.get("skip_reason") or rec.get("llm_skip_reason") or ""
             ).strip()
             text_ok = bool(str(segments[idx] or "").strip())
+            provider_fatal = bool(
+                rec.get("provider_fatal")
+                or seg_data.get("provider_fatal")
+                or skip_reason in ("provider_fatal", "model_missing")
+            )
             rule_fallback = bool(
                 skip_reason in GRACEFUL_LLM_SKIPS
                 or rec.get("rule_fallback_applied")
@@ -1088,16 +1152,22 @@ def enforce_adaptation_gate(
                 or seg_data.get("adaptation_executed")
                 or (skip_reason == "no_endpoint" and text_ok)
             )
+            # TZ v4.0: LLM fatal is a warning when rule-based DSAL already adapted.
             if IS_DEBUG_LEARNING_MODE() or (text_ok and rule_fallback):
                 continue
+            code = "LLM_PROVIDER_FATAL" if provider_fatal else "LLM_NOT_CALLED"
             violations.append(
                 {
                     "index": idx,
-                    "code": "LLM_NOT_CALLED",
+                    "code": code,
                     "reason": skip_reason or "unknown",
                     "message": (
                         f"Сегмент #{idx + 1} требует интеллектуальной адаптации, "
-                        "но LLM не была вызвана — передача в TTS запрещена"
+                        + (
+                            "но провайдер LLM недоступен (фатальная ошибка)"
+                            if provider_fatal
+                            else "но LLM не была вызвана — передача в TTS запрещена"
+                        )
                     ),
                 }
             )
@@ -1120,16 +1190,75 @@ def propagate_adaptation_flags(
             and not trace.rule_fallback_applied
         )
         seg["llm_called"] = trace.llm_called
+        seg["provider_fatal"] = trace.provider_fatal
+        seg["llm_provider"] = trace.provider
+        seg["llm_model"] = trace.model
+        seg["rewrite_reason"] = trace.rewrite_reason
+        seg["rewrite_iterations"] = trace.iterations
+        seg["original_duration_ms"] = trace.original_duration_ms
+        seg["rewritten_duration_ms"] = trace.rewritten_duration_ms
+        seg["duration_delta_ms"] = trace.duration_delta_ms
+        seg["compression_ratio"] = trace.compression_ratio
         seg["rule_fallback_applied"] = trace.rule_fallback_applied
         seg["llm_attempts"] = trace.llm_calls
-        seg["adaptation_executed"] = (
+        executed = bool(
             trace.llm_called or trace.validation_passed or trace.rule_fallback_applied
         )
+        seg["adaptation_executed"] = executed
         seg["ai_adaptation_trace"] = trace.to_dict()
+        if executed:
+            from engines.dub_engine_v2.adaptation_decision import mark_adaptation_executed
+
+            mark_adaptation_executed(
+                seg,
+                decision=str(trace.chosen_reason or "ai_adaptation"),
+                stages=["ai_adaptation"],
+            )
+        else:
+            from engines.dub_engine_v2.adaptation_decision import (
+                SKIP_DECISION_ENGINE_RETURNED_SKIP,
+                SKIP_FITS_NO_CHANGE,
+                SKIP_LLM_UNAVAILABLE_FALLBACK_FAILED,
+                SKIP_NO_SEMANTIC_CANDIDATES,
+                SKIP_RULE_ADAPTER_DISABLED,
+                mark_adaptation_skipped,
+            )
+
+            llm_skip = str(trace.llm_skip_reason or "")
+            chosen = str(trace.chosen_reason or "")
+            if chosen == "fits_no_change" or llm_skip in (
+                "no_changes_needed",
+                "fits_without_change",
+            ):
+                reason = SKIP_FITS_NO_CHANGE
+            elif llm_skip in (
+                "no_endpoint",
+                "provider_fatal",
+                "model_missing",
+                "llm_circuit_open",
+            ):
+                reason = SKIP_LLM_UNAVAILABLE_FALLBACK_FAILED
+            elif "rule" in llm_skip.lower() and "disabled" in llm_skip.lower():
+                reason = SKIP_RULE_ADAPTER_DISABLED
+            elif trace.requires_llm and not trace.llm_called:
+                reason = SKIP_LLM_UNAVAILABLE_FALLBACK_FAILED
+            elif not trace.requires_llm:
+                reason = SKIP_NO_SEMANTIC_CANDIDATES
+            else:
+                reason = SKIP_DECISION_ENGINE_RETURNED_SKIP
+            mark_adaptation_skipped(
+                seg,
+                skip_reason=reason,
+                index=idx,
+                need_adaptation=bool(trace.requires_llm),
+                decision=str(chosen or llm_skip or "ai_skip"),
+            )
         if trace.requires_llm and not trace.llm_called:
+            code = "LLM_PROVIDER_FATAL" if trace.provider_fatal else "LLM_NOT_CALLED"
             seg.setdefault("adaptation_errors", []).append(
                 {
-                    "code": "LLM_NOT_CALLED",
+                    "code": code,
                     "reason": trace.llm_skip_reason or "unknown",
+                    "skip_reason": seg.get("adaptation_skip_reason") or "",
                 }
             )

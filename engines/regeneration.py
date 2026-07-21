@@ -166,8 +166,15 @@ def regenerate_segment(
     segment["overflow_pct"] = overflow_pct
     segment["container_status"] = _overflow_status(overflow_pct)
     segment["timing_meta"] = result.get("meta") or {}
-    segment["start_ms"] = start_ms
-    segment["end_ms"] = end_ms
+    from engines.scheduler import update_time
+
+    sid = str(segment.get("segment_id") or "").strip()
+    if not sid:
+        from engines.pipeline_integrity.segment import ensure_segment_ids
+
+        ensure_segment_ids([segment])
+        sid = str(segment.get("segment_id") or "").strip()
+    update_time([segment], sid, start_ms=start_ms, end_ms=end_ms)
 
     if emotion:
         from engines.emotion_tagger import tts_params_for_emotion

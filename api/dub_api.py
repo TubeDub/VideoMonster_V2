@@ -5,6 +5,7 @@ VideoMonster V2 — Dub API
 
 from __future__ import annotations
 
+import json
 import threading
 import time
 import uuid
@@ -31,6 +32,28 @@ ALLOWED_SUBS = {".srt", ".vtt", ".ass", ".ssa", ".txt"}
 TASKS: dict[str, dict] = {}
 
 bp = Blueprint("dub_api", __name__)
+_DEBUG_LOG_PATH = APP_DIR / "debug-7e57dc.log"
+
+
+def _debug_meaning_fit_route(route: str) -> None:
+    """Temporary route diagnostic for debug session 7e57dc."""
+    try:
+        payload = {
+            "sessionId": "7e57dc",
+            "runId": "meaning-fit-route-discovery",
+            "hypothesisId": "H7,H9",
+            "location": "dub_api.py:api_dub_start",
+            "message": "Legacy Dub start endpoint entered",
+            "data": {
+                "route": route,
+                "processCwdMatchesApp": Path.cwd().resolve() == APP_DIR.resolve(),
+            },
+            "timestamp": int(time.time() * 1000),
+        }
+        with _DEBUG_LOG_PATH.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
 
 
 # ─────────────────────────────────────────────
@@ -133,6 +156,9 @@ def api_dub_start():
       original_volume, dub_volume, background_volume — для custom
       keep_original_track — сохранить извлечённую оригинальную дорожку в projects/
     """
+    # region agent log
+    _debug_meaning_fit_route("/api/dub/start")
+    # endregion
     data = request.get_json(silent=True) or {}
 
     video_filename = data.get("video_filename", "")

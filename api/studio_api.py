@@ -28,6 +28,33 @@ APP_DIR = Path(__file__).parent.parent.resolve()
 OUTPUT_DIR = APP_DIR / "output"
 UPLOADS_DIR = APP_DIR / "uploads"
 REDBUB_DIR = UPLOADS_DIR / "redub"
+
+
+def _studio_set_timing(
+    segments: list[dict[str, Any]],
+    seg: dict[str, Any],
+    *,
+    start_ms: int | None = None,
+    end_ms: int | None = None,
+) -> None:
+    """MASTER TZ v3.0 P4/P8: Studio mutates time only via Scheduler when segment_id exists."""
+    sid = str(seg.get("segment_id") or "").strip()
+    if sid:
+        from engines.scheduler import update_time
+
+        kwargs: dict[str, Any] = {}
+        if start_ms is not None:
+            kwargs["start_ms"] = int(start_ms)
+        if end_ms is not None:
+            kwargs["end_ms"] = int(end_ms)
+        if kwargs:
+            update_time(segments, sid, **kwargs)
+        return
+    # Bootstrap rows without UUID — last resort (pre-handoff drafts).
+    if start_ms is not None:
+        seg["start_ms"] = int(start_ms)
+    if end_ms is not None:
+        seg["end_ms"] = int(end_ms)
 STUDIO_STATE_DIR = APP_DIR / "output" / "studio_sessions"
 OUTPUT_DIR.mkdir(exist_ok=True)
 UPLOADS_DIR.mkdir(exist_ok=True)
@@ -288,6 +315,38 @@ def build_session_from_auto_dub_task(task_id: str) -> dict[str, Any] | None:
         "output_file": output_file,
         "studio_url": f"/studio?task_id={task_id}",
     }
+    # Part 6 — attach Studio QA views when Semantic V3 / Dub meta is present
+    try:
+        meta = (
+            (info.get("semantic_v3") or {}).get("meta")
+            if isinstance(info.get("semantic_v3"), dict)
+            else None
+        ) or info.get("studio_qa_meta") or info.get("meta") or {}
+        if isinstance(meta, dict) and (
+            meta.get("studio_qa")
+            or meta.get("decision_graph")
+            or meta.get("audio_metrics")
+            or meta.get("timeline")
+        ):
+            if meta.get("studio_qa"):
+                state["studio_qa"] = meta["studio_qa"]
+            else:
+                from engines.studio_qa import build_studio_qa_bundle
+
+                state["studio_qa"] = build_studio_qa_bundle(
+                    meta=meta,
+                    info=info,
+                    pipeline_state=str(info.get("pipeline_state") or ""),
+                ).to_dict()
+            # Convenience mirrors for Studio UI panels
+            sq = state["studio_qa"]
+            state["pipeline_view"] = sq.get("pipeline_view")
+            state["timeline_view"] = sq.get("timeline_view")
+            state["review_panel"] = sq.get("review_panel")
+            state["decision_graph_view"] = sq.get("decision_graph_view")
+            state["qa_metrics"] = sq.get("metrics")
+    except Exception:
+        pass
     return state
 
 
@@ -405,6 +464,8 @@ def _load_session(session_id: str = "default") -> dict[str, Any]:
 def _save_session(state: dict[str, Any]) -> None:
     sid = str(state.get("session_id") or "default")
     path = _session_path(sid)
+    # Dir can be deleted mid-run; never fail mix/publish on missing folder.
+    STUDIO_STATE_DIR.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     _sync_session_to_auto_dub(sid, state)
     try:
@@ -718,96 +779,13 @@ def _mark_studio_mix_done(
 
 
 def _remux_studio_mp4(task_id: str, timed_audio_path: str, state: dict[str, Any]) -> tuple[bool, str | None, list[str]]:
-    """Remux video with assembled dub track (full_dub)."""
-    video_path = state.get("video_path") or ""
-    try:
-        from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
-
-        with STATE_LOCK:
-            task = AUTO_TASKS.get(task_id)
-            if task:
-                info = task.get("info") or {}
-                video_path = info.get("video_path_backup") or video_path
-    except ImportError:
-        pass
-
-    if not video_path or not Path(video_path).is_file():
-        return False, None, ["Исходное видео недоступно для экспорта"]
-
-    output_path = _resolve_studio_output_path(task_id, video_path)
-    target_duration = int(state.get("duration_ms") or 0)
-    dub_timeout_sec = max(600, int(target_duration / 1000) + 300)
-
-    from engines.dub_engine import DubEngine
-    from engines.source_separation import (
-        build_final_mix_diagnostics,
-        get_background_mix_params,
-    )
-
-    bg_path: str | None = None
-    bg_atten_db = 4.5
-    sep_info: dict[str, Any] = {}
-    try:
-        from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
-
-        with STATE_LOCK:
-            task = AUTO_TASKS.get(task_id)
-            if task:
-                info = task.get("info") or {}
-                video_path = info.get("video_path_backup") or video_path
-                sep_info = dict(info.get("source_separation") or {})
-    except ImportError:
-        pass
-
-    bg_path, bg_atten_db, _sep_ok = get_background_mix_params(
-        {"source_separation": sep_info}
-    )
-
-    ok, out_path, dub_errors = DubEngine(
-        video_path=video_path,
-        timed_audio=timed_audio_path,
-        background_audio_path=bg_path or "",
-        background_attenuation_db=bg_atten_db,
-    ).run(
-        output_path=output_path,
-        mix_mode="full_dub",
-        timeout_sec=dub_timeout_sec,
-    )
-    if not ok:
-        errs = dub_errors if isinstance(dub_errors, list) else [str(dub_errors)]
-        return False, None, errs
-
-    final_output = out_path or output_path
-    if not final_output or not Path(final_output).exists():
-        return False, None, ["MP4 не создан после remux"]
-
-    used_stem_mix = bool(bg_path)
-    mix_diag = build_final_mix_diagnostics(
-        separation_info=sep_info,
-        final_mp4_path=str(final_output),
-        mix_success=True,
-        used_stem_mix=used_stem_mix,
-    )
-    try:
-        from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
-
-        with STATE_LOCK:
-            task = AUTO_TASKS.get(task_id)
-            if task:
-                task.setdefault("info", {})["source_separation_final_mix"] = mix_diag.to_dict()
-    except ImportError:
-        pass
-
-    output_name = Path(final_output).name
-    _mark_studio_mix_done(
+    """Remux video with assembled dub track using task mix volumes (original underlay)."""
+    return _mix_studio_mp4_with_task_settings(
         task_id,
-        timed_audio_path=timed_audio_path,
-        final_output=str(final_output),
-        state=state,
-        mix_mode_backup="full_dub",
+        timed_audio_path,
+        state,
+        keep_assets=True,
     )
-
-    return True, str(final_output), []
 
 
 def export_studio_task(task_id: str, *, remux: bool = True) -> dict[str, Any]:
@@ -1400,10 +1378,13 @@ def api_studio_segment_move(segment_id: str):
         if seg is None:
             return jsonify({"ok": False, "error": "segment not found"}), 404
 
-        if start_ms is not None:
-            seg["start_ms"] = int(start_ms)
-        if end_ms is not None:
-            seg["end_ms"] = int(end_ms)
+        if start_ms is not None or end_ms is not None:
+            _studio_set_timing(
+                segments,
+                seg,
+                start_ms=int(start_ms) if start_ms is not None else None,
+                end_ms=int(end_ms) if end_ms is not None else None,
+            )
         idx = int(seg.get("index", sid))
         while len(timing) <= idx:
             timing.append({"start": 0, "end": 0})
@@ -1870,6 +1851,15 @@ def api_studio_mix(task_id: str):
     with _LOCK:
         state = _load_session(safe)
         if not state.get("segments"):
+            # Recover when studio_sessions/*.json was never persisted.
+            rebuilt = build_session_from_auto_dub_task(safe)
+            if rebuilt and rebuilt.get("segments"):
+                try:
+                    _save_session(rebuilt)
+                except Exception:
+                    pass
+                state = rebuilt
+        if not state.get("segments"):
             return jsonify({"ok": False, "error": "Сессия Studio пуста"}), 404
 
         segments = state.get("segments") or []
@@ -2053,6 +2043,254 @@ def api_studio_preview(task_id: str):
         conditional=True,
         download_name=preview_path.name,
     )
+
+
+def _resolve_studio_original_path(task_id: str, state: dict[str, Any] | None = None) -> Path | None:
+    from engines.rasm.audio_paths import resolve_original_audio_path
+
+    return resolve_original_audio_path(
+        task_id,
+        state=state,
+        output_dir=OUTPUT_DIR,
+        uploads_dir=UPLOADS_DIR,
+    )
+
+
+@bp.get("/api/studio/original/<task_id>")
+def api_studio_original(task_id: str):
+    """Serve retained original / reference audio for RASM dual playback (R0)."""
+    safe = Path(task_id).name
+    blocked = _studio_access(safe)
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+
+    with _LOCK:
+        state = _load_session(safe)
+    path = _resolve_studio_original_path(safe, state)
+    if path is None or not path.is_file():
+        return jsonify({
+            "ok": False,
+            "error": "original_audio_unavailable",
+            "hint": "Re-run dub with RASM enabled (reference track is retained automatically).",
+        }), 404
+
+    ext = path.suffix.lower()
+    mime = {
+        ".mp3": "audio/mpeg",
+        ".wav": "audio/wav",
+        ".m4a": "audio/mp4",
+        ".ogg": "audio/ogg",
+        ".flac": "audio/flac",
+    }.get(ext, "audio/mpeg")
+    return send_file(
+        str(path),
+        mimetype=mime,
+        conditional=True,
+        download_name=path.name,
+    )
+
+
+@bp.get("/api/studio/rasm/settings")
+def api_rasm_settings_get():
+    """RASM playback + threshold settings (R0 foundation)."""
+    from engines.rasm.config import is_rasm_enabled, load_rasm_settings
+
+    settings = load_rasm_settings(APP_DIR)
+    return jsonify({
+        "ok": True,
+        "enabled": is_rasm_enabled(),
+        "settings": settings.to_dict(),
+    })
+
+
+@bp.post("/api/studio/rasm/settings")
+def api_rasm_settings_post():
+    """Update RASM settings (volumes / mode / thresholds)."""
+    from engines.rasm.config import RasmSettings, load_rasm_settings, save_rasm_settings
+
+    data = request.get_json(silent=True) or {}
+    current = load_rasm_settings(APP_DIR).to_dict()
+    current.update({k: v for k, v in data.items() if k != "extras"})
+    known = {f.name for f in RasmSettings.__dataclass_fields__.values()}  # type: ignore[attr-defined]
+    kwargs = {k: v for k, v in current.items() if k in known and k != "extras"}
+    settings = RasmSettings(**kwargs).clamp()
+    save_rasm_settings(settings, APP_DIR)
+    return jsonify({"ok": True, "settings": settings.to_dict()})
+
+
+@bp.get("/api/studio/rasm/status/<task_id>")
+def api_rasm_status(task_id: str):
+    """RASM readiness + quick stats."""
+    from engines.rasm.config import is_rasm_enabled, load_rasm_settings
+    from engines.rasm.metrics import analyze_segments, compute_stats
+
+    safe = Path(task_id).name
+    blocked = _studio_access(safe)
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+
+    with _LOCK:
+        state = _load_session(safe)
+    orig = _resolve_studio_original_path(safe, state)
+    preview = _studio_preview_path(safe)
+    settings = load_rasm_settings(APP_DIR)
+    segs = state.get("segments") or []
+    rows = analyze_segments(segs, settings=settings)
+    stats = compute_stats(rows)
+    return jsonify({
+        "ok": True,
+        "enabled": is_rasm_enabled(),
+        "original_available": bool(orig and orig.is_file()),
+        "dub_preview_available": preview.is_file() or bool(segs),
+        "settings": settings.to_dict(),
+        "phase": "R5",
+        "stats": stats,
+    })
+
+
+@bp.get("/api/studio/rasm/analyze/<task_id>")
+def api_rasm_analyze(task_id: str):
+    """Full RASM analysis: metrics, stats, reports, pre-LOCK hooks."""
+    from engines.rasm.analyze import analyze_project
+
+    safe = Path(task_id).name
+    blocked = _studio_access(safe)
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+
+    with _LOCK:
+        state = _load_session(safe)
+        segs = list(state.get("segments") or [])
+
+    info: dict[str, Any] = {}
+    try:
+        from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(safe)
+            if task:
+                info = dict(task.get("info") or {})
+    except Exception:
+        pass
+
+    write = request.args.get("write", "1").strip().lower() not in ("0", "false", "no")
+    result = analyze_project(
+        safe,
+        segs,
+        app_dir=APP_DIR,
+        info=info,
+        write_reports=write,
+        apply_hooks=True,
+    )
+
+    # Persist rasm_status / sync_qc flags back into session (QC flags only)
+    with _LOCK:
+        state = _load_session(safe)
+        state["session_id"] = safe
+        live = state.get("segments") or []
+        by_idx = {r["index"]: r for r in result.get("segments") or []}
+        for i, seg in enumerate(live):
+            m = by_idx.get(i)
+            if not m:
+                continue
+            seg["rasm_status"] = m.get("status")
+            seg["rasm_flags"] = m.get("flags") or []
+            if m.get("sync_qc"):
+                seg["sync_qc"] = m["sync_qc"]
+        state["rasm_stats"] = result.get("stats")
+        _save_session(state)
+
+    return jsonify(result)
+
+
+@bp.get("/api/studio/rasm/report/<task_id>")
+def api_rasm_report(task_id: str):
+    """Return sync_report.json (generate if missing)."""
+    from engines.rasm.reports import write_sync_reports
+
+    safe = Path(task_id).name
+    blocked = _studio_access(safe)
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+
+    report_path = OUTPUT_DIR / "sessions" / safe / "sync_report.json"
+    fmt = (request.args.get("format") or "json").strip().lower()
+    if not report_path.is_file() or request.args.get("refresh") in ("1", "true"):
+        with _LOCK:
+            state = _load_session(safe)
+        write_sync_reports(safe, state.get("segments") or [], app_dir=APP_DIR)
+
+    if fmt == "html":
+        html_path = report_path.with_suffix(".html")
+        if html_path.is_file():
+            return send_file(str(html_path), mimetype="text/html")
+    if fmt == "csv":
+        csv_path = report_path.with_suffix(".csv")
+        if csv_path.is_file():
+            return send_file(str(csv_path), mimetype="text/csv", download_name="sync_report.csv")
+
+    if not report_path.is_file():
+        return jsonify({"ok": False, "error": "report_missing"}), 404
+    return jsonify(json.loads(report_path.read_text(encoding="utf-8")))
+
+
+@bp.post("/api/studio/rasm/compare")
+def api_rasm_compare():
+    """Compare two sync_report.json payloads or paths (Before/After)."""
+    from engines.rasm.compare import compare_sync_reports
+
+    data = request.get_json(silent=True) or {}
+    before = data.get("before")
+    after = data.get("after")
+    before_task = data.get("before_task_id")
+    after_task = data.get("after_task_id")
+    if before_task and not before:
+        p = OUTPUT_DIR / "sessions" / Path(str(before_task)).name / "sync_report.json"
+        before = str(p) if p.is_file() else None
+    if after_task and not after:
+        p = OUTPUT_DIR / "sessions" / Path(str(after_task)).name / "sync_report.json"
+        after = str(p) if p.is_file() else None
+    if not before or not after:
+        return jsonify({"ok": False, "error": "need before and after reports"}), 400
+    try:
+        return jsonify(compare_sync_reports(before, after))
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+@bp.post("/api/studio/rasm/hooks/<task_id>")
+def api_rasm_hooks(task_id: str):
+    """Run TQE sync flags + pre-LOCK DSAL proposals (no post-LOCK text mutation)."""
+    from engines.rasm.hooks import run_rasm_hooks
+    from engines.rasm.config import load_rasm_settings
+
+    safe = Path(task_id).name
+    blocked = _studio_access(safe)
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+
+    with _LOCK:
+        state = _load_session(safe)
+        segs = list(state.get("segments") or [])
+
+    info: dict[str, Any] = {}
+    try:
+        from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(safe)
+            if task:
+                info = dict(task.get("info") or {})
+    except Exception:
+        pass
+
+    result = run_rasm_hooks(segs, info=info, settings=load_rasm_settings(APP_DIR))
+    with _LOCK:
+        state = _load_session(safe)
+        state["session_id"] = safe
+        state["segments"] = segs
+        _save_session(state)
+    return jsonify(result)
 
 
 @bp.get("/api/studio/media/<filename>")

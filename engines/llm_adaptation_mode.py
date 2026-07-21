@@ -421,7 +421,16 @@ def detect_capabilities() -> dict[str, Any]:
     """
     cloud_key = bool(_cloud_api_key())
     ep = resolve_llm_endpoint()
-    llm_available = bool(ep.get("available"))
+    try:
+        from engines.llm_callable import get_run_state, is_llm_callable
+
+        run_state = get_run_state()
+        if run_state.get("checked_at"):
+            llm_available = bool(run_state.get("callable"))
+        else:
+            llm_available = bool(ep.get("available")) and is_llm_callable(quick=True)
+    except Exception:
+        llm_available = bool(ep.get("available"))
     model = resolve_llm_model(ep.get("models"), provider=ep.get("provider", "")) if llm_available else ""
     assessment = assess_adaptation_model(model) if llm_available else {
         "param_b": 0.0, "adequate": False, "warning": ""

@@ -280,29 +280,117 @@ def preload_route_plan(app_dir: Path, plan) -> None:
             logger.debug("[ModelManager] preload %s->%s: %s", leg_src, leg_tgt, exc)
 
 
+def _is_whisper_oom(exc: BaseException) -> bool:
+    msg = str(exc or "").lower()
+    return any(
+        tok in msg
+        for tok in (
+            "mkl_malloc",
+            "failed to allocate",
+            "out of memory",
+            "oom",
+            "std::bad_alloc",
+            "cannot allocate",
+        )
+    )
+
+
+def clear_whisper_cache() -> None:
+    """Drop cached Whisper models to free RAM (STT OOM recovery)."""
+    global _WHISPER_CACHE
+    _WHISPER_CACHE.clear()
+    try:
+        import gc
+
+        gc.collect()
+    except Exception:
+        pass
+
+
+def _whisper_fallback_sizes(requested: str) -> list[str]:
+    order = ["large-v3", "large-v2", "large", "medium", "small", "base", "tiny"]
+    req = (requested or "tiny").strip().lower()
+    if req not in order:
+        return [req, "base", "tiny"]
+    idx = order.index(req)
+    # Prefer requested, then smaller only
+    return order[idx:]
+
+
 def load_whisper(app_dir: Path, size: str):
     key = size
     if key in _WHISPER_CACHE:
         return _WHISPER_CACHE[key]
-    if not verify_whisper(app_dir, size):
-        if is_offline_only() or not downloads_permitted():
-            raise ModelNotPreparedError(
-                f"Whisper {size} не установлен",
-                component="whisper",
-            )
-        assert_downloads_allowed("whisper load")
     from faster_whisper import WhisperModel
     from engines.hardware_probe import probe_whisper_device
 
     device, compute_type = probe_whisper_device()
     root = str(hub_dir(app_dir))
-    try:
-        model = WhisperModel(size, device=device, compute_type=compute_type, download_root=root)
-    except Exception:
-        model = WhisperModel(size, device="cpu", compute_type="int8", download_root=root)
-    _WHISPER_CACHE[key] = model
-    touch_component(app_dir, "whisper", size, engine_hint="whisper")
-    return model
+    last_exc: BaseException | None = None
+
+    for try_size in _whisper_fallback_sizes(size):
+        if not verify_whisper(app_dir, try_size):
+            if try_size == size and (is_offline_only() or not downloads_permitted()):
+                raise ModelNotPreparedError(
+                    f"Whisper {size} не установлен",
+                    component="whisper",
+                )
+            if try_size != size:
+                continue
+            assert_downloads_allowed("whisper load")
+        attempts = [
+            (device, compute_type),
+            ("cpu", "int8"),
+            ("cpu", "float32"),
+        ]
+        # Deduplicate identical attempts
+        seen: set[tuple[str, str]] = set()
+        for dev, ctype in attempts:
+            pair = (dev, ctype)
+            if pair in seen:
+                continue
+            seen.add(pair)
+            try:
+                model = WhisperModel(
+                    try_size,
+                    device=dev,
+                    compute_type=ctype,
+                    download_root=root,
+                    cpu_threads=2,
+                )
+                _WHISPER_CACHE[try_size] = model
+                if try_size != size:
+                    logger.warning(
+                        "[ModelManager] Whisper %s OOM/load fail → using %s (%s/%s)",
+                        size,
+                        try_size,
+                        dev,
+                        ctype,
+                    )
+                touch_component(app_dir, "whisper", try_size, engine_hint="whisper")
+                return model
+            except Exception as exc:
+                last_exc = exc
+                if _is_whisper_oom(exc):
+                    logger.warning(
+                        "[ModelManager] Whisper load OOM size=%s device=%s: %s",
+                        try_size,
+                        dev,
+                        exc,
+                    )
+                    clear_whisper_cache()
+                    continue
+                logger.debug(
+                    "[ModelManager] Whisper load fail size=%s device=%s: %s",
+                    try_size,
+                    dev,
+                    exc,
+                )
+                continue
+
+    if last_exc is not None:
+        raise last_exc
+    raise RuntimeError(f"Whisper {size}: failed to load")
 
 
 def load_marian(app_dir: Path, src: str, tgt: str):

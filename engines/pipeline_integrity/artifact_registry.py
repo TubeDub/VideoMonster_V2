@@ -43,7 +43,30 @@ class ArtifactRegistry:
     file_to_segment: dict[str, str] = field(default_factory=dict)
     profile_ms: float = 0.0
 
-    def register(self, segment_id: str, path: Path) -> ArtifactRecord:
+    def unregister(self, segment_id: str) -> None:
+        """Drop a segment binding (archived / superseded parent)."""
+        rec = self.records.pop(segment_id, None)
+        if rec is None:
+            return
+        if self.file_to_segment.get(rec.filename) == segment_id:
+            self.file_to_segment.pop(rec.filename, None)
+
+    def register(
+        self,
+        segment_id: str,
+        path: Path,
+        *,
+        active_ids: set[str] | None = None,
+        rebind_orphans: bool = False,
+    ) -> ArtifactRecord:
+        """
+        Bind segment_id -> file.
+
+        No-Audio-Reuse: two live segments may not share a filename.
+        When ``rebind_orphans`` is set (studio_handoff sync), a file still
+        bound to an id outside ``active_ids`` (archived post-reissue parent)
+        transfers to the new segment_id.
+        """
         t0 = time.perf_counter()
         if not path.is_file():
             raise FileNotFoundError(str(path))
@@ -52,7 +75,19 @@ class ArtifactRegistry:
         size = path.stat().st_size
         existing_owner = self.file_to_segment.get(name)
         if existing_owner and existing_owner != segment_id:
-            raise ValueError(f"file {name!r} already bound to {existing_owner}")
+            if (
+                rebind_orphans
+                and active_ids is not None
+                and existing_owner not in active_ids
+            ):
+                self.unregister(existing_owner)
+            else:
+                raise ValueError(f"file {name!r} already bound to {existing_owner}")
+        # Segment changed file after re-TTS — drop stale filename binding.
+        old_rec = self.records.get(segment_id)
+        if old_rec is not None and old_rec.filename != name:
+            if self.file_to_segment.get(old_rec.filename) == segment_id:
+                self.file_to_segment.pop(old_rec.filename, None)
         rec = ArtifactRecord(
             segment_id=segment_id,
             filename=name,

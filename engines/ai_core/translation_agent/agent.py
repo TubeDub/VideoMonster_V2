@@ -162,8 +162,85 @@ class TranslationAgent:
                 }
                 continue
 
+            # TRH: Pre-MT Entity Mask (glossary) — protect Jr/USC/Star Wars/etc.
+            entity_map: dict[str, str] = {}
+            mt_text = text
+            try:
+                from engines.naturalizer_v2.config import entity_mask_enabled
+                from engines.naturalizer_v2.entity_tokens import mask_entities, restore_entities
+
+                if entity_mask_enabled():
+                    mt_text, entity_map = mask_entities(text)
+                    if entity_map:
+                        decision_log.append(
+                            f"segment_{seg.get('index', '?')}:entity_mask "
+                            f"n={len(entity_map)}"
+                        )
+                        seg["entity_token_map"] = dict(entity_map)
+            except Exception:
+                mt_text, entity_map = text, {}
+
+            def _translate_one(chunk: str) -> str:
+                r = translate_with_fallback(
+                    chunk,
+                    source,
+                    target,
+                    registry,
+                    threshold=_brief_translation_threshold(
+                        seg, self.confidence_threshold
+                    ),
+                )
+                decision_log.extend(r.decision_log)
+                if r.fallback_used:
+                    stats["fallback_used"] = True
+                if r.attempt > 1:
+                    stats["retries"] += r.attempt - 1
+                return str(r.translated or "").strip()
+
+            # HF1: oversized MT unit → sentence-chunk translate
+            try:
+                from engines.mt.oversized_guard import (
+                    is_oversized_mt_unit,
+                    translate_oversized_safely,
+                )
+
+                if is_oversized_mt_unit(mt_text):
+                    decision_log.append(
+                        f"segment_{seg.get('index', '?')}:oversized_guard "
+                        f"chars={len(mt_text)} words={len(mt_text.split())}"
+                    )
+                    translated = translate_oversized_safely(mt_text, _translate_one)
+                    if entity_map:
+                        translated, _notes = restore_entities(
+                            translated,
+                            entity_map,
+                            original=text,
+                            tgt_lang=target,
+                        )
+                    # Post-MT canon repair on raw
+                    try:
+                        from engines.trh.canon_repair import apply_canon_repair
+
+                        translated, _tix = apply_canon_repair(
+                            translated, original=text, tgt_lang=target
+                        )
+                    except Exception:
+                        pass
+                    seg["translated_text"] = translated
+                    seg["mt_oversized_split"] = True
+                    seg["confidence"] = {
+                        "translation": 0.7,
+                        "entity": 0.7,
+                        "terminology": 0.7,
+                        "language": 0.7,
+                        "overall": 0.7,
+                    }
+                    continue
+            except Exception:
+                pass
+
             result = translate_with_fallback(
-                text,
+                mt_text,
                 source,
                 target,
                 registry,
@@ -175,6 +252,59 @@ class TranslationAgent:
             if result.attempt > 1:
                 stats["retries"] += result.attempt - 1
             translated = str(result.translated or "").strip()
+            # Force sentence-level retranslate when MT collapsed a long segment
+            try:
+                from engines.mt.sentence_split import (
+                    is_severe_mt_collapse,
+                    split_mt_sentences,
+                )
+
+                if text and is_severe_mt_collapse(text, translated):
+                    decision_log.append(
+                        f"segment_{seg.get('index', '?')}:mt_collapse "
+                        f"src_words={len(text.split())} tr_words={len(translated.split())} "
+                        "→ sentence_retranslate"
+                    )
+                    from engines.mt.argos_engine import ArgosEngine
+
+                    eng = ArgosEngine()
+                    pieces: list[str] = []
+                    for sent in split_mt_sentences(text):
+                        if len(sent.split()) >= 45:
+                            # Extra soft split for runaway clauses
+                            import re as _re
+
+                            chunks = [
+                                c.strip()
+                                for c in _re.split(r"(?<=[,;:])\s+", sent)
+                                if c.strip()
+                            ] or [sent]
+                        else:
+                            chunks = [sent]
+                        for chunk in chunks:
+                            r = eng.translate(chunk, source, target)
+                            piece = str(r.text or "").strip()
+                            pieces.append(piece if piece else chunk)
+                    rebuilt = " ".join(pieces).strip()
+                    if rebuilt and not is_severe_mt_collapse(text, rebuilt):
+                        translated = rebuilt
+                        result.success = True
+                        result.confidence = 0.7
+                        result.translator_name = "argos_sentence"
+                        stats["sentence_retranslate"] = (
+                            int(stats.get("sentence_retranslate") or 0) + 1
+                        )
+                    elif rebuilt and len(rebuilt.split()) > len(translated.split()):
+                        translated = rebuilt
+                        result.translator_name = "argos_sentence_partial"
+                        stats["sentence_retranslate_partial"] = (
+                            int(stats.get("sentence_retranslate_partial") or 0) + 1
+                        )
+            except Exception as _collapse_exc:
+                stats["warnings"].append(
+                    f"segment_{seg.get('index', '?')}:collapse_repair_failed {_collapse_exc}"
+                )
+
             if not translated or (
                 source != target
                 and translated == text
@@ -190,17 +320,69 @@ class TranslationAgent:
                         f"segment_{seg.get('index', '?')}:pass1_language_fail {lv.issues}"
                     )
             if result.success and translated:
-                stats["success_count"] += 1
+                # Do not count collapsed MT as success
+                try:
+                    from engines.mt.sentence_split import is_severe_mt_collapse
+
+                    if is_severe_mt_collapse(text, translated):
+                        stats["warnings"].append(
+                            f"segment_{seg.get('index', '?')}:mt_still_collapsed "
+                            f"{len(text.split())}->{len(translated.split())}"
+                        )
+                        stats["collapse_count"] = int(stats.get("collapse_count") or 0) + 1
+                    else:
+                        stats["success_count"] += 1
+                except Exception:
+                    stats["success_count"] += 1
             else:
                 stats["warnings"].append(
                     f"segment_{seg.get('index', '?')}: {result.error}"
                 )
 
             stats["translator_used"] = result.translator_name
+            # TRH: restore masked entities + canon repair on Raw MT
+            if entity_map and translated:
+                try:
+                    from engines.naturalizer_v2.entity_tokens import restore_entities
+
+                    translated, notes = restore_entities(
+                        translated,
+                        entity_map,
+                        original=text,
+                        tgt_lang=target,
+                    )
+                    if notes:
+                        decision_log.append(
+                            f"segment_{seg.get('index', '?')}:entity_restore {notes[:3]}"
+                        )
+                except Exception:
+                    pass
+            try:
+                from engines.trh.canon_repair import apply_canon_repair
+
+                translated, tix = apply_canon_repair(
+                    translated, original=text, tgt_lang=target
+                )
+                if tix:
+                    decision_log.append(
+                        f"segment_{seg.get('index', '?')}:canon_repair {tix[:4]}"
+                    )
+            except Exception:
+                pass
             seg["translated_text"] = translated
             seg["translator_used"] = result.translator_name
             seg["translation_attempts"] = result.attempt
-            conf = SegmentConfidence(translation=result.confidence)
+            # Recompute confidence after possible sentence repair
+            from engines.ai_core.translation_agent.confidence import translation_confidence
+
+            conf_score = translation_confidence(
+                translator_name=str(result.translator_name or "argos"),
+                success=bool(translated),
+                attempt=int(result.attempt or 1),
+                source=text,
+                translated=translated,
+            )
+            conf = SegmentConfidence(translation=conf_score)
             seg["confidence"] = {
                 "translation": conf.translation,
                 "entity": conf.entity,

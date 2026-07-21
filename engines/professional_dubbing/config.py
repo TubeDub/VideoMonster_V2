@@ -7,7 +7,8 @@ import os
 FILL_TARGET = 0.975
 MAX_RATE_SLOW = -18
 MIN_RATE_SLOW = -3
-MAX_BREAK_MS = 650
+MAX_BREAK_MS = 350  # TZ v4.0 P2: SSML breaks capped 250–350ms
+
 
 
 def is_enabled() -> bool:

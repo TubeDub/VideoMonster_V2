@@ -889,13 +889,21 @@ def _llm_model() -> str:
 
 
 def llm_rephrase_available() -> bool:
-    """True when an LLM endpoint is usable.
+    """True when an LLM endpoint is usable with a callable model tag.
 
-    Resolved automatically: a cloud API key, an explicit self-hosted base URL, OR
-    an auto-discovered local server (Ollama / LM Studio / OpenAI-compatible). No
-    manual configuration required.
+    Resolved automatically: cloud API key, explicit base URL, or auto-discovered
+    local server (Ollama / LM Studio / OpenAI-compatible). Requires a model that
+    is actually installed/listable — not merely a reachable port.
     """
-    return bool(_resolve_endpoint().get("available"))
+    ep = _resolve_endpoint()
+    if not ep.get("available"):
+        return False
+    try:
+        from engines.llm_callable import is_llm_callable
+
+        return is_llm_callable(quick=True)
+    except Exception:
+        return bool(ep.get("available"))
 
 
 def _raw_chat_send(

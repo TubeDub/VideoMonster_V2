@@ -38,6 +38,7 @@ _CORE_BLUEPRINTS: tuple[tuple[str, str], ...] = (
     ("api.timing_api", "bp"),
     ("api.grammar_api", "bp"),
     ("api.quality_api", "bp"),
+    ("api.streamdub_api", "bp"),
 )
 
 _HEAVY_BLUEPRINTS: tuple[tuple[str, str], ...] = (
@@ -95,6 +96,18 @@ def register_heavy_blueprints(app: Flask, *, feature_manager=None) -> None:
                     from api.cloud_api import bp as cloud_bp
 
                     app.register_blueprint(cloud_bp)
+                try:
+                    from api.platform_sdk_api import bp as platform_sdk_bp
+
+                    app.register_blueprint(platform_sdk_bp)
+                except Exception:
+                    pass
+                try:
+                    from api.enterprise_api import bp as enterprise_bp
+
+                    app.register_blueprint(enterprise_bp)
+                except Exception:
+                    pass
                 if feature_manager.blueprint_enabled("dub_studio_api"):
                     from api.dub_studio_api import bp as dub_studio_bp
 

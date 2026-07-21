@@ -252,6 +252,66 @@ class TestPipelineValidator:
         )
         assert result["with_tts"] == 1
 
+    def test_reissue_child_registers_at_handoff(self, tmp_path: Path):
+        """studio_handoff: NEW id after reissue must sync into artifact registry."""
+        f = tmp_path / "child.mp3"
+        f.write_bytes(b"\xff\xfb" + b"\x00" * 32)
+        old_sid = new_segment_id()
+        new_sid = new_segment_id()
+        # Parent was registered at TTS; child appears later with its own file.
+        parent = _seg_row(segment_id=old_sid, file="parent.mp3")
+        child = _seg_row(
+            segment_id=new_sid,
+            file=f.name,
+            reissued_from=[old_sid],
+        )
+        parent_file = tmp_path / "parent.mp3"
+        parent_file.write_bytes(b"\xff\xfb" + b"\x11" * 32)
+
+        def resolve(name, task_info=None):
+            return tmp_path / Path(str(name)).name
+
+        coord = PipelineIntegrityCoordinator(task_id="t-reissue")
+        coord.register_tts_artifacts([parent], resolve_path=resolve, task_info=None)
+        # Simulate post-TTS reissue: only child remains active
+        result = coord.validate_pipeline(
+            [child],
+            [{"start": 0, "end": 2000}],
+            stage="studio_handoff",
+            resolve_audio=resolve,
+        )
+        assert result["with_tts"] == 1
+        assert new_sid in coord.artifact_guard.registry.records
+
+    def test_reissue_transfers_file_from_archived_parent(self, tmp_path: Path):
+        """File still bound to archived parent id → transfer to child."""
+        f = tmp_path / "shared.mp3"
+        f.write_bytes(b"\xff\xfb" + b"\x00" * 32)
+        old_sid = new_segment_id()
+        new_sid = new_segment_id()
+        parent = _seg_row(segment_id=old_sid, file=f.name)
+        child = _seg_row(
+            segment_id=new_sid,
+            file=f.name,
+            reissued_from=[old_sid],
+        )
+
+        def resolve(name, task_info=None):
+            return tmp_path / Path(str(name)).name
+
+        coord = PipelineIntegrityCoordinator(task_id="t-xfer")
+        coord.register_tts_artifacts([parent], resolve_path=resolve, task_info=None)
+        result = coord.validate_pipeline(
+            [child],
+            [{"start": 0, "end": 2000}],
+            stage="studio_handoff",
+            resolve_audio=resolve,
+        )
+        assert result["with_tts"] == 1
+        assert new_sid in coord.artifact_guard.registry.records
+        assert old_sid not in coord.artifact_guard.registry.records
+        assert coord.artifact_guard.registry.file_to_segment[f.name] == new_sid
+
 
 class TestRollbackContract:
     def test_rollback_restores_segments_on_error(self):

@@ -75,12 +75,25 @@ def resolve_mix_volumes(
                 "ползунок «фон» управляет общей громкостью оригинала."
             )
             orig = max(orig, bg)
+        # Under full-level dub, linear 0.20 is nearly inaudible — lift mid underlay
+        # so UI "20%" is actually hearable without drowning the dub.
+        if 0.05 < orig <= 0.35 and dub >= 0.85:
+            orig = min(0.55, orig * 1.6)
     elif mode in MIX_PRESETS:
         preset = MIX_PRESETS[mode]
         orig = preset["original"]
         dub = preset["dub"]
         bg = preset["background"]
-        if mode == "atmosphere":
+        # Explicit UI/API override must win over full_dub mute.
+        if original_volume is not None and float(original_volume) > 0.001:
+            mode = "custom"
+            orig = float(original_volume)
+            if dub_volume is not None:
+                dub = float(dub_volume)
+            bg = orig if background_volume is None else float(background_volume)
+            if 0.05 < orig <= 0.35 and dub >= 0.85:
+                orig = min(0.55, orig * 1.6)
+        elif mode == "atmosphere":
             warnings.append(ATMOSPHERE_LIMITATION)
     else:
         warnings.append(f"Неизвестный mix_mode={mode!r}, используется full_dub.")

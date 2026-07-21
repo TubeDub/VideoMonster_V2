@@ -1,0 +1,397 @@
+{
+  "translation_agent_version": "4.0",
+  "project_uuid": "dcf4d193-e74d-4995-a03a-4fa70c6aefc0",
+  "task_id": "e02efc2c0c5f4f55bbe6823c57462424",
+  "status": "success",
+  "translator_used": "argos",
+  "segment_count": 22,
+  "success_count": 41,
+  "retries": 0,
+  "fallback_used": false,
+  "warnings": [
+    "entity_fail segment=0 missing=['George Jr']",
+    "entity_fail segment=1 missing=['George Jr']",
+    "entity_fail segment=2 missing=['So George Jr']",
+    "entity_fail segment=3 missing=['Italian']",
+    "entity_fail segment=5 missing=['George']",
+    "entity_fail segment=6 missing=['Two', 'George Jr']",
+    "entity_fail segment=7 missing=['George', 'George Jr']",
+    "entity_fail segment=8 missing=['Two', 'George Jr']",
+    "entity_fail segment=9 missing=['George Jr']",
+    "entity_fail segment=10 missing=['So George Jr']",
+    "entity_fail segment=11 missing=['Instead']",
+    "entity_fail segment=12 missing=['George Jr', 'University', 'Southern California']",
+    "entity_fail segment=13 missing=['Now', 'George Jr']",
+    "entity_fail segment=14 missing=['George Jr', 'Haskell Wexler']",
+    "entity_fail segment=15 missing=['Hollywood', 'And George Jr', 'Haskell']",
+    "entity_fail segment=16 missing=['Haskell', 'George']",
+    "entity_fail segment=17 missing=['Let', 'George Jr']",
+    "entity_fail segment=18 missing=['George Jr', 'George']",
+    "entity_fail segment=19 missing=['Because', 'George Jr']",
+    "entity_fail segment=21 missing=['George Jr', 'George Lucas']"
+  ],
+  "errors": [],
+  "execution_time_ms": 96026.8,
+  "avg_confidence": {
+    "avg_overall": 0.529,
+    "avg_translation": 0.529,
+    "avg_entity": 0.9242,
+    "avg_terminology": 0.1429,
+    "avg_language": 1.0
+  },
+  "entity_validation": {
+    "passed": 2,
+    "failed": 20,
+    "total": 22
+  },
+  "terminology_validation": {
+    "ok": false,
+    "confidence": 0.1429,
+    "inconsistent_terms": [
+      "George",
+      "But",
+      "And",
+      "Two",
+      "Haskell",
+      "USC"
+    ],
+    "glossary_size": 7
+  },
+  "language_validation": {
+    "passed": 22,
+    "failed": 0,
+    "total": 22
+  },
+  "decision_log": [
+    "segment_count=22",
+    "source_lang_corrected pt->en",
+    "lang=en->uk",
+    "segment_0:entity_mask n=2",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_0:entity_restore ['[#1#]→Джордж-молодший', '[#2#]→рідне місто']",
+    "segment_1:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_1:entity_restore ['[#3##]→Джордж-молодший']",
+    "segment_1:canon_repair ['TODO:calque driving', 'TODO:en_leak dreading']",
+    "segment_2:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_2:entity_restore ['[#4##]→Джордж-молодший']",
+    "segment_3:entity_mask n=1",
+    "segment_3:oversized_guard chars=314 words=59",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_6:entity_mask n=2",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_6:entity_restore ['[#7#]→Джордж-молодший', '[#6#]→відділення інтенсивної терапії']",
+    "segment_7:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_7:entity_restore ['[#8#]→Джордж-молодший']",
+    "segment_7:canon_repair ['TODO:calque smash']",
+    "segment_8:entity_mask n=2",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_8:entity_restore ['[#9#]→Джордж-молодший', '[#10#]→гоночний трек']",
+    "segment_9:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_9:entity_restore ['[#11##]→Джордж-молодший']",
+    "segment_10:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_10:entity_restore ['[#12##]→Джордж-молодший']",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_12:entity_mask n=2",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_12:entity_restore ['[#14##]→Джордж-молодший', '[#13#]→USC']",
+    "segment_13:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_13:entity_restore ['[#15##]→Джордж-молодший']",
+    "segment_14:entity_mask n=2",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_14:entity_restore ['[#17#]→Джордж-молодший', '[#16#]→Хаскелл Векслер']",
+    "segment_15:entity_mask n=3",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_15:entity_restore ['[#19#]→Голлівуд', '[#18##]→Джордж-молодший', '[#20#]→USC']",
+    "segment_16:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_16:entity_restore ['[#21#]→USC', 'proper_noun_polish']",
+    "segment_17:entity_mask n=2",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_17:entity_restore ['[#22#]→Джордж-молодший', '[#23#]→USC', 'proper_noun_polish']",
+    "segment_18:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_18:entity_restore ['[#24#]→Джордж-молодший']",
+    "segment_19:entity_mask n=1",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_19:entity_restore ['[#25#]→Джордж-молодший']",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_21:entity_mask n=3",
+    "attempt=1 translator=argos confidence=0.75",
+    "segment_21:entity_restore ['[#26#]→Джордж Лукас', '[#28#]→Зоряні війни']",
+    "pass5_retranslate count=20",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "attempt=1 translator=argos confidence=0.75",
+    "pass6_completeness ok fixed=0"
+  ],
+  "per_segment_confidence": [
+    {
+      "index": 0,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.5,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.6161
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 1,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 2,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 3,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": null
+    },
+    {
+      "index": 4,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 1.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.7411
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 5,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 6,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 7,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 8,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 9,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 10,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 11,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 12,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 13,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 14,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.5,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.6161
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 15,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 16,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 17,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 18,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 19,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.3333,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.5744
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 20,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 1.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.7411
+      },
+      "translator_used": "argos"
+    },
+    {
+      "index": 21,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 0.0,
+        "terminology": 0.1429,
+        "language": 1.0,
+        "overall": 0.4911
+      },
+      "translator_used": "argos"
+    }
+  ]
+}

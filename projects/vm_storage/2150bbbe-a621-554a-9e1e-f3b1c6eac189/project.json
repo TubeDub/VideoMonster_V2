@@ -1,0 +1,1351 @@
+{
+  "project_id": "2150bbbe-a621-554a-9e1e-f3b1c6eac189",
+  "title": "autodub-2737679d506244a2bb41e50d8d0a9fb1",
+  "storage_version": 1,
+  "created_at": 1784042917.487,
+  "updated_at": 1784043262.4253643,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "0b7b2583-a5d7-41e9-a385-fdcdfaae4d4e",
+  "legacy_project_uuid": "",
+  "studio_session": {},
+  "tdproj": {
+    "format": "tubedub-project",
+    "version": 1,
+    "project_id": "0b7b2583-a5d7-41e9-a385-fdcdfaae4d4e",
+    "title": "autodub-2737679d506244a2bb41e50d8d0a9fb1",
+    "created_ms": 1784042917487,
+    "updated_ms": 1784042917504,
+    "src_lang": "en",
+    "tgt_lang": "uk",
+    "modules": {},
+    "pipeline": {
+      "trace_id": "",
+      "last_run_ms": 0,
+      "stages": [],
+      "segments": [
+        {
+          "index": 0,
+          "text": "Ну, Ну, далі, знаєте, знаєте?",
+          "plain_text": "Ну, Ну, далі, знаєте, знаєте?",
+          "translation_text": "Ну, Ну, далі, знаєте, знаєте?",
+          "file": "tts_6e236a1d_65ea9c272300_20260714_182714_9827603b.mp3",
+          "segment_id": "574a1ed9ae314479a9d17d92e82056d1",
+          "tts_file_path": "tts_6e236a1d_65ea9c272300_20260714_182714_9827603b.mp3",
+          "playback_duration": 0,
+          "tts_text": "Ну, Ну, далі, знаєте, знаєте?",
+          "status": "generated",
+          "tts_ms": 2731,
+          "tts_status": "generated",
+          "need_adaptation": true,
+          "adaptation_decision": {
+            "segment_id": "574a1ed9ae314479a9d17d92e82056d1",
+            "index": 0,
+            "overflow_ms": 0,
+            "underflow_ms": 7069,
+            "need_adaptation": true,
+            "duration_delta_ms": 0,
+            "original_duration_ms": 0,
+            "tts_duration_ms": 2731,
+            "translation_locked": false,
+            "llm_available": true,
+            "rule_adapter_enabled": true,
+            "semantic_adapter_enabled": true,
+            "decision": "no_rewrite",
+            "adaptation_executed": false,
+            "skip_reason": "DecisionEngineReturnedSkip"
+          },
+          "actual_duration_ms": 2731,
+          "first_tts_duration_ms": 4056,
+          "segment_uuid": "574a1ed9ae314479a9d17d92e82056d1",
+          "audio_bound_uuid": "574a1ed9ae314479a9d17d92e82056d1",
+          "pause_engine": {
+            "before_ms": 4056,
+            "after_ms": 2731,
+            "saved_ms": 1325,
+            "stages": [
+              "lead_trim:244",
+              "tail_trim:991",
+              "pause_compress:89"
+            ],
+            "slot_ms": 9800
+          },
+          "expand_required": true,
+          "requires_llm_adaptation": true,
+          "adaptation_executed": false,
+          "adaptation_status": "ADAPTATION NOT EXECUTED",
+          "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+          "decision_trace": [
+            {
+              "stage": "need_adaptation",
+              "status": "SUCCESS",
+              "reason": "",
+              "detail": {
+                "need_adaptation": true,
+                "overflow_ms": 0,
+                "underflow_ms": 7069
+              },
+              "ts_ms": 1784042815105,
+              "index": 0
+            },
+            {
+              "stage": "decision_engine",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "decision": "no_rewrite"
+              },
+              "ts_ms": 1784042815109,
+              "index": 0
+            },
+            {
+              "stage": "final_result",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "overflow_ms": 0,
+                "duration_ms": 0
+              },
+              "ts_ms": 1784042815113,
+              "index": 0
+            }
+          ],
+          "decision_transitions": [
+            "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=7069",
+            "decision_engine = SKIPPED (DecisionEngineReturnedSkip)",
+            "final_result = SKIPPED (DecisionEngineReturnedSkip) | overflow_ms=0 | duration_ms=0"
+          ],
+          "timing_budget": {
+            "index": 0,
+            "slot_start": 1200,
+            "slot_end": 11000,
+            "slot_duration": 9800,
+            "tts_duration": 2731,
+            "measured_duration": 2731,
+            "delta": -7069,
+            "overflow": 0,
+            "underflow": 7069,
+            "status": "underflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1325,
+            "pause_stages": [
+              "lead_trim:244",
+              "tail_trim:991",
+              "pause_compress:89"
+            ],
+            "timing_score": 50.0,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "failed_no_rewrite",
+            "original_duration": 4056,
+            "provider_fatal": false
+          },
+          "timing_score": 50.0,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "failed_no_rewrite",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 1325,
+            "timing_score": 50.0,
+            "actual_duration_ms": 2731,
+            "slot_duration": 9800,
+            "delta": -7069,
+            "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+            "adaptation_decision": {
+              "segment_id": "574a1ed9ae314479a9d17d92e82056d1",
+              "index": 0,
+              "overflow_ms": 0,
+              "underflow_ms": 7069,
+              "need_adaptation": true,
+              "duration_delta_ms": 0,
+              "original_duration_ms": 0,
+              "tts_duration_ms": 2731,
+              "translation_locked": false,
+              "llm_available": true,
+              "rule_adapter_enabled": true,
+              "semantic_adapter_enabled": true,
+              "decision": "no_rewrite",
+              "adaptation_executed": false,
+              "skip_reason": "DecisionEngineReturnedSkip"
+            }
+          },
+          "fitted_file": "slot_fit_2737679d_574a1ed9ae31_20260714_182659_08a82f23.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 2731,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 9800,
+            "fitted_ms": 2731,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 2731,
+            "slot_fit_key": "b89ec79ebbfbd57c"
+          },
+          "start_ms": 1200,
+          "end_ms": 11000,
+          "slot_ms": 9800,
+          "slot_fit_attempts": 0,
+          "underflow": true,
+          "underflow_ms": 7069,
+          "underflow_manager": {
+            "segment_id": "574a1ed9ae314479a9d17d92e82056d1",
+            "index": 0,
+            "severity": "critical",
+            "reason": "ato_level_underflow",
+            "shortfall_ms": 7069,
+            "slot_ms": 9800,
+            "audio_ms": 2731,
+            "recovery_plan": [
+              "natural_pause",
+              "prosody_hold",
+              "padding_silence",
+              "breath_insert",
+              "tail_silence"
+            ]
+          },
+          "translation_uuid": "44f5a08f87c4bb34c0c7d417ac0c91e4",
+          "tts_uuid": "2917a78f303249189023ca676d593c94",
+          "audio_uuid": "841aba6180304621ad655893d6956095",
+          "merge_uuid": "39239e5bb26b4c0cafdf4aff681d674f",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2737679d506244a2bb41e50d8d0a9fb1\\closed_loop\\2737679d506244a2bb41e50d8d0a9fb1\\pause\\pause_run_574a1ed9ae31_20260714_182655_0f637f8a.wav",
+          "text_for_tts": "Ну, Ну, далі, знаєте, знаєте?",
+          "semantic_text": "Ну, Ну, далі, знаєте, знаєте?",
+          "timing_text": "Ну, Ну, далі, знаєте, знаєте?",
+          "grammar_text": "Ну, Ну, далі, знаєте, знаєте?",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 1.0,
+            "missing_words": [],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 0.4139,
+            "asr_confidence": 0.75,
+            "recognized_text": "Ну, ну, далі, знаєте, знаєте.",
+            "issues": [
+              "audio_incomplete"
+            ],
+            "route_to": "timing",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "audio_incomplete"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Ну, ну, далі, знаєте, знаєте.",
+          "voice_verification_route_to": "timing"
+        },
+        {
+          "index": 1,
+          "text": "Далі, розумієте, знаєте, розумієте?",
+          "plain_text": "Далі, розумієте, знаєте, розумієте?",
+          "translation_text": "Далі, розумієте, знаєте, розумієте?",
+          "file": "tts_0016f644_c64d54efd55b_20260714_182734_34a078ec.mp3",
+          "segment_id": "bc59069c5a794b09a31c397996f5c8cd",
+          "tts_file_path": "tts_0016f644_c64d54efd55b_20260714_182734_34a078ec.mp3",
+          "playback_duration": 0,
+          "tts_text": "Далі, розумієте, знаєте, розумієте?",
+          "status": "generated",
+          "tts_ms": 2978,
+          "tts_status": "generated",
+          "need_adaptation": true,
+          "adaptation_decision": {
+            "segment_id": "bc59069c5a794b09a31c397996f5c8cd",
+            "index": 1,
+            "overflow_ms": 0,
+            "underflow_ms": 4382,
+            "need_adaptation": true,
+            "duration_delta_ms": 0,
+            "original_duration_ms": 0,
+            "tts_duration_ms": 2978,
+            "translation_locked": false,
+            "llm_available": true,
+            "rule_adapter_enabled": true,
+            "semantic_adapter_enabled": true,
+            "decision": "no_rewrite",
+            "adaptation_executed": false,
+            "skip_reason": "DecisionEngineReturnedSkip"
+          },
+          "actual_duration_ms": 2978,
+          "first_tts_duration_ms": 4272,
+          "segment_uuid": "bc59069c5a794b09a31c397996f5c8cd",
+          "audio_bound_uuid": "bc59069c5a794b09a31c397996f5c8cd",
+          "pause_engine": {
+            "before_ms": 4272,
+            "after_ms": 2978,
+            "saved_ms": 1294,
+            "stages": [
+              "lead_trim:242",
+              "tail_trim:1005",
+              "pause_compress:46"
+            ],
+            "slot_ms": 7360
+          },
+          "expand_required": true,
+          "requires_llm_adaptation": true,
+          "adaptation_executed": false,
+          "adaptation_status": "ADAPTATION NOT EXECUTED",
+          "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+          "decision_trace": [
+            {
+              "stage": "need_adaptation",
+              "status": "SUCCESS",
+              "reason": "",
+              "detail": {
+                "need_adaptation": true,
+                "overflow_ms": 0,
+                "underflow_ms": 4382
+              },
+              "ts_ms": 1784042816199,
+              "index": 1
+            },
+            {
+              "stage": "decision_engine",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "decision": "no_rewrite"
+              },
+              "ts_ms": 1784042816203,
+              "index": 1
+            },
+            {
+              "stage": "final_result",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "overflow_ms": 0,
+                "duration_ms": 0
+              },
+              "ts_ms": 1784042816206,
+              "index": 1
+            }
+          ],
+          "decision_transitions": [
+            "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=4382",
+            "decision_engine = SKIPPED (DecisionEngineReturnedSkip)",
+            "final_result = SKIPPED (DecisionEngineReturnedSkip) | overflow_ms=0 | duration_ms=0"
+          ],
+          "timing_budget": {
+            "index": 1,
+            "slot_start": 11100,
+            "slot_end": 18460,
+            "slot_duration": 7360,
+            "tts_duration": 2978,
+            "measured_duration": 2978,
+            "delta": -4382,
+            "overflow": 0,
+            "underflow": 4382,
+            "status": "underflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1294,
+            "pause_stages": [
+              "lead_trim:242",
+              "tail_trim:1005",
+              "pause_compress:46"
+            ],
+            "timing_score": 50.0,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "failed_no_rewrite",
+            "original_duration": 4272,
+            "provider_fatal": false
+          },
+          "timing_score": 50.0,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "failed_no_rewrite",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 1294,
+            "timing_score": 50.0,
+            "actual_duration_ms": 2978,
+            "slot_duration": 7360,
+            "delta": -4382,
+            "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+            "adaptation_decision": {
+              "segment_id": "bc59069c5a794b09a31c397996f5c8cd",
+              "index": 1,
+              "overflow_ms": 0,
+              "underflow_ms": 4382,
+              "need_adaptation": true,
+              "duration_delta_ms": 0,
+              "original_duration_ms": 0,
+              "tts_duration_ms": 2978,
+              "translation_locked": false,
+              "llm_available": true,
+              "rule_adapter_enabled": true,
+              "semantic_adapter_enabled": true,
+              "decision": "no_rewrite",
+              "adaptation_executed": false,
+              "skip_reason": "DecisionEngineReturnedSkip"
+            }
+          },
+          "fitted_file": "slot_fit_2737679d_bc59069c5a79_20260714_182659_f2b22768.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 2978,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 7360,
+            "fitted_ms": 2978,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 2978,
+            "slot_fit_key": "4fa9159b91844711"
+          },
+          "start_ms": 11100,
+          "end_ms": 18460,
+          "slot_ms": 7360,
+          "slot_fit_attempts": 0,
+          "underflow": true,
+          "underflow_ms": 4382,
+          "underflow_manager": {
+            "segment_id": "bc59069c5a794b09a31c397996f5c8cd",
+            "index": 1,
+            "severity": "critical",
+            "reason": "ato_level_underflow",
+            "shortfall_ms": 4382,
+            "slot_ms": 7360,
+            "audio_ms": 2978,
+            "recovery_plan": [
+              "natural_pause",
+              "prosody_hold",
+              "padding_silence",
+              "breath_insert",
+              "tail_silence"
+            ]
+          },
+          "translation_uuid": "4bc7aa31b4a6db39a1f15b602fd25e8c",
+          "tts_uuid": "661380ef7b5b4c85a29c869dbe018f30",
+          "audio_uuid": "132c148694b846c3a1394e79c086e982",
+          "merge_uuid": "43c9bc5ab3a44c0eb46e6c82e624438c",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2737679d506244a2bb41e50d8d0a9fb1\\closed_loop\\2737679d506244a2bb41e50d8d0a9fb1\\pause\\pause_run_bc59069c5a79_20260714_182656_3562fd2a.wav",
+          "text_for_tts": "Далі, розумієте, знаєте, розумієте?",
+          "semantic_text": "Далі, розумієте, знаєте, розумієте?",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9,
+            "missing_words": [
+              "розумієте",
+              "розумієте"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 0.5804,
+            "asr_confidence": 0.75,
+            "recognized_text": "Далі, розуміти, знаєте, розуміти.",
+            "issues": [
+              "missing_words"
+            ],
+            "route_to": "voice",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Далі, розуміти, знаєте, розуміти.",
+          "voice_verification_route_to": "voice"
+        },
+        {
+          "index": 2,
+          "text": "Ну, ⇩, розумієте, знаєте, розумієте?",
+          "plain_text": "Ну, ⇩, розумієте, знаєте, розумієте?",
+          "translation_text": "Ну, ⇩, розумієте, знаєте, розумієте?",
+          "file": "tts_7cb3d603_a3901a09a8b0_20260714_182753_756275c6.mp3",
+          "segment_id": "671badd129854e9f8d53e55bbfa7b9ca",
+          "tts_file_path": "tts_7cb3d603_a3901a09a8b0_20260714_182753_756275c6.mp3",
+          "playback_duration": 0,
+          "tts_text": "⇩, розумієте, знаєте, розумієте?",
+          "status": "generated",
+          "tts_ms": 2790,
+          "tts_status": "generated",
+          "need_adaptation": true,
+          "adaptation_decision": {
+            "segment_id": "671badd129854e9f8d53e55bbfa7b9ca",
+            "index": 2,
+            "overflow_ms": 0,
+            "underflow_ms": 14090,
+            "need_adaptation": true,
+            "duration_delta_ms": 0,
+            "original_duration_ms": 0,
+            "tts_duration_ms": 2790,
+            "translation_locked": false,
+            "llm_available": true,
+            "rule_adapter_enabled": true,
+            "semantic_adapter_enabled": true,
+            "decision": "no_rewrite",
+            "adaptation_executed": false,
+            "skip_reason": "DecisionEngineReturnedSkip"
+          },
+          "actual_duration_ms": 2790,
+          "first_tts_duration_ms": 4056,
+          "segment_uuid": "671badd129854e9f8d53e55bbfa7b9ca",
+          "audio_bound_uuid": "671badd129854e9f8d53e55bbfa7b9ca",
+          "pause_engine": {
+            "before_ms": 4056,
+            "after_ms": 2790,
+            "saved_ms": 1266,
+            "stages": [
+              "lead_trim:243",
+              "tail_trim:1002",
+              "pause_compress:20"
+            ],
+            "slot_ms": 16880
+          },
+          "expand_required": true,
+          "requires_llm_adaptation": true,
+          "adaptation_executed": false,
+          "adaptation_status": "ADAPTATION NOT EXECUTED",
+          "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+          "decision_trace": [
+            {
+              "stage": "need_adaptation",
+              "status": "SUCCESS",
+              "reason": "",
+              "detail": {
+                "need_adaptation": true,
+                "overflow_ms": 0,
+                "underflow_ms": 14090
+              },
+              "ts_ms": 1784042817275,
+              "index": 2
+            },
+            {
+              "stage": "decision_engine",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "decision": "no_rewrite"
+              },
+              "ts_ms": 1784042817279,
+              "index": 2
+            },
+            {
+              "stage": "final_result",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "overflow_ms": 0,
+                "duration_ms": 0
+              },
+              "ts_ms": 1784042817281,
+              "index": 2
+            }
+          ],
+          "decision_transitions": [
+            "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=14090",
+            "decision_engine = SKIPPED (DecisionEngineReturnedSkip)",
+            "final_result = SKIPPED (DecisionEngineReturnedSkip) | overflow_ms=0 | duration_ms=0"
+          ],
+          "timing_budget": {
+            "index": 2,
+            "slot_start": 18460,
+            "slot_end": 35340,
+            "slot_duration": 16880,
+            "tts_duration": 2790,
+            "measured_duration": 2790,
+            "delta": -14090,
+            "overflow": 0,
+            "underflow": 14090,
+            "status": "underflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1266,
+            "pause_stages": [
+              "lead_trim:243",
+              "tail_trim:1002",
+              "pause_compress:20"
+            ],
+            "timing_score": 50.0,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "failed_no_rewrite",
+            "original_duration": 4056,
+            "provider_fatal": false
+          },
+          "timing_score": 50.0,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "failed_no_rewrite",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 1266,
+            "timing_score": 50.0,
+            "actual_duration_ms": 2790,
+            "slot_duration": 16880,
+            "delta": -14090,
+            "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+            "adaptation_decision": {
+              "segment_id": "671badd129854e9f8d53e55bbfa7b9ca",
+              "index": 2,
+              "overflow_ms": 0,
+              "underflow_ms": 14090,
+              "need_adaptation": true,
+              "duration_delta_ms": 0,
+              "original_duration_ms": 0,
+              "tts_duration_ms": 2790,
+              "translation_locked": false,
+              "llm_available": true,
+              "rule_adapter_enabled": true,
+              "semantic_adapter_enabled": true,
+              "decision": "no_rewrite",
+              "adaptation_executed": false,
+              "skip_reason": "DecisionEngineReturnedSkip"
+            }
+          },
+          "fitted_file": "slot_fit_2737679d_671badd12985_20260714_182659_d23c8119.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 2790,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 16880,
+            "fitted_ms": 2790,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 2790,
+            "slot_fit_key": "a76bd5c0f1684f78"
+          },
+          "start_ms": 18460,
+          "end_ms": 35340,
+          "slot_ms": 16880,
+          "slot_fit_attempts": 0,
+          "underflow": true,
+          "underflow_ms": 14090,
+          "underflow_manager": {
+            "segment_id": "671badd129854e9f8d53e55bbfa7b9ca",
+            "index": 2,
+            "severity": "critical",
+            "reason": "ato_level_underflow",
+            "shortfall_ms": 14090,
+            "slot_ms": 16880,
+            "audio_ms": 2790,
+            "recovery_plan": [
+              "natural_pause",
+              "prosody_hold",
+              "padding_silence",
+              "breath_insert",
+              "tail_silence"
+            ]
+          },
+          "translation_uuid": "f94693bb6be3a9b3548191946390e44a",
+          "tts_uuid": "907615379da14da1bad0761ef1eca03c",
+          "audio_uuid": "14bd8b3603184944ba50ec67199aac02",
+          "merge_uuid": "6217219451634ef6806b7341e5126cf8",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2737679d506244a2bb41e50d8d0a9fb1\\closed_loop\\2737679d506244a2bb41e50d8d0a9fb1\\pause\\pause_run_671badd12985_20260714_182657_8259e57f.wav",
+          "text_for_tts": "⇩, розумієте, знаєте, розумієте?",
+          "semantic_text": "⇩, розумієте, знаєте, розумієте?",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.8627,
+            "missing_words": [
+              "розумієте",
+              "розумієте"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 0.2104,
+            "asr_confidence": 0.75,
+            "recognized_text": "Прозуміти, знаєте, розуміти.",
+            "issues": [
+              "missing_words",
+              "audio_incomplete"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "audio_incomplete"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Прозуміти, знаєте, розуміти.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 3,
+          "text": "Далі, розумієте, знаєте, розумієте?",
+          "plain_text": "Далі, розумієте, знаєте, розумієте?",
+          "translation_text": "Далі, розумієте, знаєте, розумієте?",
+          "file": "tts_2f1c953f_9b257a182872_20260714_182812_a3516575.mp3",
+          "segment_id": "3121c8dc88c74bd2bc678e2d061f3581",
+          "tts_file_path": "tts_2f1c953f_9b257a182872_20260714_182812_a3516575.mp3",
+          "playback_duration": 0,
+          "tts_text": "Розумієте, знаєте, розумієте?",
+          "status": "generated",
+          "tts_ms": 2980,
+          "tts_status": "generated",
+          "need_adaptation": true,
+          "adaptation_decision": {
+            "segment_id": "3121c8dc88c74bd2bc678e2d061f3581",
+            "index": 3,
+            "overflow_ms": 0,
+            "underflow_ms": 10700,
+            "need_adaptation": true,
+            "duration_delta_ms": 0,
+            "original_duration_ms": 0,
+            "tts_duration_ms": 2980,
+            "translation_locked": false,
+            "llm_available": true,
+            "rule_adapter_enabled": true,
+            "semantic_adapter_enabled": true,
+            "decision": "no_rewrite",
+            "adaptation_executed": false,
+            "skip_reason": "DecisionEngineReturnedSkip"
+          },
+          "actual_duration_ms": 2980,
+          "first_tts_duration_ms": 4272,
+          "segment_uuid": "3121c8dc88c74bd2bc678e2d061f3581",
+          "audio_bound_uuid": "3121c8dc88c74bd2bc678e2d061f3581",
+          "pause_engine": {
+            "before_ms": 4272,
+            "after_ms": 2980,
+            "saved_ms": 1292,
+            "stages": [
+              "lead_trim:242",
+              "tail_trim:1005",
+              "pause_compress:44"
+            ],
+            "slot_ms": 13680
+          },
+          "expand_required": true,
+          "requires_llm_adaptation": true,
+          "adaptation_executed": false,
+          "adaptation_status": "ADAPTATION NOT EXECUTED",
+          "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+          "decision_trace": [
+            {
+              "stage": "need_adaptation",
+              "status": "SUCCESS",
+              "reason": "",
+              "detail": {
+                "need_adaptation": true,
+                "overflow_ms": 0,
+                "underflow_ms": 10700
+              },
+              "ts_ms": 1784042818354,
+              "index": 3
+            },
+            {
+              "stage": "decision_engine",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "decision": "no_rewrite"
+              },
+              "ts_ms": 1784042818356,
+              "index": 3
+            },
+            {
+              "stage": "final_result",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "overflow_ms": 0,
+                "duration_ms": 0
+              },
+              "ts_ms": 1784042818360,
+              "index": 3
+            }
+          ],
+          "decision_transitions": [
+            "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=10700",
+            "decision_engine = SKIPPED (DecisionEngineReturnedSkip)",
+            "final_result = SKIPPED (DecisionEngineReturnedSkip) | overflow_ms=0 | duration_ms=0"
+          ],
+          "timing_budget": {
+            "index": 3,
+            "slot_start": 35340,
+            "slot_end": 49020,
+            "slot_duration": 13680,
+            "tts_duration": 2980,
+            "measured_duration": 2980,
+            "delta": -10700,
+            "overflow": 0,
+            "underflow": 10700,
+            "status": "underflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1292,
+            "pause_stages": [
+              "lead_trim:242",
+              "tail_trim:1005",
+              "pause_compress:44"
+            ],
+            "timing_score": 50.0,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "failed_no_rewrite",
+            "original_duration": 4272,
+            "provider_fatal": false
+          },
+          "timing_score": 50.0,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "failed_no_rewrite",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 1292,
+            "timing_score": 50.0,
+            "actual_duration_ms": 2980,
+            "slot_duration": 13680,
+            "delta": -10700,
+            "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+            "adaptation_decision": {
+              "segment_id": "3121c8dc88c74bd2bc678e2d061f3581",
+              "index": 3,
+              "overflow_ms": 0,
+              "underflow_ms": 10700,
+              "need_adaptation": true,
+              "duration_delta_ms": 0,
+              "original_duration_ms": 0,
+              "tts_duration_ms": 2980,
+              "translation_locked": false,
+              "llm_available": true,
+              "rule_adapter_enabled": true,
+              "semantic_adapter_enabled": true,
+              "decision": "no_rewrite",
+              "adaptation_executed": false,
+              "skip_reason": "DecisionEngineReturnedSkip"
+            }
+          },
+          "fitted_file": "slot_fit_2737679d_3121c8dc88c7_20260714_182659_8ede1eb7.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 2980,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 13680,
+            "fitted_ms": 2980,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 2980,
+            "slot_fit_key": "c6f05335f47b9204"
+          },
+          "start_ms": 35340,
+          "end_ms": 49020,
+          "slot_ms": 13680,
+          "slot_fit_attempts": 0,
+          "underflow": true,
+          "underflow_ms": 10700,
+          "underflow_manager": {
+            "segment_id": "3121c8dc88c74bd2bc678e2d061f3581",
+            "index": 3,
+            "severity": "critical",
+            "reason": "ato_level_underflow",
+            "shortfall_ms": 10700,
+            "slot_ms": 13680,
+            "audio_ms": 2980,
+            "recovery_plan": [
+              "natural_pause",
+              "prosody_hold",
+              "padding_silence",
+              "breath_insert",
+              "tail_silence"
+            ]
+          },
+          "translation_uuid": "e3913d75b92b2b45e824222b57ca0a9c",
+          "tts_uuid": "bf3ad03316744720a0b6cd648b830f1f",
+          "audio_uuid": "520e51e05a6a437c9f93ee636f78f6b0",
+          "merge_uuid": "cbdafd9e0ac548dfb90d305e5cdfb172",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2737679d506244a2bb41e50d8d0a9fb1\\closed_loop\\2737679d506244a2bb41e50d8d0a9fb1\\pause\\pause_run_3121c8dc88c7_20260714_182658_3aa69beb.wav",
+          "text_for_tts": "Розумієте, знаєте, розумієте?",
+          "semantic_text": "Розумієте, знаєте, розумієте?",
+          "timing_text": "",
+          "grammar_text": "",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.88,
+            "missing_words": [
+              "розумієте",
+              "розумієте"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 0.2596,
+            "asr_confidence": 0.75,
+            "recognized_text": "Розуміти, знаєте, розуміти.",
+            "issues": [
+              "missing_words",
+              "audio_incomplete"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "audio_incomplete"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Розуміти, знаєте, розуміти.",
+          "voice_verification_route_to": "semantic"
+        },
+        {
+          "index": 4,
+          "text": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "plain_text": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "translation_text": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "file": "tts_0268dde1_275119690c77_20260714_182832_9f1205b4.mp3",
+          "segment_id": "a8cc60535c934a799332782f95401d0f",
+          "tts_file_path": "tts_0268dde1_275119690c77_20260714_182832_9f1205b4.mp3",
+          "playback_duration": 0,
+          "tts_text": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "status": "generated",
+          "tts_ms": 3517,
+          "tts_status": "generated",
+          "need_adaptation": true,
+          "adaptation_decision": {
+            "segment_id": "a8cc60535c934a799332782f95401d0f",
+            "index": 4,
+            "overflow_ms": 0,
+            "underflow_ms": 13583,
+            "need_adaptation": true,
+            "duration_delta_ms": 0,
+            "original_duration_ms": 0,
+            "tts_duration_ms": 3517,
+            "translation_locked": false,
+            "llm_available": true,
+            "rule_adapter_enabled": true,
+            "semantic_adapter_enabled": true,
+            "decision": "no_rewrite",
+            "adaptation_executed": false,
+            "skip_reason": "DecisionEngineReturnedSkip"
+          },
+          "actual_duration_ms": 3517,
+          "first_tts_duration_ms": 4776,
+          "segment_uuid": "a8cc60535c934a799332782f95401d0f",
+          "audio_bound_uuid": "a8cc60535c934a799332782f95401d0f",
+          "pause_engine": {
+            "before_ms": 4776,
+            "after_ms": 3517,
+            "saved_ms": 1259,
+            "stages": [
+              "lead_trim:243",
+              "tail_trim:981",
+              "pause_compress:34"
+            ],
+            "slot_ms": 17100
+          },
+          "expand_required": true,
+          "requires_llm_adaptation": true,
+          "adaptation_executed": false,
+          "adaptation_status": "ADAPTATION NOT EXECUTED",
+          "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+          "decision_trace": [
+            {
+              "stage": "need_adaptation",
+              "status": "SUCCESS",
+              "reason": "",
+              "detail": {
+                "need_adaptation": true,
+                "overflow_ms": 0,
+                "underflow_ms": 13583
+              },
+              "ts_ms": 1784042819515,
+              "index": 4
+            },
+            {
+              "stage": "decision_engine",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "decision": "no_rewrite"
+              },
+              "ts_ms": 1784042819518,
+              "index": 4
+            },
+            {
+              "stage": "final_result",
+              "status": "SKIPPED",
+              "reason": "DecisionEngineReturnedSkip",
+              "detail": {
+                "overflow_ms": 0,
+                "duration_ms": 0
+              },
+              "ts_ms": 1784042819521,
+              "index": 4
+            }
+          ],
+          "decision_transitions": [
+            "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=13583",
+            "decision_engine = SKIPPED (DecisionEngineReturnedSkip)",
+            "final_result = SKIPPED (DecisionEngineReturnedSkip) | overflow_ms=0 | duration_ms=0"
+          ],
+          "timing_budget": {
+            "index": 4,
+            "slot_start": 49120,
+            "slot_end": 66220,
+            "slot_duration": 17100,
+            "tts_duration": 3517,
+            "measured_duration": 3517,
+            "delta": -13583,
+            "overflow": 0,
+            "underflow": 13583,
+            "status": "underflow",
+            "rewrite_iterations": 0,
+            "pause_adjustments_ms": 1259,
+            "pause_stages": [
+              "lead_trim:243",
+              "tail_trim:981",
+              "pause_compress:34"
+            ],
+            "timing_score": 50.0,
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "final_status": "failed_no_rewrite",
+            "original_duration": 4776,
+            "provider_fatal": false
+          },
+          "timing_score": 50.0,
+          "closed_loop": {
+            "iterations": 0,
+            "final_status": "failed_no_rewrite",
+            "rewrite_reason": "duration_underflow:no_rewrite",
+            "pause_adjustments_ms": 1259,
+            "timing_score": 50.0,
+            "actual_duration_ms": 3517,
+            "slot_duration": 17100,
+            "delta": -13583,
+            "adaptation_skip_reason": "DecisionEngineReturnedSkip",
+            "adaptation_decision": {
+              "segment_id": "a8cc60535c934a799332782f95401d0f",
+              "index": 4,
+              "overflow_ms": 0,
+              "underflow_ms": 13583,
+              "need_adaptation": true,
+              "duration_delta_ms": 0,
+              "original_duration_ms": 0,
+              "tts_duration_ms": 3517,
+              "translation_locked": false,
+              "llm_available": true,
+              "rule_adapter_enabled": true,
+              "semantic_adapter_enabled": true,
+              "decision": "no_rewrite",
+              "adaptation_executed": false,
+              "skip_reason": "DecisionEngineReturnedSkip"
+            }
+          },
+          "fitted_file": "slot_fit_2737679d_a8cc60535c93_20260714_182659_834162cf.wav",
+          "container_status": "green",
+          "slot_overflow": false,
+          "fitted_ms": 3517,
+          "overflow_ms": 0,
+          "overflow_pct": 0.0,
+          "timing_meta": {
+            "slot_ms": 17100,
+            "fitted_ms": 3517,
+            "atempo": 1.0,
+            "strategy": "none",
+            "overflow_ms": 0,
+            "slot_fit_tts_ms": 3517,
+            "slot_fit_key": "1d0d304d84d101ea"
+          },
+          "start_ms": 49120,
+          "end_ms": 66220,
+          "slot_ms": 17100,
+          "slot_fit_attempts": 0,
+          "underflow": true,
+          "underflow_ms": 13583,
+          "underflow_manager": {
+            "segment_id": "a8cc60535c934a799332782f95401d0f",
+            "index": 4,
+            "severity": "critical",
+            "reason": "ato_level_underflow",
+            "shortfall_ms": 13583,
+            "slot_ms": 17100,
+            "audio_ms": 3517,
+            "recovery_plan": [
+              "natural_pause",
+              "prosody_hold",
+              "padding_silence",
+              "breath_insert",
+              "tail_silence"
+            ]
+          },
+          "translation_uuid": "394b4010716037a4949d948916d54514",
+          "tts_uuid": "3268b938d4bb4c9c86199168f3c5c15b",
+          "audio_uuid": "60bd403d16bc4ae492f88cf148e0a8a8",
+          "merge_uuid": "66d9fe133d5349c7aecb5c63efe22e46",
+          "tts_lifecycle": "HandoffReady",
+          "runtime_history": [
+            {
+              "event": "lifecycle",
+              "from": "Created",
+              "to": "Queued",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Queued",
+              "to": "Synthesized",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Synthesized",
+              "to": "Verified",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Verified",
+              "to": "Stored",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Stored",
+              "to": "Scheduled",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Scheduled",
+              "to": "Merged",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            },
+            {
+              "event": "lifecycle",
+              "from": "Merged",
+              "to": "HandoffReady",
+              "task_id": "2737679d506244a2bb41e50d8d0a9fb1"
+            }
+          ],
+          "wav_owner": "Merge Engine",
+          "runtime_registry_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\2737679d506244a2bb41e50d8d0a9fb1\\closed_loop\\2737679d506244a2bb41e50d8d0a9fb1\\pause\\pause_run_a8cc60535c93_20260714_182659_79bf7f61.wav",
+          "text_for_tts": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "semantic_text": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "timing_text": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "grammar_text": "Ну, дальше, розумієте, знаєте, розумієте?",
+          "voice_verification_passed": false,
+          "voice_verification_metrics": {
+            "similarity": 0.9143,
+            "missing_words": [
+              "розумієте",
+              "розумієте"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 0.2793,
+            "asr_confidence": 0.75,
+            "recognized_text": "Ну, дальше розуміти, знаєте, розуміти.",
+            "issues": [
+              "missing_words",
+              "audio_incomplete"
+            ],
+            "route_to": "timing",
+            "pass": false
+          },
+          "voice_verification_issues": [
+            "missing_words",
+            "audio_incomplete"
+          ],
+          "voice_verification_retry_count": 3,
+          "voice_verification_asr_text": "Ну, дальше розуміти, знаєте, розуміти.",
+          "voice_verification_route_to": "timing"
+        }
+      ]
+    },
+    "assets": [
+      {
+        "asset_id": "video",
+        "path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_46b2777cc5.mp4",
+        "kind": "video",
+        "meta": {}
+      }
+    ],
+    "meta": {}
+  },
+  "metadata": {},
+  "source": "legacy_tdproj",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\projects\\tdproj\\0b7b2583-a5d7-41e9-a385-fdcdfaae4d4e\\autodub-2737679d506244a2bb41e50d8d0a9fb1.tdproj"
+}

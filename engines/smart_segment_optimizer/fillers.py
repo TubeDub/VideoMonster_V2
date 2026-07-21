@@ -88,6 +88,7 @@ def _is_safe_to_remove(
     position: int,
     total_words: int,
     lang: str,
+    prev_word: str = "",
 ) -> tuple[bool, str]:
     low = word.lower().strip(".,!?…;:")
     fillers = _filler_set(lang)
@@ -104,6 +105,11 @@ def _is_safe_to_remove(
     # Sentence-initial "Але/But" with following contrast — keep
     if position == 0 and low in _CONTRAST_MARKERS and total_words > 5:
         return False, "leading_contrast"
+
+    # «не просто» = EN not just — never drop the hedge
+    prev_low = prev_word.lower().strip(".,!?…;:")
+    if low == "просто" and prev_low == "не":
+        return False, "not_just_marker"
 
     return True, "optional_filler"
 
@@ -127,8 +133,13 @@ def iter_filler_removals(text: str, lang: str) -> list[FillerStep]:
         removed_any = False
         for i, (word, start, end) in enumerate(tokens):
             low = word.lower().strip(".,!?…;:")
+            prev = tokens[i - 1][0] if i > 0 else ""
             ok, reason = _is_safe_to_remove(
-                word, position=i, total_words=len(tokens), lang=lang
+                word,
+                position=i,
+                total_words=len(tokens),
+                lang=lang,
+                prev_word=prev,
             )
             if not ok:
                 continue

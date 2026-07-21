@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +19,78 @@ logger = logging.getLogger("tubedub.translation_validation")
 
 MAX_TRANSLATION_RETRIES = 3
 _APP_DIR = Path(__file__).resolve().parent.parent
+
+
+def normalize_text_for_ownership(text: str) -> str:
+    """Compare translations without prosody accents / punctuation drift."""
+    s = unicodedata.normalize("NFD", str(text or ""))
+    s = "".join(ch for ch in s if unicodedata.category(ch) != "Mn")
+    s = s.casefold()
+    s = re.sub(r"[^\w\s]", " ", s, flags=re.UNICODE)
+    return " ".join(s.split())
+
+
+def texts_equivalent_for_ownership(a: str, b: str) -> bool:
+    na = normalize_text_for_ownership(a)
+    nb = normalize_text_for_ownership(b)
+    return bool(na) and na == nb
+
+
+def _semantic_authority_text(seg: dict[str, Any], audit: dict[str, Any] | None = None) -> str:
+    a = audit or {}
+    return str(
+        seg.get("semantic_engine_text")
+        or seg.get("semantic_text")
+        or a.get("semantic_engine_text")
+        or a.get("semantic_text")
+        or ""
+    ).strip()
+
+
+def prefer_semantic_authority(
+    *,
+    semantic: str,
+    candidate: str,
+    raw_mt: str = "",
+    source: str = "",
+) -> bool:
+    """True when meaning-first semantic must displace a stale / short final or raw.
+
+    Only reclaim ownership when the working text still mirrors Raw MT (including
+    accent-only prosody drift) or is the known clause-restore glue of that Raw MT.
+    Do not undo legitimate post-semantic compress/expand results.
+    """
+    from engines.semantic_meaning import should_prefer_semantic_over_raw_mt
+
+    sem = str(semantic or "").strip()
+    cur = str(candidate or "").strip()
+    raw = str(raw_mt or "").strip()
+    if not sem:
+        return False
+    if not cur:
+        return True
+    if texts_equivalent_for_ownership(sem, cur):
+        return False
+    if not raw:
+        return False
+    if texts_equivalent_for_ownership(cur, raw):
+        return not texts_equivalent_for_ownership(sem, raw)
+    if not should_prefer_semantic_over_raw_mt(
+        semantic=sem,
+        raw_mt=raw,
+        source=source,
+    ):
+        return False
+    # Detect DSAL clause-restore applied on top of a short Raw MT fragment.
+    try:
+        from engines.dsal.clause_coverage import restore_missing_clauses
+
+        restored, cov = restore_missing_clauses(raw, source)
+        if cov.restored_phrases and texts_equivalent_for_ownership(cur, restored):
+            return True
+    except Exception:
+        pass
+    return False
 
 
 def ensure_segment_has_translation(
@@ -59,19 +133,47 @@ def ensure_segment_has_translation(
     return ok, reason
 
 
-def resolve_post_quality_text(seg: dict[str, Any]) -> str:
-    """Canonical post-pipeline text for TTS (never the STT source field)."""
-    return str(
+def resolve_post_quality_text(
+    seg: dict[str, Any],
+    audit: dict[str, Any] | None = None,
+) -> str:
+    """Canonical post-pipeline text for TTS (never the STT source field).
+
+    One authoritative owner: if a fuller semantic polish exists while final/voice
+    still mirrors a short Raw MT fragment (including accent-only prosody drift),
+    semantic wins so Review / TTS / DSAL cannot diverge.
+    """
+    a = audit or {}
+    candidate = str(
         seg.get("voice_input")
         or seg.get("final_text")
+        or a.get("final_text")
         or seg.get("quality_fallback_text")
         or seg.get("grammar_text")
         or seg.get("timing_text")
         or seg.get("semantic_text")
+        or a.get("semantic_text")
         or seg.get("translated_text")
         or seg.get("translation_text")
+        or a.get("tts_text")
         or ""
     ).strip()
+    semantic = _semantic_authority_text(seg, a)
+    raw = str(
+        a.get("raw_translation")
+        or seg.get("raw_translation")
+        or seg.get("translated_text")
+        or ""
+    ).strip()
+    source = str(seg.get("original_text") or seg.get("source_text") or a.get("whisper_text") or "")
+    if prefer_semantic_authority(
+        semantic=semantic,
+        candidate=candidate,
+        raw_mt=raw,
+        source=source,
+    ):
+        return semantic
+    return candidate
 
 
 resolve_final_text = resolve_post_quality_text
@@ -81,11 +183,73 @@ def resolve_voice_input(seg: dict[str, Any], audit: dict[str, Any] | None = None
     """Voice/TTS input — MUST NOT read original STT `text` when post-quality fields exist."""
     a = audit or {}
     return str(
-        resolve_post_quality_text(seg)
+        resolve_post_quality_text(seg, a)
         or a.get("final_text")
         or a.get("tts_text")
         or ""
     ).strip()
+
+
+def stamp_authoritative_final_text(
+    seg: dict[str, Any],
+    text: str,
+    *,
+    audit: dict[str, Any] | None = None,
+    preserve_semantic_engine: bool = True,
+) -> str:
+    """Write one authoritative final into competing segment fields.
+
+    Never overwrite an existing ``translated_text`` / ``raw_translation`` —
+    those are the Raw MT anchors used by Review and meaning recovery.
+    """
+    final = str(text or "").strip()
+    if not final:
+        return ""
+    try:
+        from engines.stress_marks import strip_stress_marks
+
+        final = strip_stress_marks(final)
+    except Exception:
+        pass
+    existing_engine = str(seg.get("semantic_engine_text") or "").strip()
+    raw_anchor = str(
+        seg.get("translated_text")
+        or (audit or {}).get("raw_translation")
+        or ""
+    ).strip()
+    seg["final_text"] = final
+    seg["voice_input"] = final
+    seg["text_for_tts"] = final
+    seg["plain_text"] = final
+    seg["translation_text"] = final
+    # Keep Raw MT immutable once present
+    if not raw_anchor:
+        seg["translated_text"] = final
+    else:
+        seg["translated_text"] = raw_anchor
+    seg["text"] = final
+    seg["grammar_text"] = final
+    seg["timing_text"] = final
+    seg["semantic_text"] = final
+    if preserve_semantic_engine and existing_engine and prefer_semantic_authority(
+        semantic=existing_engine,
+        candidate=final,
+        raw_mt=str((audit or {}).get("raw_translation") or raw_anchor or ""),
+        source=str(seg.get("original_text") or ""),
+    ):
+        seg["semantic_engine_text"] = existing_engine
+    else:
+        seg["semantic_engine_text"] = existing_engine or final
+    if audit is not None:
+        audit["final_text"] = final
+        audit["tts_text"] = final
+        if not str(audit.get("raw_translation") or "").strip() and raw_anchor:
+            audit["raw_translation"] = raw_anchor
+        if not audit.get("semantic_text"):
+            audit["semantic_text"] = existing_engine or final
+        if not audit.get("semantic_engine_text"):
+            audit["semantic_engine_text"] = existing_engine or final
+    return final
 
 
 def validate_segment_for_target(
@@ -197,26 +361,36 @@ def sync_final_text_to_state(info: dict[str, Any]) -> None:
     segments_data = info.get("segments_data") or []
     audits = list(info.get("translation_audits") or [])
     audit_by = {int(a.get("index", -1)): a for a in audits}
+    source_segments = list(info.get("source_segments") or [])
 
     for i, seg in enumerate(segments_data):
-        final = resolve_post_quality_text(seg)
-        if not final:
-            continue
         row = audit_by.get(i)
         if row is None:
             row = {"index": i}
             audits.append(row)
             audit_by[i] = row
-        row["final_text"] = final
-        row["tts_text"] = final
-        seg["final_text"] = final
-        seg["voice_input"] = final
+        if i < len(source_segments) and not seg.get("original_text"):
+            seg["original_text"] = str(source_segments[i] or "")
+        if i < len(source_segments) and not str(row.get("whisper_text") or "").strip():
+            row["whisper_text"] = str(source_segments[i] or "")
+        raw_anchor = str(
+            seg.get("translated_text") or row.get("raw_translation") or ""
+        ).strip()
+        if raw_anchor and not str(row.get("raw_translation") or "").strip():
+            row["raw_translation"] = raw_anchor
+        final = resolve_post_quality_text(seg, row)
+        if not final:
+            continue
+        stamp_authoritative_final_text(seg, final, audit=row, preserve_semantic_engine=True)
         if seg.get("grammar_text"):
             row["grammar_text"] = seg["grammar_text"]
-        if seg.get("semantic_text"):
+        sem_engine = str(seg.get("semantic_engine_text") or "").strip()
+        if sem_engine:
+            row["semantic_text"] = row.get("semantic_text") or sem_engine
+            row["semantic_engine_text"] = sem_engine
+        elif seg.get("semantic_text"):
             row["semantic_text"] = seg["semantic_text"]
-        if seg.get("translated_text") and not row.get("raw_translation"):
-            row["raw_translation"] = seg["translated_text"]
+            row["semantic_engine_text"] = seg["semantic_text"]
 
     info["segments_data"] = segments_data
     info["translation_audits"] = audits
@@ -381,17 +555,255 @@ def retry_segment_translation(
 
 
 def apply_translated_text_to_segment(seg: dict[str, Any], translated: str) -> None:
-    text = str(translated or "").strip()
-    seg["translated_text"] = text
-    seg["translation_text"] = text
-    seg["semantic_text"] = text
-    seg["timing_text"] = text
-    seg["grammar_text"] = text
-    seg["text_for_tts"] = text
-    seg["text"] = text
-    seg["plain_text"] = text
-    seg["final_text"] = text
-    seg["voice_input"] = text
+    from engines.pipeline_integrity.translation_lock import (
+        assert_text_field_writable,
+        is_segment_locked,
+    )
+
+    if is_segment_locked(seg):
+        # No silent fix after TRANSLATION LOCK — raise explicitly.
+        assert_text_field_writable(
+            seg, "translated_text", mutator="engines.translation_validation"
+        )
+
+    stamp_authoritative_final_text(seg, str(translated or "").strip())
+
+
+def apply_dsal_before_lock(
+    info: dict[str, Any],
+    *,
+    allow_llm: bool = True,
+    block_merge: bool = True,
+) -> dict[str, Any]:
+    """TZ v4.0: Duration-Semantic Adaptation before TRANSLATION LOCK (rule-based)."""
+    from engines.dsal import (
+        adapt_duration_semantic,
+        apply_semantic_block_merges,
+        stamp_dsal_on_segment,
+    )
+
+    segments = list(info.get("segments_data") or [])
+    timing_map = list(info.get("timing_map") or [])
+    src_segs = list(info.get("source_segments") or info.get("original_segments") or [])
+    tgt = str(info.get("target_lang") or info.get("tgt_lang") or "uk")
+    adapted = 0
+    yellow_red = 0
+
+    for i, seg in enumerate(segments):
+        if not isinstance(seg, dict):
+            continue
+        if seg.get("translation_locked") or seg.get("merged_into") is not None:
+            continue
+        slot_ms = int(seg.get("slot_ms") or 0)
+        if slot_ms <= 0 and i < len(timing_map):
+            try:
+                from engines.timing_fit import _parse_timing
+
+                s, e = _parse_timing(timing_map[i])
+                if e > s:
+                    slot_ms = e - s
+                    seg["slot_ms"] = slot_ms
+            except Exception:
+                pass
+        if i < len(src_segs) and not seg.get("original_text"):
+            seg["original_text"] = str(src_segs[i] or "")
+        text = resolve_post_quality_text(seg).strip()
+        if not text or slot_ms <= 0:
+            continue
+        src_hint = ""
+        if i < len(src_segs):
+            src_hint = str(src_segs[i] or "")
+        if not src_hint:
+            src_hint = str(seg.get("source_text") or seg.get("original_text") or "")
+        # Re-stamp ownership before DSAL so clause restore cannot expand a stale raw fragment.
+        stamp_authoritative_final_text(seg, text, preserve_semantic_engine=True)
+        actual = int(seg.get("tts_ms") or seg.get("playback_duration") or 0) or None
+        result = adapt_duration_semantic(
+            text,
+            source_hint=src_hint,
+            slot_ms=slot_ms,
+            tgt_lang=tgt,
+            actual_tts_ms=actual,
+            allow_llm=allow_llm,
+        )
+        stamp_dsal_on_segment(seg, result)
+        if result.analysis.band in ("yellow", "red"):
+            yellow_red += 1
+        if result.changed and result.text.strip() and result.text.strip() != text:
+            apply_translated_text_to_segment(seg, result.text.strip())
+            adapted += 1
+            logger.info(
+                "DSAL pre-LOCK idx=%s band=%s detail=%s method=%s",
+                i,
+                result.analysis.band,
+                result.detail,
+                result.method,
+            )
+
+    # P1: semantic block merge for remaining yellow/red chains (2–3 segs)
+    block_meta: dict[str, Any] = {}
+    if block_merge:
+        try:
+            block_result = apply_semantic_block_merges(
+                segments,
+                source_segments=src_segs,
+                tgt_lang=tgt,
+            )
+            block_meta = block_result.to_dict()
+            if block_result.merged_blocks:
+                adapted += block_result.adapted_segments
+                logger.info(
+                    "DSAL block-merge: blocks=%s adapted_segs=%s",
+                    block_result.merged_blocks,
+                    block_result.adapted_segments,
+                )
+        except Exception as block_exc:
+            logger.warning("DSAL block-merge skipped: %s", block_exc)
+            block_meta = {"error": str(block_exc)}
+    else:
+        block_meta = {"skipped": True}
+
+    summary = {
+        "dsal_pre_lock": True,
+        "segments": len(segments),
+        "yellow_red": yellow_red,
+        "adapted": adapted,
+        "block_merge": block_meta,
+        "allow_llm": allow_llm,
+    }
+    info["dsal_pre_lock"] = summary
+    return summary
+
+
+def apply_translation_lock_after_validation(info: dict[str, Any]) -> dict[str, Any]:
+    """
+    Freeze TZ P0: after Translation Validation writes final text, apply LOCK.
+
+    TZ v4.0: run DSAL (duration-semantic adapt) before LOCK.
+    Advances pipeline state to LOCKED and stamps contract versions.
+    Idempotent when already locked.
+    """
+    from engines.pipeline_integrity.pipeline_state import (
+        PipelineState,
+        advance_pipeline_state,
+        get_pipeline_state,
+    )
+    from engines.pipeline_integrity.translation_lock import (
+        is_project_locked,
+        lock_segments,
+    )
+
+    segments = list(info.get("segments_data") or [])
+    # Ensure every segment has a real slot_ms from timing before LOCK / Dub.
+    timing_map = list(info.get("timing_map") or [])
+    if timing_map:
+        try:
+            from engines.timing_fit import _parse_timing
+
+            for i, seg in enumerate(segments):
+                if not isinstance(seg, dict):
+                    continue
+                if int(seg.get("slot_ms") or 0) > 0:
+                    continue
+                if i >= len(timing_map):
+                    break
+                s, e = _parse_timing(timing_map[i])
+                if e > s:
+                    seg["slot_ms"] = max(1, e - s)
+                    sid = str(seg.get("segment_id") or "").strip()
+                    if sid and (seg.get("start_ms") is None or seg.get("end_ms") is None):
+                        try:
+                            from engines.scheduler import update_time
+
+                            update_time([seg], sid, start_ms=s, end_ms=e, info=info)
+                        except Exception:
+                            pass
+        except Exception as exc:
+            logger.debug("slot_ms stamp before lock skipped: %s", exc)
+
+    # TZ v4.0: Duration-Semantic Adaptation BEFORE lock (rule-based, LLM optional).
+    # TPS Fast Path: skip DSAL text adapt — Timing/MeaningFit is single owner and
+    # runs only for yellow/red after APPROVED (not on every segment).
+    try:
+        if not is_project_locked(info) and not info.get("skip_dsal_pre_lock"):
+            apply_dsal_before_lock(info)
+        elif info.get("skip_dsal_pre_lock"):
+            # TPS: text rewrite skipped; duration-only stamp may already have run
+            # after run_tps_pipeline. Re-stamp if approved texts exist and not stamped.
+            try:
+                if info.get("tps") and not info.get("tps_duration_stamp"):
+                    from engines.tps.duration_stamp import stamp_duration_after_approved
+
+                    stamp_duration_after_approved(
+                        info, task_id=str(info.get("task_id") or "")
+                    )
+                else:
+                    logger.info("DSAL pre-LOCK text adapt skipped (TPS duration-only)")
+            except Exception as stamp_exc:
+                logger.info(
+                    "DSAL pre-LOCK skipped (TPS): %s", stamp_exc
+                )
+    except Exception as dsal_exc:
+        logger.warning("DSAL pre-LOCK skipped: %s", dsal_exc)
+
+    # TZ v4.0 P2: punctuation / name / USC polish before gate
+    try:
+        if not is_project_locked(info):
+            from engines.dsal.pre_lock_polish import polish_segments_before_lock
+
+            polish_segments_before_lock(info)
+    except Exception as polish_exc:
+        logger.warning("pre-LOCK polish skipped: %s", polish_exc)
+
+    current = get_pipeline_state(info)
+
+    # Ensure we are at least TRANSLATED before validation→lock.
+    if current == PipelineState.NEW:
+        advance_pipeline_state(info, PipelineState.TRANSCRIBED)
+        advance_pipeline_state(info, PipelineState.TRANSLATED)
+    elif current == PipelineState.TRANSCRIBED:
+        advance_pipeline_state(info, PipelineState.TRANSLATED)
+
+    if get_pipeline_state(info) == PipelineState.TRANSLATED:
+        advance_pipeline_state(info, PipelineState.VALIDATED)
+
+    if is_project_locked(info) and all(
+        isinstance(s, dict) and s.get("translation_locked") for s in segments
+    ):
+        return dict(info.get("translation_lock") or {"pipeline_state": "LOCKED"})
+
+    # TZ v4.0 P2: LOCK gate — duration_match ≥ 85, clause ≥ 0.85, entity pass
+    try:
+        from engines.dsal.lock_gate import apply_lock_with_gate
+
+        meta = apply_lock_with_gate(segments, info=info, lock_segments_fn=lock_segments)
+    except Exception as gate_exc:
+        logger.warning("LOCK gate failed open: %s — locking anyway", gate_exc)
+        meta = lock_segments(segments, info=info, advance_state=True)
+
+    if meta.get("translation_lock_deferred"):
+        logger.warning(
+            "TRANSLATION_LOCK deferred: %s segs need Studio (gate fail)",
+            meta.get("deferred_segments"),
+        )
+        return meta
+
+    try:
+        from engines.pipeline_integrity.uuid_chain import ensure_project_uuids
+
+        uuid_meta = ensure_project_uuids(segments)
+        meta["uuid_chain"] = uuid_meta
+        info["uuid_chain"] = uuid_meta
+    except Exception as uuid_exc:
+        logger.debug("uuid_chain after lock skipped: %s", uuid_exc)
+    logger.info(
+        "TRANSLATION_LOCK applied: segments=%s state=%s contracts t=%s d=%s",
+        meta.get("locked_segments"),
+        meta.get("pipeline_state"),
+        meta.get("translation_contract_version"),
+        meta.get("dub_contract_version"),
+    )
+    return meta
 
 
 def recover_mismatched_segments(

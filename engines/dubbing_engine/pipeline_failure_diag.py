@@ -618,6 +618,36 @@ def fail_pipeline(
     log_pipeline_failure(report)
     save_pipeline_failure(report, task_id=task_id)
 
+    # P16.7 — enriched error envelope (Run ID / UUID / Recovery / ZIP)
+    try:
+        from engines.production_hardening.enriched_logging import (
+            build_error_record,
+            format_error_log_line,
+        )
+
+        with STATE_LOCK:
+            _task = AUTO_TASKS.get(task_id) or {}
+            _info = dict(_task.get("info") or {})
+        _zip = ""
+        if isinstance(exc, Exception) and getattr(exc, "details", None):
+            _zip = str((exc.details or {}).get("diagnostic_zip") or "")
+        _rec = build_error_record(
+            run_id=str(_info.get("openddf_run_id") or task_id),
+            stage=str(report.stage or stage or ""),
+            message=str(message),
+            exc=exc,
+            segment_uuid=str(getattr(report, "segment_id", "") or ""),
+            segment_id=str(getattr(report, "segment_id", "") or ""),
+            error_code=str(error_code or getattr(report, "error_code", "") or ""),
+            diagnostic_zip=_zip,
+        )
+        logger.error("%s", format_error_log_line(_rec))
+        with STATE_LOCK:
+            if task_id in AUTO_TASKS:
+                AUTO_TASKS[task_id].setdefault("info", {})["p16_error_record"] = _rec
+    except Exception:
+        pass
+
     meta = None
     try:
         from engines.pipeline_integrity.passive_openddf import (

@@ -271,15 +271,32 @@ async def _generate_batch(
     emotions: list[str | None] | None = None,
     contexts: list[dict[str, Any] | None] | None = None,
 ) -> list:
-    """Генерирует несколько аудиофайлов (по сегментам)."""
+    """Генерирует несколько аудиофайлов (по сегментам) с уникальными именами."""
+    from engines.pipeline_integrity.audio_identity import allocate_tts_path
+
     files = []
     for i, seg in enumerate(segments):
         if not seg.strip():
             continue
-        filename = f"{task_id}_seg{i:04d}.mp3"
-        path = str(output_dir / filename)
-        emo = emotions[i] if emotions and i < len(emotions) else None
         ctx = contexts[i] if contexts and i < len(contexts) else None
+        ctx = dict(ctx or {})
+        segment_uuid = str(
+            ctx.get("segment_id") or ctx.get("segment_uuid") or ""
+        ).strip() or f"{task_id}_{i:04d}_{uuid.uuid4().hex[:8]}"
+        path_obj = allocate_tts_path(
+            output_dir,
+            segment_uuid=segment_uuid,
+            run_id=str(task_id or ""),
+            ext=".mp3",
+            purpose="tts",
+        )
+        filename = path_obj.name
+        path = str(path_obj)
+        emo = emotions[i] if emotions and i < len(emotions) else None
+        ctx.setdefault("segment_id", segment_uuid)
+        ctx.setdefault("segment_uuid", segment_uuid)
+        ctx.setdefault("segment_index", i)
+        ctx.setdefault("tts_file_path", path)
         await _generate_single(
             seg,
             voice,
@@ -374,10 +391,24 @@ async def _generate_groups_parallel_async(
                 on_group_done(g_idx, total, done_count)
             return {**item, "file": None}
         async with sem:
-            filename = f"{batch_id}_g{g_idx:04d}.mp3"
-            path = str(output_dir / filename)
+            from engines.pipeline_integrity.audio_identity import allocate_tts_path
+
+            segment_uuid = str(
+                ctx.get("segment_id") or ctx.get("segment_uuid") or ""
+            ).strip() or f"g{g_idx:04d}_{uuid.uuid4().hex[:8]}"
+            path_obj = allocate_tts_path(
+                output_dir,
+                segment_uuid=segment_uuid,
+                run_id=batch_id,
+                ext=".mp3",
+                purpose="tts",
+            )
+            filename = path_obj.name
+            path = str(path_obj)
             item_rate = item.get("rate") or rate
             item_pitch = item.get("pitch") or pitch
+            ctx.setdefault("segment_id", segment_uuid)
+            ctx.setdefault("segment_uuid", segment_uuid)
             ctx.setdefault("tts_file_path", path)
             try:
                 await asyncio.wait_for(

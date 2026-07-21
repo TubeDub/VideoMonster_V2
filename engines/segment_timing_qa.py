@@ -426,7 +426,37 @@ def post_tts_validate_and_retry(
             playback_ms = _update_speech_timing_diagnostics(
                 adapt_trace, seg, slot_ms=slot_ms, start_ms=start_ms
             )
+            speech_end: dict[str, Any] = {}
+            try:
+                from engines.tts_speech_end import apply_speech_end_to_segment
+
+                speech_end = apply_speech_end_to_segment(
+                    seg,
+                    wav_path=seg.get("tts_file_path") or seg.get("file"),
+                    slot_ms=slot_ms,
+                )
+                adapt_trace["voice_truncated"] = bool(speech_end.get("voice_truncated"))
+                adapt_trace["voice_finished_naturally"] = bool(
+                    speech_end.get("voice_finished_naturally")
+                )
+            except Exception:
+                speech_end = {}
             issues = detect_post_tts_deviations(seg, idx, timing_map)
+            if speech_end.get("voice_truncated") and not any(
+                i.get("code") == "duration_overflow" for i in issues
+            ):
+                issues.append(
+                    {
+                        "idx": idx,
+                        "code": "duration_overflow",
+                        "tts_ms": playback_ms,
+                        "slot_ms": slot_ms,
+                        "window_ms": slot_ms,
+                        "overflow_ms": max(0, playback_ms - slot_ms),
+                        "voice_truncated": True,
+                        "reason": speech_end.get("reason") or "voice_truncated",
+                    }
+                )
             overflow_issues = [
                 i
                 for i in issues
@@ -461,6 +491,57 @@ def post_tts_validate_and_retry(
             issue_slot_ms = int(issue.get("slot_ms") or slot_ms)
             tts_ms = int(issue.get("tts_ms") or playback_ms or segment_playback_ms(seg))
 
+            # MASTER TZ v3.0 P2/P10/P11: after LOCK — never rewrite text.
+            try:
+                from engines.pipeline_integrity.translation_lock import is_segment_locked
+
+                locked = is_segment_locked(seg)
+            except Exception:
+                locked = bool(seg.get("translation_locked"))
+            if locked:
+                if overflow_issues:
+                    from engines.pipeline_integrity.overflow_manager import (
+                        register_overflow,
+                    )
+
+                    ov = max(0, tts_ms - issue_slot_ms)
+                    register_overflow(
+                        seg,
+                        index=idx,
+                        overflow_ms=ov,
+                        slot_ms=issue_slot_ms,
+                        reason=str(issue.get("code") or "duration_overflow"),
+                    )
+                    adapt_trace["reasons"].append(
+                        f"{issue['code']}:locked_overflow_manager"
+                    )
+                else:
+                    from engines.pipeline_integrity.underflow_manager import (
+                        register_underflow,
+                    )
+
+                    shortfall = max(0, issue_slot_ms - tts_ms)
+                    register_underflow(
+                        seg,
+                        index=idx,
+                        shortfall_ms=shortfall,
+                        slot_ms=issue_slot_ms,
+                        audio_ms=tts_ms,
+                        reason=str(issue.get("code") or "duration_underflow"),
+                    )
+                    adapt_trace["reasons"].append(
+                        f"{issue['code']}:locked_underflow_manager"
+                    )
+                stats["issues"].append(
+                    {
+                        **issue,
+                        "retry_failed": "translation_locked",
+                        "severity": "warning",
+                        "stopped_reason": "post_lock_audio_only",
+                    }
+                )
+                break
+
             try:
                 from engines.translation_adapt import set_llm_context
 
@@ -469,6 +550,106 @@ def post_tts_validate_and_retry(
                 pass
 
             if overflow_issues:
+                # TZ Adaptive Seg §11: prefer resegment on oversized slots
+                # before aggressive text shortening.
+                _did_resegment = False
+                try:
+                    from engines.adaptive_segmentation.post_tts import (
+                        should_prefer_resegment,
+                        try_split_long_overflow_segment,
+                    )
+
+                    _ov = max(0, tts_ms - issue_slot_ms)
+                    if should_prefer_resegment(
+                        slot_ms=issue_slot_ms,
+                        tts_ms=tts_ms,
+                        overflow_ms=_ov,
+                    ):
+                        adapt_trace["reasons"].append(
+                            "resegment_preferred_before_shorten"
+                        )
+                        _audits_mut = list(audits) if audits is not None else None
+                        _did_resegment = try_split_long_overflow_segment(
+                            segments_data=segments_data,
+                            source_segments=source_segments
+                            if isinstance(source_segments, list)
+                            else list(source_segments or []),
+                            timing_map=timing_map,
+                            audits=_audits_mut,
+                            idx=idx,
+                        )
+                        if _did_resegment:
+                            if audits is not None and _audits_mut is not None:
+                                audits.clear()
+                                audits.extend(_audits_mut)
+                            adapt_trace["reasons"].append("adaptive_resegment_split")
+                            stats["adaptation_executed"] = True
+                            stats["resegmented"] = int(stats.get("resegmented") or 0) + 1
+                            try:
+                                from engines.adaptive_segmentation.retranslate import (
+                                    apply_retranslate_if_needed,
+                                )
+                            except Exception:
+                                apply_retranslate_if_needed = None  # type: ignore
+                            # Retranslate halves if needed, then TTS — skip shorten
+                            if callable(regen_fn):
+                                for _ri in (idx, idx + 1):
+                                    if _ri >= len(segments_data):
+                                        continue
+                                    _s = segments_data[_ri]
+                                    _src = (
+                                        source_segments[_ri]
+                                        if isinstance(source_segments, list)
+                                        and _ri < len(source_segments)
+                                        else src_hint
+                                    )
+                                    if apply_retranslate_if_needed:
+                                        try:
+                                            apply_retranslate_if_needed(
+                                                _s,
+                                                str(_src or ""),
+                                                src_lang=src_lang,
+                                                tgt_lang=target_lang,
+                                            )
+                                        except Exception:
+                                            pass
+                                    _txt = str(
+                                        _s.get("plain_text")
+                                        or _s.get("text")
+                                        or ""
+                                    ).strip()
+                                    if not _txt:
+                                        continue
+                                    try:
+                                        _rr = regen_fn(
+                                            _txt,
+                                            voice=voice,
+                                            tts_rate=tts_rate,
+                                            tts_pitch=tts_pitch,
+                                            task_id=task_id,
+                                            segment_index=_ri,
+                                            segment_id=str(
+                                                _s.get("segment_id") or ""
+                                            ),
+                                        )
+                                        if isinstance(_rr, tuple):
+                                            _nf, _nms = _rr[0], int(_rr[1] or 0)
+                                        else:
+                                            _nf, _nms = _rr, 0
+                                        if _nf:
+                                            _s["file"] = _nf
+                                            _s["tts_file_path"] = _nf
+                                            if _nms > 0:
+                                                _s["playback_duration"] = _nms
+                                                _s["tts_ms"] = _nms
+                                    except Exception:
+                                        pass
+                            break
+                except Exception as _reseg_exc:
+                    adapt_trace["reasons"].append(
+                        f"resegment_skipped:{type(_reseg_exc).__name__}"
+                    )
+
                 opt = optimize_llm_rephrase_for_slot(
                     original,
                     source_hint=src_hint,
@@ -479,8 +660,29 @@ def post_tts_validate_and_retry(
                 )
                 stage = "llm_rephrase"
                 expansion_strategy = ""
+                # TZ v4.0: if LLM unavailable / no change — rule-based compress via DSAL
+                if not opt.changed:
+                    from engines.dsal import adapt_duration_semantic
+
+                    dsal = adapt_duration_semantic(
+                        original,
+                        source_hint=src_hint,
+                        slot_ms=issue_slot_ms,
+                        tgt_lang=target_lang,
+                        actual_tts_ms=tts_ms,
+                    )
+                    if dsal.changed:
+                        opt = type(opt)(
+                            text=dsal.text,
+                            changed=True,
+                            budget=opt.budget,
+                            stages=opt.stages,
+                            stopped_reason="dsal_rule_compress",
+                        )
+                        stage = "dsal_rule_compress"
             else:
                 adapt_trace["expand_required"] = True
+                seg["expand_required"] = True
                 opt = optimize_expand_for_slot(
                     original,
                     source_hint=src_hint,
@@ -489,7 +691,7 @@ def post_tts_validate_and_retry(
                     max_rounds=1,
                     current_ms=tts_ms,
                 )
-                stage = "llm_expand"
+                stage = "llm_expand" if "llm" in (opt.stopped_reason or "") else "dsal_rule_expand"
                 expansion_strategy = opt.stopped_reason or "semantic_expansion"
                 if opt.changed:
                     expansion_iterations += 1
@@ -499,16 +701,33 @@ def post_tts_validate_and_retry(
             new_text = opt.text if opt.changed else original
 
             if not new_text or new_text.strip() == original:
-                stats["issues"].append({**issue, "retry_failed": "no_llm_adaptation"})
-                adapt_trace["reasons"].append(
-                    f"{issue['code']}:requires_llm_adaptation"
-                )
+                # Mark expand_required for underflow even when no text change possible
                 if underflow_issues and not overflow_issues:
+                    adapt_trace["expand_required"] = True
+                    seg["expand_required"] = True
                     adapt_trace["expansion_strategy"] = (
-                        opt.stopped_reason or "requires_llm_expansion"
+                        opt.stopped_reason or "dsal_exhausted"
                     )
-                seg["requires_llm_adaptation"] = True
-                seg["problematic"] = True
+                # LLM missing is WARNING, not hard stop — keep going with audio-fit later
+                stats["issues"].append(
+                    {
+                        **issue,
+                        "retry_failed": "no_text_adaptation",
+                        "severity": "warning",
+                        "stopped_reason": getattr(opt, "stopped_reason", ""),
+                    }
+                )
+                adapt_trace["reasons"].append(
+                    f"{issue['code']}:{getattr(opt, 'stopped_reason', 'no_change')}"
+                )
+                # Only flag requires_llm if LLM was the intended path and unavailable
+                try:
+                    from engines.translation_adapt import llm_rephrase_available
+
+                    if not llm_rephrase_available() and overflow_issues:
+                        seg["requires_llm_adaptation"] = True
+                except Exception:
+                    pass
                 break
 
             if regen_fn is None:
@@ -606,6 +825,34 @@ def post_tts_validate_and_retry(
                 issue_slot_ms,
                 expansion_strategy or "-",
             )
+
+        # Final speech-end gate: truncated voice must not count as success.
+        try:
+            from engines.tts_speech_end import apply_speech_end_to_segment
+
+            final_end = apply_speech_end_to_segment(
+                seg,
+                wav_path=seg.get("tts_file_path") or seg.get("file"),
+                slot_ms=slot_ms,
+            )
+            if final_end.get("voice_truncated"):
+                seg["needs_manual_review"] = True
+                retry_meta["truncated"] = True
+                retry_meta["manual_review_required"] = True
+                adapt_trace["voice_truncated"] = True
+                adapt_trace["voice_finished_naturally"] = False
+                stats["issues"].append(
+                    {
+                        "idx": idx,
+                        "code": "voice_truncated",
+                        "tts_ms": segment_playback_ms(seg),
+                        "slot_ms": slot_ms,
+                        "severity": "error",
+                        "reason": final_end.get("reason") or "voice_truncated",
+                    }
+                )
+        except Exception:
+            pass
 
         adapt_trace["expansion_iterations"] = expansion_iterations
 
@@ -816,6 +1063,15 @@ def build_final_dub_qa_report(task_info: dict[str, Any]) -> dict[str, Any]:
 
 
 def _segment_algorithm_reason(seg: dict[str, Any], timing_aware: dict[str, Any]) -> str:
+    # PSA7 — diagnostics truth: never claim semantic shorten for audio-only paths
+    try:
+        from engines.pipeline_integrity.honest_diagnostics import (
+            map_segment_algorithm_reason,
+        )
+
+        return map_segment_algorithm_reason(seg, timing_aware=timing_aware or {})
+    except Exception:
+        pass
     if seg.get("text_adaptation_trace", {}).get("executed"):
         return "post_tts_text_adaptation: semantic shorten + TTS regen until slot fit"
     if seg.get("video_adapt_mode") == "gap_absorb":
@@ -1393,10 +1649,16 @@ def build_openddf_full_report(task_info: dict[str, Any]) -> dict[str, Any]:
     for _s in task_info.get("llm_status") or []:
         _status_by_seg[_s.get("segment")] = _s
     _llm_available = False
+    _provider_fatal = False
     try:
+        from engines.llm_callable import get_run_state
         from engines.translation_adapt import llm_rephrase_available
 
-        _llm_available = bool(llm_rephrase_available())
+        _run = get_run_state()
+        _llm_available = bool(_run.get("callable")) if _run.get("checked_at") else bool(
+            llm_rephrase_available()
+        )
+        _provider_fatal = bool(_run.get("fatal_reason")) and not _llm_available
     except Exception:
         pass
     _post_tts_failed: dict[int, str] = {}
@@ -1425,7 +1687,23 @@ def build_openddf_full_report(task_info: dict[str, Any]) -> dict[str, Any]:
         if _row["llm_needed"] and not _row["llm_called"]:
             _fail = _post_tts_failed.get(int(_idx or -1))
             _skip = str(_st.get("skip_reason") or "")
-            if not _llm_available:
+            _trace = (_row.get("ai_adaptation_trace") or {})
+            _provider_fatal = bool(_trace.get("provider_fatal")) or _skip in (
+                "provider_fatal",
+                "model_missing",
+            ) or _provider_fatal
+            if _provider_fatal:
+                _errors.append(
+                    {
+                        "code": "LLM_PROVIDER_FATAL",
+                        "reason": _skip or "provider_fatal",
+                        "message": (
+                            "Провайдер LLM недоступен — интеллектуальная адаптация "
+                            "не выполнена после всех попыток инициализации"
+                        ),
+                    }
+                )
+            elif not _llm_available:
                 _errors.append(
                     {
                         "code": "LLM_UNAVAILABLE",
@@ -1522,7 +1800,22 @@ def build_openddf_full_report(task_info: dict[str, Any]) -> dict[str, Any]:
                 }
             )
 
-    any_adaptation = any(s.get("adaptation_executed") for s in segments)
+    any_adaptation = any(
+        s.get("adaptation_executed") or s.get("dsal_applied") for s in segments
+    )
+    post_qa = task_info.get("post_tts_qa") or {}
+    if not any_adaptation and (
+        post_qa.get("adaptation_executed")
+        or int(post_qa.get("rewritten") or 0) > 0
+    ):
+        any_adaptation = True
+    pre_dsal = task_info.get("dsal_pre_lock") or {}
+    if not any_adaptation and (
+        pre_dsal.get("adapted")
+        or int(pre_dsal.get("adapted") or 0) > 0
+        or pre_dsal.get("adaptation_executed")
+    ):
+        any_adaptation = True
     overlap_detected = bool(overlaps)
     timing_mismatch = any(
         s.get("timing_source") not in (None, "timing_map")
@@ -1550,6 +1843,25 @@ def build_openddf_full_report(task_info: dict[str, Any]) -> dict[str, Any]:
         "final_dub_qa": task_info.get("final_dub_qa"),
         "source_separation": _build_openddf_source_separation_block(task_info),
         "ai_core_report": _build_openddf_ai_core_block(task_info),
+        "decision_trace_summary": {
+            "title": "Decision Trace",
+            "segments_with_trace": sum(
+                1 for s in segments if (s.get("decision_trace") or {}).get("stages")
+            ),
+            "failed_final": [
+                {
+                    "index": s.get("index"),
+                    "segment_id": s.get("segment_id"),
+                    "summary": (s.get("decision_trace") or {}).get("summary"),
+                    "skip_reason": s.get("adaptation_skip_reason"),
+                }
+                for s in segments
+                if any(
+                    st.get("name") == "final_result" and st.get("status") == "FAILED"
+                    for st in ((s.get("decision_trace") or {}).get("stages") or [])
+                )
+            ],
+        },
         "summary": {
             "segment_count": len(segments),
             "skipped_count": len(skipped_segments),
@@ -1656,11 +1968,41 @@ def build_openddf_segment_diagnostics(
         )
 
         slot_ms = int(seg.get("slot_ms") or 0)
+        start_ms = int(adapt_trace.get("start_time_ms") or seg.get("start_ms") or 0)
+        end_ms = int(adapt_trace.get("end_time_ms") or seg.get("end_ms") or 0)
+        if end_ms <= start_ms and idx < len(task_info.get("timing_map") or []):
+            from engines.timing_fit import _parse_timing
+
+            start_ms, end_ms = _parse_timing((task_info.get("timing_map") or [])[idx])
+
+        # Derive slot from start/end when segment.slot_ms is missing (fixes false overflows).
+        if slot_ms <= 0 and end_ms > start_ms:
+            slot_ms = max(1, end_ms - start_ms)
         if slot_ms <= 0 and idx < len(task_info.get("timing_map") or []):
             from engines.timing_fit import _parse_timing
 
             s, e = _parse_timing((task_info.get("timing_map") or [])[idx])
             slot_ms = max(1, e - s)
+            if end_ms <= start_ms and e > s:
+                start_ms, end_ms = s, e
+
+        if slot_ms > 0 and int(seg.get("slot_ms") or 0) <= 0:
+            seg["slot_ms"] = slot_ms
+        # Timing ownership: stamp start/end via Scheduler when identity exists.
+        if end_ms > start_ms and str(seg.get("segment_id") or "").strip():
+            if seg.get("start_ms") is None or seg.get("end_ms") is None:
+                try:
+                    from engines.scheduler import update_time
+
+                    update_time(
+                        [seg],
+                        str(seg["segment_id"]),
+                        start_ms=start_ms,
+                        end_ms=end_ms,
+                        info=task_info if isinstance(task_info, dict) else None,
+                    )
+                except Exception:
+                    pass
 
         predicted_ms = int(
             timing_aware.get("predicted_ms_after")
@@ -1711,12 +2053,49 @@ def build_openddf_segment_diagnostics(
         )
         if seg.get("requires_llm_adaptation"):
             _rewrite_usage["requires_llm_adaptation"] = True
-        start_ms = int(adapt_trace.get("start_time_ms") or seg.get("start_ms") or 0)
-        end_ms = int(adapt_trace.get("end_time_ms") or seg.get("end_ms") or 0)
-        if end_ms <= start_ms and idx < len(task_info.get("timing_map") or []):
-            from engines.timing_fit import _parse_timing
 
-            start_ms, end_ms = _parse_timing((task_info.get("timing_map") or [])[idx])
+        # Recompute overflow from real slot + TTS (ignore stale overflow when slot was 0).
+        if slot_ms > 0 and actual_ms > 0:
+            overflow_ms = max(0, int(actual_ms) - int(slot_ms))
+            overflow_pct = round(100.0 * overflow_ms / max(slot_ms, 1), 1)
+            slot_overflow = overflow_ms > DURATION_TOLERANCE_MS
+        else:
+            overflow_ms = int(seg.get("overflow_ms") or 0) if slot_ms > 0 else 0
+            overflow_pct = float(seg.get("overflow_pct") or 0.0) if slot_ms > 0 else 0.0
+            slot_overflow = bool(seg.get("slot_overflow")) if slot_ms > 0 else False
+
+        try:
+            from engines.dub_engine_v2.adaptation_decision import (
+                finalize_segment_adaptation_fields,
+            )
+
+            if overflow_ms > 0:
+                seg["overflow_ms"] = overflow_ms
+            finalize_segment_adaptation_fields(seg, index=idx)
+        except Exception:
+            pass
+
+        _adapt_executed = (
+            bool(adapt_trace.get("executed"))
+            or ai_executed
+            or bool(seg.get("adaptation_executed"))
+        )
+        _skip_reason = str(
+            seg.get("adaptation_skip_reason")
+            or (seg.get("adaptation_decision") or {}).get("skip_reason")
+            or ""
+        )
+        try:
+            from engines.dub_engine_v2.decision_trace import format_decision_trace_openddf
+
+            _decision_trace = format_decision_trace_openddf(seg)
+        except Exception:
+            _decision_trace = {
+                "title": "Decision Trace",
+                "stages": [],
+                "transitions": [],
+                "summary": "",
+            }
 
         rows.append(
             {
@@ -1735,12 +2114,15 @@ def build_openddf_segment_diagnostics(
                 "adaptation_iterations": int(
                     ai_trace.get("iterations") or adapt_trace.get("iterations") or 0
                 ),
-                "adaptation_executed": bool(adapt_trace.get("executed")) or ai_executed,
+                "adaptation_executed": _adapt_executed,
                 "adaptation_status": (
                     "ADAPTATION EXECUTED"
-                    if (bool(adapt_trace.get("executed")) or ai_executed)
+                    if _adapt_executed
                     else "ADAPTATION NOT EXECUTED"
                 ),
+                "adaptation_skip_reason": "" if _adapt_executed else _skip_reason,
+                "adaptation_decision": dict(seg.get("adaptation_decision") or {}),
+                "decision_trace": _decision_trace,
                 "original_duration_ms": int(
                     adapt_trace.get("original_duration_ms") or slot_ms
                 ),
@@ -1758,9 +2140,9 @@ def build_openddf_segment_diagnostics(
                 "adaptation_stages": list(adapt_trace.get("stages") or []) + list(ai_trace.get("stages") or []),
                 "variant_log": variant_log,
                 "overlap_info": {
-                    "overflow_ms": seg.get("overflow_ms"),
-                    "overflow_pct": seg.get("overflow_pct"),
-                    "slot_overflow": seg.get("slot_overflow"),
+                    "overflow_ms": overflow_ms,
+                    "overflow_pct": overflow_pct,
+                    "slot_overflow": slot_overflow,
                     "merge_adjusted_start": seg.get("merge_adjusted_start"),
                 },
                 "merge_info": {

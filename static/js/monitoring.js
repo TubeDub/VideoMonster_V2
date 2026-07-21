@@ -76,8 +76,43 @@
       renderBottleneck(diagRes.bottleneck || {});
       renderTimeline(tlRes.timeline || d.timeline || []);
       renderPlugins(plugRes.plugins || []);
+      await refreshTpsMetrics();
     } catch (e) {
       console.warn('[monitoring]', e);
+    }
+  }
+
+  async function refreshTpsMetrics() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const taskId = params.get('task_id') || params.get('task') || '';
+      const url = taskId
+        ? '/api/tps/metrics/' + encodeURIComponent(taskId)
+        : '/api/tps/metrics';
+      const res = await fetchJson(url);
+      if (!res.ok || !res.metrics) {
+        if ($('mc-tps-detail')) $('mc-tps-detail').textContent = 'Нет TPS metrics';
+        return;
+      }
+      const m = res.metrics;
+      if ($('mc-tps-fast')) $('mc-tps-fast').textContent = m.fast_path_count ?? '—';
+      if ($('mc-tps-retry')) $('mc-tps-retry').textContent = m.retry_path_count ?? '—';
+      if ($('mc-tps-judge')) $('mc-tps-judge').textContent = m.llm_judge_count ?? '—';
+      if ($('mc-tps-manual')) $('mc-tps-manual').textContent = m.manual_review_count ?? '—';
+      const hist = m.reject_reason_histogram || {};
+      const histLine = Object.keys(hist).length
+        ? 'rejects: ' + Object.entries(hist).map(([k, v]) => k + '=' + v).join(', ')
+        : 'rejects: —';
+      if ($('mc-tps-detail')) {
+        $('mc-tps-detail').textContent =
+          `task ${res.task_id || '—'} · avg ${Number(m.avg_segment_ms || 0).toFixed(0)}ms` +
+          ` · p95 ${Number(m.p95_segment_ms || 0).toFixed(0)}ms` +
+          ` · LLM/seg ${Number(m.avg_llm_calls_per_segment || 0).toFixed(2)}` +
+          ` · dual_writer ${m.dual_writer_violations ?? 0}` +
+          ` · ${histLine}`;
+      }
+    } catch (e) {
+      console.warn('[monitoring] tps', e);
     }
   }
 

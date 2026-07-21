@@ -221,9 +221,27 @@ def classify_call_failure(
 
 
 def ensure_ollama_ready(model: str, *, app_dir=None) -> dict[str, Any]:
-    """Preflight: probe Ollama; restart service if unreachable (when enabled)."""
+    """Preflight: probe Ollama; restart service or remediate missing model."""
     cfg = RetryConfig.from_env(cpu_only=True)
     health = probe_ollama_detailed(model)
+    if health.get("failure_phase") == "model_missing":
+        try:
+            from engines.llm_callable import remediate_missing_model
+
+            resolved, remediation, tags = remediate_missing_model(
+                model,
+                app_dir=app_dir,
+                available=list(health.get("installed_models") or []),
+            )
+            if resolved and remediation in ("remapped", "pulled", "installed"):
+                health = probe_ollama_detailed(resolved)
+                health["remediation"] = remediation
+                health["resolved_model"] = resolved
+                health["installed_models"] = tags
+                return health
+        except Exception as exc:
+            health["remediation_error"] = str(exc)[:200]
+
     if health.get("server_reachable") or not cfg.restart_ollama_on_unreachable:
         return health
 
@@ -466,9 +484,22 @@ def run_with_retry(
             ollama_before = ensure_ollama_ready(model, app_dir=app_dir)
             last_ollama = ollama_before
             if ollama_before.get("failure_phase") == "model_missing":
-                last_failure = "model_missing"
-                last_phase = "model_missing"
-                continue
+                resolved = str(ollama_before.get("resolved_model") or "").strip()
+                if resolved and resolved != model:
+                    model = resolved
+                    models_tried[-1] = model
+                    ollama_before = ensure_ollama_ready(model, app_dir=app_dir)
+                    last_ollama = ollama_before
+                    if ollama_before.get("model_listed"):
+                        model_loaded = bool(ollama_before.get("model_loaded"))
+                    else:
+                        last_failure = "model_missing"
+                        last_phase = "model_missing"
+                        continue
+                else:
+                    last_failure = "model_missing"
+                    last_phase = "model_missing"
+                    continue
 
         model_loaded = bool(ollama_before.get("model_loaded"))
 

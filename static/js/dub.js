@@ -67,8 +67,11 @@ const state = {
   voiceCatalog: {},
   reviewFontSize: 16,
   diagnosticsShown: false,
+  reviewPauseNotified: false,
+  reviewOverlayAutoOpened: false,
   devInspectorAvailable: false,
   statusFetchFailures: 0,
+  statusCheckInFlight: false,
   pipelineCheckpoint: null,
   cancelledTask: false,
   translateStartedAt: 0,
@@ -1437,7 +1440,73 @@ function renderProgressSteps(currentStep, status) {
 function getStyleVolumePct(styleId) {
   const row = dubStylesState.styles.find(s => s.id === styleId);
   if (row && row.original_volume_pct != null) return row.original_volume_pct;
-  return 0;
+  return 20;
+}
+
+function persistOriginalVolumePct(pct) {
+  const v = Math.max(0, Math.min(100, Number(pct) || 0));
+  try {
+    const s = typeof loadSettings === 'function' ? loadSettings() : {};
+    s.originalVolume = v;
+    localStorage.setItem('vm_settings', JSON.stringify(s));
+  } catch (_) {}
+  return v;
+}
+
+function loadSavedOriginalVolumePct() {
+  try {
+    const s = typeof loadSettings === 'function' ? loadSettings() : {};
+    if (s.originalVolume != null && Number.isFinite(Number(s.originalVolume))) {
+      return Math.max(0, Math.min(100, Number(s.originalVolume)));
+    }
+  } catch (_) {}
+  return null;
+}
+
+function getReviewOriginalVolumePct() {
+  const el = document.getElementById('tr-original-volume');
+  if (el) return Number(el.value) || 0;
+  const wiz = document.getElementById('wizard-original-volume');
+  if (wiz) return Number(wiz.value) || 0;
+  return loadSavedOriginalVolumePct() ?? 20;
+}
+
+function setReviewOriginalVolumePct(pct, { persist = true } = {}) {
+  const v = Math.max(0, Math.min(100, Number(pct) || 0));
+  const el = document.getElementById('tr-original-volume');
+  const lbl = document.getElementById('tr-original-volume-label');
+  if (el) el.value = String(v);
+  if (lbl) lbl.textContent = v + '%';
+  const wiz = document.getElementById('wizard-original-volume');
+  const wizLbl = document.getElementById('wizard-original-volume-label');
+  if (wiz) wiz.value = String(v);
+  if (wizLbl) wizLbl.textContent = v + '%';
+  // Keep wizard/main slider in sync and mark custom so style change won't wipe to 0%.
+  setOriginalVolumePct(v, false);
+  if (persist) persistOriginalVolumePct(v);
+}
+
+function bindReviewOriginalMixControls() {
+  const el = document.getElementById('tr-original-volume');
+  if (el && !el.dataset.bound) {
+    el.dataset.bound = '1';
+    el.addEventListener('input', () => setReviewOriginalVolumePct(el.value));
+  }
+  document.querySelectorAll('.tr-vol-preset').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => setReviewOriginalVolumePct(btn.dataset.pct));
+  });
+  const wiz = document.getElementById('wizard-original-volume');
+  if (wiz && !wiz.dataset.bound) {
+    wiz.dataset.bound = '1';
+    wiz.addEventListener('input', () => setReviewOriginalVolumePct(wiz.value));
+  }
+  document.querySelectorAll('.wiz-vol-preset').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => setReviewOriginalVolumePct(btn.dataset.pct));
+  });
 }
 
 function getStyleHintKey(styleId) {
@@ -1527,7 +1596,8 @@ async function loadDubStyles() {
     }
 
     bindDubStyleControls();
-    applyStyleVolumePreset(getSelectedDubStyle(), true);
+    // Prefer saved Settings volume; don't force style default over user choice.
+    applyStyleVolumePreset(getSelectedDubStyle(), false);
     updateDubStyleUI();
     renderWizardStyleGrid();
   } catch (e) {
@@ -1568,9 +1638,21 @@ function setOriginalVolumePct(pct, fromPreset) {
 }
 
 function getStylePayload() {
+  // Prefer explicit user volume: review → wizard → hidden slider → settings.
+  let vol = null;
+  if (document.getElementById('tr-original-volume')) {
+    vol = getReviewOriginalVolumePct();
+  } else if (document.getElementById('wizard-original-volume')) {
+    vol = Number(document.getElementById('wizard-original-volume').value) || 0;
+  } else {
+    vol = getOriginalVolumePct();
+  }
+  const saved = loadSavedOriginalVolumePct();
+  if ((vol == null || !Number.isFinite(vol)) && saved != null) vol = saved;
+  if (vol == null || !Number.isFinite(vol)) vol = 20;
   return {
     dub_style: getSelectedDubStyle(),
-    original_volume: getOriginalVolumePct(),
+    original_volume: vol,
     keep_original_track: document.getElementById('keep-original-track').checked,
   };
 }
@@ -1633,10 +1715,16 @@ async function previewDubStyle() {
 }
 
 function applyStyleVolumePreset(styleId, force) {
+  const saved = loadSavedOriginalVolumePct();
+  if (!force && saved != null) {
+    setReviewOriginalVolumePct(saved, { persist: false });
+    return;
+  }
   const vol = getStyleVolumePct(styleId);
   const slider = document.getElementById('original-volume');
   if (!force && slider && slider.dataset.custom === '1') return;
   setOriginalVolumePct(vol, true);
+  setReviewOriginalVolumePct(vol, { persist: false });
   if (slider) delete slider.dataset.custom;
 }
 
@@ -1670,6 +1758,7 @@ function bindDubStyleControls() {
       const lbl = document.getElementById('original-volume-label');
       if (lbl) lbl.textContent = vol.value + '%';
       vol.dataset.custom = '1';
+      setReviewOriginalVolumePct(vol.value);
     });
   }
 
@@ -1678,6 +1767,7 @@ function bindDubStyleControls() {
       const pct = Number(btn.dataset.pct);
       if (!Number.isFinite(pct)) return;
       setOriginalVolumePct(pct, false);
+      setReviewOriginalVolumePct(pct);
     });
   });
 }
@@ -1877,6 +1967,7 @@ async function startDub() {
   state.lastProgressAt = Date.now();
   state.stallNotified = false;
   state.reviewPauseNotified = false;
+  state.reviewOverlayAutoOpened = false;
   state.diagnosticsShown = false;
   state.statusFetchFailures = 0;
   translationReviewState.preTts = false;
@@ -1894,7 +1985,39 @@ async function startDub() {
     model_size: document.getElementById('model-size').value,
     ui_lang: uiLang,
     content_mode: (document.getElementById('content-mode') || {}).value || 'movie',
-    segmentation_mode: (document.getElementById('segmentation-mode') || {}).value || 'timing',
+    segmentation_mode: (document.getElementById('segmentation-mode') || {}).value || 'adaptive',
+    adaptive_segmentation: (function () {
+      const pick = (uiId, hiddenId) =>
+        document.getElementById(uiId) || document.getElementById(hiddenId);
+      const enEl = pick('adaptive-seg-enabled-ui', 'adaptive-seg-enabled');
+      const minEl = pick('adaptive-seg-min-s-ui', 'adaptive-seg-min-s');
+      const maxEl = pick('adaptive-seg-max-s-ui', 'adaptive-seg-max-s');
+      const prefEl = pick('adaptive-seg-preferred-s-ui', 'adaptive-seg-preferred-s');
+      const aggEl = pick('adaptive-seg-aggressiveness-ui', 'adaptive-seg-aggressiveness');
+      const meanEl = pick('adaptive-seg-meaning-ui', 'adaptive-seg-meaning');
+      const forecastEl = pick('adaptive-seg-tts-forecast-ui', 'adaptive-seg-tts-forecast');
+      const toMs = (el, fallbackS) => {
+        const v = el ? Number(el.value) : fallbackS;
+        return Math.round((Number.isFinite(v) ? v : fallbackS) * 1000);
+      };
+      const enabled = enEl ? !!enEl.checked : true;
+      // Keep segmentation_mode coherent with the toggle
+      const modeEl = document.getElementById('segmentation-mode');
+      if (modeEl && enabled && modeEl.value === 'timing') {
+        /* leave user's timing choice; adaptive still runs via flag/settings */
+      }
+      return {
+        enabled,
+        min_ms: toMs(minEl, 4.5),
+        max_ms: toMs(maxEl, 16),
+        preferred_ms: toMs(prefEl, 9),
+        aggressiveness: aggEl
+          ? Math.max(0, Math.min(1, Number(aggEl.value) / 100))
+          : 0.65,
+        use_meaning: meanEl ? !!meanEl.checked : true,
+        use_tts_forecast: forecastEl ? !!forecastEl.checked : true,
+      };
+    })(),
     ocr_enabled: false,
     translation_review_before_tts: !!(document.getElementById('translation-review-before-tts') || {}).checked,
     strict_llm_adaptation: (document.getElementById('strict-llm-adaptation') || {}).value || 'automatic',
@@ -2064,6 +2187,10 @@ async function loadDebugModeFlag() {
 
 async function checkStatus() {
   if (!state.taskId) return;
+  // Avoid stacking polls when status is slow (heavy Whisper/TTS) — overlapping
+  // fetches used to look like "Нет связи с сервером" after 4 failures.
+  if (state.statusCheckInFlight) return;
+  state.statusCheckInFlight = true;
 
   try {
     const uiLang = localStorage.getItem('vm_ui_lang') || 'ru';
@@ -2224,27 +2351,41 @@ async function checkStatus() {
       }
       const approveBtn = document.getElementById('btn-approve-translation');
       if (approveBtn) approveBtn.disabled = false;
+      // Auto-open Review when TPS/manual hold — otherwise user waits and watchdog
+      // used to kill the job as PIPELINE_STALLED after 2 min.
+      if (!state.reviewOverlayAutoOpened) {
+        state.reviewOverlayAutoOpened = true;
+        try { openTranslationReview(); } catch (_) { /* overlay may not exist yet */ }
+      }
       if (!state.reviewPauseNotified && !state.diagnosticsShown) {
         state.reviewPauseNotified = true;
+        const manualN = Array.isArray(d.tps_manual_indices) ? d.tps_manual_indices.length : 0;
         vmNotify(
-          t('dub.review_pause_notify', 'Перевод готов — проверьте текст перед озвучкой.'),
+          manualN
+            ? t('dub.review_manual_pause_notify', 'TPS: нужна ручная правка ({n} сегм.) — откройте проверку перевода.').replace('{n}', String(manualN))
+            : t('dub.review_pause_notify', 'Перевод готов — проверьте текст перед озвучкой.'),
           'info',
-          6000
+          8000
         );
       }
     } else {
       translationReviewState.preTts = false;
       state.reviewPauseNotified = false;
+      state.reviewOverlayAutoOpened = false;
       const banner = document.getElementById('translation-review-banner');
       if (banner) banner.style.display = 'none';
     }
   } catch (e) {
     state.statusFetchFailures = (state.statusFetchFailures || 0) + 1;
-    if (state.statusFetchFailures >= 4) {
+    // ~15s of consecutive failures (poll every 1s) before giving up — brief
+    // stalls during Whisper/TTS must not abort a running dub.
+    if (state.statusFetchFailures >= 15) {
       finishError(
         e.message || t('dub.server_unreachable', 'Сервер недоступен. Проверьте подключение и нажмите «Повторить».')
       );
     }
+  } finally {
+    state.statusCheckInFlight = false;
   }
 }
 
@@ -2727,10 +2868,69 @@ function formatReviewWarning(w) {
   return code;
 }
 
+function _trFillBar(pct) {
+  const p = Math.max(0, Math.min(160, Number(pct) || 0));
+  const filled = Math.round((Math.min(p, 120) / 120) * 20);
+  const bar = '█'.repeat(filled) + '░'.repeat(Math.max(0, 20 - filled));
+  return bar + ' ' + (Math.round(p * 10) / 10) + '%';
+}
+
+function _trSpeechLines(speech) {
+  const se = speech || {};
+  const orig = Math.max(1, Number(se.original_duration_ms) || 1);
+  const dub = Math.max(0, Number(se.dub_duration_ms) || 0);
+  const max = Math.max(orig, dub, 1);
+  const oLen = Math.max(1, Math.round((orig / max) * 24));
+  const dLen = Math.max(1, Math.round((dub / max) * 24));
+  return `
+    <div class="tr-speech-end">
+      <div class="tr-speech-row"><span>Оригинал</span><code>|${'='.repeat(oLen)}|</code></div>
+      <div class="tr-speech-row"><span>TTS</span><code>|${'='.repeat(dLen)}|</code></div>
+    </div>`;
+}
+
+function _trStatusEmoji(status) {
+  if (status === 'green') return '🟢';
+  if (status === 'yellow') return '🟡';
+  if (status === 'orange') return '🟠';
+  if (status === 'red') return '🔴';
+  return '⚪';
+}
+
+function _trOverflowHtml(seg, editText) {
+  const fits = seg.text_fits != null ? seg.text_fits : editText;
+  const overflow = seg.text_overflow || '';
+  if (!overflow) {
+    return `<div class="tr-overflow-text"><span class="tr-text-fits">${escHtml(fits || editText || '')}</span></div>`;
+  }
+  return `<div class="tr-overflow-text"><span class="tr-text-fits">${escHtml(fits)}</span><span class="tr-text-overflow">${escHtml(overflow)}</span></div>`;
+}
+
+function _trQualityBlock(qb) {
+  const q = qb || {};
+  const rows = [
+    ['Translation', q.translation],
+    ['Naturalness', q.naturalness],
+    ['Entities', q.entities],
+    ['Timing', q.timing],
+    ['TTS', q.tts],
+    ['Overall', q.overall],
+  ];
+  return `<div class="tr-quality-grid">${rows.map(([k, v]) =>
+    `<div class="tr-q-cell"><span class="tr-q-k">${k}</span><span class="tr-q-v">${v != null ? escHtml(String(v)) : '—'}</span></div>`
+  ).join('')}</div>`;
+}
+
 function renderTranslationReview(data) {
   const body = document.getElementById('translation-review-body');
   const segs = data.segments || [];
   const dev = typeof isDevMode === 'function' && isDevMode();
+  bindReviewOriginalMixControls();
+  const savedVol = loadSavedOriginalVolumePct();
+  setReviewOriginalVolumePct(
+    savedVol != null ? savedVol : getReviewOriginalVolumePct(),
+    { persist: false }
+  );
   if (!segs.length) {
     body.innerHTML = '<p class="char-count">' + t('dub.review_empty', 'Нет сегментов для проверки') + '</p>';
     return;
@@ -2771,31 +2971,118 @@ function renderTranslationReview(data) {
   const saveLabel = preTts
     ? t('dub.review_save_text', '💾 Сохранить')
     : t('dub.review_save', '💾 Сохранить и озвучить');
+  const manualCount = segs.filter(s => s.needs_manual_review || s.manual_review_required).length;
+  const sortedSegs = [...segs].sort((a, b) => {
+    const am = (a.needs_manual_review || a.manual_review_required || a.fill_status === 'red') ? 0 : 1;
+    const bm = (b.needs_manual_review || b.manual_review_required || b.fill_status === 'red') ? 0 : 1;
+    if (am !== bm) return am - bm;
+    return (a.index || 0) - (b.index || 0);
+  });
+  const manualBanner = manualCount
+    ? `<p class="tr-warn-tag tr-manual-banner">${t('dub.review_manual_needed', 'Требуется ручная правка: {n} сегм.').replace('{n}', String(manualCount))} · ${t('dub.review_manual_hint', 'Одно поле = approved_text (Review = TTS)')}</p>`
+    : '';
   body.innerHTML = (langLine ? '<p class="char-count">' + escHtml(langLine) + ' · ' + segs.length + '</p>' : '') +
     summaryHtml +
-    segs.map(seg => {
+    manualBanner +
+    sortedSegs.map(seg => {
       const warnLabels = (seg.warnings || []).map(formatReviewWarning);
+      const editText = seg.approved_text || seg.final_text || seg.tts_text || '';
+      const fillStatus = String(seg.fill_status || seg.dsal_band || 'green').toLowerCase();
+      const fillPct = Number(seg.fill_pct != null ? seg.fill_pct : 0);
+      const slotSec = (Number(seg.slot_ms || 0) / 1000).toFixed(1);
+      const ttsSec = (Number(seg.tts_ms != null ? seg.tts_ms : seg.playback_duration_ms || 0) / 1000).toFixed(1);
+      const overflowSec = (Number(seg.overflow_ms || 0) / 1000).toFixed(1);
+      const statusLabel = seg.status_label || (
+        fillStatus === 'green' ? t('dub.review_status_green', 'Отлично') :
+        fillStatus === 'yellow' ? t('dub.review_status_yellow', 'Почти предел') :
+        fillStatus === 'orange' ? t('dub.review_status_orange', 'Возможна проблема') :
+        t('dub.review_status_red', 'Требует исправления')
+      );
+      const algos = (seg.algorithms || []).map(a =>
+        `<span class="tr-algo-chip">${escHtml(a)}</span>`
+      ).join('');
+      const meaningWarn = seg.meaning_loss_risk
+        ? `<div class="tr-warn-tag">⚠ ${t('dub.review_meaning_loss', 'Possible Meaning Loss')}</div>`
+        : '';
+      const entityWarn = seg.entity_risk
+        ? `<div class="tr-warn-tag">⚠ ${t('dub.review_entity_removed', 'Important Entity Removed')}</div>`
+        : '';
+      const voiceLine = seg.voice_truncated
+        ? `<div class="tr-voice-flag tr-voice-bad">Voice truncated: YES</div>`
+        : `<div class="tr-voice-flag tr-voice-ok">Voice finished naturally: ${seg.voice_finished_naturally === false ? 'NO' : 'YES'}</div>`;
       const warnHtml = warnLabels.length ? '<div class="tr-warn-tag">⚠ ' + escHtml(warnLabels.join('; ')) + '</div>' : '';
-      const editText = seg.final_text || seg.tts_text || '';
       const ttsHint = (!translationReviewState.preTts && seg.text_for_tts && seg.text_for_tts !== editText)
         ? `<div class="char-count">${t('dub.review_tts_text', 'Озвучено')}: ${escHtml(seg.text_for_tts)}</div>`
         : '';
-      const devFields = dev ? `
-          <div class="tr-dev-only tr-field"><label>Raw MT</label><div class="tr-val">${escHtml(seg.raw_translation || '—')}</div></div>
-          <div class="tr-dev-only tr-field"><label>Naturalized</label><div class="tr-val">${escHtml(seg.naturalized_text || '—')}</div></div>
-          <div class="tr-dev-only tr-field"><label>Timing-Aware</label><div class="tr-val">${escHtml(seg.timing_aware_text || seg.final_text || '—')}</div></div>
-          <div class="tr-dev-only tr-field"><label>Text for TTS</label><div class="tr-val">${escHtml(seg.text_for_tts || editText || '—')}</div></div>
-          <div class="tr-dev-only tr-field"><label>Engine / Route</label><div class="tr-val">${escHtml(seg.engine || '')} · ${escHtml(seg.route_label || seg.route || '')}</div></div>
-        ` : '';
+      const bandClass = 'tr-fill-' + fillStatus;
+      const studioTag = seg.needs_studio
+        ? `<span class="tr-warn-tag">Studio</span>`
+        : '';
+      const manualTag = (seg.needs_manual_review || seg.manual_review_required)
+        ? `<span class="tr-manual-tag">${t('dub.review_manual_tag', 'Manual Review Required')}</span>`
+        : '';
+      const tpsTag = (seg.tqe_status || seg.tps_path)
+        ? `<span class="char-count">TPS ${escHtml(seg.tps_path || '')} · ${escHtml(seg.tqe_status || '')}</span>`
+        : '';
+      const expTtsSec = (Number(seg.expected_tts_ms || 0) / 1000).toFixed(1);
+      const wordCount = Number(seg.word_count || 0);
+      const segAdvice = String(seg.seg_advice || '');
+      const segStatus = String(seg.seg_status || statusLabel);
+      const adviceHtml = segAdvice
+        ? `<div class="tr-warn-tag tr-seg-advice">${escHtml(segAdvice)}${seg.seg_status ? ' · ' + escHtml(seg.seg_status) : ''}</div>`
+        : '';
+      const budgetSec = (Number(seg.slot_budget_ms || seg.slot_ms || 0) / 1000).toFixed(1);
+      const marginSec = (Number(seg.safety_margin_ms || 0) / 1000).toFixed(1);
+      const estSpeechSec = (Number(seg.estimated_speech_ms || seg.expected_tts_ms || 0) / 1000).toFixed(1);
+      const origChars = Number(seg.original_char_len || (seg.original || '').length || 0);
+      const trChars = Number(seg.translation_char_len || (editText || '').length || 0);
+      const timingBadge = `
+        <div class="tr-timing-badge ${bandClass}">
+          <span>Original ${slotSec} s</span>
+          <span>Slot Budget ${budgetSec} s</span>
+          <span>Expected TTS ${expTtsSec > 0 ? expTtsSec : ttsSec} s</span>
+          <span>Est. Speech ${estSpeechSec} s</span>
+          <span>TTS ${ttsSec} s</span>
+          <span>Overflow ${Number(overflowSec) > 0 ? '+' : ''}${overflowSec} s</span>
+          <span>Safety Margin ${marginSec} s</span>
+          <span>Words ${wordCount || '—'}</span>
+          <span>Chars ${origChars}→${trChars}</span>
+          <span>Fill ${fillPct}%</span>
+        </div>
+        <div class="tr-fill-bar ${bandClass}">${_trFillBar(fillPct)}</div>
+        ${adviceHtml}
+        <div class="char-count">Status: ${escHtml(segStatus)}${seg.sync_status ? ' · ' + escHtml(seg.sync_status) : ''}</div>`;
+      const dsalLine = (seg.slot_ms || seg.dsal_band || seg.dsal_applied)
+        ? `<div class="tr-dev-only tr-field"><label>DSAL detail</label><div class="tr-val">applied=${seg.dsal_applied?'yes':'no'} · clause=${escHtml(String(seg.clause_coverage||0))} · expand=${seg.expand_required?'yes':'no'} · locked=${seg.translation_locked?'yes':'no'} · Semantic Adapt=${seg.semantic_adapted?'yes':'no'}</div></div>`
+        : '';
+      const stageFields = `
+          <div class="tr-field"><label>${t('dub.review_original', 'Оригинал')}</label><div class="tr-val">${escHtml(seg.original || '—')}</div></div>
+          <div class="tr-field"><label>Raw MT</label><div class="tr-val">${escHtml(seg.raw_translation || '—')}</div></div>
+          <div class="tr-field"><label>Naturalized</label><div class="tr-val">${escHtml(seg.naturalized_text || '—')}</div></div>
+          <div class="tr-field"><label>Final</label><div class="tr-val">${_trOverflowHtml(seg, editText)}</div></div>
+          <div class="tr-field"><label>Text for TTS</label><div class="tr-val">${escHtml(seg.text_for_tts || editText || '—')}</div></div>
+          ${dev ? `<div class="tr-dev-only tr-field"><label>Engine / Route</label><div class="tr-val">${escHtml(seg.engine || '')} · ${escHtml(seg.route_label || seg.route || '')}</div></div>${dsalLine}` : ''}
+        `;
       return `
-        <div class="tr-seg ${warnLabels.length ? 'tr-seg-warn' : ''}" data-idx="${seg.index}">
-          <div class="tr-seg-head"><strong>#${seg.index}</strong></div>
+        <div class="tr-seg ${warnLabels.length || seg.needs_studio || seg.voice_truncated ? 'tr-seg-warn' : ''} ${(seg.needs_manual_review || seg.manual_review_required) ? 'tr-seg-manual' : ''} ${bandClass}" data-idx="${seg.index}">
+          <div class="tr-seg-head">
+            <strong>#${seg.index}</strong>
+            <span class="tr-status-pill ${_trStatusEmoji(fillStatus) ? 'tr-status-' + fillStatus : ''}">${_trStatusEmoji(fillStatus)} ${escHtml(statusLabel)}</span>
+            ${manualTag} ${studioTag} ${tpsTag}
+          </div>
           ${warnHtml}
-          <div class="tr-original"><span class="char-count">${t('dub.review_original', 'Оригинал')}:</span> ${escHtml(seg.original || '')}</div>
-          ${devFields}
+          ${meaningWarn}
+          ${entityWarn}
+          ${timingBadge}
+          ${_trSpeechLines(seg.speech_end)}
+          ${voiceLine}
+          ${algos ? `<div class="tr-algo-row">${algos}</div>` : ''}
+          ${_trQualityBlock(seg.quality_breakdown)}
+          ${stageFields}
           <div class="tr-edit">
             <div class="tr-final-label">${t('dub.review_final', 'Финальный текст')}</div>
-            <textarea id="tr-edit-${seg.index}" rows="3">${escHtml(editText)}</textarea>
+            <textarea id="tr-edit-${seg.index}" rows="3" class="${(seg.needs_manual_review || seg.manual_review_required) ? 'tr-edit-manual' : ''}" oninput="onReviewTextInput(${seg.index})">${escHtml(editText)}</textarea>
+            <div id="tr-live-overflow-${seg.index}" class="tr-overflow-text tr-live-overflow">${_trOverflowHtml(seg, editText)}</div>
             ${ttsHint}
             <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="saveTranslationSegment(${seg.index})">${saveLabel}</button>
           </div>
@@ -2803,6 +3090,45 @@ function renderTranslationReview(data) {
     }).join('');
   setReviewFontSize(state.reviewFontSize || 16);
 }
+
+function onReviewTextInput(index) {
+  const ta = document.getElementById('tr-edit-' + index);
+  const live = document.getElementById('tr-live-overflow-' + index);
+  if (!ta || !live) return;
+  const seg = (translationReviewState.segments || []).find(s => Number(s.index) === Number(index));
+  if (!seg) {
+    live.innerHTML = `<span class="tr-text-fits">${escHtml(ta.value)}</span>`;
+    return;
+  }
+  const text = ta.value;
+  const slot = Number(seg.slot_ms || 0);
+  const baseTts = Number(seg.tts_ms || seg.playback_duration_ms || 0);
+  const baseLen = Math.max(1, String(seg.final_text || seg.text_for_tts || text).length);
+  const estTts = baseTts > 0 ? Math.round(baseTts * (text.length / baseLen)) : Math.round(text.length / 13.5 * 1000);
+  let fits = text;
+  let overflow = '';
+  if (slot > 0 && estTts > slot && text.length > 1) {
+    const ratio = slot / estTts;
+    let cut = Math.max(1, Math.min(text.length - 1, Math.round(text.length * ratio)));
+    if (text[cut] && /[\w\u0400-\u04FF]/.test(text[cut])) {
+      const sp = text.lastIndexOf(' ', cut);
+      if (sp > cut * 0.5) cut = sp + 1;
+    }
+    fits = text.slice(0, cut);
+    overflow = text.slice(cut);
+  }
+  live.innerHTML = overflow
+    ? `<span class="tr-text-fits">${escHtml(fits)}</span><span class="tr-text-overflow">${escHtml(overflow)}</span>`
+    : `<span class="tr-text-fits">${escHtml(fits)}</span>`;
+  // Update fill bar in-place
+  const row = ta.closest('.tr-seg');
+  if (row) {
+    const fillPct = slot > 0 ? (estTts / slot) * 100 : 0;
+    const bar = row.querySelector('.tr-fill-bar');
+    if (bar) bar.textContent = _trFillBar(fillPct);
+  }
+}
+window.onReviewTextInput = onReviewTextInput;
 
 async function saveTranslationSegment(index) {
   const ta = document.getElementById('tr-edit-' + index);
@@ -2917,7 +3243,10 @@ async function approveTranslationReview() {
     const r = await fetch('/api/auto_dub/translation_review/' + encodeURIComponent(state.taskId) + '/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ edits }),
+      body: JSON.stringify({
+        edits,
+        original_volume: getReviewOriginalVolumePct(),
+      }),
     });
     const d = await r.json();
     if (!r.ok || !d.ok) throw new Error(d.error || 'approve failed');
@@ -3824,6 +4153,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (strictSel && saved.strictLlmAdaptation) strictSel.value = saved.strictLlmAdaptation;
   if (strictSel) strictSel.addEventListener('change', checkAdaptationCapabilities);
   checkAdaptationCapabilities();
+
+  bindReviewOriginalMixControls();
+  const savedOrigVol = loadSavedOriginalVolumePct();
+  if (savedOrigVol != null) {
+    setReviewOriginalVolumePct(savedOrigVol, { persist: false });
+  } else {
+    setReviewOriginalVolumePct(20, { persist: false });
+  }
 
   tryResumeTask();
   loadRedubFromUrl();

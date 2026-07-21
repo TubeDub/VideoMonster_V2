@@ -149,14 +149,46 @@ def _lang_min_break(ch: str, lang: str) -> int:
 
 def _scale_break_ms(ms: int, *, fill_percent: float, lang: str = "", ch: str = "") -> int:
     """When text is long for the slot, shorten pauses before speeding speech."""
+    from engines.professional_dubbing.config import MAX_BREAK_MS
+
     floor = _lang_min_break(ch, lang)
     if fill_percent <= 108:
-        return max(ms, floor) if floor else ms
-    ratio = min(1.0, 108.0 / max(fill_percent, 108.0))
-    scaled = int(ms * max(0.78, ratio))
-    if floor:
-        scaled = max(scaled, int(floor * 0.92))
-    return max(140, scaled)
+        out = max(ms, floor) if floor else ms
+    else:
+        ratio = min(1.0, 108.0 / max(fill_percent, 108.0))
+        scaled = int(ms * max(0.78, ratio))
+        if floor:
+            scaled = max(scaled, int(floor * 0.92))
+        out = max(140, scaled)
+    # TZ v4.0 P2: never exceed MAX_BREAK_MS (350)
+    return min(int(out), int(MAX_BREAK_MS))
+
+
+_ABBREV_BEFORE_DOT = re.compile(
+    r"(?:^|[\s\(])(?:Jr|Sr|Mr|Mrs|Ms|Dr|Prof|St|vs|etc|т\s*\.?\s*д|т\s*\.?\s*п)$",
+    re.I,
+)
+_NAME_BEFORE_DOT = re.compile(
+    r"(?:Джордж-молодший|Джорджа-молодшого|George\s+Jr)$",
+    re.I,
+)
+
+
+def _is_abbrev_or_midname_dot(plain: str, dot_index: int) -> bool:
+    """True when '.' is abbreviation / mid-name, not a sentence end."""
+    before = plain[:dot_index].rstrip()
+    if _ABBREV_BEFORE_DOT.search(before) or _NAME_BEFORE_DOT.search(before):
+        after = plain[dot_index + 1 :].lstrip()
+        # Sentence end if nothing after
+        if not after:
+            return False
+        # Continuation lowercase / Ukrainian lowercase → mid-name / false period
+        if after[0].islower() or after[0] in "аеиоуяюєіїьбвгґджзйклмнпрстфхцчшщ":
+            return True
+        # Abbreviation always skip break even before capital (Jr. Drove)
+        if _ABBREV_BEFORE_DOT.search(before):
+            return True
+    return False
 
 
 def build_prosody_plan(
@@ -255,6 +287,11 @@ def build_prosody_plan(
             i += 1
             continue
         if ch in ".!?…":
+            # TZ v4.0 P2: no sentence break after Jr. / mid-name false period
+            if ch == "." and _is_abbrev_or_midname_dot(plain, i):
+                parts.append(ch)
+                i += 1
+                continue
             ms = _BREAK_SENTENCE
             ms = max(ms, _lang_min_break(ch, lang_base))
             if extra_break_budget > 0:

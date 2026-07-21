@@ -1,0 +1,141 @@
+{
+  "id": "george_lucas_en_uk_20",
+  "task_id": "0c5ddd9925f84fbd9a42dfa6f21816eb",
+  "source_lang": "en",
+  "target_lang": "uk",
+  "notes": "Golden regression for DSAL v4.0 P1 — LLM off",
+  "acceptance": {
+    "seg6_delta_pct_max": 15,
+    "clause_coverage_min": 0.85,
+    "adaptation_executed_on_yellow_red": true
+  },
+  "segments": [
+    {
+      "index": 1,
+      "en": "An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner.",
+      "uk": "18-річний Джордж-молодший поїхав додому на вечерю через рідне місто.",
+      "slot_ms": 7000
+    },
+    {
+      "index": 2,
+      "en": "But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there.",
+      "uk": "Але коли Джордж їхав за кермом, він його не полишала тривога, що йому справді страшно туди дістатися.",
+      "slot_ms": 8000
+    },
+    {
+      "index": 3,
+      "en": "So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars.",
+      "uk": "Джордж-молодший був дуже розумною дитиною, але також він дуже легко відволікався, і через це він справді не займався чимось серйозним, окрім автомобілів.",
+      "slot_ms": 11000
+    },
+    {
+      "index": 4,
+      "en": "And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat,",
+      "uk": "І тоді його батько купив йому маленьку італійську машину Фіат, але його батько, незважаючи на те, що він був тим, хто буквально дав йому Фіат.",
+      "slot_ms": 9000
+    },
+    {
+      "index": 5,
+      "en": "he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument",
+      "uk": "Він просто не розумів одержимості свого сина автомобілями, як чому б тобі не взяти фокус і не застосувати його до інших речей, отримаєш справжню роботу.",
+      "slot_ms": 10000,
+      "must_contain": ["справжню роботу"]
+    },
+    {
+      "index": 6,
+      "en": "between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black.",
+      "uk": "Джордж під'їхав до перехрестя, де він був біля його дому, і він почав повертати, коли він почув цей дуже гучний звук і потім все потемніло.",
+      "slot_ms": 12160,
+      "actual_tts_ms": 9161,
+      "must_restore": ["між батьком і сином"],
+      "must_start_with": "між батьком і сином",
+      "delta_pct_max": 15
+    },
+    {
+      "index": 7,
+      "en": "Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital.",
+      "uk": "Через два тижні Джордж-молодший лежав у лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+      "slot_ms": 5600,
+      "actual_tts_ms": 6932
+    },
+    {
+      "index": 8,
+      "en": "So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard",
+      "uk": "Так як два тижні раніше, коли Джордж зробив це, а потім щось відбулося, добре що це ще один автомобіль на великій швидкості промчала дорогою і врізалася в машину Джорджа так важко.",
+      "slot_ms": 10000
+    },
+    {
+      "index": 9,
+      "en": "that George Jr. was ejected from the car but he had survived.",
+      "uk": "що Джорджа-молодшого викинуло з машини, але він вижив.",
+      "slot_ms": 4500
+    },
+    {
+      "index": 10,
+      "en": "Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera.",
+      "uk": "Через два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+      "slot_ms": 9000
+    },
+    {
+      "index": 11,
+      "en": "So since his near-death experience, George Jr. had realized that really has dad had been kind of right that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+      "uk": "Так, після свого досвіду на межі смерті, Джордж-молодший зрозумів, що його батько був певною мірою правий, що в деяких випадках він марнував свій потенціал. Тож Джордж-молодший більше не хоче займатися автогонками.",
+      "slot_ms": 12000
+    },
+    {
+      "index": 12,
+      "en": "Instead, he had picked up this camera and really gotten back into his old hobby of photography.",
+      "uk": "Натомість, він взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+      "slot_ms": 6000
+    },
+    {
+      "index": 13,
+      "en": "In fact, George Jr. had applied to the prestigious cinematography program at the University of Southern California, but after sending off his application, he was pretty sure he would not get in.",
+      "uk": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії в університеті Південної Каліфорнії, але після того, як надіслав заяву, він був цілком упевнений, що його не приймуть.",
+      "slot_ms": 11000
+    },
+    {
+      "index": 14,
+      "en": "Now, George Jr. walked over to the podium to take some photos of the winning drive.",
+      "uk": "Тепер Джордж-молодший підійшов до подіуму, щоб зробити кілька фотографій переможного заїзду.",
+      "slot_ms": 5500
+    },
+    {
+      "index": 15,
+      "en": "But as he walked over there, the middle-aged man came up beside him and just asked George Jr. about his photography and then at some point the man actually formally introduced himself as Haskell Wexler.",
+      "uk": "Але коли він йшов туди, чоловік середнього віку підійшов до нього і запитав Джорджа-молодшого про його фотографію, а потім в якийсь момент людина насправді представився як Хаскел Уекслер.",
+      "slot_ms": 12000
+    },
+    {
+      "index": 16,
+      "en": "And he said that he was actually a cinematographer in Hollywood. And George Jr. told Haskell about how he had recently applied to USC to try to get into their cinematography program. And when Haskell heard this,",
+      "uk": "І сказав він, що він насправді був кінооператором в Голлівуді. І Джордж-молодший розповів Хаскелу про те, як він нещодавно подав заявку до USC, щоб спробувати потрапити в програму кінематографії. І коли Хаскел почув це,",
+      "slot_ms": 12000
+    },
+    {
+      "index": 17,
+      "en": "he said, George, I know people at USC. Let me make some calls. And sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school.",
+      "uk": "Джордж, я знаю людей в USC, дозвольте мені зробити кілька дзвінків і, звичайно, незабаром після цієї фатальної зустрічі Джордж-молодший отримає лист про зарахування до кіношколи USC.",
+      "slot_ms": 11000
+    },
+    {
+      "index": 18,
+      "en": "But this moment in George Jr's life did not just alter George's life forever.",
+      "uk": "Але цей момент життя Джорджа-молодшого не лише змінив життя Джорджа назавжди.",
+      "slot_ms": 5500
+    },
+    {
+      "index": 19,
+      "en": "It also would go on to completely alter cinema in general forever. Because about 13 years later, George Jr. would go on to create one of the most groundbreaking films in history. His movie would",
+      "uk": "Це також повністю змінить кіно. Через 13 років Джордж-молодший створить один з найбільш революційних фільмів в історії. Його фільм буде",
+      "slot_ms": 10000
+    },
+    {
+      "index": 20,
+      "en": "go on to become part of the most successful movie franchise of all time. George Jr. is better known today as George Lucas and his film franchise will star wars.",
+      "uk": "намагатися стати частиною найбільш успішної кінофраншизи всіх часів. Джордж-молодший сьогодні відомий як Джордж Лукас, а його кінофраншиза — «Зоряні війни».",
+      "slot_ms": 9000,
+      "must_contain": ["Зоряні війни"]
+    }
+  ]
+}

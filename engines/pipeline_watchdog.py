@@ -22,7 +22,8 @@ STALL_IDLE_SEC: dict[str, float] = {
     "translate": 300.0,
     "translation": 300.0,
     "ai_core": 300.0,
-    "tts": 90.0,
+    # Long Edge/offline group can exceed 90s with no on_group_done (e0e03d).
+    "tts": 300.0,
     "slot_fit": 180.0,
     "voice_verification": 300.0,
     "adaptation": 300.0,
@@ -34,18 +35,30 @@ STALL_IDLE_SEC: dict[str, float] = {
     "dub": 120.0,
     "mp4": 120.0,
     "transcribe": 600.0,
+    "segment_prep": 180.0,
     "extract_audio": 180.0,
     "preparing": 300.0,
 }
 DEFAULT_STALL_IDLE_SEC = 120.0
 # Stages that may block the worker thread for minutes on CPU (Whisper load, init).
 _CPU_HEAVY_STAGES = frozenset(
-    {"preparing", "extract_audio", "transcribe", "translate", "translation", "ai_core"}
+    {
+        "preparing",
+        "extract_audio",
+        "transcribe",
+        "segment_prep",
+        "translate",
+        "translation",
+        "ai_core",
+    }
 )
 _CPU_HEAVY_THREAD_MULTIPLIER = 1.5
 WATCHDOG_POLL_SEC = 5.0
 
 _TERMINAL = frozenset({"done", "error", "cancelled", "stalled", "studio_ready"})
+
+# Intentional human pauses — never PIPELINE_STALLED while waiting for user.
+_USER_WAIT_STATUSES = frozenset({"translation_review", "paused", "editing"})
 
 _STAGE_LABELS = {
     "ru": {
@@ -262,11 +275,28 @@ class PipelineWatchdog:
                 return
             if is_cancel_requested(self.task_id):
                 return
+            from engines.dub_task_state import AUTO_TASK_CONTROLS
+
             info = task.get("info") or {}
+            control = AUTO_TASK_CONTROLS.get(self.task_id) or {}
             ui_lang = str(task.get("ui_lang") or info.get("ui_lang") or "ru")
             progress = float(task.get("progress") or 0)
             step = str(task.get("step") or self._stage.stage or "")
             detail = dict(info.get("progress_detail") or {})
+            awaiting_review = bool(control.get("awaiting_translation_review"))
+            user_wait = (
+                status in _USER_WAIT_STATUSES
+                or awaiting_review
+                or step == "translation_review"
+            )
+
+        # Translation Review / Manual Review: worker blocked on purpose (TPS).
+        # Never PIPELINE_STALLED while waiting for the user.
+        if user_wait:
+            with self._lock:
+                self._stage.last_progress_at = time.time()
+                self._stage.stage = "translation_review"
+            return
 
         with self._lock:
             if progress != self._last_progress_pct:
@@ -318,7 +348,10 @@ class PipelineWatchdog:
         # Still working? extend if thread alive and recent detail heartbeat.
         detail_hb = float(detail.get("last_heartbeat_at") or 0)
         hb_age = time.time() - detail_hb if detail_hb else float("inf")
-        hb_window = min(threshold, 120.0)
+        # TTS heartbeats may be sparse (one per group); use full threshold.
+        hb_window = (
+            threshold if effective_step == "tts" else min(threshold, 120.0)
+        )
         if self._stage.thread_alive and detail_hb and hb_age < hb_window:
             with self._lock:
                 self._stage.last_progress_at = time.time()

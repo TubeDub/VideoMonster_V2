@@ -1,0 +1,1586 @@
+[
+  {
+    "index": 0,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner.",
+    "translated_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто",
+    "text_after_adaptation": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "0",
+      "index": 0,
+      "overflow_ms": 1395,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1395,
+      "original_duration_ms": 3591,
+      "tts_duration_ms": 4986,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 1395,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 1395
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 1395,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=1395 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=1395",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=1395 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=FAILED(OverflowDetected_AdaptationSkipped:FitsNoChange)"
+    },
+    "original_duration_ms": 3591,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 4986,
+    "start_time_ms": 0,
+    "end_time_ms": 3591,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 1395,
+      "overflow_pct": 38.8,
+      "slot_overflow": true,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "18-річний Джордж молодший поїхав додому на вечерю через рідне місто.",
+    "semantic_engine_text": "18-річний Джордж-молодший поїхав додому на вечерю через рідне місто.",
+    "pre_tts_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто",
+    "final_tts_text": "18-річний Джордж-молодший поїхав додому на вечерю че́рез рідне місто",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 5037,
+    "estimated_speech_duration_ms": 5037,
+    "actual_duration_ms": 4986,
+    "real_speech_duration_ms": 4986,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 3591,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 3591,
+    "tts_speech_end_ms": 4986,
+    "speech_difference_ms": -1395,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 0,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 1,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars. And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat, he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black.",
+    "translated_text": "між батьком і сином, Джордж-молодший був ду́же розумною дитиною, але́ ві́н тако́ж відволікся ду́же легко, і че́рез це ві́н не займався чимось серйозним, окрім машин, майже кожної вечері між ними виникала велика суперечка, справжню роботу.",
+    "text_after_adaptation": "між батьком і сином, Джордж-молодший був ду́же розумною дитиною, але́ ві́н тако́ж відволікся ду́же легко, і че́рез це ві́н не займався чимось серйозним, окрім машин, майже кожної вечері між ними виникала велика суперечка, справжню роботу.",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "1",
+      "index": 1,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 30110,
+      "original_duration_ms": 45457,
+      "tts_duration_ms": 15347,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=SKIPPED(FitsNoChange)"
+    },
+    "original_duration_ms": 45457,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 15347,
+    "start_time_ms": 3591,
+    "end_time_ms": 49048,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 0,
+      "overflow_pct": 0.0,
+      "slot_overflow": false,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Джордж молодший був дуже розумною дитиною, але він також відволікся дуже легко, і через це він не займався чимось серйозним, окрім машин.",
+    "semantic_engine_text": "Але, коли він їхав, Джордж-молодший його не полишала тривога, що йому справді страшно туди дістатися. Тож Джордж-молодший був дуже розумною дитиною, але також дуже легко відволікався, і через це він насправді не займався чимось настільки серйозним, окрім автомобілів. І в той момент його батько дійсно купив йому невелику італійську машину під назвою Fiat, але його батько, незважаючи на те, що він буквально дав йому Fiat, він просто не зрозумів одержимості свого сина автомобілями, наприклад, чому ти не можеш взяти цей фокус і застосувати його до інших речей, отримаєш справжню роботу. І так по суті, кожна вечеря в ці дні, перетворювалася на велику суперечку між батьком і сином суперечка між батьком і сином. І ось Джордж, він підійшов до цього перехрестя, де воно було прямо біля його дому, і він почав повертати, коли почув цей дуже гучний вереск, а потім усе потемніло.",
+    "pre_tts_text": "між батьком і сином, Джордж-молодший був ду́же розумною дитиною, але́ ві́н тако́ж відволікся ду́же легко, і че́рез це ві́н не займався чимось серйозним, окрім машин, майже кожної вечері між ними виникала велика суперечка, справжню роботу.",
+    "final_tts_text": "між батьком і сином, Джордж-молодший був ду́же розумною дитиною, але́ ві́н тако́ж відволікся ду́же легко, і че́рез це ві́н не займався чимось серйозним, окрім машин, майже кожної вечері між ними виникала велика суперечка, справжню роботу.",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 17629,
+    "estimated_speech_duration_ms": 17629,
+    "actual_duration_ms": 15347,
+    "real_speech_duration_ms": 15347,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 45457,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 49048,
+    "tts_speech_end_ms": 18938,
+    "speech_difference_ms": 30110,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 0,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 2,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital. So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard that George Jr. was ejected from the car but he had survived.",
+    "translated_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у реанімації місцевої лікарні",
+    "text_after_adaptation": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у реанімації місцевої лікарні",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "2",
+      "index": 2,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 19228,
+      "original_duration_ms": 24777,
+      "tts_duration_ms": 5549,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=SKIPPED(FitsNoChange)"
+    },
+    "original_duration_ms": 24777,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 5549,
+    "start_time_ms": 49148,
+    "end_time_ms": 73925,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 0,
+      "overflow_pct": 0.0,
+      "slot_overflow": false,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Через два тижні Джордж молодший лежав у лікарняному ліжку у реанімації місцевої лікарні.",
+    "semantic_engine_text": "Через два тижні Джордж-молодший лежав у лікарняному ліжку у реанімації місцевої лікарні.",
+    "pre_tts_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у реанімації місцевої лікарні",
+    "final_tts_text": "Че́рез два тижні Джордж-молодший лежав у лікарняному ліжку у реанімації місцевої лікарні",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 6518,
+    "estimated_speech_duration_ms": 6518,
+    "actual_duration_ms": 5549,
+    "real_speech_duration_ms": 5549,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 24777,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 73925,
+    "tts_speech_end_ms": 54697,
+    "speech_difference_ms": 19228,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 0,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 3,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera. So since his near-death experience, George Jr. had realized that really has dad had been kind of right that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+    "translated_text": "Два роки джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат, досвід на межі смерті.",
+    "text_after_adaptation": "Два роки джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат, досвід на межі смерті.",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "3",
+      "index": 3,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 12505,
+      "original_duration_ms": 21566,
+      "tts_duration_ms": 9061,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=SKIPPED(FitsNoChange)"
+    },
+    "original_duration_ms": 21566,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 9061,
+    "start_time_ms": 74025,
+    "end_time_ms": 95591,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 0,
+      "overflow_pct": 0.0,
+      "slot_overflow": false,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Через два роки Джордж молодший повністю одужав від травм, стояв на фінішній лінії на гоночному треку і підняв фотоапарат.",
+    "semantic_engine_text": "Через два роки Джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+    "pre_tts_text": "Два роки джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат, досвід на межі смерті.",
+    "final_tts_text": "Два роки джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат, досвід на межі смерті.",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 10296,
+    "estimated_speech_duration_ms": 10296,
+    "actual_duration_ms": 9061,
+    "real_speech_duration_ms": 9061,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 21566,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 95591,
+    "tts_speech_end_ms": 83086,
+    "speech_difference_ms": 12505,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 0,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 4,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "Instead, he had picked up this camera and really gotten back into his old hobby of photography.",
+    "translated_text": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+    "text_after_adaptation": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Натомість</emphasis>,<break time=\"184ms\"/> ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.<break time=\"350ms\"/></speak>",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "4",
+      "index": 4,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 403,
+      "original_duration_ms": 5585,
+      "tts_duration_ms": 5182,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SKIPPED(FitsNoChange) → decision_engine=SKIPPED(FitsNoChange) → final_result=SUCCESS(fits)"
+    },
+    "original_duration_ms": 5585,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 5182,
+    "start_time_ms": 95691,
+    "end_time_ms": 101276,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 0,
+      "overflow_pct": 0.0,
+      "slot_overflow": false,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Натомість, він взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+    "semantic_engine_text": "Натомість, він взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+    "pre_tts_text": "Натомість, ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+    "final_tts_text": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Натомість</emphasis>,<break time=\"184ms\"/> ві́н взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.<break time=\"350ms\"/></speak>",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 18444,
+    "estimated_speech_duration_ms": 18444,
+    "actual_duration_ms": 5182,
+    "real_speech_duration_ms": 5182,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 5585,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 101276,
+    "tts_speech_end_ms": 100873,
+    "speech_difference_ms": 403,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 91,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 5,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "In fact, George Jr. had applied to the prestigious cinematography program at the University of Southern California, but after sending off his application, he was pretty sure he would not get in.",
+    "translated_text": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з Університету Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+    "text_after_adaptation": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з Університету Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "5",
+      "index": 5,
+      "overflow_ms": 2456,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 2456,
+      "original_duration_ms": 10545,
+      "tts_duration_ms": 13001,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 2456,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 2456
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 2456,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=2456 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=2456",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=2456 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=FAILED(OverflowDetected_AdaptationSkipped:FitsNoChange)"
+    },
+    "original_duration_ms": 10545,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 13001,
+    "start_time_ms": 101376,
+    "end_time_ms": 111921,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 2456,
+      "overflow_pct": 23.3,
+      "slot_overflow": true,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Насправді, Джордж молодший подав заяву на престижну кінотехніку в університеті Південної Каліфорнії, але після того, як відпустив заяву, він був цілком упевнений, що не потрапить до неї.",
+    "semantic_engine_text": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з USC, Південної Каліфорнії, але після того, як надіслав заяву, він був цілком упевнений, що його не приймуть до неї.",
+    "pre_tts_text": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з Університету Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+    "final_tts_text": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з Університету Південної Каліфорнії, але́ пі́сля того, як надіслав заяву, ві́н був цілком упевнений, що його́ не приймуть до неї",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 15259,
+    "estimated_speech_duration_ms": 15259,
+    "actual_duration_ms": 13001,
+    "real_speech_duration_ms": 13001,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 10545,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 111921,
+    "tts_speech_end_ms": 114377,
+    "speech_difference_ms": -2456,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 17,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 6,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "Now, George Jr. walked over to the podium to take some photos of the winning drive. But as he walked over there, the smithelaged man came up beside him and just asked George Jr. about his photography and then at some point the man actually formally introduced himself as Haskell Wexler. And he said that he was actually a cinematographer in Hollywood. And George Jr. told Haskell about how he had recently applied to USC to try to get into their cinematography program. And when Haskell heard this, he said, George, I know people at USC.",
+    "translated_text": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але́ як ві́н прогулявся над там, скотарний чоловік приступив до нього і про́сто попросив Джорджа Джера. про свою фотографію, а по́тім в певній точці людина фактично офіційно представила себе як Хаскелл Векслер. І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший розповів Хаскелу про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. А коли́ Хаскелл чув це, ві́н сказав, Джордж, я знаю людей до Університету Південної Каліфорнії",
+    "text_after_adaptation": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але́ як ві́н прогулявся над там, скотарний чоловік приступив до нього і про́сто попросив Джорджа Джера. про свою фотографію, а по́тім в певній точці людина фактично офіційно представила себе як Хаскелл Векслер. І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший розповів Хаскелу про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. А коли́ Хаскелл чув це, ві́н сказав, Джордж, я знаю людей до Університету Південної Каліфорнії",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "6",
+      "index": 6,
+      "overflow_ms": 13929,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 13929,
+      "original_duration_ms": 25973,
+      "tts_duration_ms": 39902,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 13929,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 13929
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 13929,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=13929 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=13929",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=13929 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=FAILED(OverflowDetected_AdaptationSkipped:FitsNoChange)"
+    },
+    "original_duration_ms": 25973,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 39902,
+    "start_time_ms": 111921,
+    "end_time_ms": 137894,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 13929,
+      "overflow_pct": 53.6,
+      "slot_overflow": true,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Тепер Джордж Джер. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але як він прогулявся над там, скотарний чоловік приступив до нього і просто попросив Джорджа Джера. про свою фотографію, а потім в певній точці людина фактично офіційно представила себе як Haskell Wexler. І сказав він, що він насправді був кінематографістом в Голлівуді. І Георг Жр. Про те, як він нещодавно був застосований до USC, щоб спробувати потрапити в програму кінематографі. А коли Хаскелл чув це, він сказав, Джордж, я знаю людей у США.",
+    "semantic_engine_text": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але як він прогулявся над там, скотарний чоловік приступив до нього і просто попросив Джорджа Джера. про свою фотографію, а потім в певній точці людина фактично офіційно представила себе як Хаскелл Векслер. І сказав він, що він насправді був кінооператором в Голлівуді. І Джордж-молодший. Про те, як він нещодавно подав заявку до USC, Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. А коли Хаскелл чув це, він сказав, Джордж, я знаю людей до USC, Південної Каліфорнії.",
+    "pre_tts_text": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але́ як ві́н прогулявся над там, скотарний чоловік приступив до нього і про́сто попросив Джорджа Джера. про свою фотографію, а по́тім в певній точці людина фактично офіційно представила себе як Хаскелл Векслер. І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший розповів Хаскелу про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. А коли́ Хаскелл чув це, ві́н сказав, Джордж, я знаю людей до Університету Південної Каліфорнії",
+    "final_tts_text": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але́ як ві́н прогулявся над там, скотарний чоловік приступив до нього і про́сто попросив Джорджа Джера. про свою фотографію, а по́тім в певній точці людина фактично офіційно представила себе як Хаскелл Векслер. І сказав ві́н, що ві́н був кінооператором в Голлівуді. І Джордж-молодший розповів Хаскелу про те, як ві́н нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. А коли́ Хаскелл чув це, ві́н сказав, Джордж, я знаю людей до Університету Південної Каліфорнії",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 45407,
+    "estimated_speech_duration_ms": 45407,
+    "actual_duration_ms": 39902,
+    "real_speech_duration_ms": 39902,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 25973,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 137894,
+    "tts_speech_end_ms": 151823,
+    "speech_difference_ms": -13929,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 0,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 7,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "Let me make some calls. And sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school. But this moment in George Jr's life did not just alter George's life forever.",
+    "translated_text": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довге пі́сля цієї долі наради, Джордж-молодший. Отримувати прийомний лист з кіношколи США. Але́ цей момент у житті Юра Джера не про́сто змінив життя Джорджа назавжди.",
+    "text_after_adaptation": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Дозвольте</emphasis> мені зробити деякі дзвінки.<break time=\"350ms\"/> І вистачить,<break time=\"184ms\"/> не довге пі́сля цієї долі наради,<break time=\"184ms\"/> <emphasis level=\"reduced\">Джордж</emphasis>-молодший.<break time=\"350ms\"/> <emphasis level=\"reduced\">Отримувати</emphasis> прийомний лист з кіношколи США.<break time=\"350ms\"/> Але́ цей момент у житті Юра Джера не про́сто змінив життя Джорджа назавжди.<break time=\"350ms\"/></speak>",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "7",
+      "index": 7,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 0,
+      "original_duration_ms": 14336,
+      "tts_duration_ms": 14336,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "need_adaptation": false,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "SUCCESS",
+          "reason": "fits",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SKIPPED (FitsNoChange) | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SUCCESS (fits) | overflow_ms=0 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SKIPPED(FitsNoChange) → decision_engine=SKIPPED(FitsNoChange) → final_result=SUCCESS(fits)"
+    },
+    "original_duration_ms": 14336,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 14336,
+    "start_time_ms": 137894,
+    "end_time_ms": 152230,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 0,
+      "overflow_pct": 0.0,
+      "slot_overflow": false,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Давайте мені зробити деякі дзвінки. І вистачить, не довге після цієї долі наради, Джордж Жр. Отримувати прийомний лист з кіношколи США. Але цей момент у житті Юра Джера не просто чергував життя Георга назавжди.",
+    "semantic_engine_text": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довге після цієї долі наради, Джордж-молодший. Отримувати прийомний лист з кіношколи США. Але цей момент у житті Юра Джера не просто змінив життя Джорджа назавжди.",
+    "pre_tts_text": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довге пі́сля цієї долі наради, Джордж-молодший. Отримувати прийомний лист з кіношколи США. Але́ цей момент у житті Юра Джера не про́сто змінив життя Джорджа назавжди.",
+    "final_tts_text": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Дозвольте</emphasis> мені зробити деякі дзвінки.<break time=\"350ms\"/> І вистачить,<break time=\"184ms\"/> не довге пі́сля цієї долі наради,<break time=\"184ms\"/> <emphasis level=\"reduced\">Джордж</emphasis>-молодший.<break time=\"350ms\"/> <emphasis level=\"reduced\">Отримувати</emphasis> прийомний лист з кіношколи США.<break time=\"350ms\"/> Але́ цей момент у житті Юра Джера не про́сто змінив життя Джорджа назавжди.<break time=\"350ms\"/></speak>",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 40518,
+    "estimated_speech_duration_ms": 40518,
+    "actual_duration_ms": 14336,
+    "real_speech_duration_ms": 14336,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 14336,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 152230,
+    "tts_speech_end_ms": 152230,
+    "speech_difference_ms": 0,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 100,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 8,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "It also would go on to completely alter cinema in general forever. Because about 13 years later, George Jr. would go on to create one of the most groundbreaking films in history.",
+    "translated_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії",
+    "text_after_adaptation": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "8",
+      "index": 8,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 986,
+      "original_duration_ms": 9214,
+      "tts_duration_ms": 8228,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=SKIPPED(FitsNoChange)"
+    },
+    "original_duration_ms": 9214,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 8228,
+    "start_time_ms": 152330,
+    "end_time_ms": 161544,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 0,
+      "overflow_pct": 0.0,
+      "slot_overflow": false,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "В цілому, це буде йти на повністю чергувати кінотеатр. Через 13 років, Джордж Джер. покаже на створення одного з найбільш загадних фільмів в історії.",
+    "semantic_engine_text": "Це також повністю змінити кіно. Через 13 років, Джордж-молодший. створить одного з найбільш революційних фільмів в історії.",
+    "pre_tts_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії",
+    "final_tts_text": "Це тако́ж повністю змінити кіно. Че́рез 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 9111,
+    "estimated_speech_duration_ms": 9111,
+    "actual_duration_ms": 8228,
+    "real_speech_duration_ms": 8228,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 9214,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 161544,
+    "tts_speech_end_ms": 160558,
+    "speech_difference_ms": 986,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 69,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 9,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "His movie would go on to become part of the most successful movie franchise of all time.",
+    "translated_text": "Його́ фільм стане частиною найбільш успішної кінофраншизи всього часу",
+    "text_after_adaptation": "Його́ фільм стане частиною найбільш успішної кінофраншизи всього часу",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "9",
+      "index": 9,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 5491,
+      "original_duration_ms": 9929,
+      "tts_duration_ms": 4438,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 0,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=0 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=0",
+        "final_result = SKIPPED (FitsNoChange) | overflow_ms=0 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=SKIPPED(FitsNoChange)"
+    },
+    "original_duration_ms": 9929,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 4438,
+    "start_time_ms": 161644,
+    "end_time_ms": 171573,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 0,
+      "overflow_pct": 0.0,
+      "slot_overflow": false,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Його фільм буде проходити, щоб стати частиною найбільш успішної кінофраншизи всього часу.",
+    "semantic_engine_text": "Його фільм стане частиною найбільш успішної кінофраншизи всього часу.",
+    "pre_tts_text": "Його́ фільм стане частиною найбільш успішної кінофраншизи всього часу",
+    "final_tts_text": "Його́ фільм стане частиною найбільш успішної кінофраншизи всього часу",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 5111,
+    "estimated_speech_duration_ms": 5111,
+    "actual_duration_ms": 4438,
+    "real_speech_duration_ms": 4438,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 9929,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 171573,
+    "tts_speech_end_ms": 166082,
+    "speech_difference_ms": 5491,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 0,
+    "expansion_iterations": 0
+  },
+  {
+    "index": 10,
+    "segment_id": null,
+    "skipped": false,
+    "merged_into": null,
+    "path_chain": [],
+    "original_text": "George Jr. is better known today as George Lucas and his film franchise will star wars.",
+    "translated_text": "Сьогодні Джорджа-молодшого бі́льше знають як Джорджа Лукаса і його́ фільм \"Франшиза\" бу́де вести війни",
+    "text_after_adaptation": "Сьогодні Джорджа-молодшого бі́льше знають як Джорджа Лукаса і його́ фільм \"Франшиза\" бу́де вести війни",
+    "adaptation_iterations": 0,
+    "adaptation_executed": false,
+    "adaptation_status": "ADAPTATION NOT EXECUTED",
+    "adaptation_skip_reason": "FitsNoChange",
+    "adaptation_decision": {
+      "segment_id": "10",
+      "index": 10,
+      "overflow_ms": 833,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 833,
+      "original_duration_ms": 5750,
+      "tts_duration_ms": 6583,
+      "translation_locked": false,
+      "llm_available": true,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "decision_trace": {
+      "title": "Decision Trace",
+      "stages": [
+        {
+          "stage_index": 1,
+          "name": "need_adaptation",
+          "status": "SUCCESS",
+          "reason": "",
+          "detail": {
+            "need_adaptation": true,
+            "overflow_ms": 833,
+            "underflow_ms": 0
+          }
+        },
+        {
+          "stage_index": 2,
+          "name": "decision_engine",
+          "status": "SKIPPED",
+          "reason": "FitsNoChange",
+          "detail": {
+            "overflow_ms": 833
+          }
+        },
+        {
+          "stage_index": 3,
+          "name": "final_result",
+          "status": "FAILED",
+          "reason": "OverflowDetected_AdaptationSkipped:FitsNoChange",
+          "detail": {
+            "overflow_ms": 833,
+            "duration_ms": 0
+          }
+        }
+      ],
+      "transitions": [
+        "need_adaptation = SUCCESS | overflow_ms=833 | underflow_ms=0",
+        "decision_engine = SKIPPED (FitsNoChange) | overflow_ms=833",
+        "final_result = FAILED (OverflowDetected_AdaptationSkipped:FitsNoChange) | overflow_ms=833 | duration_ms=0"
+      ],
+      "summary": "need_adaptation=SUCCESS → decision_engine=SKIPPED(FitsNoChange) → final_result=FAILED(OverflowDetected_AdaptationSkipped:FitsNoChange)"
+    },
+    "original_duration_ms": 5750,
+    "first_tts_duration_ms": 0,
+    "final_tts_duration_ms": 6583,
+    "start_time_ms": 171673,
+    "end_time_ms": 177423,
+    "timing_source": "timing_map",
+    "warnings": [],
+    "adaptation_reasons": [],
+    "adaptation_stages": [],
+    "variant_log": [],
+    "overlap_info": {
+      "overflow_ms": 833,
+      "overflow_pct": 14.5,
+      "slot_overflow": true,
+      "merge_adjusted_start": null
+    },
+    "merge_info": {
+      "merged_into": null,
+      "merged_into_id": null,
+      "block_merged_with_next": null
+    },
+    "gap_absorb": {
+      "mode": null,
+      "video_stretch_ratio": null
+    },
+    "block_merge": {
+      "merge_adjusted_start": null,
+      "merge_adjusted_slot_ms": null,
+      "block_merged_with_next": null
+    },
+    "algorithm_reason": "slot_fit: silence trim / pause compress only (no atempo)",
+    "rule_rewrite_used": false,
+    "llm_rewrite_used": false,
+    "llm_reason": null,
+    "requires_llm_adaptation": false,
+    "raw_translation": "Сьогодні Джорджа Молодшого більше знають як Джорджа Лукаса і його фільм \"Франшиза\" буде вести війни.",
+    "semantic_engine_text": "Сьогодні Джорджа-молодшого більше знають як Джорджа Лукаса і його фільм \"Франшиза\" буде вести війни.",
+    "pre_tts_text": "Сьогодні Джорджа-молодшого бі́льше знають як Джорджа Лукаса і його́ фільм \"Франшиза\" бу́де вести війни",
+    "final_tts_text": "Сьогодні Джорджа-молодшого бі́льше знають як Джорджа Лукаса і його́ фільм \"Франшиза\" бу́де вести війни",
+    "original_word_count": null,
+    "raw_mt_word_count": null,
+    "semantic_word_count": null,
+    "final_tts_word_count": null,
+    "compression_ratio": null,
+    "predicted_duration_ms": 7555,
+    "estimated_speech_duration_ms": 7555,
+    "actual_duration_ms": 6583,
+    "real_speech_duration_ms": 6583,
+    "meaning_loss_score": null,
+    "entity_preservation_score": null,
+    "slot_ms": 5750,
+    "voice": "",
+    "language": "uk",
+    "raw_mt_diagnosis": null,
+    "quality_reasons": null,
+    "transformation_chain": [],
+    "optimization_stages": [],
+    "ai_adaptation_trace": {},
+    "llm_attempts": 0,
+    "optimization_retries": {
+      "timing_aware": null,
+      "post_tts": null,
+      "reasons": []
+    },
+    "original_speech_end_ms": 177423,
+    "tts_speech_end_ms": 178256,
+    "speech_difference_ms": -833,
+    "expand_required": false,
+    "expand_executed": false,
+    "expansion_strategy": "",
+    "duration_match_score": 61,
+    "expansion_iterations": 0
+  }
+]

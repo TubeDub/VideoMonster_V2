@@ -1,0 +1,18 @@
+{
+  "reference_audio_volume": 0.15,
+  "dub_volume": 1.0,
+  "play_original": true,
+  "play_dub": true,
+  "ab_hotkey_enabled": true,
+  "listen_mode": "dual",
+  "yellow_reserve_ms": 150,
+  "overflow_threshold_ms": 0,
+  "early_start_threshold_ms": 100,
+  "late_start_threshold_ms": 120,
+  "gap_threshold_ms": 450,
+  "overlap_epsilon_ms": 10,
+  "show_timeline": true,
+  "show_colors": true,
+  "auto_pause_on_error": true,
+  "playback_rate": 1.0
+}

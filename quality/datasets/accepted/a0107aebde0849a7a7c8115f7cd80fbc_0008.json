@@ -1,0 +1,183 @@
+{
+  "index": 8,
+  "status": "PASS",
+  "overall_confidence": 0.9917,
+  "explanation": "PASS",
+  "retry_strategy": "none",
+  "original": "It also would go on to completely alter cinema in general forever. Because about 13 years later, George Jr. would go on to create one of the most groundbreaking films in history.",
+  "translation": "Це також повністю змінити кіно. Через 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії.",
+  "allowed_for_tts": true,
+  "reports": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.51,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "entity_check_error",
+          "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "severity": "warn"
+        }
+      ],
+      "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.15,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.95
+      ],
+      "confidence": {
+        "entity_preservation": 0.75,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.95
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.34,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.17,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "timing_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8,
+        "slot_ms": 7224
+      },
+      "review_time_ms": 0.07,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.06,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ]
+}

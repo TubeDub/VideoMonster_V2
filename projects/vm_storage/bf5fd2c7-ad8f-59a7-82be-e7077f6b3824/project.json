@@ -1,0 +1,90 @@
+{
+  "project_id": "bf5fd2c7-ad8f-59a7-82be-e7077f6b3824",
+  "title": "bf5fd2c7-ad8f-59a7-82be-e7077f6b3824",
+  "storage_version": 1,
+  "created_at": 1784428800.6919994,
+  "updated_at": 1784428800.7024577,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "a1c2fde718334b2795f64f5283e696cd",
+  "legacy_project_uuid": "",
+  "studio_session": {
+    "session_id": "a1c2fde718334b2795f64f5283e696cd",
+    "task_id": "a1c2fde718334b2795f64f5283e696cd",
+    "segments": [],
+    "timing_map": [],
+    "source_segments": [],
+    "tracks": {
+      "original": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Original Voice",
+        "i18n_key": "studio.track.original",
+        "color": "#22c55e"
+      },
+      "user_voice": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "User Voice",
+        "i18n_key": "studio.track.user_voice",
+        "color": "#ec4899"
+      },
+      "music": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Music",
+        "i18n_key": "studio.track.music",
+        "color": "#a855f7"
+      },
+      "sfx": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "SFX",
+        "i18n_key": "studio.track.sfx",
+        "color": "#64748b"
+      },
+      "tts": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Dub Voice",
+        "i18n_key": "studio.track.dub",
+        "color": "#f59e0b"
+      }
+    },
+    "voice": "ru-RU-DmitryNeural",
+    "lang": "ru",
+    "plugin_order": [
+      "eq",
+      "compressor"
+    ],
+    "duration_ms": 178773,
+    "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_2dde62b91c.mp4",
+    "video_preview": "video_2dde62b91c.mp4",
+    "original_audio": null,
+    "task_status": "pipeline_failed",
+    "output_file": null,
+    "studio_url": "/studio?task_id=a1c2fde718334b2795f64f5283e696cd",
+    "pipeline_error": {
+      "title": "Ошибка дубляжа",
+      "stage": "STT",
+      "error_type": "RuntimeError",
+      "error_code": "PIPELINE_CRITICAL",
+      "reason_short": "Критическая ошибка пайплайна.",
+      "reason": "mkl_malloc: failed to allocate memory",
+      "pipeline_state": "STOPPED",
+      "timestamp": "2026-07-18T18:50:19.626000+00:00",
+      "voice_engine": "Edge-TTS",
+      "detail_block": "Stage: STT\nengine: Edge-TTS\nException:\nRuntimeError\nError code:\nPIPELINE_CRITICAL\nReason:\nmkl_malloc: failed to allocate memory\nPipeline:\nSTOPPED\ntimestamp:\n2026-07-18T18:50:19.626000+00:00"
+    }
+  },
+  "tdproj": {},
+  "metadata": {},
+  "source": "legacy_studio_session",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\studio_sessions\\a1c2fde718334b2795f64f5283e696cd.json"
+}

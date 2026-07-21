@@ -33,7 +33,11 @@ def test_dedupe_similar():
         "Она остановилась",
     ]
     out = dedupe_consecutive_similar(lines)
-    assert len(out) == 2
+    # Length must stay aligned with source segments (clear dup, don't drop).
+    assert len(out) == 3
+    assert out[0] == "Коза ходила по полю"
+    assert out[1] == ""
+    assert out[2] == "Она остановилась"
 
 
 def test_merge_translation_groups():

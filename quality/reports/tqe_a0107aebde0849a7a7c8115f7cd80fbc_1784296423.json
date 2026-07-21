@@ -1,0 +1,2145 @@
+{
+  "task_id": "a0107aebde0849a7a7c8115f7cd80fbc",
+  "passed": 8,
+  "rejected": 3,
+  "overall_confidence": 0.9787,
+  "gate_passed": false,
+  "blocked_indices": [
+    1,
+    2,
+    7
+  ],
+  "analytics": {
+    "segments_total": 11,
+    "passed": 8,
+    "rejected": 3,
+    "retry_count": 3,
+    "retry_average": 0.273,
+    "average_review_time_ms": 29.16,
+    "average_confidence": 0.9787,
+    "entity_loss": 11,
+    "meaning_loss": 2,
+    "grammar_errors": 2,
+    "timing_errors": 7,
+    "narrative_errors": 2,
+    "llm_usage": 0,
+    "retry_success_rate": 0.0,
+    "fallback_usage": 0,
+    "gate_passed": false
+  },
+  "explanations": [
+    "Segment #1\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #2\nStatus: REJECT\nAllowed for TTS: NO\nOverall Confidence: 0.95\nMissing Entity: cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)\nMeaning Loss: src_words=163 tr_words=21\nRetry: Meaning Preservation Strategy\nDetail: MeaningReviewer: severe_truncation; MeaningReviewer/severe_truncation: src_words=163 tr_words=21; TimingReviewer: over_compressed; TimingReviewer/over_compressed: est_ms=11416 slot_ms=44069 ratio=0.26; NarrativeReviewer: narrative_drop; NarrativeReviewer/narrative_drop: src_words=163 tr_words=21",
+    "Segment #3\nStatus: REJECT\nAllowed for TTS: NO\nOverall Confidence: 0.95\nMissing Entity: cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)\nMeaning Loss: \\bcrashed?\\b|\\bsmashed?\\b|\\bcollision\\b, src_words=65 tr_words=12\nRetry: Meaning Preservation Strategy\nDetail: MeaningReviewer: severe_truncation; event_missing; MeaningReviewer/severe_truncation: src_words=65 tr_words=12; MeaningReviewer/event_missing: \\bcrashed?\\b|\\bsmashed?\\b|\\bcollision\\b; NarrativeReviewer: narrative_drop; NarrativeReviewer/narrative_drop: src_words=65 tr_words=12",
+    "Segment #4\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.98",
+    "Segment #5\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #6\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #7\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #8\nStatus: REJECT\nAllowed for TTS: NO\nOverall Confidence: 0.96\nMissing Entity: cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)\nSentence/Grammar: \\bне довге\\b, \\bвистачить,\\s*не довге\\b\nRetry: Grammar Strategy\nDetail: GrammarReviewer: orphan_clause_glue; orphan_clause_glue; GrammarReviewer/orphan_clause_glue: \\bне довге\\b; GrammarReviewer/orphan_clause_glue: \\bвистачить,\\s*не довге\\b",
+    "Segment #9\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #10\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99",
+    "Segment #11\nStatus: PASS\nAllowed for TTS: yes\nOverall Confidence: 0.99"
+  ],
+  "decisions": [
+    {
+      "index": 0,
+      "status": "PASS",
+      "overall_confidence": 0.9867,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner.",
+      "translation": "18-річний Джордж-молодший поїхав додому на вечерю через рідне місто.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 291.95,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 0.89,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 3.03,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 2.23,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=5666 slot_ms=3241 ratio=1.75"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0,
+            "slot_ms": 3241
+          },
+          "review_time_ms": 0.1,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 0
+          },
+          "review_time_ms": 0.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "status": "REJECT",
+      "overall_confidence": 0.9533,
+      "explanation": "MeaningReviewer: severe_truncation; MeaningReviewer/severe_truncation: src_words=163 tr_words=21; TimingReviewer: over_compressed; TimingReviewer/over_compressed: est_ms=11416 slot_ms=44069 ratio=0.26; NarrativeReviewer: narrative_drop; NarrativeReviewer/narrative_drop: src_words=163 tr_words=21",
+      "retry_strategy": "Meaning Preservation Strategy",
+      "original": "But, as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. So George Jr. was a very smart kid, but he also got distracted really easily and because of that, he really had not pursued anything all that seriously that is except for cars. And at that point his father actually bought him a small Italian car called the Fiat, but his father, despite being the one who literally gave him the Fiat, he just didn't get his son's obsession with cars, like why aren't you able to take that focus and apply it to other things, so we'll get your real job. And so basically every dinner these days, if he came this huge argument between father and son. And so George, he came to this intersection where it was right near his home, and he begins making the turn when he hears this really loud screeching sound and then everything went black.",
+      "translation": "Джордж-молодший був дуже розумною дитиною, але він також відволікся дуже легко, і через це він не займався чимось серйозним, окрім машин.",
+      "allowed_for_tts": false,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 0.79,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 0.19,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "severe_truncation",
+              "severity": "critical",
+              "detail": "src_words=163 tr_words=21"
+            }
+          ],
+          "explanation": "severe_truncation",
+          "retry_strategy": "Meaning Preservation Strategy",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 1.07,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 0.8,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 0.24,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "over_compressed",
+              "severity": "major",
+              "detail": "est_ms=11416 slot_ms=44069 ratio=0.26"
+            }
+          ],
+          "explanation": "over_compressed",
+          "retry_strategy": "Timing Strategy",
+          "metadata": {
+            "index": 1,
+            "slot_ms": 44069
+          },
+          "review_time_ms": 0.44,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "narrative_drop",
+              "severity": "critical",
+              "detail": "src_words=163 tr_words=21"
+            }
+          ],
+          "explanation": "narrative_drop",
+          "retry_strategy": "Narrative Strategy",
+          "metadata": {
+            "index": 1
+          },
+          "review_time_ms": 0.22,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.85
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 0.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.85
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "status": "REJECT",
+      "overall_confidence": 0.95,
+      "explanation": "MeaningReviewer: severe_truncation; event_missing; MeaningReviewer/severe_truncation: src_words=65 tr_words=12; MeaningReviewer/event_missing: \\bcrashed?\\b|\\bsmashed?\\b|\\bcollision\\b; NarrativeReviewer: narrative_drop; NarrativeReviewer/narrative_drop: src_words=65 tr_words=12",
+      "retry_strategy": "Meaning Preservation Strategy",
+      "original": "Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital. So two weeks earlier when George was making that turn and then something happened, well what it was is another car can speeding down the road and smashed into George's car so hard that George Jr. was ejected from the car but he had survived.",
+      "translation": "Через два тижні Джордж-молодший лежав у лікарняному ліжку у реанімації місцевої лікарні.",
+      "allowed_for_tts": false,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 2.26,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.26,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "severe_truncation",
+              "severity": "critical",
+              "detail": "src_words=65 tr_words=12"
+            },
+            {
+              "code": "event_missing",
+              "detail": "\\bcrashed?\\b|\\bsmashed?\\b|\\bcollision\\b",
+              "severity": "major"
+            }
+          ],
+          "explanation": "severe_truncation; event_missing",
+          "retry_strategy": "Meaning Preservation Strategy",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.78,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.9
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 0.6,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.9
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.25,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "timing_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 2,
+            "slot_ms": 17205
+          },
+          "review_time_ms": 0.12,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "narrative_drop",
+              "severity": "critical",
+              "detail": "src_words=65 tr_words=12"
+            }
+          ],
+          "explanation": "narrative_drop",
+          "retry_strategy": "Narrative Strategy",
+          "metadata": {
+            "index": 2
+          },
+          "review_time_ms": 0.14,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.85
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 0.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.85
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "status": "PASS",
+      "overall_confidence": 0.9833,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "Two years later, George Jr. who by this point was fully recovered from his injuries, stood at the finish line at a race track and raised his camera. So since his near-death experience, George Jr. had realized that really has dad had been kind of right that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+      "translation": "Два роки джордж-молодший повністю одужав від травм, стояв на фінішній прямій на гоночному треку і підняв фотоапарат.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 1.24,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 0.22,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "negation_loss",
+              "severity": "major"
+            }
+          ],
+          "explanation": "negation_loss",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 1.05,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 0.8,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 0.34,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "timing_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3,
+            "slot_ms": 18711
+          },
+          "review_time_ms": 0.1,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 3
+          },
+          "review_time_ms": 0.12,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "status": "PASS",
+      "overall_confidence": 0.9867,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "Instead, he had picked up this camera and really gotten back into his old hobby of photography.",
+      "translation": "Натомість, він взяв цю камеру і дійсно повернувся в своє старе хобі фотографії.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.52,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.19,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.35,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.15,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=6583 slot_ms=3996 ratio=1.65"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4,
+            "slot_ms": 3996
+          },
+          "review_time_ms": 0.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 4
+          },
+          "review_time_ms": 0.05,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "status": "PASS",
+      "overall_confidence": 0.9867,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "In fact, George Jr. had applied to the prestigious cinematography program at the University of Southern California, but after sending off his application, he was pretty sure he would not get in.",
+      "translation": "Насправді, Джордж-молодший подав заяву на престижну програму з кінематографії з Університету Південної Каліфорнії, але після того, як надіслав заяву, він був цілком упевнений, що його не приймуть до неї.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.84,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.22,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.54,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.35,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=16916 slot_ms=9261 ratio=1.83"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5,
+            "slot_ms": 9261
+          },
+          "review_time_ms": 0.13,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 5
+          },
+          "review_time_ms": 0.11,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "status": "PASS",
+      "overall_confidence": 0.9867,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "Now, George Jr. walked over to the podium to take some photos of the winning drive. But as he walked over there, the smithelaged man came up beside him and just asked George Jr. about his photography and then at some point the man actually formally introduced himself as Haskell Wexler. And he said that he was actually a cinematographer in Hollywood. And George Jr. told Haskell about how he had recently applied to USC to try to get into their cinematography program. And when Haskell heard this, he said, George, I know people at USC.",
+      "translation": "Тепер Джордж-молодший. Пройшов до подіуму, щоб взяти деякі фотографії виграшного приводу. Але як він йшов туди, чоловік середнього віку приступив до нього і просто попросив Джорджа-молодшого про свою фотографію, а потім в певній точці людина фактично офіційно представила себе як Хаскелл Векслер. І сказав він, що він був кінооператором в Голлівуді. І Джордж-молодший розповів Хаскелу про те, як він нещодавно подав заявку до Університету Південної Каліфорнії, щоб спробувати потрапити в програму кінематографі. А коли Хаскелл чув це, він сказав, Джордж, я знаю людей до Університету Південної Каліфорнії.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.92,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.15,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.65,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.41,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=50416 slot_ms=25015 ratio=2.02"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6,
+            "slot_ms": 25015
+          },
+          "review_time_ms": 0.08,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 6
+          },
+          "review_time_ms": 0.1,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "status": "REJECT",
+      "overall_confidence": 0.9617,
+      "explanation": "GrammarReviewer: orphan_clause_glue; orphan_clause_glue; GrammarReviewer/orphan_clause_glue: \\bне довге\\b; GrammarReviewer/orphan_clause_glue: \\bвистачить,\\s*не довге\\b",
+      "retry_strategy": "Grammar Strategy",
+      "original": "Let me make some calls. And sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school. But this moment in George Jr's life did not just alter George's life forever.",
+      "translation": "Дозвольте мені зробити деякі дзвінки. І вистачить, не довге після цієї долі наради, Джордж-молодший отримає прийомний лист з кіношколи США. Але цей момент у житті Джорджа-молодшого не просто змінив життя Джорджа назавжди.",
+      "allowed_for_tts": false,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.97,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.23,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.49,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "REJECT",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "orphan_clause_glue",
+              "detail": "\\bне довге\\b",
+              "severity": "critical"
+            },
+            {
+              "code": "orphan_clause_glue",
+              "detail": "\\bвистачить,\\s*не довге\\b",
+              "severity": "critical"
+            }
+          ],
+          "explanation": "orphan_clause_glue; orphan_clause_glue",
+          "retry_strategy": "Grammar Strategy",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.21,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.85
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 0.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.85
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=18416 slot_ms=11337 ratio=1.62"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7,
+            "slot_ms": 11337
+          },
+          "review_time_ms": 0.13,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 7
+          },
+          "review_time_ms": 0.07,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "status": "PASS",
+      "overall_confidence": 0.9917,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "It also would go on to completely alter cinema in general forever. Because about 13 years later, George Jr. would go on to create one of the most groundbreaking films in history.",
+      "translation": "Це також повністю змінити кіно. Через 13 років, Джордж-молодший створить одного з найбільш революційних фільмів в історії.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.51,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.15,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.34,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.17,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "timing_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8,
+            "slot_ms": 7224
+          },
+          "review_time_ms": 0.07,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 8
+          },
+          "review_time_ms": 0.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "status": "PASS",
+      "overall_confidence": 0.9917,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "His movie would go on to become part of the most successful movie franchise of all time.",
+      "translation": "Його фільм стане частиною найбільш успішної кінофраншизи всього часу.",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.5,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.14,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.22,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.13,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "timing_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9,
+            "slot_ms": 4193
+          },
+          "review_time_ms": 0.06,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 9
+          },
+          "review_time_ms": 0.05,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "status": "PASS",
+      "overall_confidence": 0.9867,
+      "explanation": "PASS",
+      "retry_strategy": "none",
+      "original": "George Jr. is better known today as George Lucas and his film franchise will star wars.",
+      "translation": "Сьогодні Джорджа-молодшого більше знають як Джорджа Лукаса і його кінофраншиза стане «Зоряними війнами».",
+      "allowed_for_tts": true,
+      "reports": [
+        {
+          "reviewer_name": "FastQAReviewer",
+          "status": "PASS",
+          "metrics": {
+            "error_count": 0
+          },
+          "errors": [],
+          "explanation": "fast_qa_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.67,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "EntityReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "entity_check_error",
+              "detail": "cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+              "severity": "warn"
+            }
+          ],
+          "explanation": "entity_check_error:cannot import name 'check_critical_entities' from 'engines.translation_quality' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\translation_quality.py)",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.78,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.95
+          ],
+          "confidence": {
+            "entity_preservation": 0.75,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 0.95
+          }
+        },
+        {
+          "reviewer_name": "MeaningReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "meaning_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.4,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "GrammarReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "grammar_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.26,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        },
+        {
+          "reviewer_name": "TimingReviewer",
+          "status": "WARN",
+          "metrics": {},
+          "errors": [
+            {
+              "code": "too_long_for_slot",
+              "severity": "major",
+              "detail": "est_ms=8666 slot_ms=4582 ratio=1.89"
+            }
+          ],
+          "explanation": "too_long_for_slot",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10,
+            "slot_ms": 4582
+          },
+          "review_time_ms": 0.14,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            0.97
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 0.7,
+            "overall_confidence": 0.97
+          }
+        },
+        {
+          "reviewer_name": "NarrativeReviewer",
+          "status": "PASS",
+          "metrics": {},
+          "errors": [],
+          "explanation": "narrative_ok",
+          "retry_strategy": "none",
+          "metadata": {
+            "index": 10
+          },
+          "review_time_ms": 0.1,
+          "retry_count": 0,
+          "llm_used": false,
+          "fallback_used": false,
+          "confidence_history": [
+            1.0
+          ],
+          "confidence": {
+            "entity_preservation": 1.0,
+            "meaning_coverage": 1.0,
+            "grammar_integrity": 1.0,
+            "sentence_completeness": 1.0,
+            "narrative_integrity": 1.0,
+            "timing_fitness": 1.0,
+            "overall_confidence": 1.0
+          }
+        }
+      ]
+    }
+  ]
+}
