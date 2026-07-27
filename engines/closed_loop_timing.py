@@ -910,7 +910,23 @@ def run_closed_loop_timing(
             stats["deviations"] += 1
 
         # TZ §11: resegment oversized overflow before any text shorten
-        if before.status == "overflow" and not seg.get("adaptive_resegment_done"):
+        # Happy Path: skip — resegment causes translation bleed (Stage 3).
+        _allow_resegment = True
+        try:
+            from engines.happy_path import (
+                advanced_adaptation_enabled,
+                task_info_for,
+            )
+
+            _hp_info = task_info_for(task_id) if task_id else {}
+            _allow_resegment = bool(advanced_adaptation_enabled(_hp_info))
+        except Exception:
+            _allow_resegment = True
+        if (
+            _allow_resegment
+            and before.status == "overflow"
+            and not seg.get("adaptive_resegment_done")
+        ):
             try:
                 from engines.adaptive_segmentation.post_tts import (
                     should_prefer_resegment,

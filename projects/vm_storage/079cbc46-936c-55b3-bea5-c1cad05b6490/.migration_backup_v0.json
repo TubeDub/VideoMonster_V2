@@ -1,0 +1,33 @@
+{
+  "project_id": "079cbc46-936c-55b3-bea5-c1cad05b6490",
+  "title": "autodub-fa66b0299dbc499bb99ededcd6e4cb21",
+  "storage_version": 0,
+  "tdproj": {
+    "format": "tubedub-project",
+    "version": 1,
+    "project_id": "92ec4fa1-d3fa-46d7-bbd8-8bbcb14a8813",
+    "title": "autodub-fa66b0299dbc499bb99ededcd6e4cb21",
+    "created_ms": 1785171391180,
+    "updated_ms": 1785171391180,
+    "src_lang": "en",
+    "tgt_lang": "uk",
+    "modules": {},
+    "pipeline": {
+      "trace_id": "",
+      "last_run_ms": 0,
+      "stages": [],
+      "segments": []
+    },
+    "assets": [],
+    "meta": {}
+  },
+  "legacy_task_id": "",
+  "legacy_project_uuid": "",
+  "created_at": 1785171391.18,
+  "updated_at": 1785181683.716097,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "source": "legacy_tdproj",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\projects\\tdproj\\92ec4fa1-d3fa-46d7-bbd8-8bbcb14a8813\\autodub-fa66b0299dbc499bb99ededcd6e4cb21.tdproj"
+}

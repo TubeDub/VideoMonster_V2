@@ -1,0 +1,217 @@
+{
+  "task_id": "fa66b0299dbc499bb99ededcd6e4cb21",
+  "index": 11,
+  "original": "George Jr. is better known today as George Lucas and his film franchise was Star Wars. better known today as George Lucas and his film franchise was Star Wars.",
+  "translation": "Жорж Жр, відомий сьогодні, як Джордж Лукас і його кінофраншиза були. відоме сьогодні, як Джордж Лукас і його кінофраншиза були.",
+  "reason": "EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Star', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Wars', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:Star; preserved_token:Wars; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'Star', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'Wars', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: Star; EntityReviewer/preserved_token: Wars; MeaningReviewer: event_missing; meaning_collapse; MeaningReviewer/event_missing: \\bstar wars\\b; MeaningReviewer/meaning_collapse: no mapped events preserved",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 11
+      },
+      "review_time_ms": 0.17,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "entity_missing",
+          "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Star', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+          "severity": "critical"
+        },
+        {
+          "code": "entity_missing",
+          "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Wars', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+          "severity": "critical"
+        },
+        {
+          "code": "preserved_token",
+          "token": "Star",
+          "severity": "major"
+        },
+        {
+          "code": "preserved_token",
+          "token": "Wars",
+          "severity": "major"
+        }
+      ],
+      "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Star', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'Wars', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:Star; preserved_token:Wars",
+      "retry_strategy": "Entity Correction Strategy",
+      "metadata": {
+        "index": 11
+      },
+      "review_time_ms": 3.74,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.8
+      ],
+      "confidence": {
+        "entity_preservation": 0.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.8
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "event_missing",
+          "detail": "\\bstar wars\\b",
+          "severity": "major"
+        },
+        {
+          "code": "meaning_collapse",
+          "severity": "critical",
+          "detail": "no mapped events preserved"
+        }
+      ],
+      "explanation": "event_missing; meaning_collapse",
+      "retry_strategy": "Meaning Preservation Strategy",
+      "metadata": {
+        "index": 11
+      },
+      "review_time_ms": 0.2,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.9
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 0.6,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.9
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 11
+      },
+      "review_time_ms": 0.12,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "timing_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 11,
+        "slot_ms": 7831
+      },
+      "review_time_ms": 0.04,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 11
+      },
+      "review_time_ms": 0.04,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.95,
+  "retry_history": [
+    {
+      "ok": true,
+      "strategy": "argos_sentence_retranslate",
+      "text": "Жорж Жр, відомий сьогодні, як Джордж Лукас і його кінофраншиза були. відоме сьогодні, як Джордж Лукас і його кінофраншиза були."
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Entity Correction Strategy",
+  "ts": 1785171087986
+}

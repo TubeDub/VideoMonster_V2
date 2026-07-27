@@ -15,14 +15,14 @@ from pydub.silence import detect_nonsilent
 
 logger = logging.getLogger(__name__)
 
-# ─── Quality-first constants (TZ Stage 3) ─────────────────────────────────────
+# ─── Quality-first constants (TZ text-fit) ────────────────────────────────────
 # atempo is the LAST RESORT — listener must not hear unnatural speed.
-# Hard ceiling 1.20 — never 1.5–2.0. Prefer 1.15–1.18 when possible.
+# Advanced ceiling 1.20; Happy Path uses ≤1.08 (see engines.happy_path).
 _ATEMPO_MIN = 0.95
-_ATEMPO_ABSOLUTE_MAX = 1.20      # TZ Stage 3 hard ceiling
-_ATEMPO_EMERGENCY_MAX = 1.20     # never above 1.20
-DUB_MAX_ATEMPO = 1.18            # preferred per-segment cap
-HAPPY_PATH_MAX_ATEMPO = 1.20
+_ATEMPO_ABSOLUTE_MAX = 1.20      # hard ceiling (advanced / legacy)
+_ATEMPO_EMERGENCY_MAX = 1.20
+DUB_MAX_ATEMPO = 1.08            # preferred per-segment cap
+HAPPY_PATH_MAX_ATEMPO = 1.08
 DUB_SLOT_TOLERANCE_MS = 75
 
 # Video-adaptation window: if overflow ≤ this %, prefer gap-borrow / video
@@ -54,7 +54,7 @@ _PUNCT_PAUSE_MS: dict[str, int] = {
 }
 _DEFAULT_PUNCT_PAUSE_MS = 120
 _MIN_NATURAL_PAUSE_MS = 80
-_MAX_NATURAL_PAUSE_MS = 220
+_MAX_NATURAL_PAUSE_MS = 200
 
 # Significant underfill: if TTS fills < 55% of slot the silence is noticeable.
 UNDERFILL_SIGNIFICANT_THRESH = 0.55
@@ -402,17 +402,17 @@ def _atempo_hard_cap(max_atempo: float) -> float:
 def _gentle_atempo_factor(need: float, *, max_atempo: float = _ATEMPO_ABSOLUTE_MAX) -> float:
     """
     Minimal speech speed-up — LAST RESORT.
-    Soft steps toward need, hard-capped at max_atempo (≤1.20).
+    Soft steps toward need, hard-capped at max_atempo (Happy Path ≤1.08).
     """
     cap = _atempo_hard_cap(max_atempo)
     if need <= 1.0:
         return 1.0
-    if need <= 1.04:
+    if need <= 1.03:
         return min(need, min(1.02, cap))
-    if need <= 1.08:
+    if need <= 1.06:
         return min(need, min(1.04, cap))
-    if need <= 1.15:
-        return min(need, min(1.12, cap))
+    if need <= 1.10:
+        return min(need, min(1.06, cap))
     return min(need, cap)
 
 
@@ -523,11 +523,8 @@ def fit_segment_audio(
 
     if cur_ms > effective_slot and allow_atempo:
         need = cur_ms / max(effective_slot, 1)
-        overflow_pct = (cur_ms - effective_slot) / max(effective_slot, 1)
-        effective_max = float(max_atempo)
-        # After DSAL: red overflow >15% may use emergency ±12% audio fit.
-        if overflow_pct > 0.15:
-            effective_max = max(effective_max, _ATEMPO_EMERGENCY_MAX)
+        # Never exceed caller max_atempo (Happy Path passes ≤1.08).
+        effective_max = min(float(max_atempo), float(_ATEMPO_ABSOLUTE_MAX))
         atempo = _gentle_atempo_factor(need, max_atempo=effective_max)
         if atempo > 1.001:
             tmp = work / f"{src.stem}_spd.wav"
@@ -537,15 +534,16 @@ def fit_segment_audio(
                 AudioSegment.from_file(str(tmp)),
                 len(AudioSegment.from_file(str(tmp))),
             )
-            tag = "atempo_emergency" if effective_max > _ATEMPO_ABSOLUTE_MAX + 0.001 else "atempo_gentle"
+            tag = "atempo_gentle"
             strategy = tag if strategy == "none" else strategy + f"+{tag}"
             logger.info(
-                "timing_fit: %s atempo=%.3f (need=%.3f, slot=%dms, tts=%dms)",
+                "timing_fit: %s atempo=%.3f (need=%.3f, slot=%dms, tts=%dms, cap=%.3f)",
                 tag,
                 atempo,
                 need,
                 effective_slot,
                 orig_ms,
+                effective_max,
             )
     elif cur_ms > effective_slot and not allow_atempo:
         logger.debug(
@@ -599,21 +597,15 @@ def fit_segment_audio(
                 fitted_ms,
             )
     elif fitted_ms > hard_cap and no_speech_trim:
-        # TZ Stage 3 Happy Path: never chop words — try atempo ≤1.20, else keep overflow.
+        # Happy Path: never chop words — try atempo ≤ caller max (≤1.08), else overflow.
         need_cap = fitted_ms / max(hard_cap, 1)
         if allow_atempo and need_cap > 1.02:
-            emergency = _gentle_atempo_factor(
-                need_cap, max_atempo=min(float(max_atempo), _ATEMPO_ABSOLUTE_MAX)
-            )
+            cap = min(float(max_atempo), float(_ATEMPO_ABSOLUTE_MAX))
+            emergency = _gentle_atempo_factor(need_cap, max_atempo=cap)
             if emergency > 1.001:
                 tmp_em = work / f"{src.stem}_spd_cap.wav"
                 try:
-                    _atempo(
-                        cur,
-                        emergency,
-                        tmp_em,
-                        max_atempo=min(float(max_atempo), _ATEMPO_ABSOLUTE_MAX),
-                    )
+                    _atempo(cur, emergency, tmp_em, max_atempo=cap)
                     cur = tmp_em
                     audio = AudioSegment.from_file(str(tmp_em))
                     fitted_ms = len(audio)

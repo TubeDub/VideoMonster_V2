@@ -552,7 +552,22 @@ def post_tts_validate_and_retry(
             if overflow_issues:
                 # TZ Adaptive Seg §11: prefer resegment on oversized slots
                 # before aggressive text shortening.
+                # Happy Path: skip resegment (Stage 3 anti-bleed).
                 _did_resegment = False
+                _allow_reseg_qa = True
+                try:
+                    from engines.happy_path import (
+                        advanced_adaptation_enabled,
+                        task_info_for,
+                    )
+
+                    _allow_reseg_qa = bool(
+                        advanced_adaptation_enabled(
+                            task_info_for(task_id) if task_id else {}
+                        )
+                    )
+                except Exception:
+                    _allow_reseg_qa = True
                 try:
                     from engines.adaptive_segmentation.post_tts import (
                         should_prefer_resegment,
@@ -560,10 +575,13 @@ def post_tts_validate_and_retry(
                     )
 
                     _ov = max(0, tts_ms - issue_slot_ms)
-                    if should_prefer_resegment(
-                        slot_ms=issue_slot_ms,
-                        tts_ms=tts_ms,
-                        overflow_ms=_ov,
+                    if (
+                        _allow_reseg_qa
+                        and should_prefer_resegment(
+                            slot_ms=issue_slot_ms,
+                            tts_ms=tts_ms,
+                            overflow_ms=_ov,
+                        )
                     ):
                         adapt_trace["reasons"].append(
                             "resegment_preferred_before_shorten"

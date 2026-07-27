@@ -21,8 +21,9 @@ logger = logging.getLogger("tubedub.happy_path")
 # Default OFF — Simple mode is always Happy Path; Pro/dev may opt in via env.
 USE_ADVANCED_ADAPTATION = False
 
-# Happy Path timing (TZ Stage 3)
-HAPPY_PATH_MAX_ATEMPO = 1.20
+# Happy Path timing (TZ text-fit): natural rate first — atempo almost unnoticeable.
+HAPPY_PATH_MIN_ATEMPO = 0.95
+HAPPY_PATH_MAX_ATEMPO = 1.08
 HAPPY_PATH_NO_SPEECH_TRIM = True
 
 _TRUE = frozenset({"1", "true", "yes", "on"})
@@ -138,8 +139,15 @@ def stamp_happy_path_meta(
         "adaptation_shorteners": (
             ["timing_aware", "meaning_fit", "sso", "ada", "soft_compress", "closed_loop_rewrite"]
             if advanced
-            else ["naturalizer", "soft_compress"]
+            else ["naturalizer", "text_slot_fit"]
         ),
+        # Explicit Simple gates (TZ reference pipeline).
+        "post_tts_resegment_allowed": bool(advanced),
+        "blind_timing_align_allowed": bool(advanced),
+        "text_fit_required": (not advanced),
+        "min_atempo": HAPPY_PATH_MIN_ATEMPO if not advanced else 0.90,
+        "max_atempo": HAPPY_PATH_MAX_ATEMPO if not advanced else 1.20,
+        "no_speech_trim": HAPPY_PATH_NO_SPEECH_TRIM if not advanced else False,
     }
     task_info.update(meta)
     logger.info(

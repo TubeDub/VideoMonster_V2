@@ -2697,7 +2697,7 @@ def _publish_studio_session_keep_running(task_id: str, step: str) -> str | None:
 
 
 _DUB_SLOT_TOLERANCE_MS = 75
-_DUB_MAX_ATEMPO = 1.18          # quality-first; Happy Path may raise to 1.20
+_DUB_MAX_ATEMPO = 1.08          # natural rate; Happy Path hard-cap 1.08
 _VIDEO_ADAPT_MAX_PCT = 15.0     # overlap ≤ 15% → prefer gap-borrow / video slowdown
 
 # ── Block merge constants ──────────────────────────────────────────────────────
@@ -3774,7 +3774,7 @@ def _build_gap_adjusted_track_no_double_soft_sync(
     Slot-fit may still leave overflow_ms>0; skipping trim_overlap overlays full WAV
     into the next segment. Only video_adapt / gap_absorb may keep no_speech_trim.
 
-    Happy Path (TZ Stage 3): never chop speech — no_speech_trim=True, atempo≤1.20.
+    Happy Path (TZ text-fit): never chop speech — no_speech_trim=True, atempo≤1.08.
     """
     import engines.timing_fit as timing_fit_mod
 
@@ -3783,11 +3783,13 @@ def _build_gap_adjusted_track_no_double_soft_sync(
     try:
         from engines.happy_path import HAPPY_PATH_MAX_ATEMPO as _HP_ATEMPO
     except Exception:
-        _HP_ATEMPO = 1.20
+        _HP_ATEMPO = 1.08
     fit_max = float(max_atempo if max_atempo is not None else (
         _HP_ATEMPO if happy_path else _DUB_MAX_ATEMPO
     ))
-    fit_max = min(1.20, max(1.0, fit_max))
+    # Happy Path: hard 1.08; advanced may go to 1.20 absolute ceiling.
+    _ceil = 1.08 if happy_path else 1.20
+    fit_max = min(_ceil, max(1.0, fit_max))
 
     def _fit_with_skip(tts_path, slot_start, slot_end, next_start=None, work_dir=None, **fit_kw):
         pos = call_idx["i"]
@@ -3804,7 +3806,9 @@ def _build_gap_adjusted_track_no_double_soft_sync(
             fit_kw.setdefault("allow_atempo", True)
         else:
             fit_kw.setdefault("no_speech_trim", allow_overflow)
-        fit_kw.setdefault("max_atempo", fit_max)
+        # Always enforce ceiling (setdefault loses when build_gap_adjusted_track
+        # already passes absolute default 1.20).
+        fit_kw["max_atempo"] = fit_max
         if pre_fitted:
             # Skip re-atempo / soft-sync; Happy Path still forbids speech trim.
             fit_kw["_skip_soft_sync"] = True
@@ -3822,6 +3826,8 @@ def _build_gap_adjusted_track_no_double_soft_sync(
 
     timing_fit_mod.fit_segment_audio = _fit_with_skip
     try:
+        kwargs = dict(kwargs)
+        kwargs["max_atempo"] = fit_max
         return timing_fit_mod.build_gap_adjusted_track(segment_paths, timing_map, **kwargs)
     finally:
         timing_fit_mod.fit_segment_audio = orig_fit
@@ -3870,7 +3876,7 @@ def _build_timed_dub_track(
         _happy_path_timing = True
     if _happy_path_timing and task_info is not None:
         task_info["timing_mode"] = "happy_path_no_speech_trim"
-        task_info["timing_max_atempo"] = 1.20
+        task_info["timing_max_atempo"] = 1.08
 
     segment_paths: list[str] = []
     placed_seg_indices: list[int] = []
@@ -4071,7 +4077,7 @@ def _build_timed_dub_track(
         lead_in_ms_list=lead_ins,
         text_hints=text_hints,
         max_atempo=float(
-            1.20
+            1.08
             if _happy_path_timing
             else (style_params.get("max_atempo") or _DUB_MAX_ATEMPO)
         ),
@@ -4685,12 +4691,17 @@ def api_auto_dub_start():
     }
     try:
         from engines.happy_path import stamp_happy_path_meta as _stamp_hp
+        from engines.simple_dub_pipeline import apply_simple_pipeline_policy as _simple_pol
 
         _stamp_hp(task_payload["info"], user_mode=_user_mode)
+        if _user_mode in ("basic", "simple"):
+            _simple_pol(task_payload["info"], user_mode=_user_mode)
     except Exception:
         task_payload["info"]["happy_path"] = True
         task_payload["info"]["adaptation_path"] = "happy_path"
         task_payload["info"]["USE_ADVANCED_ADAPTATION"] = False
+        task_payload["info"]["simple_pipeline"] = True
+        task_payload["info"]["simple_auto_mix"] = True
     _store_style_profile(task_payload["info"], resolved_style)
     init_auto_task(task_id, task_payload)
     with STATE_LOCK:
@@ -4707,38 +4718,50 @@ def api_auto_dub_start():
 
     from engines.dub_task_state import register_pipeline_thread
 
-    t = threading.Thread(
-        target=_run_pipeline,
-        kwargs={
-            "task_id": task_id,
-            "video_path": str(video_path),
-            "target_lang": _normalize_pipeline_target_lang(
+    _pipe_kwargs = {
+        "task_id": task_id,
+        "video_path": str(video_path),
+        "target_lang": _normalize_pipeline_target_lang(
+            data.get("target_lang") or data.get("lang")
+        ),
+        "voice": data.get("voice")
+        or _default_edge_voice(
+            _normalize_pipeline_target_lang(
                 data.get("target_lang") or data.get("lang")
-            ),
-            "voice": data.get("voice")
-            or _default_edge_voice(
-                _normalize_pipeline_target_lang(
-                    data.get("target_lang") or data.get("lang")
-                )
-            ),
-            "model_size": model_size,
-            "mix_mode": mix_mode,
-            "mix_volumes": mix_volumes,
-            "keep_original_track": keep_original_track,
-            "dub_mode": data.get("dub_mode", "replace"),
-            "mix_volume": float(data.get("mix_volume", 0.3)),
-            "source_lang": data.get("source_lang"),
-            "target_duration_ms": data.get("target_duration_ms"),
-            "skip_translate": skip_translate,
-            "ui_lang": ui_lang,
-            "segmentation_mode": (data.get("segmentation_mode") or "adaptive").strip().lower(),
-            "ocr_enabled": bool(data.get("ocr_enabled", False)),
-            "dub_style": style_id,
-            "skip_tts": skip_tts,
-            "tts_rate": tts_rate,
-            "tts_pitch": tts_pitch,
-            "content_mode": content_mode,
-        },
+            )
+        ),
+        "model_size": model_size,
+        "mix_mode": mix_mode,
+        "mix_volumes": mix_volumes,
+        "keep_original_track": keep_original_track,
+        "dub_mode": data.get("dub_mode", "replace"),
+        "mix_volume": float(data.get("mix_volume", 0.3)),
+        "source_lang": data.get("source_lang"),
+        "target_duration_ms": data.get("target_duration_ms"),
+        "skip_translate": skip_translate,
+        "ui_lang": ui_lang,
+        "segmentation_mode": (data.get("segmentation_mode") or "adaptive").strip().lower(),
+        "ocr_enabled": bool(data.get("ocr_enabled", False)),
+        "dub_style": style_id,
+        "skip_tts": skip_tts,
+        "tts_rate": tts_rate,
+        "tts_pitch": tts_pitch,
+        "content_mode": content_mode,
+    }
+    _pipeline_target = _run_pipeline
+    if _user_mode in ("basic", "simple"):
+        # Explicit Simple entrypoint (TZ reference pipeline).
+        from engines.simple_dub_pipeline import run_simple_dub_pipeline as _run_simple
+
+        _pipeline_target = _run_simple
+        _pipe_kwargs["segmentation_mode"] = "happy_path"
+        # run_simple_dub_pipeline does not take ocr_enabled.
+        _pipe_kwargs.pop("ocr_enabled", None)
+        _pipe_kwargs.pop("segmentation_mode", None)
+
+    t = threading.Thread(
+        target=_pipeline_target,
+        kwargs=_pipe_kwargs,
         daemon=True,
     )
     register_pipeline_thread(task_id, t)
@@ -7738,6 +7761,23 @@ def _run_pipeline(
 
     apply_ml_thread_limits()
     set_offline_only(True)
+    # Simple / Happy Path: lock gates before any stage (TZ reference pipeline).
+    try:
+        from engines.simple_dub_pipeline import apply_simple_pipeline_policy
+
+        with STATE_LOCK:
+            if task_id in AUTO_TASKS:
+                _info0 = AUTO_TASKS[task_id].setdefault("info", {})
+                if str(_info0.get("user_mode") or "basic").lower() in (
+                    "basic",
+                    "simple",
+                    "",
+                ) or _info0.get("happy_path"):
+                    apply_simple_pipeline_policy(
+                        _info0, user_mode=str(_info0.get("user_mode") or "basic")
+                    )
+    except Exception as _pol_exc:
+        logger.debug("Task %s: simple policy stamp skipped: %s", task_id, _pol_exc)
     # MF-HOTFIX: enable Meaning Fit on real dubbing path (env unset → ON; =0 wins)
     # Happy Path: do NOT auto-enable MF — keep advanced shorteners off.
     try:
@@ -9716,6 +9756,168 @@ def _run_pipeline_inner(
         )
         _wtm_record_checkpoint(wtm_cp_log, task_id, "post_translate")
 
+        # ── Stage 3: enforce 1 source = 1 translation (anti-bleed) ──
+        try:
+            from engines.translation_segment_parity import (
+                detect_translation_bleed,
+                enforce_one_to_one_translations,
+                stamp_segment_translation_audit,
+            )
+
+            with STATE_LOCK:
+                _src_par = list(
+                    task["info"].get("source_segments") or source_segments_snapshot or []
+                )
+                _tm_par = list(
+                    task["info"].get("timing_map_backup")
+                    or timing_map_for_translate
+                    or []
+                )
+                _sd_par = list(task["info"].get("segments_data") or [])
+            segments, _parity_audits = enforce_one_to_one_translations(
+                _src_par,
+                list(segments),
+                timing_map=_tm_par,
+            )
+            _bleed_flags = detect_translation_bleed(_src_par, segments)
+            with STATE_LOCK:
+                task["info"]["translation_parity"] = {
+                    "applied": True,
+                    "segments": len(segments),
+                    "bleed_count": sum(1 for b in _bleed_flags if b),
+                    "actions": [a for a in _parity_audits if a.get("action")][:40],
+                }
+                for _i_p, _txt_p in enumerate(segments):
+                    if _i_p < len(_sd_par) and isinstance(_sd_par[_i_p], dict):
+                        try:
+                            from engines.translation_validation import (
+                                stamp_authoritative_final_text,
+                            )
+
+                            stamp_authoritative_final_text(_sd_par[_i_p], _txt_p)
+                        except Exception:
+                            _sd_par[_i_p]["text"] = _txt_p
+                            _sd_par[_i_p]["final_text"] = _txt_p
+                            _sd_par[_i_p]["tts_text"] = _txt_p
+                        stamp_segment_translation_audit(
+                            _sd_par[_i_p],
+                            original=_src_par[_i_p] if _i_p < len(_src_par) else "",
+                            translated=_txt_p,
+                            tts_text=_txt_p,
+                            translation_bleed=bool(
+                                _bleed_flags[_i_p] if _i_p < len(_bleed_flags) else False
+                            ),
+                        )
+                if _sd_par:
+                    task["info"]["segments_data"] = _sd_par
+                _aud_par = task["info"].get("translation_audits") or []
+                for _ar in _aud_par:
+                    if not isinstance(_ar, dict):
+                        continue
+                    _ai = int(_ar.get("index", -1))
+                    if 0 <= _ai < len(segments):
+                        _ar["translation_bleed"] = bool(
+                            _bleed_flags[_ai] if _ai < len(_bleed_flags) else False
+                        )
+                        if str(_ar.get("tts_text") or "") != segments[_ai]:
+                            _ar["tts_text"] = segments[_ai]
+                            _ar["final_text"] = segments[_ai]
+                logger.info(
+                    "Task %s: translation_parity n=%d bleed=%d",
+                    task_id,
+                    len(segments),
+                    sum(1 for b in _bleed_flags if b),
+                )
+        except Exception as _par_exc:
+            logger.warning("Task %s: translation_parity skipped: %s", task_id, _par_exc)
+
+        # ── Happy Path text-fit BEFORE review/TTS (natural rate > atempo) ──
+        try:
+            from engines.happy_path import skip_advanced_text_shorteners as _hp_fit
+            from engines.text_slot_fit import fit_segments_to_slots
+
+            with STATE_LOCK:
+                _info_fit = dict(task.get("info") or {})
+                _tm_fit = list(
+                    task["info"].get("timing_map_backup")
+                    or timing_map_for_translate
+                    or []
+                )
+                _src_fit = list(
+                    task["info"].get("source_segments") or source_segments_snapshot or []
+                )
+            if _hp_fit(_info_fit) and segments:
+                segments, _fit_audits = fit_segments_to_slots(
+                    list(segments),
+                    _tm_fit,
+                    lang=str(target_lang or "uk"),
+                    source_hints=_src_fit,
+                )
+                _fit_changed = sum(1 for a in _fit_audits if a.get("changed"))
+                with STATE_LOCK:
+                    task["info"]["text_slot_fit"] = {
+                        "applied": True,
+                        "changed": _fit_changed,
+                        "segments": len(_fit_audits),
+                        "rows": _fit_audits[:80],
+                    }
+                    _sd_fit = list(task["info"].get("segments_data") or [])
+                    try:
+                        from engines.translation_segment_parity import (
+                            detect_translation_bleed as _det_bleed,
+                        )
+
+                        _bleed_fit = _det_bleed(_src_fit, segments)
+                    except Exception:
+                        _bleed_fit = [False] * len(segments)
+                    for _i_f, _a in enumerate(_fit_audits):
+                        if _i_f >= len(segments):
+                            break
+                        if _i_f < len(_sd_fit) and isinstance(_sd_fit[_i_f], dict):
+                            try:
+                                from engines.translation_validation import (
+                                    stamp_authoritative_final_text,
+                                )
+
+                                stamp_authoritative_final_text(
+                                    _sd_fit[_i_f], segments[_i_f]
+                                )
+                            except Exception:
+                                _sd_fit[_i_f]["text"] = segments[_i_f]
+                                _sd_fit[_i_f]["final_text"] = segments[_i_f]
+                            _sd_fit[_i_f]["text_slot_fit"] = {
+                                "action": _a.get("action"),
+                                "predicted_ms_before": _a.get("predicted_ms_before"),
+                                "predicted_ms_after": _a.get("predicted_ms_after"),
+                                "slot_ms": _a.get("slot_ms"),
+                                "text_fit_applied": bool(_a.get("changed")),
+                                "translation_bleed": bool(
+                                    _bleed_fit[_i_f] if _i_f < len(_bleed_fit) else False
+                                ),
+                                "original_len": len(
+                                    str(_src_fit[_i_f] if _i_f < len(_src_fit) else "")
+                                ),
+                                "fitted_len": len(str(segments[_i_f] or "")),
+                            }
+                            if _a.get("changed"):
+                                logger.info(
+                                    "text_fit seg#%d slot=%s pred %s→%s bleed=%s",
+                                    _i_f,
+                                    _a.get("slot_ms"),
+                                    _a.get("predicted_ms_before"),
+                                    _a.get("predicted_ms_after"),
+                                    _bleed_fit[_i_f] if _i_f < len(_bleed_fit) else False,
+                                )
+                    task["info"]["segments_data"] = _sd_fit
+                logger.info(
+                    "Task %s: text_slot_fit changed=%d/%d (atempo cap 1.08)",
+                    task_id,
+                    _fit_changed,
+                    len(_fit_audits),
+                )
+        except Exception as _fit_exc:
+            logger.warning("Task %s: text_slot_fit skipped: %s", task_id, _fit_exc)
+
         with STATE_LOCK:
             review_before_tts = bool(
                 task["info"].get("translation_review_before_tts", True)
@@ -9768,6 +9970,22 @@ def _run_pipeline_inner(
         except Exception:
             _tps_enabled = True
 
+        if _tps_enabled and segments:
+            try:
+                from engines.happy_path import skip_advanced_text_shorteners as _hp_tps
+
+                with STATE_LOCK:
+                    _info_tps_gate = dict(task.get("info") or {})
+                if _hp_tps(_info_tps_gate):
+                    _tps_enabled = False
+                    with STATE_LOCK:
+                        task["info"]["tps_skipped"] = "happy_path"
+                    logger.info(
+                        "Task %s: TPS skipped (happy_path — text_slot_fit only)",
+                        task_id,
+                    )
+            except Exception:
+                pass
         if _tps_enabled and segments:
             try:
                 from engines.tps import run_tps_pipeline
@@ -9965,12 +10183,42 @@ def _run_pipeline_inner(
                 ]
             if not any(raw_mt_segments):
                 raw_mt_segments = list(segments)
-            segments = align_segments_to_timing_map(
-                segments, current_timing_map_snapshot
+            # Happy Path: never blind timing-redistribute (Stage 3 anti-bleed).
+            _src_align = list(
+                info_snapshot.get("source_segments") or source_segments_snapshot or []
             )
-            raw_mt_segments = align_segments_to_timing_map(
-                raw_mt_segments, current_timing_map_snapshot
-            )
+            _use_source_align = False
+            try:
+                from engines.happy_path import skip_advanced_text_shorteners
+                _use_source_align = bool(skip_advanced_text_shorteners(info_snapshot))
+            except Exception:
+                _use_source_align = False
+            if _use_source_align and _src_align:
+                from engines.translation_segment_parity import (
+                    enforce_one_to_one_translations,
+                )
+                segments, _ = enforce_one_to_one_translations(
+                    _src_align, segments, timing_map=current_timing_map_snapshot
+                )
+                raw_mt_segments, _ = enforce_one_to_one_translations(
+                    _src_align, raw_mt_segments, timing_map=current_timing_map_snapshot
+                )
+                _tm_n = len(current_timing_map_snapshot or [])
+                if _tm_n and len(segments) < _tm_n:
+                    segments = list(segments) + [""] * (_tm_n - len(segments))
+                    raw_mt_segments = list(raw_mt_segments) + [""] * (
+                        _tm_n - len(raw_mt_segments)
+                    )
+                elif _tm_n and len(segments) > _tm_n:
+                    segments = list(segments)[:_tm_n]
+                    raw_mt_segments = list(raw_mt_segments)[:_tm_n]
+            else:
+                segments = align_segments_to_timing_map(
+                    segments, current_timing_map_snapshot
+                )
+                raw_mt_segments = align_segments_to_timing_map(
+                    raw_mt_segments, current_timing_map_snapshot
+                )
             tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
             _skip_timing_adapt = bool(task["info"].get("translation_agent_path"))
             _skip_semantic_shorten = bool(task["info"].get("semantic_agent_path"))
@@ -10256,32 +10504,20 @@ def _run_pipeline_inner(
                     )
                     for r in _dub_engine_results
                 ]
-            # Soft-compress UK/RU lines that still overflow tight Whisper slots.
-            # Freeze when review-before-TTS: Final is operator-approved — never
-            # drop «насправді/дійсно/просто» between Review and spoken TTS.
-            # Stage 3: light soft-compress is allowed on Happy Path (not ADA/SSO).
+            # Happy Path text-fit reinforce before TTS (natural rate > atempo).
             try:
-                from engines.mt.tts_slot_compress import soft_compress_for_slot
+                from engines.happy_path import skip_advanced_text_shorteners as _hp_sc
+                from engines.text_slot_fit import fit_text_to_slot
 
                 with STATE_LOCK:
-                    _review_freeze_sc = bool(
-                        task["info"].get("translation_review_before_tts", True)
-                    )
-                # Stage 3: light soft-compress allowed on Happy Path (not ADA/SSO).
-                # Freeze when review-before-TTS: Final is operator-approved.
-                _tm_sc = list(current_timing_map_snapshot or [])
-                with STATE_LOCK:
+                    _info_sc = dict(task.get("info") or {})
                     _sd_sc = list(task["info"].get("segments_data") or [])
-                if not _review_freeze_sc:
+                _tm_sc = list(current_timing_map_snapshot or [])
+                if _hp_sc(_info_sc):
+                    _sc_rows = []
                     for _i_sc, _txt_sc in enumerate(list(segments)):
                         if not str(_txt_sc or "").strip():
                             continue
-                        # Skip when Meaning Fit already refused destructive shorten
-                        if _i_sc < len(_sd_sc) and isinstance(_sd_sc[_i_sc], dict):
-                            if _sd_sc[_i_sc].get("meaning_fit_refused_destructive") or _sd_sc[
-                                _i_sc
-                            ].get("expand_required"):
-                                continue
                         _slot_sc = 0
                         if _i_sc < len(_tm_sc):
                             _it = _tm_sc[_i_sc]
@@ -10293,13 +10529,20 @@ def _run_pipeline_inner(
                                 _slot_sc = max(0, int(_it[1]) - int(_it[0]))
                         if _slot_sc <= 0:
                             continue
-                        _cmp = soft_compress_for_slot(
-                            str(_txt_sc),
-                            slot_ms=_slot_sc,
-                            target_lang=str(target_lang or "uk"),
+                        _hint = (
+                            source_segments_snapshot[_i_sc]
+                            if _i_sc < len(source_segments_snapshot or [])
+                            else ""
                         )
-                        if _cmp and _cmp != _txt_sc:
-                            segments[_i_sc] = _cmp
+                        _fit = fit_text_to_slot(
+                            str(_txt_sc),
+                            _slot_sc,
+                            str(target_lang or "uk"),
+                            source_hint=str(_hint or ""),
+                        )
+                        if _fit.changed and _fit.text:
+                            segments[_i_sc] = _fit.text
+                            _sc_rows.append(_fit.to_dict())
                             if _i_sc < len(_sd_sc) and isinstance(_sd_sc[_i_sc], dict):
                                 try:
                                     from engines.translation_validation import (
@@ -10307,30 +10550,37 @@ def _run_pipeline_inner(
                                     )
 
                                     stamp_authoritative_final_text(
-                                        _sd_sc[_i_sc], _cmp
+                                        _sd_sc[_i_sc], _fit.text
                                     )
                                 except Exception:
-                                    _sd_sc[_i_sc]["text"] = _cmp
-                                    _sd_sc[_i_sc]["plain_text"] = _cmp
-                                    _sd_sc[_i_sc]["tts_text"] = _cmp
-                                    _sd_sc[_i_sc]["text_for_tts"] = _cmp
-                                    _sd_sc[_i_sc]["final_text"] = _cmp
-                    with STATE_LOCK:
-                        if _sd_sc:
-                            task["info"]["segments_data"] = _sd_sc
-                            # Keep audit naturalized/final in sync with soft_compress
-                            _aud_sc = task["info"].get("translation_audits") or []
-                            _aby = {int(a.get("index", -1)): a for a in _aud_sc}
-                            for _i_sc2, _txt2 in enumerate(segments):
-                                _row = _aby.get(_i_sc2)
-                                if _row is None or not str(_txt2 or "").strip():
-                                    continue
-                                if str(_row.get("tts_text") or "") != _txt2:
-                                    _row["tts_text"] = _txt2
-                                    _row["final_text"] = _txt2
-                                    _row["naturalized_text"] = _txt2
+                                    _sd_sc[_i_sc]["text"] = _fit.text
+                                    _sd_sc[_i_sc]["final_text"] = _fit.text
+                                    _sd_sc[_i_sc]["tts_text"] = _fit.text
+                    if _sc_rows:
+                        with STATE_LOCK:
+                            task["info"]["text_slot_fit_pre_tts"] = {
+                                "changed": len(_sc_rows),
+                                "rows": _sc_rows[:40],
+                            }
+                            if _sd_sc:
+                                task["info"]["segments_data"] = _sd_sc
+                                _aud_sc = task["info"].get("translation_audits") or []
+                                _aby = {int(a.get("index", -1)): a for a in _aud_sc}
+                                for _i_sc2, _txt2 in enumerate(segments):
+                                    _row = _aby.get(_i_sc2)
+                                    if _row is None or not str(_txt2 or "").strip():
+                                        continue
+                                    if str(_row.get("tts_text") or "") != _txt2:
+                                        _row["tts_text"] = _txt2
+                                        _row["final_text"] = _txt2
+                                        _row["naturalized_text"] = _txt2
+                        logger.info(
+                            "Task %s: text_slot_fit pre-TTS changed=%d",
+                            task_id,
+                            len(_sc_rows),
+                        )
             except Exception as _sc_exc:
-                logger.debug("tts soft-compress skipped: %s", _sc_exc)
+                logger.debug("text_slot_fit pre-TTS skipped: %s", _sc_exc)
             _engine_meta = {
                 "segments": len(_dub_engine_results),
                 "adapted": sum(
@@ -13790,10 +14040,19 @@ def _run_pipeline_inner(
                 "yes",
                 "on",
             )
+            _simple_auto_mix = False
+            try:
+                from engines.simple_dub_pipeline import should_auto_mix_mp4
+
+                with STATE_LOCK:
+                    _mix_info = dict((AUTO_TASKS.get(task_id) or {}).get("info") or {})
+                _simple_auto_mix = bool(should_auto_mix_mp4(_mix_info))
+            except Exception:
+                _simple_auto_mix = False
             try:
                 from engines.core.feature_flags import IS_DEBUG_LEARNING_MODE as _idl
 
-                if _idl() or _auto_mix_env:
+                if _idl() or _auto_mix_env or _simple_auto_mix:
                     from api.studio_api import run_studio_mix_internal
 
                     _mix_ok, _mix_out, _mix_errs = run_studio_mix_internal(
@@ -13801,8 +14060,9 @@ def _run_pipeline_inner(
                     )
                     if _mix_ok and _mix_out:
                         logger.info(
-                            "Task %s: debug/auto mix complete → %s",
+                            "Task %s: %s mix complete → %s",
                             task_id,
+                            "simple_auto" if _simple_auto_mix else "debug/auto",
                             _mix_out,
                         )
                         with STATE_LOCK:
@@ -13812,6 +14072,9 @@ def _run_pipeline_inner(
                                 _mt["step"] = "done"
                                 _mt["progress"] = 100.0
                                 _mt["output_file"] = _mix_out
+                                _mt.setdefault("info", {})["simple_auto_mix_done"] = bool(
+                                    _simple_auto_mix
+                                )
                         _open_ddf.save(task_id)
                         log_stage_end(task_id, "STUDIO")
                         log_stage_transition(task_id, "STUDIO", "MP4")

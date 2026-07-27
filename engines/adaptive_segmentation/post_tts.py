@@ -121,12 +121,37 @@ def try_split_long_overflow_segment(
     else:
         src_left, src_right = left, right
 
-    # Target split: if we split source, try proportional target by sentence count
+    # Target split MUST follow source ownership (Stage 3 anti-bleed).
+    # Never leave the full UK blob on the left while the right keeps EN only.
     tgt_chunks = _safe_split_chunks(tgt) if tgt else []
-    if len(tgt_chunks) >= 2:
+    if len(src_chunks) >= 2 and tgt:
+        try:
+            from engines.translation_segment_parity import (
+                split_translation_by_sources,
+            )
+
+            tgt_left, tgt_right = split_translation_by_sources(
+                tgt, [src_left, src_right]
+            )
+        except Exception:
+            tgt_left, tgt_right = "", ""
+        if not (tgt_left and tgt_right) and len(tgt_chunks) >= 2:
+            tgt_left, tgt_right = tgt_chunks[0], " ".join(tgt_chunks[1:]).strip()
+        if not tgt_right and tgt_left == tgt:
+            # Last resort: source-char proportional word split (never full→left).
+            try:
+                from engines.translation_segment_parity import (
+                    split_translation_by_sources,
+                )
+
+                tgt_left, tgt_right = split_translation_by_sources(
+                    tgt, [src_left, src_right]
+                )
+            except Exception:
+                tgt_left, tgt_right = tgt, ""
+    elif len(tgt_chunks) >= 2:
         tgt_left, tgt_right = tgt_chunks[0], " ".join(tgt_chunks[1:]).strip()
     else:
-        # Keep full text on left; right empty → force retranslate path
         tgt_left, tgt_right = tgt, ""
 
     # PSA3 — when IdentityGuard is ON: archive old id, mint NEW ids, rebind.

@@ -524,47 +524,49 @@ class UniversalTranslationPipeline:
                 m["group_indices"] = list(group)
                 per_index_meta[group[0]] = m
                 per_index_ms[group[0]] = share_ms
-            elif timing_map:
-                sub_timing = [timing_map[i] for i in group if i < len(timing_map)]
-                sub_parts = split_by_timing_map(tr_phrase, sub_timing)
-                # Prefer source-proportional split when sentence-safe split left
-                # empty tails (1 UK sentence → N Whisper fragments).
-                nonempty = sum(1 for p in sub_parts if str(p or "").strip())
-                if nonempty < len(group) and len(group) >= 2:
-                    from engines.pipeline_orchestrator.translation_batch import (
-                        TranslationBatch,
-                        split_batch_translation,
-                    )
+            elif len(group) >= 2:
+                # Happy Path TZ: always source-aware split first (never broadcast
+                # one MT blob onto N slots; timing-only split is fallback only).
+                from engines.pipeline_orchestrator.translation_batch import (
+                    TranslationBatch,
+                    split_batch_translation,
+                )
+                from engines.translation_segment_parity import (
+                    split_translation_by_sources,
+                )
 
-                    batch = TranslationBatch(
-                        batch_id=-1,
-                        segment_indices=list(group),
-                        source_texts=[
-                            str(source_segments[i] or "") for i in group
-                        ],
+                batch = TranslationBatch(
+                    batch_id=-1,
+                    segment_indices=list(group),
+                    source_texts=[
+                        str(source_segments[i] or "") for i in group
+                    ],
+                )
+                split_map = split_batch_translation(batch, tr_phrase)
+                sub_parts = [str(split_map.get(i, "") or "") for i in group]
+                nonempty = sum(1 for p in sub_parts if str(p or "").strip())
+                if nonempty < len(group):
+                    sub_parts = split_translation_by_sources(
+                        tr_phrase,
+                        [str(source_segments[i] or "") for i in group],
                     )
-                    split_map = split_batch_translation(batch, tr_phrase)
-                    sub_parts = [split_map.get(i, "") for i in group]
+                nonempty = sum(1 for p in sub_parts if str(p or "").strip())
+                if nonempty < len(group) and timing_map:
+                    sub_timing = [
+                        timing_map[i] for i in group if i < len(timing_map)
+                    ]
+                    if len(sub_timing) == len(group):
+                        sub_parts = split_by_timing_map(tr_phrase, sub_timing)
                 for j, idx in enumerate(group):
                     part = sub_parts[j].strip() if j < len(sub_parts) else ""
                     raw_by_index[idx] = part
                     m = dict(meta)
                     m["group_indices"] = list(group)
+                    m["split_mode"] = "source_aware"
                     if not part and tr_phrase:
                         m["split_empty_part"] = True
                     per_index_meta[idx] = m
                     per_index_ms[idx] = share_ms
-            else:
-                raw_by_index[group[0]] = tr_phrase
-                m = dict(meta)
-                m["group_indices"] = list(group)
-                per_index_meta[group[0]] = m
-                per_index_ms[group[0]] = elapsed_ms
-                for idx in group[1:]:
-                    m_tail = dict(meta)
-                    m_tail["group_indices"] = list(group)
-                    m_tail["non_head_group_index"] = True
-                    per_index_meta[idx] = m_tail
 
         preserved_finals: dict[int, str] = {}
         if self.task_id:

@@ -22,7 +22,7 @@ SRC_CANDIDATES = [
     APP_DIR / "uploads" / "video_0c3e6038c7.mp4",
 ]
 CLIP = APP_DIR / "uploads" / "stage2_happy_path_clip.mp4"
-RESULT = APP_DIR / "output" / "stage2_segmentation_result.json"
+RESULT = APP_DIR / "output" / "stage3_text_fit_result.json"
 CLIP_SEC = 110
 
 
@@ -199,6 +199,9 @@ def main() -> int:
         out["pipeline"]["adaptive_segmentation_skipped"] = info.get(
             "adaptive_segmentation_skipped"
         )
+        out["pipeline"]["tps_skipped"] = info.get("tps_skipped")
+        out["pipeline"]["text_slot_fit"] = info.get("text_slot_fit")
+        out["pipeline"]["text_slot_fit_pre_tts"] = info.get("text_slot_fit_pre_tts")
         timing_rows = list(info.get("timing_fit_segments") or [])
         out["pipeline"]["timing_fit_segments"] = timing_rows[:40]
         atempos = [float(r.get("atempo") or 1.0) for r in timing_rows]
@@ -207,6 +210,7 @@ def main() -> int:
         out["pipeline"]["timing_summary"] = {
             "n": len(timing_rows),
             "max_atempo": max(atempos) if atempos else None,
+            "atempo_over_1_08": any(a > 1.0801 for a in atempos),
             "atempo_over_1_20": any(a > 1.2001 for a in atempos),
             "overflow_count": sum(1 for o in overflows if o > 0),
             "speech_trimmed_count": sum(1 for t in trimmed if t),

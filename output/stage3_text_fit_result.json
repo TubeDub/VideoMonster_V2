@@ -1,0 +1,340 @@
+{
+  "synthetic": {
+    "segments_before": 24,
+    "segments_after": 6,
+    "min_dur_ms": 5400,
+    "median_dur_ms": 5400,
+    "ok_fewer": true
+  },
+  "pipeline": {
+    "start": {
+      "status": 200,
+      "body": {
+        "status": "running",
+        "task_id": "41b2ced5bc954484a9228fb6df4abe93"
+      }
+    },
+    "task_id": "41b2ced5bc954484a9228fb6df4abe93",
+    "status": "done",
+    "output_file": "video_889ebc25ad_OUTPUT_41b2ced5.mp4",
+    "adaptation_path": "happy_path",
+    "happy_path": true,
+    "segments_before": 21,
+    "segments_after": 11,
+    "mt_batch_mode": null,
+    "mt_batch_groups": null,
+    "mt_batch_segments": null,
+    "adaptive_segmentation_skipped": "happy_path",
+    "tps_skipped": "happy_path",
+    "text_slot_fit": {
+      "applied": true,
+      "changed": 1,
+      "segments": 10,
+      "rows": [
+        {
+          "text": "дістатися туди. Тож Джордж-молодший був дуже розумною дитиною, але також дуже легко відволікався. І через це він насправді нічим настільки серйозно не займався.",
+          "slot_ms": 8626,
+          "predicted_ms_before": 11851,
+          "predicted_ms_after": 11851,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 0
+        },
+        {
+          "text": "Це за винятком автомобілів. І в той момент його батько дійсно купив йому маленький італійський автомобіль під назвою «фіат». Але його батько, незважаючи на те, що він буквально дав йому фіат, він просто не зрозумів одержимість свого сина автомобілями.",
+          "slot_ms": 11764,
+          "predicted_ms_before": 18592,
+          "predicted_ms_after": 18592,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 1
+        },
+        {
+          "text": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, щоб ми отримали вашу справжню роботу. І тому практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином. І ось Джордж, він підійшов до цього перехрестя, де воно було прямо біля його дому, і він почав повертати, коли почув цей дуже гучний вереск, а потім усе потемніло.",
+          "slot_ms": 18760,
+          "predicted_ms_before": 28592,
+          "predicted_ms_after": 28592,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 2
+        },
+        {
+          "text": "Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні. два тижні тому, коли Джордж робив той поворот, а потім щось сталося.",
+          "slot_ms": 9318,
+          "predicted_ms_before": 13629,
+          "predicted_ms_after": 13185,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "drop_fillers"
+          ],
+          "idx": 3
+        },
+        {
+          "text": "Що ж, це був інший автомобіль, який Кінг мчав дорогою і так сильно врізався в машину Джорджа, що Джорджа-молодшого викинуло з машини, але він вижив.",
+          "slot_ms": 7958,
+          "predicted_ms_before": 10962,
+          "predicted_ms_after": 10962,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 4
+        },
+        {
+          "text": "Через два роки Джордж-молодший, який до цього моменту повністю оговтався від травм, стояв на фініші на іподромі і підняв камеру. Тож після свого передсмертного досвіду Джордж-молодший зрозумів, що тато справді мав рацію.",
+          "slot_ms": 12360,
+          "predicted_ms_before": 16296,
+          "predicted_ms_after": 16296,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 5
+        },
+        {
+          "text": "Що певним чином він витрачав свій потенціал. Тож Джордж-молодший вирішив, що справді більше не хоче брати участь у перегонах автомобілів.",
+          "slot_ms": 6102,
+          "predicted_ms_before": 10148,
+          "predicted_ms_after": 10148,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 6
+        },
+        {
+          "text": "Натомість він узяв цей фотоапарат і повернувся до свого старого хобі фотографії.",
+          "slot_ms": 4848,
+          "predicted_ms_before": 5925,
+          "predicted_ms_after": 5925,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 7
+        },
+        {
+          "text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Університеті Південної Каліфорнії. Але після відправки офісної заявки він був майже впевнений, що не потрапить.",
+          "slot_ms": 9169,
+          "predicted_ms_before": 14000,
+          "predicted_ms_after": 14000,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 8
+        },
+        {
+          "text": "Тепер Джордж молодший підійшов до подіуму, щоб зробити кілька фотографій переможної гонки. Але коли він підійшов туди, підійшов Убитий Чоловік.",
+          "slot_ms": 7284,
+          "predicted_ms_before": 10592,
+          "predicted_ms_after": 10592,
+          "action": "unchanged",
+          "changed": false,
+          "reasons": [],
+          "idx": 9
+        }
+      ]
+    },
+    "text_slot_fit_pre_tts": {
+      "changed": 1,
+      "rows": [
+        {
+          "text": "Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні. двома тижнями раніше, коли Джордж робив той поворот, а потім щось сталося.",
+          "slot_ms": 9318,
+          "predicted_ms_before": 14074,
+          "predicted_ms_after": 13629,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "drop_fillers"
+          ]
+        }
+      ]
+    },
+    "timing_fit_segments": [
+      {
+        "idx": 0,
+        "slot_ms": 8726,
+        "tts_ms": 13104,
+        "speech_ms": 8767,
+        "fitted_ms": 8767,
+        "atempo": 1.2,
+        "overflow_ms": 41,
+        "strategy": "pause_compress+atempo_gentle+no_trim_overflow+overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 1,
+        "slot_ms": 1456,
+        "tts_ms": 2808,
+        "speech_ms": 1438,
+        "fitted_ms": 1456,
+        "atempo": 1.2,
+        "overflow_ms": 0,
+        "strategy": "pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 2,
+        "slot_ms": 12480,
+        "tts_ms": 8712,
+        "speech_ms": 8712,
+        "fitted_ms": 8832,
+        "atempo": 1.0,
+        "overflow_ms": 0,
+        "strategy": "none",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 3,
+        "slot_ms": 5470,
+        "tts_ms": 14280,
+        "speech_ms": 8689,
+        "fitted_ms": 8689,
+        "atempo": 1.2,
+        "overflow_ms": 3219,
+        "strategy": "pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow+overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 4,
+        "slot_ms": 15771,
+        "tts_ms": 11880,
+        "speech_ms": 11880,
+        "fitted_ms": 12000,
+        "atempo": 1.0,
+        "overflow_ms": 0,
+        "strategy": "none",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 5,
+        "slot_ms": 9718,
+        "tts_ms": 8712,
+        "speech_ms": 8712,
+        "fitted_ms": 8832,
+        "atempo": 1.0,
+        "overflow_ms": 0,
+        "strategy": "none",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 6,
+        "slot_ms": 8308,
+        "tts_ms": 10176,
+        "speech_ms": 8286,
+        "fitted_ms": 8308,
+        "atempo": 1.0081,
+        "overflow_ms": 0,
+        "strategy": "pause_compress+atempo_gentle",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 7,
+        "slot_ms": 8220,
+        "tts_ms": 6384,
+        "speech_ms": 6384,
+        "fitted_ms": 6504,
+        "atempo": 1.0,
+        "overflow_ms": 0,
+        "strategy": "none",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 8,
+        "slot_ms": 6336,
+        "tts_ms": 6624,
+        "speech_ms": 6624,
+        "fitted_ms": 6624,
+        "atempo": 1.0,
+        "overflow_ms": 0,
+        "strategy": "pause_borrow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 9,
+        "slot_ms": 6325,
+        "tts_ms": 11496,
+        "speech_ms": 6701,
+        "fitted_ms": 6701,
+        "atempo": 1.2,
+        "overflow_ms": 376,
+        "strategy": "pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow+overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 10,
+        "slot_ms": 5086,
+        "tts_ms": 6384,
+        "speech_ms": 5377,
+        "fitted_ms": 5377,
+        "atempo": 1.04,
+        "overflow_ms": 1,
+        "strategy": "pause_borrow+pause_compress+atempo_gentle+no_trim_overflow+overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 11,
+        "slot_ms": 5491,
+        "tts_ms": 6624,
+        "speech_ms": 5510,
+        "fitted_ms": 5510,
+        "atempo": 1.06,
+        "overflow_ms": 19,
+        "strategy": "pause_compress+atempo_gentle+no_trim_overflow+overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 12,
+        "slot_ms": 4078,
+        "tts_ms": 6504,
+        "speech_ms": 4611,
+        "fitted_ms": 4611,
+        "atempo": 1.2,
+        "overflow_ms": 22,
+        "strategy": "pause_borrow+pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow+overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      },
+      {
+        "idx": 13,
+        "slot_ms": 7284,
+        "tts_ms": 11496,
+        "speech_ms": 7266,
+        "fitted_ms": 7284,
+        "atempo": 1.2,
+        "overflow_ms": 0,
+        "strategy": "pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow",
+        "speech_trimmed": false,
+        "no_speech_trim": true
+      }
+    ],
+    "timing_summary": {
+      "n": 14,
+      "max_atempo": 1.2,
+      "atempo_over_1_08": true,
+      "atempo_over_1_20": false,
+      "overflow_count": 6,
+      "speech_trimmed_count": 0
+    },
+    "meaning_fit_skipped": "happy_path",
+    "timing_aware_skipped": "happy_path",
+    "last_status": {
+      "status": "done",
+      "step": "Готово",
+      "progress": 100.0
+    }
+  }
+}

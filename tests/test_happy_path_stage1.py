@@ -46,7 +46,7 @@ def test_stamp_meta_labels_happy_path():
     assert meta["happy_path"] is True
     assert meta["adaptation_path"] == "happy_path"
     assert meta["USE_ADVANCED_ADAPTATION"] is False
-    assert meta["adaptation_shorteners"] == ["naturalizer", "soft_compress"]
+    assert info["adaptation_shorteners"] == ["naturalizer", "text_slot_fit"]
 
 
 def test_stamp_meta_advanced_when_pro_env(monkeypatch):

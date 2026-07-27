@@ -1,0 +1,877 @@
+{
+  "task_id": "4aadfafb4a2548cb96dd2a67b32d54ad",
+  "generated_at": "2026-07-27T15:31:34+00:00",
+  "final_status": "completed",
+  "ddf_summary": {
+    "total_agents": 23,
+    "failed_agents": 0,
+    "fallback_used": 14,
+    "warnings": 0,
+    "total_execution_time_ms": 189736.2,
+    "total_llm_calls": 0
+  },
+  "agents": {
+    "Planner/v3": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": true,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "LOCAL_ONLY",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "AudioExtraction": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 1094.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "extracted",
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_6d3fa8fd1b.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\4aadfafb4a2548cb96dd2a67b32d54ad\\4aadfafb_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\4aadfafb4a2548cb96dd2a67b32d54ad\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    "Whisper/STT": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "detected_lang=en",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "LLM Gateway": {
+      "called": false,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": true,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "Director/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 26.2,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "creative_briefs_ready",
+      "input_metrics": {
+        "segment_count": 12
+      },
+      "output_metrics": {
+        "brief_count": 12,
+        "llm_used_count": 0,
+        "rule_only_count": 12
+      }
+    },
+    "Translation/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "translation_agent_v1",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "translation": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 188582.2,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {
+        "segments": 12
+      },
+      "output_metrics": {
+        "execution_time_ms": 188582.2,
+        "segment_count": 12,
+        "success_count": 18,
+        "retries": 99,
+        "fallback_used": true,
+        "translator_used": "deep-translator",
+        "per_segment_confidence": [
+          {
+            "translation": 0.55,
+            "entity": 0.3333,
+            "terminology": 0.5,
+            "language": 0.8405,
+            "overall": 0.5439
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.5,
+            "language": 0.8315,
+            "overall": 0.5838
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.743,
+            "overall": 0.4411
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8873,
+            "overall": 0.47
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8468,
+            "overall": 0.4619
+          },
+          {
+            "translation": 0.72,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.7821,
+            "overall": 0.5084
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8266,
+            "overall": 0.4578
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8553,
+            "overall": 0.4636
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8436,
+            "overall": 0.4612
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.5,
+            "language": 0.8139,
+            "overall": 0.5803
+          },
+          {
+            "translation": 0.204,
+            "entity": 1.0,
+            "terminology": 0.5,
+            "language": 0.7953,
+            "overall": 0.5805
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8341,
+            "overall": 0.4593
+          }
+        ],
+        "avg_overall": 0.501,
+        "avg_translation": 0.501,
+        "avg_entity": 0.8611,
+        "avg_terminology": 0.5,
+        "avg_language": 0.825
+      }
+    },
+    "ArchitectureValidation/4.3": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 36,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    },
+    "VoicePrep/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 16.9,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "voice_prep_validated",
+      "input_metrics": {
+        "segment_count": 12
+      },
+      "output_metrics": {
+        "ready_count": 12
+      }
+    },
+    "voice_preparation": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 16.9,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {
+        "segments": 12
+      },
+      "output_metrics": {
+        "ready_count": 12,
+        "segment_count": 12,
+        "input_summary": {
+          "segment_count": 12
+        },
+        "output_summary": {
+          "ready_count": 12
+        }
+      }
+    }
+  },
+  "agent_timeline": [
+    {
+      "agent_name": "Planner/v3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "LOCAL_ONLY",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:19:22+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "AudioExtraction",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "extracted",
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:19:23+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 1094.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_6d3fa8fd1b.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\4aadfafb4a2548cb96dd2a67b32d54ad\\4aadfafb_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\4aadfafb4a2548cb96dd2a67b32d54ad\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    {
+      "agent_name": "Whisper/STT",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "detected_lang=en",
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:28:18+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 0,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 1,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 2,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 3,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 4,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 5,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 6,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 7,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 8,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 9,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 10,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "LLM Gateway",
+      "called": false,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped: heavy_llm_disabled",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": 11,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Director/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "creative_briefs_ready",
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:28:19+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 26.2,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segment_count": 12
+      },
+      "output_metrics": {
+        "brief_count": 12,
+        "llm_used_count": 0,
+        "rule_only_count": 12
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "LLM skipped",
+      "fallback_used": true,
+      "timestamp": "2026-07-27T15:31:28+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "translation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:31:28+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 188582.2,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 12
+      },
+      "output_metrics": {
+        "execution_time_ms": 188582.2,
+        "segment_count": 12,
+        "success_count": 18,
+        "retries": 99,
+        "fallback_used": true,
+        "translator_used": "deep-translator",
+        "per_segment_confidence": [
+          {
+            "translation": 0.55,
+            "entity": 0.3333,
+            "terminology": 0.5,
+            "language": 0.8405,
+            "overall": 0.5439
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.5,
+            "language": 0.8315,
+            "overall": 0.5838
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.743,
+            "overall": 0.4411
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8873,
+            "overall": 0.47
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8468,
+            "overall": 0.4619
+          },
+          {
+            "translation": 0.72,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.7821,
+            "overall": 0.5084
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8266,
+            "overall": 0.4578
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8553,
+            "overall": 0.4636
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8436,
+            "overall": 0.4612
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.5,
+            "terminology": 0.5,
+            "language": 0.8139,
+            "overall": 0.5803
+          },
+          {
+            "translation": 0.204,
+            "entity": 1.0,
+            "terminology": 0.5,
+            "language": 0.7953,
+            "overall": 0.5805
+          },
+          {
+            "translation": 0.55,
+            "entity": 0.0,
+            "terminology": 0.5,
+            "language": 0.8341,
+            "overall": 0.4593
+          }
+        ],
+        "avg_overall": 0.501,
+        "avg_translation": 0.501,
+        "avg_entity": 0.8611,
+        "avg_terminology": 0.5,
+        "avg_language": 0.825
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:31:28+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 0,
+        "active_agents": 1,
+        "contract_violations": 20,
+        "ux_validation_passed": true
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "translation_agent_v1",
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:31:28+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "VoicePrep/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "voice_prep_validated",
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:31:34+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 16.9,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segment_count": 12
+      },
+      "output_metrics": {
+        "ready_count": 12
+      }
+    },
+    {
+      "agent_name": "voice_preparation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:31:34+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 16.9,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 12
+      },
+      "output_metrics": {
+        "ready_count": 12,
+        "segment_count": 12,
+        "input_summary": {
+          "segment_count": 12
+        },
+        "output_summary": {
+          "ready_count": 12
+        }
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-27T15:31:34+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 36,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    }
+  ],
+  "llm_calls_count": 0,
+  "llm_calls": [],
+  "llm_status": {
+    "task": "4aadfafb4a2548cb96dd2a67b32d54ad",
+    "spent_s": 0.0,
+    "consec_fail": 0,
+    "open": false,
+    "logged_open": false,
+    "global_consec_fail": 0,
+    "global_open": false,
+    "global_logged": false,
+    "slow_fail": 0,
+    "model_too_slow": false,
+    "slow_logged": false,
+    "mode": "max_quality",
+    "per_segment_budget_s": 0.0,
+    "project_budget_s": 0.0,
+    "circuit_open": false,
+    "circuit_cooldown_s": 45.0,
+    "recent_decisions": []
+  },
+  "fallbacks": [
+    {
+      "agent": "Planner/v3",
+      "reason": "LOCAL_ONLY",
+      "segment": null
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 0
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 1
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 2
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 3
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 4
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 5
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 6
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 7
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 8
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 9
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 10
+    },
+    {
+      "agent": "LLM Gateway",
+      "reason": "LLM skipped: heavy_llm_disabled",
+      "segment": 11
+    },
+    {
+      "agent": "Translation/v1",
+      "reason": "LLM skipped",
+      "segment": null
+    }
+  ],
+  "segment_attention": [],
+  "totals": {
+    "agents_run": 23,
+    "failed_agents": 0,
+    "fallback_count": 14,
+    "total_llm_calls": 0,
+    "total_execution_ms": 189736.2
+  }
+}

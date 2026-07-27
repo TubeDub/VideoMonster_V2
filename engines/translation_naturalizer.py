@@ -1444,7 +1444,11 @@ def merge_segments_for_translation_happy_path(
     max_gap_ms: int | None = None,
     max_batch: int | None = None,
 ) -> List[List[int]]:
-    """Happy Path batch groups — cross-sentence, larger blocks (TZ Stage 2)."""
+    """Happy Path batch groups — glue short fragments, keep sentence borders.
+
+    Stage 3 TZ: cross_sentence=False reduces mega-batches that cause
+    translation bleed when MT returns one paragraph for N slots.
+    """
     try:
         from engines.segment_merger import HAPPY_PATH_MAX_GAP_MS as _gap
     except Exception:
@@ -1454,7 +1458,7 @@ def merge_segments_for_translation_happy_path(
         timing_map,
         max_gap_ms=int(max_gap_ms if max_gap_ms is not None else _gap),
         max_batch=int(max_batch if max_batch is not None else HAPPY_PATH_MAX_BATCH_SEGMENTS),
-        cross_sentence=True,
+        cross_sentence=False,
     )
 
 

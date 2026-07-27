@@ -1,0 +1,177 @@
+{
+  "index": 3,
+  "status": "PASS",
+  "overall_confidence": 1.0,
+  "explanation": "PASS",
+  "retry_strategy": "none",
+  "original": "And so basically every dinner these days it became this huge argument between father and son. And so George, he came to this intersection where it was right near his home and he begins making the turn when he hears this really loud screeching sound and then everything went making the turn when he hears this really loud screeching sound and then everything went Two weeks later, George Jr. was laying in a hospital bed in the intensive care unit at the local hospital. So two weeks earlier when George was making that turn and then something happened, well what it was is another car came speeding down the road and smashed into George's car so hard that George Jr. was ejected from the car but he had survived.",
+  "translation": "І тому практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином. І ось Джордж, він підійшов до цього перехрестя, де воно було прямо біля його дому, і він почав повертати, коли почув цей дуже гучний вереск, а потім усе пішло. Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні. Тож за два тижні до того, коли Джордж повертав, а потім щось трапилося, це було так: по дорозі мчала інша машина й так сильно врізалася в машину Джорджа, що Джорджа-молодшого викинуло з машини, але він вижив.",
+  "allowed_for_tts": true,
+  "reports": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 0.46,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "entities_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 4.73,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 0.34,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 0.2,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "timing_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3,
+        "slot_ms": 33942
+      },
+      "review_time_ms": 0.03,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 3
+      },
+      "review_time_ms": 0.04,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ]
+}

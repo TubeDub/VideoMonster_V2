@@ -1,0 +1,50 @@
+{
+  "examples": [
+    {
+      "i": 2,
+      "src": "That is, except for cars.",
+      "was": "Тобто, окрім автомобілів.",
+      "now": "Тобто, окрім автомобілів.",
+      "slot": 1644,
+      "pred_before": 1851,
+      "pred_after": 1851
+    },
+    {
+      "i": 3,
+      "src": "And at that point his father actually bought him a small Italian car called a Fi",
+      "was": "І в той момент його батько дійсно купив йому маленький італійський автомобіль під назвою Fiat. Але його батько, незважаю",
+      "now": "І в той момент його батько дійсно купив йому маленький італійський автомобіль під назвою Fiat. Але його батько, незважаю",
+      "slot": 13421,
+      "pred_before": 15037,
+      "pred_after": 15037
+    },
+    {
+      "i": 11,
+      "src": "Now, George Jr. walked over to the podium to take some photos of the winning dri",
+      "was": "Джордж-молодший підійшов до подіуму, щоб сфотографувати водія-переможця, але коли він ішов туди, до нього підійшов чолов",
+      "now": "Джордж-молодший підійшов до подіуму, щоб.",
+      "slot": 4112,
+      "pred_before": 34222,
+      "pred_after": 3037
+    },
+    {
+      "i": 12,
+      "src": "but as he walked over there, this middle-aged man came up beside him and just as",
+      "was": "«Джордж, я знаю людей в USC».",
+      "now": "«Джордж, я знаю людей в USC».",
+      "slot": 22346,
+      "pred_before": 2307,
+      "pred_after": 2307
+    },
+    {
+      "i": 16,
+      "src": "George Jr. is better known today as George Lucas and his film franchise was Star",
+      "was": "Джордж-молодший сьогодні більш відомий як Джордж Лукас, а його кінофраншиза— це «Зоряні війни».",
+      "now": "Джордж-молодший сьогодні більш відомий як Джордж Лукас, а його кінофраншиза— це «Зоряні війни».",
+      "slot": 7831,
+      "pred_before": 7037,
+      "pred_after": 7037
+    }
+  ],
+  "max_atempo_studio": 1.08
+}

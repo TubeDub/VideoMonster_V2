@@ -20,12 +20,12 @@
     },
     "en->uk": {
       "marian": {
-        "attempts": 6724,
-        "successes": 6724,
-        "total_quality": 527872.7700000068,
+        "attempts": 6736,
+        "successes": 6736,
+        "total_quality": 528663.9300000074,
         "manual_corrections": 0,
         "retries": 0,
-        "last_used": "2026-07-26T22:07:28Z"
+        "last_used": "2026-07-27T20:43:21Z"
       },
       "failed": {
         "attempts": 3,
@@ -100,12 +100,12 @@
     },
     "pt->uk": {
       "deep": {
-        "attempts": 686,
-        "successes": 686,
-        "total_quality": 55295.360000000124,
+        "attempts": 698,
+        "successes": 698,
+        "total_quality": 56260.16000000014,
         "manual_corrections": 0,
         "retries": 0,
-        "last_used": "2026-07-17T13:53:36Z"
+        "last_used": "2026-07-27T20:46:58Z"
       },
       "marian": {
         "attempts": 99,
@@ -138,20 +138,20 @@
     },
     "da->uk": {
       "deep": {
-        "attempts": 377,
-        "successes": 377,
-        "total_quality": 30198.959999999995,
+        "attempts": 431,
+        "successes": 431,
+        "total_quality": 34484.219999999994,
         "manual_corrections": 0,
         "retries": 0,
-        "last_used": "2026-07-15T05:02:29Z"
+        "last_used": "2026-07-27T16:51:23Z"
       },
       "marian": {
-        "attempts": 93,
-        "successes": 93,
-        "total_quality": 7866.499999999994,
+        "attempts": 111,
+        "successes": 111,
+        "total_quality": 9330.439999999997,
         "manual_corrections": 0,
         "retries": 0,
-        "last_used": "2026-07-15T05:02:14Z"
+        "last_used": "2026-07-27T16:50:51Z"
       }
     },
     "en->ru": {
@@ -269,10 +269,10 @@
       "last_used": "2026-07-15T09:24:33Z"
     },
     "en→uk": {
-      "attempts": 8188,
-      "successes": 8188,
-      "total_quality": 650875.9400000031,
-      "last_used": "2026-07-26T22:07:28Z"
+      "attempts": 8200,
+      "successes": 8200,
+      "total_quality": 651667.1000000037,
+      "last_used": "2026-07-27T20:43:21Z"
     },
     "es→en→uk": {
       "attempts": 221,
@@ -317,22 +317,22 @@
       "last_used": "2026-07-17T14:51:57Z"
     },
     "pt→uk": {
-      "attempts": 686,
-      "successes": 686,
-      "total_quality": 55295.360000000124,
-      "last_used": "2026-07-17T13:53:36Z"
+      "attempts": 698,
+      "successes": 698,
+      "total_quality": 56260.16000000014,
+      "last_used": "2026-07-27T20:46:58Z"
     },
     "da→uk": {
-      "attempts": 377,
-      "successes": 377,
-      "total_quality": 30198.959999999995,
-      "last_used": "2026-07-15T05:02:29Z"
+      "attempts": 431,
+      "successes": 431,
+      "total_quality": 34484.219999999994,
+      "last_used": "2026-07-27T16:51:23Z"
     },
     "da→en→uk": {
-      "attempts": 93,
-      "successes": 93,
-      "total_quality": 7866.499999999994,
-      "last_used": "2026-07-15T05:02:14Z"
+      "attempts": 111,
+      "successes": 111,
+      "total_quality": 9330.439999999997,
+      "last_used": "2026-07-27T16:50:51Z"
     },
     "pt→en→uk": {
       "attempts": 99,
