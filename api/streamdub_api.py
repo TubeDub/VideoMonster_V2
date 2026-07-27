@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-import time
 import uuid
 from pathlib import Path
 
@@ -16,28 +14,6 @@ logger = logging.getLogger("tubedub.api.streamdub")
 bp = Blueprint("streamdub_api", __name__)
 
 APP_DIR = Path(__file__).resolve().parent.parent
-_DEBUG_LOG_PATH = APP_DIR / "debug-7e57dc.log"
-
-
-def _debug_meaning_fit_route() -> None:
-    """Temporary route diagnostic for debug session 7e57dc."""
-    try:
-        payload = {
-            "sessionId": "7e57dc",
-            "runId": "meaning-fit-route-discovery",
-            "hypothesisId": "H7,H9",
-            "location": "streamdub_api.py:api_streamdub_run",
-            "message": "StreamDub run endpoint entered",
-            "data": {
-                "route": "/api/streamdub/run",
-                "processCwdMatchesApp": Path.cwd().resolve() == APP_DIR.resolve(),
-            },
-            "timestamp": int(time.time() * 1000),
-        }
-        with _DEBUG_LOG_PATH.open("a", encoding="utf-8") as stream:
-            stream.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    except OSError:
-        pass
 
 
 def _run_async(coro):
@@ -78,20 +54,26 @@ def api_streamdub_modes():
 @bp.post("/api/streamdub/run")
 def api_streamdub_run():
     """Run StreamDub pipeline on a video file."""
-    # region agent log
-    _debug_meaning_fit_route()
-    # endregion
     data = request.get_json(silent=True) or {}
     video_path = (data.get("video_path") or "").strip()
     if not video_path:
         return jsonify({"error": "video_path required"}), 400
 
+    from engines.path_safety import resolve_under_roots
     from engines.streamdub import parse_mode, run_streamdub
     from engines.streamdub.types import StreamDubRequest
 
+    resolved = resolve_under_roots(
+        video_path,
+        [APP_DIR / "uploads", APP_DIR / "uploads" / "imports", APP_DIR / "output"],
+        basename_fallback=True,
+    )
+    if resolved is None:
+        return jsonify({"error": "video not found under uploads/output"}), 404
+
     req = StreamDubRequest(
         project_id=str(data.get("project_id") or uuid.uuid4().hex),
-        video_path=video_path,
+        video_path=str(resolved),
         audio_path=(data.get("audio_path") or "").strip() or None,
         source_lang=str(data.get("source_lang") or "en"),
         target_lang=str(data.get("target_lang") or "uk"),

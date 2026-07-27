@@ -21,6 +21,20 @@ UUID_FIELDS: tuple[str, ...] = (
     "merge_uuid",
 )
 
+# Identity fields that MUST be unique per segment. ``source_segment_uuid`` is
+# intentionally excluded: one STT source may split into several dub segments
+# (or two merged phrases may still share ancestry) — treating that as a
+# handoff-blocking error falsely kills otherwise healthy runs (see 33.zip /
+# task db4a484c… HandoffViolation).
+UNIQUE_UUID_FIELDS: tuple[str, ...] = (
+    "segment_uuid",
+    "translation_uuid",
+    "adaptation_uuid",
+    "tts_uuid",
+    "audio_uuid",
+    "merge_uuid",
+)
+
 
 def _new_uuid() -> str:
     return uuid.uuid4().hex
@@ -135,6 +149,12 @@ def ensure_project_uuids(segments: list[dict[str, Any]]) -> dict[str, Any]:
             continue
         ids = ensure_all_uuids(seg)
         for field, value in ids.items():
+            if not value:
+                continue
+            # source_segment_uuid may legitimately repeat across child segments
+            if field == "source_segment_uuid":
+                seen[field].add(value)
+                continue
             if value in seen[field]:
                 duplicates.append({"field": field, "value": value})
                 # Repair duplicate by regenerating non-segment uuid
@@ -162,7 +182,7 @@ def ensure_project_uuids(segments: list[dict[str, Any]]) -> dict[str, Any]:
 def assert_uuids_unique(segments: list[dict[str, Any]]) -> None:
     from engines.pipeline_integrity.exceptions import PipelineIdentityError
 
-    for field in UUID_FIELDS:
+    for field in UNIQUE_UUID_FIELDS:
         values = [
             str(s.get(field) or "")
             for s in segments

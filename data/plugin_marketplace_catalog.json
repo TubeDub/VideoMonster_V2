@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "plugins": [
+    {
+      "id": "demo",
+      "name": "demo",
+      "label": "Demo Plugin",
+      "version": "1.0.0",
+      "capabilities": ["demo"],
+      "description": "Built-in demo plugin for marketplace smoke tests",
+      "source_hint": "plugins/demo"
+    },
+    {
+      "id": "edge_tts",
+      "name": "edge_tts",
+      "label": "Edge TTS",
+      "version": "1.0.0",
+      "capabilities": ["tts"],
+      "description": "Microsoft Edge neural TTS provider",
+      "source_hint": "plugins/edge_tts"
+    },
+    {
+      "id": "whisper",
+      "name": "whisper",
+      "label": "Whisper STT",
+      "version": "1.0.0",
+      "capabilities": ["stt"],
+      "description": "Whisper speech-to-text plugin",
+      "source_hint": "plugins/whisper"
+    },
+    {
+      "id": "translation",
+      "name": "translation",
+      "label": "Translation",
+      "version": "1.0.0",
+      "capabilities": ["translation"],
+      "description": "Translation capability plugin",
+      "source_hint": "plugins/translation"
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
+      "label": "Subtitles",
+      "version": "1.0.0",
+      "capabilities": ["subtitles"],
+      "description": "Subtitle import/export helpers",
+      "source_hint": "plugins/subtitle"
+    },
+    {
+      "id": "lip_sync",
+      "name": "lip_sync",
+      "label": "Lip Sync",
+      "version": "1.0.0",
+      "capabilities": ["lip_sync"],
+      "description": "Lip-sync offset analysis",
+      "source_hint": "plugins/lip_sync"
+    },
+    {
+      "id": "voice_clone",
+      "name": "voice_clone",
+      "label": "Voice Clone",
+      "version": "1.0.0",
+      "capabilities": ["voice_clone"],
+      "description": "Reference voice bank for cloning",
+      "source_hint": "plugins/voice_clone"
+    }
+  ]
+}

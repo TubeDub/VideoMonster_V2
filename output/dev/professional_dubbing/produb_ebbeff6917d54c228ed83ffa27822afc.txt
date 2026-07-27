@@ -1,0 +1,14 @@
+=== PROFESSIONAL DUBBING task=ebbeff6917d54c228ed83ffa27822afc ===
+groups=1
+
+--- Group 1 indices=[0] ---
+Original Translation: 我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.<break time="350ms"/></speak>
+Segment duration: 4370 ms
+Est TTS before: 9555 ms
+Est TTS after: 9905 ms
+Fill %: 226.7
+Rate: +1%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -5%
+  Decision: overfill 218.6% → light faster +1% (pauses scaled)

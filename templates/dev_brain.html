@@ -4,14 +4,14 @@
 <style>
 .brain-nav { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
 .brain-nav button { font-size:11px; padding:4px 10px; }
-.brain-content { background:#0d0d12; border:1px solid var(--border); border-radius:8px;
-  padding:16px; font-family:monospace; font-size:12px; white-space:pre-wrap;
+.brain-content { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:16px; font-family:var(--font-mono); font-size:12px; white-space:pre-wrap;
   max-height:70vh; overflow-y:auto; line-height:1.5; }
 </style>
 {% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>🧠 Project Brain</h1>
+  <h1>Project Brain</h1>
   <p class="subtitle">Единый источник знаний проекта (TZ #10)</p>
 </div>
 <div class="brain-nav" id="brain-nav"></div>

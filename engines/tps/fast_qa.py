@@ -174,6 +174,70 @@ def run_fast_qa(
     except Exception:
         pass
 
+    # Cross-script leak / meaning hallucination (any language pair)
+    try:
+        from engines.mt.cross_script_guard import (
+            has_phrase_loop,
+            meaning_collapse,
+            source_script_leak,
+        )
+
+        src_lang = str(ctx.get("source_lang") or "").split("-")[0].lower()
+        leak = source_script_leak(
+            src, tr, source_lang=src_lang or None, target_lang=tgt
+        )
+        if leak:
+            errors.append(
+                {
+                    "code": "source_script_leak",
+                    "severity": "critical",
+                    "detail": leak.get("reason") or "source_script_dominant",
+                }
+            )
+        if has_phrase_loop(tr, min_repeats=3):
+            try:
+                from engines.mt.cross_script_guard import deflate_phrase_loop
+
+                deflated = deflate_phrase_loop(tr)
+            except Exception:
+                deflated = ""
+            # Only fail when the loop cannot be collapsed to clean target text.
+            if not deflated or has_phrase_loop(deflated, min_repeats=2):
+                errors.append(
+                    {
+                        "code": "phrase_loop",
+                        "severity": "critical",
+                        "detail": "repeated_phrase_hallucination",
+                    }
+                )
+        collapse = meaning_collapse(
+            src, tr, source_lang=src_lang or None, target_lang=tgt
+        )
+        if collapse:
+            errors.append(
+                {
+                    "code": "meaning_collapse",
+                    "severity": "critical",
+                    "detail": ",".join((collapse.get("reasons") or [])[:3]),
+                }
+            )
+            # Legacy review code for zh→uk dumps
+            if (collapse.get("source_script") == "cjk") or src_lang in (
+                "zh",
+                "ja",
+                "ko",
+                "yue",
+            ):
+                errors.append(
+                    {
+                        "code": "cjk_meaning_collapse",
+                        "severity": "critical",
+                        "detail": ",".join((collapse.get("reasons") or [])[:3]),
+                    }
+                )
+    except Exception:
+        pass
+
     # TRH: residual breakage after naturalizer must FAIL (not silent naturalizer PASS)
     try:
         from engines.trh.canon_repair import still_broken_entities

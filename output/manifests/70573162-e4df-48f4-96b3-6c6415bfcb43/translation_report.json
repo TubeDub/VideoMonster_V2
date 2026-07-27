@@ -1,0 +1,71 @@
+{
+  "translation_agent_version": "4.0",
+  "project_uuid": "70573162-e4df-48f4-96b3-6c6415bfcb43",
+  "task_id": "1721539b423542ecaa95dfb4e8cb9d5a",
+  "status": "success",
+  "translator_used": "deep-translator",
+  "segment_count": 1,
+  "success_count": 1,
+  "retries": 6,
+  "fallback_used": true,
+  "warnings": [],
+  "errors": [],
+  "execution_time_ms": 64335.2,
+  "avg_confidence": {
+    "avg_overall": 0.797,
+    "avg_translation": 0.797,
+    "avg_entity": 1.0,
+    "avg_terminology": 1.0,
+    "avg_language": 1.0
+  },
+  "entity_validation": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1
+  },
+  "terminology_validation": {
+    "ok": true,
+    "confidence": 1.0,
+    "inconsistent_terms": [],
+    "glossary_size": 0
+  },
+  "language_validation": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1
+  },
+  "decision_log": [
+    "segment_count=1",
+    "source_lang_corrected da->zh",
+    "lang=zh->uk",
+    "attempt=1 translator=argos confidence=0.55",
+    "low_confidence=0.55 retry=1",
+    "attempt=2 translator=argos confidence=0.5",
+    "low_confidence=0.5 retry=2",
+    "attempt=3 translator=argos confidence=0.45",
+    "low_confidence=0.45 retry=3",
+    "fallback_to=deep-translator",
+    "attempt=4 translator=deep-translator confidence=0.72",
+    "low_confidence=0.72 retry=1",
+    "attempt=5 translator=deep-translator confidence=0.67",
+    "low_confidence=0.67 retry=2",
+    "attempt=6 translator=deep-translator confidence=0.62",
+    "low_confidence=0.62 retry=3",
+    "exhausted_fallback_chain_try_rule_mt",
+    "rule_fallback_ok translator=deep-translator src=zh",
+    "pass6_completeness ok fixed=0"
+  ],
+  "per_segment_confidence": [
+    {
+      "index": 0,
+      "confidence": {
+        "translation": 0.42,
+        "entity": 1.0,
+        "terminology": 1.0,
+        "language": 1.0,
+        "overall": 0.797
+      },
+      "translator_used": "deep-translator"
+    }
+  ]
+}

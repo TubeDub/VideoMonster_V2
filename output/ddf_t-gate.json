@@ -1,0 +1,32 @@
+{
+  "task_id": "t-gate",
+  "created_at": "2026-07-23T18:12:17+00:00",
+  "agents": [
+    {
+      "agent_name": "Grammar/v1",
+      "called": true,
+      "success": false,
+      "error_msg": "timing_agent_failed",
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-23T18:12:17+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    }
+  ],
+  "segment_attention": [],
+  "summary": {
+    "total_agents": 1,
+    "failed_agents": 1,
+    "fallback_used": 0,
+    "warnings": 1,
+    "total_execution_time_ms": 0.0,
+    "total_llm_calls": 0
+  },
+  "saved_at": "2026-07-23T18:12:17+00:00"
+}

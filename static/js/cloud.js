@@ -25,10 +25,38 @@
     if (!el) return;
     el.innerHTML = (providers || [])
       .map(function (p) {
-        const dot = p.connected ? "#3ecf8e" : "#6b7280";
+        const meta = p.meta || {};
+        const oauth = meta.oauth_status || "";
+        const remoteOk = meta.oauth_connected === true;
+        // Green only for real OAuth; local mirror uses amber/gray — never fake "cloud connected"
+        const dot = remoteOk ? "#3ecf8e" : oauth === "needs_auth" ? "#f59e0b" : "#6b7280";
+        let statusLabel;
+        if (remoteOk) {
+          statusLabel = "OAuth ✓";
+        } else if (oauth === "needs_auth") {
+          statusLabel = "OAuth: нужна авторизация";
+        } else if (oauth === "not_configured" || meta.oauth_remote_gated) {
+          const miss = (meta.oauth_missing || []).join(", ");
+          statusLabel = "OAuth hard-gate" + (miss ? " (" + miss + ")" : "") + " · локальное зеркало";
+          if (meta.message_ru) statusLabel = meta.message_ru;
+        } else if (p.connected) {
+          statusLabel = meta.mode === "local_mirror" || !oauth ? "локальное зеркало ✓" : (p.error || "локальное зеркало");
+        } else {
+          statusLabel = p.error || "не подключено";
+        }
         const free = p.free_bytes != null ? fmtBytes(p.free_bytes) + " free" : "";
         const up = p.upload_bps ? fmtBps(p.upload_bps) : "";
         const dn = p.download_bps ? fmtBps(p.download_bps) : "";
+        const authBtn =
+          oauth === "needs_auth" || oauth === "not_configured"
+            ? ' <button class="btn" style="font-size:10px;padding:2px 6px;" data-oauth="' +
+              (p.provider_id || "") +
+              '">OAuth</button>'
+            : remoteOk
+              ? ' <button class="btn" style="font-size:10px;padding:2px 6px;" data-oauth-disconnect="' +
+                (p.provider_id || "") +
+                '">Disconnect</button>'
+              : "";
         return (
           '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">' +
           '<span class="cloud-dot" style="background:' +
@@ -36,24 +64,56 @@
           '"></span><strong>' +
           (p.label || p.provider_id) +
           "</strong> " +
-          (p.connected ? "✓" : p.error || "не подключено") +
+          statusLabel +
+          authBtn +
           '<div style="font-size:11px;opacity:.7;margin-top:2px;">' +
-          [free, up && "↑ " + up, dn && "↓ " + dn].filter(Boolean).join(" · ") +
+          [free, up && "↑ " + up, dn && "↓ " + dn, meta.mode && "mode=" + meta.mode]
+            .filter(Boolean)
+            .join(" · ") +
           "</div></div>"
         );
       })
       .join("");
+
+    el.querySelectorAll("[data-oauth]").forEach(function (btn) {
+      btn.addEventListener("click", async function () {
+        const pid = btn.getAttribute("data-oauth");
+        try {
+          const r = await fetch("/api/cloud/oauth/" + encodeURIComponent(pid) + "/authorize");
+          const j = await r.json();
+          if (j.ok && j.url) {
+            window.open(j.url, "_blank", "noopener");
+            if (window.vmNotify) vmNotify("Откройте окно OAuth и завершите авторизацию", "info", 4000);
+          } else if (window.vmNotify) {
+            vmNotify(j.message || j.error || "OAuth недоступен", "error", 5000);
+          }
+        } catch (e) {
+          if (window.vmNotify) vmNotify(String(e), "error");
+        }
+      });
+    });
+    el.querySelectorAll("[data-oauth-disconnect]").forEach(function (btn) {
+      btn.addEventListener("click", async function () {
+        const pid = btn.getAttribute("data-oauth-disconnect");
+        await fetch("/api/cloud/oauth/" + encodeURIComponent(pid) + "/disconnect", { method: "POST" });
+        cloudRefresh();
+      });
+    });
   }
 
   function renderStats(data) {
     const el = document.getElementById("cloud-stats");
     if (!el) return;
     const connected = (data.providers || []).filter(function (p) {
+      return p.meta && p.meta.oauth_connected;
+    }).length;
+    const mirrors = (data.providers || []).filter(function (p) {
       return p.connected;
     }).length;
     el.innerHTML =
       stat("Проекты", data.projects_count || 0) +
-      stat("Облака", connected + " / " + (data.providers || []).length) +
+      stat("OAuth", connected + " remote") +
+      stat("Зеркала", mirrors + " / " + (data.providers || []).length) +
       stat("Очередь", (data.sync_queue || []).length) +
       stat("Режим", data.default_storage_mode || "local_only");
   }

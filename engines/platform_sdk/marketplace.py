@@ -66,6 +66,35 @@ class MarketplaceCatalog:
     def kinds(self) -> list[str]:
         return [k.value for k in MarketplaceKind]
 
+    def plugins_catalog_snapshot(self) -> dict[str, Any]:
+        """Read-only view of data/plugin_marketplace_catalog.json (plugins sibling).
+
+        Never installs or enables plugins — ownership stays on PluginMarketplaceAPI.
+        """
+        catalog_path = ROOT / "data" / "plugin_marketplace_catalog.json"
+        if not catalog_path.is_file():
+            return {
+                "ok": True,
+                "configured": False,
+                "plugins": [],
+                "reason": "plugin_marketplace_catalog_missing",
+            }
+        try:
+            data = json.loads(catalog_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            return {"ok": False, "configured": False, "plugins": [], "error": str(exc)}
+        plugins = data.get("plugins") if isinstance(data, dict) else []
+        if not isinstance(plugins, list):
+            plugins = []
+        return {
+            "ok": True,
+            "configured": True,
+            "version": data.get("version") if isinstance(data, dict) else 1,
+            "plugins": plugins,
+            "path": str(catalog_path),
+            "install_via": "/api/plugins/marketplace/install",
+        }
+
 
 _MARKET: MarketplaceCatalog | None = None
 

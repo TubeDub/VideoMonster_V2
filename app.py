@@ -24,7 +24,9 @@ if not _fast and os.getenv("VM_SKIP_STARTUP_STORAGE_AUDIT", "").strip().lower() 
 
         startup_storage_audit(APP_DIR)
     except Exception:
-        pass
+        import logging as _logging
+
+        _logging.getLogger(__name__).exception("Startup storage audit failed")
 
 # Storage Manager Phase 1 — cleanup, legacy migration, recovery checkpoint.
 if not _fast and os.getenv("VM_SKIP_STORAGE_MANAGER", "").strip().lower() not in (
@@ -44,7 +46,9 @@ if not _fast and os.getenv("VM_SKIP_STORAGE_MANAGER", "").strip().lower() not in
                 _storage_startup["recovery"].get("project_id"),
             )
     except Exception:
-        pass
+        import logging as _logging
+
+        _logging.getLogger(__name__).exception("Storage manager startup failed")
 
 from engines.app_logging import setup_app_logging
 from engines.app_loader import (
@@ -68,7 +72,9 @@ try:
         _ustate["update_available"] = False
     save_update_state(APP_DIR, _ustate)
 except Exception:
-    pass
+    import logging as _logging
+
+    _logging.getLogger(__name__).exception("Update state bootstrap failed")
 
 app = Flask(
     __name__,
@@ -78,24 +84,63 @@ app = Flask(
 )
 app.config["MAX_CONTENT_LENGTH"] = int(os.getenv("VM_MAX_UPLOAD_MB", "2048")) * 1024 * 1024
 
+
+def _ensure_flask_secret() -> str:
+    """Persist a per-install Flask secret (or honor SECRET_KEY / VM_SECRET_KEY)."""
+    import secrets
+
+    env = (os.getenv("SECRET_KEY") or os.getenv("VM_SECRET_KEY") or "").strip()
+    if env:
+        return env
+    secret_file = APP_DIR / "data" / "flask_secret.txt"
+    try:
+        if secret_file.exists():
+            raw = secret_file.read_text(encoding="utf-8").strip()
+            if raw:
+                return raw
+    except OSError:
+        pass
+    secret_file.parent.mkdir(parents=True, exist_ok=True)
+    token = secrets.token_urlsafe(48)
+    secret_file.write_text(token, encoding="utf-8")
+    return token
+
+
+app.secret_key = _ensure_flask_secret()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.getenv("VM_SESSION_SECURE", "").strip().lower()
+    in ("1", "true", "yes", "on"),
+)
+
 register_core_blueprints(app)
 
 _FEATURE_MANAGER = get_feature_manager(APP_DIR)
 
-start_background_blueprint_load(app, feature_manager=_FEATURE_MANAGER)
+# Heavy API blueprints (auto-dub, studio, projects, voice, …) MUST be registered
+# BEFORE Flask handles its first request. Flask 3.x locks the app after the first
+# dispatch and raises on any later register_blueprint(), so a background thread /
+# before_request registration races the first request and silently drops those
+# routes (observed: 404 on /api/auto_dub/*). Register synchronously at import —
+# there are no circular imports back into `app`, so this is safe.
+ensure_heavy_blueprints(app, feature_manager=_FEATURE_MANAGER)
 
 
 def _defer_bootstrap() -> None:
+    import logging as _logging
+
+    _log = _logging.getLogger(__name__)
     try:
         _FEATURE_MANAGER.bootstrap()
     except Exception:
-        pass
+        _log.exception("Feature manager bootstrap failed")
     try:
         from engines.tubedub.bootstrap import bootstrap_platform
 
         bootstrap_platform(APP_DIR)
     except Exception:
-        pass
+        _log.exception("Platform bootstrap failed")
 
 
 import threading as _threading
@@ -282,8 +327,17 @@ def reader():
 
 
 # ─────────────────────────────────────────────
-#  Coming Soon pages
+#  Legacy Coming Soon → real module redirects
 # ─────────────────────────────────────────────
+
+_SOON_REDIRECTS: dict[str, str] = {
+    "dub-studio": "/studio",
+    "voice-studio": "/voice",
+    "ai-director": "/director",
+    "live": "/platform/live",
+    "cloud": "/cloud",
+    "plugins": "/plugins",
+}
 
 _SOON_MODULES: dict[str, dict] = {
     "dub-studio": {
@@ -393,11 +447,21 @@ _SOON_MODULES: dict[str, dict] = {
 
 @app.route("/soon/<module_id>")
 def coming_soon_page(module_id: str):
+    from flask import redirect
+
+    target = _SOON_REDIRECTS.get(module_id)
+    if target:
+        return redirect(target, code=302)
     mod = _SOON_MODULES.get(module_id)
     if mod is None:
         from flask import abort
         abort(404)
     return render_template("soon.html", mod=mod)
+
+
+@app.route("/director")
+def director_page():
+    return render_template("director.html")
 
 
 @app.route("/owner/download-center")
@@ -605,4 +669,6 @@ def error_413(e):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    # Default localhost-only. Explicit LAN bind: VM_BIND_HOST=0.0.0.0
+    host = os.environ.get("VM_BIND_HOST", "127.0.0.1").strip() or "127.0.0.1"
+    app.run(host=host, port=port, debug=False)

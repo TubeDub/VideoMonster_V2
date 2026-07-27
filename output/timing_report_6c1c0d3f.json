@@ -1,0 +1,107 @@
+{
+  "engine": "closed_loop_timing",
+  "segment_count": 1,
+  "avg_timing_score": 30.0,
+  "segments_score_ge_95": 0,
+  "kpi_target_score": 95,
+  "overflow_threshold_ms": 100,
+  "underflow_threshold_ms": 450,
+  "max_rewrite_iterations": 5,
+  "closed_loop": {
+    "engine": "closed_loop_timing",
+    "checked": 1,
+    "ok": 0,
+    "rewritten": 1,
+    "pause_only": 0,
+    "failed": 1,
+    "retries": 1,
+    "deviations": 1,
+    "fixed": 1,
+    "adaptation_executed": true,
+    "resegmented": 0,
+    "issues": [
+      {
+        "idx": 0,
+        "code": "overflow",
+        "final_status": "dsal_exhausted_audio_fit",
+        "tts_ms": 7382,
+        "slot_ms": 4370,
+        "overflow_ms": 3012,
+        "underflow_ms": 0,
+        "rewrite_reason": "duration_overflow:no_rewrite"
+      }
+    ],
+    "avg_timing_score": 30.0,
+    "segments_score_ge_95": 0,
+    "budgets": [
+      {
+        "index": 0,
+        "slot_start": 1200,
+        "slot_end": 5570,
+        "slot_duration": 4370,
+        "tts_duration": 7382,
+        "measured_duration": 7382,
+        "delta": 3012,
+        "overflow": 3012,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 1,
+        "pause_adjustments_ms": 2741,
+        "pause_stages": [
+          "lead_trim:201",
+          "tail_trim:975",
+          "pause_compress:138",
+          "lead_trim:222",
+          "tail_trim:1008",
+          "pause_compress:195"
+        ],
+        "timing_score": 30.0,
+        "rewrite_reason": "duration_overflow:no_rewrite",
+        "final_status": "dsal_exhausted_audio_fit",
+        "original_duration": 8376,
+        "provider_fatal": false
+      }
+    ],
+    "requires_llm_adaptation": {
+      "count": 1,
+      "segment_indices": [
+        0
+      ],
+      "reason": "closed_loop_unresolved"
+    }
+  },
+  "timeline_validation": {
+    "ok": true,
+    "segment_overlap": [],
+    "speech_overlap": [],
+    "gap_analysis": [],
+    "problem_indices": []
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original_duration": 8376,
+      "tts_duration": 7382,
+      "slot_duration": 4370,
+      "slot_start": 1200,
+      "slot_end": 5570,
+      "delta": 3012,
+      "overflow": 3012,
+      "underflow": 0,
+      "rewrite_iterations": 1,
+      "pause_adjustments": 2741,
+      "pause_stages": [
+        "lead_trim:201",
+        "tail_trim:975",
+        "pause_compress:138",
+        "lead_trim:222",
+        "tail_trim:1008",
+        "pause_compress:195"
+      ],
+      "timing_score": 30.0,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "status": "overflow"
+    }
+  ]
+}

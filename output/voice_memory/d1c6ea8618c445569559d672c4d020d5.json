@@ -1,0 +1,329 @@
+{
+  "project_id": "d1c6ea8618c445569559d672c4d020d5",
+  "locked": false,
+  "speakers": {
+    "seg-0": {
+      "speaker_uuid": "seg-0",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-1": {
+      "speaker_uuid": "seg-1",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-2": {
+      "speaker_uuid": "seg-2",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-3": {
+      "speaker_uuid": "seg-3",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-4": {
+      "speaker_uuid": "seg-4",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-5": {
+      "speaker_uuid": "seg-5",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-6": {
+      "speaker_uuid": "seg-6",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-7": {
+      "speaker_uuid": "seg-7",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-8": {
+      "speaker_uuid": "seg-8",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-9": {
+      "speaker_uuid": "seg-9",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-10": {
+      "speaker_uuid": "seg-10",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-11": {
+      "speaker_uuid": "seg-11",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-12": {
+      "speaker_uuid": "seg-12",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-13": {
+      "speaker_uuid": "seg-13",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-14": {
+      "speaker_uuid": "seg-14",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-15": {
+      "speaker_uuid": "seg-15",
+      "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "500f0c9f-cb90-575f-b85e-72ba63ae8d69"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    },
+    "seg-16": {
+      "speaker_uuid": "seg-16",
+      "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "4a6d0325-6bb0-5086-96f6-bab82cc1ab60"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "ru"
+    }
+  }
+}

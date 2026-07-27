@@ -1,0 +1,11 @@
+=== DUBBING ENGINE REPORT task=ebbeff6917d54c228ed83ffa27822afc run=32adf39a ===
+lang=uk  segments=1  elapsed=0.16s
+adapted=0  skipped=0  strategies={'direct': 1, 'adapted': 0, 'video_adapt': 0, 'merge_next': 0, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=3285ms slot=4370ms
+       IN : 我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一
+       OUT: 我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一
+       [punct] added_terminal_period,capitalised_first_word
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied

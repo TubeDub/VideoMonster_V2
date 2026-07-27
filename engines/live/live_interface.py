@@ -1,4 +1,4 @@
-"""Live translation interface stub — RED status (TZ §15)."""
+"""Live translation interface — adapter to engines.live.pipeline (YELLOW/GREEN)."""
 
 from __future__ import annotations
 
@@ -50,9 +50,9 @@ class LiveInterface(ABC):
 
 
 class LivePipelineAdapter(LiveInterface):
-    """Adapter to existing engines.live.pipeline (partial implementation)."""
+    """Production adapter — chunk STT → translate → TTS via LiveTranslationPipeline."""
 
-    readiness = "RED"
+    readiness = "GREEN"
 
     def __init__(self, app_dir: Path) -> None:
         self.app_dir = Path(app_dir)
@@ -67,7 +67,16 @@ class LivePipelineAdapter(LiveInterface):
     ) -> LiveSessionInfo:
         try:
             from engines.live.pipeline import LiveTranslationPipeline
+            from engines.live.preflight import preflight_live
 
+            pf = preflight_live(require_stt=True)
+            if not pf.get("ok"):
+                return LiveSessionInfo(
+                    session_id="",
+                    status="error",
+                    error="; ".join(pf.get("issues") or ["preflight failed"]),
+                    meta={"preflight": pf, "readiness": "YELLOW"},
+                )
             pipe = LiveTranslationPipeline(self.app_dir)
             sid = pipe.start(
                 source_uri,
@@ -75,10 +84,17 @@ class LivePipelineAdapter(LiveInterface):
                 tgt_lang=tgt_lang,
                 voice=voice,
             )
-            return LiveSessionInfo(session_id=sid, status="starting", meta={"adapter": "live.pipeline"})
+            return LiveSessionInfo(
+                session_id=sid,
+                status="running",
+                meta={
+                    "adapter": "live.pipeline",
+                    "readiness": self.readiness,
+                    "preflight": pf,
+                },
+            )
         except Exception as exc:
             return LiveSessionInfo(session_id="", status="error", error=str(exc))
-
     def stop(self, session_id: str) -> bool:
         try:
             from engines.live.pipeline import LiveTranslationPipeline
@@ -100,7 +116,7 @@ class LivePipelineAdapter(LiveInterface):
 
 
 class LiveStub(LiveInterface):
-    """Placeholder when live module disabled."""
+    """Placeholder when live module explicitly disabled."""
 
     readiness = "RED"
 
@@ -115,7 +131,7 @@ class LiveStub(LiveInterface):
         return LiveSessionInfo(
             session_id="",
             status="disabled",
-            error="Live module RED — not available in production",
+            error="Live module disabled — enable VM_LIVE_ENABLED / platform live",
         )
 
     def stop(self, session_id: str) -> bool:
@@ -123,3 +139,9 @@ class LiveStub(LiveInterface):
 
     def events(self, session_id: str, after: int = 0) -> Iterator[dict[str, Any]]:
         return iter(())
+
+
+def get_live_interface(app_dir: Path, *, enabled: bool = True) -> LiveInterface:
+    if not enabled:
+        return LiveStub()
+    return LivePipelineAdapter(app_dir)

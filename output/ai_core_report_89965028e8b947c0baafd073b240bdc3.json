@@ -1,0 +1,533 @@
+{
+  "task_id": "89965028e8b947c0baafd073b240bdc3",
+  "generated_at": "2026-07-23T14:19:43+00:00",
+  "final_status": "completed",
+  "ddf_summary": {
+    "total_agents": 11,
+    "failed_agents": 0,
+    "fallback_used": 1,
+    "warnings": 0,
+    "total_execution_time_ms": 264399.8,
+    "total_llm_calls": 1
+  },
+  "agents": {
+    "Planner/v3": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "BALANCED",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "AudioExtraction": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 497.8,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "extracted",
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_89cd3366e8.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\89965028e8b947c0baafd073b240bdc3\\89965028_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\89965028e8b947c0baafd073b240bdc3\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    "Whisper/STT": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "detected_lang=zh",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "Director/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 197506.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 1,
+      "decision": "creative_briefs_ready",
+      "input_metrics": {
+        "segment_count": 1
+      },
+      "output_metrics": {
+        "brief_count": 1,
+        "llm_used_count": 1,
+        "rule_only_count": 0
+      }
+    },
+    "Translation/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "translation_agent_v1",
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    "translation": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 66393.9,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {
+        "segments": 1
+      },
+      "output_metrics": {
+        "execution_time_ms": 66393.9,
+        "segment_count": 1,
+        "success_count": 1,
+        "retries": 0,
+        "fallback_used": false,
+        "translator_used": "argos",
+        "per_segment_confidence": [
+          {
+            "translation": 0.75,
+            "entity": 1.0,
+            "terminology": 1.0,
+            "language": 1.0,
+            "overall": 0.9125
+          }
+        ],
+        "avg_overall": 0.9125,
+        "avg_translation": 0.9125,
+        "avg_entity": 1.0,
+        "avg_terminology": 1.0,
+        "avg_language": 1.0
+      }
+    },
+    "ArchitectureValidation/4.3": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 3,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    },
+    "VoicePrep/v1": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_used": false,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": "voice_prep_validated",
+      "input_metrics": {
+        "segment_count": 1
+      },
+      "output_metrics": {
+        "ready_count": 0
+      }
+    },
+    "voice_preparation": {
+      "called": true,
+      "success": true,
+      "execution_time_ms": 2.1,
+      "retry_count": 0,
+      "fallback_used": true,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "decision": null,
+      "input_metrics": {
+        "segments": 1
+      },
+      "output_metrics": {
+        "ready_count": 0,
+        "segment_count": 1,
+        "input_summary": {
+          "segment_count": 1
+        },
+        "output_summary": {
+          "ready_count": 0
+        }
+      }
+    }
+  },
+  "agent_timeline": [
+    {
+      "agent_name": "Planner/v3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "BALANCED",
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:02:08+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "AudioExtraction",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "extracted",
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:02:08+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 497.8,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_89cd3366e8.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\89965028e8b947c0baafd073b240bdc3\\89965028_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\89965028e8b947c0baafd073b240bdc3\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    {
+      "agent_name": "Whisper/STT",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "detected_lang=zh",
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:02:17+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Director/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "creative_briefs_ready",
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:05:36+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 197506.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 1,
+      "input_metrics": {
+        "segment_count": 1
+      },
+      "output_metrics": {
+        "brief_count": 1,
+        "llm_used_count": 1,
+        "rule_only_count": 0
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "llm",
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:06:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "translation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:06:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 66393.9,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 1
+      },
+      "output_metrics": {
+        "execution_time_ms": 66393.9,
+        "segment_count": 1,
+        "success_count": 1,
+        "retries": 0,
+        "fallback_used": false,
+        "translator_used": "argos",
+        "per_segment_confidence": [
+          {
+            "translation": 0.75,
+            "entity": 1.0,
+            "terminology": 1.0,
+            "language": 1.0,
+            "overall": 0.9125
+          }
+        ],
+        "avg_overall": 0.9125,
+        "avg_translation": 0.9125,
+        "avg_entity": 1.0,
+        "avg_terminology": 1.0,
+        "avg_language": 1.0
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:06:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 0,
+        "active_agents": 1,
+        "contract_violations": 2,
+        "ux_validation_passed": true
+      }
+    },
+    {
+      "agent_name": "Translation/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "translation_agent_v1",
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:06:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "VoicePrep/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "voice_prep_validated",
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:19:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segment_count": 1
+      },
+      "output_metrics": {
+        "ready_count": 0
+      }
+    },
+    {
+      "agent_name": "voice_preparation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": true,
+      "timestamp": "2026-07-23T14:19:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 2.1,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 1
+      },
+      "output_metrics": {
+        "ready_count": 0,
+        "segment_count": 1,
+        "input_summary": {
+          "segment_count": 1
+        },
+        "output_summary": {
+          "ready_count": 0
+        }
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-23T14:19:43+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 3,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    }
+  ],
+  "llm_calls_count": 6,
+  "llm_calls": [
+    {
+      "segment": null,
+      "stage": null,
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "sent": "Source language: Chinese\n\nTarget language: Ukrainian\n\nOriginal speech (Whisper):\n我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\n\nRaw machine translation:\nМи, восьме покоління Лу Ся, невинні. Ми самотні в цей час. Ми шоковані. ти вагітна Лу Ся товстий. Було б ідеальніше, якщо б було кілька хлопців. Мамо, якщо це ти в моєму житті, я не можу думати про вагітність.\n\nDetected problems: dirty_mt:cjk_meaning_collaps",
+      "sent_chars": 767,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 120011.3,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": null,
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "sent": "Source language: Chinese\n\nTarget language: Ukrainian\n\nOriginal speech (Whisper):\n我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\n\nRaw machine translation:\nМи, восьме покоління Лу Ся, невинні. Ми самотні в цей час. Ми шоковані. ти вагітна Лу Ся товстий. Було б ідеальніше, якщо б було кілька хлопців. Мамо, якщо це ти в моєму житті, я не можу думати про вагітність.\n\nDetected problems: dirty_mt:cjk_meaning_collaps",
+      "sent_chars": 767,
+      "received": "",
+      "finish_reason": "error",
+      "ms": 120034.4,
+      "usable": false
+    },
+    {
+      "segment": null,
+      "stage": null,
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "sent": "Source language: Chinese\n\nTarget language: Ukrainian\n\nOriginal speech (Whisper):\n我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\n\nRaw machine translation:\nМи, восьме покоління Лу Ся, невинні. Ми самотні в цей час. Ми шоковані. ти вагітна Лу Ся товстий. Було б ідеальніше, якщо б було кілька хлопців. Мамо, якщо це ти в моєму житті, я не можу думати про вагітність.\n\nDetected problems: dirty_mt:cjk_meaning_collaps",
+      "sent_chars": 767,
+      "received": "Ми, осмого покоління Лу Ся, невинні. Тепер ми самотні. Ти вагітна, Лу Ся стає товстим. Було б ідеальніше, якщо б могли мати кілька хлопців. Мама, якщо це ти у моєму житті, я не можу думати про таку вагітність.",
+      "finish_reason": "stop",
+      "ms": 58590.7,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": null,
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "sent": "Source language: Chinese\n\nTarget language: Ukrainian\n\nOriginal speech (Whisper):\n我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\n\nRaw machine translation:\nМи, восьме покоління Лу Ся, невинні. Ми самотні в цей час. Ми шоковані. ти вагітна Лу Ся товстий. Було б ідеальніше, якщо б було кілька хлопців. Мамо, якщо це ти в моєму житті, я не можу думати про вагітність.\n\nDetected problems: dirty_mt:cjk_meaning_collaps",
+      "sent_chars": 779,
+      "received": "Ми восьмої лінії Лу Ся, невинні. Тепер ми самотні. Ти вагітна, Лу Ся стає товстим. Було б ідеальніше, якщо б ми могли мати кілька хлопців. Мама, якшо це ти у моєму житті, я не можу думати про таку вагітність.",
+      "finish_reason": "stop",
+      "ms": 80659.9,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": null,
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "sent": "Source language: Chinese\n\nTarget language: Ukrainian\n\nOriginal speech (Whisper):\n我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\n\nRaw machine translation:\nМи, осмого покоління Лу Ся, невинні. Тепер ми самотні. Ти вагітна, Лу Ся стає товстим. Було б ідеальніше, якщо б могли мати кілька хлопців. Мама, якщо це ти у моєму житті, я не можу думати про таку вагітність.\n\nDetected problems: dirty_mt:cjk_meaning_collaps",
+      "sent_chars": 767,
+      "received": "Ми, осмого покоління Лу Ся, все ще невинні. Тепер ми самотні. Ти вагітна, Лу Ся стає товстим. Було б справжньо прекрасно, якщо б ми могли мати кілька хлопців. Мама, якщо це ти у моєму житті, мені це дуже важко зрозуміти.",
+      "finish_reason": "stop",
+      "ms": 114206.1,
+      "usable": true
+    },
+    {
+      "segment": null,
+      "stage": null,
+      "purpose": "",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "sent": "Source language: Chinese\n\nTarget language: Ukrainian\n\nOriginal speech (Whisper):\n我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\n\nRaw machine translation:\nМи, осмого покоління Лу Ся, невинні. Тепер ми самотні. Ти вагітна, Лу Ся стає товстим. Було б ідеальніше, якщо б могли мати кілька хлопців. Мама, якщо це ти у моєму житті, я не можу думати про таку вагітність.\n\nDetected problems: dirty_mt:cjk_meaning_collaps",
+      "sent_chars": 790,
+      "received": "Ми з осмого покоління Лу Ся ще так невинні. Тепер ми самотні. Ти вагітна, Лу Ся стає товстим. Було б справжньо чудово, якщо б ми могли мати кілька хлопців. Мама, якщо це ти у моєму житті, мені це дуже важко зрозуміти.",
+      "finish_reason": "stop",
+      "ms": 81246.0,
+      "usable": true
+    }
+  ],
+  "llm_status": {
+    "task": "89965028e8b947c0baafd073b240bdc3",
+    "spent_s": 574.7484428000025,
+    "consec_fail": 0,
+    "open": false,
+    "logged_open": false,
+    "global_consec_fail": 0,
+    "global_open": false,
+    "global_logged": false,
+    "slow_fail": 0,
+    "model_too_slow": false,
+    "slow_logged": false,
+    "mode": "max_quality",
+    "per_segment_budget_s": 0.0,
+    "project_budget_s": 0.0,
+    "circuit_open": false,
+    "circuit_cooldown_s": 45.0,
+    "recent_decisions": []
+  },
+  "fallbacks": [
+    {
+      "agent": "voice_preparation",
+      "reason": null,
+      "segment": null
+    }
+  ],
+  "segment_attention": [],
+  "totals": {
+    "agents_run": 11,
+    "failed_agents": 0,
+    "fallback_count": 1,
+    "total_llm_calls": 1,
+    "total_execution_ms": 264399.8
+  }
+}

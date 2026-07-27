@@ -1,196 +1,84 @@
 {% extends "base.html" %}
 {% block title %}AI Download Center — TubeDub{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>🧠 AI Download Center</h1>
+<div class="page-header"><h1> AI Download Center</h1>
   <p class="subtitle">Управление компонентами ИИ: MT, Whisper, TTS, OCR, LLM</p>
 </div>
 
-<div class="settings-grid">
-  <div class="settings-card">
-    <h2>Хранилище</h2>
+<div class="settings-grid"><div class="settings-card"><h2>Хранилище</h2>
     <div id="dc-summary" style="font-size:13px;color:var(--text2);">Загрузка…</div>
-    <div class="field-group" style="margin-top:14px;">
-      <label>Лимит (ГБ)</label>
-      <div class="row-group" style="max-width:360px;">
-        <input id="dc-limit" type="number" min="0.5" max="200" step="0.5" value="10" class="input-control" style="width:100px;" />
+    <div class="field-group" style="margin-top:14px;"><label>Лимит (ГБ)</label>
+      <div class="row-group" style="max-width:360px;"><input id="dc-limit" type="number" min="0.5" max="200" step="0.5" value="10" class="input-control" style="width:100px;" />
         <button class="btn btn-secondary" onclick="dcSetLimit()">Применить</button>
       </div>
     </div>
-    <div class="field-group">
-      <label>Папка хранения</label>
-      <div class="row-group" style="flex-wrap:wrap;gap:8px;">
-        <select id="dc-drive" class="select-control" style="min-width:200px;"></select>
+    <div class="field-group"><label>Папка хранения</label>
+      <div class="row-group" style="flex-wrap:wrap;gap:8px;"><select id="dc-drive" class="select-control" style="min-width:200px;"></select>
         <button class="btn btn-secondary" onclick="dcMoveStorage()">Перенести сюда</button>
         <button class="btn btn-secondary" onclick="dcOpenFolder()">Открыть корень</button>
       </div>
     </div>
-    <div class="row-group" style="flex-wrap:wrap;gap:8px;margin-top:8px;">
-      <button class="btn btn-secondary" onclick="dcRefresh()">🔄 Обновить</button>
-      <button class="btn btn-secondary" onclick="dcTempCleanup()">🧹 Временные файлы</button>
+    <div class="row-group" style="flex-wrap:wrap;gap:8px;margin-top:8px;"><button class="btn btn-secondary" onclick="dcRefresh()"> Обновить</button>
+      <button class="btn btn-secondary" onclick="dcTempCleanup()"> Временные файлы</button>
     </div>
     <div id="dc-msg" style="font-size:12px;margin-top:10px;"></div>
   </div>
 
-  <div class="settings-card" style="grid-column:1/-1;">
-    <h2>Компоненты</h2>
+  <div class="settings-card" style="grid-column:1/-1;"><h2>Компоненты</h2>
     <div id="dc-components" style="overflow:auto;"></div>
   </div>
 
-  <div class="settings-card">
-    <h2>Рекомендации по очистке</h2>
+  <div class="settings-card"><h2>Рекомендации по очистке</h2>
     <p style="font-size:12px;color:var(--text2);">Долго не использовались — удалить только с вашего согласия.</p>
     <div id="dc-suggestions"></div>
   </div>
 </div>
 
-<script>
-  const DC_GROUPS = {
-    whisper: 'Whisper (STT)',
-    mt: 'Machine Translation',
-    tts: 'TTS',
-    ocr: 'OCR',
-    llm: 'LLM / Naturalizer',
-    naturalizer: 'LLM / Naturalizer',
-    semantic: 'Semantic',
-  };
+<script> const DC_GROUPS = { whisper: 'Whisper (STT)', mt: 'Machine Translation', tts: 'TTS', ocr: 'OCR', llm: 'LLM / Naturalizer', naturalizer: 'LLM / Naturalizer', semantic: 'Semantic', }; function dcHeaders() { const t = localStorage.getItem('vm_owner_token') || ''; return { 'Content-Type': 'application/json', 'X-VM-Owner-Token': t }; }
 
-  function dcHeaders() {
-    const t = localStorage.getItem('vm_owner_token') || '';
-    return { 'Content-Type': 'application/json', 'X-VM-Owner-Token': t };
-  }
+  function dcMsg(t, ok) { const el = document.getElementById('dc-msg'); if (el) { el.textContent = t; el.style.color = ok ? '#4ade80' : '#f87171'; } }
 
-  function dcMsg(t, ok) {
-    const el = document.getElementById('dc-msg');
-    if (el) { el.textContent = t; el.style.color = ok ? '#4ade80' : '#f87171'; }
-  }
+  function dcEsc(s) { return String(s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
 
-  function dcEsc(s) {
-    return String(s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-  }
-
-  function dcRow(c) {
-    const path = c.path || '—';
-    const pathShort = path.length > 48 ? '…' + path.slice(-45) : path;
-    return `<tr>
+  function dcRow(c) { const path = c.path || '—'; const pathShort = path.length > 48 ? '…' + path.slice(-45) : path; return `<tr>
       <td>${c.label || c.id}</td>
       <td><code style="font-size:11px;">${c.variant || ''}</code></td>
       <td>${c.size_mb || 0} МБ</td>
       <td style="font-size:11px;">${c.last_used || '—'}</td>
       <td title="${dcEsc(path)}" style="font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pathShort}</td>
       <td>${c.status || ''}</td>
-      <td style="white-space:nowrap;">
-        ${c.path ? `<button class="btn btn-secondary btn-sm" onclick="dcOpenPath('${dcEsc(c.path)}')">📁</button>` : ''}
+      <td style="white-space:nowrap;"> ${c.path ? `<button class="btn btn-secondary btn-sm" onclick="dcOpenPath('${dcEsc(c.path)}')"></button>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="dcUpdate('${c.id}','${c.variant}')">↻</button>
         <button class="btn btn-secondary btn-sm" onclick="dcDelete('${c.id}','${c.variant}')">✕</button>
       </td>
-    </tr>`;
-  }
+    </tr>`; }
 
-  function dcRenderComponents(components) {
-    const groups = {};
-    (components || []).forEach((c) => {
-      const g = DC_GROUPS[c.id] || c.id;
-      (groups[g] = groups[g] || []).push(c);
-    });
-    const html = Object.entries(groups).map(([title, items]) =>
-      `<h3 style="font-size:14px;margin:18px 0 8px;color:var(--text2);">${title}</h3>
+  function dcRenderComponents(components) { const groups = {}; (components || []).forEach((c) => { const g = DC_GROUPS[c.id] || c.id; (groups[g] = groups[g] || []).push(c); }); const html = Object.entries(groups).map(([title, items]) => `<h3 style="font-size:14px;margin:18px 0 8px;color:var(--text2);">${title}</h3>
       <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:8px;">
         <thead><tr style="text-align:left;color:var(--text2);">
           <th>Компонент</th><th>Вариант</th><th>Размер</th><th>Использован</th><th>Путь</th><th>Статус</th><th></th>
         </tr></thead>
         <tbody>${items.map(dcRow).join('')}</tbody>
-      </table>`
-    ).join('');
-    document.getElementById('dc-components').innerHTML =
-      html || '<div style="opacity:.7;">Нет компонентов</div>';
-  }
+      </table>` ).join(''); document.getElementById('dc-components').innerHTML = html || '<div style="opacity:.7;">Нет компонентов</div>'; }
 
-  async function dcRefresh() {
-    const r = await fetch('/api/owner/components', { headers: dcHeaders() });
-    if (!r.ok) { dcMsg('Нет доступа владельца', false); return; }
-    const d = await r.json();
-    const st = d.storage || {};
-    document.getElementById('dc-summary').innerHTML =
-      `<div>Размер кэша: <b>${st.total_gb || 0} ГБ</b> / лимит ${st.max_storage_gb || 10} ГБ</div>` +
-      `<div>Свободно на диске: ${st.disk_free_gb} ГБ · Pipeline cache: ${st.pipeline_cache_mb} МБ</div>` +
-      `<div>Последняя очистка: ${st.last_cleanup || '—'}</div>` +
-      `<div>Путь: <code>${st.storage_root || ''}</code></div>`;
-    document.getElementById('dc-limit').value = st.max_storage_gb || 10;
-    dcRenderComponents(d.components || []);
-
-    const sug = await fetch('/api/owner/cleanup/suggestions', { headers: dcHeaders() }).then(r => r.json());
-    document.getElementById('dc-suggestions').innerHTML = (sug.suggestions || []).map(s =>
-      `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <span>${s.label} (${s.variant}) — ${s.unused_days} дн., ${s.size_mb} МБ</span>
+  async function dcRefresh() { const r = await fetch('/api/owner/components', { headers: dcHeaders() }); if (!r.ok) { dcMsg('Нет доступа владельца', false); return; } const d = await r.json(); const st = d.storage || {}; document.getElementById('dc-summary').innerHTML = `<div>Размер кэша: <b>${st.total_gb || 0} ГБ</b> / лимит ${st.max_storage_gb || 10} ГБ</div>` + `<div>Свободно на диске: ${st.disk_free_gb} ГБ · Pipeline cache: ${st.pipeline_cache_mb} МБ</div>` + `<div>Последняя очистка: ${st.last_cleanup || '—'}</div>` + `<div>Путь: <code>${st.storage_root || ''}</code></div>`; document.getElementById('dc-limit').value = st.max_storage_gb || 10; dcRenderComponents(d.components || []); const sug = await fetch('/api/owner/cleanup/suggestions', { headers: dcHeaders() }).then(r => r.json()); document.getElementById('dc-suggestions').innerHTML = (sug.suggestions || []).map(s => `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;"><span>${s.label} (${s.variant}) — ${s.unused_days} дн., ${s.size_mb} МБ</span>
         <button class="btn btn-secondary btn-sm" onclick="dcDelete('${s.id}','${s.variant}')">Удалить</button>
-      </div>`).join('') || '<div style="opacity:.7;">Нет рекомендаций</div>';
+      </div>`).join('') || '<div style="opacity:.7;">Нет рекомендаций</div>'; if ((st.lru_candidates || []).length && st.require_confirm_lru) { dcMsg(`Превышен лимит — ${st.lru_candidates.length} кандидат(ов) на очистку (только с подтверждением)`, false); }
+  } async function dcSetLimit() { const gb = parseFloat(document.getElementById('dc-limit').value) || 10; await fetch('/api/owner/storage/limit', { method: 'POST', headers: dcHeaders(), body: JSON.stringify({ max_storage_gb: gb }) }); dcMsg('Лимит обновлён', true); dcRefresh(); }
 
-    if ((st.lru_candidates || []).length && st.require_confirm_lru) {
-      dcMsg(`Превышен лимит — ${st.lru_candidates.length} кандидат(ов) на очистку (только с подтверждением)`, false);
-    }
-  }
+  async function dcMoveStorage() { const path = document.getElementById('dc-drive').value; if (!path || !confirm('Перенести хранилище на ' + path + '/VideoMonster/models ?')) return; const r = await fetch('/api/owner/storage/root', { method: 'POST', headers: dcHeaders(), body: JSON.stringify({ path }) }); const d = await r.json(); dcMsg(d.ok ? 'Перенесено' : (d.error || 'Ошибка'), d.ok); dcRefresh(); }
 
-  async function dcSetLimit() {
-    const gb = parseFloat(document.getElementById('dc-limit').value) || 10;
-    await fetch('/api/owner/storage/limit', { method: 'POST', headers: dcHeaders(), body: JSON.stringify({ max_storage_gb: gb }) });
-    dcMsg('Лимит обновлён', true);
-    dcRefresh();
-  }
+  async function dcOpenFolder() { await fetch('/api/owner/storage/open-folder', { method: 'POST', headers: dcHeaders(), body: '{}' }); }
 
-  async function dcMoveStorage() {
-    const path = document.getElementById('dc-drive').value;
-    if (!path || !confirm('Перенести хранилище на ' + path + '/VideoMonster/models ?')) return;
-    const r = await fetch('/api/owner/storage/root', { method: 'POST', headers: dcHeaders(), body: JSON.stringify({ path }) });
-    const d = await r.json();
-    dcMsg(d.ok ? 'Перенесено' : (d.error || 'Ошибка'), d.ok);
-    dcRefresh();
-  }
+  async function dcOpenPath(path) { await fetch('/api/owner/components/open-folder', { method: 'POST', headers: dcHeaders(), body: JSON.stringify({ path }), }); }
 
-  async function dcOpenFolder() {
-    await fetch('/api/owner/storage/open-folder', { method: 'POST', headers: dcHeaders(), body: '{}' });
-  }
+  async function dcDelete(id, variant) { if (!confirm('Удалить компонент?')) return; const r = await fetch('/api/owner/components/delete', { method: 'POST', headers: dcHeaders(), body: JSON.stringify({ component_id: id, variant: variant, confirmed: true }), }); const d = await r.json(); dcMsg(d.ok ? 'Удалено' : (d.error || 'Ошибка'), d.ok); dcRefresh(); }
 
-  async function dcOpenPath(path) {
-    await fetch('/api/owner/components/open-folder', {
-      method: 'POST', headers: dcHeaders(),
-      body: JSON.stringify({ path }),
-    });
-  }
+  async function dcUpdate(id, variant) { if (!confirm('Обновить компонент (перекачать)?')) return; await fetch('/api/owner/components/update', { method: 'POST', headers: dcHeaders(), body: JSON.stringify({ component_id: id, variant: variant }), }); dcMsg('Обновлено', true); dcRefresh(); }
 
-  async function dcDelete(id, variant) {
-    if (!confirm('Удалить компонент?')) return;
-    const r = await fetch('/api/owner/components/delete', {
-      method: 'POST', headers: dcHeaders(),
-      body: JSON.stringify({ component_id: id, variant: variant, confirmed: true }),
-    });
-    const d = await r.json();
-    dcMsg(d.ok ? 'Удалено' : (d.error || 'Ошибка'), d.ok);
-    dcRefresh();
-  }
+  async function dcTempCleanup() { await fetch('/api/models/cache/cleanup', { method: 'POST' }); dcMsg('Временные файлы очищены', true); }
 
-  async function dcUpdate(id, variant) {
-    if (!confirm('Обновить компонент (перекачать)?')) return;
-    await fetch('/api/owner/components/update', {
-      method: 'POST', headers: dcHeaders(),
-      body: JSON.stringify({ component_id: id, variant: variant }),
-    });
-    dcMsg('Обновлено', true);
-    dcRefresh();
-  }
-
-  async function dcTempCleanup() {
-    await fetch('/api/models/cache/cleanup', { method: 'POST' });
-    dcMsg('Временные файлы очищены', true);
-  }
-
-  async function dcLoadDrives() {
-    const r = await fetch('/api/owner/storage/drives', { headers: dcHeaders() });
-    const d = await r.json();
-    const sel = document.getElementById('dc-drive');
-    sel.innerHTML = (d.drives || []).map(dr =>
-      `<option value="${dr.path}">${dr.label} (${dr.free_gb} ГБ своб.)</option>`).join('');
-  }
+  async function dcLoadDrives() { const r = await fetch('/api/owner/storage/drives', { headers: dcHeaders() }); const d = await r.json(); const sel = document.getElementById('dc-drive'); sel.innerHTML = (d.drives || []).map(dr => `<option value="${dr.path}">${dr.label} (${dr.free_gb} ГБ своб.)</option>`).join(''); }
 
   window.addEventListener('load', () => { dcLoadDrives(); dcRefresh(); });
 </script>

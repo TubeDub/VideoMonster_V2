@@ -1,0 +1,75 @@
+{
+  "task_id": "1721539b423542ecaa95dfb4e8cb9d5a",
+  "run_id": "643697c7",
+  "lang": "uk",
+  "elapsed_sec": 0.112,
+  "segments_total": 1,
+  "segments_adapted": 1,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 0,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 1,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "我们陆家八代单传 子嗣单抱 如今啊 你怀孕了 陆家有后了 要是能一己得难 那就更完美了 要是能一己得难 那就更完美了 妈 只要是我一真的 无论是人是女 我都喜欢",
+      "input": "Наше восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця.",
+      "output": "Наше восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 46598,
+      "slot_ms": 4737,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=46598ms slot=4737ms prev_end=0ms overflow=883.7% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=46598ms slot=4737ms ratio=9.84",
+        "voice_quality_risk: projected_atempo=9.84 (max=1.2) — recommend text adaptation"
+      ]
+    }
+  ]
+}

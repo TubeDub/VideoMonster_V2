@@ -30,30 +30,43 @@ ALLOWED_SUBS = {".srt", ".vtt", ".ass", ".ssa", ".txt"}
 
 # task_id -> {status, progress, output_file, errors, created_at}
 TASKS: dict[str, dict] = {}
+_TASKS_PATH = OUTPUT_DIR / "dub_legacy_tasks.json"
 
 bp = Blueprint("dub_api", __name__)
-_DEBUG_LOG_PATH = APP_DIR / "debug-7e57dc.log"
 
 
-def _debug_meaning_fit_route(route: str) -> None:
-    """Temporary route diagnostic for debug session 7e57dc."""
+def _persist_tasks() -> None:
+    """Best-effort persist so status survives short restarts."""
     try:
-        payload = {
-            "sessionId": "7e57dc",
-            "runId": "meaning-fit-route-discovery",
-            "hypothesisId": "H7,H9",
-            "location": "dub_api.py:api_dub_start",
-            "message": "Legacy Dub start endpoint entered",
-            "data": {
-                "route": route,
-                "processCwdMatchesApp": Path.cwd().resolve() == APP_DIR.resolve(),
-            },
-            "timestamp": int(time.time() * 1000),
+        slim = {
+            tid: {
+                "status": t.get("status"),
+                "progress": t.get("progress"),
+                "output_file": t.get("output_file"),
+                "errors": t.get("errors") or [],
+                "created_at": t.get("created_at"),
+            }
+            for tid, t in TASKS.items()
         }
-        with _DEBUG_LOG_PATH.open("a", encoding="utf-8") as stream:
-            stream.write(json.dumps(payload, ensure_ascii=False) + "\n")
+        _TASKS_PATH.write_text(json.dumps(slim, ensure_ascii=False), encoding="utf-8")
     except OSError:
         pass
+
+
+def _load_persisted_tasks() -> None:
+    if TASKS or not _TASKS_PATH.is_file():
+        return
+    try:
+        data = json.loads(_TASKS_PATH.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            for tid, row in data.items():
+                if isinstance(row, dict):
+                    TASKS[str(tid)] = row
+    except (OSError, json.JSONDecodeError, TypeError):
+        pass
+
+
+_load_persisted_tasks()
 
 
 # ─────────────────────────────────────────────
@@ -156,9 +169,6 @@ def api_dub_start():
       original_volume, dub_volume, background_volume — для custom
       keep_original_track — сохранить извлечённую оригинальную дорожку в projects/
     """
-    # region agent log
-    _debug_meaning_fit_route("/api/dub/start")
-    # endregion
     data = request.get_json(silent=True) or {}
 
     video_filename = data.get("video_filename", "")
@@ -214,6 +224,7 @@ def api_dub_start():
         "errors": [],
         "created_at": time.time(),
     }
+    _persist_tasks()
 
     thread = threading.Thread(
         target=_run_dub_task,
@@ -266,9 +277,11 @@ def _run_dub_task(
             TASKS[task_id].update({"status": "done", "progress": 100.0, "output_file": output_name, "errors": warnings})
         else:
             TASKS[task_id].update({"status": "error", "errors": warnings})
+        _persist_tasks()
     except Exception as e:
         if task_id in TASKS:
             TASKS[task_id].update({"status": "error", "errors": [f"Неожиданная ошибка: {e}"]})
+        _persist_tasks()
 
 
 # ─────────────────────────────────────────────
@@ -318,10 +331,18 @@ def api_dub_download(filename):
 
 @bp.get("/api/dub/check")
 def api_dub_check():
-    import shutil
-    ffmpeg  = shutil.which("ffmpeg")
-    ffprobe = shutil.which("ffprobe")
-    return jsonify({"ffmpeg": bool(ffmpeg), "ffprobe": bool(ffprobe), "ffmpeg_path": ffmpeg or ""})
+    from engines.ffmpeg_paths import find_ffmpeg, find_ffprobe
+
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    return jsonify(
+        {
+            "ffmpeg": bool(ffmpeg),
+            "ffprobe": bool(ffprobe),
+            "ffmpeg_path": ffmpeg or "",
+            "ffprobe_path": ffprobe or "",
+        }
+    )
 
 
 # ─────────────────────────────────────────────

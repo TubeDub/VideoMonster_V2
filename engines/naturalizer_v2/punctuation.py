@@ -31,9 +31,60 @@ def clean_punctuation(text: str) -> str:
     if re.search(r"\b\w+-\s*$", out):
         out = re.sub(r"-\s*$", "", out).strip()
 
-    # Ensure sentence ends with punctuation if it looks complete
+    # Ensure sentence ends with punctuation if it looks complete —
+    # but never after a short clause that is clearly mid-thought
+    # (e.g. «Але коли він їхав» before a following name clause).
     if out and out[-1].isalnum() and len(out.split()) >= 4:
-        if out[-1] in "аеиоуяюєіїь":
+        words = out.split()
+        last = words[-1].lower().strip("«»\"'")
+        mid_clause_tails = {
+            "їхав",
+            "їхала",
+            "їхало",
+            "їхали",
+            "коли",
+            "що",
+            "який",
+            "яка",
+            "яке",
+            "які",
+            "але",
+            "і",
+            "та",
+            "бо",
+            "тож",
+            "тому",
+            "сказав",
+            "сказала",
+            "був",
+            "була",
+            "став",
+            "стала",
+            "міг",
+            "могла",
+            "хотів",
+            "хотіла",
+            "відчув",
+            "відчула",
+            "почав",
+            "почала",
+            "почали",
+            "потім",
+            "далі",
+            "туди",
+            "сюди",
+        }
+        if last not in mid_clause_tails and out[-1] in "аеиоуяюєіїь":
             out += "."
+
+    # Undo false mid-sentence periods before a continuing proper name / clause
+    # (soft_compress / naturalizer artifact: «їхав. Джордж»).
+    out = re.sub(
+        r"\b(їхав|їхала|їхали|сказав|сказала|був|була|став|стала|"
+        r"міг|могла|хотів|хотіла|відчув|відчула|почав|почала|почали)\."
+        r"\s+(?=[А-ЯІЇЄҐA-Z])",
+        r"\1 ",
+        out,
+    )
 
     return out.strip()

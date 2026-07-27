@@ -10,7 +10,10 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from typing import Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional
+
+if TYPE_CHECKING:
+    from engines.audio_mix_config import AudioMixConfig
 
 
 # Пресеты микширования (POST-REAL-TEST)
@@ -135,6 +138,12 @@ class DubEngine:
         # Optional music+SFX stem from source separation (no original speech)
         background_audio_path: str = "",
         background_attenuation_db: float = 4.5,
+        # Optional isolated ORIGINAL VOICE stem (vocals) from source separation.
+        # When present + original_volume>0 the original voice can be underlaid and
+        # ducked independently of music/SFX (professional cinema mix).
+        dialogue_audio_path: str = "",
+        # Resolved professional-mix policy (levels + intelligent ducking).
+        mix_config: "AudioMixConfig | None" = None,
     ):
         self.video_path = video_path
         self.audio_path = audio_path
@@ -149,6 +158,8 @@ class DubEngine:
         self.speech_intervals: list[dict] = speech_intervals or []
         self.background_audio_path = str(background_audio_path or "").strip()
         self.background_attenuation_db = float(background_attenuation_db)
+        self.dialogue_audio_path = str(dialogue_audio_path or "").strip()
+        self.mix_config = mix_config
         from engines.ffmpeg_paths import find_ffmpeg
 
         self._ffmpeg = find_ffmpeg()
@@ -205,29 +216,10 @@ class DubEngine:
             self.video_stretch_segments and
             any(float(s.get("stretch_ratio", 1.0)) > 1.01 for s in self.video_stretch_segments)
         )
-        use_stem_background = self._has_background_stem()
-        if use_stem_background and (effective_mode == "full_dub" or orig_vol <= 0.001):
-            if has_video_stretch:
-                cmd = self._cmd_stem_mix_video_adapted(
-                    audio,
-                    output_path,
-                    dub_volume=dub_vol,
-                    bg_attenuation_db=self.background_attenuation_db,
-                )
-            else:
-                cmd = self._cmd_stem_mix(
-                    audio,
-                    output_path,
-                    dub_volume=dub_vol,
-                    bg_attenuation_db=self.background_attenuation_db,
-                )
-        elif effective_mode == "full_dub" or orig_vol <= 0.001:
-            if has_video_stretch:
-                cmd = self._cmd_replace_video_adapted(audio, output_path, dub_volume=dub_vol)
-            else:
-                cmd = self._cmd_replace(audio, output_path, dub_volume=dub_vol)
-        else:
-            cmd = self._cmd_mix(audio, output_path, orig_vol, dub_vol)
+        cmd = self._select_mix_command(
+            audio, output_path, effective_mode, orig_vol, dub_vol,
+            has_video_stretch, warnings,
+        )
 
         try:
             proc = subprocess.Popen(
@@ -370,6 +362,59 @@ class DubEngine:
         concat = f"{''.join(labels)}concat=n={n}:v=1:a=0[vout]"
         return ";".join(parts) + ";" + concat
 
+    def _select_mix_command(
+        self,
+        audio: str,
+        output_path: str,
+        effective_mode: str,
+        orig_vol: float,
+        dub_vol: float,
+        has_video_stretch: bool,
+        warnings: list[str],
+    ) -> list[str]:
+        """
+        Choose the FFmpeg command for the requested mix (single decision point —
+        keeps all routing in one place so auto-dub / studio / preview never diverge).
+
+        Routing (TZ Tasks 1–4, 8):
+          * stem + underlay + isolated voice → stem voice-duck mix
+              (music/SFX alive, original voice ducked only while dub speaks)
+          * stem + muted original            → stem mix (music/SFX + dub, no voice)
+          * muted original, no stem          → replace (dub only)
+          * underlay, no stem                → sidechain-ducked full-original mix
+        """
+        use_stem_background = self._has_background_stem()
+        use_dialogue_stem = self._has_dialogue_stem()
+        mute_original = effective_mode == "full_dub" or orig_vol <= 0.001
+
+        if use_stem_background and not mute_original and use_dialogue_stem:
+            if has_video_stretch:
+                warnings.append(
+                    "Видео-растяжение недоступно в режиме голос+стем; собрано без адаптации PTS."
+                )
+            return self._cmd_stem_voiceduck_mix(
+                audio,
+                output_path,
+                orig_voice_vol=orig_vol,
+                dub_volume=dub_vol,
+                bg_attenuation_db=self.background_attenuation_db,
+            )
+        if use_stem_background and mute_original:
+            if has_video_stretch:
+                return self._cmd_stem_mix_video_adapted(
+                    audio, output_path, dub_volume=dub_vol,
+                    bg_attenuation_db=self.background_attenuation_db,
+                )
+            return self._cmd_stem_mix(
+                audio, output_path, dub_volume=dub_vol,
+                bg_attenuation_db=self.background_attenuation_db,
+            )
+        if mute_original:
+            if has_video_stretch:
+                return self._cmd_replace_video_adapted(audio, output_path, dub_volume=dub_vol)
+            return self._cmd_replace(audio, output_path, dub_volume=dub_vol)
+        return self._cmd_mix(audio, output_path, orig_vol, dub_vol)
+
     def _cmd_replace_video_adapted(
         self,
         audio: str,
@@ -492,29 +537,42 @@ class DubEngine:
     def _cmd_mix(
         self, audio: str, out: str, orig_vol: float, dub_vol: float
     ) -> list[str]:
-        """Микширование: приглушённый оригинал + дубляж на полную длительность видео."""
+        """Микширование: приглушённый оригинал + дубляж на всю длительность видео.
+
+        Без разделения дорожек оригинал = голос+музыка целиком. Чтобы между
+        репликами всегда был слышен исходный звук (TZ Task 2/3), а во время дубляжа
+        оригинал плавно приглушался и затем возвращался (Task 6/8), используем
+        интеллектуальный sidechain-ducking по огибающей дубляжа вместо статичной
+        громкости или жёстких переключений.
+        """
         orig = max(0.0, min(1.0, orig_vol))
         dub = max(0.0, min(2.0, dub_vol))
         duration = self._get_duration()
-        dub_chain = f"[1:a]volume={dub:.3f}"
-        if duration > 0:
-            dub_chain += f",apad=whole_dur={duration:.3f}"
-        # EBU R128 loudness normalization on dub track before mixing
-        dub_chain += f",{_LOUDNORM_FILTER}"
-        dub_chain += "[new]"
+        cfg = self._resolve_mix_config(orig, dub)
+        dur_pad = f",apad=whole_dur={duration:.3f}" if duration > 0 else ""
 
-        # Audio ducking on original track — lower during speech, restore after
-        ducking = self._build_ducking_filter()
-        orig_chain = f"[0:a]volume={orig:.3f}"
-        if ducking:
-            orig_chain += f",{ducking}"
-        orig_chain += "[orig]"
-
-        filt = (
-            f"{orig_chain};"
-            f"{dub_chain};"
-            f"[orig][new]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[out]"
-        )
+        if cfg.ducking_enabled and orig > 0.001:
+            dub_pre = f"[1:a]volume={dub:.3f}{dur_pad},{_LOUDNORM_FILTER},{self._SC_FMT}[dubp]"
+            split = "[dubp]asplit=2[dubmix][dubkey]"
+            orig_pre = f"[0:a]volume={orig:.3f},{self._SC_FMT}[origp]"
+            orig_duck = f"[origp][dubkey]{self._sidechain_duck_expr(cfg)}[origd]"
+            amix = (
+                "[origd][dubmix]"
+                "amix=inputs=2:duration=first:dropout_transition=2:normalize=0[out]"
+            )
+            filt = ";".join([dub_pre, split, orig_pre, orig_duck, amix])
+        else:
+            dub_chain = f"[1:a]volume={dub:.3f}{dur_pad},{_LOUDNORM_FILTER}[new]"
+            # Legacy interval-based ducking, if explicitly configured.
+            ducking = self._build_ducking_filter()
+            orig_chain = f"[0:a]volume={orig:.3f}"
+            if ducking:
+                orig_chain += f",{ducking}"
+            orig_chain += "[orig]"
+            filt = (
+                f"{orig_chain};{dub_chain};"
+                "[orig][new]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[out]"
+            )
         cmd = [
             self._ffmpeg,
             "-y",
@@ -545,6 +603,117 @@ class DubEngine:
             self.background_audio_path
             and Path(self.background_audio_path).is_file()
         )
+
+    def _has_dialogue_stem(self) -> bool:
+        return bool(
+            self.dialogue_audio_path
+            and Path(self.dialogue_audio_path).is_file()
+        )
+
+    # ── Professional intelligent voice ducking ────────────────────────────────
+
+    def _resolve_mix_config(
+        self, orig_vol: float, dub_vol: float
+    ) -> "AudioMixConfig":
+        """Return the resolved mix policy, or a sane default derived from levels."""
+        if self.mix_config is not None:
+            return self.mix_config
+        from engines.audio_mix_config import AudioMixConfig, is_voice_ducking_enabled
+
+        return AudioMixConfig(
+            dub_volume=dub_vol,
+            original_voice_volume=orig_vol,
+            ducking_enabled=is_voice_ducking_enabled(),
+        )
+
+    @staticmethod
+    def _sidechain_duck_expr(cfg: "AudioMixConfig") -> str:
+        """
+        FFmpeg ``sidechaincompress`` string that ducks the *main* input whenever
+        the *sidechain* (dub) is speaking.  Between dubbed lines the compressor
+        releases and the main track (original voice) returns to full level, with
+        smooth attack/release — no abrupt jumps (TZ Task 6/8/10).
+        """
+        p = cfg.sidechain_params()
+        return (
+            f"sidechaincompress=threshold={p['threshold']:.4f}:"
+            f"ratio={p['ratio']:.2f}:attack={p['attack']:.0f}:"
+            f"release={p['release']:.0f}:makeup={p['makeup']:.2f}"
+        )
+
+    # Common audio format so sidechaincompress/amix inputs are compatible.
+    _SC_FMT = "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo"
+
+    def _cmd_stem_voiceduck_mix(
+        self,
+        dub_audio: str,
+        out: str,
+        orig_voice_vol: float,
+        dub_volume: float = 1.0,
+        bg_attenuation_db: float = 4.5,
+    ) -> list[str]:
+        """
+        Final professional mix from separated stems:
+          input0 = video
+          input1 = accompaniment stem (music + SFX + ambience) — stays fully alive
+          input2 = isolated original voice (vocals) — underlaid + ducked by the dub
+          input3 = dubbed (translated) speech
+
+        Result: music/effects unchanged throughout; the original voice is audible
+        but automatically ducked while the dubbed line plays and restored between
+        lines; the dub is always intelligible.
+        """
+        orig_v = max(0.0, min(1.0, orig_voice_vol))
+        dub_v = max(0.0, min(2.0, dub_volume))
+        bg_gain = 10 ** (-max(0.0, bg_attenuation_db) / 20.0)
+        duration = self._get_duration()
+        cfg = self._resolve_mix_config(orig_v, dub_v)
+        bg_vol = bg_gain * cfg.background_volume
+
+        dur_pad = f",apad=whole_dur={duration:.3f}" if duration > 0 else ""
+
+        dub_pre = (
+            f"[3:a]volume={dub_v:.3f}{dur_pad},{_LOUDNORM_FILTER},{self._SC_FMT}[dubp]"
+        )
+        split = "[dubp]asplit=2[dubmix][dubkey]"
+        voice_pre = f"[2:a]volume={orig_v:.3f},{self._SC_FMT}[voice]"
+        bg_pre = f"[1:a]volume={bg_vol:.4f}{dur_pad},{self._SC_FMT}[bg]"
+
+        if cfg.ducking_enabled and orig_v > 0.001:
+            voice_duck = f"[voice][dubkey]{self._sidechain_duck_expr(cfg)}[voiced]"
+            amix = (
+                "[bg][voiced][dubmix]"
+                "amix=inputs=3:duration=first:dropout_transition=0:normalize=0[out]"
+            )
+            filt = ";".join([dub_pre, split, voice_pre, bg_pre, voice_duck, amix])
+        else:
+            # Ducking off → static underlay of the original voice.
+            voice_pre2 = f"[2:a]volume={orig_v:.3f},{self._SC_FMT}[voiced]"
+            dub_pre2 = (
+                f"[3:a]volume={dub_v:.3f}{dur_pad},{_LOUDNORM_FILTER},{self._SC_FMT}[dubmix]"
+            )
+            amix = (
+                "[bg][voiced][dubmix]"
+                "amix=inputs=3:duration=first:dropout_transition=0:normalize=0[out]"
+            )
+            filt = ";".join([dub_pre2, voice_pre2, bg_pre, amix])
+
+        cmd = [
+            self._ffmpeg, "-y",
+            "-i", self.video_path,
+            "-i", self.background_audio_path,
+            "-i", self.dialogue_audio_path,
+            "-i", dub_audio,
+            "-filter_complex", filt,
+            "-map", "0:v:0",
+            "-map", "[out]",
+            "-c:v", "copy",
+            "-c:a", "aac", "-b:a", "192k",
+        ]
+        if duration > 0:
+            cmd.extend(["-t", f"{duration:.3f}"])
+        cmd.append(out)
+        return cmd
 
     def _cmd_stem_mix(
         self,

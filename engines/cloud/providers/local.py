@@ -142,5 +142,42 @@ class LocalProvider(CloudProviderAdapter):
         st = dest.stat()
         return CloudFileEntry(path=rel, size_bytes=st.st_size, modified_ms=int(st.st_mtime * 1000))
 
+    def archive_prefix(self, prefix: str) -> str:
+        import zipfile
+        import time as _time
+        import uuid
+
+        root = self._root()
+        src = root / prefix.replace("\\", "/") if prefix else root
+        if not src.exists():
+            raise FileNotFoundError(prefix or ".")
+        archives = root / "_archives"
+        archives.mkdir(parents=True, exist_ok=True)
+        aid = f"arch_{int(_time.time())}_{uuid.uuid4().hex[:8]}"
+        zpath = archives / f"{aid}.zip"
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as zf:
+            if src.is_file():
+                zf.write(src, arcname=src.name)
+            else:
+                for f in src.rglob("*"):
+                    if f.is_file():
+                        zf.write(f, arcname=str(f.relative_to(root)).replace("\\", "/"))
+        return aid
+
+    def restore_archive(self, archive_id: str, dest_prefix: str) -> None:
+        import zipfile
+
+        root = self._root()
+        zpath = root / "_archives" / f"{Path(archive_id).name}.zip"
+        if not zpath.is_file():
+            alt = root / "_archives" / Path(archive_id).name
+            zpath = alt if alt.is_file() else zpath
+        if not zpath.is_file():
+            raise FileNotFoundError(archive_id)
+        dest = root / dest_prefix.replace("\\", "/").strip("/")
+        dest.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(zpath, "r") as zf:
+            zf.extractall(dest)
+
     def capabilities(self) -> ProviderCapabilities:
         return ProviderCapabilities(multipart=True, resume=True, direct_stream_write=True)

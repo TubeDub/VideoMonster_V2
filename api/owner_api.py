@@ -50,12 +50,19 @@ def _owner_ok() -> bool:
         token = "vm-owner-local"
     header = request.headers.get("X-VM-Owner-Token", "")
     body = (request.get_json(silent=True) or {}).get("owner_token", "")
-    return token and (header == token or body == token)
+    return bool(token) and (header == token or body == token)
+
+
+def _is_local_request() -> bool:
+    addr = (request.remote_addr or "").strip().lower()
+    return addr in ("127.0.0.1", "::1", "localhost")
 
 
 def _require_owner():
     if not is_owner_host():
         return jsonify({"error": "Доступно только на копии владельца"}), 403
+    if not _is_local_request():
+        return jsonify({"error": "Только localhost"}), 403
     if not _owner_ok():
         return jsonify({"error": "Требуется токен владельца (X-VM-Owner-Token)"}), 403
     return None
@@ -156,7 +163,11 @@ def api_owner_download_build(build_id: str):
     if not _owner_ok():
         return jsonify({"error": "Требуется токен владельца"}), 403
 
-    setup_path = get_setup_path(build_id)
+    safe_id = Path(build_id).name
+    if not safe_id or safe_id != build_id:
+        return jsonify({"error": "Некорректный build_id"}), 400
+
+    setup_path = get_setup_path(safe_id)
     if setup_path:
         return send_file(
             setup_path,
@@ -165,7 +176,7 @@ def api_owner_download_build(build_id: str):
             mimetype="application/octet-stream",
         )
 
-    zip_path = get_build_zip_path(build_id)
+    zip_path = get_build_zip_path(safe_id)
     if not zip_path:
         return jsonify({"error": "Сборка не найдена"}), 404
 

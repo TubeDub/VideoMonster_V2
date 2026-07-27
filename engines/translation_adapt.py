@@ -895,6 +895,13 @@ def llm_rephrase_available() -> bool:
     local server (Ollama / LM Studio / OpenAI-compatible). Requires a model that
     is actually installed/listable — not merely a reachable port.
     """
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            return False
+    except Exception:
+        pass
     ep = _resolve_endpoint()
     if not ep.get("available"):
         return False

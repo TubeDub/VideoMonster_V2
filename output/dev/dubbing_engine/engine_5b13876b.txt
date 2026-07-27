@@ -1,0 +1,154 @@
+=== DUBBING ENGINE REPORT task=af522608598a4539a734bc4445124ae8 run=5b13876b ===
+lang=uk  segments=21  elapsed=0.76s
+adapted=19  skipped=0  strategies={'direct': 2, 'adapted': 0, 'video_adapt': 0, 'merge_next': 18, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=merge_next pred=7383ms slot=4527ms
+       IN : 18-річний хлопець на ім'я Джордж-молодший проїхав через своє рідне місто, поверт
+       OUT: 18-річний хлопець на ім'я Джордж-молодший проїхав че́рез своє рідне місто, повер
+       [stress] ok
+       [timing] strategy=merge_next pred=7383ms slot=4527ms prev_end=0ms overflow=63.1% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; severe_overflow: predicted=7383ms slot=4527ms ratio=1.63; voice_quality_risk: projected_atempo
+  [✓] seg#01 strategy=add_pause pred=5975ms slot=5483ms
+       IN : Але коли він їхав, Джордж-молодший відчути, що він справді боїться потрапити туд
+       OUT: Але́ коли́ ві́н їхав, Джордж-молодший відчути, що ві́н справді боїться потрапити
+       [stress] ok
+       [timing] strategy=add_pause pred=5975ms slot=5483ms prev_end=4527ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#02 strategy=merge_next pred=11760ms slot=8904ms
+       IN : Отже, Джордж-молодший був дуже розумною дитиною, але він також дуже легко відвол
+       OUT: Отже, Джордж-молодший був ду́же розумною дитиною, але́ ві́н тако́ж ду́же легко в
+       [stress] ok
+       [timing] strategy=merge_next pred=11760ms slot=8904ms prev_end=10010ms gap_too_small=0ms (<80ms); overflow=32
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr; severe_overflow: predicted=11760ms slot=8904ms ratio=1.32; voice_quality_risk: projected_at
+  [✓] seg#03 strategy=merge_next pred=15896ms slot=10263ms
+       IN : І в той момент його батько дійсно купив йому маленьку італійську машину під назв
+       OUT: І в той момент його́ батько дійсно купив йому маленьку італійську машину під наз
+       [stress] ok
+       [phonetics] fixed: Fiat→Фіат
+       [timing] strategy=merge_next pred=15896ms slot=10263ms prev_end=18914ms gap_too_small=0ms (<80ms); overflow=5
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:Fiat; missing_entity:Italian; severe_overflow: predicted=15896ms slot=10263ms ratio=1.55; voice_quality_r
+  [✓] seg#04 strategy=merge_next pred=8851ms slot=5038ms
+       IN : Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших р
+       OUT: Наприклад, чому ви не можете зосередитися на цьому й застосувати його́ до інших 
+       [stress] ok
+       [timing] strategy=merge_next pred=8851ms slot=5038ms prev_end=29177ms overflow=75.7% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=8851ms slot=5038ms ratio=1.76; voice_quality_risk: projected_atempo=1.76 (max=1.2) — recommen
+  [✓] seg#05 strategy=merge_next pred=7451ms slot=4620ms
+       IN : І тому практично кожна вечеря в ці дні перетворювалася на величезну суперечку мі
+       OUT: І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку м
+       [stress] ok
+       [timing] strategy=merge_next pred=7451ms slot=4620ms prev_end=39778ms overflow=61.3% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=7451ms slot=4620ms ratio=1.61; voice_quality_risk: projected_atempo=1.61 (max=1.2) — recommen
+  [✓] seg#06 strategy=merge_next pred=12018ms slot=9241ms
+       IN : І ось Джордж, він підійшов до цього перехрестя, де воно було прямо біля його дом
+       OUT: І ось Джордж, ві́н підійшов до цього перехрестя, де воно бу́ло прямо біля його́ 
+       [stress] ok
+       [timing] strategy=merge_next pred=12018ms slot=9241ms prev_end=44950ms gap_too_small=0ms (<80ms); overflow=30
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=12018ms slot=9241ms ratio=1.30; voice_quality_risk: projected_atempo=1.30 (max=1.2) — recomme
+  [✓] seg#07 strategy=direct pred=19241ms slot=17290ms
+       IN : Через два тижні Джордж-молодший лежав у реанімації місцевої лікарні, тож за два 
+       OUT: Че́рез два тижні Джордж-молодший лежав у реанімації місцевої лікарні, тож за два
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#08 strategy=merge_next pred=9933ms slot=7433ms
+       IN : Через два роки Джордж-молодший, який до цього моменту вже повністю оговтався від
+       OUT: Че́рез два роки Джордж-молодший, яки́й до цього моменту вже́ повністю оговтався 
+       [stress] ok
+       [timing] strategy=merge_next pred=9933ms slot=7433ms prev_end=73850ms overflow=33.6% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; severe_overflow: predicted=9933ms slot=7433ms ratio=1.34; voice_quality_risk: projected_atempo
+  [✓] seg#09 strategy=merge_next pred=10975ms slot=7533ms
+       IN : Тож після свого передсмертного досвіду Джордж-молодший зрозумів, що насправді йо
+       OUT: Тож пі́сля свого передсмертного досвіду Джордж-молодший зрозумів, що насправді й
+       [stress] ok
+       [timing] strategy=merge_next pred=10975ms slot=7533ms prev_end=84303ms gap_too_small=0ms (<80ms); overflow=45
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; severe_overflow: predicted=10975ms slot=7533ms ratio=1.46; voice_quality_risk: projected_atemp
+  [✓] seg#10 strategy=merge_next pred=12305ms slot=10171ms
+       IN : Тож Джордж-молодший вирішив, що справді більше не хоче брати участь у перегонах 
+       OUT: Тож Джордж-молодший вирішив, що справді бі́льше не хоче брати участь у перегонах
+       [stress] ok
+       [timing] strategy=merge_next pred=12305ms slot=10171ms prev_end=91836ms gap_too_small=0ms (<80ms); overflow=2
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr; voice_quality_risk: projected_atempo=1.21 (max=1.2) — recommend text adaptation
+  [✓] seg#11 strategy=merge_next pred=12385ms slot=9258ms
+       IN : Насправді Джордж-молодший подав заявку на престижну програму кінематографії в US
+       OUT: Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю 
+       [stress] ok
+       [phonetics] fixed: USC→Ю Ес Сі
+       [timing] strategy=merge_next pred=12385ms slot=9258ms prev_end=102007ms overflow=33.8% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:University of Southern California; missing_entity:California; missing_entity:George Jr; missing_entity:So
+  [✓] seg#12 strategy=merge_next pred=16531ms slot=9900ms
+       IN : Тепер Джордж-молодший підійшов до подіуму, щоб зробити декілька фотографій водія
+       OUT: Тепер Джордж-молодший підійшов до подіуму, щоб зробити декілька фотографій водія
+       [stress] ok
+       [timing] strategy=merge_next pred=16531ms slot=9900ms prev_end=112055ms overflow=67.0% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; severe_overflow: predicted=16531ms slot=9900ms ratio=1.67; voice_quality_risk: projected_atemp
+  [✓] seg#13 strategy=merge_next pred=9406ms slot=7400ms
+       IN : І тоді в якийсь момент цей чоловік фактично офіційно представився як Хаскелл Век
+       OUT: І тоді́ в якийсь момент цей чоловік фактично офіційно представився як Хаскелл Ве
+       [stress] ok
+       [timing] strategy=merge_next pred=9406ms slot=7400ms prev_end=122614ms gap_too_small=0ms (<80ms); overflow=27
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:Haskell Wexler; voice_quality_risk: projected_atempo=1.27 (max=1.2) — recommend text adaptation
+  [✓] seg#14 strategy=merge_next pred=10558ms slot=5734ms
+       IN : І Джордж-молодший розповів Хаскеллу про те, як він нещодавно подав заяву в USC, 
+       OUT: І Джордж-молодший розповів Хаскеллу про те, як ві́н нещодавно подав заяву в Ю Ес
+       [stress] ok
+       [phonetics] fixed: USC→Ю Ес Сі
+       [timing] strategy=merge_next pred=10558ms slot=5734ms prev_end=130014ms gap_too_small=0ms (<80ms); overflow=8
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:USC; missing_entity:And George Jr; severe_overflow: predicted=10558ms slot=5734ms ratio=1.84; voice_quali
+  [✓] seg#15 strategy=merge_next pred=4576ms slot=3286ms
+       IN : І коли Хаскелл почув це, він сказав: «Джордж, я знаю людей в USC».
+       OUT: І коли́ Хаскелл почув це, ві́н сказав: «Джордж, я знаю людей в Ю Ес Сі».
+       [stress] ok
+       [phonetics] fixed: USC→Ю Ес Сі
+       [timing] strategy=merge_next pred=4576ms slot=3286ms prev_end=135748ms gap_too_small=0ms (<80ms); overflow=39
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:USC; severe_overflow: predicted=4576ms slot=3286ms ratio=1.39; voice_quality_risk: projected_atempo=1.39 
+  [✓] seg#16 strategy=merge_next pred=10638ms slot=7493ms
+       IN : Дозволь мені подзвонити. І справді, незабаром після цієї доленосної зустрічі Джо
+       OUT: Дозволь мені подзвонити. І справді, незабаром пі́сля цієї доленосної зустрічі Дж
+       [stress] ok
+       [phonetics] fixed: USC→Ю Ес Сі
+       [timing] strategy=merge_next pred=10638ms slot=7493ms prev_end=139034ms overflow=42.0% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:USC; missing_entity:George Jr; severe_overflow: predicted=10638ms slot=7493ms ratio=1.42; voice_quality_r
+  [✓] seg#17 strategy=merge_next pred=5606ms slot=4004ms
+       IN : Але цей момент у житті Джорджа-молодшого не лише змінив його життя назавжди.
+       OUT: Але́ цей момент у житті Джорджа-молодшого не лише змінив його́ життя назавжди.
+       [stress] ok
+       [timing] strategy=merge_next pred=5606ms slot=4004ms prev_end=148613ms gap_too_small=0ms (<80ms); overflow=40
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; severe_overflow: predicted=5606ms slot=4004ms ratio=1.40; voice_quality_risk: projected_atempo
+  [✓] seg#18 strategy=merge_next pred=10350ms slot=8979ms
+       IN : Це також назавжди повністю змінило б кіно в цілому. Тому що приблизно через 13 р
+       OUT: Це тако́ж назавжди повністю змінило б кіно в цілому. Тому́́ що́ приблизно че́рез
+       [stress] ok
+       [timing] strategy=merge_next pred=10350ms slot=8979ms prev_end=152617ms overflow=15.3% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#19 strategy=direct pred=4743ms slot=4620ms
+       IN : Його фільм став частиною найуспішнішої кінофраншизи всіх часів.
+       OUT: Його́ фільм став частиною найуспішнішої кінофраншизи всіх часів.
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#20 strategy=merge_next pred=9201ms slot=6066ms
+       IN : Джордж-молодший. Сьогодні більш відомий як Джордж Лукас, а його кінофраншиза — «
+       OUT: Джордж-молодший. Сьогодні більш відомий як Джордж Лукас, а його́ кінофраншиза — 
+       [stress] ok
+       [timing] strategy=merge_next pred=9201ms slot=6066ms prev_end=171861ms overflow=51.7% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; missing_entity:George Lucas; missing_entity:Star Wars; severe_overflow: predicted=9201ms slot=

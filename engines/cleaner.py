@@ -202,6 +202,11 @@ def _distribute_text_by_timing_sentences(text: str, timing_map: List) -> List[st
     if target == 1:
         return [text.strip()]
     sentences = _split_complete_sentences(text)
+    # Not enough sentence boundaries to cover every slot → fall back to
+    # word-level proportional distribution so no slot is left empty and no
+    # translated words are dropped (TZ §8 fill + timing sync).
+    if len(sentences) < target:
+        return _distribute_text_by_timing(text, timing_map)
     return _merge_sentences_to_buckets(sentences, target)
 
 

@@ -78,23 +78,40 @@ def check_recovery(paths: StoragePaths) -> dict[str, Any] | None:
       * referenced project still exists on disk;
       * recovery is younger than 7 days.
     """
-    data = load_recovery_state(paths)
+    try:
+        data = load_recovery_state(paths)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("corrupt recovery state ignored: %s", exc)
+        try:
+            clear_recovery_state(paths)
+        except Exception:
+            pass
+        return None
     if not data:
         return None
 
-    project_id = str(data.get("project_id") or "")
-    if not project_id:
+    project_id = Path(str(data.get("project_id") or "")).name
+    if not project_id or project_id != str(data.get("project_id") or ""):
         clear_recovery_state(paths)
         return None
 
-    saved_at = float(data.get("saved_at") or 0)
+    try:
+        saved_at = float(data.get("saved_at") or 0)
+    except (TypeError, ValueError):
+        clear_recovery_state(paths)
+        return None
     if saved_at and (time.time() - saved_at) > 7 * 86400:
         clear_recovery_state(paths)
         return None
 
     # Project must still exist (active or trashed).
-    active = paths.project_json(project_id, trashed=False)
-    trashed = paths.project_json(project_id, trashed=True)
+    try:
+        active = paths.project_json(project_id, trashed=False)
+        trashed = paths.project_json(project_id, trashed=True)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("recovery project path failed: %s", exc)
+        clear_recovery_state(paths)
+        return None
     if not active.is_file() and not trashed.is_file():
         clear_recovery_state(paths)
         return None

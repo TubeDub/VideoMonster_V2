@@ -1,0 +1,33 @@
+{
+  "reviewer_agent_version": "1.1",
+  "project_uuid": "p1",
+  "task_id": "reviewer-test",
+  "status": "success",
+  "summary": {
+    "segment_count": 1,
+    "passed_count": 1,
+    "failed_count": 0,
+    "retries": 0
+  },
+  "warnings": [],
+  "errors": [],
+  "execution_time_ms": 0.3,
+  "decision_log": [],
+  "per_segment": [
+    {
+      "index": 0,
+      "segment_id": null,
+      "pass": true,
+      "issues": [],
+      "route_to": "",
+      "final_text_preview": "Привіт, світ, як у тебе справи сьогодні?",
+      "duration_ok": true,
+      "slot_fit_score": 1.0,
+      "grammar_score": 1.0,
+      "slot_fit_threshold": 0.85,
+      "grammar_threshold": 0.85,
+      "retry_count": 0,
+      "events": []
+    }
+  ]
+}

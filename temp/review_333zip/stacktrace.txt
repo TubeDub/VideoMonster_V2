@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 7863, in _run_pipeline_inner
+    source_text, _, timing_map, detected_lang = transcribe(
+                                                ~~~~~~~~~~^
+        stt_audio_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        word_timestamps=stt_word_timestamps,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\stt_engine.py", line 64, in transcribe
+    return _transcribe_faster_whisper(
+        audio_path,
+    ...<2 lines>...
+        word_timestamps=word_timestamps,
+    )
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\stt_engine.py", line 194, in _transcribe_faster_whisper
+    return _transcribe_faster_whisper(
+        audio_path,
+    ...<2 lines>...
+        word_timestamps=word_timestamps,
+    )
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\stt_engine.py", line 169, in _transcribe_faster_whisper
+    model = _get_faster_model(model_size)
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\stt_engine.py", line 156, in _get_faster_model
+    _MODEL_CACHE[cache_key] = load_whisper(app_dir, model_size)
+                              ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\model_manager\downloader.py", line 344, in load_whisper
+    raise ModelNotPreparedError(
+    ...<2 lines>...
+    )
+engines.model_manager.runtime.ModelNotPreparedError: Whisper small не установлен

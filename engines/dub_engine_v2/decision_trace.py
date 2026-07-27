@@ -43,7 +43,17 @@ CANONICAL_STAGES = (
 
 
 def _dbg(hypothesis_id: str, location: str, message: str, data: dict[str, Any]) -> None:
-    # #region agent log
+    """Opt-in NDJSON diagnostics (VM_DEBUG_NDJSON=1). Off in production."""
+    import os
+    from pathlib import Path
+
+    if (os.getenv("VM_DEBUG_NDJSON") or "").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        return
     try:
         payload = {
             "sessionId": "ee98a6",
@@ -54,15 +64,11 @@ def _dbg(hypothesis_id: str, location: str, message: str, data: dict[str, Any]) 
             "data": data,
             "timestamp": int(time.time() * 1000),
         }
-        with open(
-            r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log",
-            "a",
-            encoding="utf-8",
-        ) as f:
+        path = Path(__file__).resolve().parents[2] / "debug-ee98a6.log"
+        with path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(payload, ensure_ascii=False) + "\n")
     except Exception:
         pass
-    # #endregion
 
 
 def _trace_list(seg: dict[str, Any]) -> list[dict[str, Any]]:

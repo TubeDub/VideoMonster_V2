@@ -2,9 +2,17 @@
 {% block title %}Dub Studio — TubeDub{% endblock %}
 {% block extra_head %}
 <style>
-.ds-layout { display:grid; grid-template-columns:220px 1fr 280px; gap:12px; min-height:70vh; }
+.ds-layout { display:grid; grid-template-columns:260px 1fr 280px; gap:12px; min-height:70vh; }
 .ds-panel { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; overflow:auto; }
-.ds-track { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.ds-track { display:flex; flex-direction:column; gap:4px; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.ds-track-active { background:rgba(255,255,255,0.03); border-radius:6px; padding-left:6px; padding-right:6px; }
+.ds-track-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.ds-track-kind { opacity:.55; margin-left:auto; font-size:10px; }
+.ds-track-vol { display:flex; align-items:center; gap:8px; }
+.ds-track-vol input[type=range] { flex:1; min-width:80px; }
+.ds-vol-lbl { min-width:36px; opacity:.7; font-size:11px; }
+.ds-track-fx { font-size:10px; opacity:.7; word-break:break-word; }
+.ds-ctl { padding:0 6px !important; font-size:10px !important; min-width:24px; }
 .ds-seg { padding:8px; margin-bottom:6px; border-radius:6px; border:1px solid var(--border); font-size:12px; cursor:pointer; }
 .ds-seg.active { border-color:var(--accent); }
 .ds-dot { width:10px;height:10px;border-radius:50%;display:inline-block; }
@@ -12,12 +20,22 @@
 .ds-dot.yellow { background:#f6ad55; }
 .ds-dot.red { background:#f56565; }
 .ds-timeline { min-height:120px; background:var(--panel2); border-radius:6px; padding:8px; }
-.ds-fx-item { padding:6px; margin:4px 0; background:var(--panel2); border-radius:4px; font-size:11px; }
+.ds-fx-target { font-size:11px; margin-bottom:8px; opacity:.85; }
+.ds-fx-item { display:block; width:100%; text-align:left; padding:6px; margin:4px 0; background:var(--panel2); border:1px solid var(--border); border-radius:4px; font-size:11px; cursor:pointer; color:inherit; }
+.ds-fx-item:hover { border-color:var(--accent); }
+.ds-fx-chain { margin:10px 0 12px; padding:8px; background:var(--panel2); border:1px solid var(--border); border-radius:6px; }
+.ds-fx-chain h4 { margin:0 0 8px; font-size:11px; opacity:.8; font-weight:600; }
+.ds-fx-slot { display:flex; align-items:center; gap:4px; padding:4px 0; border-bottom:1px solid var(--border); font-size:11px; }
+.ds-fx-slot:last-child { border-bottom:none; }
+.ds-fx-slot.off { opacity:.45; }
+.ds-fx-slot-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ds-fx-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.ds-fx-empty { font-size:11px; opacity:.55; font-style:italic; }
 </style>
 {% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>🎛️ Dub Studio</h1>
+  <h1>Dub Studio</h1>
   <p class="subtitle">Professional multitrack dubbing editor — timing, FX, emotions, A/B/C takes</p>
 </div>
 
@@ -51,7 +69,9 @@
     <div class="ds-panel">
       <h3 style="margin:0 0 8px;font-size:13px;">Инспектор</h3>
       <div id="ds-inspector"><em>Выберите сегмент</em></div>
-      <h3 style="margin:16px 0 8px;font-size:13px;">FX Plugins</h3>
+      <h3 style="margin:16px 0 8px;font-size:13px;">FX Chain</h3>
+      <div id="ds-fx-chain"></div>
+      <h3 style="margin:16px 0 8px;font-size:13px;">Добавить FX</h3>
       <div id="ds-plugins"></div>
     </div>
   </div>

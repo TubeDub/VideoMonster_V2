@@ -1,0 +1,37 @@
+=== PROFESSIONAL DUBBING task=1721539b423542ecaa95dfb4e8cb9d5a ===
+groups=1
+
+--- Group 1 indices=[0] ---
+Original Translation: Наше восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця. Тепер ти вагітна. У сім'ї Лу народилося потомство. Було б досконаліше, якби ти міг пройти через труднощі сам. Було б досконаліше, якби ти міг пройти через труднощі сам. Мамо, поки ти мені вірна, я буду любити тебе незалежно від того, чоловік ти чи жінка. Брат Сюй Хуай, я вагітна. Аварія місяць тому. Місяць тому мене і Цюй Фейфея викрали одночасно. Тієї ночі він обслужив викрадача, отже, ця дитина і є викрадачем. Аварія місячної давності, ця дитина належить викрадачеві. Цей хлопець належить викрадачеві.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Наше</emphasis> восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця.<break time="350ms"/> <emphasis level="reduced">Тепер</emphasis> ти вагітна.<break time="350ms"/> У сім'ї Лу народилося потомство.<break time="350ms"/> <emphasis level="reduced">Було</emphasis> б досконаліше,<break time="184ms"/> якби ти міг пройти через труднощі сам.<break time="350ms"/> Було б доск
+Segment duration: 4737 ms
+Est TTS before: 43555 ms
+Est TTS after: 49411 ms
+Fill %: 1043.1
+Rate: +1%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Наше', 'type': 'name'}
+  Accent: {'word': 'Тепер', 'type': 'name'}
+  Accent: {'word': 'Було', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 919.5% → light faster +1% (pauses scaled)

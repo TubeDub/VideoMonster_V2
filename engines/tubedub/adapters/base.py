@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from engines.tubedub.lifecycle import HealthReport, ModuleContext, PlatformModule
@@ -200,6 +201,190 @@ class ProjectModule(ArchitectureModule):
         )
 
 
+class EnterpriseTranslationModule(ArchitectureModule):
+    module_id = "enterprise_translation"
+    api_namespace = "enterprise_translation"
+    dependencies = ["translation"]
+
+    def _register_api(self, ctx: ModuleContext) -> None:
+        super()._register_api(ctx)
+        from engines.tubedub.api_bus import get_api_bus
+
+        bus = get_api_bus()
+
+        def _translate(payload: dict[str, Any]) -> dict[str, Any]:
+            text = str(payload.get("text") or "")
+            src = str(payload.get("src_lang") or "en")
+            tgt = str(payload.get("tgt_lang") or "uk")
+            try:
+                from engines.enterprise_translation.integration import translate_with_enterprise
+
+                out, meta = translate_with_enterprise(
+                    text, src, tgt, app_dir=Path(ctx.app_dir)
+                )
+                return {"text": out, "engine": "enterprise", "meta": meta}
+            except Exception:
+                try:
+                    from engines.translation_pipeline import translate_text
+
+                    out = translate_text(text, src_lang=src, tgt_lang=tgt)
+                    return {"text": out, "engine": "translation_pipeline_fallback"}
+                except Exception as exc:
+                    return {"text": text, "error": str(exc)}
+
+        bus.register(
+            "enterprise_translation",
+            "translate",
+            _translate,
+            module_id=self.module_id,
+            description="Enterprise translation tournament/fusion",
+        )
+
+
+class WordTimingModule(ArchitectureModule):
+    module_id = "word_timing"
+    api_namespace = "word_timing"
+    dependencies = ["dubbing"]
+
+    def _register_api(self, ctx: ModuleContext) -> None:
+        super()._register_api(ctx)
+        from engines.tubedub.api_bus import get_api_bus
+
+        bus = get_api_bus()
+
+        def _build(payload: dict[str, Any]) -> dict[str, Any]:
+            try:
+                from engines.word_timing_map.pipeline import build_raw_word_maps
+
+                segments = list(payload.get("segments") or [])
+                timing_map = list(payload.get("timing_map") or [])
+                maps = build_raw_word_maps(
+                    [str(s) for s in segments],
+                    timing_map,
+                    timing_source=payload.get("timing_source"),
+                )
+                return {
+                    "ok": True,
+                    "word_maps": [m.to_dict() if hasattr(m, "to_dict") else m for m in maps],
+                }
+            except Exception as exc:
+                return {"ok": False, "error": str(exc)}
+
+        bus.register("word_timing", "build", _build, module_id=self.module_id)
+
+
+class ProfessionalDubbingModule(ArchitectureModule):
+    module_id = "professional_dubbing"
+    api_namespace = "professional_dubbing"
+    dependencies = ["dubbing"]
+
+    def _register_api(self, ctx: ModuleContext) -> None:
+        super()._register_api(ctx)
+        from engines.tubedub.api_bus import get_api_bus
+
+        bus = get_api_bus()
+
+        def _prosody(payload: dict[str, Any]) -> dict[str, Any]:
+            try:
+                from engines.professional_dubbing.prosody import build_prosody_plan
+
+                plan = build_prosody_plan(
+                    str(payload.get("text") or ""),
+                    segment_ms=int(payload.get("segment_ms") or 2000),
+                    lang=str(payload.get("lang") or "ru"),
+                    base_rate=payload.get("base_rate"),
+                    base_pitch=payload.get("base_pitch"),
+                    use_ssml=bool(payload.get("use_ssml", True)),
+                    source_cues=payload.get("source_cues"),
+                )
+                if hasattr(plan, "to_dict"):
+                    return {"ok": True, "plan": plan.to_dict()}
+                return {"ok": True, "plan": plan.__dict__}
+            except Exception as exc:
+                return {"ok": False, "error": str(exc)}
+
+        bus.register("professional_dubbing", "prosody", _prosody, module_id=self.module_id)
+
+
+class DeveloperToolsModule(ArchitectureModule):
+    module_id = "developer_tools"
+    api_namespace = "developer"
+    dependencies = ["core"]
+
+    def _register_api(self, ctx: ModuleContext) -> None:
+        super()._register_api(ctx)
+        from engines.tubedub.api_bus import get_api_bus
+
+        bus = get_api_bus()
+
+        def _dashboard(_p: dict[str, Any]) -> dict[str, Any]:
+            try:
+                from engines.tubedub.dev_mode.dashboard import build_architecture_dashboard
+
+                return build_architecture_dashboard(Path(ctx.app_dir))
+            except Exception as exc:
+                return {
+                    "ok": True,
+                    "modules": list(ADAPTER_MAP.keys()),
+                    "error": str(exc),
+                }
+
+        bus.register("developer", "dashboard", _dashboard, module_id=self.module_id)
+
+
+class CloudPlatformModule(ArchitectureModule):
+    module_id = "cloud_platform"
+    api_namespace = "cloud"
+    dependencies = ["core"]
+
+    def _register_api(self, ctx: ModuleContext) -> None:
+        super()._register_api(ctx)
+        from engines.tubedub.api_bus import get_api_bus
+
+        bus = get_api_bus()
+
+        def _status(_p: dict[str, Any]) -> dict[str, Any]:
+            try:
+                from engines.cloud.service import get_cloud_service
+
+                return get_cloud_service(ctx.app_dir).status()
+            except Exception as exc:
+                return {"ok": False, "error": str(exc)}
+
+        bus.register("cloud", "status", _status, module_id=self.module_id)
+
+
+class LiveTranslationModule(ArchitectureModule):
+    module_id = "live_translation"
+    api_namespace = "live"
+    dependencies = ["translation", "tts"]
+
+    def _register_api(self, ctx: ModuleContext) -> None:
+        super()._register_api(ctx)
+        from engines.tubedub.api_bus import get_api_bus
+
+        bus = get_api_bus()
+
+        def _start(payload: dict[str, Any]) -> dict[str, Any]:
+            uri = str(payload.get("url") or payload.get("path") or payload.get("source") or "")
+            if not uri:
+                return {"ok": False, "error": "url or path required"}
+            try:
+                from engines.live.pipeline import LiveTranslationPipeline
+
+                sid = LiveTranslationPipeline(ctx.app_dir).start(
+                    uri,
+                    tgt_lang=payload.get("tgt_lang") or "ru",
+                    src_lang=payload.get("src_lang"),
+                    voice=payload.get("voice") or "",
+                )
+                return {"ok": True, "session_id": sid}
+            except Exception as exc:
+                return {"ok": False, "error": str(exc)}
+
+        bus.register("live", "start", _start, module_id=self.module_id)
+
+
 from engines.tubedub.project.model import TdProject  # noqa: E402 — used in load handler
 
 ADAPTER_MAP: dict[str, type[ArchitectureModule]] = {
@@ -212,6 +397,12 @@ ADAPTER_MAP: dict[str, type[ArchitectureModule]] = {
     "video": VideoModule,
     "dub_studio": DubStudioModule,
     "project": ProjectModule,
+    "enterprise_translation": EnterpriseTranslationModule,
+    "word_timing": WordTimingModule,
+    "professional_dubbing": ProfessionalDubbingModule,
+    "developer_tools": DeveloperToolsModule,
+    "cloud_platform": CloudPlatformModule,
+    "live_translation": LiveTranslationModule,
 }
 
 

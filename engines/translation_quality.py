@@ -798,6 +798,48 @@ def segment_quality_warnings(
     if is_nonsense_text(display):
         warnings.append({"code": "nonsense", "stage": "final"})
 
+    # Cross-script meaning collapse / source-script leak (any pair)
+    try:
+        from engines.mt.cross_script_guard import meaning_collapse, source_script_leak
+
+        leak = source_script_leak(
+            original, display, source_lang=src, target_lang=tgt
+        )
+        if leak:
+            warnings.append(
+                {
+                    "code": "source_script_leak",
+                    "stage": "final",
+                    "severity": "critical",
+                    "hints": [str(leak.get("source_script") or "")],
+                }
+            )
+        collapse = meaning_collapse(
+            original, display, source_lang=src, target_lang=tgt
+        )
+        if collapse:
+            warnings.append(
+                {
+                    "code": "meaning_collapse",
+                    "stage": "final",
+                    "severity": "critical",
+                    "hints": list(collapse.get("missing_gloss") or [])[:5],
+                    "reasons": list(collapse.get("reasons") or [])[:5],
+                }
+            )
+            if collapse.get("source_script") == "cjk" or (src or "").startswith("zh"):
+                warnings.append(
+                    {
+                        "code": "cjk_meaning_collapse",
+                        "stage": "final",
+                        "severity": "critical",
+                        "hints": list(collapse.get("missing_gloss") or [])[:5],
+                        "reasons": list(collapse.get("reasons") or [])[:5],
+                    }
+                )
+    except Exception:
+        pass
+
     from engines.semantic_translation import detect_semantic_issues
 
     check_text = tts_text or final or naturalized or display

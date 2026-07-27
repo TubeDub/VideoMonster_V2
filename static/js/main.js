@@ -76,9 +76,9 @@ function vmIsWorkBusy() {
 }
 
 const MODE_LABELS = {
-  simple: { btn: '✨ Просто', title: 'Режим пользователя — только основные функции' },
-  pro:    { btn: '⚙️ Про',   title: 'Профессиональный режим — расширенные настройки' },
-  dev:    { btn: '🔧 Dev',   title: 'Режим разработчика — логи, pipeline, диагностика' },
+  simple: { btn: 'Просто', title: 'Режим пользователя — только основные функции' },
+  pro:    { btn: 'Про',   title: 'Профессиональный режим — расширенные настройки' },
+  dev:    { btn: 'Dev',   title: 'Режим разработчика — логи, pipeline, диагностика' },
 };
 
 function setMode(mode) {
@@ -118,7 +118,7 @@ function toggleMode() {
   const idx = order.indexOf(cur);
   const next = order[(idx + 1) % order.length];
   setMode(next);
-  const names = { simple: '✨ Режим пользователя', pro: '⚙️ Профессиональный режим', dev: '🔧 Режим разработчика' };
+  const names = { simple: 'Режим пользователя', pro: 'Профессиональный режим', dev: 'Режим разработчика' };
   vmNotify(names[next] || 'Режим изменён', 'info', 2500);
 }
 
@@ -165,6 +165,19 @@ function vmFriendlyError(msg) {
     if (m.includes('FFmpeg не найден')) return m + ' Скачайте диагностику (ZIP) для подробностей.';
     if (m.includes('нет аудиодорожки')) return m + ' Проверьте исходное видео или скачайте диагностику (ZIP).';
     return m + ' Скачайте диагностику (ZIP) для подробностей.';
+  }
+
+  // Voice clone readiness — show «нужен движок», not bare 503
+  if (
+    m.includes('CLONE_ENGINE_MISSING') ||
+    m.includes('voice_clone_unavailable') ||
+    m.includes('Клонирование голоса недоступно') ||
+    m.includes('нужен движок') ||
+    m.includes('Voice cloning adapter unavailable') ||
+    m.includes('Voice cloning unavailable')
+  ) {
+    if (m.includes('нужен движок') || m.includes('Клонирование голоса')) return m;
+    return 'Клонирование голоса недоступно — нужен движок xtts/coqui, openvoice, fishspeech или cosyvoice';
   }
 
   // TTS / Pipeline diagnostics v1.0 — never replace with generic message
@@ -364,7 +377,13 @@ async function vmConsumeUniversalImport(handlers) {
   try {
     const r = await fetch(`/api/import/load/${encodeURIComponent(importId)}`);
     const d = await r.json();
-    if (!r.ok || d.error) return null;
+    if (!r.ok || d.error) {
+      const msg = d.error || `HTTP ${r.status}`;
+      if (typeof vmNotify === 'function') {
+        vmNotify(typeof vmFriendlyError === 'function' ? vmFriendlyError(msg) : msg, 'error');
+      }
+      return null;
+    }
 
     const handler = handlers && handlers[d.kind];
     if (typeof handler === 'function') await handler(d);
@@ -377,7 +396,11 @@ async function vmConsumeUniversalImport(handlers) {
       window.history.replaceState({}, '', url.pathname + (qs ? `?${qs}` : ''));
     }
     return d;
-  } catch (_) {
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    if (typeof vmNotify === 'function') {
+      vmNotify(typeof vmFriendlyError === 'function' ? vmFriendlyError(msg) : msg, 'error');
+    }
     return null;
   }
 }
@@ -386,6 +409,7 @@ function loadSettings()       { return JSON.parse(localStorage.getItem('vm_setti
 function getDefaultVoice()    { return loadSettings().voice      || 'ru-RU-DmitryNeural'; }
 function getDefaultTargetLang() { return loadSettings().targetLang || 'ru'; }
 function getAutoClean()       { const s = loadSettings(); return s.autoClean !== undefined ? s.autoClean : true; }
+function getTranslateMode()   { return loadSettings().translateMode || 'auto'; }
 
 /* ══════════════════════════════════════════
    ИНИЦИАЛИЗАЦИЯ

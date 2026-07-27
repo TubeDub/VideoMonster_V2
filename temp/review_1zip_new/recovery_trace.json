@@ -1,0 +1,117 @@
+{
+  "task_id": "01b5c496322647ca8b26d6ef96c91707",
+  "stage": "STUDIO",
+  "created_at": "2026-07-26T12:37:14.814029+00:00",
+  "healed_indices": [
+    22
+  ],
+  "still_hard": [],
+  "still_soft": [],
+  "trace": [
+    {
+      "index": 22,
+      "before_category": "ambiguous",
+      "before_code": "latin_in_uk_track",
+      "actions": [
+        "salvage:approved_ok",
+        "revalidate"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.8341,
+      "text_preview": "Джордж-молодший сьогодні більш відомий як Джордж Лукас, а його франшиза фільму «Зоряні війни». більш відомий сьогодні як Джордж Лукас, а його франшиза «Зоряні війни»."
+    }
+  ],
+  "recovered": 1,
+  "failed_hard": 0,
+  "initial_issues": 1,
+  "decisions": [
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "ambiguous",
+      "code": "latin_in_uk_track",
+      "expected_lang": "uk",
+      "detected_lang": "en",
+      "confidence": 1.0,
+      "target_confidence": 0.0,
+      "scores": {
+        "uk": 0.0,
+        "ru": 0.0,
+        "en": 1.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора",
+        "script_gate:latin_in_uk_track"
+      ],
+      "text_checked": "and his film franchise was Star Wars. better known today as George Lucas and his film franchise was Star Wars.",
+      "text_masked": "and his film franchise was ⟨E⟩. better known today as ⟨E⟩ and his film franchise was ⟨E⟩.",
+      "entities_masked": [
+        "George Lucas",
+        "Star Wars"
+      ],
+      "stage": "STUDIO",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 22,
+      "segment_id": "38d28afa85ab4d43bc79ae878529926f",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 110,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [
+            "George Lucas",
+            "Star Wars"
+          ],
+          "masked_preview": "and his film franchise was ⟨E⟩. better known today as ⟨E⟩ and his film franchise was ⟨E⟩."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.0,
+            "ru": 0.0,
+            "en": 1.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "en",
+          "confidence": 1.0,
+          "target_confidence": 0.0,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "en",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "en",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "en",
+          "raw_confidence": 1.0
+        },
+        {
+          "step": "script_gate",
+          "bad": true,
+          "code": "latin_in_uk_track"
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: en (confidence 1.00)\nTarget confidence: 0.00\nCategory: ambiguous\nCode: latin_in_uk_track\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора; script_gate:latin_in_uk_track\nMasked entities: George Lucas, Star Wars\nRecovery: needs_recovery_pipeline\nText: and his film franchise was Star Wars. better known today as George Lucas and his film franchise was Star Wars.",
+      "collapse": null,
+      "script_mismatch": true,
+      "final_preview": "and his film franchise was Star Wars. better known today as George Lucas and his film franchise was Star Wars."
+    }
+  ]
+}

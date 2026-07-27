@@ -1,0 +1,1226 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "d1c6ea8618c445569559d672c4d020d5",
+    "groups": 17,
+    "style_id": "professional",
+    "elapsed_sec": 2.702
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {},
+      "plain_text": "18-летний мальчик по имени Джордж-младший проезжал через свой родной город по пути домой на ужин. Но пока он вел машину, Джордж-младший чувствовал, что действительно боится добраться туда.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">18</emphasis>-летний мальчик по имени <emphasis level=\"reduced\">Джордж</emphasis>-младший проезжал через свой родной город по пути домой на ужин.<break time=\"350ms\"/> Но пока он вел машину,<break time=\"184ms\"/> <emphasis level=\"reduced\">Джордж</emphasis>-младший чувствовал,<break time=\"184ms\"/> что действительно боится добраться туда.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "18",
+          "type": "number"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 9899,
+      "est_ms_before": 13925,
+      "est_ms_after": 14993,
+      "fill_percent": 151.5,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 140.7% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 75,
+        "tail_silence_ms": 0,
+        "speech_ms": 9209,
+        "slot_ms": 9899,
+        "internal_gaps_ms": [
+          85,
+          130,
+          143,
+          103
+        ],
+        "speech_ratio": 0.93,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 1,
+      "indices": [
+        1
+      ],
+      "voice_hint": {},
+      "plain_text": "Итак, Джордж-младший был очень умным ребенком, но он также очень легко отвлекался и из-за этого ничем серьезно не занимался.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Итак</emphasis>,<break time=\"194ms\"/> <emphasis level=\"reduced\">Джордж</emphasis>-младший был очень умным ребенком,<break time=\"194ms\"/> но он также очень легко отвлекался и из-за этого ничем серьезно не занимался.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+0%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 194,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 194,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Итак",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 7512,
+      "est_ms_before": 9185,
+      "est_ms_after": 9923,
+      "fill_percent": 132.1,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 122.3% → light faster +0% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 7359,
+        "slot_ms": 7512,
+        "internal_gaps_ms": [
+          92
+        ],
+        "speech_ratio": 0.98,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 2,
+      "indices": [
+        2
+      ],
+      "voice_hint": {},
+      "plain_text": "То есть, кроме автомобилей. И в этот момент его отец купил ему небольшую итальянскую машину под названием «Fiat».",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\">То есть,<break time=\"184ms\"/> кроме автомобилей.<break time=\"350ms\"/> И в этот момент его отец купил ему небольшую итальянскую машину под названием «<emphasis level=\"reduced\">Fiat</emphasis>».<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Fiat",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 5543,
+      "est_ms_before": 8370,
+      "est_ms_after": 9254,
+      "fill_percent": 166.9,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 151.0% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 5129,
+        "slot_ms": 5543,
+        "internal_gaps_ms": [
+          93,
+          90,
+          95
+        ],
+        "speech_ratio": 0.925,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 3,
+      "indices": [
+        3
+      ],
+      "voice_hint": {},
+      "plain_text": "Но его отец, несмотря на то, что он буквально дал ему Fiat, он просто не понимал одержимости своего сына автомобилями.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\">Но его отец,<break time=\"184ms\"/> несмотря на то,<break time=\"184ms\"/> что он буквально дал ему <emphasis level=\"reduced\">Fiat</emphasis>,<break time=\"184ms\"/> он просто не понимал одержимости своего сына автомобилями.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Fiat",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6161,
+      "est_ms_before": 8740,
+      "est_ms_after": 9642,
+      "fill_percent": 156.5,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 141.9% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 5778,
+        "slot_ms": 6161,
+        "internal_gaps_ms": [
+          108,
+          112,
+          80,
+          83
+        ],
+        "speech_ratio": 0.938,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 4,
+      "indices": [
+        4
+      ],
+      "voice_hint": {},
+      "plain_text": "Например, почему вы не можете сосредоточить это внимание и применить его к другим вещам, которые дадут вам настоящую работу?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Например</emphasis>,<break time=\"184ms\"/> почему вы не можете сосредоточить это внимание и применить его к другим вещам,<break time=\"184ms\"/> которые дадут вам <emphasis level=\"moderate\">настоящую работу</emphasis>?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Например",
+          "type": "name"
+        },
+        {
+          "word": "настоящую работу",
+          "type": "key_phrase"
+        }
+      ],
+      "segment_ms": 4967,
+      "est_ms_before": 9185,
+      "est_ms_after": 9903,
+      "fill_percent": 199.4,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 184.9% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4815,
+        "slot_ms": 4967,
+        "internal_gaps_ms": [
+          82
+        ],
+        "speech_ratio": 0.969,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 5,
+      "indices": [
+        5
+      ],
+      "voice_hint": {},
+      "plain_text": "И поэтому практически каждый ужин в наши дни становился огромным спором между отцом и сыном. И вот Джордж, он подошел к этому перекрестку, где он был прямо возле его дома, и он начал поворачивать, когда услышал этот очень громкий визг, а затем все пошло на поворот, когда он услышал этот действительно громкий визг, и тогда все пошло. Две недели спустя Джордж-младший лежал на больничной койке в отделении интенсивной терапии местной больницы.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\">И поэтому практически каждый ужин в наши дни становился огромным спором между отцом и сыном.<break time=\"350ms\"/> И вот <emphasis level=\"reduced\">Джордж</emphasis>,<break time=\"184ms\"/> он подошел к этому перекрестку,<break time=\"184ms\"/> где он был прямо возле его дома,<break time=\"184ms\"/> и он начал поворачивать,<break time=\"184ms\"/> когда услышал этот очень громкий визг,<break time=\"184ms\"/> а<break time=\"184ms\"/> затем все пошло на поворот,<break time=\"184ms\"/> когда он услышал этот действительно громкий визг,<break time=\"184ms\"/> и тогда все пошло.<break time=\"350ms\"/> <emphasis level=\"reduced\">Две</emphasis> недели спустя <emphasis level=\"reduced\">Джордж</emphasis>-младший лежал на больничной койке в отделении интенсивной терапии местной больницы.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Две",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 22028,
+      "est_ms_before": 32814,
+      "est_ms_after": 35152,
+      "fill_percent": 159.6,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 149.0% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 21317,
+        "slot_ms": 22028,
+        "internal_gaps_ms": [
+          108,
+          116,
+          105,
+          113
+        ],
+        "speech_ratio": 0.968,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 6,
+      "indices": [
+        6
+      ],
+      "voice_hint": {},
+      "plain_text": "Итак, двумя неделями ранее, когда Джордж делал этот поворот, а потом что-то произошло, ну, это была другая машина, мчавшаяся по дороге, и врезалась в машину Джорджа с такой силой, что Джорджа-младшего выбросило из машины, но он выжил.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Итак</emphasis>,<break time=\"184ms\"/> двумя неделями ранее,<break time=\"184ms\"/> когда <emphasis level=\"reduced\">Джордж</emphasis> делал этот поворот,<break time=\"184ms\"/> а<break time=\"184ms\"/> потом что-то произошло,<break time=\"184ms\"/> ну,<break time=\"184ms\"/> это была другая машина,<break time=\"184ms\"/> мчавшаяся по дороге,<break time=\"184ms\"/> и врезалась в машину <emphasis level=\"reduced\">Джорджа</emphasis> с такой силой,<break time=\"184ms\"/> что Джорджа-младшего выбросило из машины,<break time=\"184ms\"/> но он выжил.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Итак",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Джорджа",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 11393,
+      "est_ms_before": 17333,
+      "est_ms_after": 19339,
+      "fill_percent": 169.7,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 152.1% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 11316,
+        "slot_ms": 11393,
+        "internal_gaps_ms": [],
+        "speech_ratio": 0.993,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 7,
+      "indices": [
+        7
+      ],
+      "voice_hint": {},
+      "plain_text": "Два года спустя Джордж-младший, который к этому моменту полностью оправился от травм, стоял на финише автодрома и поднял камеру.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Два</emphasis> года спустя <emphasis level=\"reduced\">Джордж</emphasis>-младший,<break time=\"184ms\"/> который к этому моменту полностью оправился от травм,<break time=\"184ms\"/> стоял на финише автодрома и поднял камеру.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Два",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 7241,
+      "est_ms_before": 9481,
+      "est_ms_after": 10199,
+      "fill_percent": 140.9,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 130.9% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 6984,
+        "slot_ms": 7241,
+        "internal_gaps_ms": [
+          113,
+          80
+        ],
+        "speech_ratio": 0.965,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 8,
+      "indices": [
+        8
+      ],
+      "voice_hint": {},
+      "plain_text": "Итак, после своего околосмертного опыта Джордж-младший понял, что на самом деле его отец был в некотором роде прав, что в некотором смысле он растрачивает свой потенциал.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Итак</emphasis>,<break time=\"184ms\"/> после своего околосмертного опыта <emphasis level=\"reduced\">Джордж</emphasis>-младший понял,<break time=\"184ms\"/> что на самом деле его отец был в некотором роде прав,<break time=\"184ms\"/> что в некотором смысле он растрачивает свой потенциал.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Итак",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 7388,
+      "est_ms_before": 12592,
+      "est_ms_after": 13494,
+      "fill_percent": 182.6,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 170.4% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 7167,
+        "slot_ms": 7388,
+        "internal_gaps_ms": [
+          129,
+          92
+        ],
+        "speech_ratio": 0.97,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 9,
+      "indices": [
+        9
+      ],
+      "voice_hint": {},
+      "plain_text": "Итак, Джордж-младший решил, что больше не хочет участвовать в гонках на машинах.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Итак</emphasis>,<break time=\"184ms\"/> <emphasis level=\"reduced\">Джордж</emphasis>-младший решил,<break time=\"184ms\"/> что больше не хочет участвовать в гонках на машинах.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Итак",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 3622,
+      "est_ms_before": 5925,
+      "est_ms_after": 6643,
+      "fill_percent": 183.4,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 163.6% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3506,
+        "slot_ms": 3622,
+        "internal_gaps_ms": [
+          116
+        ],
+        "speech_ratio": 0.968,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 10,
+      "indices": [
+        10
+      ],
+      "voice_hint": {},
+      "plain_text": "Вместо этого он взял в руки фотоаппарат и по-настоящему вернулся к своему старому увлечению фотографией.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Вместо</emphasis> этого он взял в руки фотоаппарат и по-настоящему вернулся к своему старому увлечению фотографией.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Вместо",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4746,
+      "est_ms_before": 7703,
+      "est_ms_after": 8053,
+      "fill_percent": 169.7,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 162.3% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4667,
+        "slot_ms": 4746,
+        "internal_gaps_ms": [],
+        "speech_ratio": 0.983,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 11,
+      "indices": [
+        11
+      ],
+      "voice_hint": {},
+      "plain_text": "На самом деле Джордж-младший подал заявку на престижную программу кинематографии в Университете Южной Калифорнии, но после отправки заявления был почти уверен, что не попадет.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\">На самом деле <emphasis level=\"reduced\">Джордж</emphasis>-младший подал заявку на престижную программу кинематографии в <emphasis level=\"reduced\">Университете Южной</emphasis> <emphasis level=\"reduced\">Калифорнии</emphasis>,<break time=\"184ms\"/> но после отправки заявления был почти уверен,<break time=\"184ms\"/> что не попадет.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Университете Южной",
+          "type": "name"
+        },
+        {
+          "word": "Калифорнии",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 9011,
+      "est_ms_before": 12962,
+      "est_ms_after": 13680,
+      "fill_percent": 151.8,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 143.8% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 8830,
+        "slot_ms": 9011,
+        "internal_gaps_ms": [
+          93,
+          88
+        ],
+        "speech_ratio": 0.98,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 12,
+      "indices": [
+        12
+      ],
+      "voice_hint": {},
+      "plain_text": "Теперь Джордж-младший подошел к трибуне, чтобы сфотографировать победившего гонщика, но когда он подошел туда, этот мужчина средних лет подошел к нему и просто спросил Джорджа-младшего о его фотографиях, а затем в какой-то момент этот человек официально представился как Хаскелл Векслер и сказал, что на самом деле он был кинематографистом в Голлівуде, и Джордж-младший рассказал Хаскеллу о том, как он недавно подал заявление в Университет Южной Калифорнии, чтобы попытаться поступить в их программу кинематографии, и когда Хаскелл услышал это, он сказал: Джордж, я знаю людей в Университете Южной Калифорнии.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Теперь Джордж</emphasis>-младший подошел к трибуне,<break time=\"184ms\"/> чтобы сфотографировать победившего гонщика,<break time=\"184ms\"/> но когда он подошел туда,<break time=\"184ms\"/> этот мужчина средних лет подошел к нему и просто спросил <emphasis level=\"reduced\">Джорджа</emphasis>-младшего о его фотографиях,<break time=\"184ms\"/> а<break time=\"184ms\"/> затем в какой-то момент этот человек официально представился как <emphasis level=\"reduced\">Хаскелл Векслер</emphasis> и сказал,<break time=\"184ms\"/> что на самом деле он был кинематографистом в Голлівуде,<break time=\"184ms\"/> и Джордж-младший рассказал Хаскеллу о том,<break time=\"184ms\"/> как он недавно подал заявление в Университет Южной Калифорнии,<break time=\"184ms\"/> чтобы попытаться поступить в их программу кинематографии,<break time=\"184ms\"/> и когда Хаскелл услышал это,<break time=\"184ms\"/> он сказал:<break time=\"312ms\"/> Джордж,<break time=\"184ms\"/> я знаю людей в Университете Южной Калифорнии.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ":",
+          "ms": 312,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Теперь Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Джорджа",
+          "type": "name"
+        },
+        {
+          "word": "Хаскелл Векслер",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 25253,
+      "est_ms_before": 45185,
+      "est_ms_after": 47871,
+      "fill_percent": 189.6,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 178.9% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 24973,
+        "slot_ms": 25253,
+        "internal_gaps_ms": [
+          93,
+          88,
+          99
+        ],
+        "speech_ratio": 0.989,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 13,
+      "indices": [
+        13
+      ],
+      "voice_hint": {},
+      "plain_text": "Позвольте мне сделать несколько звонков, и, конечно же, вскоре после этой судьбоносной встречи Джордж-младший получит письмо о зачислении из киношколы Университета Южной Калифорнии, но этот момент в жизни Джорджа-младшего не просто изменил жизнь Джорджа навсегда.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Позвольте</emphasis> мне сделать несколько звонков,<break time=\"184ms\"/> и,<break time=\"184ms\"/> конечно же,<break time=\"184ms\"/> вскоре после этой судьбоносной встречи <emphasis level=\"reduced\">Джордж</emphasis>-младший получит письмо о зачислении из киношколы <emphasis level=\"reduced\">Университета Южной</emphasis> Калифорнии,<break time=\"184ms\"/> но этот момент в жизни Джорджа-младшего не просто изменил жизнь Джорджа навсегда.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Позвольте",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Университета Южной",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 11009,
+      "est_ms_before": 19481,
+      "est_ms_after": 20567,
+      "fill_percent": 186.8,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 177.0% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 10269,
+        "slot_ms": 11009,
+        "internal_gaps_ms": [
+          99,
+          84,
+          127,
+          93,
+          86,
+          99,
+          90
+        ],
+        "speech_ratio": 0.933,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 14,
+      "indices": [
+        14
+      ],
+      "voice_hint": {},
+      "plain_text": "Это также навсегда изменило кино в целом, потому что примерно 13 лет спустя Джордж-младший создал один из самых революционных фильмов в истории.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Это</emphasis> также навсегда изменило кино в целом,<break time=\"193ms\"/> потому что примерно <emphasis level=\"reduced\">13</emphasis> лет спустя <emphasis level=\"reduced\">Джордж</emphasis>-младший создал один из самых революционных фильмов в истории.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+0%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 193,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "13",
+          "type": "number"
+        },
+        {
+          "word": "Это",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 8694,
+      "est_ms_before": 10666,
+      "est_ms_after": 11209,
+      "fill_percent": 128.9,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 122.7% → light faster +0% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 8248,
+        "slot_ms": 8694,
+        "internal_gaps_ms": [
+          96,
+          125,
+          152
+        ],
+        "speech_ratio": 0.949,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 15,
+      "indices": [
+        15
+      ],
+      "voice_hint": {},
+      "plain_text": "Его фильм впоследствии стал частью самой успешной кинофраншизы всех времен.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Его</emphasis> фильм впоследствии стал частью самой успешной кинофраншизы всех времен.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Его",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4556,
+      "est_ms_before": 5555,
+      "est_ms_after": 5964,
+      "fill_percent": 130.9,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 121.9% → light faster -1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4374,
+        "slot_ms": 4556,
+        "internal_gaps_ms": [
+          109
+        ],
+        "speech_ratio": 0.96,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 16,
+      "indices": [
+        16
+      ],
+      "voice_hint": {},
+      "plain_text": "Джордж-младший сегодня более известен как Джордж Лукас, а его кинофраншизой были «Звездные войны». сегодня более известный как Джордж Лукас, а его кинофраншиза — «Звездные войны».",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"ru-RU\"><emphasis level=\"reduced\">Джордж</emphasis>-младший сегодня более известен как <emphasis level=\"reduced\">Джордж Лукас</emphasis>,<break time=\"184ms\"/> а<break time=\"184ms\"/> его кинофраншизой были «<emphasis level=\"reduced\">Звездные</emphasis> войны».<break time=\"350ms\"/> сегодня более известный как Джордж Лукас,<break time=\"184ms\"/> а<break time=\"184ms\"/> его кинофраншиза — «Звездные войны».<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Джордж Лукас",
+          "type": "name"
+        },
+        {
+          "word": "Звездные",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 7715,
+      "est_ms_before": 13259,
+      "est_ms_after": 14327,
+      "fill_percent": 185.7,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 171.9% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 5477,
+        "slot_ms": 7715,
+        "internal_gaps_ms": [
+          80
+        ],
+        "speech_ratio": 0.986,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    }
+  ]
+}

@@ -20,34 +20,34 @@
     },
     "en->uk": {
       "marian": {
-        "attempts": 6712,
-        "successes": 6712,
-        "total_quality": 527081.6100000062,
+        "attempts": 6724,
+        "successes": 6724,
+        "total_quality": 527872.7700000068,
         "manual_corrections": 0,
         "retries": 0,
-        "last_used": "2026-07-20T18:07:21Z"
+        "last_used": "2026-07-26T22:07:28Z"
       },
       "failed": {
-        "attempts": 2,
-        "successes": 2,
+        "attempts": 3,
+        "successes": 3,
         "total_quality": 48.4,
         "manual_corrections": 0,
         "retries": 0,
-        "last_used": "2026-07-08T06:17:19Z"
+        "last_used": "2026-07-24T15:22:51Z"
       },
       "argos": {
-        "attempts": 1463,
-        "successes": 1463,
+        "attempts": 1464,
+        "successes": 1464,
         "total_quality": 123003.17000000029,
         "manual_corrections": 0,
         "retries": 0,
-        "last_used": "2026-07-20T18:07:01Z"
+        "last_used": "2026-07-24T15:22:53Z"
       },
       "translation_agent": {
         "attempts": 0,
         "successes": 0,
         "total_quality": 0.0,
-        "manual_corrections": 282,
+        "manual_corrections": 408,
         "retries": 0,
         "last_used": ""
       }
@@ -170,6 +170,14 @@
         "manual_corrections": 0,
         "retries": 0,
         "last_used": "2026-07-14T02:55:22Z"
+      },
+      "translation_agent": {
+        "attempts": 0,
+        "successes": 0,
+        "total_quality": 0.0,
+        "manual_corrections": 17,
+        "retries": 0,
+        "last_used": ""
       }
     },
     "hu->uk": {
@@ -217,6 +225,40 @@
         "retries": 0,
         "last_used": "2026-07-20T23:19:48Z"
       }
+    },
+    "zh->uk": {
+      "marian": {
+        "attempts": 5,
+        "successes": 5,
+        "total_quality": 472.45,
+        "manual_corrections": 0,
+        "retries": 0,
+        "last_used": "2026-07-23T12:47:18Z"
+      },
+      "translation_agent": {
+        "attempts": 0,
+        "successes": 0,
+        "total_quality": 0.0,
+        "manual_corrections": 1,
+        "retries": 0,
+        "last_used": ""
+      },
+      "deep": {
+        "attempts": 27,
+        "successes": 27,
+        "total_quality": 2087.0,
+        "manual_corrections": 0,
+        "retries": 2,
+        "last_used": "2026-07-24T13:25:41Z"
+      },
+      "argos": {
+        "attempts": 4,
+        "successes": 4,
+        "total_quality": 376.0,
+        "manual_corrections": 0,
+        "retries": 0,
+        "last_used": "2026-07-23T13:19:23Z"
+      }
     }
   },
   "routes": {
@@ -227,10 +269,10 @@
       "last_used": "2026-07-15T09:24:33Z"
     },
     "en→uk": {
-      "attempts": 8175,
-      "successes": 8175,
-      "total_quality": 650084.7800000025,
-      "last_used": "2026-07-20T18:07:21Z"
+      "attempts": 8188,
+      "successes": 8188,
+      "total_quality": 650875.9400000031,
+      "last_used": "2026-07-26T22:07:28Z"
     },
     "es→en→uk": {
       "attempts": 221,
@@ -357,6 +399,24 @@
       "successes": 1,
       "total_quality": 38.0,
       "last_used": "2026-07-20T23:19:48Z"
+    },
+    "zh→uk": {
+      "attempts": 29,
+      "successes": 29,
+      "total_quality": 2259.45,
+      "last_used": "2026-07-24T13:25:41Z"
+    },
+    "zh→en→uk": {
+      "attempts": 7,
+      "successes": 7,
+      "total_quality": 676.0,
+      "last_used": "2026-07-23T13:19:23Z"
+    },
+    "en→zh→uk": {
+      "attempts": 1,
+      "successes": 1,
+      "total_quality": 0.0,
+      "last_used": "2026-07-24T15:22:51Z"
     }
   },
   "version": 2

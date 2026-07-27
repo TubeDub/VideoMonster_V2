@@ -1,0 +1,5615 @@
+[
+  {
+    "segment_id": "458773e77b7449d3bc6bd6f2196ca382",
+    "segment_uuid": "458773e77b7449d3bc6bd6f2196ca382",
+    "text": "18-річний хлопець на ім'я Джордж-молодший проїхав че́рез своє рідне місто",
+    "plain_text": "18-річний хлопець на ім'я Джордж-молодший проїхав че́рез своє рідне місто",
+    "start_ms": 0,
+    "end_ms": 4544,
+    "slot_ms": 4544,
+    "owned_text_segment_id": "458773e77b7449d3bc6bd6f2196ca382",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "458773e77b7449d3bc6bd6f2196ca382",
+    "translation_uuid": "31642b81035900a1b4117121d97fb9c3",
+    "adaptation_uuid": "b3bd9b0dbc614e468e3b54911c977c64",
+    "tts_uuid": "3cbce5aa2e034cbdbce0d3e1b8bc91fa",
+    "audio_uuid": "9e0e5fad5cce4a879ec57f6c0d34fea7",
+    "merge_uuid": "bb65e0aae7964f2d92ac9ada6d450399",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "458773e77b7449d3bc6bd6f2196ca382",
+      "text_hash": "32556b55b82aadcd00c83c77",
+      "text_revision": "b3bd9b0dbc614e468e3b54911c977c64",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "32556b55b82aadcd00c83c77",
+    "identity_text_revision": "b3bd9b0dbc614e468e3b54911c977c64",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "18-річний хлопець на ім'я Джордж-молодший проїхав че́рез своє рідне місто.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "audio_strategy:stretch",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 617,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 5481,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "success": false,
+    "tts_text": "18-річний хлопець на ім'я Джордж-молодший проїхав че́рез своє рідне місто",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_458773e77b74_20260724_164442_8185394b.wav",
+    "playback_duration": 5161,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_458773e77b74_20260724_164442_8185394b.wav",
+    "tts_ms": 5161,
+    "tts_status": "generated",
+    "original_duration_ms": 4544,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=617)",
+    "adaptation_decision": {
+      "segment_id": "458773e77b7449d3bc6bd6f2196ca382",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 617,
+      "original_duration_ms": 4544,
+      "tts_duration_ms": 5161,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "stretch",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 5161,
+    "first_tts_duration_ms": 6216,
+    "audio_bound_uuid": "458773e77b7449d3bc6bd6f2196ca382",
+    "pause_engine": {
+      "before_ms": 5168,
+      "after_ms": 5161,
+      "saved_ms": 7,
+      "stages": [
+        "pause_compress:7"
+      ],
+      "slot_ms": 4544
+    },
+    "translation_text": "18-річний хлопець на ім'я Джордж-молодший проїхав че́рез своє рідне місто",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "dsal_rule_compress",
+        "overflow_strategy:stretch"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+        "detail": {
+          "chosen": "stretch",
+          "why": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+          "cost": 4.0,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900686641,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+        "detail": {
+          "chosen": "stretch",
+          "cost": 4.0,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900686641,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+        "detail": {
+          "chosen": "stretch",
+          "stages": [
+            "overflow_strategy:stretch"
+          ]
+        },
+        "ts_ms": 1784900686641
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "stretch",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 5161
+        },
+        "ts_ms": 1784900686641,
+        "index": 0
+      },
+      {
+        "stage": "tts_duration",
+        "status": "SKIPPED",
+        "reason": "AudioStrategyNoTextRewrite",
+        "detail": {
+          "requires_re_tts": false
+        },
+        "ts_ms": 1784900686640,
+        "index": 0
+      },
+      {
+        "stage": "scheduler",
+        "status": "SUCCESS",
+        "reason": "strategy_queued:stretch",
+        "detail": {
+          "chosen": "stretch"
+        },
+        "ts_ms": 1784900686641,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+      "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=4993",
+      "decision_engine = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=stretch | overflow_ms=294",
+      "chosen_strategy = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=stretch | overflow_ms=294",
+      "strategy_result = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=stretch",
+      "tts_duration = SKIPPED (AudioStrategyNoTextRewrite)",
+      "scheduler = SUCCESS (strategy_queued:stretch) | chosen=stretch",
+      "decision_engine = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=stretch | overflow_ms=0",
+      "chosen_strategy = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=stretch | overflow_ms=0",
+      "strategy_result = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=stretch",
+      "final_result = SUCCESS (stretch) | overflow_ms=0 | duration_ms=5161"
+    ],
+    "dsal_applied": true,
+    "requires_llm_adaptation": false,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "why": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900632738,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900632739,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "stages": [
+              "dsal_rule_compress"
+            ]
+          },
+          "ts_ms": 1784900632739
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 4993
+          },
+          "ts_ms": 1784900632739,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+        "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=4993"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 0,
+      "slot_start": 0,
+      "slot_end": 4544,
+      "slot_duration": 4544,
+      "tts_duration": 5161,
+      "measured_duration": 5161,
+      "delta": 617,
+      "overflow": 617,
+      "underflow": 0,
+      "status": "overflow",
+      "rewrite_iterations": 0,
+      "pause_adjustments_ms": 7,
+      "pause_stages": [
+        "pause_compress:7"
+      ],
+      "timing_score": 65.8,
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 6216,
+      "provider_fatal": false
+    },
+    "timing_score": 65.8,
+    "closed_loop": {
+      "iterations": 0,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "pause_adjustments_ms": 7,
+      "timing_score": 65.8,
+      "actual_duration_ms": 5161,
+      "slot_duration": 4544,
+      "delta": 617,
+      "underflow_ms": 0,
+      "expand_required": false,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "458773e77b7449d3bc6bd6f2196ca382",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 624,
+        "original_duration_ms": 4544,
+        "tts_duration_ms": 5168,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "dsal_rule_compress",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "video_stretch_ratio": 1.0812,
+    "video_adapt_mode": "video_adapt",
+    "overflow_decision": {
+      "index": 0,
+      "overflow_ms": 294,
+      "slot_ms": 4544,
+      "cause": "video_adapt",
+      "variants_considered": [
+        {
+          "strategy": "trim_silence",
+          "cost": 1.0,
+          "reason": "remove leading/trailing silence",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.935,
+            "naturalness": 0.92,
+            "prosody": 0.9,
+            "duration": 0.935,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "already_applied"
+        },
+        {
+          "strategy": "pause_optimization",
+          "cost": 2.0,
+          "reason": "compress internal pauses",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.935,
+            "naturalness": 0.92,
+            "prosody": 0.9,
+            "duration": 0.935,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "already_applied"
+        },
+        {
+          "strategy": "tempo",
+          "cost": 2.0,
+          "reason": "playback rate ≤±5% (≤12% emergency)",
+          "estimated_fit": true,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.935,
+            "naturalness": 0.92,
+            "prosody": 0.9,
+            "duration": 0.935,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "already_applied"
+        },
+        {
+          "strategy": "stretch",
+          "cost": 4.0,
+          "reason": "micro stretch or video stretch",
+          "estimated_fit": true,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 1.0,
+            "naturalness": 0.8,
+            "prosody": 0.75,
+            "duration": 1.0,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": false,
+          "reject_reason": ""
+        },
+        {
+          "strategy": "borrow_time",
+          "cost": 6.0,
+          "reason": "gap absorb / neighbor borrow",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 1.0,
+            "naturalness": 0.8,
+            "prosody": 0.75,
+            "duration": 1.0,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": false,
+          "reject_reason": ""
+        },
+        {
+          "strategy": "semantic_rewrite",
+          "cost": 20.0,
+          "reason": "text locked — rewrite blocked until studio unlock",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 0.95,
+            "timing": 0.9,
+            "naturalness": 0.85,
+            "prosody": 0.85,
+            "duration": 0.9,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "translation_locked"
+        },
+        {
+          "strategy": "manual_review",
+          "cost": 100.0,
+          "reason": "studio manual review after all cheaper options",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.5,
+            "naturalness": 0.5,
+            "prosody": 0.5,
+            "duration": 0.5,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": false,
+          "reject_reason": ""
+        }
+      ],
+      "chosen": "stretch",
+      "chosen_cost": 4.0,
+      "why": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+      "duration_after_ms": 4913,
+      "adaptation_executed": true,
+      "requires_manual_review": false,
+      "requires_re_tts": false,
+      "quality": {
+        "meaning": 1.0,
+        "timing": 1.0,
+        "naturalness": 0.8,
+        "prosody": 0.75,
+        "duration": 1.0,
+        "entity": 1.0,
+        "context": 0.9
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_458773e77b74_20260724_164446_3ff68250.wav",
+    "container_status": "yellow",
+    "slot_overflow": false,
+    "fitted_ms": 4913,
+    "overflow_ms": 294,
+    "overflow_pct": 6.5,
+    "timing_meta": {
+      "slot_ms": 4544,
+      "slot_limit_ms": 4619,
+      "tts_ms": 5161,
+      "fitted_ms": 4913,
+      "atempo": 1.05,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 5,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 294,
+      "slot_fit_tts_ms": 5161,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 4913,
+          "atempo": 1.05
+        }
+      ],
+      "slot_fit_key": "04349c2c6d9d39c1"
+    },
+    "slot_fit_attempts": 1,
+    "sync_status": "SYNC_FAIL",
+    "sync_detail": "SYNC_OVERFLOW_REMAINING",
+    "manual_review": true,
+    "meaning_fit_call_point": true,
+    "manual_review_call_point": true,
+    "lock_ordering_reason": "slot_budget_not_ok",
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "71b685ed41894587a24d406bbb54ce1c",
+    "segment_uuid": "71b685ed41894587a24d406bbb54ce1c",
+    "text": "Але́ коли́ ві́н їхав. Джордж-молодший відчути. що ві́н справді боїться потрапити туди",
+    "plain_text": "Але́ коли́ ві́н їхав. Джордж-молодший відчути. що ві́н справді боїться потрапити туди",
+    "start_ms": 4544,
+    "end_ms": 10047,
+    "slot_ms": 5503,
+    "owned_text_segment_id": "71b685ed41894587a24d406bbb54ce1c",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "71b685ed41894587a24d406bbb54ce1c",
+    "translation_uuid": "4529e0a485794af90bfcf4adca78eca3",
+    "adaptation_uuid": "a8b1c91eee9f47bca7a731bfa0ce0b49",
+    "tts_uuid": "845eeec29c084e9cac967cdc26c07ebe",
+    "audio_uuid": "354d4b3b92e24088bf643cdcf743c88a",
+    "merge_uuid": "f9c514bb96244d66afc4dd1fae09bb4d",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "71b685ed41894587a24d406bbb54ce1c",
+      "text_hash": "b5bb2f226c197ea65be1b73f",
+      "text_revision": "a8b1c91eee9f47bca7a731bfa0ce0b49",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "b5bb2f226c197ea65be1b73f",
+    "identity_text_revision": "a8b1c91eee9f47bca7a731bfa0ce0b49",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Але́ коли́ ві́н їхав. Джордж-молодший відчути. що ві́н справді боїться потрапити туди.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 161,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 6370,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "success": false,
+    "tts_text": "Але́ коли́ ві́н їхав. Джордж-молодший відчути. що ві́н справді боїться потрапити туди",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_71b685ed4189_20260724_164442_d89695fc.wav",
+    "playback_duration": 5664,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_71b685ed4189_20260724_164442_d89695fc.wav",
+    "tts_ms": 5664,
+    "tts_status": "generated",
+    "original_duration_ms": 5503,
+    "need_adaptation": false,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=3041)",
+    "adaptation_decision": {
+      "segment_id": "71b685ed41894587a24d406bbb54ce1c",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 161,
+      "original_duration_ms": 5503,
+      "tts_duration_ms": 5664,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "tempo",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 5664,
+    "first_tts_duration_ms": 8544,
+    "audio_bound_uuid": "71b685ed41894587a24d406bbb54ce1c",
+    "pause_engine": {
+      "before_ms": 5674,
+      "after_ms": 5664,
+      "saved_ms": 10,
+      "stages": [
+        "pause_compress:9"
+      ],
+      "slot_ms": 5503
+    },
+    "translation_text": "Але́ коли́ ві́н їхав. Джордж-молодший відчути. що ві́н справді боїться потрапити туди",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "dsal_rule_compress",
+        "overflow_strategy:tempo"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+        "detail": {
+          "chosen": "tempo",
+          "why": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+          "cost": 2.0,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900687150,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+        "detail": {
+          "chosen": "tempo",
+          "cost": 2.0,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900687150,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+        "detail": {
+          "chosen": "tempo",
+          "stages": [
+            "overflow_strategy:tempo"
+          ]
+        },
+        "ts_ms": 1784900687150
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "tempo",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 5664
+        },
+        "ts_ms": 1784900687151,
+        "index": 0
+      },
+      {
+        "stage": "tts_duration",
+        "status": "SKIPPED",
+        "reason": "AudioStrategyNoTextRewrite",
+        "detail": {
+          "requires_re_tts": false
+        },
+        "ts_ms": 1784900687150,
+        "index": 1
+      },
+      {
+        "stage": "scheduler",
+        "status": "SUCCESS",
+        "reason": "strategy_queued:tempo",
+        "detail": {
+          "chosen": "tempo"
+        },
+        "ts_ms": 1784900687150,
+        "index": 1
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+      "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=5604",
+      "decision_engine = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=tempo | overflow_ms=73",
+      "chosen_strategy = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=tempo | overflow_ms=73",
+      "strategy_result = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=tempo",
+      "tts_duration = SKIPPED (AudioStrategyNoTextRewrite)",
+      "scheduler = SUCCESS (strategy_queued:tempo) | chosen=tempo",
+      "decision_engine = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=tempo | overflow_ms=0",
+      "chosen_strategy = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=tempo | overflow_ms=0",
+      "strategy_result = SUCCESS (min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']) | chosen=tempo",
+      "final_result = SUCCESS (tempo) | overflow_ms=0 | duration_ms=5664"
+    ],
+    "dsal_applied": true,
+    "requires_llm_adaptation": false,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "why": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900635010,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900635011,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "stages": [
+              "dsal_rule_compress"
+            ]
+          },
+          "ts_ms": 1784900635011
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 5604
+          },
+          "ts_ms": 1784900635011,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+        "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=5604"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 1,
+      "slot_start": 4544,
+      "slot_end": 10047,
+      "slot_duration": 5503,
+      "tts_duration": 5664,
+      "measured_duration": 5664,
+      "delta": 161,
+      "overflow": 161,
+      "underflow": 0,
+      "status": "overflow",
+      "rewrite_iterations": 0,
+      "pause_adjustments_ms": 10,
+      "pause_stages": [
+        "pause_compress:9"
+      ],
+      "timing_score": 93.3,
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 8544,
+      "provider_fatal": false
+    },
+    "timing_score": 93.3,
+    "closed_loop": {
+      "iterations": 0,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "pause_adjustments_ms": 10,
+      "timing_score": 93.3,
+      "actual_duration_ms": 5664,
+      "slot_duration": 5503,
+      "delta": 161,
+      "underflow_ms": 0,
+      "expand_required": false,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "71b685ed41894587a24d406bbb54ce1c",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": false,
+        "duration_delta_ms": 171,
+        "original_duration_ms": 5503,
+        "tts_duration_ms": 5674,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "dsal_rule_compress",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "overflow_decision": {
+      "index": 1,
+      "overflow_ms": 73,
+      "slot_ms": 5503,
+      "cause": "resolved_by_tempo",
+      "variants_considered": [
+        {
+          "strategy": "trim_silence",
+          "cost": 1.0,
+          "reason": "remove leading/trailing silence",
+          "estimated_fit": true,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.987,
+            "naturalness": 0.92,
+            "prosody": 0.9,
+            "duration": 0.987,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "already_applied"
+        },
+        {
+          "strategy": "pause_optimization",
+          "cost": 2.0,
+          "reason": "compress internal pauses",
+          "estimated_fit": true,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.987,
+            "naturalness": 0.92,
+            "prosody": 0.9,
+            "duration": 0.987,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "already_applied"
+        },
+        {
+          "strategy": "tempo",
+          "cost": 2.0,
+          "reason": "playback rate ≤±5% (≤12% emergency)",
+          "estimated_fit": true,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.987,
+            "naturalness": 0.92,
+            "prosody": 0.9,
+            "duration": 0.987,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "already_applied"
+        },
+        {
+          "strategy": "stretch",
+          "cost": 4.0,
+          "reason": "micro stretch or video stretch",
+          "estimated_fit": true,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 1.0,
+            "naturalness": 0.8,
+            "prosody": 0.75,
+            "duration": 1.0,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": false,
+          "reject_reason": ""
+        },
+        {
+          "strategy": "borrow_time",
+          "cost": 6.0,
+          "reason": "gap absorb / neighbor borrow",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 1.0,
+            "naturalness": 0.8,
+            "prosody": 0.75,
+            "duration": 1.0,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": false,
+          "reject_reason": ""
+        },
+        {
+          "strategy": "semantic_rewrite",
+          "cost": 20.0,
+          "reason": "text locked — rewrite blocked until studio unlock",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 0.95,
+            "timing": 0.9,
+            "naturalness": 0.85,
+            "prosody": 0.85,
+            "duration": 0.9,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": true,
+          "reject_reason": "translation_locked"
+        },
+        {
+          "strategy": "manual_review",
+          "cost": 100.0,
+          "reason": "studio manual review after all cheaper options",
+          "estimated_fit": false,
+          "quality": {
+            "meaning": 1.0,
+            "timing": 0.5,
+            "naturalness": 0.5,
+            "prosody": 0.5,
+            "duration": 0.5,
+            "entity": 1.0,
+            "context": 0.9
+          },
+          "rejected": false,
+          "reject_reason": ""
+        }
+      ],
+      "chosen": "tempo",
+      "chosen_cost": 2.0,
+      "why": "min_cost=4.0 among quality-ok; next_in_chain=stretch; applied=['trim_silence', 'pause_optimization', 'tempo']",
+      "duration_after_ms": 5539,
+      "adaptation_executed": true,
+      "requires_manual_review": false,
+      "requires_re_tts": false,
+      "quality": {
+        "meaning": 1.0,
+        "timing": 1.0,
+        "naturalness": 0.8,
+        "prosody": 0.75,
+        "duration": 1.0,
+        "entity": 1.0,
+        "context": 0.9
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_71b685ed4189_20260724_164447_443e5df5.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 5539,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 5503,
+      "slot_limit_ms": 5578,
+      "tts_ms": 5664,
+      "fitted_ms": 5539,
+      "atempo": 1.02,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 12,
+      "strategy": "pause_compress+atempo",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 5664,
+      "slot_fit_iterations": [
+        {
+          "action": "tempo",
+          "fitted_ms": 5539,
+          "atempo": 1.02
+        }
+      ],
+      "slot_fit_key": "26cf1e3f41116095"
+    },
+    "slot_fit_attempts": 1,
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "fac8f79061b04b729a256e71d0f9ad28",
+    "segment_uuid": "fac8f79061b04b729a256e71d0f9ad28",
+    "text": "Джордж-молодший був ду́же розумною дитиною. але́ ві́н тако́ж ду́же легко відволікався",
+    "plain_text": "Джордж-молодший був ду́же розумною дитиною. але́ ві́н тако́ж ду́же легко відволікався",
+    "start_ms": 10047,
+    "end_ms": 17673,
+    "slot_ms": 7626,
+    "owned_text_segment_id": "fac8f79061b04b729a256e71d0f9ad28",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "fac8f79061b04b729a256e71d0f9ad28",
+    "translation_uuid": "a8038b7a8b32e87700fcd6416001ab13",
+    "adaptation_uuid": "b094ed7a96db4c5abc8333106cfa37e5",
+    "tts_uuid": "4d149dac9adb4146bf9125be09a287f4",
+    "audio_uuid": "efc54c3baa6e45c4bb5034c5bdfc3438",
+    "merge_uuid": "2c2ba961c1d949919793ee6876aa32a7",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "fac8f79061b04b729a256e71d0f9ad28",
+      "text_hash": "43e7aabba04cfa2d19f089a0",
+      "text_revision": "b094ed7a96db4c5abc8333106cfa37e5",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "43e7aabba04cfa2d19f089a0",
+    "identity_text_revision": "b094ed7a96db4c5abc8333106cfa37e5",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "Джордж-молодший був ду́же розумною дитиною. але́ ві́н тако́ж ду́же легко відволікався.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 6370,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "Джордж-молодший був ду́же розумною дитиною. але́ ві́н тако́ж ду́же легко відволікався",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_fac8f79061b0_20260724_164357_3b9521d8.wav",
+    "playback_duration": 5444,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_fac8f79061b0_20260724_164357_3b9521d8.wav",
+    "tts_ms": 5444,
+    "tts_status": "generated",
+    "original_duration_ms": 7626,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1658)",
+    "adaptation_decision": {
+      "segment_id": "fac8f79061b04b729a256e71d0f9ad28",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1658,
+      "original_duration_ms": 7626,
+      "tts_duration_ms": 5968,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 5444,
+    "first_tts_duration_ms": 8472,
+    "audio_bound_uuid": "fac8f79061b04b729a256e71d0f9ad28",
+    "pause_engine": {
+      "before_ms": 7488,
+      "after_ms": 5444,
+      "saved_ms": 2044,
+      "stages": [
+        "lead_trim:208",
+        "tail_trim:982",
+        "pause_compress:854"
+      ],
+      "slot_ms": 7626
+    },
+    "translation_text": "Джордж-молодший був ду́же розумною дитиною. але́ ві́н тако́ж ду́же легко відволікався",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900637442,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900637442,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900637442
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 5968
+        },
+        "ts_ms": 1784900637442,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=5968"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900637442,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900637442,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900637442
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 5968
+          },
+          "ts_ms": 1784900637442,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=5968"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 2,
+      "slot_start": 10047,
+      "slot_end": 17673,
+      "slot_duration": 7626,
+      "tts_duration": 5444,
+      "measured_duration": 5444,
+      "delta": -2182,
+      "overflow": 0,
+      "underflow": 2182,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 4548,
+      "pause_stages": [
+        "lead_trim:255",
+        "tail_trim:1192",
+        "pause_compress:1056",
+        "lead_trim:208",
+        "tail_trim:982",
+        "pause_compress:854"
+      ],
+      "timing_score": 70.4,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 8472,
+      "provider_fatal": false
+    },
+    "timing_score": 70.4,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 4548,
+      "timing_score": 70.4,
+      "actual_duration_ms": 5444,
+      "slot_duration": 7626,
+      "delta": -2182,
+      "underflow_ms": 2182,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "fac8f79061b04b729a256e71d0f9ad28",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 1658,
+        "original_duration_ms": 7626,
+        "tts_duration_ms": 5968,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_fac8f79061b0_20260724_164447_3523bf6a.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 5444,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 7626,
+      "fitted_ms": 5444,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 5444,
+      "slot_fit_key": "b21328c15649a91a"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "already_fits"
+  },
+  {
+    "segment_id": "f27de545f70344bc8ae1d4bcc53e29f3",
+    "segment_uuid": "f27de545f70344bc8ae1d4bcc53e29f3",
+    "text": "Тобто. окрім автомобілів",
+    "plain_text": "Тобто. окрім автомобілів",
+    "start_ms": 20964,
+    "end_ms": 26587,
+    "slot_ms": 5623,
+    "owned_text_segment_id": "f27de545f70344bc8ae1d4bcc53e29f3",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "f27de545f70344bc8ae1d4bcc53e29f3",
+    "translation_uuid": "b8bb9b66484ab2964f145e05092b8b6e",
+    "adaptation_uuid": "dd548f94669542e8a70707a09a0ad9e4",
+    "tts_uuid": "f3a2973be46f4bd193b8b868981014cf",
+    "audio_uuid": "7695fa06bb744de88e4c337e6e840df4",
+    "merge_uuid": "2187b692bdd84266804f4b8b71cf88f7",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "f27de545f70344bc8ae1d4bcc53e29f3",
+      "text_hash": "6dc3d4265f079d8fb5787a21",
+      "text_revision": "dd548f94669542e8a70707a09a0ad9e4",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "6dc3d4265f079d8fb5787a21",
+    "identity_text_revision": "dd548f94669542e8a70707a09a0ad9e4",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Тобто. окрім автомобілів.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 1851,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "tts_text": "Тобто. окрім автомобілів",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_f27de545f703_20260724_164359_572bd545.wav",
+    "playback_duration": 1664,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_f27de545f703_20260724_164359_572bd545.wav",
+    "tts_ms": 1664,
+    "tts_status": "generated",
+    "original_duration_ms": 5623,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=3687)",
+    "adaptation_decision": {
+      "segment_id": "f27de545f70344bc8ae1d4bcc53e29f3",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 3687,
+      "original_duration_ms": 5623,
+      "tts_duration_ms": 1936,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 1664,
+    "first_tts_duration_ms": 4440,
+    "audio_bound_uuid": "f27de545f70344bc8ae1d4bcc53e29f3",
+    "pause_engine": {
+      "before_ms": 3768,
+      "after_ms": 1664,
+      "saved_ms": 2104,
+      "stages": [
+        "lead_trim:211",
+        "tail_trim:1051",
+        "pause_compress:842"
+      ],
+      "slot_ms": 8814
+    },
+    "translation_text": "Тобто. окрім автомобілів",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900639663,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900639663,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900639663
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 1936
+        },
+        "ts_ms": 1784900639663,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=1936"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900639663,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900639663,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900639663
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 1936
+          },
+          "ts_ms": 1784900639663,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=1936"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 3,
+      "slot_start": 17773,
+      "slot_end": 26587,
+      "slot_duration": 8814,
+      "tts_duration": 1664,
+      "measured_duration": 1664,
+      "delta": -7150,
+      "overflow": 0,
+      "underflow": 7150,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 4608,
+      "pause_stages": [
+        "lead_trim:243",
+        "tail_trim:1223",
+        "pause_compress:1038",
+        "lead_trim:211",
+        "tail_trim:1051",
+        "pause_compress:842"
+      ],
+      "timing_score": 50.0,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 4440,
+      "provider_fatal": false
+    },
+    "timing_score": 50.0,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 4608,
+      "timing_score": 50.0,
+      "actual_duration_ms": 1664,
+      "slot_duration": 8814,
+      "delta": -7150,
+      "underflow_ms": 7150,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "f27de545f70344bc8ae1d4bcc53e29f3",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 3687,
+        "original_duration_ms": 5623,
+        "tts_duration_ms": 1936,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_f27de545f703_20260724_164447_fe825f0d.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 1664,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 5623,
+      "fitted_ms": 1664,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 1664,
+      "slot_fit_key": "de9c105f8f2652c9"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "7513c84b0de143f28ce43908839dde07",
+    "segment_uuid": "7513c84b0de143f28ce43908839dde07",
+    "text": "Але́ його́ батько. незважаючи на те. що ві́н буквально дав йому Фіат",
+    "plain_text": "Але́ його́ батько. незважаючи на те. що ві́н буквально дав йому Фіат",
+    "start_ms": 26587,
+    "end_ms": 32838,
+    "slot_ms": 6251,
+    "owned_text_segment_id": "7513c84b0de143f28ce43908839dde07",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "7513c84b0de143f28ce43908839dde07",
+    "translation_uuid": "f8bd1ba2fb648d96c3c9d6a261d10dca",
+    "adaptation_uuid": "77ebed755c6b4ed6a7e851fa986e9740",
+    "tts_uuid": "7c97da1444f64de19fa051470e7f367f",
+    "audio_uuid": "161e1b420ec4487585a59a04b7092e61",
+    "merge_uuid": "3378a36e36fa45ab9d62a15f11ad228e",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "7513c84b0de143f28ce43908839dde07",
+      "text_hash": "c16b4c57775c0b305c92fbd1",
+      "text_revision": "77ebed755c6b4ed6a7e851fa986e9740",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "c16b4c57775c0b305c92fbd1",
+    "identity_text_revision": "77ebed755c6b4ed6a7e851fa986e9740",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "Але́ його́ батько. незважаючи на те. що ві́н буквально дав йому Фіат.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 5111,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "Але́ його́ батько. незважаючи на те. що ві́н буквально дав йому Фіат",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_7513c84b0de1_20260724_164402_a441d2b8.wav",
+    "playback_duration": 4714,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_7513c84b0de1_20260724_164402_a441d2b8.wav",
+    "tts_ms": 4714,
+    "tts_status": "generated",
+    "original_duration_ms": 6251,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1200)",
+    "adaptation_decision": {
+      "segment_id": "7513c84b0de143f28ce43908839dde07",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1200,
+      "original_duration_ms": 6251,
+      "tts_duration_ms": 5051,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 4714,
+    "first_tts_duration_ms": 8808,
+    "audio_bound_uuid": "7513c84b0de143f28ce43908839dde07",
+    "pause_engine": {
+      "before_ms": 7656,
+      "after_ms": 4714,
+      "saved_ms": 2942,
+      "stages": [
+        "lead_trim:216",
+        "tail_trim:1047",
+        "pause_compress:1678"
+      ],
+      "slot_ms": 6251
+    },
+    "translation_text": "Але́ його́ батько. незважаючи на те. що ві́н буквально дав йому Фіат",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900641942,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900641942,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900641942
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 5051
+        },
+        "ts_ms": 1784900641942,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=5051"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900641942,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900641942,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900641942
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 5051
+          },
+          "ts_ms": 1784900641942,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=5051"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 4,
+      "slot_start": 26587,
+      "slot_end": 32838,
+      "slot_duration": 6251,
+      "tts_duration": 4714,
+      "measured_duration": 4714,
+      "delta": -1537,
+      "overflow": 0,
+      "underflow": 1537,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 6699,
+      "pause_stages": [
+        "lead_trim:265",
+        "tail_trim:1330",
+        "pause_compress:2161",
+        "lead_trim:216",
+        "tail_trim:1047",
+        "pause_compress:1678"
+      ],
+      "timing_score": 76.3,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 8808,
+      "provider_fatal": false
+    },
+    "timing_score": 76.3,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 6699,
+      "timing_score": 76.3,
+      "actual_duration_ms": 4714,
+      "slot_duration": 6251,
+      "delta": -1537,
+      "underflow_ms": 1537,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "7513c84b0de143f28ce43908839dde07",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 1200,
+        "original_duration_ms": 6251,
+        "tts_duration_ms": 5051,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_7513c84b0de1_20260724_164447_c05a10d8.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 4714,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 6251,
+      "fitted_ms": 4714,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 4714,
+      "slot_fit_key": "91e41e2656a6daaa"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "already_fits"
+  },
+  {
+    "segment_id": "3fc81ebe9f61491aa3311bc2b8f87efa",
+    "segment_uuid": "3fc81ebe9f61491aa3311bc2b8f87efa",
+    "text": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, які дадуть вам справжню роботу?",
+    "plain_text": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, які дадуть вам справжню роботу?",
+    "start_ms": 34798,
+    "end_ms": 39833,
+    "slot_ms": 5035,
+    "owned_text_segment_id": "3fc81ebe9f61491aa3311bc2b8f87efa",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "3fc81ebe9f61491aa3311bc2b8f87efa",
+    "translation_uuid": "01a8c67289bb3ed5868437930b99770f",
+    "adaptation_uuid": "a172e4b79f5349bea4f37beab4280bc1",
+    "tts_uuid": "af08867b88ac43269eeea168e64eb64f",
+    "audio_uuid": "a114ece8598b4e199ba6554095dbd078",
+    "merge_uuid": "f9090407fb8f4b5b8b3ff2f31bc0f7e0",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "3fc81ebe9f61491aa3311bc2b8f87efa",
+      "text_hash": "e375332fe16b64b6fe6e7d38",
+      "text_revision": "a172e4b79f5349bea4f37beab4280bc1",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "e375332fe16b64b6fe6e7d38",
+    "identity_text_revision": "a172e4b79f5349bea4f37beab4280bc1",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, які дадуть вам справжню роботу?",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 1779,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 8666,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "success": false,
+    "tts_text": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, які дадуть вам справжню роботу?",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_3fc81ebe9f61_20260724_164403_73f85bac.wav",
+    "playback_duration": 6814,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_3fc81ebe9f61_20260724_164403_73f85bac.wav",
+    "tts_ms": 6814,
+    "tts_status": "generated",
+    "original_duration_ms": 5035,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1779)",
+    "adaptation_decision": {
+      "segment_id": "3fc81ebe9f61491aa3311bc2b8f87efa",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1779,
+      "original_duration_ms": 5035,
+      "tts_duration_ms": 6814,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "pause_optimization",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 6814,
+    "first_tts_duration_ms": 8040,
+    "audio_bound_uuid": "3fc81ebe9f61491aa3311bc2b8f87efa",
+    "pause_engine": {
+      "before_ms": 8040,
+      "after_ms": 6814,
+      "saved_ms": 1226,
+      "stages": [
+        "lead_trim:205",
+        "tail_trim:929",
+        "pause_compress:91"
+      ],
+      "slot_ms": 6895
+    },
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "pause"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "pause_optimization",
+        "detail": {
+          "chosen": "pause_optimization",
+          "why": "pause_optimization",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900643046,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "pause_optimization",
+        "detail": {
+          "chosen": "pause_optimization",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900643046,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "pause_optimization",
+        "detail": {
+          "chosen": "pause_optimization",
+          "stages": [
+            "pause"
+          ]
+        },
+        "ts_ms": 1784900643046
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "pause_optimization",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 6814
+        },
+        "ts_ms": 1784900643046,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (pause_optimization) | chosen=pause_optimization | overflow_ms=0",
+      "chosen_strategy = SUCCESS (pause_optimization) | chosen=pause_optimization | overflow_ms=0",
+      "strategy_result = SUCCESS (pause_optimization) | chosen=pause_optimization",
+      "final_result = SUCCESS (pause_optimization) | overflow_ms=0 | duration_ms=6814"
+    ],
+    "timing_budget": {
+      "index": 5,
+      "slot_start": 32938,
+      "slot_end": 39833,
+      "slot_duration": 6895,
+      "tts_duration": 6814,
+      "measured_duration": 6814,
+      "delta": -81,
+      "overflow": 0,
+      "underflow": 81,
+      "status": "ok",
+      "rewrite_iterations": 0,
+      "pause_adjustments_ms": 1226,
+      "pause_stages": [
+        "lead_trim:205",
+        "tail_trim:929",
+        "pause_compress:91"
+      ],
+      "timing_score": 100.0,
+      "rewrite_reason": "fits_after_pause",
+      "final_status": "ok",
+      "original_duration": 8040,
+      "provider_fatal": false
+    },
+    "timing_score": 100.0,
+    "fitted_file": "slot_fit_db4a484c_3fc81ebe9f61_20260724_164447_936d0a38.wav",
+    "container_status": "red",
+    "slot_overflow": true,
+    "fitted_ms": 6802,
+    "overflow_ms": 1692,
+    "overflow_pct": 33.6,
+    "timing_meta": {
+      "slot_ms": 5035,
+      "slot_limit_ms": 5110,
+      "tts_ms": 6814,
+      "fitted_ms": 6802,
+      "atempo": 1.0,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 11,
+      "strategy": "pause_compress",
+      "overflow_ms": 1692,
+      "slot_fit_tts_ms": 6814,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "b5296a0232f31ac0"
+    },
+    "slot_fit_attempts": 1,
+    "sync_status": "SYNC_FAIL",
+    "sync_detail": "SYNC_OVERFLOW_REMAINING",
+    "manual_review": true,
+    "meaning_fit_call_point": true,
+    "manual_review_call_point": true,
+    "lock_ordering_reason": "slot_budget_not_ok",
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "da3ff7895788411db85a290801a2b1b6",
+    "segment_uuid": "da3ff7895788411db85a290801a2b1b6",
+    "text": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином",
+    "plain_text": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином",
+    "start_ms": 40240,
+    "end_ms": 44685,
+    "slot_ms": 4445,
+    "owned_text_segment_id": "da3ff7895788411db85a290801a2b1b6",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "da3ff7895788411db85a290801a2b1b6",
+    "translation_uuid": "df4977300e2e72677a9fa073094b72ca",
+    "adaptation_uuid": "9b3774d105e449e391b318225c857312",
+    "tts_uuid": "b201756a038245598e78e5e1eff7f422",
+    "audio_uuid": "2e0c52fcd6954d35bc9b7e90a6d2df4c",
+    "merge_uuid": "f33fb2198eef499c9a1027bd704f0863",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "da3ff7895788411db85a290801a2b1b6",
+      "text_hash": "1715c66e0940607010da007c",
+      "text_revision": "9b3774d105e449e391b318225c857312",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "1715c66e0940607010da007c",
+    "identity_text_revision": "9b3774d105e449e391b318225c857312",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином. І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати. коли́ почув цей ду́же гучний вереск.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 1524,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 18222,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином",
+    "status": "generated",
+    "tts_status": "generated",
+    "original_duration_ms": 22372,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=16403)",
+    "adaptation_decision": {
+      "segment_id": "da3ff7895788411db85a290801a2b1b6",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 16403,
+      "original_duration_ms": 22372,
+      "tts_duration_ms": 5969,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "dsal_rule_compress",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "final_text": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином.",
+    "translation_text": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином",
+    "adaptive_resegment_done": true,
+    "needs_retranslate": false,
+    "adaptation_stages": [
+      "adaptive_resegment"
+    ],
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_da3ff7895788_20260724_164446_4f9a48bb.wav",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_da3ff7895788_20260724_164446_4f9a48bb.wav",
+    "playback_duration": 5969,
+    "tts_ms": 5969,
+    "actual_duration_ms": 5969,
+    "first_tts_duration_ms": 7176,
+    "audio_bound_uuid": "da3ff7895788411db85a290801a2b1b6",
+    "pause_engine": {
+      "before_ms": 7176,
+      "after_ms": 5969,
+      "saved_ms": 1207,
+      "stages": [
+        "lead_trim:215",
+        "tail_trim:992"
+      ],
+      "slot_ms": 4445
+    },
+    "timing_budget": {
+      "index": 6,
+      "slot_start": 40240,
+      "slot_end": 44685,
+      "slot_duration": 4445,
+      "tts_duration": 5969,
+      "measured_duration": 5969,
+      "delta": 1524,
+      "overflow": 1524,
+      "underflow": 0,
+      "status": "overflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 1207,
+      "pause_stages": [
+        "lead_trim:215",
+        "tail_trim:992"
+      ],
+      "timing_score": 12.0,
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 7176,
+      "provider_fatal": false
+    },
+    "timing_score": 12.0,
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "dsal_rule_compress"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "chosen": "dsal_rule_compress",
+          "why": "dsal_rule_compress",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900685670,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "chosen": "dsal_rule_compress",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900685670,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "chosen": "dsal_rule_compress",
+          "stages": [
+            "dsal_rule_compress"
+          ]
+        },
+        "ts_ms": 1784900685670
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 5969
+        },
+        "ts_ms": 1784900685671,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+      "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=5969"
+    ],
+    "dsal_applied": true,
+    "requires_llm_adaptation": false,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "why": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900685670,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900685670,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "stages": [
+              "dsal_rule_compress"
+            ]
+          },
+          "ts_ms": 1784900685670
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 5969
+          },
+          "ts_ms": 1784900685671,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+        "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=5969"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "pause_adjustments_ms": 1207,
+      "timing_score": 12.0,
+      "actual_duration_ms": 5969,
+      "slot_duration": 4445,
+      "delta": 1524,
+      "underflow_ms": 0,
+      "expand_required": false,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "da3ff7895788411db85a290801a2b1b6",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 16403,
+        "original_duration_ms": 22372,
+        "tts_duration_ms": 5969,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "dsal_rule_compress",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_da3ff7895788_20260724_164447_d69153f1.wav",
+    "container_status": "red",
+    "slot_overflow": true,
+    "fitted_ms": 5969,
+    "overflow_ms": 1449,
+    "overflow_pct": 32.6,
+    "timing_meta": {
+      "slot_ms": 4445,
+      "slot_limit_ms": 4520,
+      "tts_ms": 5969,
+      "fitted_ms": 5969,
+      "atempo": 1.0,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 0,
+      "strategy": "none",
+      "overflow_ms": 1449,
+      "slot_fit_tts_ms": 5969,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "01e1ac0b5f018680"
+    },
+    "slot_fit_attempts": 1,
+    "sync_status": "SYNC_FAIL",
+    "sync_detail": "SYNC_OVERFLOW_REMAINING",
+    "manual_review": true,
+    "needs_manual_review": true,
+    "success": false,
+    "meaning_fit_call_point": true,
+    "manual_review_call_point": true,
+    "lock_ordering_reason": "slot_budget_not_ok",
+    "algorithm_reason": "already_fits"
+  },
+  {
+    "segment_id": "4e6b9cd44daf4659b976ef8ea7f38ff4",
+    "segment_uuid": "4e6b9cd44daf4659b976ef8ea7f38ff4",
+    "text": "І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати. коли́ почув цей ду́же гучний вереск.",
+    "plain_text": "І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати. коли́ почув цей ду́же гучний вереск.",
+    "start_ms": 44685,
+    "end_ms": 62612,
+    "slot_ms": 17927,
+    "owned_text_segment_id": "da3ff7895788411db85a290801a2b1b6",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "da3ff7895788411db85a290801a2b1b6",
+    "adaptation_uuid": "31ec3e35811945e1822f714dc5b5920e",
+    "tts_uuid": "ce0cf0bfc6344a4482b556b24984df28",
+    "audio_uuid": "8668c941642b498b84b7167931570f8a",
+    "merge_uuid": "fc60aea7b9ba4f77b074c25575ec6aa9",
+    "reissued_from": [
+      "da3ff7895788411db85a290801a2b1b6"
+    ],
+    "identity_binding": {
+      "segment_id": "da3ff7895788411db85a290801a2b1b6",
+      "text_hash": "1715c66e0940607010da007c",
+      "text_revision": "9b3774d105e449e391b318225c857312",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "1715c66e0940607010da007c",
+    "identity_text_revision": "9b3774d105e449e391b318225c857312",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином. І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати. коли́ почув цей ду́же гучний вереск.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "AudioStrategyNoTextRewrite",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 18222,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином. І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати. коли́ почув цей ду́же гучний вереск.",
+    "status": "generated",
+    "tts_status": "generated",
+    "original_duration_ms": 22372,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=7900)",
+    "adaptation_decision": {
+      "need_adaptation": true,
+      "duration_delta_ms": 7900,
+      "original_duration_ms": 22372,
+      "tts_duration_ms": 14472,
+      "decision": "post_tts_sync_duration_gate",
+      "adaptation_executed": false,
+      "skip_reason": "FitsNoChange"
+    },
+    "split_from_segment_id": "da3ff7895788411db85a290801a2b1b6",
+    "final_text": "І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати. коли́ почув цей ду́же гучний вереск.",
+    "translation_text": "І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати. коли́ почув цей ду́же гучний вереск.",
+    "adaptive_resegment_done": true,
+    "needs_retranslate": false,
+    "adaptation_stages": [
+      "adaptive_resegment"
+    ],
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_4e6b9cd44daf_20260724_164407_837cac62.wav",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_4e6b9cd44daf_20260724_164407_837cac62.wav",
+    "playback_duration": 9937,
+    "tts_ms": 9937,
+    "actual_duration_ms": 9937,
+    "first_tts_duration_ms": 14472,
+    "audio_bound_uuid": "4e6b9cd44daf4659b976ef8ea7f38ff4",
+    "pause_engine": {
+      "before_ms": 14472,
+      "after_ms": 9937,
+      "saved_ms": 4535,
+      "stages": [
+        "lead_trim:212",
+        "tail_trim:978",
+        "pause_compress:3343"
+      ],
+      "slot_ms": 17927
+    },
+    "timing_budget": {
+      "index": 7,
+      "slot_start": 44685,
+      "slot_end": 62612,
+      "slot_duration": 17927,
+      "tts_duration": 9937,
+      "measured_duration": 9937,
+      "delta": -7990,
+      "overflow": 0,
+      "underflow": 7990,
+      "status": "underflow",
+      "rewrite_iterations": 0,
+      "pause_adjustments_ms": 4535,
+      "pause_stages": [
+        "lead_trim:212",
+        "tail_trim:978",
+        "pause_compress:3343"
+      ],
+      "timing_score": 52.2,
+      "rewrite_reason": "pause_only_after_resegment",
+      "final_status": "deferred_after_resegment",
+      "original_duration": 14472,
+      "provider_fatal": false
+    },
+    "timing_score": 52.2,
+    "fitted_file": "slot_fit_db4a484c_4e6b9cd44daf_20260724_164447_5f16788c.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 9937,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 17927,
+      "fitted_ms": 9937,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 9937,
+      "slot_fit_key": "935aca8811d157ec"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "already_fits",
+    "translation_uuid": "c0790b1cbdae05a1c55ff89e94656281"
+  },
+  {
+    "segment_id": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+    "segment_uuid": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+    "text": "Тож за два тижні до того. у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ Джордж повертав. а по́тім щось трапилося",
+    "plain_text": "Тож за два тижні до того. у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ Джордж повертав. а по́тім щось трапилося",
+    "start_ms": 62612,
+    "end_ms": 74182,
+    "slot_ms": 11570,
+    "owned_text_segment_id": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+    "translation_uuid": "68448eef9dadad00b34d47dcb1a49a06",
+    "adaptation_uuid": "e9314349eb89416da960a3aac89b99be",
+    "tts_uuid": "0eb1141bc78341e6acd89be6e366304e",
+    "audio_uuid": "6af259b0bc4f4b29bc900e1de28d5822",
+    "merge_uuid": "e1c2a31f5ad3416d8970b899a7f4465e",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+      "text_hash": "86cf54bc5116af72bcebed6c",
+      "text_revision": "e9314349eb89416da960a3aac89b99be",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "86cf54bc5116af72bcebed6c",
+    "identity_text_revision": "e9314349eb89416da960a3aac89b99be",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Тож за два тижні до того. коли́ Джордж повертав. а по́тім щось трапилося.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 5407,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "tts_text": "Тож за два тижні до того. у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ Джордж повертав. а по́тім щось трапилося",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a1cf6c6bb2b2_20260724_164413_5479c9f9.wav",
+    "playback_duration": 10959,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a1cf6c6bb2b2_20260724_164413_5479c9f9.wav",
+    "tts_ms": 10959,
+    "tts_status": "generated",
+    "original_duration_ms": 11570,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=2496)",
+    "adaptation_decision": {
+      "segment_id": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 2496,
+      "original_duration_ms": 11570,
+      "tts_duration_ms": 9074,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 10959,
+    "first_tts_duration_ms": 9000,
+    "audio_bound_uuid": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+    "pause_engine": {
+      "before_ms": 14520,
+      "after_ms": 10959,
+      "saved_ms": 3561,
+      "stages": [
+        "lead_trim:219",
+        "tail_trim:977",
+        "pause_compress:2363"
+      ],
+      "slot_ms": 11570
+    },
+    "translation_text": "Тож за два тижні до того. у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ Джордж повертав. а по́тім щось трапилося",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900652248,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900652248,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900652248
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 9074
+        },
+        "ts_ms": 1784900652248,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=5443",
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=9074"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": false,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900652248,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900652248,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900652248
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 9074
+          },
+          "ts_ms": 1784900652248,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=5443",
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=9074"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 8,
+      "slot_start": 62612,
+      "slot_end": 74182,
+      "slot_duration": 11570,
+      "tts_duration": 10959,
+      "measured_duration": 10959,
+      "delta": -611,
+      "overflow": 0,
+      "underflow": 611,
+      "status": "underflow",
+      "rewrite_iterations": 2,
+      "pause_adjustments_ms": 10500,
+      "pause_stages": [
+        "lead_trim:248",
+        "tail_trim:1156",
+        "pause_compress:2152",
+        "lead_trim:219",
+        "tail_trim:971",
+        "pause_compress:2190",
+        "lead_trim:219",
+        "tail_trim:977",
+        "pause_compress:2363"
+      ],
+      "timing_score": 96.8,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 9000,
+      "provider_fatal": false
+    },
+    "timing_score": 96.8,
+    "closed_loop": {
+      "iterations": 2,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 10500,
+      "timing_score": 96.8,
+      "actual_duration_ms": 10959,
+      "slot_duration": 11570,
+      "delta": -611,
+      "underflow_ms": 611,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "a1cf6c6bb2b245e290e29549d1b4d6ac",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 2496,
+        "original_duration_ms": 11570,
+        "tts_duration_ms": 9074,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_a1cf6c6bb2b2_20260724_164447_ab8e0fee.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 10959,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 11570,
+      "fitted_ms": 10959,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 10959,
+      "slot_fit_key": "66713c2309fd1d1d"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "14fb2343dea449acb3b639e6cbe3b71e",
+    "segment_uuid": "14fb2343dea449acb3b639e6cbe3b71e",
+    "text": "Че́рез два роки Джордж-молодший. Тож пі́сля свого передсмертного досвіду Джордж-молодший зрозумів",
+    "plain_text": "Че́рез два роки Джордж-молодший. Тож пі́сля свого передсмертного досвіду Джордж-молодший зрозумів",
+    "start_ms": 76880,
+    "end_ms": 91723,
+    "slot_ms": 14843,
+    "owned_text_segment_id": "14fb2343dea449acb3b639e6cbe3b71e",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "14fb2343dea449acb3b639e6cbe3b71e",
+    "translation_uuid": "32ed03fc80947a7ed7e2e55bb9a127d7",
+    "adaptation_uuid": "8d135ac0b64f47ebb7b0354b08497ad3",
+    "tts_uuid": "393402f4578d4de98f9442b888a838b5",
+    "audio_uuid": "391175d675d943538f47a533805f7fa9",
+    "merge_uuid": "3bbf3be2fe914b819b6db1f665ca6ae6",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "14fb2343dea449acb3b639e6cbe3b71e",
+      "text_hash": "350d4346fba24064882ae92d",
+      "text_revision": "8d135ac0b64f47ebb7b0354b08497ad3",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "350d4346fba24064882ae92d",
+    "identity_text_revision": "8d135ac0b64f47ebb7b0354b08497ad3",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "Че́рез два роки Джордж-молодший. Тож пі́сля свого передсмертного досвіду Джордж-молодший зрозумів.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 7259,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "tts_text": "Че́рез два роки Джордж-молодший. Тож пі́сля свого передсмертного досвіду Джордж-молодший зрозумів",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_14fb2343dea4_20260724_164417_fc1c1ede.wav",
+    "playback_duration": 5758,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_14fb2343dea4_20260724_164417_fc1c1ede.wav",
+    "tts_ms": 5758,
+    "tts_status": "generated",
+    "original_duration_ms": 14843,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=8367)",
+    "adaptation_decision": {
+      "segment_id": "14fb2343dea449acb3b639e6cbe3b71e",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 8367,
+      "original_duration_ms": 14843,
+      "tts_duration_ms": 6476,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 5758,
+    "first_tts_duration_ms": 9120,
+    "audio_bound_uuid": "14fb2343dea449acb3b639e6cbe3b71e",
+    "pause_engine": {
+      "before_ms": 7872,
+      "after_ms": 5758,
+      "saved_ms": 2114,
+      "stages": [
+        "lead_trim:229",
+        "tail_trim:1028",
+        "pause_compress:857"
+      ],
+      "slot_ms": 17441
+    },
+    "translation_text": "Че́рез два роки Джордж-молодший. Тож пі́сля свого передсмертного досвіду Джордж-молодший зрозумів",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900656638,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900656638,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900656638
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 6476
+        },
+        "ts_ms": 1784900656638,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=6476"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900656638,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900656638,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900656638
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 6476
+          },
+          "ts_ms": 1784900656638,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=6476"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 9,
+      "slot_start": 74282,
+      "slot_end": 91723,
+      "slot_duration": 17441,
+      "tts_duration": 5758,
+      "measured_duration": 5758,
+      "delta": -11683,
+      "overflow": 0,
+      "underflow": 11683,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 4758,
+      "pause_stages": [
+        "lead_trim:274",
+        "tail_trim:1265",
+        "pause_compress:1104",
+        "lead_trim:229",
+        "tail_trim:1028",
+        "pause_compress:857"
+      ],
+      "timing_score": 50.0,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 9120,
+      "provider_fatal": false
+    },
+    "timing_score": 50.0,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 4758,
+      "timing_score": 50.0,
+      "actual_duration_ms": 5758,
+      "slot_duration": 17441,
+      "delta": -11683,
+      "underflow_ms": 11683,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "14fb2343dea449acb3b639e6cbe3b71e",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 8367,
+        "original_duration_ms": 14843,
+        "tts_duration_ms": 6476,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_14fb2343dea4_20260724_164447_2cec596f.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 5758,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 14843,
+      "fitted_ms": 5758,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 5758,
+      "slot_fit_key": "017845784b13af9c"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "a7c37267362543db848a88e5220deff6",
+    "segment_uuid": "a7c37267362543db848a88e5220deff6",
+    "text": "Тож Джордж-молодший вирішив, досвід на межі смерті.",
+    "plain_text": "Тож Джордж-молодший вирішив, досвід на межі смерті.",
+    "start_ms": 91723,
+    "end_ms": 95398,
+    "slot_ms": 3675,
+    "owned_text_segment_id": "a7c37267362543db848a88e5220deff6",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "a7c37267362543db848a88e5220deff6",
+    "translation_uuid": "6383babe4bb43d7726a2aba471811bd7",
+    "adaptation_uuid": "0c1bbfe5855741a4b18f01a25742f024",
+    "tts_uuid": "8d2ee1d82138491e9f29c7af7247cf8a",
+    "audio_uuid": "481e6dbc8a0d400eb2766b8e725402e6",
+    "merge_uuid": "9f4c28115eb54f08b25e0ffa8b68d601",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "a7c37267362543db848a88e5220deff6",
+      "text_hash": "1abc2d0b92a09e50859c284d",
+      "text_revision": "0c1bbfe5855741a4b18f01a25742f024",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "1abc2d0b92a09e50859c284d",
+    "identity_text_revision": "0c1bbfe5855741a4b18f01a25742f024",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Тож Джордж-молодший вирішив.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 2074,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "Тож Джордж-молодший вирішив, досвід на межі смерті.",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a7c372673625_20260724_164419_0803d6c1.wav",
+    "playback_duration": 3189,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a7c372673625_20260724_164419_0803d6c1.wav",
+    "tts_ms": 3189,
+    "tts_status": "generated",
+    "original_duration_ms": 3675,
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "a7c37267362543db848a88e5220deff6",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1734,
+      "original_duration_ms": 3675,
+      "tts_duration_ms": 1941,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 3189,
+    "first_tts_duration_ms": 3408,
+    "audio_bound_uuid": "a7c37267362543db848a88e5220deff6",
+    "pause_engine": {
+      "before_ms": 4488,
+      "after_ms": 3189,
+      "saved_ms": 1299,
+      "stages": [
+        "lead_trim:214",
+        "tail_trim:1004",
+        "pause_compress:81"
+      ],
+      "slot_ms": 3675
+    },
+    "translation_text": "Тож Джордж-молодший вирішив, досвід на межі смерті.",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1734)",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900658963,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900658964,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900658964
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 1941
+        },
+        "ts_ms": 1784900658964,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=1941"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": false,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900658963,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900658964,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900658964
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 1941
+          },
+          "ts_ms": 1784900658964,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=1941"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 10,
+      "slot_start": 91723,
+      "slot_end": 95398,
+      "slot_duration": 3675,
+      "tts_duration": 3189,
+      "measured_duration": 3189,
+      "delta": -486,
+      "overflow": 0,
+      "underflow": 486,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 2766,
+      "pause_stages": [
+        "lead_trim:246",
+        "tail_trim:1221",
+        "lead_trim:214",
+        "tail_trim:1004",
+        "pause_compress:81"
+      ],
+      "timing_score": 93.9,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 3408,
+      "provider_fatal": false
+    },
+    "timing_score": 93.9,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 2766,
+      "timing_score": 93.9,
+      "actual_duration_ms": 3189,
+      "slot_duration": 3675,
+      "delta": -486,
+      "underflow_ms": 486,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "a7c37267362543db848a88e5220deff6",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 1734,
+        "original_duration_ms": 3675,
+        "tts_duration_ms": 1941,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_a7c372673625_20260724_164447_49ce24ac.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 3189,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 3675,
+      "fitted_ms": 3189,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 3189,
+      "slot_fit_key": "788a4d46eebcc2f8"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "already_fits"
+  },
+  {
+    "segment_id": "be05849ac6f04e4d897fac4ec9ef8b1c",
+    "segment_uuid": "be05849ac6f04e4d897fac4ec9ef8b1c",
+    "text": "Натомість ві́н взяв фотоапарат і повернувся до свого старого хобі фотографії",
+    "plain_text": "Натомість ві́н взяв фотоапарат і повернувся до свого старого хобі фотографії",
+    "start_ms": 97280,
+    "end_ms": 102095,
+    "slot_ms": 4815,
+    "owned_text_segment_id": "be05849ac6f04e4d897fac4ec9ef8b1c",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "be05849ac6f04e4d897fac4ec9ef8b1c",
+    "translation_uuid": "8fe442279926beec422888fab0e30ea1",
+    "adaptation_uuid": "e9679d5d049f484dbdc33d22671d64f1",
+    "tts_uuid": "70c450cdc8994e239e60a602990ed931",
+    "audio_uuid": "ea5a4559867e4d169ce9fc07d9fc4ed1",
+    "merge_uuid": "70ae9aae646a497cb24416ac00be4535",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "be05849ac6f04e4d897fac4ec9ef8b1c",
+      "text_hash": "dbcb721a6f52480bff530b25",
+      "text_revision": "e9679d5d049f484dbdc33d22671d64f1",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "dbcb721a6f52480bff530b25",
+    "identity_text_revision": "e9679d5d049f484dbdc33d22671d64f1",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "Натомість ві́н взяв фотоапарат і повернувся до свого старого хобі фотографії.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 12,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 5703,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "success": false,
+    "tts_text": "Натомість ві́н взяв фотоапарат і повернувся до свого старого хобі фотографії",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_be05849ac6f0_20260724_164421_f769bde5.wav",
+    "playback_duration": 4827,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_be05849ac6f0_20260724_164421_f769bde5.wav",
+    "tts_ms": 4827,
+    "tts_status": "generated",
+    "original_duration_ms": 4815,
+    "need_adaptation": false,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=945)",
+    "adaptation_decision": {
+      "segment_id": "be05849ac6f04e4d897fac4ec9ef8b1c",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 278,
+      "original_duration_ms": 4815,
+      "tts_duration_ms": 4537,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 4827,
+    "first_tts_duration_ms": 5760,
+    "audio_bound_uuid": "be05849ac6f04e4d897fac4ec9ef8b1c",
+    "pause_engine": {
+      "before_ms": 6048,
+      "after_ms": 4827,
+      "saved_ms": 1221,
+      "stages": [
+        "lead_trim:215",
+        "tail_trim:987",
+        "pause_compress:19"
+      ],
+      "slot_ms": 6597
+    },
+    "translation_text": "Натомість ві́н взяв фотоапарат і повернувся до свого старого хобі фотографії",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900661259,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900661259,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900661259
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 4537
+        },
+        "ts_ms": 1784900661259,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=4537"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900661259,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900661259,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900661259
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 4537
+          },
+          "ts_ms": 1784900661259,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=4537"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 11,
+      "slot_start": 95498,
+      "slot_end": 102095,
+      "slot_duration": 6597,
+      "tts_duration": 4827,
+      "measured_duration": 4827,
+      "delta": -1770,
+      "overflow": 0,
+      "underflow": 1770,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 2444,
+      "pause_stages": [
+        "lead_trim:234",
+        "tail_trim:989",
+        "lead_trim:215",
+        "tail_trim:987",
+        "pause_compress:19"
+      ],
+      "timing_score": 73.3,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 5760,
+      "provider_fatal": false
+    },
+    "timing_score": 73.3,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 2444,
+      "timing_score": 73.3,
+      "actual_duration_ms": 4827,
+      "slot_duration": 6597,
+      "delta": -1770,
+      "underflow_ms": 1770,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "be05849ac6f04e4d897fac4ec9ef8b1c",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": false,
+        "duration_delta_ms": 278,
+        "original_duration_ms": 4815,
+        "tts_duration_ms": 4537,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_be05849ac6f0_20260724_164447_9a29eb2a.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 4827,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 4815,
+      "fitted_ms": 4827,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 4827,
+      "slot_fit_key": "147be852349a8d01"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "f19d1a69454f425da6687cbe00054c11",
+    "segment_uuid": "f19d1a69454f425da6687cbe00054c11",
+    "text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі. але́ пі́сля того",
+    "plain_text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі. але́ пі́сля того",
+    "start_ms": 102730,
+    "end_ms": 111885,
+    "slot_ms": 9155,
+    "owned_text_segment_id": "f19d1a69454f425da6687cbe00054c11",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "f19d1a69454f425da6687cbe00054c11",
+    "translation_uuid": "7bf9f53e7b0274f7a5e3943cafc06c84",
+    "adaptation_uuid": "2e9ee2cad98f4bdc92fdf0ff927155ec",
+    "tts_uuid": "b2d7c51ca8df413ca3507b3cc89e64c7",
+    "audio_uuid": "cc493371d6774204beb8cd7b16a4315b",
+    "merge_uuid": "e21ce50c26c244cb874b884d113be697",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "f19d1a69454f425da6687cbe00054c11",
+      "text_hash": "01d4de05dcfe4e4b1abf002f",
+      "text_revision": "2e9ee2cad98f4bdc92fdf0ff927155ec",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "01d4de05dcfe4e4b1abf002f",
+    "identity_text_revision": "2e9ee2cad98f4bdc92fdf0ff927155ec",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі. але́ пі́сля того.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 7703,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі. але́ пі́сля того",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_f19d1a69454f_20260724_164424_78a92581.wav",
+    "playback_duration": 6764,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_f19d1a69454f_20260724_164424_78a92581.wav",
+    "tts_ms": 6764,
+    "tts_status": "generated",
+    "original_duration_ms": 9155,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=1375)",
+    "adaptation_decision": {
+      "segment_id": "f19d1a69454f425da6687cbe00054c11",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 1375,
+      "original_duration_ms": 9155,
+      "tts_duration_ms": 7780,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 6764,
+    "first_tts_duration_ms": 10176,
+    "audio_bound_uuid": "f19d1a69454f425da6687cbe00054c11",
+    "pause_engine": {
+      "before_ms": 8808,
+      "after_ms": 6764,
+      "saved_ms": 2044,
+      "stages": [
+        "lead_trim:215",
+        "tail_trim:999",
+        "pause_compress:829"
+      ],
+      "slot_ms": 9155
+    },
+    "translation_text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі. але́ пі́сля того",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900663662,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900663662,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900663662
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 7780
+        },
+        "ts_ms": 1784900663662,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=7780"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900663662,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900663662,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900663662
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 7780
+          },
+          "ts_ms": 1784900663662,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=7780"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 12,
+      "slot_start": 102730,
+      "slot_end": 111885,
+      "slot_duration": 9155,
+      "tts_duration": 6764,
+      "measured_duration": 6764,
+      "delta": -2391,
+      "overflow": 0,
+      "underflow": 2391,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 4440,
+      "pause_stages": [
+        "lead_trim:239",
+        "tail_trim:1155",
+        "pause_compress:1001",
+        "lead_trim:215",
+        "tail_trim:999",
+        "pause_compress:829"
+      ],
+      "timing_score": 72.6,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 10176,
+      "provider_fatal": false
+    },
+    "timing_score": 72.6,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 4440,
+      "timing_score": 72.6,
+      "actual_duration_ms": 6764,
+      "slot_duration": 9155,
+      "delta": -2391,
+      "underflow_ms": 2391,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "f19d1a69454f425da6687cbe00054c11",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 1375,
+        "original_duration_ms": 9155,
+        "tts_duration_ms": 7780,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_f19d1a69454f_20260724_164447_25fbae9c.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 6764,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 9155,
+      "fitted_ms": 6764,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 6764,
+      "slot_fit_key": "1255a773f5c3869f"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "already_fits"
+  },
+  {
+    "segment_id": "6c3391d2bf87470387234e2eeb1891b1",
+    "segment_uuid": "6c3391d2bf87470387234e2eeb1891b1",
+    "text": "Джордж-молодший підійшов до подіуму. щоб сфотографувати водія-переможця. але́ у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ ві́н підійшов до нього. цей чоловік середнього віку підійшов до нього та про́сто запитав Джорджа-молодшого про його́ фотографію. а по́тім у якийсь момент чоловік фактично офіційно представився як Хаскелл Векслер і сказав",
+    "plain_text": "Джордж-молодший підійшов до подіуму. щоб сфотографувати водія-переможця. але́ у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ ві́н підійшов до нього. цей чоловік середнього віку підійшов до нього та про́сто запитав Джорджа-молодшого про його́ фотографію. а по́тім у якийсь момент чоловік фактично офіційно представився як Хаскелл Векслер і сказав",
+    "start_ms": 112800,
+    "end_ms": 138443,
+    "slot_ms": 25643,
+    "owned_text_segment_id": "6c3391d2bf87470387234e2eeb1891b1",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "6c3391d2bf87470387234e2eeb1891b1",
+    "translation_uuid": "fa351b5e396d2c402f2c0f871f780099",
+    "adaptation_uuid": "8144d47a3c91404aaa86f22572090387",
+    "tts_uuid": "11bc76dc4b9e4e1bbbe0e08044674882",
+    "audio_uuid": "ad2b35f20acb49648ec0e7be3f3d484d",
+    "merge_uuid": "7815858b95ab4f0a9e060857bafcf4a1",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "6c3391d2bf87470387234e2eeb1891b1",
+      "text_hash": "f698d305a7ae219521daf44a",
+      "text_revision": "8144d47a3c91404aaa86f22572090387",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "f698d305a7ae219521daf44a",
+    "identity_text_revision": "8144d47a3c91404aaa86f22572090387",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "Джордж-молодший підійшов до подіуму. щоб сфотографувати водія-переможця. але́ коли́ ві́н підійшов до нього. цей чоловік середнього віку підійшов до нього та про́сто запитав Джорджа-молодшого про його́ фотографію. а по́тім у якийсь момент чоловік фактично офіційно представився як Хаскелл Векслер і сказав.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 22592,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "Джордж-молодший підійшов до подіуму. щоб сфотографувати водія-переможця. але́ у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ ві́н підійшов до нього. цей чоловік середнього віку підійшов до нього та про́сто запитав Джорджа-молодшого про його́ фотографію. а по́тім у якийсь момент чоловік фактично офіційно представився як Хаскелл Векслер і сказав",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_6c3391d2bf87_20260724_164434_7b5a71c3.wav",
+    "playback_duration": 24313,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_6c3391d2bf87_20260724_164434_7b5a71c3.wav",
+    "tts_ms": 24313,
+    "tts_status": "generated",
+    "original_duration_ms": 25643,
+    "need_adaptation": true,
+    "adaptation_decision": {
+      "segment_id": "6c3391d2bf87470387234e2eeb1891b1",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 3120,
+      "original_duration_ms": 25643,
+      "tts_duration_ms": 22523,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 24313,
+    "first_tts_duration_ms": 25272,
+    "audio_bound_uuid": "6c3391d2bf87470387234e2eeb1891b1",
+    "pause_engine": {
+      "before_ms": 29544,
+      "after_ms": 24313,
+      "saved_ms": 5231,
+      "stages": [
+        "lead_trim:208",
+        "tail_trim:1027",
+        "pause_compress:3993"
+      ],
+      "slot_ms": 26458
+    },
+    "translation_text": "Джордж-молодший підійшов до подіуму. щоб сфотографувати водія-переможця. але́ у той момент, у той момент, у той момент, у той момент, у той момент, у той момент, коли́ ві́н підійшов до нього. цей чоловік середнього віку підійшов до нього та про́сто запитав Джорджа-молодшого про його́ фотографію. а по́тім у якийсь момент чоловік фактично офіційно представився як Хаскелл Векслер і сказав",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=3120)",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900673065,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900673065,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900673065
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 22523
+        },
+        "ts_ms": 1784900673065,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=19892",
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=22523"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": false,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900673065,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900673065,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900673065
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 22523
+          },
+          "ts_ms": 1784900673065,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=19892",
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=22523"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 13,
+      "slot_start": 111985,
+      "slot_end": 138443,
+      "slot_duration": 26458,
+      "tts_duration": 24313,
+      "measured_duration": 24313,
+      "delta": -2145,
+      "overflow": 0,
+      "underflow": 2145,
+      "status": "underflow",
+      "rewrite_iterations": 2,
+      "pause_adjustments_ms": 15664,
+      "pause_stages": [
+        "lead_trim:261",
+        "tail_trim:1170",
+        "pause_compress:3945",
+        "lead_trim:208",
+        "tail_trim:1039",
+        "pause_compress:3803",
+        "lead_trim:208",
+        "tail_trim:1027",
+        "pause_compress:3993"
+      ],
+      "timing_score": 91.6,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 25272,
+      "provider_fatal": false
+    },
+    "timing_score": 91.6,
+    "closed_loop": {
+      "iterations": 2,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 15664,
+      "timing_score": 91.6,
+      "actual_duration_ms": 24313,
+      "slot_duration": 26458,
+      "delta": -2145,
+      "underflow_ms": 2145,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "6c3391d2bf87470387234e2eeb1891b1",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 3120,
+        "original_duration_ms": 25643,
+        "tts_duration_ms": 22523,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_6c3391d2bf87_20260724_164447_8f34a5ee.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 24313,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 25643,
+      "fitted_ms": 24313,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 24313,
+      "slot_fit_key": "13c0e50ed9818aff"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "already_fits"
+  },
+  {
+    "segment_id": "bd2b346487904e2299f6a8d3afc4ae04",
+    "segment_uuid": "bd2b346487904e2299f6a8d3afc4ae04",
+    "text": "Дозвольте мені подзвонити. і. звичайно",
+    "plain_text": "Дозвольте мені подзвонити. і. звичайно",
+    "start_ms": 140969,
+    "end_ms": 152146,
+    "slot_ms": 11177,
+    "owned_text_segment_id": "bd2b346487904e2299f6a8d3afc4ae04",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "bd2b346487904e2299f6a8d3afc4ae04",
+    "translation_uuid": "c31afeb5571687b4420a8243c9cb3973",
+    "adaptation_uuid": "34d76070b94a48439f021974372101bc",
+    "tts_uuid": "217c58dfbd1f42118ec3dcfd0efc2a35",
+    "audio_uuid": "b5f266bb19a3450eaa3b2f8891bf0133",
+    "merge_uuid": "6937793387884c3ab10c13543648c67a",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "bd2b346487904e2299f6a8d3afc4ae04",
+      "text_hash": "f70d43e960108c67227fc6fe",
+      "text_revision": "34d76070b94a48439f021974372101bc",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "f70d43e960108c67227fc6fe",
+    "identity_text_revision": "34d76070b94a48439f021974372101bc",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Дозвольте мені подзвонити. і. звичайно.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 2888,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "tts_text": "Дозвольте мені подзвонити. і. звичайно",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_bd2b34648790_20260724_164436_bfba5a44.wav",
+    "playback_duration": 2682,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_bd2b34648790_20260724_164436_bfba5a44.wav",
+    "tts_ms": 2682,
+    "tts_status": "generated",
+    "original_duration_ms": 11177,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=8024)",
+    "adaptation_decision": {
+      "segment_id": "bd2b346487904e2299f6a8d3afc4ae04",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 8024,
+      "original_duration_ms": 11177,
+      "tts_duration_ms": 3153,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 2682,
+    "first_tts_duration_ms": 5592,
+    "audio_bound_uuid": "bd2b346487904e2299f6a8d3afc4ae04",
+    "pause_engine": {
+      "before_ms": 4728,
+      "after_ms": 2682,
+      "saved_ms": 2046,
+      "stages": [
+        "lead_trim:212",
+        "tail_trim:999",
+        "pause_compress:835"
+      ],
+      "slot_ms": 13603
+    },
+    "translation_text": "Дозвольте мені подзвонити. і. звичайно",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900676027,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900676027,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900676027
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 3153
+        },
+        "ts_ms": 1784900676027,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=3153"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900676027,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900676027,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900676027
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 3153
+          },
+          "ts_ms": 1784900676027,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=3153"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 14,
+      "slot_start": 138543,
+      "slot_end": 152146,
+      "slot_duration": 13603,
+      "tts_duration": 2682,
+      "measured_duration": 2682,
+      "delta": -10921,
+      "overflow": 0,
+      "underflow": 10921,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 4485,
+      "pause_stages": [
+        "lead_trim:241",
+        "tail_trim:1177",
+        "pause_compress:1021",
+        "lead_trim:212",
+        "tail_trim:999",
+        "pause_compress:835"
+      ],
+      "timing_score": 50.0,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 5592,
+      "provider_fatal": false
+    },
+    "timing_score": 50.0,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 4485,
+      "timing_score": 50.0,
+      "actual_duration_ms": 2682,
+      "slot_duration": 13603,
+      "delta": -10921,
+      "underflow_ms": 10921,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "bd2b346487904e2299f6a8d3afc4ae04",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 8024,
+        "original_duration_ms": 11177,
+        "tts_duration_ms": 3153,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_bd2b34648790_20260724_164447_7cf39430.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 2682,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 11177,
+      "fitted_ms": 2682,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 2682,
+      "slot_fit_key": "ef9404880ff0fcb8"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "a2db7efaf6164eb6abd036ea9a764bb4",
+    "segment_uuid": "a2db7efaf6164eb6abd036ea9a764bb4",
+    "text": "Це тако́ж назавжди повністю змінить кінематограф загалом",
+    "plain_text": "Це тако́ж назавжди повністю змінить кінематограф загалом",
+    "start_ms": 154320,
+    "end_ms": 163142,
+    "slot_ms": 8822,
+    "owned_text_segment_id": "a2db7efaf6164eb6abd036ea9a764bb4",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "a2db7efaf6164eb6abd036ea9a764bb4",
+    "translation_uuid": "250f521899f1459c3fcfe57e53835568",
+    "adaptation_uuid": "fb1f89fcbde543cbabfaa8c40c05e954",
+    "tts_uuid": "5048ccf5275a44e6b54bf5d1d0112f2c",
+    "audio_uuid": "8fdb84e542a7438196be1125c5f68761",
+    "merge_uuid": "ca77b324196645fab52055998799bec7",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "a2db7efaf6164eb6abd036ea9a764bb4",
+      "text_hash": "e19316ff89371663991f25c0",
+      "text_revision": "fb1f89fcbde543cbabfaa8c40c05e954",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "e19316ff89371663991f25c0",
+    "identity_text_revision": "fb1f89fcbde543cbabfaa8c40c05e954",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "Це тако́ж назавжди повністю змінить кінематограф загалом.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 4222,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "tts_text": "Це тако́ж назавжди повністю змінить кінематограф загалом",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a2db7efaf616_20260724_164438_8a04c65a.wav",
+    "playback_duration": 3662,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a2db7efaf616_20260724_164438_8a04c65a.wav",
+    "tts_ms": 3662,
+    "tts_status": "generated",
+    "original_duration_ms": 8822,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=4861)",
+    "adaptation_decision": {
+      "segment_id": "a2db7efaf6164eb6abd036ea9a764bb4",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 4861,
+      "original_duration_ms": 8822,
+      "tts_duration_ms": 3961,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 3662,
+    "first_tts_duration_ms": 5424,
+    "audio_bound_uuid": "a2db7efaf6164eb6abd036ea9a764bb4",
+    "pause_engine": {
+      "before_ms": 4896,
+      "after_ms": 3662,
+      "saved_ms": 1234,
+      "stages": [
+        "lead_trim:225",
+        "tail_trim:1009"
+      ],
+      "slot_ms": 10896
+    },
+    "translation_text": "Це тако́ж назавжди повністю змінить кінематограф загалом",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900678259,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900678259,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900678259
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 3961
+        },
+        "ts_ms": 1784900678260,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=3961"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900678259,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900678259,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900678259
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 3961
+          },
+          "ts_ms": 1784900678260,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=3961"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 15,
+      "slot_start": 152246,
+      "slot_end": 163142,
+      "slot_duration": 10896,
+      "tts_duration": 3662,
+      "measured_duration": 3662,
+      "delta": -7234,
+      "overflow": 0,
+      "underflow": 7234,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 2697,
+      "pause_stages": [
+        "lead_trim:267",
+        "tail_trim:1196",
+        "lead_trim:225",
+        "tail_trim:1009"
+      ],
+      "timing_score": 50.0,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 5424,
+      "provider_fatal": false
+    },
+    "timing_score": 50.0,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 2697,
+      "timing_score": 50.0,
+      "actual_duration_ms": 3662,
+      "slot_duration": 10896,
+      "delta": -7234,
+      "underflow_ms": 7234,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "a2db7efaf6164eb6abd036ea9a764bb4",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 4861,
+        "original_duration_ms": 8822,
+        "tts_duration_ms": 3961,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_a2db7efaf616_20260724_164447_0e19aeb7.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 3662,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 8822,
+      "fitted_ms": 3662,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 3662,
+      "slot_fit_key": "db2ecf484dca35d8"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "fit_failed"
+  },
+  {
+    "segment_id": "5d5280b5c8594478afe33afd57100eef",
+    "segment_uuid": "5d5280b5c8594478afe33afd57100eef",
+    "text": "Його́ фільм став частиною найуспішнішої кінофраншизи всіх часів",
+    "plain_text": "Його́ фільм став частиною найуспішнішої кінофраншизи всіх часів",
+    "start_ms": 166824,
+    "end_ms": 171444,
+    "slot_ms": 4620,
+    "owned_text_segment_id": "5d5280b5c8594478afe33afd57100eef",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "5d5280b5c8594478afe33afd57100eef",
+    "translation_uuid": "9567c018b250e6d775dcaf82cde33a5b",
+    "adaptation_uuid": "752f114ec78b49bea35345480d251776",
+    "tts_uuid": "893f81781faf4e5eb6399ad0b17642b4",
+    "audio_uuid": "639cd408dd24420c82a086ab296b3064",
+    "merge_uuid": "262990e626ce47c8beee7eeac78283c7",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "5d5280b5c8594478afe33afd57100eef",
+      "text_hash": "37cbce24eab60f1e1d7325db",
+      "text_revision": "752f114ec78b49bea35345480d251776",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "37cbce24eab60f1e1d7325db",
+    "identity_text_revision": "752f114ec78b49bea35345480d251776",
+    "assigned_voice": "uk-UA-OstapNeural",
+    "voice": "uk-UA-OstapNeural",
+    "meaning_fit_source": "Його́ фільм став частиною найуспішнішої кінофраншизи всіх часів.",
+    "text_adaptation_reason": "already_fits",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "already_fits",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "none",
+    "predicted_tts_ms": 4740,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": true,
+    "meaning_fit_reason": "already_fits",
+    "dsal_skip_reason": "meaning_fit_owner",
+    "tts_text": "Його́ фільм став частиною найуспішнішої кінофраншизи всіх часів",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_5d5280b5c859_20260724_164440_107a889f.wav",
+    "playback_duration": 4230,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_5d5280b5c859_20260724_164440_107a889f.wav",
+    "tts_ms": 4230,
+    "tts_status": "generated",
+    "original_duration_ms": 4620,
+    "need_adaptation": false,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=900)",
+    "adaptation_decision": {
+      "segment_id": "5d5280b5c8594478afe33afd57100eef",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": false,
+      "duration_delta_ms": 351,
+      "original_duration_ms": 4620,
+      "tts_duration_ms": 4269,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 4230,
+    "first_tts_duration_ms": 5520,
+    "audio_bound_uuid": "5d5280b5c8594478afe33afd57100eef",
+    "pause_engine": {
+      "before_ms": 5448,
+      "after_ms": 4230,
+      "saved_ms": 1218,
+      "stages": [
+        "lead_trim:207",
+        "tail_trim:1011"
+      ],
+      "slot_ms": 8202
+    },
+    "translation_text": "Його́ фільм став частиною найуспішнішої кінофраншизи всіх часів",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900680055,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900680055,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900680055
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 4269
+        },
+        "ts_ms": 1784900680055,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=4269"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900680055,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900680055,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900680055
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 4269
+          },
+          "ts_ms": 1784900680055,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=4269"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 16,
+      "slot_start": 163242,
+      "slot_end": 171444,
+      "slot_duration": 8202,
+      "tts_duration": 4230,
+      "measured_duration": 4230,
+      "delta": -3972,
+      "overflow": 0,
+      "underflow": 3972,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 2469,
+      "pause_stages": [
+        "lead_trim:207",
+        "tail_trim:1044",
+        "lead_trim:207",
+        "tail_trim:1011"
+      ],
+      "timing_score": 50.6,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 5520,
+      "provider_fatal": false
+    },
+    "timing_score": 50.6,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 2469,
+      "timing_score": 50.6,
+      "actual_duration_ms": 4230,
+      "slot_duration": 8202,
+      "delta": -3972,
+      "underflow_ms": 3972,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "5d5280b5c8594478afe33afd57100eef",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": false,
+        "duration_delta_ms": 351,
+        "original_duration_ms": 4620,
+        "tts_duration_ms": 4269,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_5d5280b5c859_20260724_164447_59404ede.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 4230,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 4620,
+      "fitted_ms": 4230,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 4230,
+      "slot_fit_key": "0b63e2c997135fd9"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "already_fits"
+  },
+  {
+    "segment_id": "a68467a3425e43afafb7c3a4980e87d8",
+    "segment_uuid": "a68467a3425e43afafb7c3a4980e87d8",
+    "text": "Джордж-молодший. Сьогодні більш відомий як Джордж Лукас",
+    "plain_text": "Джордж-молодший. Сьогодні більш відомий як Джордж Лукас",
+    "start_ms": 173216,
+    "end_ms": 181047,
+    "slot_ms": 7831,
+    "owned_text_segment_id": "a68467a3425e43afafb7c3a4980e87d8",
+    "reissued_from_resegment": true,
+    "source_segment_uuid": "a68467a3425e43afafb7c3a4980e87d8",
+    "translation_uuid": "d9d5fc150e77a4e4a157239c1bc81318",
+    "adaptation_uuid": "801bdea09c4e4997b3cb77dde26492b2",
+    "tts_uuid": "50e1d0b82315405088e8ac03f584a832",
+    "audio_uuid": "3c70e4c803e8480891d34d4644181fed",
+    "merge_uuid": "c565137924f8434b9c28a8c9c7e8279d",
+    "reissued_from": [
+      "1e0ff862944d455caae7cb1b17eba781",
+      "0ac0d8bdc0a04caa9ae64600810ebd93",
+      "54f2941c376e484d83427a3c5a40d207",
+      "bd3e4bd230054314891622c2f6659404",
+      "cb77f9f08b1145cc9f11e4dddc06bdee",
+      "479914c7e3014ce682a1b9524641a3b7",
+      "f2b5a1b89833412493b2d536895bd6f1",
+      "d42ee5bbaa214c26bbd5487c45406186",
+      "21eb81dd5ca84190ad3782e3a195e35e",
+      "dafafa11db8b48a9a0597c2032618f43",
+      "cc946f20fd0d4a95aff5b508dc8296e6",
+      "f8023c8068de4fb08939b6b21a77807e",
+      "b0536c2e7e9240448bddd664938e7415",
+      "ef353d3e8db140c0bf3f7fb26454b37f",
+      "0366f5907f3449a5a721382b934cc653",
+      "0332eb63abe44122b1c680f21743722b",
+      "2957f8e1d9fa4d57860e59f0bfb67d4d",
+      "e3a490ab4a484bcb86c7bb248fcb605a"
+    ],
+    "identity_binding": {
+      "segment_id": "a68467a3425e43afafb7c3a4980e87d8",
+      "text_hash": "42f7247c7582cb1612818ff3",
+      "text_revision": "801bdea09c4e4997b3cb77dde26492b2",
+      "audio_path": "",
+      "bound_at_stage": "segment_normalizer",
+      "tts_bound": false
+    },
+    "identity_text_hash": "42f7247c7582cb1612818ff3",
+    "identity_text_revision": "801bdea09c4e4997b3cb77dde26492b2",
+    "assigned_voice": "uk-UA-PolinaNeural",
+    "voice": "uk-UA-PolinaNeural",
+    "meaning_fit_source": "Джордж-молодший. Сьогодні більш відомий як Джордж Лукас.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 0,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 4148,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "tts_text": "Джордж-молодший. Сьогодні більш відомий як Джордж Лукас",
+    "tts_file_path": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a68467a3425e_20260724_164442_8e8f028a.wav",
+    "playback_duration": 3736,
+    "status": "generated",
+    "file": "output\\sessions\\db4a484cfe354a80b12a8245795a963d\\closed_loop\\db4a484cfe354a80b12a8245795a963d\\pause\\pause_run_a68467a3425e_20260724_164442_8e8f028a.wav",
+    "tts_ms": 3736,
+    "tts_status": "generated",
+    "original_duration_ms": 7831,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=3754)",
+    "adaptation_decision": {
+      "segment_id": "a68467a3425e43afafb7c3a4980e87d8",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 3754,
+      "original_duration_ms": 7831,
+      "tts_duration_ms": 4077,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "smart_expansion",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 3736,
+    "first_tts_duration_ms": 6648,
+    "audio_bound_uuid": "a68467a3425e43afafb7c3a4980e87d8",
+    "pause_engine": {
+      "before_ms": 5736,
+      "after_ms": 3736,
+      "saved_ms": 2000,
+      "stages": [
+        "lead_trim:208",
+        "tail_trim:950",
+        "pause_compress:842"
+      ],
+      "slot_ms": 9503
+    },
+    "translation_text": "Джордж-молодший. Сьогодні більш відомий як Джордж Лукас",
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "smart_expansion"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "why": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900681953,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784900681954,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "chosen": "smart_expansion",
+          "stages": [
+            "smart_expansion"
+          ]
+        },
+        "ts_ms": 1784900681954
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "smart_expansion",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 4077
+        },
+        "ts_ms": 1784900681954,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+      "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+      "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=4077"
+    ],
+    "expand_required": true,
+    "requires_llm_adaptation": true,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "why": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900681953,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784900681954,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "chosen": "smart_expansion",
+            "stages": [
+              "smart_expansion"
+            ]
+          },
+          "ts_ms": 1784900681954
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "smart_expansion",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 4077
+          },
+          "ts_ms": 1784900681954,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "chosen_strategy = SUCCESS (smart_expansion) | chosen=smart_expansion | overflow_ms=0",
+        "strategy_result = SUCCESS (smart_expansion) | chosen=smart_expansion",
+        "final_result = SUCCESS (smart_expansion) | overflow_ms=0 | duration_ms=4077"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 17,
+      "slot_start": 171544,
+      "slot_end": 181047,
+      "slot_duration": 9503,
+      "tts_duration": 3736,
+      "measured_duration": 3736,
+      "delta": -5767,
+      "overflow": 0,
+      "underflow": 5767,
+      "status": "underflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 4571,
+      "pause_stages": [
+        "lead_trim:268",
+        "tail_trim:1163",
+        "pause_compress:1140",
+        "lead_trim:208",
+        "tail_trim:950",
+        "pause_compress:842"
+      ],
+      "timing_score": 50.0,
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 6648,
+      "provider_fatal": false
+    },
+    "timing_score": 50.0,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_underflow:no_rewrite",
+      "pause_adjustments_ms": 4571,
+      "timing_score": 50.0,
+      "actual_duration_ms": 3736,
+      "slot_duration": 9503,
+      "delta": -5767,
+      "underflow_ms": 5767,
+      "expand_required": true,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "a68467a3425e43afafb7c3a4980e87d8",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 3754,
+        "original_duration_ms": 7831,
+        "tts_duration_ms": 4077,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "smart_expansion",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_db4a484c_a68467a3425e_20260724_164447_900a96f8.wav",
+    "container_status": "green",
+    "slot_overflow": false,
+    "fitted_ms": 3736,
+    "overflow_ms": 0,
+    "overflow_pct": 0.0,
+    "timing_meta": {
+      "slot_ms": 7831,
+      "fitted_ms": 3736,
+      "atempo": 1.0,
+      "strategy": "none",
+      "overflow_ms": 0,
+      "slot_fit_tts_ms": 3736,
+      "slot_fit_key": "19a0c8e9497d7bbd"
+    },
+    "slot_fit_attempts": 0,
+    "algorithm_reason": "fit_failed"
+  }
+]

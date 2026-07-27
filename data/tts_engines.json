@@ -9,42 +9,58 @@
       "mode": "offline"
     },
     {
+      "id": "piper",
+      "name": "Piper TTS",
+      "provider": "Piper",
+      "description": "Локальный офлайн TTS (CLI piper или pip-пакет). Нужен PIPER_MODEL / VM_PIPER_MODEL.",
+      "mode": "offline",
+      "config_keys": ["PIPER_MODEL", "VM_PIPER_MODEL"]
+    },
+    {
+      "id": "coqui",
+      "name": "Coqui / XTTS",
+      "provider": "Coqui TTS",
+      "description": "Локальный Coqui TTS; XTTS клонирует голос по reference WAV (VM_COQUI_SPEAKER_WAV / clone API).",
+      "mode": "offline",
+      "config_keys": ["VM_COQUI_MODEL", "VM_COQUI_SPEAKER_WAV", "VM_COQUI_LANG"]
+    },
+    {
       "id": "online-studio",
       "name": "Online Studio",
       "provider": "VideoMonster Cloud",
-      "description": "Облачная студия озвучки (скоро).",
+      "description": "HTTP-мост к VM_STUDIO_TTS_URL (/synthesize).",
       "mode": "online",
-      "config_keys": ["VM_STUDIO_TTS_URL"]
+      "config_keys": ["VM_STUDIO_TTS_URL", "VM_STUDIO_TTS_TOKEN"]
     },
     {
       "id": "openai-voice",
       "name": "OpenAI Voice",
       "provider": "OpenAI",
-      "description": "GPT-4o mini TTS / Voice API (скоро).",
+      "description": "GPT-4o mini TTS — нужен OPENAI_API_KEY.",
       "mode": "online",
-      "config_keys": ["OPENAI_API_KEY"]
+      "config_keys": ["OPENAI_API_KEY", "VM_OPENAI_TTS_MODEL", "VM_OPENAI_TTS_VOICE"]
     },
     {
       "id": "elevenlabs",
       "name": "ElevenLabs",
       "provider": "ElevenLabs",
-      "description": "Премиальные голоса с естественной интонацией (скоро).",
+      "description": "Премиальные голоса — нужен ELEVENLABS_API_KEY.",
       "mode": "online",
-      "config_keys": ["ELEVENLABS_API_KEY"]
+      "config_keys": ["ELEVENLABS_API_KEY", "ELEVENLABS_VOICE_ID"]
     },
     {
       "id": "azure-neural",
       "name": "Azure Neural",
       "provider": "Microsoft Azure",
-      "description": "Azure Cognitive Services Neural TTS (скоро).",
+      "description": "Azure Cognitive Services Neural TTS — AZURE_SPEECH_KEY + REGION.",
       "mode": "online",
-      "config_keys": ["AZURE_SPEECH_KEY"]
+      "config_keys": ["AZURE_SPEECH_KEY", "AZURE_SPEECH_REGION"]
     },
     {
       "id": "google-neural",
       "name": "Google Neural",
       "provider": "Google Cloud",
-      "description": "Google Cloud Text-to-Speech Neural2 (скоро).",
+      "description": "Google Cloud Text-to-Speech — GOOGLE_TTS_KEY / GOOGLE_API_KEY.",
       "mode": "online",
       "config_keys": ["GOOGLE_TTS_KEY"]
     }

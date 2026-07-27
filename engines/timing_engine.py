@@ -29,8 +29,15 @@ def parse_timing(item: Any) -> Tuple[int, int]:
     """
     try:
         if isinstance(item, dict):
-            start = item["start"]
-            end = item["end"]
+            # Studio / ASR maps use start_ms/end_ms; older maps use start/end.
+            if "start" in item or "start_ms" in item:
+                start = item.get("start", item.get("start_ms"))
+            else:
+                raise KeyError("start")
+            if "end" in item or "end_ms" in item:
+                end = item.get("end", item.get("end_ms"))
+            else:
+                raise KeyError("end")
         elif isinstance(item, (list, tuple)):
             if len(item) < 2:
                 raise ValueError(
@@ -293,13 +300,17 @@ def build_timed_audio(
 
         if actual_len > window_len:
             timing_warnings_count += 1
+            overflow_ms = actual_len - window_len
             warn_msg = (
                 f"Превышение временного окна на индексе {idx}: файл {segment_paths[idx]} "
                 f"имеет длину {actual_len} мс при размере окна {window_len} мс. "
-                f"Величина превышения: {actual_len - window_len} мс. Сегмент наложен без обрезки."
+                f"Величина превышения: {overflow_ms} мс. Сегмент обрезан по границе окна."
             )
             warnings_list.append(warn_msg)
             logger.warning(warn_msg)
+            # Prevent bleed into the next slot / overlapping dialogue.
+            if window_len > 0:
+                seg = seg[:window_len]
 
         final_audio = final_audio.overlay(seg, position=start_ms)
 

@@ -1,0 +1,340 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "ebbeff6917d54c228ed83ffa27822afc",
+  "created_at": "2026-07-22T14:06:13.623490+00:00",
+  "task_id": "ebbeff6917d54c228ed83ffa27822afc",
+  "stage": "tts",
+  "developer": {
+    "version": "TubeDub-Passive-1.0",
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "error_code": "STAGE_SNAPSHOT_INTEGRITY",
+    "stage": "tts",
+    "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+    "snapshot_diff": {
+      "field": "container_status",
+      "old_value": "None",
+      "new_value": "red",
+      "structured_diff": [
+        {
+          "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+          "field": "container_status",
+          "old_value": null,
+          "new_value": "red",
+          "structured_diff": {
+            "field": "container_status",
+            "old": "null",
+            "new": "red"
+          }
+        },
+        {
+          "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+          "field": "tts_error",
+          "old_value": null,
+          "new_value": {
+            "error_type": "VoiceGenerationError",
+            "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+            "segment_index": 0,
+            "segment_number": 1,
+            "current": 1,
+            "total": 1,
+            "text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+            "original_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+            "tts_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+            "voice": "uk-UA-OstapNeural",
+            "engine": "Edge-TTS",
+            "engine_id": "edge-offline",
+            "language": "uk",
+            "tts_file_path": "output\\sessions\\ebbeff6917d54c228ed83ffa27822afc\\ebbeff69_seg0000.mp3",
+            "error_code": "RuntimeError",
+            "error_message": "No audio was received. Please verify that your parameters are correct.",
+            "reason": "No audio was received. Please verify that your parameters are correct.",
+            "traceback": "NoneType: None\n",
+            "duration_ms": 4488.82,
+            "task_id": "ebbeff6917d54c228ed83ffa27822afc",
+            "timestamp_ms": 1784729168581,
+            "timestamp": "2026-07-22T14:06:08.581000+00:00",
+            "stage": "TTS",
+            "pipeline_state": "PARTIAL"
+          },
+          "structured_diff": {
+            "field": "tts_error",
+            "old": "null",
+            "new": "{\"error_type\": \"VoiceGenerationError\", \"segment_id\": \"e16e6e1ad06d4d9592e4ec16f94b0ace\", \"segment_index\": 0, \"segment_number\": 1, \"current\": 1, \"total\": 1, \"text\": \"我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.\", \"original_text\": \"我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\", \"tts_text\": \"我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能..."
+          }
+        }
+      ]
+    },
+    "traceability": {
+      "module": "tts",
+      "function": "(unknown)",
+      "file_path": "tts.py",
+      "line_number": 0,
+      "full_path": "engines.tts"
+    },
+    "mutation_policy": {
+      "allowed": [
+        "actual_duration_ms",
+        "adaptation_decision",
+        "audio_bound_uuid",
+        "audio_sha256",
+        "audio_uuid",
+        "index",
+        "need_adaptation",
+        "need_adaptation_force_reason",
+        "original_duration_ms",
+        "playback_duration",
+        "runtime_history",
+        "runtime_registry_path",
+        "segment_id",
+        "status",
+        "tts_file_path",
+        "tts_lifecycle",
+        "tts_ms",
+        "tts_status",
+        "tts_text",
+        "tts_uuid",
+        "wav_owner"
+      ],
+      "forbidden": [
+        "container_status"
+      ],
+      "violated_rule": "mutation_of_container_status",
+      "reason": "Поле «container_status» не входит в Allowed Mutations этапа «tts»."
+    },
+    "dependency_pipeline": [
+      "Segment",
+      "STT",
+      "Translation",
+      "Timing-Aware Translation",
+      "TTS",
+      "FAILED"
+    ],
+    "event_timeline": [
+      {
+        "timestamp": "2026-07-22T13:47:43.759626+00:00",
+        "message": "Audio Extraction completed (2295.2ms)"
+      },
+      {
+        "timestamp": "2026-07-22T13:47:43.986661+00:00",
+        "message": "Source Separation completed (206.1ms)"
+      },
+      {
+        "timestamp": "2026-07-22T13:48:04.619212+00:00",
+        "message": "STT completed (20593.1ms)"
+      },
+      {
+        "timestamp": "2026-07-22T13:48:54.438864+00:00",
+        "message": "Translation completed (47984.2ms)"
+      },
+      {
+        "timestamp": "14:06:13",
+        "message": "tts validation started"
+      },
+      {
+        "timestamp": "14:06:13",
+        "message": "container_status modified (snapshot diff detected)"
+      },
+      {
+        "timestamp": "14:06:13",
+        "message": "Snapshot validation failed"
+      }
+    ],
+    "recovery_hint": {
+      "probable_cause": "Поле «container_status» изменено модулем tts.",
+      "text": "Либо прекратить изменение container_status,\nлибо добавить поле в Allowed Mutations этапа tts,\nесли изменение является частью архитектуры.",
+      "options": [
+        "прекратить изменение container_status",
+        "добавить «container_status» в Allowed Mutations этапа «tts», если изменение является частью архитектуры"
+      ],
+      "note": "Автоматическое исправление запрещено (Passive OpenDDF)."
+    },
+    "developer_details": {
+      "field": "container_status",
+      "old_value": "None",
+      "new_value": "red",
+      "module": "tts",
+      "function": "(unknown)",
+      "file": "tts.py",
+      "line": 0,
+      "allowed_mutations": [
+        "actual_duration_ms",
+        "adaptation_decision",
+        "audio_bound_uuid",
+        "audio_sha256",
+        "audio_uuid",
+        "index",
+        "need_adaptation",
+        "need_adaptation_force_reason",
+        "original_duration_ms",
+        "playback_duration",
+        "runtime_history",
+        "runtime_registry_path",
+        "segment_id",
+        "status",
+        "tts_file_path",
+        "tts_lifecycle",
+        "tts_ms",
+        "tts_status",
+        "tts_text",
+        "tts_uuid",
+        "wav_owner"
+      ],
+      "recovery_hint": "Либо прекратить изменение container_status,\nлибо добавить поле в Allowed Mutations этапа tts,\nесли изменение является частью архитектуры."
+    },
+    "artifacts": {},
+    "violations_count": 2,
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "tts",
+    "task_id": "ebbeff6917d54c228ed83ffa27822afc",
+    "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+    "violations": [
+      {
+        "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+        "field": "container_status",
+        "old_value": null,
+        "new_value": "red",
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_status",
+          "tts_text",
+          "tts_uuid",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment e16e6e1ad06d4d9592e4ec16f94b0ace: disallowed mutation of 'container_status' at stage 'tts'"
+      },
+      {
+        "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+        "field": "tts_error",
+        "old_value": null,
+        "new_value": {
+          "error_type": "VoiceGenerationError",
+          "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+          "segment_index": 0,
+          "segment_number": 1,
+          "current": 1,
+          "total": 1,
+          "text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+          "original_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+          "tts_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+          "voice": "uk-UA-OstapNeural",
+          "engine": "Edge-TTS",
+          "engine_id": "edge-offline",
+          "language": "uk",
+          "tts_file_path": "output\\sessions\\ebbeff6917d54c228ed83ffa27822afc\\ebbeff69_seg0000.mp3",
+          "error_code": "RuntimeError",
+          "error_message": "No audio was received. Please verify that your parameters are correct.",
+          "reason": "No audio was received. Please verify that your parameters are correct.",
+          "traceback": "NoneType: None\n",
+          "duration_ms": 4488.82,
+          "task_id": "ebbeff6917d54c228ed83ffa27822afc",
+          "timestamp_ms": 1784729168581,
+          "timestamp": "2026-07-22T14:06:08.581000+00:00",
+          "stage": "TTS",
+          "pipeline_state": "PARTIAL"
+        },
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_status",
+          "tts_text",
+          "tts_uuid",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment e16e6e1ad06d4d9592e4ec16f94b0ace: disallowed mutation of 'tts_error' at stage 'tts'"
+      }
+    ],
+    "structured_diff": [
+      {
+        "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+        "field": "container_status",
+        "old_value": null,
+        "new_value": "red",
+        "structured_diff": {
+          "field": "container_status",
+          "old": "null",
+          "new": "red"
+        }
+      },
+      {
+        "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+        "field": "tts_error",
+        "old_value": null,
+        "new_value": {
+          "error_type": "VoiceGenerationError",
+          "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+          "segment_index": 0,
+          "segment_number": 1,
+          "current": 1,
+          "total": 1,
+          "text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+          "original_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+          "tts_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+          "voice": "uk-UA-OstapNeural",
+          "engine": "Edge-TTS",
+          "engine_id": "edge-offline",
+          "language": "uk",
+          "tts_file_path": "output\\sessions\\ebbeff6917d54c228ed83ffa27822afc\\ebbeff69_seg0000.mp3",
+          "error_code": "RuntimeError",
+          "error_message": "No audio was received. Please verify that your parameters are correct.",
+          "reason": "No audio was received. Please verify that your parameters are correct.",
+          "traceback": "NoneType: None\n",
+          "duration_ms": 4488.82,
+          "task_id": "ebbeff6917d54c228ed83ffa27822afc",
+          "timestamp_ms": 1784729168581,
+          "timestamp": "2026-07-22T14:06:08.581000+00:00",
+          "stage": "TTS",
+          "pipeline_state": "PARTIAL"
+        },
+        "structured_diff": {
+          "field": "tts_error",
+          "old": "null",
+          "new": "{\"error_type\": \"VoiceGenerationError\", \"segment_id\": \"e16e6e1ad06d4d9592e4ec16f94b0ace\", \"segment_index\": 0, \"segment_number\": 1, \"current\": 1, \"total\": 1, \"text\": \"我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.\", \"original_text\": \"我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的\", \"tts_text\": \"我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能..."
+        }
+      }
+    ],
+    "traceback": "Traceback (most recent call last):\n  File \"<USER>\\Desktop\\VideoMonster_V2\\engines\\pipeline_integrity\\openddf_diagnostics.py\", line 571, in guard_check_with_diagnostics\n    StageSnapshotGuard.check(\n    ~~~~~~~~~~~~~~~~~~~~~~~~^\n        before,\n        ^^^^^^^\n    ...<2 lines>...\n        mutator_module=mutator_module,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<USER>\\Desktop\\VideoMonster_V2\\engines\\pipeline_integrity\\guards.py\", line 365, in check\n    raise StageSnapshotIntegrityError(\n    ...<9 lines>...\n    )\nengines.pipeline_integrity.exceptions.StageSnapshotIntegrityError: segment e16e6e1ad06d4d9592e4ec16f94b0ace: disallowed mutation of 'container_status' at stage 'tts'\n"
+  },
+  "exception": {},
+  "timeline_event_count": 19
+}

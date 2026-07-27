@@ -197,6 +197,122 @@ def test_marketplace_enable_disable(tmp_path):
     assert mgr.marketplace.disable("mp")["ok"] is True
 
 
+def test_marketplace_catalog_and_zip_install(tmp_path):
+    import zipfile
+
+    install_root = tmp_path / "install_root"
+    uploads = install_root / "uploads"
+    uploads.mkdir(parents=True)
+    src = _write_plugin(uploads / "pkg", "zipme", caps=["utility"])
+    zpath = uploads / "zipme.zip"
+    with zipfile.ZipFile(zpath, "w") as zf:
+        for f in src.rglob("*"):
+            if f.is_file():
+                zf.write(f, f.relative_to(src.parent))
+
+    mgr = PluginManager(app_dir=install_root)
+    # Point plugins dir under install_root/plugins
+    cat = mgr.marketplace.catalog()
+    assert cat["ok"] is True
+    assert cat["remote"]["configured"] is False
+    assert cat["remote"]["reason"] == "remote_marketplace_not_configured"
+    result = mgr.marketplace.install(str(zpath))
+    assert result["ok"] is True
+    assert mgr.get_plugin("zipme") is not None
+
+
+def test_marketplace_install_rejects_outside_allowlist(tmp_path):
+    outside = tmp_path / "evil.zip"
+    outside.write_bytes(b"PK\x05\x06" + b"\x00" * 18)
+    mgr = PluginManager(app_dir=tmp_path / "app")
+    (tmp_path / "app").mkdir()
+    result = mgr.marketplace.install(str(outside))
+    assert result["ok"] is False
+    assert result["error"] == "source_outside_allowlist"
+
+
+def test_remote_marketplace_hard_gate(tmp_path, monkeypatch):
+    monkeypatch.delenv("VM_PLUGIN_MARKETPLACE_URL", raising=False)
+    monkeypatch.delenv("VM_PLUGIN_CATALOG_URL", raising=False)
+    mgr = PluginManager(app_dir=tmp_path)
+    blocked = mgr.marketplace.install_from_url("https://example.com/p.zip")
+    assert blocked["ok"] is False
+    assert blocked["error"] == "remote_marketplace_not_configured"
+    blocked2 = mgr.marketplace.install_remote("demo")
+    assert blocked2["ok"] is False
+    assert blocked2["error"] == "remote_marketplace_not_configured"
+    fetched = mgr.marketplace.fetch_remote_catalog()
+    assert fetched["ok"] is False
+    assert fetched["error"] == "remote_marketplace_not_configured"
+
+
+def test_remote_marketplace_fetch_and_install(tmp_path, monkeypatch):
+    import io
+    import zipfile
+
+    src = _write_plugin(tmp_path / "pkg", "remoteme", caps=["utility"])
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        for f in src.rglob("*"):
+            if f.is_file():
+                zf.write(f, f.relative_to(src.parent))
+    zip_bytes = buf.getvalue()
+
+    catalog = {
+        "version": 1,
+        "plugins": [
+            {
+                "id": "remoteme",
+                "name": "remoteme",
+                "version": "1.0.0",
+                "download_url": "https://plugins.example/remoteme.zip",
+            }
+        ],
+    }
+    catalog_bytes = json.dumps(catalog).encode("utf-8")
+    monkeypatch.setenv("VM_PLUGIN_MARKETPLACE_URL", "https://plugins.example/catalog.json")
+
+    def _fake_get(url: str) -> bytes:
+        if url.endswith("catalog.json"):
+            return catalog_bytes
+        if url.endswith("remoteme.zip"):
+            return zip_bytes
+        raise ValueError(f"unexpected url {url}")
+
+    install_root = tmp_path / "install_root"
+    install_root.mkdir()
+    monkeypatch.setenv("VM_PLUGINS_DIR", str(install_root / "plugins"))
+    mgr = PluginManager(app_dir=install_root)
+    monkeypatch.setattr(mgr.marketplace, "_http_get_bytes", _fake_get)
+
+    status = mgr.marketplace.remote_status()
+    assert status["configured"] is True
+    assert status["available"] is True
+    assert status["plugins"][0]["name"] == "remoteme"
+
+    result = mgr.marketplace.install_remote("remoteme")
+    assert result["ok"] is True
+    assert result.get("store") == "remote"
+    assert mgr.get_plugin("remoteme") is not None
+
+    denied = mgr.marketplace.install_from_url("https://evil.example/x.zip")
+    assert denied["ok"] is False
+    assert denied["error"] == "remote_url_not_allowed"
+
+
+def test_invoke_registered_handler(tmp_path):
+    _write_plugin(tmp_path, "inv")
+    mgr = PluginManager(app_dir=tmp_path)
+    mgr.discover(auto_load=True)
+
+    def _handler(x, y=1):
+        return x + y
+
+    mgr.register_capability_handler("utility", "add", _handler, plugin_name="inv")
+    assert mgr.invoke("utility", "add", 2, y=3) == 5
+    assert "add" in mgr.list_registrations("utility")
+
+
 def test_diagnostics(tmp_path):
     _write_plugin(tmp_path, "diag")
     mgr = PluginManager(app_dir=tmp_path)

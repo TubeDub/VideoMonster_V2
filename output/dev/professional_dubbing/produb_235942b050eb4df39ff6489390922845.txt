@@ -1,0 +1,16 @@
+=== PROFESSIONAL DUBBING task=235942b050eb4df39ff6489390922845 ===
+groups=1
+
+--- Group 1 indices=[0] ---
+Original Translation: Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів,<break time="184ms"/> а<break time="184ms"/> якщо необхідно,<break time="184ms"/> то збережемо сюрприз.<break time="350ms"/></speak>
+Segment duration: 4370 ms
+Est TTS before: 9481 ms
+Est TTS after: 10199 ms
+Fill %: 233.4
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -5%
+  Decision: overfill 217.0% → light faster +1% (pauses scaled)

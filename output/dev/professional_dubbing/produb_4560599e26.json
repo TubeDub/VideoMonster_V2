@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "",
+    "groups": 1,
+    "style_id": "professional",
+    "elapsed_sec": 0.003
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {},
+      "plain_text": "Перше речення. Друге, з паузами.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Перше</emphasis> речення.<break time=\"350ms\"/> <emphasis level=\"reduced\">Друге</emphasis>,<break time=\"220ms\"/> з паузами.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-18%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Перше",
+          "type": "name"
+        },
+        {
+          "word": "Друге",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 8000,
+      "est_ms_before": 2370,
+      "est_ms_after": 3882,
+      "fill_percent": 48.5,
+      "underfill": true,
+      "decisions": [
+        "underfill 29.6% → rate -18%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 0,
+        "slot_ms": 8000,
+        "internal_gaps_ms": [],
+        "speech_ratio": 0.0,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    }
+  ]
+}

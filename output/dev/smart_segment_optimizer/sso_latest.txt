@@ -1,0 +1,12 @@
+=== SMART SEGMENT OPTIMIZER V2 task=test ===
+segments=2 changed=0 skipped=2 underfill=2
+
+--- Segment #1 ---
+Original segment duration: 5000 ms
+Original Translation: Hello world.
+SKIPPED: underfill_only (est=888ms fill=17.8%)
+
+--- Segment #2 ---
+Original segment duration: 1000 ms
+Original Translation: Short.
+SKIPPED: underfill_only (est=444ms fill=44.4%)

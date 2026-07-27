@@ -1,0 +1,12 @@
+=== DUBBING ENGINE REPORT task=89965028e8b947c0baafd073b240bdc3 run=63656761 ===
+lang=uk  segments=1  elapsed=0.12s
+adapted=1  skipped=0  strategies={'direct': 0, 'adapted': 0, 'video_adapt': 0, 'merge_next': 1, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=merge_next pred=15526ms slot=4335ms
+       IN : Ми, восьме покоління Лу Ся, невинні. Ми самотні в цей час. Ми шоковані. ти вагіт
+       OUT: Ми, восьме покоління Лу Ся, невинні. Ми самотні в цей час. Ми шоковані. ти вагіт
+       [stress] ok
+       [timing] strategy=merge_next pred=15526ms slot=4335ms prev_end=0ms overflow=258.2% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=15526ms slot=4335ms ratio=3.58; voice_quality_risk: projected_atempo=3.58 (max=1.2) — recomme

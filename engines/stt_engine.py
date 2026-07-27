@@ -50,6 +50,19 @@ def transcribe(
 
         word_timestamps = whisper_word_timestamps_enabled()
 
+    # Prefer small for CJK — but only if prepared (no hard-fail mid-dub).
+    lang0 = str(language or "").split("-")[0].lower()
+    if lang0 in ("zh", "ja", "ko", "yue") and model_size in ("tiny", "base", ""):
+        bumped = _best_prepared_cjk_model(model_size or "tiny")
+        if bumped != (model_size or "tiny"):
+            logger.info(
+                "[STT] CJK lang=%s using Whisper %s (requested %s)",
+                lang0 or "?",
+                bumped,
+                model_size or "tiny",
+            )
+            model_size = bumped
+
     try:
         return _transcribe_faster_whisper(
             audio_path,
@@ -59,29 +72,52 @@ def transcribe(
         )
     except ImportError:
         pass
-    except RuntimeError as exc:
-        # mkl_malloc / OOM — retry with tiny after clearing cache
-        msg = str(exc).lower()
-        if any(t in msg for t in ("mkl_malloc", "failed to allocate", "out of memory", "oom")):
-            logger.error("[STT] Whisper OOM on %s: %s — retry tiny", model_size, exc)
-            try:
-                from engines.model_manager.downloader import clear_whisper_cache
+    except Exception as exc:
+        # CJK bump / missing small must not kill the job — fall back to tiny
+        from engines.model_manager.runtime import ModelNotPreparedError
 
-                clear_whisper_cache()
-                _MODEL_CACHE.clear()
-            except Exception:
-                _MODEL_CACHE.clear()
-            if model_size != "tiny":
+        if isinstance(exc, ModelNotPreparedError) and model_size != "tiny":
+            logger.warning(
+                "[STT] Whisper %s not prepared (%s) — falling back to tiny",
+                model_size,
+                exc,
+            )
+            try:
+                return _transcribe_faster_whisper(
+                    audio_path,
+                    language,
+                    "tiny",
+                    word_timestamps=word_timestamps,
+                )
+            except Exception as retry_exc:
+                logger.error("[STT] tiny fallback failed: %s", retry_exc)
+                raise
+        # mkl_malloc / OOM — retry with tiny after clearing cache
+        if isinstance(exc, RuntimeError):
+            msg = str(exc).lower()
+            if any(
+                t in msg
+                for t in ("mkl_malloc", "failed to allocate", "out of memory", "oom")
+            ):
+                logger.error("[STT] Whisper OOM on %s: %s — retry tiny", model_size, exc)
                 try:
-                    return _transcribe_faster_whisper(
-                        audio_path,
-                        language,
-                        "tiny",
-                        word_timestamps=word_timestamps,
-                    )
-                except Exception as retry_exc:
-                    logger.error("[STT] tiny retry failed: %s", retry_exc)
-            raise
+                    from engines.model_manager.downloader import clear_whisper_cache
+
+                    clear_whisper_cache()
+                    _MODEL_CACHE.clear()
+                except Exception:
+                    _MODEL_CACHE.clear()
+                if model_size != "tiny":
+                    try:
+                        return _transcribe_faster_whisper(
+                            audio_path,
+                            language,
+                            "tiny",
+                            word_timestamps=word_timestamps,
+                        )
+                    except Exception as retry_exc:
+                        logger.error("[STT] tiny retry failed: %s", retry_exc)
+                raise
         raise
 
     try:
@@ -129,6 +165,22 @@ def check_available() -> tuple[bool, str]:
 # ─────────────────────────────────────────────
 
 
+def _best_prepared_cjk_model(requested: str = "tiny") -> str:
+    """Pick the best Whisper size available without mid-run downloads."""
+    from pathlib import Path
+
+    from engines.model_manager.downloader import verify_whisper
+
+    app_dir = Path(__file__).resolve().parent.parent
+    for size in ("small", "base", requested or "tiny", "tiny"):
+        try:
+            if size and verify_whisper(app_dir, size):
+                return size
+        except Exception:
+            continue
+    return "tiny"
+
+
 def _get_faster_model(model_size: str):
     """
     Кэширует модели.
@@ -168,6 +220,40 @@ def _transcribe_faster_whisper(
         word_timestamps=word_timestamps,
     )
 
+    detected = str(getattr(info, "language", language or "unknown") or "unknown")
+    det0 = detected.split("-")[0].lower()
+    # Auto-detect CJK with tiny/base → re-run on best prepared larger model.
+    # Never let a failed upgrade abort the already-good tiny/base pass
+    # (verify_whisper can be optimistic; load may still raise).
+    if (
+        not language
+        and det0 in ("zh", "ja", "ko", "yue")
+        and model_size in ("tiny", "base")
+    ):
+        better = _best_prepared_cjk_model(model_size)
+        if better != model_size:
+            logger.info(
+                "[STT] Re-transcribe with %s after CJK detect=%s (was %s)",
+                better,
+                det0,
+                model_size,
+            )
+            try:
+                return _transcribe_faster_whisper(
+                    audio_path,
+                    det0,
+                    better,
+                    word_timestamps=word_timestamps,
+                )
+            except Exception as upgrade_exc:
+                logger.warning(
+                    "[STT] CJK upgrade %s→%s failed (%s) — keeping %s result",
+                    model_size,
+                    better,
+                    upgrade_exc,
+                    model_size,
+                )
+
     text_lines: list[str] = []
     srt_blocks: list[str] = []
     timing_map: list[dict[str, int]] = []
@@ -202,7 +288,7 @@ def _transcribe_faster_whisper(
         "\n".join(text_lines),
         "\n".join(srt_blocks),
         timing_map,
-        getattr(info, "language", language or "unknown"),
+        detected,
     )
 
 

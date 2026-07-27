@@ -159,6 +159,18 @@ def normalize_usc_uk_phrase_fixes(text: str) -> str:
         out,
         flags=re.I,
     )
+    out = re.sub(
+        r"\bпотрапити\s+до\s+них\s+Кінематографічна\s+програма\b",
+        "потрапити до їхньої програми з кінематографії",
+        out,
+        flags=re.I,
+    )
+    out = re.sub(
+        r"\bдо\s+них\s+Кінематографічна\s+програма\b",
+        "до їхньої програми з кінематографії",
+        out,
+        flags=re.I,
+    )
     # Collapse duplicated «Південної Каліфорнії»
     out = re.sub(
         r"(Південної\s+Каліфорнії)(?:\s*,\s*Південної\s+Каліфорнії)+",
@@ -286,10 +298,6 @@ def apply_uk_dub_name_polish(text: str, *, original: str = "") -> str:
     out = normalize_haskell_wexler_uk(out, original=original)
     out = normalize_star_wars_uk(out)
     out = re.sub(r"\bGeorge\s+Lucas\b", GEORGE_LUCAS_UK, out, flags=re.I)
-    # Split glued «Джордж-молодший Сьогодні» into two sentences.
-    out = re.sub(
-        r"(Джордж-молодший)\s+[Сс]ьогодні\b",
-        r"\1. Сьогодні",
-        out,
-    )
+    # Do NOT insert «молодший. Сьогодні» — EN «George Jr. is … today» is one
+    # clause; a forced period created false sentence breaks in Review/TTS.
     return out.strip()

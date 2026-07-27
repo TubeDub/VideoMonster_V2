@@ -8,14 +8,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="TubeDub"/>
-  <meta name="theme-color" content="#1a1a2e"/>
+  <meta name="theme-color" content="#0b0f16"/>
   <link rel="apple-touch-icon" href="/static/icons/icon-180.png"/>
   <link rel="manifest" href="/static/manifest.json"/>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/static/css/style.css"/>
   {% block extra_head %}{% endblock %}
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 
   <style>
   /* ── TOAST CONTAINER ── */
@@ -28,18 +29,19 @@
   .license-banner {
     display: flex; align-items: center; gap: 12px;
     margin: 0 0 16px; padding: 12px 16px;
-    background: rgba(251, 191, 36, .12);
-    border: 1px solid rgba(251, 191, 36, .35);
-    border-radius: 10px; font-size: 13px; color: var(--text);
+    background: rgba(232, 184, 74, .1);
+    border: 1px solid rgba(232, 184, 74, .32);
+    border-radius: var(--radius-sm); font-size: 13px; color: var(--text);
   }
-  .license-banner-icon { font-size: 18px; }
+  .license-banner-icon { display:inline-flex; align-items:center; opacity: .9; color: var(--amber); }
+  .license-banner-icon svg { display:block; }
   .mod-status-dot {
-    width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex-shrink: 0;
+    width: 7px; height: 7px; border-radius: 50%; margin-left: auto; flex-shrink: 0;
     box-shadow: 0 0 0 1px rgba(0,0,0,.25);
   }
   .nav-label-mod { flex: 1; }
   .mod-exp-badge {
-    font-size: 9px; font-weight: 700; margin-left: 4px; color: #f6ad55;
+    font-size: 9px; font-weight: 700; margin-left: 4px; color: var(--amber);
     vertical-align: super;
   }
   .sidebar-nav .nav-item {
@@ -47,20 +49,12 @@
   }
   .mod-soon-badge {
     font-size: 9px; font-weight: 700; padding: 2px 6px;
-    background: rgba(156,163,175,.18); border: 1px solid rgba(156,163,175,.35);
-    border-radius: 6px; color: #9ca3af; letter-spacing: .03em;
+    background: rgba(156,163,175,.12); border: 1px solid rgba(156,163,175,.28);
+    border-radius: var(--radius-xs); color: var(--text3); letter-spacing: .03em;
     flex-shrink: 0; margin-left: auto;
   }
-  .nav-item.soon-item {
-    opacity: .65;
-  }
-  .nav-item.soon-item:hover {
-    opacity: .85;
-  }
-  /* Active modules get a subtle green tint indicator */
-  .sidebar-nav .nav-item.active {
-    color: #3ecf8e;
-  }
+  .nav-item.soon-item { opacity: .6; }
+  .nav-item.soon-item:hover { opacity: .85; }
   </style>
 </head>
 <body>
@@ -69,17 +63,19 @@
     <!-- ═══ TOPBAR (mobile) ═══ -->
     <header class="topbar">
       <div class="topbar-logo">
-        <span style="font-size:20px;">🎬</span>
-        <span style="font-weight:700;font-size:15px;">TubeDub</span>
+        <span class="logo-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10V6l4 2 4-4 4 3" stroke="#0a1220" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="3" cy="11" r="1.2" fill="#0a1220"/><circle cx="7" cy="9" r="1.2" fill="#0a1220"/><circle cx="11" cy="5" r="1.2" fill="#0a1220"/><circle cx="14" cy="8" r="1.2" fill="#0a1220"/></svg>
+        </span>
+        <span style="font-weight:700;font-size:15px;letter-spacing:-0.02em;">TubeDub</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-        <select id="ui-lang-select" class="select-control" style="width:auto;padding:4px 8px;font-size:12px;" onchange="setUiLang(this.value)" title="Language">
+        <select id="ui-lang-select" class="select-control" style="width:auto;padding:4px 8px;font-size:12px;min-height:32px;" onchange="setUiLang(this.value)" title="Language">
           <option value="ru">RU</option>
           <option value="uk">UK</option>
           <option value="en">EN</option>
           <option value="de">DE</option>
         </select>
-        <button id="mode-toggle-btn" class="mode-btn" onclick="toggleMode()" title="Переключить режим">✨ Просто</button>
+        <button id="mode-toggle-btn" class="mode-btn" onclick="toggleMode()" title="Переключить режим">Просто</button>
         <button class="hamburger" onclick="toggleSidebar()" aria-label="Меню">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
             <rect y="4" width="22" height="2" rx="1" fill="currentColor"/>
@@ -96,32 +92,34 @@
     <!-- ═══ SIDEBAR ═══ -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <span class="logo-icon">🎬</span>
+        <span class="logo-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10V6l4 2 4-4 4 3" stroke="#0a1220" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="3" cy="11" r="1.2" fill="#0a1220"/><circle cx="7" cy="9" r="1.2" fill="#0a1220"/><circle cx="11" cy="5" r="1.2" fill="#0a1220"/><circle cx="14" cy="8" r="1.2" fill="#0a1220"/></svg>
+        </span>
         <span class="logo-text">TubeDub</span>
         <span id="sys-dot" title="Проверка системы…"
-              style="width:8px;height:8px;border-radius:50%;background:#555;
-                     margin-left:auto;flex-shrink:0;transition:background .4s;"
+              style="width:7px;height:7px;border-radius:50%;background:#3a4252;
+                     margin-left:auto;flex-shrink:0;transition:background .35s;"
         ></span>
       </div>
       <nav class="sidebar-nav" id="sidebar-nav-dynamic">
         {# Fallback if JS disabled #}
-        <a href="/" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Главная</span></a>
-        <a href="/dub" class="nav-item"><span class="nav-icon">🎬</span><span class="nav-label">Дубляж</span></a>
-        <a href="/settings" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">Настройки</span></a>
+        <a href="/" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></span><span class="nav-label">Главная</span></a>
+        <a href="/dub" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg></span><span class="nav-label">Дубляж</span></a>
+        <a href="/settings" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="nav-label">Настройки</span></a>
       </nav>
       <div class="sidebar-footer">
         <button type="button" id="sidebar-update-hint" class="vm-update-badge"
           style="display:none;width:100%;justify-content:center;margin-bottom:8px;font-size:11px;padding:7px 10px;"
           title="Доступно обновление"></button>
-        <button class="mode-btn" onclick="toggleMode();closeSidebar();" id="sidebar-mode-btn" style="width:100%;text-align:center;">✨ Просто</button>
-        <div style="margin-top:8px;font-size:11px;color:var(--text2);text-align:center;" data-i18n="app.powered_by">Powered by VideoMonster Engine</div>
+        <button class="mode-btn" onclick="toggleMode();closeSidebar();" id="sidebar-mode-btn" style="width:100%;text-align:center;">Просто</button>
+        <div style="margin-top:4px;font-size:10px;color:var(--text3);text-align:center;letter-spacing:.02em;" data-i18n="app.powered_by">VideoMonster Engine</div>
       </div>
     </aside>
 
     <!-- ═══ MAIN CONTENT ═══ -->
     <main class="main-content{% block main_class %}{% endblock %}">
       <div id="license-banner" class="license-banner" style="display:none;">
-        <span class="license-banner-icon">⏳</span>
+        <span class="license-banner-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
         <span class="license-banner-text"></span>
         <a href="/settings" class="btn btn-sm" style="margin-left:auto;">Настройки</a>
       </div>
@@ -131,19 +129,19 @@
     <!-- ═══ BOTTOM NAV (mobile) ═══ -->
     <nav class="bottom-nav">
       <a href="/" class="bottom-nav-item {% if request.path == '/' %}active{% endif %}">
-        <span class="nav-icon">🏠</span><span>Главная</span>
+        <span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></span><span>Главная</span>
       </a>
       <a href="/dub" class="bottom-nav-item {% if request.path == '/dub' %}active{% endif %}">
-        <span class="nav-icon">🎬</span><span>Дубляж</span>
+        <span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg></span><span>Дубляж</span>
       </a>
       <a href="/translate" class="bottom-nav-item {% if request.path == '/translate' %}active{% endif %}">
-        <span class="nav-icon">🌍</span><span>Перевод</span>
+        <span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span><span>Перевод</span>
       </a>
       <a href="/voice" class="bottom-nav-item {% if request.path == '/voice' %}active{% endif %}">
-        <span class="nav-icon">🔊</span><span>Озвучка</span>
+        <span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a4 4 0 0 1 0 7"/></svg></span><span>Озвучка</span>
       </a>
       <a href="/projects" class="bottom-nav-item {% if request.path == '/projects' %}active{% endif %}">
-        <span class="nav-icon">📁</span><span>Проекты</span>
+        <span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7V5a2 2 0 0 1 2-2h4l2 2"/></svg></span><span>Проекты</span>
       </a>
     </nav>
 
@@ -152,7 +150,7 @@
   <!-- ═══ FIRST-RUN PREPARATION SCREEN ═══ -->
   <div id="tubedub-prepare-overlay" style="display:none;">
     <div class="tdp-card">
-      <div class="tdp-logo">🎬 TubeDub</div>
+      <div class="tdp-logo">TubeDub</div>
       <div class="tdp-title">Добро пожаловать в TubeDub</div>
       <div class="tdp-sub" id="tdp-sub">Подготавливаем программу…</div>
       <div class="tdp-bar"><div class="tdp-bar-fill" id="tdp-bar-fill"></div></div>
@@ -169,39 +167,39 @@
   <style>
     #tubedub-prepare-overlay{position:fixed;inset:0;z-index:99999;display:flex;
       align-items:center;justify-content:center;
-      background:radial-gradient(120% 120% at 50% 0%,#1a1d29 0%,#0c0e16 100%);
-      transition:opacity .5s ease;}
+      background:radial-gradient(100% 80% at 50% 0%,#121a27 0%,#0b0f16 70%);
+      transition:opacity .45s ease;}
     #tubedub-prepare-overlay.tdp-hide{opacity:0;pointer-events:none;}
-    .tdp-card{width:min(440px,90vw);padding:34px 30px;border-radius:18px;
-      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-      box-shadow:0 24px 80px rgba(0,0,0,.55);text-align:center;color:#e8eaf0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
-    .tdp-logo{font-size:15px;letter-spacing:.5px;opacity:.7;margin-bottom:18px;}
-    .tdp-title{font-size:22px;font-weight:700;margin-bottom:6px;}
-    .tdp-sub{font-size:13px;color:#9aa0b4;margin-bottom:22px;min-height:18px;}
-    .tdp-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);
-      overflow:hidden;margin-bottom:22px;}
-    .tdp-bar-fill{height:100%;width:0;border-radius:6px;
-      background:linear-gradient(90deg,#6c8cff,#9b6cff);transition:width .4s ease;}
+    .tdp-card{width:min(420px,90vw);padding:32px 28px;border-radius:12px;
+      background:#121a27;border:1px solid rgba(255,255,255,.07);
+      box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center;color:#e8edf5;
+      font-family:"Plus Jakarta Sans",system-ui,sans-serif;}
+    .tdp-logo{font-size:13px;font-weight: 600;letter-spacing:.04em;opacity:.55;margin-bottom:16px;text-transform:uppercase;}
+    .tdp-title{font-size:20px;font-weight:700;margin-bottom:6px;letter-spacing:-0.02em;}
+    .tdp-sub{font-size:13px;color:#8b97ab;margin-bottom:20px;min-height:18px;}
+    .tdp-bar{height:4px;border-radius:4px;background:rgba(255,255,255,.08);
+      overflow:hidden;margin-bottom:20px;}
+    .tdp-bar-fill{height:100%;width:0;border-radius:4px;
+      background:#5b9cf5;transition:width .35s ease;}
     .tdp-list{list-style:none;margin:0;padding:0;text-align:left;}
-    .tdp-list li{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;font-size:14px;
-      padding:7px 2px;color:#c7cbd9;}
-    .tdp-list li .tdp-ic{width:20px;text-align:center;font-size:14px;}
-    .tdp-list li.pending .tdp-ic{color:#6c8cff;animation:tdpspin 1s linear infinite;}
-    .tdp-list li.ready{color:#e8eaf0;}
+    .tdp-list li{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;font-size:13px;
+      padding:7px 2px;color:#c4ccd8;}
+    .tdp-list li .tdp-ic{width:18px;text-align:center;font-size:13px;}
+    .tdp-list li.pending .tdp-ic{color:#5b9cf5;animation:tdpspin 1s linear infinite;}
+    .tdp-list li.ready{color:#e8edf5;}
     .tdp-list li.ready .tdp-ic{color:#3ecf8e;}
-    .tdp-list li.optional .tdp-ic{color:#7a809a;}
-    .tdp-done{margin-top:18px;font-size:18px;font-weight:700;color:#3ecf8e;}
-    .tdp-list li.error{color:#f56565;}
-    .tdp-list li.active{color:#e8eaf0;}
-    .tdp-list li .tdp-pct{font-variant-numeric:tabular-nums;color:#9aa0b4;font-size:11px;min-width:36px;text-align:right;}
-    .tdp-list li .tdp-msg{flex-basis:100%;padding-left:30px;}
-    .tdp-wait{font-size:12px;color:#f6ad55;margin:8px 0 0;min-height:16px;}
-    .tdp-error{font-size:12px;color:#f56565;margin:10px 0 0;}
+    .tdp-list li.optional .tdp-ic{color:#5f6b7e;}
+    .tdp-done{margin-top:16px;font-size:16px;font-weight:700;color:#3ecf8e;}
+    .tdp-list li.error{color:#f07178;}
+    .tdp-list li.active{color:#e8edf5;}
+    .tdp-list li .tdp-pct{font-variant-numeric:tabular-nums;color:#8b97ab;font-size:11px;min-width:36px;text-align:right;font-family:"IBM Plex Mono",monospace;}
+    .tdp-list li .tdp-msg{flex-basis:100%;padding-left:28px;font-size:12px;color:#8b97ab;}
+    .tdp-wait{font-size:12px;color:#e8b84a;margin:8px 0 0;min-height:16px;}
+    .tdp-error{font-size:12px;color:#f07178;margin:10px 0 0;}
     .tdp-actions{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
-    .tdp-btn{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e8eaf0;
-      border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;}
-    .tdp-btn:hover{background:rgba(255,255,255,.1);}
+    .tdp-btn{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e8edf5;
+      border-radius:8px;padding:8px 14px;font-size:12px;font-family:inherit;cursor:pointer;}
+    .tdp-btn:hover{background:rgba(255,255,255,.09);}
     @keyframes tdpspin{to{transform:rotate(360deg)}}
   </style>
   <script>
@@ -313,6 +311,7 @@
   <div id="vm-notify-container"></div>
   <input type="file" id="vm-universal-import-input" style="display:none;" accept=".mp4,.mkv,.mov,.avi,.webm,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.wma,.aiff,.amr,.ac3,.ape,.srt,.vtt,.ass,.ssa,.txt"/>
 
+  <script src="/static/js/ui_icons.js"></script>
   <script src="/static/js/i18n.js"></script>
   <script src="/static/js/license.js"></script>
   <script src="/static/js/main.js"></script>
@@ -360,5 +359,6 @@
   });
   </script>
   {% block scripts %}{% endblock %}
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

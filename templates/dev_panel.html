@@ -3,24 +3,24 @@
 {% block extra_head %}
 <style>
 .ff-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-bottom:16px; }
-.ff-stat { padding:14px; border-radius:8px; background:var(--card); border:1px solid var(--border); }
+.ff-stat { padding:14px; border-radius:var(--radius-sm); background:var(--card); border:1px solid var(--border); }
 .ff-stat .val { font-size:22px; font-weight:700; }
 .ff-table { width:100%; border-collapse:collapse; font-size:12px; }
 .ff-table th, .ff-table td { padding:8px 6px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle; }
 .ff-dot { width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px; }
 .ff-actions { display:flex; flex-wrap:wrap; gap:4px; }
 .ff-actions button { font-size:10px; padding:3px 6px; }
-.ff-log { font-family:monospace; font-size:11px; max-height:220px; overflow:auto; background:#111; padding:10px; border-radius:6px; }
+.ff-log { font-family:var(--font-mono); font-size:11px; max-height:220px; overflow:auto; background:var(--bg); padding:10px; border-radius:var(--radius-xs); }
 </style>
 {% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>🚩 Developer Panel</h1>
+  <h1>Developer Panel</h1>
   <p class="subtitle">Feature Flags — безопасное включение модулей TubeDub</p>
 </div>
 
 <div id="ff-blocked" class="card" style="display:none;padding:20px;">
-  <p>Доступно только в <strong>режиме разработчика</strong> (🔧 Dev + owner host).</p>
+  <p>Доступно только в <strong>режиме разработчика</strong> (Dev + owner host).</p>
 </div>
 
 <div id="ff-panel" style="display:none;">

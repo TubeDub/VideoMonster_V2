@@ -1,0 +1,75 @@
+{
+  "task_id": "1258b2b68dcd4f2ca96b704124f260d5",
+  "run_id": "f9fb0696",
+  "lang": "uk",
+  "elapsed_sec": 0.086,
+  "segments_total": 1,
+  "segments_adapted": 1,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 0,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 1,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "我们入家八代单纯 此次担保 如今啊 你怀孕了 入家有后了 要是能一己得难 那就更完美了 那就更完美了 妈 只要是我一身的 无论是人是你 我都喜欢 请怀孕哥哥 我",
+      "input": "Ми в родині осма покоління працювали над простотою. Це раз гаряча гарячка: тепер",
+      "output": "Ми в родині осма покоління працювали над простотою. Це раз гаряча гарячка: тепер",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 28846,
+      "slot_ms": 4603,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": true,
+          "note": "added_terminal_period"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=28846ms slot=4603ms prev_end=0ms overflow=526.7% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=28846ms slot=4603ms ratio=6.27",
+        "voice_quality_risk: projected_atempo=6.27 (max=1.2) — recommend text adaptation"
+      ]
+    }
+  ]
+}

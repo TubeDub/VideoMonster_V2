@@ -123,8 +123,12 @@ function canWizardAdvance(stepKey) {
   switch (stepKey) {
     case 'video':
       return !!state.filename;
-    case 'lang':
-      return !!document.getElementById('target-lang')?.value;
+    case 'lang': {
+      if (!document.getElementById('target-lang')?.value) return false;
+      const manual = document.getElementById('source-manual')?.checked;
+      if (manual && !document.getElementById('source-lang')?.value) return false;
+      return true;
+    }
     case 'voice':
       return !!(state.selectedVoice || document.getElementById('voice-select')?.value);
     case 'content':
@@ -170,10 +174,23 @@ function updateWizardNav() {
     backBtn.style.display = showBack ? '' : 'none';
     backBtn.disabled = busy;
   }
+  const nextBtn = document.getElementById('btn-wizard-next');
+  if (nextBtn) {
+    const showNext = onFlow && !onStartStep && !busy;
+    nextBtn.hidden = !showNext;
+    nextBtn.style.display = showNext ? '' : 'none';
+    nextBtn.disabled = busy;
+  }
   const startBtn = document.getElementById('btn-start-dub');
   if (startBtn) {
     if (onFlow && onStartStep) {
-      startBtn.disabled = busy || !state.filename;
+      const ready =
+        !!state.filename &&
+        canWizardAdvance('lang') &&
+        canWizardAdvance('voice') &&
+        canWizardAdvance('content') &&
+        canWizardAdvance('style');
+      startBtn.disabled = busy || !ready;
     }
   }
   if (cancelBtn) {
@@ -476,9 +493,39 @@ function wizardPickStyle(styleId) {
   wizardAdvanceFrom('style');
 }
 
+function syncWizardModelSize(fromUi) {
+  const hidden = document.getElementById('model-size');
+  const ui = document.getElementById('wizard-model-size');
+  if (!hidden || !ui) return;
+  const allowed = ['tiny', 'base', 'small', 'medium', 'large'];
+  if (fromUi) {
+    let v = String(ui.value || 'medium');
+    if (!allowed.includes(v)) v = 'medium';
+    hidden.value = v;
+    ui.value = v;
+    try {
+      const s = typeof loadSettings === 'function' ? loadSettings() : {};
+      s.whisperSize = v;
+      localStorage.setItem('vm_settings', JSON.stringify(s));
+    } catch (_) {}
+  } else {
+    let v = String(hidden.value || 'medium');
+    try {
+      const s = typeof loadSettings === 'function' ? loadSettings() : {};
+      if (s.whisperSize && allowed.includes(String(s.whisperSize))) {
+        v = String(s.whisperSize);
+      }
+    } catch (_) {}
+    if (!allowed.includes(v)) v = 'medium';
+    hidden.value = v;
+    ui.value = v;
+  }
+}
+
 function updateWizardSummary() {
   const box = document.getElementById('wizard-summary');
   if (!box) return;
+  syncWizardModelSize(false);
   const langs = window.VM_LANGUAGES || {};
   const tgt = document.getElementById('target-lang')?.value || '';
   const langName = Object.entries(langs).find(([, code]) => code === tgt)?.[0] || tgt;
@@ -492,6 +539,7 @@ function updateWizardSummary() {
   const styleName = styleRow
     ? t(styleRow.i18n_key || `dub.style_${styleId}`, styleId)
     : styleId;
+  const whisper = document.getElementById('model-size')?.value || 'medium';
   box.innerHTML = `
     <dl class="wizard-summary-list">
       <dt>${escHtml(t('dub.video', 'Видео'))}</dt>
@@ -504,6 +552,8 @@ function updateWizardSummary() {
       <dd data-delay-tooltip="${escHtml(contentLabel)}">${escHtml(contentLabel)}</dd>
       <dt>${escHtml(t('dub.voice_style', 'Стиль'))}</dt>
       <dd data-delay-tooltip="${escHtml(styleName)}">${escHtml(styleName)}</dd>
+      <dt>${escHtml(t('dub.whisper_model', 'Whisper'))}</dt>
+      <dd data-delay-tooltip="${escHtml(whisper)}">${escHtml(whisper)}</dd>
     </dl>`;
   bindDelayedTooltips(box);
 }
@@ -1326,12 +1376,32 @@ function setSourceMode(mode) {
   const sel = document.getElementById('source-lang');
   const detectedRow = document.getElementById('detected-lang-row');
   const isAuto = mode === 'auto';
-  sel.disabled = isAuto;
-  sel.style.display = isAuto ? 'none' : 'inline-block';
+  const autoRadio = document.getElementById('source-auto');
+  const manualRadio = document.getElementById('source-manual');
+  if (autoRadio) autoRadio.checked = isAuto;
+  if (manualRadio) manualRadio.checked = !isAuto;
+  if (sel) {
+    sel.disabled = isAuto;
+    sel.style.display = isAuto ? 'none' : 'inline-block';
+  }
   if (detectedRow && isAuto && detectedRow.dataset.langCode) {
     detectedRow.style.display = 'block';
   } else if (detectedRow && !isAuto) {
     detectedRow.style.display = 'none';
+  }
+  const wizAuto = document.getElementById('wizard-source-auto');
+  const wizManual = document.getElementById('wizard-source-manual');
+  const wizSel = document.getElementById('wizard-source-lang-select');
+  const wizDetected = document.getElementById('wizard-detected-lang');
+  if (wizAuto) wizAuto.checked = isAuto;
+  if (wizManual) wizManual.checked = !isAuto;
+  if (wizSel) {
+    wizSel.style.display = isAuto ? 'none' : 'block';
+    wizSel.disabled = isAuto;
+    if (sel && sel.value) wizSel.value = sel.value;
+  }
+  if (wizDetected) {
+    wizDetected.style.display = (isAuto && detectedRow && detectedRow.dataset.langCode) ? 'block' : 'none';
   }
 }
 
@@ -1345,11 +1415,54 @@ function updateDetectedLangDisplay(code, name) {
   const displayName = name || code;
   label.textContent = displayName;
   row.dataset.langCode = code;
-  row.style.display = document.getElementById('source-auto').checked ? 'block' : 'none';
+  row.style.display = document.getElementById('source-auto')?.checked ? 'block' : 'none';
 
   if (sel) {
     const opt = Array.from(sel.options).find(o => o.value === code);
     if (opt) sel.value = code;
+  }
+  const wizName = document.getElementById('wizard-detected-lang-name');
+  const wizDetected = document.getElementById('wizard-detected-lang');
+  const wizSel = document.getElementById('wizard-source-lang-select');
+  if (wizName) wizName.textContent = displayName;
+  if (wizDetected) {
+    wizDetected.style.display = document.getElementById('source-auto')?.checked ? 'block' : 'none';
+  }
+  if (wizSel && sel) wizSel.value = sel.value;
+}
+
+function initWizardSourceLang() {
+  const hidden = document.getElementById('source-lang');
+  const wizSel = document.getElementById('wizard-source-lang-select');
+  if (hidden && wizSel && !wizSel.options.length) {
+    Array.from(hidden.options).forEach(opt => {
+      const o = document.createElement('option');
+      o.value = opt.value;
+      o.textContent = opt.textContent;
+      wizSel.appendChild(o);
+    });
+    if (hidden.value) wizSel.value = hidden.value;
+  }
+  const wizAuto = document.getElementById('wizard-source-auto');
+  const wizManual = document.getElementById('wizard-source-manual');
+  if (wizAuto) {
+    wizAuto.addEventListener('change', () => {
+      if (wizAuto.checked) setSourceMode('auto');
+    });
+  }
+  if (wizManual) {
+    wizManual.addEventListener('change', () => {
+      if (wizManual.checked) setSourceMode('manual');
+    });
+  }
+  if (wizSel) {
+    wizSel.addEventListener('change', () => {
+      if (hidden) {
+        hidden.value = wizSel.value;
+        hidden.dispatchEvent(new Event('change'));
+      }
+      setSourceMode('manual');
+    });
   }
 }
 
@@ -1439,7 +1552,12 @@ function renderProgressSteps(currentStep, status) {
 
 function getStyleVolumePct(styleId) {
   const row = dubStylesState.styles.find(s => s.id === styleId);
-  if (row && row.original_volume_pct != null) return row.original_volume_pct;
+  if (row && row.original_volume_pct != null) return Number(row.original_volume_pct) || 0;
+  // full_dub styles default to mute — never invent 20%
+  if (styleId === 'cinematic' || styleId === 'modern' || styleId === 'professional'
+      || styleId === 'cinema' || styleId === 'full_dub') {
+    return 0;
+  }
   return 20;
 }
 
@@ -1639,19 +1757,29 @@ function setOriginalVolumePct(pct, fromPreset) {
 
 function getStylePayload() {
   // Prefer explicit user volume: review → wizard → hidden slider → settings.
+  const styleId = getSelectedDubStyle();
+  const styleDefault = getStyleVolumePct(styleId);
   let vol = null;
   if (document.getElementById('tr-original-volume')) {
     vol = getReviewOriginalVolumePct();
   } else if (document.getElementById('wizard-original-volume')) {
-    vol = Number(document.getElementById('wizard-original-volume').value) || 0;
+    vol = Number(document.getElementById('wizard-original-volume').value);
+    if (!Number.isFinite(vol)) vol = null;
   } else {
     vol = getOriginalVolumePct();
   }
   const saved = loadSavedOriginalVolumePct();
-  if ((vol == null || !Number.isFinite(vol)) && saved != null) vol = saved;
-  if (vol == null || !Number.isFinite(vol)) vol = 20;
+  // Mute styles: ignore stale saved 20% unless user marked slider custom
+  const slider = document.getElementById('original-volume');
+  const userCustom = slider && slider.dataset.custom === '1';
+  if (styleDefault <= 0 && !userCustom && (vol == null || vol <= 25)) {
+    vol = 0;
+  } else if ((vol == null || !Number.isFinite(vol)) && saved != null) {
+    vol = saved;
+  }
+  if (vol == null || !Number.isFinite(vol)) vol = styleDefault;
   return {
-    dub_style: getSelectedDubStyle(),
+    dub_style: styleId,
     original_volume: vol,
     keep_original_track: document.getElementById('keep-original-track').checked,
   };
@@ -1868,9 +1996,12 @@ async function runComponentPrepare() {
   const sourceAuto = document.getElementById('source-auto')?.checked;
   const uiLang = localStorage.getItem('vm_ui_lang') || 'ru';
   const opts = {
-    source_lang: sourceAuto ? 'en' : (document.getElementById('source-lang')?.value || 'en'),
+    source_lang: sourceAuto ? null : (document.getElementById('source-lang')?.value || null),
     target_lang: document.getElementById('target-lang')?.value || 'ru',
-    whisper_size: document.getElementById('model-size')?.value || 'tiny',
+    whisper_size: (function () {
+      if (typeof syncWizardModelSize === 'function') syncWizardModelSize(true);
+      return document.getElementById('model-size')?.value || 'medium';
+    })(),
     feature: 'dub',
     ui_lang: uiLang,
   };
@@ -1982,7 +2113,10 @@ async function startDub() {
     source_lang: sourceAuto ? null : document.getElementById('source-lang').value,
     voice: state.selectedVoice || document.getElementById('voice-select').value,
     tts_engine: (document.getElementById('tts-engine') || {}).value || 'edge-offline',
-    model_size: document.getElementById('model-size').value,
+    model_size: (function () {
+      if (typeof syncWizardModelSize === 'function') syncWizardModelSize(true);
+      return document.getElementById('model-size')?.value || 'medium';
+    })(),
     ui_lang: uiLang,
     content_mode: (document.getElementById('content-mode') || {}).value || 'movie',
     segmentation_mode: (document.getElementById('segmentation-mode') || {}).value || 'adaptive',
@@ -3351,8 +3485,23 @@ function finishSuccess(outputFile, subtitleFile, studioUrl) {
     previewBtn.dataset.outputFile = outputFile || '';
   }
 
+  const resolvedStudioUrl =
+    studioUrl ||
+    state.studioUrl ||
+    (state.taskId ? ('/studio?task_id=' + encodeURIComponent(state.taskId)) : null);
+  if (resolvedStudioUrl) state.studioUrl = resolvedStudioUrl;
   const studioBtn = document.getElementById('btn-open-studio');
-  if (studioBtn) studioBtn.style.display = 'none';
+  if (studioBtn) {
+    if (resolvedStudioUrl) {
+      studioBtn.style.display = 'inline-block';
+      studioBtn.onclick = function () {
+        window.location.href = resolvedStudioUrl;
+      };
+    } else {
+      studioBtn.style.display = 'none';
+      studioBtn.onclick = null;
+    }
+  }
 
   const subLink = document.getElementById('subtitle-download-link');
   if (subLink) {
@@ -4082,7 +4231,25 @@ function tryResumeTask() {
       .then(r => r.json())
       .then(d => {
         if (d.error || d.status === 'error') {
-          localStorage.removeItem('vm_active_task');
+          const errMsg =
+            d.error ||
+            d.message ||
+            d.reason ||
+            t('dub.resume_failed', 'Предыдущий дубляж завершился с ошибкой.');
+          state.taskId = task.taskId;
+          try {
+            finishError(
+              errMsg,
+              d.diagnostic_block || null,
+              d.pipeline_error || null,
+              d.openddf_developer || null,
+              d.openddf_artifacts || null,
+              d.passive_openddf || null,
+              d.run_id || task.taskId
+            );
+          } catch (_) {
+            localStorage.removeItem('vm_active_task');
+          }
           return;
         }
         if (d.status === 'studio_ready') {
@@ -4139,9 +4306,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('source-auto').addEventListener('change', () => setSourceMode('auto'));
   updateInspectorButtonVisibility();
   document.getElementById('source-manual').addEventListener('change', () => setSourceMode('manual'));
+  initWizardSourceLang();
   setSourceMode(document.getElementById('source-auto').checked ? 'auto' : 'manual');
   document.getElementById('btn-start-dub').addEventListener('click', startDub);
   document.getElementById('btn-wizard-back')?.addEventListener('click', wizardGoBack);
+  document.getElementById('btn-wizard-next')?.addEventListener('click', wizardGoNext);
   document.getElementById('btn-wizard-cancel')?.addEventListener('click', wizardCancelSetup);
   document.getElementById('btn-progress-cancel')?.addEventListener('click', cancelDubOperation);
   document.getElementById('btn-preview-output')?.addEventListener('click', openOutputPreview);
@@ -4153,6 +4322,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (strictSel && saved.strictLlmAdaptation) strictSel.value = saved.strictLlmAdaptation;
   if (strictSel) strictSel.addEventListener('change', checkAdaptationCapabilities);
   checkAdaptationCapabilities();
+  syncWizardModelSize(false);
+  document.getElementById('wizard-model-size')?.addEventListener('change', () => {
+    syncWizardModelSize(true);
+    updateWizardSummary();
+  });
 
   bindReviewOriginalMixControls();
   const savedOrigVol = loadSavedOriginalVolumePct();

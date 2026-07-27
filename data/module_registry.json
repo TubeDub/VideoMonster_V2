@@ -4,9 +4,14 @@
   "modules": [
     {
       "id": "home",
-      "name": { "ru": "Главная", "uk": "Головна", "en": "Home", "de": "Startseite" },
+      "name": {
+        "ru": "Главная",
+        "uk": "Головна",
+        "en": "Home",
+        "de": "Startseite"
+      },
       "route": "/",
-      "icon": "🏠",
+      "icon": "home",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -17,37 +22,50 @@
     },
     {
       "id": "studio",
-      "name": { "ru": "Dub Studio", "uk": "Dub Studio", "en": "Dub Studio", "de": "Dub Studio" },
-      "route": "/soon/dub-studio",
-      "icon": "🎙️",
-      "status": "development",
+      "name": {
+        "ru": "Dub Studio",
+        "uk": "Dub Studio",
+        "en": "Dub Studio",
+        "de": "Dub Studio"
+      },
+      "route": "/studio",
+      "icon": "mic",
+      "status": "beta",
       "visible_to_users": true,
       "show_in_menu": true,
-      "show_experimental_badge": false,
+      "show_experimental_badge": true,
       "pro_only": false,
       "kind": "page",
-      "coming_soon": true,
       "i18n_key": "nav.studio"
     },
     {
       "id": "voice",
-      "name": { "ru": "Voice Studio", "uk": "Voice Studio", "en": "Voice Studio", "de": "Voice Studio" },
-      "route": "/soon/voice-studio",
-      "icon": "🎤",
-      "status": "development",
+      "name": {
+        "ru": "Voice Studio",
+        "uk": "Voice Studio",
+        "en": "Voice Studio",
+        "de": "Voice Studio"
+      },
+      "route": "/voice",
+      "icon": "speaker",
+      "status": "beta",
       "visible_to_users": true,
       "show_in_menu": true,
-      "show_experimental_badge": false,
+      "show_experimental_badge": true,
       "pro_only": false,
       "kind": "page",
-      "coming_soon": true,
       "i18n_key": "nav.voice"
     },
     {
       "id": "translate",
-      "name": { "ru": "Переводчик", "uk": "Перекладач", "en": "Translator", "de": "Übersetzer" },
+      "name": {
+        "ru": "Переводчик",
+        "uk": "Перекладач",
+        "en": "Translator",
+        "de": "Übersetzer"
+      },
       "route": "/translate",
-      "icon": "🌍",
+      "icon": "globe",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -58,9 +76,14 @@
     },
     {
       "id": "dub",
-      "name": { "ru": "Дубляж", "uk": "Дубляж", "en": "Dubbing", "de": "Synchronisation" },
+      "name": {
+        "ru": "Дубляж",
+        "uk": "Дубляж",
+        "en": "Dubbing",
+        "de": "Synchronisation"
+      },
       "route": "/dub",
-      "icon": "🎬",
+      "icon": "film",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -71,9 +94,13 @@
     },
     {
       "id": "live_translation",
-      "name": { "ru": "Live Translation", "uk": "Live Translation", "en": "Live Translation" },
+      "name": {
+        "ru": "Live Translation",
+        "uk": "Live Translation",
+        "en": "Live Translation"
+      },
       "route": "/platform/live",
-      "icon": "⚡",
+      "icon": "bolt",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -85,9 +112,13 @@
     },
     {
       "id": "media_browser",
-      "name": { "ru": "Media Browser", "uk": "Media Browser", "en": "Media Browser" },
+      "name": {
+        "ru": "Media Browser",
+        "uk": "Media Browser",
+        "en": "Media Browser"
+      },
       "route": "/platform",
-      "icon": "📺",
+      "icon": "monitor",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -99,9 +130,13 @@
     },
     {
       "id": "streaming",
-      "name": { "ru": "Streaming", "uk": "Streaming", "en": "Streaming" },
+      "name": {
+        "ru": "Streaming",
+        "uk": "Streaming",
+        "en": "Streaming"
+      },
       "route": "/platform/streaming",
-      "icon": "📡",
+      "icon": "broadcast",
       "status": "beta",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -113,9 +148,13 @@
     },
     {
       "id": "ai_live_dub",
-      "name": { "ru": "AI Live Dub", "uk": "AI Live Dub", "en": "AI Live Dub" },
+      "name": {
+        "ru": "AI Live Dub",
+        "uk": "AI Live Dub",
+        "en": "AI Live Dub"
+      },
       "route": "/platform/broadcast",
-      "icon": "🔴",
+      "icon": "record",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -127,9 +166,13 @@
     },
     {
       "id": "recording_studio",
-      "name": { "ru": "Recording Studio", "uk": "Recording Studio", "en": "Recording Studio" },
+      "name": {
+        "ru": "Recording Studio",
+        "uk": "Recording Studio",
+        "en": "Recording Studio"
+      },
       "route": "/platform/recording",
-      "icon": "🎚️",
+      "icon": "sliders",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -141,9 +184,13 @@
     },
     {
       "id": "voice_trainer",
-      "name": { "ru": "Voice Trainer", "uk": "Voice Trainer", "en": "Voice Trainer" },
+      "name": {
+        "ru": "Voice Trainer",
+        "uk": "Voice Trainer",
+        "en": "Voice Trainer"
+      },
       "route": "/platform/voice-training",
-      "icon": "🗣️",
+      "icon": "waveform",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -155,9 +202,13 @@
     },
     {
       "id": "music_coach",
-      "name": { "ru": "Music Coach", "uk": "Music Coach", "en": "Music Coach" },
+      "name": {
+        "ru": "Music Coach",
+        "uk": "Music Coach",
+        "en": "Music Coach"
+      },
       "route": "/platform/vocal-training",
-      "icon": "🎵",
+      "icon": "music",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -169,9 +220,13 @@
     },
     {
       "id": "ai_studio",
-      "name": { "ru": "AI Studio", "uk": "AI Studio", "en": "AI Studio" },
+      "name": {
+        "ru": "AI Studio",
+        "uk": "AI Studio",
+        "en": "AI Studio"
+      },
       "route": "/platform",
-      "icon": "🌐",
+      "icon": "spark",
       "status": "disabled",
       "visible_to_users": false,
       "show_in_menu": false,
@@ -182,9 +237,14 @@
     },
     {
       "id": "reader",
-      "name": { "ru": "Reader", "uk": "Reader", "en": "Reader", "de": "Reader" },
+      "name": {
+        "ru": "Reader",
+        "uk": "Reader",
+        "en": "Reader",
+        "de": "Reader"
+      },
       "route": "/reader",
-      "icon": "📖",
+      "icon": "book",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -195,9 +255,14 @@
     },
     {
       "id": "projects",
-      "name": { "ru": "Проекты", "uk": "Проєкти", "en": "Projects", "de": "Projekte" },
+      "name": {
+        "ru": "Проекты",
+        "uk": "Проєкти",
+        "en": "Projects",
+        "de": "Projekte"
+      },
       "route": "/projects",
-      "icon": "📁",
+      "icon": "folder",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -208,9 +273,14 @@
     },
     {
       "id": "settings",
-      "name": { "ru": "Настройки", "uk": "Налаштування", "en": "Settings", "de": "Einstellungen" },
+      "name": {
+        "ru": "Настройки",
+        "uk": "Налаштування",
+        "en": "Settings",
+        "de": "Einstellungen"
+      },
       "route": "/settings",
-      "icon": "⚙️",
+      "icon": "settings",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -221,9 +291,14 @@
     },
     {
       "id": "ai_sources",
-      "name": { "ru": "AI Sources", "uk": "AI Sources", "en": "AI Sources", "de": "AI Sources" },
+      "name": {
+        "ru": "AI Sources",
+        "uk": "AI Sources",
+        "en": "AI Sources",
+        "de": "AI Sources"
+      },
       "route": "/ai/sources",
-      "icon": "🧠",
+      "icon": "brain",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -234,9 +309,14 @@
     },
     {
       "id": "ai_settings",
-      "name": { "ru": "AI Settings", "uk": "AI Settings", "en": "AI Settings", "de": "AI Settings" },
+      "name": {
+        "ru": "AI Settings",
+        "uk": "AI Settings",
+        "en": "AI Settings",
+        "de": "AI Settings"
+      },
       "route": "/ai/settings",
-      "icon": "🤖",
+      "icon": "cpu",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -247,65 +327,89 @@
     },
     {
       "id": "ai_director",
-      "name": { "ru": "AI Director", "uk": "AI Director", "en": "AI Director", "de": "AI Director" },
-      "route": "/soon/ai-director",
-      "icon": "🎬",
-      "status": "development",
+      "name": {
+        "ru": "AI Director",
+        "uk": "AI Director",
+        "en": "AI Director",
+        "de": "AI Director"
+      },
+      "route": "/director",
+      "icon": "clapper",
+      "status": "beta",
       "visible_to_users": true,
       "show_in_menu": true,
-      "show_experimental_badge": false,
+      "show_experimental_badge": true,
       "pro_only": false,
       "kind": "page",
-      "coming_soon": true,
+      "feature_id": "ai_director",
       "i18n_key": "nav.ai_director"
     },
     {
       "id": "live_stream_soon",
-      "name": { "ru": "Live Stream", "uk": "Live Stream", "en": "Live Stream", "de": "Live Stream" },
-      "route": "/soon/live",
-      "icon": "📡",
-      "status": "development",
+      "name": {
+        "ru": "Live Stream",
+        "uk": "Live Stream",
+        "en": "Live Stream",
+        "de": "Live Stream"
+      },
+      "route": "/platform/live",
+      "icon": "broadcast",
+      "status": "beta",
       "visible_to_users": true,
       "show_in_menu": true,
-      "show_experimental_badge": false,
+      "show_experimental_badge": true,
       "pro_only": false,
       "kind": "page",
-      "coming_soon": true,
+      "platform_key": "live",
+      "feature_id": "live_translation",
       "i18n_key": "nav.live_stream"
     },
     {
       "id": "cloud_soon",
-      "name": { "ru": "Cloud", "uk": "Cloud", "en": "Cloud", "de": "Cloud" },
-      "route": "/soon/cloud",
-      "icon": "☁️",
-      "status": "development",
+      "name": {
+        "ru": "Cloud",
+        "uk": "Cloud",
+        "en": "Cloud",
+        "de": "Cloud"
+      },
+      "route": "/cloud",
+      "icon": "cloud",
+      "status": "beta",
       "visible_to_users": true,
       "show_in_menu": true,
-      "show_experimental_badge": false,
+      "show_experimental_badge": true,
       "pro_only": false,
       "kind": "page",
-      "coming_soon": true,
+      "feature_id": "cloud_platform",
       "i18n_key": "nav.cloud"
     },
     {
       "id": "plugin_store",
-      "name": { "ru": "Plugin Store", "uk": "Plugin Store", "en": "Plugin Store", "de": "Plugin Store" },
-      "route": "/soon/plugins",
-      "icon": "🛍️",
-      "status": "development",
+      "name": {
+        "ru": "Plugin Store",
+        "uk": "Plugin Store",
+        "en": "Plugin Store",
+        "de": "Plugin Store"
+      },
+      "route": "/plugins",
+      "icon": "store",
+      "status": "beta",
       "visible_to_users": true,
       "show_in_menu": true,
-      "show_experimental_badge": false,
+      "show_experimental_badge": true,
       "pro_only": false,
       "kind": "page",
-      "coming_soon": true,
       "i18n_key": "nav.plugin_store"
     },
     {
       "id": "import",
-      "name": { "ru": "Универсальный импорт", "uk": "Університальний імпорт", "en": "Universal Import" },
+      "name": {
+        "ru": "Универсальный импорт",
+        "uk": "Університальний імпорт",
+        "en": "Universal Import"
+      },
       "route": "",
-      "icon": "📥",
+      "icon": "import",
       "status": "stable",
       "visible_to_users": true,
       "show_in_menu": true,
@@ -316,9 +420,13 @@
     },
     {
       "id": "module_manager",
-      "name": { "ru": "Модули", "uk": "Модулі", "en": "Modules" },
+      "name": {
+        "ru": "Модули",
+        "uk": "Модулі",
+        "en": "Modules"
+      },
       "route": "/dev/modules",
-      "icon": "🧩",
+      "icon": "grid",
       "status": "stable",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -330,9 +438,13 @@
     },
     {
       "id": "feature_panel",
-      "name": { "ru": "Feature Flags", "uk": "Feature Flags", "en": "Feature Flags" },
+      "name": {
+        "ru": "Feature Flags",
+        "uk": "Feature Flags",
+        "en": "Feature Flags"
+      },
       "route": "/dev/panel",
-      "icon": "🚩",
+      "icon": "flag",
       "status": "stable",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -344,9 +456,13 @@
     },
     {
       "id": "cloud_platform",
-      "name": { "ru": "Облако", "uk": "Хмара", "en": "Cloud" },
+      "name": {
+        "ru": "Облако",
+        "uk": "Хмара",
+        "en": "Cloud"
+      },
       "route": "/cloud",
-      "icon": "☁️",
+      "icon": "cloud",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -358,9 +474,13 @@
     },
     {
       "id": "dub_studio",
-      "name": { "ru": "Dub Studio", "uk": "Dub Studio", "en": "Dub Studio" },
+      "name": {
+        "ru": "Dub Studio",
+        "uk": "Dub Studio",
+        "en": "Dub Studio"
+      },
       "route": "/dub-studio",
-      "icon": "🎛️",
+      "icon": "knobs",
       "status": "beta",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -372,9 +492,13 @@
     },
     {
       "id": "pipeline_inspector_ui",
-      "name": { "ru": "Pipeline Inspector", "uk": "Pipeline Inspector", "en": "Pipeline Inspector" },
+      "name": {
+        "ru": "Pipeline Inspector",
+        "uk": "Pipeline Inspector",
+        "en": "Pipeline Inspector"
+      },
       "route": "/dev/pipeline",
-      "icon": "🔬",
+      "icon": "inspect",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,
@@ -386,9 +510,13 @@
     },
     {
       "id": "architecture_dashboard",
-      "name": { "ru": "Architecture", "uk": "Architecture", "en": "Architecture" },
+      "name": {
+        "ru": "Architecture",
+        "uk": "Architecture",
+        "en": "Architecture"
+      },
       "route": "/dev/architecture",
-      "icon": "🏗️",
+      "icon": "layers",
       "status": "development",
       "visible_to_users": false,
       "show_in_menu": true,

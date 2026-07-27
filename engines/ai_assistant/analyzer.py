@@ -89,11 +89,32 @@ def analyze_trace_file(trace_path: str) -> list[dict[str, Any]]:
 
 
 def analyze_session_dir(app_dir: Path, module: str, session_id: str) -> dict[str, Any]:
-    path = app_dir / "output" / "dev" / module / f"{module}_{session_id}.json"
+    safe_mod = Path(str(module or "assistant")).name
+    safe_sid = Path(str(session_id or "")).name
+    if not safe_sid:
+        return {
+            "module": safe_mod,
+            "session_id": "",
+            "trace_path": "",
+            "issue_count": 0,
+            "issues": [],
+            "error": "session_id required",
+        }
+    path = Path(app_dir) / "output" / "dev" / safe_mod / f"{safe_mod}_{safe_sid}.json"
+    if not path.is_file():
+        return {
+            "module": safe_mod,
+            "session_id": safe_sid,
+            "trace_path": str(path),
+            "issue_count": 0,
+            "issues": [],
+            "error": "trace_not_found",
+            "hint": "Run a live/platform session first; traces land under output/dev/<module>/",
+        }
     issues = analyze_trace_file(str(path))
     return {
-        "module": module,
-        "session_id": session_id,
+        "module": safe_mod,
+        "session_id": safe_sid,
         "trace_path": str(path),
         "issue_count": len(issues),
         "issues": issues,

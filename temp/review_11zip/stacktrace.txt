@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\openddf_diagnostics.py", line 571, in guard_check_with_diagnostics
+    StageSnapshotGuard.check(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        before,
+        ^^^^^^^
+    ...<2 lines>...
+        mutator_module=mutator_module,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 365, in check
+    raise StageSnapshotIntegrityError(
+    ...<9 lines>...
+    )
+engines.pipeline_integrity.exceptions.StageSnapshotIntegrityError: segment e16e6e1ad06d4d9592e4ec16f94b0ace: disallowed mutation of 'container_status' at stage 'tts'

@@ -337,6 +337,13 @@ def ensure_llm_callable(
 
 def is_llm_callable(*, quick: bool = False) -> bool:
     """Whether adaptation may invoke the LLM right now."""
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            return False
+    except Exception:
+        pass
     state = get_run_state()
     if state.get("checked_at"):
         return bool(state.get("callable"))

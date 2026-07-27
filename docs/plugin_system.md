@@ -54,9 +54,15 @@ Available: `register_plugin`, `register_agent`, `register_model`,
 - **Hot reload** — `POST /api/plugins/{name}/reload`
 - **Permissions** — file/network/gpu/audio/video/memory (§13)
 
-## Marketplace API (§9 — stub)
+## Marketplace API (§9)
 
-`POST /api/plugins/marketplace/install|update|remove|enable|disable`
+Local package manager (default) + optional remote storefront.
+
+`POST /api/plugins/marketplace/install|update|remove|enable|disable|install_remote`
+`GET /api/plugins/marketplace/catalog|remote`
+
+Remote requires `VM_PLUGIN_MARKETPLACE_URL` (or `VM_PLUGIN_CATALOG_URL`); otherwise
+remote install/catalog hard-gates with `remote_marketplace_not_configured`.
 
 ## Monitoring Integration (§14)
 
@@ -98,6 +104,8 @@ POST /api/plugins/marketplace/{action}
 | `VM_PLUGINS` | `1` | Enable plugin system |
 | `VM_PLUGINS_DIR` | `plugins/` | Plugin directory |
 | `VM_PLUGIN_PATH` | — | Extra plugin paths (OS pathsep) |
+| `VM_PLUGIN_MARKETPLACE_URL` | — | Remote storefront catalog JSON URL |
+| `VM_PLUGIN_CATALOG_URL` | — | Alias for marketplace URL |
 
 ## What is NOT changed
 

@@ -14,8 +14,10 @@ from engines.llm_providers.qwen import PROVIDER as QWEN
 
 logger = logging.getLogger("tubedub.llm_providers")
 
-DEFAULT_FAMILY_ID = "deepseek"
-FALLBACK_FAMILY_ORDER: tuple[str, ...] = ("deepseek", "qwen", "llama")
+# Heavy families (deepseek / qwen) are last — kill-switch disables them by default.
+# If a developer re-enables heavy LLM, prefer the lightest local option first.
+DEFAULT_FAMILY_ID = "llama"
+FALLBACK_FAMILY_ORDER: tuple[str, ...] = ("llama", "qwen", "deepseek")
 
 _PROVIDERS: dict[str, LLMProvider] = {
     DEEPSEEK.family_id: DEEPSEEK,
@@ -167,6 +169,22 @@ def resolve_model(
             env_model,
             len(available),
         )
+    # Env pin with empty/stale tag list: still accept if Ollama reports it.
+    if env_model and not available:
+        try:
+            from engines.llm_callable import _fetch_models_for_endpoint, refresh_endpoint_models
+
+            ep = refresh_endpoint_models(force=False)
+            tags = list(ep.get("models") or []) or _fetch_models_for_endpoint(ep)
+            if env_model in tags or any(
+                t.lower() == env_model.lower() for t in tags
+            ):
+                logger.info("[LLM] Loaded model: %s (env override, refreshed tags)", env_model)
+                return env_model
+            if tags:
+                available = tags
+        except Exception:
+            logger.debug("env model tag refresh failed", exc_info=True)
 
     persisted = load_persisted_selection(app_dir)
     quality_mode = str(persisted.get("quality_mode") or "max_quality")

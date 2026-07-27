@@ -1,4 +1,11 @@
 {
   "version": 1,
-  "pairs": {}
+  "pairs": {
+    "zh->uk": [["zh", "en"], ["en", "uk"]],
+    "zh->ru": [["zh", "en"], ["en", "ru"]],
+    "ja->uk": [["ja", "en"], ["en", "uk"]],
+    "ja->ru": [["ja", "en"], ["en", "ru"]],
+    "ko->uk": [["ko", "en"], ["en", "uk"]],
+    "ko->ru": [["ko", "en"], ["en", "ru"]]
+  }
 }

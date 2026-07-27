@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "6c1c0d3f40b4478d9f5c4ba65d423614",
+    "groups": 1,
+    "style_id": "modern",
+    "elapsed_sec": 0.912
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {},
+      "plain_text": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Нам</emphasis> вісім поколінь прості,<break time=\"184ms\"/> і в цей момент ви вагітні,<break time=\"184ms\"/> ви товсті,<break time=\"184ms\"/> ви вагітні,<break time=\"184ms\"/> а<break time=\"184ms\"/> якщо ні,<break time=\"184ms\"/> то це ідеально.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+0%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Нам",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4370,
+      "est_ms_before": 7692,
+      "est_ms_after": 8962,
+      "fill_percent": 205.1,
+      "underfill": false,
+      "decisions": [
+        "natural rate -6%",
+        "overfill 176.0% → light faster +0% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4370,
+        "slot_ms": 4370,
+        "internal_gaps_ms": [],
+        "speech_ratio": 1.0,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    }
+  ]
+}

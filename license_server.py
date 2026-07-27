@@ -36,7 +36,10 @@ app = Flask(__name__)
 
 
 def _owner_ok() -> bool:
-    token = os.getenv("VM_OWNER_TOKEN", "vm-owner-local").strip()
+    # Refuse the public default when binding a network-facing license server.
+    token = os.getenv("VM_OWNER_TOKEN", "").strip()
+    if not token or token == "vm-owner-local":
+        return False
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
         return auth[7:] == token
@@ -257,7 +260,8 @@ def main():
     p.add_argument("--port", type=int, default=8787)
     args = p.parse_args()
     print(f"VideoMonster License Server on http://{args.host}:{args.port}")
-    print("Owner token: VM_OWNER_TOKEN (default vm-owner-local)")
+    if not os.getenv("VM_OWNER_TOKEN", "").strip():
+        print("WARNING: set VM_OWNER_TOKEN — default/empty token is rejected")
     app.run(host=args.host, port=args.port, debug=False)
 
 

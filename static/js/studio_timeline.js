@@ -338,6 +338,7 @@
 
     return ensure().then(function () {
       if (!self._previewAudio) return;
+      self._applyPreviewGain();
       self._alignPreviewToVideo();
       if (play && self.videoEl && !self.videoEl.paused) {
         const p = self._previewAudio.play();
@@ -717,9 +718,15 @@
       labelCol.innerHTML =
         "<span>" + self._trackLabel(track) + "</span>" +
         '<div style="display:flex;gap:2px;align-items:center;">' +
-        '<button type="button" class="btn btn-sm st-ctl" data-tid="' + track.id + '" data-act="0" title="' + _t("studio.mute", "Mute") + '" style="padding:0 5px;font-size:10px;">M</button>' +
-        '<button type="button" class="btn btn-sm st-ctl" data-tid="' + track.id + '" data-act="1" title="' + _t("studio.solo", "Solo") + '" style="padding:0 5px;font-size:10px;">S</button>' +
-        '<input type="range" min="0" max="100" value="' + Math.round((track.volume || 1) * 100) + '" class="st-vol" data-tid="' + track.id + '" style="width:48px;height:4px;" title="' + _t("studio.volume", "Volume") + '"/>' +
+        '<button type="button" class="btn btn-sm st-ctl' + (track.muted ? ' st-ctl-active' : '') +
+          '" data-tid="' + track.id + '" data-act="0" title="' + _t("studio.mute", "Mute") +
+          '" style="padding:0 5px;font-size:10px;' + (track.muted ? 'background:var(--danger,#f87171);color:#111;' : '') + '">M</button>' +
+        '<button type="button" class="btn btn-sm st-ctl' + (track.solo ? ' st-ctl-active' : '') +
+          '" data-tid="' + track.id + '" data-act="1" title="' + _t("studio.solo", "Solo") +
+          '" style="padding:0 5px;font-size:10px;' + (track.solo ? 'background:var(--amber,#fbbf24);color:#111;' : '') + '">S</button>' +
+        '<input type="range" min="0" max="100" value="' + Math.round((track.volume || 1) * 100) +
+          '" class="st-vol" data-tid="' + track.id + '" style="width:48px;height:4px;" title="' +
+          _t("studio.volume", "Volume") + '"/>' +
         "</div>";
 
       const lane = document.createElement("div");
@@ -857,7 +864,30 @@
     });
   };
 
+  StudioTimeline.prototype._notifyErr = function (msg) {
+    const text = msg || _t("studio.error", "Ошибка");
+    const status = document.getElementById("st-insp-status") || document.getElementById("se-export-status");
+    if (status) status.textContent = "✗ " + text;
+    if (typeof global.vmNotify === "function") global.vmNotify(text, "error", 5000);
+  };
+
+  StudioTimeline.prototype._trackGain = function (trackId) {
+    const t = this.tracks.find(function (x) { return x.id === trackId; });
+    if (!t) return 1;
+    if (t.muted) return 0;
+    const anySolo = this.tracks.some(function (x) { return !!x.solo; });
+    if (anySolo && !t.solo) return 0;
+    const vol = typeof t.volume === "number" ? t.volume : 1;
+    return Math.max(0, Math.min(2, vol));
+  };
+
+  StudioTimeline.prototype._applyPreviewGain = function () {
+    if (!this._previewAudio) return;
+    this._previewAudio.volume = Math.max(0, Math.min(1, this._trackGain("tts")));
+  };
+
   StudioTimeline.prototype._toggleTrack = function (trackId, action) {
+    const self = this;
     const t = this.tracks.find(function (x) { return x.id === trackId; });
     if (!t) return;
     if (action === 0) t.muted = !t.muted;
@@ -869,6 +899,8 @@
         });
       }
     }
+    this._applyPreviewGain();
+    this._dirty = true;
     fetch("/api/studio/track/" + trackId + "/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -878,19 +910,32 @@
         solo: t.solo,
         volume: t.volume,
       }),
-    }).catch(function () {});
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.error) self._notifyErr(d.error);
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
     this._renderTracks();
   };
 
   StudioTimeline.prototype._setVolume = function (trackId, vol) {
+    const self = this;
     const t = this.tracks.find(function (x) { return x.id === trackId; });
     if (!t) return;
     t.volume = vol;
+    this._applyPreviewGain();
+    this._dirty = true;
     fetch("/api/studio/track/" + trackId + "/volume", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: this.sessionId, volume: vol }),
-    }).catch(function () {});
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.error) self._notifyErr(d.error);
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
   };
 
   StudioTimeline.prototype.selectSegment = function (segId) {
@@ -906,23 +951,31 @@
 
     this.inspectorEl.innerHTML =
       '<div class="st-inspector">' +
-      "<h4 style=\"margin:0 0 8px;\">" + _t("studio.segment_title", "Segment") + " #" + (parseInt(idx, 10) + 1) + "</h4>" +
-      "<div><b>" + _t("studio.original", "Original") + ":</b><br/><span style=\"color:var(--text2);\">" + self._esc(orig) + "</span></div>" +
-      '<div style="margin-top:8px;"><b>' + _t("studio.translation", "Translation") + ":</b><br/>' +
+      '<h4 style="margin:0 0 8px;">' + _t("studio.segment_title", "Segment") + " #" + (parseInt(idx, 10) + 1) + "</h4>" +
+      "<div><b>" + _t("studio.original", "Original") + ':</b><br/><span style="color:var(--text2);">' + self._esc(orig) + "</span></div>" +
+      '<div style="margin-top:8px;"><b>' + _t("studio.translation", "Translation") + ":</b><br/>" +
       '<textarea id="st-insp-text" class="input-control" rows="4" style="width:100%;margin-top:4px;">' + self._esc(seg.text || "") + "</textarea></div>" +
-      "<div style=\"margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;\">" +
+      '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+      '<label style="font-size:12px;color:var(--text2);">' + _t("studio.emotion", "Emotion") + "</label>" +
+      '<select id="st-insp-emotion" class="select-control" style="min-width:120px;height:28px;font-size:12px;">' +
+      ["neutral", "happy", "sad", "angry", "fear", "surprise"].map(function (em) {
+        const sel = (seg.emotion || "neutral") === em ? " selected" : "";
+        return '<option value="' + em + '"' + sel + ">" + em + "</option>";
+      }).join("") +
+      "</select></div>" +
+      '<div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;">' +
       "<span>⏱ " + self._formatTime(seg.start_ms) + " – " + self._formatTime(seg.end_ms) + "</span>" +
-      "<span style=\"color:" + statusColor(seg.container_status) + ";\">" + _t("studio.overflow", "overflow") + " " + (seg.overflow_pct || 0) + "%</span>" +
+      '<span style="color:' + statusColor(seg.container_status) + ';">' + _t("studio.overflow", "overflow") + " " + (seg.overflow_pct || 0) + "%</span>" +
       "</div>" +
       '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">' +
-      '<button type="button" class="btn btn-sm btn-primary" id="st-btn-autofix">' + _t("studio.btn_autofix", "Исправить автоматически") + '</button>' +
-      '<button type="button" class="btn btn-sm btn-primary" id="st-btn-regen">' + _t("studio.btn_regen", "Исправить вручную") + '</button>' +
-      '<button type="button" class="btn btn-sm" id="st-btn-stretch">' + _t("studio.btn_stretch", "Time Stretch") + '</button>' +
-      '<button type="button" class="btn btn-sm" id="st-btn-split">' + _t("studio.btn_split", "Split") + '</button>' +
-      '<button type="button" class="btn btn-sm" id="st-btn-copy">' + _t("studio.btn_copy", "Copy") + '</button>' +
-      '<button type="button" class="btn btn-sm" id="st-btn-delete">' + _t("studio.btn_delete", "Delete") + '</button>' +
+      '<button type="button" class="btn btn-sm btn-primary" id="st-btn-autofix">' + _t("studio.btn_autofix", "Исправить автоматически") + "</button>" +
+      '<button type="button" class="btn btn-sm btn-primary" id="st-btn-regen">' + _t("studio.btn_regen", "Исправить вручную") + "</button>" +
+      '<button type="button" class="btn btn-sm" id="st-btn-stretch">' + _t("studio.btn_stretch", "Time Stretch") + "</button>" +
+      '<button type="button" class="btn btn-sm" id="st-btn-split">' + _t("studio.btn_split", "Split") + "</button>" +
+      '<button type="button" class="btn btn-sm" id="st-btn-copy">' + _t("studio.btn_copy", "Copy") + "</button>" +
+      '<button type="button" class="btn btn-sm" id="st-btn-delete">' + _t("studio.btn_delete", "Delete") + "</button>" +
       (self.selectedIds.length > 1
-        ? ('<button type="button" class="btn btn-sm" id="st-btn-merge">' + _t("studio.btn_merge", "Merge selected") + '</button>')
+        ? ('<button type="button" class="btn btn-sm" id="st-btn-merge">' + _t("studio.btn_merge", "Merge selected") + "</button>")
         : "") +
       "</div>" +
       '<div id="st-insp-status" style="margin-top:8px;font-size:11px;color:var(--text2);"></div>' +
@@ -948,6 +1001,12 @@
     document.getElementById("st-btn-delete").onclick = function () {
       self._deleteSegment(seg.id);
     };
+    const emoSel = document.getElementById("st-insp-emotion");
+    if (emoSel) {
+      emoSel.onchange = function () {
+        self._setEmotion(seg.id, emoSel.value);
+      };
+    }
     const mergeBtn = document.getElementById("st-btn-merge");
     if (mergeBtn) {
       mergeBtn.onclick = function () {
@@ -1210,10 +1269,47 @@
             ? "Исправлено · " + (data.overflow_pct || 0) + "%"
             : "Частично · " + (data.overflow_pct || 0) + "%";
         }
+        if (data && data.error) self._notifyErr(data.error);
         self._invalidatePreview();
         self._renderAll();
         self.selectSegment(segId);
-      });
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
+  };
+
+  StudioTimeline.prototype._setEmotion = function (segId, emotion) {
+    const self = this;
+    const status = document.getElementById("st-insp-status");
+    if (status) status.textContent = _t("studio.emotion_saving", "Emotion…");
+    fetch("/api/studio/segment/" + encodeURIComponent(segId) + "/emotion", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: this.sessionId,
+        emotion: emotion,
+        voice: this.voice,
+        regenerate: true,
+      }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.segment) {
+          const i = self.segments.findIndex(function (s) { return String(s.id) === String(segId); });
+          if (i >= 0) self.segments[i] = data.segment;
+        } else {
+          const seg = self.segments.find(function (s) { return String(s.id) === String(segId); });
+          if (seg) seg.emotion = emotion;
+        }
+        if (!data.ok && data.error) {
+          self._notifyErr(data.error);
+          return;
+        }
+        if (status) status.textContent = _t("studio.emotion_saved", "Emotion: ") + emotion;
+        self._invalidatePreview();
+        self._renderAll();
+        self.selectSegment(segId);
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
   };
 
   StudioTimeline.prototype._timeStretch = function (segId) {
@@ -1231,11 +1327,13 @@
           const i = self.segments.findIndex(function (s) { return String(s.id) === String(segId); });
           if (i >= 0) self.segments[i] = data.segment;
         }
+        if (data && data.error) self._notifyErr(data.error);
         if (status) status.textContent = "Stretch · overflow " + (data.overflow_pct || 0) + "%";
         self._invalidatePreview();
         self._renderAll();
         self.selectSegment(segId);
-      });
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
   };
 
   StudioTimeline.prototype._splitSegment = function (segId) {
@@ -1247,12 +1345,16 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data.ok) return;
+        if (!data.ok) {
+          self._notifyErr(data.error || _t("studio.split_failed", "Split failed"));
+          return;
+        }
         if (Array.isArray(data.segments)) self.segments = data.segments;
         self._invalidatePreview();
         self._renderAll();
         self.selectSegment(segId);
-      });
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
   };
 
   StudioTimeline.prototype._copySegment = function (segId) {
@@ -1264,11 +1366,15 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data.ok) return;
+        if (!data.ok) {
+          self._notifyErr(data.error || _t("studio.copy_failed", "Copy failed"));
+          return;
+        }
         if (Array.isArray(data.segments)) self.segments = data.segments;
         self._invalidatePreview();
         self._renderAll();
-      });
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
   };
 
   StudioTimeline.prototype._deleteSegment = function (segId) {
@@ -1280,13 +1386,17 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data.ok) return;
+        if (!data.ok) {
+          self._notifyErr(data.error || _t("studio.delete_failed", "Delete failed"));
+          return;
+        }
         if (Array.isArray(data.segments)) self.segments = data.segments;
         self.selectedIds = [];
         self.selectedId = null;
         self._invalidatePreview();
         self._renderAll();
-      });
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
   };
 
   StudioTimeline.prototype._mergeSelected = function () {
@@ -1300,14 +1410,18 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data.ok) return;
+        if (!data.ok) {
+          self._notifyErr(data.error || _t("studio.merge_failed", "Merge failed"));
+          return;
+        }
         if (Array.isArray(data.segments)) self.segments = data.segments;
         self.selectedIds = [String((data.segment || {}).id || ids[0])];
         self.selectedId = self.selectedIds[0];
         self._invalidatePreview();
         self._renderAll();
         self.selectSegment(self.selectedId);
-      });
+      })
+      .catch(function (e) { self._notifyErr(String(e.message || e)); });
   };
 
   StudioTimeline.prototype.setDuration = function (ms) {

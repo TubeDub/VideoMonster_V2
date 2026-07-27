@@ -266,13 +266,102 @@ def cleanup_llm_rewrite_cache(app_dir: Path) -> StorageCleanupReport:
     return report
 
 
+# TTL for universal imports / translate STT uploads (optional hygiene).
+IMPORT_TTL_SEC = 7 * 24 * 3600  # 7 days
+TRANSLATE_UPLOAD_TTL_SEC = 24 * 3600  # 1 day
+UPLOAD_LOOSE_TTL_SEC = 3 * 24 * 3600  # 3 days
+
+
+def _cleanup_aged_files(
+    root: Path,
+    report: StorageCleanupReport,
+    *,
+    max_age_sec: float,
+    patterns: tuple[str, ...] | None = None,
+    skip_suffixes: tuple[str, ...] = (),
+) -> None:
+    if not root.is_dir():
+        return
+    now = time.time()
+    paths: list[Path] = []
+    if patterns:
+        for pat in patterns:
+            paths.extend(root.glob(pat))
+    else:
+        paths = [p for p in root.iterdir() if p.is_file()]
+    for path in paths:
+        if not path.is_file():
+            continue
+        if any(path.name.endswith(suf) for suf in skip_suffixes):
+            continue
+        try:
+            age = now - path.stat().st_mtime
+        except OSError:
+            continue
+        if age < max_age_sec:
+            _skip(report, path, "too_recent")
+            continue
+        _remove_file(path, report)
+
+
+def cleanup_stale_imports(
+    app_dir: Path,
+    *,
+    max_age_sec: float = IMPORT_TTL_SEC,
+) -> StorageCleanupReport:
+    """Remove aged universal-import media + meta under uploads/imports."""
+    report = StorageCleanupReport(scope="stale_imports")
+    imports = Path(app_dir) / "uploads" / "imports"
+    _cleanup_aged_files(imports, report, max_age_sec=max_age_sec)
+    return report
+
+
+def cleanup_stale_translate_uploads(
+    app_dir: Path,
+    *,
+    max_age_sec: float = TRANSLATE_UPLOAD_TTL_SEC,
+) -> StorageCleanupReport:
+    """Remove aged translate STT upload temps under uploads/translate."""
+    report = StorageCleanupReport(scope="stale_translate_uploads")
+    uploads = Path(app_dir) / "uploads" / "translate"
+    _cleanup_aged_files(uploads, report, max_age_sec=max_age_sec)
+    return report
+
+
+def cleanup_stale_loose_uploads(
+    app_dir: Path,
+    *,
+    max_age_sec: float = UPLOAD_LOOSE_TTL_SEC,
+) -> StorageCleanupReport:
+    """Remove aged loose files directly under uploads/ (not subdirs like imports)."""
+    report = StorageCleanupReport(scope="stale_loose_uploads")
+    uploads = Path(app_dir) / "uploads"
+    if not uploads.is_dir():
+        return report
+    now = time.time()
+    for path in uploads.iterdir():
+        if not path.is_file():
+            continue
+        try:
+            age = now - path.stat().st_mtime
+        except OSError:
+            continue
+        if age < max_age_sec:
+            continue
+        _remove_file(path, report)
+    return report
+
+
 def cleanup_all_temp_and_cache(app_dir: Path) -> StorageCleanupReport:
-    """Single-button cleanup: temp files + pipeline cache + LLM rewrite cache."""
+    """Single-button cleanup: temp files + pipeline cache + LLM rewrite cache + aged uploads."""
     combined = StorageCleanupReport(scope="all_temp_and_cache")
     for part in (
         cleanup_pipeline_temp(app_dir),
         cleanup_pipeline_cache(app_dir),
         cleanup_llm_rewrite_cache(app_dir),
+        cleanup_stale_imports(app_dir),
+        cleanup_stale_translate_uploads(app_dir),
+        cleanup_stale_loose_uploads(app_dir),
     ):
         combined.merge(part)
     _persist_last_cleanup(app_dir, combined)

@@ -72,6 +72,7 @@ def fit_segment(request: FitRequest | dict[str, Any], *, force: bool = False) ->
             meta={"call_site": MEANING_FIT_CALL_SITE},
         )
 
+    fit_lang = str((req.meta or {}).get("tgt_lang") or "uk").split("-")[0].lower()
     variants: list[dict[str, Any]] = [{"text": text, "method": "original"}]
     if pred.verdict == "TOO_LONG" and (force or meaning_fit_shorten_flag()) and req.allow_shorten:
         short = semantic_shorten(
@@ -79,6 +80,7 @@ def fit_segment(request: FitRequest | dict[str, Any], *, force: bool = False) ->
             slot,
             original_en=req.original_en,
             force=force,
+            tgt_lang=fit_lang,
         )
         if short.text_uk and short.text_uk != text:
             variants.append({"text": short.text_uk, "method": "semantic_shorten"})
@@ -92,6 +94,7 @@ def fit_segment(request: FitRequest | dict[str, Any], *, force: bool = False) ->
             slot,
             original_en=req.original_en,
             force=force,
+            tgt_lang=fit_lang,
         )
         if expanded.text_uk and expanded.text_uk != text:
             variants.append({"text": expanded.text_uk, "method": "semantic_expand"})
@@ -179,6 +182,12 @@ def apply_meaning_fit_before_lock(
         task_info["meaning_fit_phase"] = "before_lock"
         task_info["meaning_fit_before_lock"] = True
 
+    tgt_lang = str(
+        (task_info or {}).get("target_lang")
+        or (task_info or {}).get("tgt_lang")
+        or "uk"
+    ).split("-")[0].lower()
+
     stats = {
         "enabled": True,
         "noop": False,
@@ -190,6 +199,7 @@ def apply_meaning_fit_before_lock(
         "fit_failed": 0,
         "applied": 0,
         "early_lock_recovered": early_lock,
+        "tgt_lang": tgt_lang,
     }
 
     for seg in segs:
@@ -225,12 +235,18 @@ def apply_meaning_fit_before_lock(
             stats["fit_failed"] += 1
             continue
         seg["meaning_fit_source"] = text
+        seg_lang = str(
+            seg.get("target_lang") or tgt_lang or "uk"
+        ).split("-")[0].lower()
         result = fit_segment(
             FitRequest(
                 text_uk=text,
                 slot_ms=slot,
-                original_en=str(seg.get("original") or ""),
+                original_en=str(
+                    seg.get("original") or seg.get("original_text") or ""
+                ),
                 segment_id=str(seg.get("segment_id") or ""),
+                meta={"tgt_lang": seg_lang},
             ),
             force=force,
         )
@@ -245,9 +261,60 @@ def apply_meaning_fit_before_lock(
             stats["fit_failed"] += 1
 
         if result.success and result.text_uk and result.text_uk != text:
-            seg["plain_text"] = result.text_uk
-            seg["translated_text"] = result.text_uk
-            seg["final_text"] = result.text_uk
+            # Refuse destructive shorten: keep full meaning when >35% content lost
+            # or meaning check fails (44.zip / Review truncation RCA).
+            apply_ok = True
+            try:
+                from engines.semantic_meaning import (
+                    is_truncated_adaptation,
+                    verify_meaning_preserved,
+                    word_count,
+                )
+
+                ow, nw = word_count(text), word_count(result.text_uk)
+                if ow >= 8 and nw <= int(ow * 0.65):
+                    apply_ok = False
+                if is_truncated_adaptation(text, result.text_uk):
+                    apply_ok = False
+                ok_m, reason_m, _ = verify_meaning_preserved(
+                    str(seg.get("original") or seg.get("original_text") or ""),
+                    text,
+                    result.text_uk,
+                    target_lang=seg_lang,
+                )
+                if not ok_m and reason_m in (
+                    "truncated_tail",
+                    "incomplete_sentence",
+                    "empty",
+                ):
+                    apply_ok = False
+            except Exception:
+                apply_ok = True
+            if apply_ok:
+                seg["plain_text"] = result.text_uk
+                seg["final_text"] = result.text_uk
+                seg["text"] = result.text_uk
+                seg["tts_text"] = result.text_uk
+                seg["text_for_tts"] = result.text_uk
+                seg["voice_input"] = result.text_uk
+                # Do NOT overwrite translated_text Raw MT anchor
+            else:
+                from engines.meaning_fit.types import FitResult as _FR
+
+                seg["meaning_fit_refused_destructive"] = True
+                seg["expand_required"] = True
+                result = _FR(
+                    text_uk=text,
+                    status="rejected_truncate",
+                    reason="refused_destructive_shorten",
+                    predicted_ms=result.predicted_ms,
+                    slot_ms=result.slot_ms,
+                    verdict=result.verdict,
+                    success=False,
+                    needs_manual=True,
+                    method="refused_destructive_shorten",
+                    meta=dict(result.meta or {}),
+                )
 
         apply_honest_meaning_fit_reasons(seg, result)
         seg["meaning_fit_method"] = result.method

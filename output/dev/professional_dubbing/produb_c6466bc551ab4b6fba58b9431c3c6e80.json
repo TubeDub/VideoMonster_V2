@@ -1,0 +1,165 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "c6466bc551ab4b6fba58b9431c3c6e80",
+    "groups": 1,
+    "style_id": "professional",
+    "elapsed_sec": 0.554
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {},
+      "plain_text": "Наше восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця. Тепер ти вагітна. У сім'ї Лу народилося потомство. Було б досконаліше, якби ти міг пережити негаразди сам. Було б досконаліше, якби ти міг пережити негаразди сам. Мамо, поки ти мені вірна, я буду любити тебе незалежно від того, чоловік ти чи жінка. Брат Сюй Хуай, я вагітна. Аварія місяць тому. Місяць тому мене і Цюй Фейфея викрали одночасно. Тієї ночі він обслужив викрадача, отже, ця дитина і є викрадачем. Аварія місячної давності, ця дитина належить викрадачеві. Цей хлопець належить викрадачеві.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Наше</emphasis> восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця.<break time=\"350ms\"/> <emphasis level=\"reduced\">Тепер</emphasis> ти вагітна.<break time=\"350ms\"/> У сім'ї Лу народилося потомство.<break time=\"350ms\"/> <emphasis level=\"reduced\">Було</emphasis> б досконаліше,<break time=\"184ms\"/> якби ти міг пережити негаразди сам.<break time=\"350ms\"/> Було б досконаліше,<break time=\"184ms\"/> якби ти міг пережити негаразди сам.<break time=\"350ms\"/> Мамо,<break time=\"184ms\"/> поки ти мені вірна,<break time=\"184ms\"/> я буду любити тебе незалежно від того,<break time=\"184ms\"/> чоловік ти чи жінка.<break time=\"350ms\"/> Брат Сюй Хуай,<break time=\"184ms\"/> я вагітна.<break time=\"350ms\"/> Аварія місяць тому.<break time=\"350ms\"/> Місяць тому мене і Цюй Фейфея викрали одночасно.<break time=\"350ms\"/> Тієї ночі він обслужив викрадача,<break time=\"184ms\"/> отже,<break time=\"184ms\"/> ця дитина і є викрадачем.<break time=\"350ms\"/> Аварія місячної давності,<break time=\"184ms\"/> ця дитина належить викрадачеві.<break time=\"350ms\"/> Цей хлопець належить викрадачеві.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Наше",
+          "type": "name"
+        },
+        {
+          "word": "Тепер",
+          "type": "name"
+        },
+        {
+          "word": "Було",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4737,
+      "est_ms_before": 43111,
+      "est_ms_after": 48967,
+      "fill_percent": 1033.7,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 910.1% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4737,
+        "slot_ms": 4737,
+        "internal_gaps_ms": [],
+        "speech_ratio": 1.0,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    }
+  ]
+}

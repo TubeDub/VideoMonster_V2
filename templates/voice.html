@@ -1,133 +1,96 @@
 {% extends "base.html" %}
 {% block title %}Озвучка — TubeDub{% endblock %}
 {% block content %}
-<div class="page-header-row">
-  <h1>🔊 Озвучка текста</h1>
-  <div class="header-controls">
-    <select id="lang-filter" class="select-control" onchange="filterVoices(this.value)" title="Язык голоса">
-      {% for name, code in languages.items() %}
-      <option value="{{ code }}" {% if code=='ru' %}selected{% endif %}>{{ name }}</option>
-      {% endfor %}
+<div class="page-header-row"><h1>Озвучка текста</h1>
+  <div class="header-controls"><select id="lang-filter" class="select-control" onchange="filterVoices(this.value)" title="Язык голоса"> {% for name, code in languages.items() %}
+      <option value="{{ code }}" {% if code=='ru' %}selected{% endif %}>{{ name }}</option> {% endfor %}
     </select>
-    <select id="voice-select" class="select-control">
-      {% for v in voices.ru %}
-      <option value="{{ v.id }}">{{ v.name }}</option>
-      {% endfor %}
+    <select id="voice-select" class="select-control"> {% for v in voices.ru %}
+      <option value="{{ v.id }}">{{ v.name }}</option> {% endfor %}
     </select>
   </div>
 </div>
 
-<div class="panel" style="height:auto;margin-bottom:12px;">
-  <div class="panel-header">
-    <span class="panel-title">🎤 Аудио → текст (STT)</span>
-    <div class="panel-actions">
-      <button class="btn btn-sm" onclick="triggerAudioLoad()">📂 Загрузить аудио</button>
+<div class="panel" style="height:auto;margin-bottom:12px;"><div class="panel-header"><span class="panel-title">Аудио → текст (STT)</span>
+    <div class="panel-actions"><button class="btn btn-sm" onclick="triggerAudioLoad()">Загрузить аудио</button>
       <input type="file" id="audio-input" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.wma" style="display:none" onchange="uploadVoiceAudio(this)" />
-      <button class="btn btn-sm btn-primary" id="btn-transcribe" onclick="transcribeVoiceAudio()" disabled>📝 Распознать</button>
+      <button class="btn btn-sm btn-primary" id="btn-transcribe" onclick="transcribeVoiceAudio()" disabled>Распознать</button>
     </div>
   </div>
   <div id="voice-audio-info" style="padding:8px 16px;font-size:12px;color:var(--text2);">Загрузите аудио для распознавания речи (Whisper)</div>
 </div>
 
-<div class="panel" style="height: auto;">
-  <div class="panel-header">
-    <span class="panel-title">Текст для озвучки</span>
-    <div class="panel-actions">
-      <button class="btn btn-sm" onclick="pasteText('voice-box')">📋 Вставить</button>
-      <button class="btn btn-sm"
-        onclick="document.getElementById('voice-box').value=''; updateCount('voice-box','voice-chars')">🗑
-        Очистить</button>
-      <button class="btn btn-sm" onclick="triggerSrtLoad()">📂 Субтитры</button>
+<div class="panel" style="height: auto;"><div class="panel-header"><span class="panel-title">Текст для озвучки</span>
+    <div class="panel-actions"><button class="btn btn-sm" onclick="pasteText('voice-box')">Вставить</button>
+      <button class="btn btn-sm" onclick="document.getElementById('voice-box').value=''; updateCount('voice-box','voice-chars')">Очистить</button>
+      <button class="btn btn-sm" onclick="triggerSrtLoad()">Субтитры</button>
       <input type="file" id="srt-input" accept=".srt,.vtt,.ass,.ssa,.txt" style="display:none" onchange="loadSrtFileVoice(this)" />
     </div>
   </div>
   <textarea id="voice-box" class="text-area" style="height:240px" placeholder="Введите текст для озвучки..."></textarea>
-  <div class="panel-footer">
-    <span id="voice-chars" class="char-count">0 символов</span>
+  <div class="panel-footer"><span id="voice-chars" class="char-count">0 символов</span>
   </div>
 </div>
 
 <!-- ── НАСТРОЙКИ ТАЙМИНГА (только Pro-режим) ── -->
-<div class="panel pro-only" style="height:auto; margin-bottom:10px;">
-  <div class="panel-header">
-    <span class="panel-title">⏱ Timing Mode</span>
-    <label class="toggle-label" style="margin-left:auto">
-      <input type="checkbox" id="use-timing" onchange="toggleTimingOptions()" />
+<div class="panel pro-only" style="height:auto; margin-bottom:10px;"><div class="panel-header"><span class="panel-title">Timing Mode</span>
+    <label class="toggle-label" style="margin-left:auto"><input type="checkbox" id="use-timing" onchange="toggleTimingOptions()" />
       <span class="toggle-switch"></span>
       <span style="font-size:12px;color:var(--text2);margin-left:6px">Использовать тайминг</span>
     </label>
   </div>
-  <div id="timing-options" style="padding:12px 16px;display:none;flex-direction:column;gap:10px;">
-    <div class="row-group" style="flex-wrap:wrap;gap:12px;">
-      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
-        <label style="font-size:12px;color:var(--text2);">Режим тайминга</label>
+  <div id="timing-options" style="padding:12px 16px;display:none;flex-direction:column;gap:10px;"><div class="row-group" style="flex-wrap:wrap;gap:12px;"><div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;"><label style="font-size:12px;color:var(--text2);">Режим тайминга</label>
         <select id="timing-mode" class="select-control" onchange="onTimingModeChange()">
           <option value="exact">Точный (exact) — по тайм-кодам</option>
           <option value="preserve_pauses">Сохранять паузы</option>
           <option value="match_total">Под общую длину</option>
         </select>
       </div>
-      <div id="total-duration-group" style="display:none;flex-direction:column;gap:4px;flex:1;min-width:160px;">
-        <label style="font-size:12px;color:var(--text2);">Целевая длина (ЧЧ:ММ:СС)</label>
+      <div id="total-duration-group" style="display:none;flex-direction:column;gap:4px;flex:1;min-width:160px;"><label style="font-size:12px;color:var(--text2);">Целевая длина (ЧЧ:ММ:СС)</label>
         <input id="total-duration" type="text" class="input-control" placeholder="напр. 1:30 или 0:01:30" />
       </div>
     </div>
-    <div class="info-item" style="margin-top:4px;">
-      <span class="info-icon">💡</span>
-      <span style="font-size:12px;color:var(--text2);" id="timing-mode-hint">
-        Каждый сегмент размещается строго на своём тайм-коде из SRT.
+    <div class="info-item" style="margin-top:4px;"><span class="info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg></span>
+      <span style="font-size:12px;color:var(--text2);" id="timing-mode-hint">Каждый сегмент размещается строго на своём тайм-коде из SRT.
       </span>
     </div>
   </div>
 </div>
 
-<div class="action-row">
-  <button class="btn btn-primary btn-large" onclick="doVoiceTTS()">🔊 Озвучить</button>
-  <button class="btn btn-secondary" onclick="doVoicePreview()">▶ Предпрослушать</button>
-  <button class="btn btn-secondary" onclick="exportVoiceTxt()">📄 Экспорт TXT</button>
+<div class="action-row"><button class="btn btn-primary btn-large" onclick="doVoiceTTS()">Озвучить</button>
+  <button class="btn btn-secondary" onclick="doVoicePreview()">Предпрослушать</button>
+  <button class="btn btn-secondary" onclick="exportVoiceTxt()">Экспорт TXT</button>
 </div>
 
-<div id="status-bar" class="status-bar">
-  <span id="status-text">Готов к работе</span>
+<div id="status-bar" class="status-bar"><span id="status-text">Готов к работе</span>
 </div>
 
-<div id="audio-section" class="audio-section" style="display:none">
-  <div class="audio-header">
-    <span>🎧 Готовые аудиофайлы</span>
-    <button class="btn btn-sm" onclick="closeAudio()">✖</button>
+<div id="audio-section" class="audio-section" style="display:none"><div class="audio-header"><span>Готовые аудиофайлы</span>
+    <button class="btn btn-sm" onclick="closeAudio()" aria-label="Закрыть">✕</button>
   </div>
   <div id="audio-players" class="audio-players"></div>
 </div>
 
 <!-- ── Тайминговый результат ── -->
-<div id="timed-section" class="audio-section" style="display:none;margin-top:10px;border-color:#4f8ef7">
-  <div class="audio-header" style="color:#4f8ef7">
-    <span>⏱ Тайминговая дорожка (Timing Engine)</span>
-    <button class="btn btn-sm" onclick="document.getElementById('timed-section').style.display='none'">✖</button>
+<div id="timed-section" class="audio-section" style="display:none;margin-top:10px;border-color:var(--accent)"><div class="audio-header" style="color:var(--accent)"><span>Тайминговая дорожка (Timing Engine)</span>
+    <button class="btn btn-sm" onclick="document.getElementById('timed-section').style.display='none'" aria-label="Закрыть">✕</button>
   </div>
   <div id="timed-player" class="audio-players"></div>
-  <div id="timing-warnings" style="font-size:12px;color:#f56565;margin-top:8px;"></div>
+  <div id="timing-warnings" style="font-size:12px;color:var(--danger);margin-top:8px;"></div>
 </div>
 
-<div class="info-block" style="margin-top:24px">
-  <div class="info-item">
-    <span class="info-icon">💡</span>
-    <div>
-      <strong>Поддерживаемые форматы входных данных</strong>
+<div class="info-block" style="margin-top:24px"><div class="info-item"><span class="info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg></span>
+    <div><strong>Поддерживаемые форматы входных данных</strong>
       <span>Обычный текст, субтитры SRT — тайминг сохраняется автоматически</span>
     </div>
   </div>
-  <div class="info-item">
-    <span class="info-icon">🎵</span>
-    <div>
-      <strong>Выходной формат</strong>
+  <div class="info-item"><span class="info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg></span>
+    <div><strong>Выходной формат</strong>
       <span>MP3 файлы через edge-tts (Microsoft Neural voices)</span>
     </div>
   </div>
-  <div class="info-item">
-    <span class="info-icon">⏱</span>
-    <div>
-      <strong>Timing Engine</strong>
+  <div class="info-item"><span class="info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg></span>
+    <div><strong>Timing Engine</strong>
       <span>Собирает сегменты в единую дорожку по тайм-кодам SRT (требует pydub)</span>
     </div>
   </div>
@@ -182,23 +145,23 @@
     if (!file) return;
     const fd = new FormData();
     fd.append('file', file);
-    setStatus('⏳ Загрузка аудио…');
+    setStatus(' Загрузка аудио…');
     if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
     fetch('/api/voice/upload', { method: 'POST', body: fd })
       .then(r => r.json())
       .then(d => {
-        if (d.error) { setStatus('⚠️ ' + d.error); return; }
+        if (d.error) { setStatus(' ' + d.error); return; }
         setVoiceAudioReady(d.filename, d.original_name || file.name);
-        setStatus('✅ Аудио загружено — нажмите «Распознать»');
+        setStatus(' Аудио загружено — нажмите «Распознать»');
       })
-      .catch(e => setStatus('⚠️ ' + e))
+      .catch(e => setStatus(' ' + e))
       .finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
     input.value = '';
   }
 
   function transcribeVoiceAudio() {
     if (!voiceAudioFile) { vmNotify('Сначала загрузите аудио', 'warning'); return; }
-    setStatus('⏳ Распознавание речи (Whisper)…');
+    setStatus(' Распознавание речи (Whisper)…');
     document.getElementById('btn-transcribe').disabled = true;
     if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
     fetch('/api/voice/transcribe', {
@@ -208,18 +171,18 @@
     }).then(r => r.json()).then(d => {
       document.getElementById('btn-transcribe').disabled = false;
       if (d.error) {
-        setStatus('⚠️ ' + (typeof vmFriendlyError === 'function' ? vmFriendlyError(d.error) : d.error));
+        setStatus(' ' + (typeof vmFriendlyError === 'function' ? vmFriendlyError(d.error) : d.error));
         return;
       }
       document.getElementById('voice-box').value = d.text;
       updateCount('voice-box', 'voice-chars');
       voiceTimingMap = d.timing_map || [];
-      setStatus(`✅ Распознано: ${d.segments || 0} сегм., язык: ${d.detected_name || d.detected || '?'}`);
+      setStatus(` Распознано: ${d.segments || 0} сегм., язык: ${d.detected_name || d.detected || '?'}`);
       vmNotify('Текст распознан — отредактируйте и нажмите «Озвучить»', 'success', 3500);
       _vsSave();
     }).catch(() => {
       document.getElementById('btn-transcribe').disabled = false;
-      setStatus('⚠️ Ошибка соединения');
+      setStatus(' Ошибка соединения');
     }).finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
   }
 
@@ -237,7 +200,7 @@
         const name = d.upload_filename || (d.path ? d.path.split('/').pop() : '');
         if (!name) return;
         setVoiceAudioReady(name, d.original_filename || d.filename || name);
-        setStatus('✅ Аудио из импорта — нажмите «Распознать»');
+        setStatus(' Аудио из импорта — нажмите «Распознать»');
       },
     });
   }
@@ -248,7 +211,7 @@
     fd.append('file', file);
     fetch('/api/studio/import', { method: 'POST', body: fd })
       .then(r => r.json()).then(d => {
-        if (d.error) { setStatus('⚠️ ' + d.error); return; }
+        if (d.error) { setStatus(' ' + d.error); return; }
         document.getElementById('voice-box').value = d.text || '';
         updateCount('voice-box', 'voice-chars');
         voiceTimingMap = d.timing_map || [];
@@ -274,7 +237,7 @@
   function doVoiceTTS() {
     const text = document.getElementById('voice-box').value.trim();
     if (!text) { vmNotify('Введите текст для озвучки', 'warning', 2500); return; }
-    setStatus('⏳ Создаём голос…');
+    setStatus(' Создаём голос…');
     document.querySelector('.btn-primary').disabled = true;
     if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
     fetch('/api/tts', {
@@ -284,26 +247,26 @@
       document.querySelector('.btn-primary').disabled = false;
       if (d.error) {
         const msg = typeof vmFriendlyError === 'function' ? vmFriendlyError(d.error) : d.error;
-        setStatus('⚠️ ' + msg);
+        setStatus(' ' + msg);
         vmNotify(msg, 'error');
         return;
       }
       showAudio(d);
       showTimedAudio(d);
-      setStatus('✅ Готово! ' + (d.count > 1 ? d.count + ' файлов' : 'Аудио создано'));
-      vmNotify('🎤 Озвучка готова!', 'success', 3000);
+      setStatus(' Готово! ' + (d.count > 1 ? d.count + ' файлов' : 'Аудио создано'));
+      vmNotify(' Озвучка готова!', 'success', 3000);
       _vsSave();
     }).catch(e => {
       document.querySelector('.btn-primary').disabled = false;
       const msg = typeof vmFriendlyError === 'function' ? vmFriendlyError(String(e)) : String(e);
-      setStatus('⚠️ ' + msg);
+      setStatus(' ' + msg);
     }).finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
   }
 
   function doVoicePreview() {
     const text = document.getElementById('voice-box').value.trim().slice(0, 400);
     if (!text) { vmNotify('Введите текст', 'warning', 2000); return; }
-    setStatus('⏳ Предпрослушивание…');
+    setStatus(' Предпрослушивание…');
     if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(true);
     fetch('/api/tts', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -311,10 +274,10 @@
     }).then(r => r.json()).then(d => {
       if (d.error) {
         const msg = typeof vmFriendlyError === 'function' ? vmFriendlyError(d.error) : d.error;
-        setStatus('⚠️ ' + msg); return;
+        setStatus(' ' + msg); return;
       }
-      showAudio(d); setStatus('▶ Превью готово');
-    }).catch(() => setStatus('⚠️ Ошибка соединения'))
+      showAudio(d); setStatus(' Превью готово');
+    }).catch(() => setStatus(' Ошибка соединения'))
       .finally(() => { if (typeof vmSetWorkBusy === 'function') vmSetWorkBusy(false); });
   }
 

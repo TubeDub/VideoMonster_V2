@@ -96,11 +96,32 @@ def probe_tts() -> dict[str, Any]:
 
 
 def probe_voice_clone() -> dict[str, Any]:
-    return {
-        "id": "voice_clone",
-        "label": "Voice Clone",
-        "status": CapabilityStatus.NOT_INSTALLED.value,
-    }
+    try:
+        from engines.voice_platform.cloning import get_clone_adapter
+
+        adapter = get_clone_adapter()
+        available = bool(adapter.is_available())
+        status = (
+            CapabilityStatus.READY if available else CapabilityStatus.NOT_INSTALLED
+        )
+        return {
+            "id": "voice_clone",
+            "label": "Voice Clone",
+            "status": status.value,
+            "adapter_id": getattr(adapter, "adapter_id", "clone-null"),
+            "hint": (
+                None
+                if available
+                else "Install Coqui TTS / XTTS (pip install TTS) for minimal clone flow"
+            ),
+        }
+    except Exception as exc:
+        return {
+            "id": "voice_clone",
+            "label": "Voice Clone",
+            "status": CapabilityStatus.NOT_INSTALLED.value,
+            "error": str(exc)[:200],
+        }
 
 
 def probe_lipsync() -> dict[str, Any]:

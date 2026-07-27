@@ -1,0 +1,19 @@
+{
+  "os": "Windows",
+  "os_release": "10",
+  "os_version": "10.0.19045",
+  "architecture": "AMD64",
+  "python_version": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+  "python_implementation": "CPython",
+  "process_id": 22532,
+  "platform": "Windows-10-10.0.19045-SP0",
+  "cuda": {
+    "cuda_available": false,
+    "gpu_name": null,
+    "device_count": 0
+  },
+  "environment_variables": {
+    "PATH": "C:\\Program Files (x86)\\Intel\\iCLS Client\\;C:\\Program Files\\Intel\\iCLS Client\\;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL;C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL;C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT;C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT;C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;<USER>\\AppData\\Local\\Microsoft\\WindowsApps;<USER>\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin;<USER>\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;<USER>\\AppData\\Local\\Python\\bin;<USER>\\AppData\\Local\\Programs\\cursor\\resources\\app\\bin;<USER>\\AppData\\Local\\Programs\\Ollama;C:\\ProgramData\\serhii\\GitHubDesktop\\bin;<USER>\\AppData\\Local\\GitHubDesktop\\bin;<USER>\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\webview\\lib\\runtimes\\win-arm64\\native;<USER>\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\webview\\lib\\runtimes\\win-x64\\native;<USER>\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\webview\\lib\\runtimes\\win-x86\\native",
+    "USERPROFILE": "<USER>"
+  }
+}

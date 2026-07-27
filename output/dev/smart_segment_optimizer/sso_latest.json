@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "test",
+    "segments": 2,
+    "changed": 0,
+    "skipped": 2,
+    "underfill": 2,
+    "elapsed_sec": 0.0,
+    "tgt_lang": "en",
+    "src_lang": "en"
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "Hello world.",
+      "optimized": "Hello world.",
+      "text_for_tts": "Hello world.",
+      "changed": false,
+      "skipped": true,
+      "skip_reason": "underfill_only",
+      "level_used": 0,
+      "stop_reason": "",
+      "segment_ms": 5000,
+      "slot_ms": 4960,
+      "est_ms_before": 888,
+      "est_ms_after": 888,
+      "ms_saved": 0,
+      "fill_percent_before": 17.8,
+      "fill_percent_after": 17.8,
+      "underfill": true,
+      "overflow": false,
+      "quality": {},
+      "diff": {},
+      "steps": []
+    },
+    {
+      "index": 1,
+      "original": "Short.",
+      "optimized": "Short.",
+      "text_for_tts": "Short.",
+      "changed": false,
+      "skipped": true,
+      "skip_reason": "underfill_only",
+      "level_used": 0,
+      "stop_reason": "",
+      "segment_ms": 1000,
+      "slot_ms": 960,
+      "est_ms_before": 444,
+      "est_ms_after": 444,
+      "ms_saved": 0,
+      "fill_percent_before": 44.4,
+      "fill_percent_after": 44.4,
+      "underfill": true,
+      "overflow": false,
+      "quality": {},
+      "diff": {},
+      "steps": []
+    }
+  ],
+  "prosody_groups": []
+}

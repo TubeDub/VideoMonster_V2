@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 11607, in _run_pipeline_inner
+    _pi_sf.validate_pipeline(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        segments_data,
+        ^^^^^^^^^^^^^^
+    ...<3 lines>...
+        resolve_audio=_resolve_segment_audio_path,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 748, in validate_pipeline
+    result = PipelineValidator.validate(
+        segments_data,
+    ...<4 lines>...
+        resolve_audio=resolve_audio,
+    )
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 451, in validate
+    RuntimeIntegrityGuard.check(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        segments_data,
+        ^^^^^^^^^^^^^^
+    ...<4 lines>...
+        resolve_audio=resolve_audio,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 164, in check
+    raise RuntimeIntegrityError(
+    ...<2 lines>...
+    )
+engines.pipeline_integrity.exceptions.RuntimeIntegrityError: active segment e0af8f2a91fd4662bb6fff08c19e6b12 missing TTS file

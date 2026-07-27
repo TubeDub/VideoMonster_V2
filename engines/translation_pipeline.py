@@ -240,6 +240,27 @@ class UniversalTranslationPipeline:
             )
 
         groups = merge_segments_for_translation(mt_segments, timing_map)
+        try:
+            from engines.happy_path import happy_path_batch_translate
+            from engines.translation_naturalizer import (
+                HAPPY_PATH_MAX_BATCH_SEGMENTS,
+                merge_segments_for_translation as _merge_tr,
+            )
+
+            if happy_path_batch_translate(task_id=self.task_id):
+                groups = _merge_tr(
+                    mt_segments,
+                    timing_map,
+                    max_gap_ms=800,
+                    max_batch=HAPPY_PATH_MAX_BATCH_SEGMENTS,
+                )
+                logger.info(
+                    "happy_path batch MT: %d source segs → %d translate groups",
+                    len(mt_segments),
+                    len(groups),
+                )
+        except Exception:
+            pass
         index_to_group: dict[int, tuple[int, ...]] = {}
         for group in groups:
             gt = tuple(group)
@@ -323,6 +344,13 @@ class UniversalTranslationPipeline:
                         segment_index=group[0] if group else -1,
                         source_original=orig_phrase or None,
                     )
+                # TZ Stage 4: never keep legacy [context: ...] pollution in MT text.
+                try:
+                    from engines.translation_naturalizer import strip_mt_context_prefix
+
+                    tr_phrase = strip_mt_context_prefix(tr_phrase)
+                except Exception:
+                    pass
                 if meta.get("engine"):
                     engines_used.add(str(meta["engine"]))
                 if meta.get("route_label"):
@@ -571,7 +599,11 @@ class UniversalTranslationPipeline:
         try:
             from engines.translation_naturalizer import debleed_adjacent_batch_copies
 
-            _raw_list = [str(raw_by_index.get(i) or "") for i in range(len(segments))]
+            # raw_by_index is a list (not dict) — .get() was silently killing debleed.
+            _raw_list = [
+                str(raw_by_index[i] if i < len(raw_by_index) else "")
+                for i in range(len(segments))
+            ]
             _debleeded = debleed_adjacent_batch_copies(
                 [str(source_segments[i] or "") for i in range(len(segments))],
                 _raw_list,
@@ -1226,6 +1258,44 @@ class UniversalTranslationPipeline:
             if kept:
                 naturalized[i] = kept
             # Never bypass to English source when target language differs (TZ §3.2).
+
+        # Final debleed gate (UK+RU): MT/LLM can re-copy a shared blob after the
+        # early raw debleed. Split again before audits so Review Raw/Final diverge.
+        try:
+            from engines.dsal.clause_coverage import strip_cross_lang_clause_orphans
+            from engines.translation_naturalizer import debleed_adjacent_batch_copies
+
+            _src_final = [str(source_segments[i] or "") for i in range(len(segments))]
+            _nat_list = [
+                strip_cross_lang_clause_orphans(str(naturalized[i] or ""))
+                for i in range(len(naturalized))
+            ]
+            _raw_list = [
+                strip_cross_lang_clause_orphans(str(raw_by_index[i] or ""))
+                for i in range(len(raw_by_index))
+            ]
+            _nat_db = debleed_adjacent_batch_copies(_src_final, _nat_list)
+            _raw_db = debleed_adjacent_batch_copies(_src_final, _raw_list)
+            _post_list = [
+                strip_cross_lang_clause_orphans(str(post_naturalizer[i] or ""))
+                for i in range(len(post_naturalizer))
+            ]
+            _post_db = debleed_adjacent_batch_copies(_src_final, _post_list)
+            for i in range(len(segments)):
+                if i < len(_nat_db) and _nat_db[i] != _nat_list[i]:
+                    naturalized[i] = _nat_db[i]
+                elif i < len(_nat_list):
+                    naturalized[i] = _nat_list[i]
+                if i < len(_raw_db) and _raw_db[i] != _raw_list[i]:
+                    raw_by_index[i] = _raw_db[i]
+                elif i < len(_raw_list):
+                    raw_by_index[i] = _raw_list[i]
+                if i < len(_post_db):
+                    post_naturalizer[i] = _post_db[i]
+                elif i < len(_post_list):
+                    post_naturalizer[i] = _post_list[i]
+        except Exception as _final_debleed_exc:
+            logger.debug("final debleed gate skipped: %s", _final_debleed_exc)
 
         naturalizer_sec = time.perf_counter() - t_nat_start
         per_index_nat_ms = (naturalizer_sec * 1000.0) / max(len(segments), 1)

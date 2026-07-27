@@ -162,3 +162,56 @@ def api_assistant_debt():
         return jsonify({"ok": True, **get_technical_debt_monitor(app_dir=APP_DIR).summary()})
     except Exception as exc:  # noqa: BLE001
         return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+@bp.post("/api/assistant/test")
+def api_assistant_test():
+    if not _dev_mode():
+        return jsonify({"ok": False, "error": "Developer mode required"}), 403
+    body = request.get_json(silent=True) or {}
+    targets = body.get("targets") or body.get("files") or None
+    try:
+        from core.dev_assistant import get_dev_assistant
+        return jsonify({"ok": True, **get_dev_assistant(app_dir=APP_DIR).test(targets=targets)})
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+@bp.post("/api/assistant/post-change")
+def api_assistant_post_change():
+    if not _dev_mode():
+        return jsonify({"ok": False, "error": "Developer mode required"}), 403
+    body = request.get_json(silent=True) or {}
+    files = body.get("files") or []
+    if not files:
+        return jsonify({"ok": False, "error": "files required"}), 400
+    try:
+        from core.dev_assistant import get_dev_assistant
+        return jsonify({
+            "ok": True,
+            **get_dev_assistant(app_dir=APP_DIR).post_change(
+                files,
+                title=str(body.get("title") or ""),
+                reason=str(body.get("reason") or ""),
+            ),
+        })
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+@bp.post("/api/assistant/self-diagnose")
+def api_assistant_self_diagnose():
+    if not _dev_mode():
+        return jsonify({"ok": False, "error": "Developer mode required"}), 403
+    body = request.get_json(silent=True) or {}
+    try:
+        from core.dev_assistant import get_dev_assistant
+        return jsonify({
+            "ok": True,
+            **get_dev_assistant(app_dir=APP_DIR).self_diagnose(
+                project_id=str(body.get("project_id") or ""),
+                metrics=body.get("metrics") if isinstance(body.get("metrics"), dict) else None,
+            ),
+        })
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 500

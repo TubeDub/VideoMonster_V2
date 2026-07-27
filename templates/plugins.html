@@ -4,33 +4,45 @@
 <style>
 .plg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px; }
 .plg-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
-.plg-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.plg-card { background:var(--panel-solid); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; }
 .plg-card h3 { margin:0 0 4px; font-size:14px; }
 .plg-meta { font-size:11px; color:var(--text-muted); margin-bottom:8px; }
 .plg-caps { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0; }
-.plg-cap { font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(99,102,241,.15); color:#a5b4fc; }
+.plg-cap { font-size:10px; padding:2px 6px; border-radius:4px; background:var(--accent-dim); color:var(--accent); }
 .plg-state { font-size:11px; font-weight:600; }
 .plg-state.enabled { color:#3ecf8e; }
 .plg-state.failed { color:#f56565; }
 .plg-state.disabled { color:#9ca3af; }
-.plg-actions { display:flex; gap:6px; margin-top:10px; }
+.plg-actions { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
 .plg-actions button { font-size:11px; padding:4px 8px; }
+.plg-market { margin-top:28px; }
+.plg-install { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 16px; align-items:center; }
+.plg-install input { flex:1; min-width:200px; }
 </style>
 {% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>🧩 Plugin Manager</h1>
+<div class="page-header"><h1>Plugin Manager</h1>
   <p class="subtitle">Управление расширениями VideoMonster V2</p>
 </div>
 
-<div class="plg-header">
-  <div>
-    <span id="plg-summary" class="subtitle">Загрузка...</span>
+<div class="plg-header"><div><span id="plg-summary" class="subtitle">Загрузка...</span>
   </div>
   <button class="btn btn-primary" id="plg-refresh">Обновить</button>
 </div>
 
 <div class="plg-grid" id="plg-list"></div>
+
+<section class="plg-market">
+  <h2>Local Marketplace</h2>
+  <p class="subtitle">Установка из папки или ZIP (developer mode для install/remove). Remote — только при VM_PLUGIN_MARKETPLACE_URL.</p>
+  <div class="plg-install"><input id="plg-source" class="input-control" type="text" placeholder="Путь к папке плагина или .zip" />
+    <input id="plg-name" class="input-control" type="text" placeholder="Имя (опц.)" style="max-width:160px;" />
+    <button class="btn btn-primary" id="plg-install-btn">Install</button>
+  </div>
+  <p id="plg-remote-status" class="subtitle"></p>
+  <div class="plg-grid" id="plg-remote-catalog"></div>
+  <div class="plg-grid" id="plg-catalog"></div>
+</section>
 {% endblock %}
 {% block extra_scripts %}
 <script src="/static/js/plugins.js"></script>

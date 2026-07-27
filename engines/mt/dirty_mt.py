@@ -73,7 +73,22 @@ _GARBAGE = re.compile(
     r"автомобіль,\s*яка|"
     r"був\s+(?:повністю\s+)?одужав|"
     r"правий\s+мав\s+рацію|"
-    r"автомобіль\s+на\s+великій\s+швидкості\s+промчала",
+    r"автомобіль\s+на\s+великій\s+швидкості\s+промчала|"
+    # zh→uk / Argos agreement & nonsense leftovers
+    r"поколінь\s+прості|"
+    r"вісім\s+поколінь\s+прості|"
+    r"ви\s+товсті,\s*ви\s+вагітні|"
+    r"ви\s+вагітні,\s*ви\s+товсті|"
+    r"Лу\s+Ся\s+товст|"
+    r"осмого\s+покоління|"
+    r"осма\s+покоління|"
+    r"восьме\s+покоління\s+Лу|"
+    r"кілька\s+хлопців|"
+    r"не\s+можу\s+думати\s+про\s+(?:таку\s+)?вагітність|"
+    r"вагітна/вагітність|"
+    r"ви\s+в\s+будинку,\s*ви\s+в\s+будинку|"
+    r"гаряча\s+гарячка|"
+    r"\bребенок\b",
     re.I,
 )
 
@@ -122,6 +137,32 @@ def compute_dirty_mt_score(
     if _CALQUE_UK.search(tr):
         score += 0.25
         reasons.append("calque")
+
+    # Source script still in "translation" (any pair)
+    try:
+        from engines.mt.cross_script_guard import (
+            has_phrase_loop,
+            meaning_collapse,
+            source_script_leak,
+        )
+
+        leak = source_script_leak(src, tr, source_lang=None, target_lang=lang)
+        if leak:
+            score += 0.55
+            reasons.append("source_script_leak")
+            details["leak"] = leak
+        collapse = meaning_collapse(src, tr, source_lang=None, target_lang=lang)
+        if collapse:
+            score += 0.55
+            reasons.append("meaning_collapse")
+            reasons.append("cjk_meaning_collapse")  # review / legacy warning code
+            details["collapse"] = {k: collapse[k] for k in ("reasons", "meta_waffle") if k in collapse}
+        if has_phrase_loop(tr, min_repeats=3):
+            score += 0.5
+            reasons.append("phrase_loop")
+            details["phrase_loop"] = True
+    except Exception:
+        pass
 
     # Severe collapse
     try:

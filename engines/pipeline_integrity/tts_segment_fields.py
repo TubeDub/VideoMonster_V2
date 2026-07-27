@@ -13,7 +13,16 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
 
 def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
     """Priority: authoritative final (semantic over stale raw) then legacy fields."""
-    from engines.translation_validation import resolve_post_quality_text
+    if seg.get("tts_blocked") or seg.get("skip_tts"):
+        return ""
+    if "FAIL" in str(seg.get("tqe_status") or "").upper() and not str(
+        seg.get("approved_text") or ""
+    ).strip():
+        return ""
+    from engines.translation_validation import (
+        is_shared_mt_blob_reclaim,
+        resolve_post_quality_text,
+    )
 
     owned = resolve_post_quality_text(seg)
     text = owned or str(
@@ -24,8 +33,45 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
         or seg.get("text")
         or ""
     ).strip()
+    # Last ownership belt: prefer segment Final/translated over multi-segment blob.
+    final_owned = str(
+        seg.get("approved_text")
+        or seg.get("final_text")
+        or seg.get("translated_text")
+        or ""
+    ).strip()
+    if final_owned and text and is_shared_mt_blob_reclaim(
+        final_owned,
+        text,
+        raw_mt=str(seg.get("raw_translation") or ""),
+    ):
+        text = final_owned
     if not text:
         return ""
+    # Last line of defense: never voice source-script leak / meaning collapse
+    try:
+        from engines.mt.cross_script_guard import meaning_collapse, source_script_leak
+        from engines.translation_validation import texts_equivalent_for_ownership
+
+        source = str(
+            seg.get("original")
+            or seg.get("original_text")
+            or seg.get("whisper_text")
+            or seg.get("source_text")
+            or ""
+        )
+        tgt = str(seg.get("target_lang") or seg.get("lang") or "")
+        if source and source_script_leak(source, text):
+            return ""
+        if source and meaning_collapse(source, text, target_lang=tgt or None):
+            # Keep segment-owned Final/translated even when the slot is a short
+            # split fragment (collapse vs long EN source is expected).
+            if not (
+                final_owned and texts_equivalent_for_ownership(text, final_owned)
+            ):
+                return ""
+    except Exception:
+        pass
     try:
         from engines.semantic_meaning import restore_terminal_close
 

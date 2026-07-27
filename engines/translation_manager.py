@@ -77,6 +77,7 @@ def _translate_route_with_engines(
     *,
     segment_index: int = -1,
     score_source: str | None = None,
+    max_engines: int | None = None,
 ) -> list[TranslationCandidate]:
     """Run a route; for each leg try top-N engines and keep best leg scores."""
     from engines.mt.registry import get_engine_by_id, ordered_engines_for_pair
@@ -89,9 +90,10 @@ def _translate_route_with_engines(
     src0, tgt0 = route.chain[0]
     candidates: list[TranslationCandidate] = []
     q_src = (score_source or text).strip()
+    eng_limit = max_engines if max_engines is not None else MAX_ENGINES_PER_ROUTE
 
     if route.is_direct:
-        engines = ordered_engines_for_pair(app_dir, src0, tgt0)[:MAX_ENGINES_PER_ROUTE]
+        engines = ordered_engines_for_pair(app_dir, src0, tgt0)[:eng_limit]
         for eng in engines:
             t0 = time.perf_counter()
             try:
@@ -317,12 +319,24 @@ def translate_with_manager(
         return text, meta
 
     routes = candidate_routes(src, tgt, base)[: max(1, MAX_ROUTES)]
+    # CJK sources need deep + pivot in the tournament
+    if src in ("zh", "ja", "ko"):
+        routes = candidate_routes(src, tgt, base)[: max(MAX_ROUTES, 4)]
     all_candidates: list[TranslationCandidate] = []
+
+    _max_eng = MAX_ENGINES_PER_ROUTE
+    if src in ("zh", "ja", "ko"):
+        _max_eng = max(_max_eng, 3)
 
     for route in routes:
         meta["routes_tried"].append(route.label)
         for cand in _translate_route_with_engines(
-            clean, route, base, segment_index=segment_index, score_source=score_source
+            clean,
+            route,
+            base,
+            segment_index=segment_index,
+            score_source=score_source,
+            max_engines=_max_eng,
         ):
             all_candidates.extend([cand])
             meta["engines_tried"].extend(cand.engines_tried)
@@ -405,11 +419,44 @@ def translate_with_manager(
     best = ranked[0]
     alt = ranked[1] if len(ranked) > 1 else None
 
+    def _is_collapse(cand: TranslationCandidate | None) -> bool:
+        if cand is None:
+            return True
+        qd = cand.quality_details or {}
+        if qd.get("meaning_collapse") or qd.get("cjk_meaning_collapse"):
+            return True
+        try:
+            from engines.mt.cross_script_guard import is_meta_waffle, meaning_collapse
+
+            if is_meta_waffle(cand.text):
+                return True
+            if score_source and meaning_collapse(
+                score_source, cand.text, source_lang=src, target_lang=tgt
+            ):
+                return True
+        except Exception:
+            pass
+        return False
+
+    # Prefer first non-collapse candidate (deep/NLLB over Argos flower)
+    if _is_collapse(best):
+        for cand in ranked[1:]:
+            if not _is_collapse(cand):
+                meta["mt_retries"] = int(meta.get("mt_retries", 0)) + 1
+                logger.info(
+                    "[TM] skip collapse eng=%s → eng=%s seg=%s",
+                    best.engine,
+                    cand.engine,
+                    segment_index,
+                )
+                best = cand
+                break
+
     from engines.translation_quality_score import MIN_ACCEPT_QUALITY
 
     if score_source and (best.score < MIN_ACCEPT_QUALITY or has_mt_garbage(best.text)):
         fb = _marian_fallback(score_source, src, tgt, base, segment_index=segment_index)
-        if fb and (fb.score > best.score or has_mt_garbage(best.text)):
+        if fb and not _is_collapse(fb) and (fb.score > best.score or has_mt_garbage(best.text)):
             meta["mt_retries"] = int(meta.get("mt_retries", 0)) + 1
             logger.info("[TM] marian fallback seg=%s score=%.1f", segment_index, fb.score)
             best = fb
@@ -431,7 +478,7 @@ def translate_with_manager(
 
     if has_mt_garbage(best.text) and score_source:
         fb = _marian_fallback(score_source, src, tgt, base, segment_index=segment_index)
-        if fb:
+        if fb and not _is_collapse(fb):
             meta["mt_retries"] = int(meta.get("mt_retries", 0)) + 1
             logger.info("[TM] last-resort marian seg=%s", segment_index)
             best = fb
@@ -454,6 +501,151 @@ def translate_with_manager(
                 best.text[:80],
             )
             meta["language_leak_code"] = "english_in_target_track"
+
+    # Final: never ship flower waffle; allow partial non-waffle MT for long ASR
+    if _is_collapse(best):
+        from engines.mt.registry import get_engine_by_id
+        from engines.mt.cross_script_guard import is_meta_waffle
+
+        deep = get_engine_by_id("deep")
+        if deep and deep.supports_pair(src, tgt):
+            try:
+                dr = deep.translate(clean, src, tgt)
+                if str(dr.text or "").strip() and not is_meta_waffle(dr.text):
+                    from engines.translation_quality_score import compute_quality_score
+
+                    ds, dqd = compute_quality_score(
+                        score_source, dr.text, src_lang=src, tgt_lang=tgt
+                    )
+                    deep_cand = TranslationCandidate(
+                        text=dr.text.strip(),
+                        score=ds,
+                        engine="deep",
+                        route_label=f"{src}→{tgt}",
+                        route_name="deep_collapse_rescue",
+                        pivot=None,
+                        direct=True,
+                        elapsed_ms=float(dr.elapsed_ms or 0),
+                        quality_details=dqd,
+                        engines_tried=["deep"],
+                    )
+                    # Accept deep rescue if no waffle even when secondary cues missing
+                    if not is_meta_waffle(deep_cand.text):
+                        meta["mt_retries"] = int(meta.get("mt_retries", 0)) + 1
+                        meta["collapse_rescue"] = "deep"
+                        best = deep_cand
+            except Exception as exc:
+                logger.debug("[TM] deep collapse rescue failed: %s", exc)
+
+        # CJK→uk/ru: LLM direct from source when offline/deep still collapsed
+        if _is_collapse(best):
+            try:
+                from engines.mt.zh_drama_gloss import try_offline_gloss_rescue
+
+                gloss = try_offline_gloss_rescue(
+                    clean or score_source,
+                    best.text if best else "",
+                    src_lang=src,
+                    tgt_lang=tgt,
+                )
+                if gloss and str(gloss.get("text") or "").strip():
+                    gtext = str(gloss["text"]).strip()
+                    if not _is_collapse(
+                        TranslationCandidate(
+                            text=gtext,
+                            score=0.0,
+                            engine="gloss",
+                            route_label=f"{src}→{tgt}",
+                            route_name="offline_gloss_rescue",
+                            pivot=None,
+                            direct=True,
+                            elapsed_ms=0.0,
+                        )
+                    ):
+                        meta["mt_retries"] = int(meta.get("mt_retries", 0)) + 1
+                        meta["collapse_rescue"] = f"offline_gloss:{gloss.get('method')}"
+                        best = TranslationCandidate(
+                            text=gtext,
+                            score=85.0,
+                            engine="gloss",
+                            route_label=f"{src}→{tgt}",
+                            route_name="offline_gloss_rescue",
+                            pivot=None,
+                            direct=True,
+                            elapsed_ms=0.0,
+                            quality_details={"offline_gloss": True},
+                            engines_tried=list((best.engines_tried if best else []) or [])
+                            + ["gloss"],
+                        )
+            except Exception as exc:
+                logger.debug("[TM] offline gloss rescue failed: %s", exc)
+
+        if _is_collapse(best):
+            try:
+                from engines.mt.llm_retranslate import (
+                    llm_direct_translate,
+                    should_llm_retranslate,
+                )
+
+                if should_llm_retranslate(src_lang=src, tgt_lang=tgt):
+                    llm_text = llm_direct_translate(
+                        clean or score_source,
+                        src_lang=src,
+                        tgt_lang=tgt,
+                        segment_idx=segment_index if segment_index >= 0 else None,
+                    )
+                    if llm_text and not _is_collapse(
+                        TranslationCandidate(
+                            text=llm_text,
+                            score=0.0,
+                            engine="llm",
+                            route_label=f"{src}→{tgt}",
+                            route_name="llm_collapse_rescue",
+                            pivot=None,
+                            direct=True,
+                            elapsed_ms=0.0,
+                        )
+                    ):
+                        from engines.translation_quality_score import compute_quality_score
+
+                        ls, lqd = compute_quality_score(
+                            score_source, llm_text, src_lang=src, tgt_lang=tgt
+                        )
+                        meta["mt_retries"] = int(meta.get("mt_retries", 0)) + 1
+                        meta["collapse_rescue"] = "llm_direct"
+                        best = TranslationCandidate(
+                            text=llm_text,
+                            score=ls,
+                            engine="llm",
+                            route_label=f"{src}→{tgt}",
+                            route_name="llm_collapse_rescue",
+                            pivot=None,
+                            direct=True,
+                            elapsed_ms=0.0,
+                            quality_details=lqd,
+                            engines_tried=list(best.engines_tried or []) + ["llm"],
+                        )
+            except Exception as exc:
+                logger.debug("[TM] llm collapse rescue failed: %s", exc)
+
+        if is_meta_waffle(best.text) or (
+            (best.quality_details or {}).get("meaning_collapse")
+            and is_meta_waffle(best.text)
+        ):
+            meta["meaning_collapse"] = True
+            meta["engine"] = best.engine
+            meta["quality_score"] = 0.0
+            meta["quality_details"] = {
+                **(best.quality_details or {}),
+                "meaning_collapse": True,
+            }
+            meta["router_reason"] = "meta_waffle_rejected"
+            logger.warning(
+                "[TM] rejecting waffle MT seg=%s eng=%s",
+                segment_index,
+                best.engine,
+            )
+            return "", meta
 
     if alt:
         meta["alternative_translation"] = alt.text

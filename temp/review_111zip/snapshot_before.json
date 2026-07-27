@@ -1,0 +1,350 @@
+[
+  {
+    "index": 0,
+    "text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз",
+    "plain_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз",
+    "translation_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз",
+    "file": "output\\sessions\\235942b050eb4df39ff6489390922845\\closed_loop\\235942b050eb4df39ff6489390922845\\pause\\pause_run_a1212b98f896_20260723_001050_0641f6c5.wav",
+    "source_word_map": {
+      "segment_index": 0,
+      "segment_start_ms": 1200,
+      "segment_end_ms": 11000,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "我们陆下八代单纯",
+          "start_ms": 1200,
+          "end_ms": 3000,
+          "confidence": 0.5
+        },
+        {
+          "text": "此时单保",
+          "start_ms": 3000,
+          "end_ms": 4280,
+          "confidence": 0.5
+        },
+        {
+          "text": "有惊呀",
+          "start_ms": 4280,
+          "end_ms": 5160,
+          "confidence": 0.5
+        },
+        {
+          "text": "你怀孕了",
+          "start_ms": 5160,
+          "end_ms": 6240,
+          "confidence": 0.5
+        },
+        {
+          "text": "陆下有厚了",
+          "start_ms": 6240,
+          "end_ms": 7600,
+          "confidence": 0.5
+        },
+        {
+          "text": "要是能一几个男",
+          "start_ms": 7600,
+          "end_ms": 9720,
+          "confidence": 0.5
+        },
+        {
+          "text": "那就更完美了",
+          "start_ms": 9720,
+          "end_ms": 11000,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "a1212b98f89645c8a81a0e2eda8d9a98",
+    "final_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "voice_input": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "text_for_tts": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "translated_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "grammar_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "timing_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "semantic_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "semantic_engine_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "original_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+    "start_ms": 1200,
+    "end_ms": 5570,
+    "slot_ms": 4370,
+    "meaning_fit_source": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 4173,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 9481,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "success": false,
+    "tts_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз",
+    "tts_file_path": "output\\sessions\\235942b050eb4df39ff6489390922845\\closed_loop\\235942b050eb4df39ff6489390922845\\pause\\pause_run_a1212b98f896_20260723_001050_0641f6c5.wav",
+    "playback_duration": 8543,
+    "status": "generated",
+    "tts_ms": 8543,
+    "tts_status": "generated",
+    "original_duration_ms": 4370,
+    "need_adaptation": true,
+    "need_adaptation_force_reason": "DurationDelta>500ms (delta=3773)",
+    "adaptation_decision": {
+      "segment_id": "a1212b98f89645c8a81a0e2eda8d9a98",
+      "index": 0,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "need_adaptation": true,
+      "duration_delta_ms": 3773,
+      "original_duration_ms": 4370,
+      "tts_duration_ms": 8143,
+      "translation_locked": false,
+      "llm_available": false,
+      "rule_adapter_enabled": true,
+      "semantic_adapter_enabled": true,
+      "decision": "dsal_rule_compress",
+      "adaptation_executed": true,
+      "skip_reason": ""
+    },
+    "actual_duration_ms": 8543,
+    "first_tts_duration_ms": 9432,
+    "segment_uuid": "a1212b98f89645c8a81a0e2eda8d9a98",
+    "audio_bound_uuid": "a1212b98f89645c8a81a0e2eda8d9a98",
+    "pause_engine": {
+      "before_ms": 9936,
+      "after_ms": 8543,
+      "saved_ms": 1393,
+      "stages": [
+        "lead_trim:214",
+        "tail_trim:932",
+        "pause_compress:246"
+      ],
+      "slot_ms": 4370
+    },
+    "adaptation_executed": true,
+    "adaptation_status": "ADAPTATION EXECUTED",
+    "adaptation_skip_reason": "",
+    "text_adaptation_trace": {
+      "executed": true,
+      "stages": [
+        "dsal_rule_compress"
+      ]
+    },
+    "decision_trace": [
+      {
+        "stage": "decision_engine",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "chosen": "dsal_rule_compress",
+          "why": "dsal_rule_compress",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784754648608,
+        "index": 0
+      },
+      {
+        "stage": "chosen_strategy",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "chosen": "dsal_rule_compress",
+          "cost": null,
+          "overflow_ms": 0
+        },
+        "ts_ms": 1784754648610,
+        "index": 0
+      },
+      {
+        "stage": "strategy_result",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "chosen": "dsal_rule_compress",
+          "stages": [
+            "dsal_rule_compress"
+          ]
+        },
+        "ts_ms": 1784754648611
+      },
+      {
+        "stage": "final_result",
+        "status": "SUCCESS",
+        "reason": "dsal_rule_compress",
+        "detail": {
+          "overflow_ms": 0,
+          "duration_ms": 8143
+        },
+        "ts_ms": 1784754648613,
+        "index": 0
+      }
+    ],
+    "decision_transitions": [
+      "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+      "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+      "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=8143"
+    ],
+    "dsal_applied": true,
+    "requires_llm_adaptation": false,
+    "decision_trace_report": {
+      "stages": [
+        {
+          "stage": "decision_engine",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "why": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784754648608,
+          "index": 0
+        },
+        {
+          "stage": "chosen_strategy",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "cost": null,
+            "overflow_ms": 0
+          },
+          "ts_ms": 1784754648610,
+          "index": 0
+        },
+        {
+          "stage": "strategy_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "chosen": "dsal_rule_compress",
+            "stages": [
+              "dsal_rule_compress"
+            ]
+          },
+          "ts_ms": 1784754648611
+        },
+        {
+          "stage": "final_result",
+          "status": "SUCCESS",
+          "reason": "dsal_rule_compress",
+          "detail": {
+            "overflow_ms": 0,
+            "duration_ms": 8143
+          },
+          "ts_ms": 1784754648613,
+          "index": 0
+        }
+      ],
+      "transitions": [
+        "decision_engine = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "chosen_strategy = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress | overflow_ms=0",
+        "strategy_result = SUCCESS (dsal_rule_compress) | chosen=dsal_rule_compress",
+        "final_result = SUCCESS (dsal_rule_compress) | overflow_ms=0 | duration_ms=8143"
+      ],
+      "silent_stages": [],
+      "ok": true
+    },
+    "timing_budget": {
+      "index": 0,
+      "slot_start": 1200,
+      "slot_end": 5570,
+      "slot_duration": 4370,
+      "tts_duration": 8543,
+      "measured_duration": 8543,
+      "delta": 4173,
+      "overflow": 4173,
+      "underflow": 0,
+      "status": "overflow",
+      "rewrite_iterations": 1,
+      "pause_adjustments_ms": 2682,
+      "pause_stages": [
+        "lead_trim:204",
+        "tail_trim:879",
+        "pause_compress:205",
+        "lead_trim:214",
+        "tail_trim:932",
+        "pause_compress:246"
+      ],
+      "timing_score": 30.0,
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "final_status": "dsal_exhausted_audio_fit",
+      "original_duration": 9432,
+      "provider_fatal": false
+    },
+    "timing_score": 30.0,
+    "closed_loop": {
+      "iterations": 1,
+      "final_status": "dsal_exhausted_audio_fit",
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "pause_adjustments_ms": 2682,
+      "timing_score": 30.0,
+      "actual_duration_ms": 8543,
+      "slot_duration": 4370,
+      "delta": 4173,
+      "underflow_ms": 0,
+      "expand_required": false,
+      "adaptation_skip_reason": "",
+      "adaptation_decision": {
+        "segment_id": "a1212b98f89645c8a81a0e2eda8d9a98",
+        "index": 0,
+        "overflow_ms": 0,
+        "underflow_ms": 0,
+        "need_adaptation": true,
+        "duration_delta_ms": 3773,
+        "original_duration_ms": 4370,
+        "tts_duration_ms": 8143,
+        "translation_locked": false,
+        "llm_available": false,
+        "rule_adapter_enabled": true,
+        "semantic_adapter_enabled": true,
+        "decision": "dsal_rule_compress",
+        "adaptation_executed": true,
+        "skip_reason": ""
+      }
+    },
+    "fitted_file": "slot_fit_235942b0_a1212b98f896_20260723_001051_34f74aa4.wav",
+    "container_status": "red",
+    "slot_overflow": true,
+    "fitted_ms": 8515,
+    "overflow_ms": 4070,
+    "overflow_pct": 93.1,
+    "timing_meta": {
+      "slot_ms": 4370,
+      "slot_limit_ms": 4445,
+      "tts_ms": 8543,
+      "fitted_ms": 8515,
+      "atempo": 1.0,
+      "tail_trim_ms": 0,
+      "pause_compressed_ms": 27,
+      "strategy": "pause_compress",
+      "overflow_ms": 4070,
+      "slot_fit_tts_ms": 8543,
+      "slot_fit_iterations": [
+        {
+          "action": "overflow_text_only",
+          "note": "no_atempo"
+        }
+      ],
+      "slot_fit_key": "3a290f47a59cc816"
+    },
+    "slot_fit_attempts": 1,
+    "sync_status": "SYNC_FAIL",
+    "sync_detail": "SYNC_OVERFLOW_REMAINING",
+    "manual_review": true,
+    "meaning_fit_call_point": true,
+    "manual_review_call_point": true,
+    "lock_ordering_reason": "slot_budget_not_ok",
+    "algorithm_reason": "fit_failed",
+    "source_segment_uuid": "a1212b98f89645c8a81a0e2eda8d9a98",
+    "translation_uuid": "4658bd622e2c43b08800d3d801b1db26",
+    "adaptation_uuid": "80f5281f15c046c9988a4cd40b3c95d1",
+    "tts_uuid": "bb0484d49c034ab28eb967e115139453",
+    "audio_uuid": "2c74f80876344f6eb196aece66faef81",
+    "merge_uuid": "13c072135e1544f0bb383e616f103485"
+  }
+]

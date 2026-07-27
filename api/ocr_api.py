@@ -18,14 +18,14 @@ _LOCK = RLock()
 
 
 def _resolve_video(raw_path: str) -> Path | None:
-    candidates = [
-        Path(raw_path),
-        APP_DIR / raw_path,
-        Path("uploads") / Path(raw_path).name,
-        APP_DIR / "uploads" / "imports" / Path(raw_path).name,
-        OUTPUT_DIR / Path(raw_path).name,
-    ]
-    return next((p for p in candidates if p.exists()), None)
+    from engines.path_safety import resolve_under_roots
+
+    return resolve_under_roots(
+        raw_path,
+        [APP_DIR / "uploads", APP_DIR / "uploads" / "imports", OUTPUT_DIR],
+        basename_fallback=True,
+    )
+
 
 
 @bp.get("/api/ocr/status")

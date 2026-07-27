@@ -130,7 +130,7 @@ class LegacyEngineAdapter(VoiceProvider):
 
     def capabilities(self) -> VoiceCapabilities:
         eid = self.provider_id.lower()
-        cloning = any(x in eid for x in ("xtts", "openvoice", "fish", "cosy", "clone"))
+        cloning = any(x in eid for x in ("xtts", "openvoice", "fish", "cosy", "clone", "coqui"))
         return VoiceCapabilities(
             languages=[],
             cloning=cloning,

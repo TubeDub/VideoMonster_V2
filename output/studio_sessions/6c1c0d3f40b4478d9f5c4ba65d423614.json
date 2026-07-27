@@ -1,0 +1,794 @@
+{
+  "session_id": "6c1c0d3f40b4478d9f5c4ba65d423614",
+  "task_id": "6c1c0d3f40b4478d9f5c4ba65d423614",
+  "segments": [
+    {
+      "id": "803a687a0f874c99b8823e435edb6b95",
+      "index": 0,
+      "segment_id": "803a687a0f874c99b8823e435edb6b95",
+      "text": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально",
+      "original": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+      "start_ms": 1200,
+      "end_ms": 5570,
+      "file": "tts_55256409_bbc83b1335a4_20260723_012156_409ca27b.mp3",
+      "fitted_file": "slot_fit_6c1c0d3f_803a687a0f87_20260723_012139_19e2692e.wav",
+      "tts_ms": 7382,
+      "fitted_ms": 7368,
+      "overflow_ms": 2923,
+      "overflow_pct": 66.9,
+      "container_status": "red",
+      "tts_status": "generated",
+      "tts_error": null,
+      "emotion": "neutral",
+      "timing_meta": {
+        "slot_ms": 4370,
+        "slot_limit_ms": 4445,
+        "tts_ms": 7382,
+        "fitted_ms": 7368,
+        "atempo": 1.0,
+        "tail_trim_ms": 0,
+        "pause_compressed_ms": 13,
+        "strategy": "pause_compress",
+        "overflow_ms": 2923,
+        "slot_fit_tts_ms": 7382,
+        "slot_fit_iterations": [
+          {
+            "action": "overflow_text_only",
+            "note": "no_atempo"
+          }
+        ],
+        "slot_fit_key": "3163a26c11314e69",
+        "crossfade_ms": 12
+      }
+    }
+  ],
+  "timing_map": [
+    {
+      "start": 1200,
+      "end": 5570
+    }
+  ],
+  "source_segments": [
+    "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的"
+  ],
+  "tracks": {
+    "original": {
+      "muted": false,
+      "solo": false,
+      "volume": 1.0,
+      "label": "Original Voice",
+      "i18n_key": "studio.track.original",
+      "color": "#22c55e"
+    },
+    "user_voice": {
+      "muted": false,
+      "solo": false,
+      "volume": 1.0,
+      "label": "User Voice",
+      "i18n_key": "studio.track.user_voice",
+      "color": "#ec4899"
+    },
+    "music": {
+      "muted": false,
+      "solo": false,
+      "volume": 1.0,
+      "label": "Music",
+      "i18n_key": "studio.track.music",
+      "color": "#a855f7"
+    },
+    "sfx": {
+      "muted": false,
+      "solo": false,
+      "volume": 1.0,
+      "label": "SFX",
+      "i18n_key": "studio.track.sfx",
+      "color": "#64748b"
+    },
+    "tts": {
+      "muted": false,
+      "solo": false,
+      "volume": 1.0,
+      "label": "Dub Voice",
+      "i18n_key": "studio.track.dub",
+      "color": "#f59e0b"
+    }
+  },
+  "voice": "ru-RU-DmitryNeural",
+  "lang": "uk",
+  "plugin_order": [
+    "eq",
+    "compressor"
+  ],
+  "duration_ms": 68333,
+  "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_0f5af95b55.mp4",
+  "video_preview": "video_0f5af95b55.mp4",
+  "original_audio": null,
+  "task_status": "running",
+  "output_file": "video_0f5af95b55_OUTPUT_6c1c0d3f.mp4",
+  "studio_url": "/studio?task_id=6c1c0d3f40b4478d9f5c4ba65d423614",
+  "studio_qa": {
+    "version": "6.0",
+    "pipeline_view": {
+      "pipeline_state": "SPEECH_READY",
+      "stages": [
+        {
+          "name": "Recognition",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Sentence",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Translation",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Validation",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Semantic Lock",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Planning",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Speech",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Scheduler",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Alignment",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Merge",
+          "status": "ok",
+          "errors": []
+        },
+        {
+          "name": "Export",
+          "status": "ok",
+          "errors": []
+        }
+      ],
+      "has_errors": false
+    },
+    "timeline_view": {
+      "timeline_uuid": "ac333fd294484b9bb6d9008c35b4f157",
+      "units": [
+        {
+          "audio_uuid": "e5cc3597a1b9478daf00d37a29fc32df",
+          "speech_uuid": "1219c7017ab74246ac351250767aca7d",
+          "start_ms": 1200,
+          "end_ms": 5570,
+          "wav": "",
+          "tempo": 0.98,
+          "stretch": 1.0,
+          "borrow_ms": 0,
+          "pause_ms": 1300,
+          "alignment": [
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            },
+            {
+              "viseme": "A",
+              "mouth_open": 0.8,
+              "mouth_close": 0.1,
+              "lip_rounding": 0.1,
+              "jaw_position": 0.7,
+              "timing_ms": 142.0
+            }
+          ],
+          "merge": false
+        }
+      ],
+      "pauses": [
+        {
+          "after_audio": "e5cc3597a1b9478daf00d37a29fc32df",
+          "pause_ms": 1300,
+          "breath_ms": 200
+        }
+      ],
+      "conflicts": []
+    },
+    "replicas": [
+      {
+        "segment_id": "0a238cc7d61340a5b46610c2158bc686",
+        "sentence_uuid": "91f6815e7b36409b90488a9f73b3a68f",
+        "speech_uuid": "1219c7017ab74246ac351250767aca7d",
+        "state": "prepared",
+        "owner": "Dub Engine",
+        "uuid": "91f6815e7b36409b90488a9f73b3a68f",
+        "start_ms": 1200,
+        "end_ms": 66220,
+        "status": "warning",
+        "errors": [],
+        "warnings": [
+          "overflow_ms=2490"
+        ],
+        "text_preview": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟"
+      }
+    ],
+    "review_panel": [
+      {
+        "sentence_uuid": "91f6815e7b36409b90488a9f73b3a68f",
+        "scores": {
+          "meaning_score": 100.0,
+          "translation_confidence": 0.625,
+          "timing_score": 100.0,
+          "lipsync_score": 100.0,
+          "entity_score": 100.0,
+          "speech_score": 100.0,
+          "overall_score": 93.8
+        }
+      }
+    ],
+    "decision_graph_view": {
+      "profile": "Movie",
+      "scene_uuid": "8a157f91d340410e801e4222a7bb8569",
+      "records": [
+        {
+          "sentence_uuid": "91f6815e7b36409b90488a9f73b3a68f",
+          "problem": "fit",
+          "considered": [],
+          "rejected": [],
+          "accepted": {
+            "label": "C",
+            "steps": [
+              "pause_optimization",
+              "ready"
+            ],
+            "score": 93.948,
+            "explanation": "steps=pause_optimization>ready; fit=True; score=93.948; cost=2.0"
+          },
+          "reason": "accepted=C; score=93.948; cost=2.0; path=C; A:score=93.576<93.948; B:score=93.529<93.948; D:score=93.924<93.948",
+          "rollback_path": []
+        }
+      ],
+      "conflicts": []
+    },
+    "metrics": {
+      "overlap": 0,
+      "tail_spill": 0,
+      "borrow": 0,
+      "tempo": 0,
+      "stretch": 0,
+      "rewrite": 0,
+      "manual_review": 0,
+      "scheduler_iterations": 0,
+      "prediction_error": 0.956,
+      "alignment_error": 0.0,
+      "speech_flow_score": 100.0,
+      "runtime": null,
+      "memory": null,
+      "cpu": null
+    },
+    "health": {
+      "ts": 1784758803.2353106,
+      "rss_mb": 507.69,
+      "vms_mb": 1218.47,
+      "cpu_percent": 0.0,
+      "open_files": 21,
+      "threads": 27,
+      "temp_dir_mb": 0.0,
+      "temp_wav_count": 0,
+      "details": {}
+    },
+    "acceptance": {
+      "ok": true,
+      "checks": {
+        "no_critical_errors": true,
+        "no_architecture_violations": true,
+        "no_regression_flag": true,
+        "semantic_lock_ok": true,
+        "no_overlap": true,
+        "no_tail_spill": true,
+        "no_duplicate_uuid": true,
+        "no_corrupt_wav": true
+      },
+      "metrics": {
+        "overlap": 0,
+        "tail_spill": 0,
+        "borrow": 0,
+        "tempo": 0,
+        "stretch": 0,
+        "rewrite": 0,
+        "manual_review": 0,
+        "scheduler_iterations": 0,
+        "prediction_error": 0.956,
+        "alignment_error": 0.0,
+        "speech_flow_score": 100.0,
+        "runtime": null,
+        "memory": null,
+        "cpu": null
+      }
+    },
+    "errors": [],
+    "warnings": [
+      "high_prediction_error"
+    ]
+  },
+  "pipeline_view": {
+    "pipeline_state": "SPEECH_READY",
+    "stages": [
+      {
+        "name": "Recognition",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Sentence",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Translation",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Validation",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Semantic Lock",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Planning",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Speech",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Scheduler",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Alignment",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Merge",
+        "status": "ok",
+        "errors": []
+      },
+      {
+        "name": "Export",
+        "status": "ok",
+        "errors": []
+      }
+    ],
+    "has_errors": false
+  },
+  "timeline_view": {
+    "timeline_uuid": "ac333fd294484b9bb6d9008c35b4f157",
+    "units": [
+      {
+        "audio_uuid": "e5cc3597a1b9478daf00d37a29fc32df",
+        "speech_uuid": "1219c7017ab74246ac351250767aca7d",
+        "start_ms": 1200,
+        "end_ms": 5570,
+        "wav": "",
+        "tempo": 0.98,
+        "stretch": 1.0,
+        "borrow_ms": 0,
+        "pause_ms": 1300,
+        "alignment": [
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          },
+          {
+            "viseme": "A",
+            "mouth_open": 0.8,
+            "mouth_close": 0.1,
+            "lip_rounding": 0.1,
+            "jaw_position": 0.7,
+            "timing_ms": 142.0
+          }
+        ],
+        "merge": false
+      }
+    ],
+    "pauses": [
+      {
+        "after_audio": "e5cc3597a1b9478daf00d37a29fc32df",
+        "pause_ms": 1300,
+        "breath_ms": 200
+      }
+    ],
+    "conflicts": []
+  },
+  "review_panel": [
+    {
+      "sentence_uuid": "91f6815e7b36409b90488a9f73b3a68f",
+      "scores": {
+        "meaning_score": 100.0,
+        "translation_confidence": 0.625,
+        "timing_score": 100.0,
+        "lipsync_score": 100.0,
+        "entity_score": 100.0,
+        "speech_score": 100.0,
+        "overall_score": 93.8
+      }
+    }
+  ],
+  "decision_graph_view": {
+    "profile": "Movie",
+    "scene_uuid": "8a157f91d340410e801e4222a7bb8569",
+    "records": [
+      {
+        "sentence_uuid": "91f6815e7b36409b90488a9f73b3a68f",
+        "problem": "fit",
+        "considered": [],
+        "rejected": [],
+        "accepted": {
+          "label": "C",
+          "steps": [
+            "pause_optimization",
+            "ready"
+          ],
+          "score": 93.948,
+          "explanation": "steps=pause_optimization>ready; fit=True; score=93.948; cost=2.0"
+        },
+        "reason": "accepted=C; score=93.948; cost=2.0; path=C; A:score=93.576<93.948; B:score=93.529<93.948; D:score=93.924<93.948",
+        "rollback_path": []
+      }
+    ],
+    "conflicts": []
+  },
+  "qa_metrics": {
+    "overlap": 0,
+    "tail_spill": 0,
+    "borrow": 0,
+    "tempo": 0,
+    "stretch": 0,
+    "rewrite": 0,
+    "manual_review": 0,
+    "scheduler_iterations": 0,
+    "prediction_error": 0.956,
+    "alignment_error": 0.0,
+    "speech_flow_score": 100.0,
+    "runtime": null,
+    "memory": null,
+    "cpu": null
+  }
+}

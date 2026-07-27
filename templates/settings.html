@@ -2,7 +2,7 @@
 {% block title %}Настройки — TubeDub{% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>⚙️ Настройки</h1>
+  <h1>Настройки</h1>
   <p class="subtitle">Параметры интерфейса, голоса, перевода и лицензии</p>
 </div>
 
@@ -10,7 +10,7 @@
 
   <!-- ── ЯЗЫК ИНТЕРФЕЙСА ─────────────────── -->
   <div class="settings-card">
-    <h2>🌐 <span data-i18n="settings.ui_lang">Язык интерфейса</span></h2>
+    <h2><span data-i18n="settings.ui_lang">Язык интерфейса</span></h2>
     <div class="field-group">
       <select id="settings-ui-lang" class="select-control" onchange="setUiLang(this.value)">
         <option value="ru">Русский</option>
@@ -23,28 +23,28 @@
 
   <!-- ── РЕЖИМ ИНТЕРФЕЙСА ─────────────────── -->
   <div class="settings-card">
-    <h2>🎛 Режим интерфейса</h2>
+    <h2>Режим интерфейса</h2>
 
     <div class="field-group">
       <label>Режим работы</label>
       <div id="mode-switcher"
-        style="display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;max-width:480px;">
+        style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;max-width:480px;">
         <button id="mode-btn-simple" class="mode-sw-btn" onclick="setModeUI('simple')"
           style="flex:1;padding:11px 16px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;">
-          ✨ Простой
+          Простой
         </button>
         <button id="mode-btn-pro" class="mode-sw-btn" onclick="setModeUI('pro')"
           style="flex:1;padding:11px 16px;border:none;border-left:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;">
-          ⚙️ Профессиональный
+          Профессиональный
         </button>
         <button id="mode-btn-dev" class="mode-sw-btn" onclick="setModeUI('dev')"
           style="flex:1;padding:11px 16px;border:none;border-left:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;">
-          🔧 Разработчик
+          Разработчик
         </button>
       </div>
       <div id="mode-desc" style="font-size:12px;color:var(--text2);margin-top:10px;"></div>
       <p id="mod-manager-link" class="pro-only" style="display:none;margin-top:12px;font-size:12px;">
-        <a href="/dev/modules">🧩 Module Manager</a> — каналы релизов (Stable / Beta / Dev)
+        <a href="/dev/modules">Module Manager</a> — каналы релизов (Stable / Beta / Dev)
       </p>
       <style>body.mode-dev #mod-manager-link { display: block !important; }</style>
     </div>
@@ -52,7 +52,7 @@
 
   <!-- ── БЕТА: ПОДДЕРЖКА ─────────────────── -->
   <div class="settings-card">
-    <h2>🧪 Бета-тестирование</h2>
+    <h2>Бета-тестирование</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">
       Диагностика, обновления и отправка отчёта разработчику одним нажатием.
     </p>
@@ -63,18 +63,18 @@
     </div>
 
     <div class="row-group" style="flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-      <button class="btn btn-secondary" onclick="vmRunDiagnostics('beta-diagnostics-box')">🔍 Диагностика системы</button>
+      <button class="btn btn-secondary" onclick="vmRunDiagnostics('beta-diagnostics-box')">Диагностика системы</button>
       <div data-vm-update-widget data-vm-update-meta="settings-update-meta"></div>
-      <button class="btn btn-secondary" onclick="vmSubmitErrorReport()">📨 Сообщить об ошибке</button>
+      <button class="btn btn-secondary" onclick="vmSubmitErrorReport()">Сообщить об ошибке</button>
     </div>
     <div id="settings-update-meta" class="vm-update-meta" style="margin-bottom:14px;"></div>
 
-    <div id="beta-diagnostics-box" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;min-height:48px;"></div>
+    <div id="beta-diagnostics-box" style="background:var(--panel2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;min-height:48px;"></div>
   </div>
 
   <!-- ── ДУБЛЯЖ / ОРИГИНАЛ ───────────────── -->
   <div class="settings-card">
-    <h2>🎙 Дубляж — оригинальный голос</h2>
+    <h2>Дубляж — оригинальный голос</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">
       Громкость английской (исходной) речи на фоне готового дубляжа. 0% — только дубляж.
     </p>
@@ -99,7 +99,7 @@
 
   <!-- ── TTS ─────────────────────────────── -->
   <div class="settings-card">
-    <h2>🔊 Озвучка (TTS)</h2>
+    <h2>Озвучка (TTS)</h2>
 
     <div class="field-group">
       <label>Язык голоса по умолчанию</label>
@@ -124,7 +124,7 @@
       <div class="row-group">
         <input id="s-preview-text" class="input-control" value="Привет! Это тестовая фраза для TubeDub."
           placeholder="Текст для теста" />
-        <button class="btn btn-primary" onclick="previewVoice()">▶ Слушать</button>
+        <button class="btn btn-primary" onclick="previewVoice()">Слушать</button>
       </div>
       <div id="preview-audio" style="margin-top:10px;display:none">
         <audio id="preview-player" controls style="width:100%"></audio>
@@ -134,7 +134,7 @@
 
   <!-- ── ПЕРЕВОД / AI ─────────────────────── -->
   <div class="settings-card">
-    <h2>🌍 Перевод / AI</h2>
+    <h2>Перевод / AI</h2>
 
     <div class="field-group">
       <label>Язык перевода по умолчанию</label>
@@ -183,13 +183,13 @@
 
   <!-- ── ЛИЦЕНЗИЯ ─────────────────────────── -->
   <div class="settings-card">
-    <h2>🔑 Лицензия</h2>
+    <h2>Лицензия</h2>
 
     <div class="field-group">
       <div id="license-badge-row" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div id="license-badge"
-          style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;background:var(--panel2);border:2px solid var(--border);">
-          <span id="license-icon">🆓</span>
+          style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;background:var(--panel2);border:2px solid var(--border);">
+          <span id="license-icon"></span>
           <span id="license-label">Бесплатная версия</span>
         </div>
       </div>
@@ -198,7 +198,7 @@
       <div class="row-group">
         <input type="text" id="license-key" class="input-control" placeholder="VM-XXXX-XXXX-XXXX"
           style="font-family:monospace;letter-spacing:1px;" />
-        <button class="btn btn-primary" onclick="activateLicense()">🔑 Активировать</button>
+        <button class="btn btn-primary" onclick="activateLicense()"> Активировать</button>
       </div>
       <div id="license-status-line" style="font-size:12px;color:var(--text2);margin-top:8px;"></div>
       <div id="license-server-line" style="font-size:11px;color:var(--text2);margin-top:4px;"></div>
@@ -208,13 +208,13 @@
     <div class="field-group">
       <label>Возможности</label>
       <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
-        <div style="font-size:13px;color:var(--success);">✅ Озвучка текста (TTS)</div>
-        <div style="font-size:13px;color:var(--success);">✅ Перевод текста</div>
-        <div style="font-size:13px;color:var(--success);">✅ Чтение книги (базовый)</div>
-        <div style="font-size:13px;color:var(--success);">✅ Дубляж (ручной режим)</div>
-        <div id="feat-autodub" class="feat-premium-item feat-pro-item" style="font-size:13px;">🔒 Авто-дубляж (Whisper)</div>
-        <div id="feat-mp4" class="feat-premium-item feat-pro-item" style="font-size:13px;">🔒 Экспорт MP4 (авто-дубляж)</div>
-        <div id="feat-batch" class="feat-premium-item feat-pro-item" style="font-size:13px;">🔒 Пакетная обработка</div>
+        <div style="font-size:13px;color:var(--success);"> Озвучка текста (TTS)</div>
+        <div style="font-size:13px;color:var(--success);"> Перевод текста</div>
+        <div style="font-size:13px;color:var(--success);"> Чтение книги (базовый)</div>
+        <div style="font-size:13px;color:var(--success);"> Дубляж (ручной режим)</div>
+        <div id="feat-autodub" class="feat-premium-item feat-pro-item" style="font-size:13px;"> Авто-дубляж (Whisper)</div>
+        <div id="feat-mp4" class="feat-premium-item feat-pro-item" style="font-size:13px;"> Экспорт MP4 (авто-дубляж)</div>
+        <div id="feat-batch" class="feat-premium-item feat-pro-item" style="font-size:13px;"> Пакетная обработка</div>
       </div>
     </div>
 
@@ -227,7 +227,7 @@
 
   <!-- ── ВЛАДЕЛЕЦ: ТЕСТОВЫЕ СБОРКИ ─────────── -->
   <div class="settings-card" id="owner-panel" style="display:none;border-color:rgba(99,102,241,.35);">
-    <h2>🛠 Панель владельца</h2>
+    <h2>Панель владельца</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">
       Сборки TubeDub для тестеров: ZIP, <strong>TubeDub_Test_7_Days.exe</strong>, экосистема (7 free apps).
     </p>
@@ -265,12 +265,12 @@
     </div>
 
     <div class="row-group" style="margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <a href="/owner/download-center" class="btn btn-secondary">🧠 AI Download Center</a>
-      <button class="btn btn-primary" onclick="ownerBuildInstaller()">📦 Создать установщик</button>
-      <button class="btn btn-primary" onclick="ownerBuildTestInstaller()">🧪 Создать тестовую версию</button>
+      <a href="/owner/download-center" class="btn btn-secondary">AI Download Center</a>
+      <button class="btn btn-primary" onclick="ownerBuildInstaller()"> Создать установщик</button>
+      <button class="btn btn-primary" onclick="ownerBuildTestInstaller()">Создать тестовую версию</button>
       <button class="btn btn-secondary" onclick="ownerBuildTestExe()">EXE (legacy)</button>
       <button class="btn btn-secondary" onclick="ownerCreateBuild()">ZIP (dev)</button>
-      <button class="btn btn-secondary" onclick="ownerBuildEcosystem()">🌐 Экосистема</button>
+      <button class="btn btn-secondary" onclick="ownerBuildEcosystem()">Экосистема</button>
       <button class="btn btn-secondary" onclick="ownerRefreshBuilds()">↻ Обновить список</button>
     </div>
     <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">
@@ -302,7 +302,7 @@
 
   <!-- ── ИНТЕРФЕЙС ──────────────────────── -->
   <div class="settings-card">
-    <h2>🎨 Интерфейс</h2>
+    <h2>Интерфейс</h2>
     <div class="field-group">
       <label class="toggle-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
         <input type="checkbox" id="s-ui-sounds" checked />
@@ -313,7 +313,7 @@
 
   <!-- ── МЕНЕДЖЕР МОДЕЛЕЙ ─────────────────── -->
   <div class="settings-card" id="models-manager-card">
-    <h2>📦 Менеджер моделей</h2>
+    <h2>Менеджер моделей</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
       Модели загружаются только по требованию. Общий кэш для перевода, дубляжа, STT и чтения книг.
     </p>
@@ -333,8 +333,8 @@
       </table>
     </div>
     <div class="row-group" style="flex-wrap:wrap;gap:8px;margin-top:14px;">
-      <button type="button" class="btn btn-secondary btn-sm" onclick="modelsCleanupUnused()">🧹 Удалить неиспользуемые</button>
-      <button type="button" class="btn btn-secondary btn-sm" onclick="modelsCleanupAll()">🗑 Очистить весь кэш</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="modelsCleanupUnused()"> Удалить неиспользуемые</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="modelsCleanupAll()">Очистить весь кэш</button>
       <button type="button" class="btn btn-secondary btn-sm" onclick="modelsRefresh()">↻ Обновить список</button>
     </div>
     <div id="models-dev-info" class="dev-only" style="display:none;margin-top:12px;font-size:11px;color:var(--text2);"></div>
@@ -342,7 +342,7 @@
 
   <!-- ── AI MODULE ─────────────────────────── -->
   <div class="settings-card" id="ai-module-card">
-    <h2>🤖 AI Module</h2>
+    <h2>AI Module</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
       Источник AI и API настраиваются на страницах
       <a href="/ai/sources">AI Sources</a> и
@@ -393,7 +393,7 @@
 
   <!-- ── ХРАНИЛИЩЕ ─────────────────────────── -->
   <div class="settings-card" id="storage-manager-card">
-    <h2>💾 Хранилище</h2>
+    <h2>Хранилище</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">
       Показывает, что именно занимает место на диске. Очистка удаляет <strong>только временные файлы</strong>
       — проекты, готовые MP4, модели, настройки и пресеты не затрагиваются.
@@ -401,16 +401,30 @@
     <div id="storage-summary" class="char-count" style="margin-bottom:12px;">Загрузка…</div>
     <div id="storage-buckets" style="font-size:12px;margin-bottom:14px;"></div>
     <div class="row-group" style="flex-wrap:wrap;gap:8px;">
-      <button type="button" class="btn btn-primary btn-sm" onclick="storageCleanupAll()">🧹 Очистить временные файлы и кэш</button>
-      <button type="button" class="btn btn-secondary btn-sm" onclick="storageCleanupTemp()">🗂 Только временные</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="storageCleanupAll()"> Очистить временные файлы и кэш</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="storageCleanupTemp()"> Только временные</button>
       <button type="button" class="btn btn-secondary btn-sm" onclick="storageRefresh()">↻ Обновить</button>
     </div>
     <div id="storage-cleanup-result" style="font-size:12px;margin-top:10px;color:var(--text2);"></div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:18px 0 14px;" />
+    <h3 style="font-size:14px;margin:0 0 8px;">Проекты Storage Manager</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">
+      Список, корзина и удаление через hardened Storage API.
+    </p>
+    <div class="row-group" style="flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+      <button type="button" class="btn btn-sm btn-primary" onclick="storageCreateProject()">+ Создать</button>
+      <button type="button" class="btn btn-sm btn-secondary" onclick="storageProjectsRefresh()">↻ Список</button>
+      <button type="button" class="btn btn-sm btn-secondary" onclick="storageEmptyTrash()">Очистить корзину</button>
+    </div>
+    <div id="storage-projects-stats" class="char-count" style="margin-bottom:8px;"></div>
+    <div id="storage-projects-list" style="font-size:12px;max-height:220px;overflow:auto;"></div>
+    <div id="storage-trash-list" style="font-size:12px;margin-top:12px;max-height:160px;overflow:auto;"></div>
   </div>
 
   <!-- ── О ПРОГРАММЕ ──────────────────────── -->
   <div class="settings-card">
-    <h2>ℹ️ О программе</h2>
+    <h2>О программе</h2>
     <div class="about-block">
       <div class="about-row"><span>Продукт</span><strong>TubeDub</strong></div>
       <div class="about-row"><span>Движок</span><strong>VideoMonster Engine</strong></div>
@@ -431,17 +445,17 @@
     </details>
 
     <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-      <a href="/mini/dub" class="btn btn-sm">🎬 Мини-дубляж</a>
-      <a href="/mini/voice" class="btn btn-sm">🔊 Мини-озвучка</a>
-      <a href="/mini/translate" class="btn btn-sm">🌍 Мини-перевод</a>
-      <a href="/mini/reader" class="btn btn-sm">📖 Мини «Чтение книги»</a>
+      <a href="/mini/dub" class="btn btn-sm">Мини-дубляж</a>
+      <a href="/mini/voice" class="btn btn-sm">Мини-озвучка</a>
+      <a href="/mini/translate" class="btn btn-sm">Мини-перевод</a>
+      <a href="/mini/reader" class="btn btn-sm"> Мини «Чтение книги»</a>
     </div>
   </div>
 
 </div>
 
 <div class="action-row" style="margin-top:24px">
-  <button class="btn btn-primary" onclick="saveSettings()">💾 Сохранить настройки</button>
+  <button class="btn btn-primary" onclick="saveSettings()"> Сохранить настройки</button>
   <button class="btn btn-secondary" onclick="resetSettings()">↩ Сбросить</button>
 </div>
 
@@ -457,7 +471,7 @@
 
   .mode-sw-btn.active {
     background: var(--accent);
-    color: #fff;
+    color: #0a1220;
   }
 
   .feat-pro-item {
@@ -470,7 +484,7 @@
   }
 
   body.mode-pro .feat-pro-item::before {
-    content: "✅ ";
+    content: "";
   }
 
   body.mode-pro .feat-pro-item {
@@ -483,9 +497,9 @@
 
   /* ── РЕЖИМ ИНТЕРФЕЙСА ── */
   const MODE_DESCS = {
-    simple: '✨ Простой — минимум настроек, только главные функции',
-    pro: '⚙️ Профессиональный — все движки, настройки, форматы, тайминги',
-    dev: '🔧 Разработчик — логи, pipeline, OCR, сегменты, диагностика',
+    simple: 'Простой — минимум настроек, только главные функции',
+    pro: 'Профессиональный — все движки, настройки, форматы, тайминги',
+    dev: 'Разработчик — логи, pipeline, OCR, сегменты, диагностика',
   };
 
   function setModeUI(mode) {
@@ -498,7 +512,7 @@
     if (devBtn) devBtn.classList.toggle('active', mode === 'dev');
     const desc = document.getElementById('mode-desc');
     if (desc) desc.textContent = MODE_DESCS[mode] || '';
-    const names = { simple: '✨ Простой режим', pro: '⚙️ Профессиональный режим', dev: '🔧 Режим разработчика' };
+    const names = { simple: 'Простой режим', pro: 'Профессиональный режим', dev: 'Режим разработчика' };
     vmNotify(names[mode] || 'Режим изменён', 'info', 2000);
   }
 
@@ -886,7 +900,7 @@
         + (d.deletable_temp_mb ? ' · можно очистить (временное): ' + _fmtStorageMb(d.deletable_temp_mb) : '');
       if (bucketsEl) {
         bucketsEl.innerHTML = (d.buckets || []).map(function (b) {
-          var prot = b.deletable ? '' : ' <span style="color:var(--text2);">🔒 ' + _escStorageHtml(b.protected_reason || 'защищено') + '</span>';
+          var prot = b.deletable ? '' : ' <span style="color:var(--text2);"> ' + _escStorageHtml(b.protected_reason || 'защищено') + '</span>';
           return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">'
             + '<span>' + _escStorageHtml(b.label) + '</span>'
             + '<span><strong>' + _fmtStorageMb(b.mb) + '</strong>' + prot + '</span></div>';
@@ -897,11 +911,18 @@
     }
   }
 
+  function _storageDestructiveHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'X-VM-Destructive-Confirm': '1',
+    };
+  }
+
   async function _storageCleanup(scope) {
     var resultEl = document.getElementById('storage-cleanup-result');
     var r = await fetch('/api/storage/cleanup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: _storageDestructiveHeaders(),
       body: JSON.stringify({ scope: scope, confirm: true }),
     });
     var d = await r.json();
@@ -915,6 +936,146 @@
     if (resultEl) resultEl.textContent = msg;
     vmNotify('Очистка завершена · ' + msg, 'success', 5000);
     storageRefresh();
+    storageProjectsRefresh();
+  }
+
+  function _fmtStorageDate(ts) {
+    if (!ts) return '';
+    try { return new Date(Number(ts) * 1000).toLocaleString('ru'); } catch (_) { return ''; }
+  }
+
+  async function storageProjectsRefresh() {
+    var listEl = document.getElementById('storage-projects-list');
+    var trashEl = document.getElementById('storage-trash-list');
+    var statsEl = document.getElementById('storage-projects-stats');
+    if (!listEl) return;
+    listEl.textContent = 'Загрузка проектов…';
+    if (trashEl) trashEl.textContent = '';
+    try {
+      var r = await fetch('/api/storage/projects');
+      var d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'projects failed');
+      var stats = d.statistics || {};
+      if (statsEl) {
+        statsEl.textContent = 'Проектов: ' + (stats.active_count != null ? stats.active_count : (d.projects || []).length)
+          + (stats.trashed_count != null ? ' · в корзине: ' + stats.trashed_count : '')
+          + (stats.total_bytes != null ? ' · размер: ' + _fmtStorageMb((stats.total_bytes || 0) / 1048576) : '');
+      }
+      var projects = d.projects || [];
+      if (!projects.length) {
+        listEl.innerHTML = '<div style="color:var(--text2);">Нет проектов</div>';
+      } else {
+        listEl.innerHTML = projects.map(function (p) {
+          var id = p.project_id || '';
+          var title = _escStorageHtml(p.title || id);
+          return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">'
+            + '<div><strong>' + title + '</strong><div style="color:var(--text2);font-size:11px;">'
+            + _escStorageHtml(id.slice(0, 8)) + (p.updated_at ? ' · ' + _fmtStorageDate(p.updated_at) : '')
+            + '</div></div>'
+            + '<div style="display:flex;gap:6px;flex-shrink:0;">'
+            + '<button type="button" class="btn btn-sm btn-secondary" data-sm-trash="' + _escStorageHtml(id) + '">В корзину</button>'
+            + '</div></div>';
+        }).join('');
+        listEl.querySelectorAll('[data-sm-trash]').forEach(function (btn) {
+          btn.addEventListener('click', function () { storageTrashProject(btn.getAttribute('data-sm-trash')); });
+        });
+      }
+
+      var tr = await fetch('/api/storage/trash');
+      var td = await tr.json();
+      var trash = (td && td.projects) || [];
+      if (!trashEl) return;
+      if (!trash.length) {
+        trashEl.innerHTML = '<div style="color:var(--text2);">Корзина пуста</div>';
+      } else {
+        trashEl.innerHTML = '<div style="font-weight:600;margin-bottom:6px;">Корзина</div>' + trash.map(function (p) {
+          var id = p.project_id || '';
+          return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">'
+            + '<span>' + _escStorageHtml(p.title || id) + '</span>'
+            + '<div style="display:flex;gap:6px;">'
+            + '<button type="button" class="btn btn-sm btn-secondary" data-sm-restore="' + _escStorageHtml(id) + '">Восстановить</button>'
+            + '<button type="button" class="btn btn-sm" data-sm-delete="' + _escStorageHtml(id) + '">Удалить</button>'
+            + '</div></div>';
+        }).join('');
+        trashEl.querySelectorAll('[data-sm-restore]').forEach(function (btn) {
+          btn.addEventListener('click', function () { storageRestoreProject(btn.getAttribute('data-sm-restore')); });
+        });
+        trashEl.querySelectorAll('[data-sm-delete]').forEach(function (btn) {
+          btn.addEventListener('click', function () { storageDeleteProject(btn.getAttribute('data-sm-delete')); });
+        });
+      }
+    } catch (e) {
+      listEl.textContent = 'Ошибка: ' + e.message;
+    }
+  }
+
+  async function storageCreateProject() {
+    var title = prompt('Название проекта:', 'New Project');
+    if (title == null) return;
+    title = String(title).trim() || 'New Project';
+    var r = await fetch('/api/storage/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: title }),
+    });
+    var d = await r.json();
+    if (!d.ok) { vmNotify(d.error || 'Не удалось создать', 'error'); return; }
+    vmNotify('Проект создан', 'success', 2500);
+    storageProjectsRefresh();
+  }
+
+  async function storageTrashProject(projectId) {
+    if (!projectId) return;
+    if (!confirm('Переместить проект в корзину?')) return;
+    var r = await fetch('/api/storage/projects/' + encodeURIComponent(projectId) + '/trash', {
+      method: 'POST',
+      headers: _storageDestructiveHeaders(),
+      body: JSON.stringify({ confirm: true }),
+    });
+    var d = await r.json();
+    if (!d.ok) { vmNotify(d.message || d.error || 'Ошибка', 'error'); return; }
+    vmNotify('В корзине', 'success', 2500);
+    storageProjectsRefresh();
+  }
+
+  async function storageRestoreProject(projectId) {
+    if (!projectId) return;
+    var r = await fetch('/api/storage/projects/' + encodeURIComponent(projectId) + '/restore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    var d = await r.json();
+    if (!d.ok) { vmNotify(d.message || d.error || 'Ошибка восстановления', 'error'); return; }
+    vmNotify('Восстановлено', 'success', 2500);
+    storageProjectsRefresh();
+  }
+
+  async function storageDeleteProject(projectId) {
+    if (!projectId) return;
+    if (!confirm('Удалить проект навсегда? Это необратимо.')) return;
+    var r = await fetch('/api/storage/projects/' + encodeURIComponent(projectId) + '?permanent=1', {
+      method: 'DELETE',
+      headers: _storageDestructiveHeaders(),
+      body: JSON.stringify({ confirm: true }),
+    });
+    var d = await r.json();
+    if (!d.ok) { vmNotify(d.message || d.error || 'Ошибка удаления', 'error'); return; }
+    vmNotify('Удалено', 'success', 2500);
+    storageProjectsRefresh();
+  }
+
+  async function storageEmptyTrash() {
+    if (!confirm('Очистить корзину Storage Manager? Проекты будут удалены навсегда.')) return;
+    var r = await fetch('/api/storage/trash/empty', {
+      method: 'POST',
+      headers: _storageDestructiveHeaders(),
+      body: JSON.stringify({ confirm: true }),
+    });
+    var d = await r.json();
+    if (!d.ok) { vmNotify(d.message || d.error || 'Ошибка', 'error'); return; }
+    vmNotify('Корзина очищена · удалено: ' + (d.deleted || 0), 'success', 3500);
+    storageProjectsRefresh();
   }
 
   async function storageCleanupAll() {
@@ -936,8 +1097,8 @@
     const deact = document.getElementById('deactivate-row');
     const statusLine = document.getElementById('license-status-line');
 
-    const icons = { demo: '🧪', basic: '🆓', premium: '⭐' };
-    icon.textContent = icons[type] || '🆓';
+    const icons = { demo: 'Demo', basic: 'Free', premium: 'Pro' };
+    icon.textContent = icons[type] || '';
     label.textContent = status.label || type;
     if (statusLine) statusLine.textContent = status.message || '';
 
@@ -947,9 +1108,9 @@
         const sync = status.last_online_sync
           ? ' · синхр. ' + new Date(status.last_online_sync * 1000).toLocaleString('ru')
           : '';
-        serverLine.textContent = '🌐 Онлайн-сервер подключён' + sync;
+        serverLine.textContent = 'Онлайн-сервер подключён' + sync;
       } else {
-        serverLine.textContent = '📴 Онлайн-сервер не настроен (только офлайн-ключи)';
+        serverLine.textContent = ' Онлайн-сервер не настроен (только офлайн-ключи)';
       }
     }
 
@@ -987,7 +1148,7 @@
       } else {
         msgEl.style.color = 'var(--danger)';
         msgEl.textContent = d.error || 'Неверный ключ';
-        vmNotify('❌ ' + (d.error || 'Неверный ключ'), 'error');
+        vmNotify(' ' + (d.error || 'Неверный ключ'), 'error');
       }
     } catch (e) {
       msgEl.textContent = 'Ошибка подключения';
@@ -1325,6 +1486,7 @@
     initOwnerPanel();
     modelsRefresh();
     storageRefresh();
+    storageProjectsRefresh();
     aiModuleRefresh();
   });
 </script>

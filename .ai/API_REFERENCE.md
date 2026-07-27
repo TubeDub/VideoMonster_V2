@@ -53,12 +53,23 @@ mgr.list_plugins()
 mgr.plugins_for_capability("translation")
 ```
 
-## Marketplace API (stub)
+## Marketplace API (local + optional remote)
 
 ```python
-mgr.marketplace.install("/path/to/plugin")
+mgr.marketplace.catalog()                         # local default; remote status in .remote
+mgr.marketplace.install("/path/to/plugin")         # or .zip
+mgr.marketplace.install_from_url("https://…/p.zip")  # requires VM_PLUGIN_MARKETPLACE_URL
+mgr.marketplace.install_remote("plugin_id")
 mgr.marketplace.update("name", "/path/to/new")
 mgr.marketplace.remove("name")
 mgr.marketplace.enable("name")
 mgr.marketplace.disable("name")
 ```
+
+HTTP: `GET /api/plugins/marketplace/catalog`, `GET /api/plugins/marketplace/remote`,
+`POST /api/plugins/marketplace/<action>` (install accepts `{remote:true,id}` / `{url}`).
+
+Env: `VM_PLUGIN_MARKETPLACE_URL` (alias `VM_PLUGIN_CATALOG_URL`). Without it, remote
+actions hard-gate with `remote_marketplace_not_configured`.
+
+Also: `POST /api/plugins/invoke`, `GET /api/plugins/registrations`.

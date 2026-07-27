@@ -19,19 +19,38 @@ from engines.translation_quality import (
 _ELLIPSIS_END = re.compile(r"(?:…|\.\.\.)[\s\"'»»]*$")
 _INCOMPLETE_END = re.compile(r"[,;:—–-]\s*$")
 
-# Long UK/RU spoken forms → shorter natural alternatives (TZ §6)
+# Long UK/RU spoken forms → shorter natural alternatives (TZ §6).
+# NEVER strip «не міг не » to "" — that left bare infinitives («відчути»).
 _UK_COMPACT_PHRASES: list[tuple[str, str]] = [
-    (r"\bне\s+мог\s+не\s+", ""),
-    (r"\bне\s+міг\s+не\s+", ""),
-    (r"\bне\s+мог\s+помочь\s+но\s+", ""),
+    (r"\bне\s+міг\s+не\s+відчувати,?\s*що\b", "відчував, що"),
+    (r"\bне\s+міг\s+не\s+відчути,?\s*що\b", "відчув, що"),
+    (r"\bне\s+міг\s+не\s+помітити,?\s*що\b", "помітив, що"),
+    (r"\bне\s+міг\s+не\s+сказати,?\s*що\b", "сказав, що"),
     (r"\bне\s+міг\s+допомогти\s+собі\s+", ""),
-    (r"\bне\s+мог\s+избавиться\s+от\s+ощущения\b", "его не покидало ощущение"),
     (r"\bне\s+міг\s+позбутися\s+відчуття\b", "його не полишала тривога"),
+]
+_RU_COMPACT_PHRASES: list[tuple[str, str]] = [
+    (r"\bне\s+мог\s+не\s+почувствовать,?\s*что\b", "почувствовал, что"),
+    (r"\bне\s+мог\s+не\s+заметить,?\s*что\b", "заметил, что"),
+    (r"\bне\s+мог\s+помочь\s+но\s+", ""),
+    (r"\bне\s+мог\s+избавиться\s+от\s+ощущения\b", "его не покидало ощущение"),
     (r"\bне\s+мог\s+избавиться\s+от\s+чувства\b", "его не покидало чувство"),
+]
+_EN_COMPACT_PHRASES: list[tuple[str, str]] = [
     (r"\bcould\s+not\s+help\s+but\s+feel\b", "kept feeling"),
     (r"\breally\s+dreading\b", "dreading"),
     (r"\bactually\s+getting\s+there\b", "arriving"),
 ]
+
+# Generic «не міг не + infinitive» → past-tense stem (never bare infinitive).
+_UK_COULD_NOT_HELP = re.compile(
+    r"\bне\s+міг\s+не\s+([а-яіїєґ]{3,}ти)\b",
+    re.I,
+)
+_RU_COULD_NOT_HELP = re.compile(
+    r"\bне\s+мог\s+не\s+([а-яё]{3,}ть)\b",
+    re.I,
+)
 
 _ACTION_CUES_EN = re.compile(
     r"\b(driving|drive|dread|feel|feeling|getting|arrive|arriving|could\s+not|cannot|help\s+but)\b",
@@ -138,16 +157,53 @@ def restore_terminal_close(text: str, *, original: str = "", reference: str = ""
     return out
 
 
+def _uk_infinitive_to_past(inf: str) -> str:
+    """Best-effort UK infinitive → masculine past (spoken dubbing)."""
+    w = str(inf or "").lower()
+    if w.endswith("ити") and len(w) > 4:
+        return w[:-3] + "ив"  # помітити → помітив
+    if w.endswith("ати") and len(w) > 4:
+        return w[:-3] + "ав"  # сказати → сказав
+    if w.endswith("іти") and len(w) > 4:
+        return w[:-3] + "ів"
+    if w.endswith("ти") and len(w) > 3:
+        return w[:-2] + "в"  # відчути → відчув
+    return w
+
+
 def apply_compact_phrases(text: str, *, target_lang: str | None = None) -> str:
-    """Replace heavy calques with shorter natural spoken forms."""
+    """Replace heavy calques with shorter natural spoken forms.
+
+    Language-gated: UK rows never rewrite Russian (and vice versa).
+    """
     out = str(text or "").strip()
     if not out:
         return out
     lang = (target_lang or "").split("-")[0].lower()
     if lang not in ("uk", "ru", "en"):
         return out
-    for pattern, repl in _UK_COMPACT_PHRASES:
+    table = (
+        _UK_COMPACT_PHRASES
+        if lang == "uk"
+        else _RU_COMPACT_PHRASES
+        if lang == "ru"
+        else _EN_COMPACT_PHRASES
+    )
+    for pattern, repl in table:
         out = re.sub(pattern, repl, out, flags=re.IGNORECASE)
+    if lang == "uk":
+        out = _UK_COULD_NOT_HELP.sub(
+            lambda m: _uk_infinitive_to_past(m.group(1)), out
+        )
+    elif lang == "ru":
+        out = _RU_COULD_NOT_HELP.sub(
+            lambda m: (
+                m.group(1)[:-2] + "л"
+                if m.group(1).lower().endswith("ть")
+                else m.group(1)
+            ),
+            out,
+        )
     return " ".join(out.split())
 
 

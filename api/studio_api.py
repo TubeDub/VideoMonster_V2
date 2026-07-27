@@ -433,6 +433,54 @@ def _default_tracks() -> dict[str, dict]:
     }
 
 
+def _track_effective_gain(tracks: dict[str, Any] | None, track_id: str) -> float:
+    """Resolve mute/solo/volume for a track into a 0..2 gain multiplier."""
+    tracks = tracks or {}
+    t = tracks.get(track_id) or {}
+    if bool(t.get("muted")):
+        return 0.0
+    any_solo = any(bool((tracks.get(k) or {}).get("solo")) for k in tracks)
+    if any_solo and not bool(t.get("solo")):
+        return 0.0
+    try:
+        vol = float(t.get("volume", 1.0) or 0.0)
+    except (TypeError, ValueError):
+        vol = 1.0
+    return max(0.0, min(2.0, vol))
+
+
+def _apply_session_tracks_to_mix_volumes(
+    state: dict[str, Any],
+    *,
+    original_volume: float | None,
+    dub_volume: float | None,
+    background_volume: float | None,
+) -> tuple[float | None, float | None, float | None]:
+    """Scale mix volumes by Studio timeline mute/solo/volume state."""
+    tracks = state.get("tracks") if isinstance(state, dict) else None
+    if not isinstance(tracks, dict) or not tracks:
+        return original_volume, dub_volume, background_volume
+
+    orig_g = _track_effective_gain(tracks, "original")
+    dub_g = _track_effective_gain(tracks, "tts")
+    if dub_g <= 0 and "dub" in tracks:
+        dub_g = _track_effective_gain(tracks, "dub")
+    music_g = _track_effective_gain(tracks, "music")
+    sfx_g = _track_effective_gain(tracks, "sfx")
+    bg_g = max(music_g, sfx_g)
+
+    def _scale(base: float | None, gain: float) -> float | None:
+        if base is None:
+            return 0.0 if gain <= 0.0 else None
+        return max(0.0, min(2.0, float(base) * gain))
+
+    return (
+        _scale(original_volume, orig_g),
+        _scale(dub_volume if dub_volume is not None else 1.0, dub_g),
+        _scale(background_volume, bg_g),
+    )
+
+
 def _session_path(session_id: str) -> Path:
     safe = Path(session_id).name or "default"
     return STUDIO_STATE_DIR / f"{safe}.json"
@@ -1684,6 +1732,13 @@ def _mix_studio_mp4_with_task_settings(
 
     bg_path, bg_atten_db, _sep_ok = get_background_mix_params(
         {"source_separation": sep_info}
+    )
+
+    original_volume, dub_volume, background_volume = _apply_session_tracks_to_mix_volumes(
+        state,
+        original_volume=original_volume,
+        dub_volume=dub_volume,
+        background_volume=background_volume,
     )
 
     ok, out_path, dub_errors = DubEngine(

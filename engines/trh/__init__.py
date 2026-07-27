@@ -47,7 +47,8 @@ def stamp_segment_recovery(
         "original_preview": str(original or "")[:500],
         "raw_mt_preview": raw[:500],
         "naturalized_preview": nat[:500],
-        "approved_preview": (approved_full or nat or raw)[:500],
+        # Never fake an approved preview from dirty nat/raw on FAIL
+        "approved_preview": (approved_full[:500] if approved_full else ""),
         "dirty_mt_score": dirty_d.get("dirty_mt_score", dirty_d.get("score")),
         "dirty": bool(dirty_d.get("dirty")),
         "dirty_reasons": list(dirty_d.get("reasons") or []),
@@ -136,16 +137,26 @@ def sync_audits_trh(info: dict[str, Any]) -> None:
         # Prefer live segment fields over trh snapshots. Never let a truncated
         # trh.approved preview clobber Final/TTS (manual path used to fall back
         # to nat[:500] and wipe the rest of long segments).
-        approved = str(
-            seg.get("approved_text")
-            or seg.get("final_text")
-            or seg.get("voice_input")
-            or seg.get("text_for_tts")
-            or nat
-            or trh.get("approved")
-            or raw
-        ).strip()
-        approved = heal_truncated_final(approved, nat)
+        # CJK hallucination blocked for TTS: do not resurrect rejected text.
+        tts_blocked = bool(seg.get("tts_blocked") or seg.get("skip_tts"))
+        rejected = str(seg.get("rejected_translation") or "").strip()
+        if tts_blocked:
+            approved = ""
+        else:
+            approved = str(
+                seg.get("approved_text")
+                or seg.get("final_text")
+                or seg.get("voice_input")
+                or seg.get("text_for_tts")
+                or nat
+                or trh.get("approved")
+                or raw
+            ).strip()
+            approved = heal_truncated_final(approved, nat)
+            # Never restore a known rejected hallucination via nat/raw fallback
+            if rejected and approved == rejected and not str(seg.get("approved_text") or "").strip():
+                if seg.get("needs_manual_review"):
+                    approved = str(seg.get("final_text") or seg.get("text") or "").strip()
         # Heal segment fields in-place so Review/TTS see full text even on old tasks
         if approved and approved == nat and len(nat) > 500:
             for key in (
@@ -206,6 +217,16 @@ def sync_audits_trh(info: dict[str, Any]) -> None:
             row["final_text"] = approved
             row["tts_text"] = approved
             row["approved_text"] = approved
+        elif tts_blocked:
+            row["final_text"] = ""
+            row["tts_text"] = ""
+            row["approved_text"] = ""
+            if rejected:
+                row["rejected_translation"] = rejected
+            row["tts_blocked"] = True
+            row["tts_blocked_reason"] = str(
+                seg.get("tts_blocked_reason") or "manual_fail"
+            )
 
         row["route"] = route
         row["route_label"] = route

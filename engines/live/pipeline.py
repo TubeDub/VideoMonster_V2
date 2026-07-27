@@ -82,7 +82,10 @@ class LiveTranslationPipeline:
         src_lang: str | None = None,
         voice: str = "",
     ) -> str:
+        from engines.live.preflight import preflight_live
+
         cfg = live_config()
+        pf = preflight_live(require_stt=True, require_tts=not cfg.simulate_only)
         session_id = uuid.uuid4().hex[:12]
         sink = PlatformTraceSink(self.app_dir, module="live", session_id=session_id)
         session = LiveSession(
@@ -101,9 +104,26 @@ class LiveTranslationPipeline:
             LiveEvent(
                 type="session_started",
                 session_id=session_id,
-                payload={"source": source_uri, "tgt_lang": session.tgt_lang},
+                payload={"source": source_uri, "tgt_lang": session.tgt_lang, "preflight": pf},
             )
         )
+        if not pf.get("ok"):
+            session.status = "error"
+            session.error = "; ".join(pf.get("issues") or ["preflight failed"])
+            session.push(
+                LiveEvent(
+                    type="error",
+                    session_id=session_id,
+                    payload={
+                        "stage": "preflight",
+                        "message": session.error,
+                        "issues": pf.get("issues"),
+                        "engines": pf.get("engines"),
+                    },
+                )
+            )
+            return session_id
+
         t = threading.Thread(
             target=self._run_session,
             args=(session, cfg),

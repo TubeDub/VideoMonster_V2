@@ -242,8 +242,32 @@ def candidate_routes(
             TranslationRoute(f"via_{hub}", [(src_n, hub), (hub, tgt_n)])
         )
 
+    # Configured CJK fallback (zh→en→uk) — ensure present early
+    fb = fallback_route_for_pair(app_dir, src_n, tgt_n)
+    if fb is not None:
+        labels = {r.label for r in routes}
+        if fb.label not in labels and fb.name not in {r.name for r in routes}:
+            # Normalize name to via_en style when chain is src→en→tgt
+            if (
+                len(fb.chain) == 2
+                and fb.chain[0][0] == src_n
+                and fb.chain[0][1] == "en"
+                and fb.chain[1][1] == tgt_n
+            ):
+                fb = TranslationRoute("via_en", fb.chain)
+            routes.append(fb)
+
     direct = routes[0]
     pivots = sorted(routes[1:], key=lambda r: _route_historical_score(app_dir, r), reverse=True)
+
+    # CJK → Cyrillic/Latin: prefer English pivot right after direct
+    if src_n in ("zh", "ja", "ko"):
+        via_en = [r for r in pivots if r.name == "via_en" or (
+            len(r.chain) == 2 and r.chain[0][1] == "en"
+        )]
+        rest = [r for r in pivots if r not in via_en]
+        pivots = via_en + rest
+
     return [direct] + pivots
 
 

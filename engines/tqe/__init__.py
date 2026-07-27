@@ -38,6 +38,8 @@ def run_tqe_gate(
     confidence_threshold: float | None = None,
     persist: bool = True,
     allow_retry: bool = True,
+    src_lang: str | None = None,
+    tgt_lang: str | None = None,
 ) -> TQEBatchResult:
     """Hard gate: no segment reaches TTS unless TQE allows it."""
     return run_tqe_on_segments(
@@ -49,4 +51,6 @@ def run_tqe_gate(
         confidence_threshold=confidence_threshold,
         persist=persist,
         allow_retry=allow_retry,
+        src_lang=src_lang,
+        tgt_lang=tgt_lang,
     )

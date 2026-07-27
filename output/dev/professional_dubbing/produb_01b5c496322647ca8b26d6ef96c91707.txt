@@ -1,0 +1,313 @@
+=== PROFESSIONAL DUBBING task=01b5c496322647ca8b26d6ef96c91707 ===
+groups=18
+
+--- Group 1 indices=[0] ---
+Original Translation: 18-річний хлопець на ім'я Джордж-молодший проїхав через своє рідне місто, повертаючись додому на вечерю.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">18</emphasis>-річний хлопець на ім'я <emphasis level="reduced">Джордж</emphasis>-молодший проїхав через своє рідне місто,<break time="184ms"/> повертаючись додому на вечерю.<break time="350ms"/></speak>
+Segment duration: 4544 ms
+Est TTS before: 7703 ms
+Est TTS after: 8237 ms
+Fill %: 181.3
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': '18', 'type': 'number'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 169.5% → light faster +1% (pauses scaled)
+
+--- Group 2 indices=[1] ---
+Original Translation: Але коли він їхав, Джордж-молодший відчув, що він справді боїться потрапити туди.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><break time="360ms"/>Але коли він їхав,<break time="217ms"/> <emphasis level="reduced">Джордж</emphasis>-молодший відчув,<break time="217ms"/> що він справді боїться потрапити туди.<break time="350ms"/></speak>
+Segment duration: 5503 ms
+Est TTS before: 6000 ms
+Est TTS after: 7501 ms
+Fill %: 136.3
+Rate: -5%
+  Pause: {'before': 'start', 'ms': 360, 'type': 'source_lead'}
+  Pause: {'after': ',', 'ms': 217, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 217, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: leading contrast pause before clause
+
+--- Group 3 indices=[2] ---
+Original Translation: Отже, Джордж-молодший був дуже розумною дитиною, але він також дуже легко відволікався, і через це він насправді не займався чимось настільки серйозно.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Отже</emphasis>,<break time="184ms"/> <emphasis level="reduced">Джордж</emphasis>-молодший був дуже розумною дитиною,<break time="184ms"/> але він також дуже легко відволікався,<break time="184ms"/> і через це він насправді не займався чимось настільки серйозно.<break time="350ms"/></speak>
+Segment duration: 7626 ms
+Est TTS before: 11185 ms
+Est TTS after: 12087 ms
+Fill %: 158.5
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Отже', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 146.7% → light faster +1% (pauses scaled)
+
+--- Group 4 indices=[3] ---
+Original Translation: Тобто, окрім автомобілів. І в той момент його батько дійсно купив йому маленький італійський автомобіль під назвою Fiat.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Тобто</emphasis>,<break time="184ms"/> окрім автомобілів.<break time="350ms"/> І в той момент його батько дійсно купив йому маленький італійський автомобіль під назвою <emphasis level="reduced">Fiat</emphasis>.<break time="350ms"/></speak>
+Segment duration: 5623 ms
+Est TTS before: 8888 ms
+Est TTS after: 9772 ms
+Fill %: 173.8
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Тобто', 'type': 'name'}
+  Accent: {'word': 'Fiat', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 158.1% → light faster +1% (pauses scaled)
+
+--- Group 5 indices=[4] ---
+Original Translation: Але його батько, незважаючи на те, що він буквально дав йому Fiat, він просто не зрозумів одержимість свого сина автомобілями.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><break time="360ms"/>Але його батько,<break time="184ms"/> незважаючи на те,<break time="184ms"/> що він буквально дав йому <emphasis level="reduced">Fiat</emphasis>,<break time="184ms"/> він просто не зрозумів одержимість свого сина автомобілями.<break time="350ms"/></speak>
+Segment duration: 6251 ms
+Est TTS before: 9333 ms
+Est TTS after: 10595 ms
+Fill %: 169.5
+Rate: +1%
+  Pause: {'before': 'start', 'ms': 360, 'type': 'source_lead'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Fiat', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 149.3% → light faster +1% (pauses scaled)
+  Decision: leading contrast pause before clause
+
+--- Group 6 indices=[5] ---
+Original Translation: Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, які дадуть вам справжню роботу?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Наприклад</emphasis>,<break time="184ms"/> чому ви не можете зосередитися на цьому й застосувати його до інших речей,<break time="184ms"/> які дадуть вам <emphasis level="moderate">справжню роботу</emphasis>?<break time="350ms"/></speak>
+Segment duration: 5035 ms
+Est TTS before: 8666 ms
+Est TTS after: 9384 ms
+Fill %: 186.4
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Наприклад', 'type': 'name'}
+  Accent: {'word': 'справжню роботу', 'type': 'key_phrase'}
+  Decision: natural rate -5%
+  Decision: overfill 172.1% → light faster +1% (pauses scaled)
+
+--- Group 7 indices=[6] ---
+Original Translation: І тому практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином. І ось Джордж, він підійшов до цього перехрестя, де воно було прямо біля його дому, і він почав повертати, коли почув цей дуже гучний вереск, а потім усе повернуло, коли він почув цей дуже гучний вереск, а потім усе пішло. Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І тому практично <emphasis level="moderate">кожна вечеря</emphasis> в ці дні перетворювалася на величезну суперечку між батьком і сином.<break time="350ms"/> І ось <emphasis level="reduced">Джордж</emphasis>,<break time="184ms"/> він підійшов до цього перехрестя,<break time="184ms"/> де воно було прямо біля його дому,<break time="184ms"/> і він почав повертати,<break time="184ms"/> коли почув цей дуже гучний вереск
+Segment duration: 22372 ms
+Est TTS before: 31851 ms
+Est TTS after: 34189 ms
+Fill %: 152.8
+Rate: +1%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Через', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'кожна вечеря', 'type': 'key_phrase'}
+  Decision: natural rate -5%
+  Decision: overfill 142.4% → light faster +1% (pauses scaled)
+
+--- Group 8 indices=[7] ---
+Original Translation: Тож за два тижні до того, коли Джордж повертав, а потім щось трапилося, ну це було так: по дорозі мчала інша машина й так сильно врізалася в машину Джорджа, що Джорджа-молодшого викинуло з машини, але він вижив.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Тож</emphasis> за два тижні до того,<break time="184ms"/> коли <emphasis level="reduced">Джордж</emphasis> повертав,<break time="184ms"/> а<break time="184ms"/> потім щось трапилося,<break time="184ms"/> ну це було так:<break time="312ms"/> по дорозі мчала інша машина й так сильно врізалася в машину <emphasis level="reduced">Джорджа</emphasis>,<break time="184ms"/> що Джорджа-молодшого вик
+Segment duration: 11570 ms
+Est TTS before: 15629 ms
+Est TTS after: 17211 ms
+Fill %: 148.8
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ':', 'ms': 312, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Тож', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Джорджа', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 135.1% → light faster +1% (pauses scaled)
+
+--- Group 9 indices=[8] ---
+Original Translation: Через два роки Джордж-молодший, який до цього моменту повністю оговтався від травм, стояв на фініші на іподромі й підняв камеру.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Через</emphasis> два роки <emphasis level="reduced">Джордж</emphasis>-молодший,<break time="184ms"/> який до цього моменту повністю оговтався від травм,<break time="184ms"/> стояв на фініші на іподромі й підняв камеру.<break time="350ms"/></speak>
+Segment duration: 7347 ms
+Est TTS before: 9481 ms
+Est TTS after: 10199 ms
+Fill %: 138.8
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Через', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 129.0% → light faster +1% (pauses scaled)
+
+--- Group 10 indices=[9] ---
+Original Translation: Тож після свого передсмертного досвіду Джордж-молодший зрозумів, що насправді його тато був певною мірою правий, що певним чином він витрачав свій потенціал.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Тож</emphasis> після свого передсмертного досвіду <emphasis level="reduced">Джордж</emphasis>-молодший зрозумів,<break time="184ms"/> що насправді його тато був певною мірою правий,<break time="184ms"/> що певним чином він витрачав свій потенціал.<break time="350ms"/></speak>
+Segment duration: 7496 ms
+Est TTS before: 11629 ms
+Est TTS after: 12347 ms
+Fill %: 164.7
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Тож', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 155.1% → light faster +1% (pauses scaled)
+
+--- Group 11 indices=[10] ---
+Original Translation: Тож Джордж-молодший вирішив, що справді більше не хоче брати участь у перегонах автомобілів.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Тож Джордж</emphasis>-молодший вирішив,<break time="184ms"/> що справді більше не хоче брати участь у перегонах автомобілів.<break time="350ms"/></speak>
+Segment duration: 3675 ms
+Est TTS before: 6814 ms
+Est TTS after: 7348 ms
+Fill %: 199.9
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Тож Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 185.4% → light faster +1% (pauses scaled)
+
+--- Group 12 indices=[11] ---
+Original Translation: Натомість він взяв фотоапарат і повернувся до свого старого хобі фотографії.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Натомість</emphasis> він взяв фотоапарат і повернувся до свого старого хобі фотографії.<break time="350ms"/></speak>
+Segment duration: 4815 ms
+Est TTS before: 5629 ms
+Est TTS after: 6098 ms
+Fill %: 126.6
+Rate: -2%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Натомість', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 116.9% → light faster -2% (pauses scaled)
+
+--- Group 13 indices=[12] ---
+Original Translation: Насправді Джордж-молодший подав заявку на престижну програму кінематографії в USC, але після того, як відправив свою заявку, він був майже впевнений, що його не приймуть.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Насправді Джордж</emphasis>-молодший подав заявку на престижну програму кінематографії в USC,<break time="184ms"/> але після того,<break time="184ms"/> як відправив свою заявку,<break time="184ms"/> він був майже впевнений,<break time="184ms"/> що його не приймуть.<break time="350ms"/></speak>
+Segment duration: 9155 ms
+Est TTS before: 12592 ms
+Est TTS after: 13678 ms
+Fill %: 149.4
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Насправді Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 137.5% → light faster +1% (pauses scaled)
+
+--- Group 14 indices=[13] ---
+Original Translation: Джордж-молодший підійшов до подіуму, щоб сфотографувати водія-переможця, але коли він підійшов до нього, цей чоловік середнього віку підійшов до нього та просто запитав Джорджа-молодшого про його фотографію, а потім у якийсь момент чоловік фактично офіційно представився як Хаскелл Векслер і сказав, що насправді він кінооператор у Голлівуді, а Джордж-молодший розповів Хаскеллу про те, як він нещодавно подав заяву в USC, щоб спробувати потрапити до них Кінематографічна програма, і коли Хаскелл почув це, він сказав: «Джордж, я знаю людей в USC.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis>-молодший підійшов до подіуму,<break time="184ms"/> щоб сфотографувати водія-переможця,<break time="184ms"/> але коли він підійшов до нього,<break time="184ms"/> цей чоловік середнього віку підійшов до нього та просто запитав <emphasis level="reduced">Джорджа</emphasis>-молодшого про його фотографію,<break time="184ms"/> а<break time="184ms"/> потім у якийсь момент чоловік
+Segment duration: 25643 ms
+Est TTS before: 40518 ms
+Est TTS after: 43204 ms
+Fill %: 168.5
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ':', 'ms': 312, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Джорджа', 'type': 'name'}
+  Accent: {'word': 'Хаскелл Векслер', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 158.0% → light faster +1% (pauses scaled)
+
+--- Group 15 indices=[14] ---
+Original Translation: Дозвольте мені подзвонити, і, звичайно, невдовзі після цієї доленосної зустрічі Джордж-молодший отримає лист про прийняття від кіношколи USC, але цей момент у житті Джорджа-молодшого не лише змінив його життя назавжди.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Дозвольте</emphasis> мені подзвонити,<break time="184ms"/> і,<break time="184ms"/> звичайно,<break time="184ms"/> невдовзі після цієї доленосної зустрічі <emphasis level="reduced">Джордж</emphasis>-молодший отримає лист про прийняття від кіношколи USC,<break time="184ms"/> але цей момент у житті <emphasis level="reduced">Джорджа</emphasis>-молодшого не лише змінив його життя назавжди.<brea
+Segment duration: 11177 ms
+Est TTS before: 16148 ms
+Est TTS after: 17234 ms
+Fill %: 154.2
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Дозвольте', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Джорджа', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 144.5% → light faster +1% (pauses scaled)
+
+--- Group 16 indices=[15] ---
+Original Translation: Це також назавжди повністю змінить кінематограф загалом, тому що приблизно через 13 років Джордж-молодший продовжить створення одного з найбільш новаторських фільмів в історії.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Це також назавжди повністю змінить кінематограф загалом,<break time="184ms"/> тому що<break time="184ms"/> приблизно через <emphasis level="reduced">13</emphasis> років <emphasis level="reduced">Джордж</emphasis>-молодший продовжить створення одного з найбільш новаторських фільмів в історії.<break time="350ms"/></speak>
+Segment duration: 8822 ms
+Est TTS before: 13037 ms
+Est TTS after: 13571 ms
+Fill %: 153.8
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': '13', 'type': 'number'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 147.8% → light faster +1% (pauses scaled)
+
+--- Group 17 indices=[16] ---
+Original Translation: Його фільм став частиною найуспішнішої кінофраншизи всіх часів.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Його</emphasis> фільм став частиною найуспішнішої кінофраншизи всіх часів.<break time="350ms"/></speak>
+Segment duration: 4620 ms
+Est TTS before: 4666 ms
+Est TTS after: 5266 ms
+Fill %: 114.0
+Rate: -5%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Його', 'type': 'name'}
+  Decision: natural rate -5%
+
+--- Group 18 indices=[17] ---
+Original Translation: Джордж-молодший сьогодні більш відомий як Джордж Лукас, а його франшиза фільму «Зоряні війни». більш відомий сьогодні як Джордж Лукас, а його франшиза «Зоряні війни».
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis>-молодший сьогодні більш відомий як <emphasis level="reduced">Джордж Лукас</emphasis>,<break time="184ms"/> а<break time="184ms"/> його франшиза фільму «<emphasis level="reduced">Зоряні</emphasis> війни».<break time="350ms"/> більш відомий сьогодні як Джордж Лукас,<break time="184ms"/> а<break time="184ms"/> його франшиза «Зоряні війни».<break time="350ms"/></speak>
+Segment duration: 7831 ms
+Est TTS before: 12296 ms
+Est TTS after: 13364 ms
+Fill %: 170.7
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Джордж Лукас', 'type': 'name'}
+  Accent: {'word': 'Зоряні', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 157.0% → light faster +1% (pauses scaled)

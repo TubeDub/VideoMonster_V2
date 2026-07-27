@@ -38,13 +38,22 @@ from engines.semantic_v3.types import SemanticProject
 from engines.semantic_v3.word_alignment import align_words_to_sentences, word_alignment_report
 
 logger = logging.getLogger("tubedub.semantic_v3.phase2")
-_DEBUG_LOG_PATH = Path(r"C:\Users\serhii\Desktop\VideoMonster_V2\debug-7e57dc.log")
+_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-7e57dc.log"
 
 
 def _debug_log(
     hypothesis_id: str, location: str, message: str, data: dict[str, Any]
 ) -> None:
-    """Temporary debug-mode NDJSON logger; emits only non-content metrics."""
+    """Opt-in NDJSON diagnostics (VM_DEBUG_NDJSON=1). Off in production."""
+    import os
+
+    if (os.getenv("VM_DEBUG_NDJSON") or "").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        return
     try:
         payload = {
             "sessionId": "7e57dc",

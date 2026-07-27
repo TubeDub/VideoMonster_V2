@@ -11,7 +11,7 @@ from flask import Blueprint, jsonify, request
 
 from data.languages import LANG_CODE_TO_NAME
 from engines.cleaner import clean_transcript
-from engines.translation_compat import detect_language, translate_text
+from engines.translation_compat import detect_language
 
 APP_DIR = Path(__file__).parent.parent.resolve()
 UPLOADS_DIR = APP_DIR / "uploads" / "translate"
@@ -133,6 +133,49 @@ def _run_whisper(audio_path: str, *, language: str | None = None) -> dict:
     }
 
 
+def _normalize_translate_mode(raw) -> str:
+    mode = str(raw or "auto").strip().lower()
+    return mode if mode in ("online", "offline", "auto") else "auto"
+
+
+def _translate_with_mode(text: str, source: str, target: str, mode: str) -> tuple[str, str]:
+    """Settings modes: online=Google, offline=Argos, auto=online→offline."""
+    src = (source or "en").split("-")[0]
+    tgt = (target or "ru").split("-")[0]
+    if src == tgt:
+        return text, "identity"
+
+    def _online() -> str:
+        from engines.mt.deep_engine import DeepTranslatorEngine
+
+        r = DeepTranslatorEngine().translate(text, src, tgt)
+        if not r.text:
+            raise RuntimeError(r.error or "Онлайн-перевод (Google) недоступен.")
+        return r.text
+
+    def _offline() -> str:
+        from engines.mt.argos_engine import translate_argos
+
+        out = translate_argos(text, src, tgt)
+        if not out:
+            raise RuntimeError(
+                "Офлайн-перевод (Argos) недоступен для этой пары языков. "
+                "Подготовьте языковой пакет или выберите онлайн-режим."
+            )
+        return out
+
+    if mode == "online":
+        return _online(), "deep"
+    if mode == "offline":
+        return _offline(), "argos"
+
+    # auto: online → offline (matches Settings label)
+    try:
+        return _online(), "deep"
+    except Exception:
+        return _offline(), "argos"
+
+
 @bp.post("/api/translate")
 def api_translate():
     """Legacy block translate — kept for studio/compat; prefer /api/translate/pipeline."""
@@ -141,7 +184,11 @@ def api_translate():
         return jsonify({"error": lic_msg}), 403
 
     data = request.get_json(silent=True) or {}
-    if data.get("pipeline", True):
+    mode = _normalize_translate_mode(data.get("mode"))
+    # auto + pipeline (default): Universal Translation Pipeline (same as dub).
+    # online/offline: honor Settings (Google / Argos) — do not ignore mode.
+    use_pipeline = bool(data.get("pipeline", True)) and mode == "auto"
+    if use_pipeline:
         return api_translate_pipeline()
 
     text = data.get("text", "").strip()
@@ -165,7 +212,11 @@ def api_translate():
     detected = source or detect_language(text)
 
     try:
-        translated = translate_text(text, source=detected, target=target)
+        if mode in ("online", "offline"):
+            translated, engine = _translate_with_mode(text, detected, target, mode)
+        else:
+            # auto with pipeline=False: Settings auto = online → offline
+            translated, engine = _translate_with_mode(text, detected, target, "auto")
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -177,6 +228,8 @@ def api_translate():
             "detected_name": LANG_CODE_TO_NAME.get(detected, detected),
             "timing_map": timing_map,
             "review_count": len(review_items),
+            "mode": mode,
+            "engine": engine,
         }
     )
 
@@ -316,10 +369,11 @@ def api_translate_stt_audio():
     if "file" not in request.files:
         return jsonify({"error": "Файл не передан"}), 400
     file = request.files["file"]
-    if not file.filename:
+    original = Path(file.filename or "").name
+    if not original:
         return jsonify({"error": "Имя файла пустое"}), 400
 
-    ext = Path(file.filename).suffix.lower() or ".audio"
+    ext = Path(original).suffix.lower() or ".audio"
     fid = uuid.uuid4().hex[:10]
     path = UPLOADS_DIR / f"audio_{fid}{ext}"
     file.save(str(path))
@@ -331,15 +385,17 @@ def api_translate_stt_audio():
     blocked = _profile_gate(language or "en", "ru", feature="stt")
     if blocked:
         body, code = blocked
+        path.unlink(missing_ok=True)
         return body, code
 
     try:
         out = _run_whisper(str(path), language=language)
     except Exception as e:
-        path.unlink(missing_ok=True)
         return jsonify({"error": str(e)}), 500
+    finally:
+        path.unlink(missing_ok=True)
 
-    return jsonify({"ok": True, **out})
+    return jsonify({"ok": True, "original_filename": original, **out})
 
 
 @bp.post("/api/translate/stt/video")
@@ -348,10 +404,11 @@ def api_translate_stt_video():
     if "file" not in request.files:
         return jsonify({"error": "Файл не передан"}), 400
     file = request.files["file"]
-    if not file.filename:
+    original = Path(file.filename or "").name
+    if not original:
         return jsonify({"error": "Имя файла пустое"}), 400
 
-    ext = Path(file.filename).suffix.lower() or ".mp4"
+    ext = Path(original).suffix.lower() or ".mp4"
     fid = uuid.uuid4().hex[:10]
     video_path = UPLOADS_DIR / f"video_{fid}{ext}"
     audio_path = UPLOADS_DIR / f"video_{fid}.mp3"
@@ -364,6 +421,7 @@ def api_translate_stt_video():
     blocked = _profile_gate(language or "en", "ru", feature="stt")
     if blocked:
         body, code = blocked
+        video_path.unlink(missing_ok=True)
         return body, code
 
     try:
@@ -375,8 +433,11 @@ def api_translate_stt_video():
         out = _run_whisper(str(audio_path), language=language)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    finally:
+        audio_path.unlink(missing_ok=True)
+        video_path.unlink(missing_ok=True)
 
-    return jsonify({"ok": True, **out})
+    return jsonify({"ok": True, "original_filename": original, **out})
 
 
 @bp.get("/api/translate/inspector/<session_id>")
@@ -443,7 +504,9 @@ def api_translate_open_reader():
         "reader_settings": {"font_size": 17, "show_source": True},
         "origin": "translate",
     }
-    path.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    from engines.storage.atomic import atomic_write_json
+
+    atomic_write_json(path, doc)
 
     return jsonify(
         {
@@ -458,7 +521,7 @@ def api_translate_open_reader():
 def api_reader_document(filename):
     """Load VMR JSON from output/ for Reader auto-open."""
     safe = Path(filename).name
-    if not safe.endswith(".vmr"):
+    if not safe.endswith(".vmr") or safe != filename:
         return jsonify({"error": "Неверный формат"}), 400
     path = OUTPUT_DIR / safe
     if not path.is_file():

@@ -1,0 +1,23 @@
+{
+  "task_id": "01b5c496322647ca8b26d6ef96c91707",
+  "stage": "STUDIO",
+  "created_at": "2026-07-26T12:37:14.814029+00:00",
+  "rows": [
+    {
+      "index": 22,
+      "expected": "uk",
+      "detected": "en",
+      "confidence": 1.0,
+      "target_confidence": 0.0,
+      "scores": {
+        "uk": 0.0,
+        "ru": 0.0,
+        "en": 1.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "latin_in_uk_track",
+      "category": "ambiguous"
+    }
+  ]
+}

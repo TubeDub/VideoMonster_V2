@@ -1,63 +1,86 @@
-"""Semantic Agent v1.0 API — semantic report endpoint."""
+"""Semantic Agent v1.0 API — semantic report endpoints."""
 
 from __future__ import annotations
 
-import json
 import logging
-from pathlib import Path
 
 from flask import Blueprint, jsonify
 
-from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+from api._agent_report_helpers import (
+    list_recent_reports,
+    load_json,
+    report_summary,
+    resolve_report_path,
+    safe_task_id,
+    segment_from_report,
+)
 
 logger = logging.getLogger("tubedub.semantic_api")
 
 bp = Blueprint("semantic_api", __name__)
 
-_APP_DIR = Path(__file__).resolve().parent.parent
-_MANIFESTS_DIR = _APP_DIR / "output" / "manifests"
+
+@bp.get("/api/semantic")
+@bp.get("/api/semantic/list")
+def api_semantic_list():
+    return jsonify({"ok": True, "reports": list_recent_reports("semantic_report.json")})
 
 
-def _load_json(path: Path) -> dict | None:
-    if not path.is_file():
-        return None
-    try:
-        with open(path, encoding="utf-8") as fh:
-            return json.load(fh)
-    except Exception:
-        return None
+@bp.get("/api/semantic/<task_id>/summary")
+def api_semantic_summary(task_id: str):
+    safe = safe_task_id(task_id)
+    if not safe:
+        return jsonify({"ok": False, "error": "invalid task_id"}), 400
+
+    report_path = resolve_report_path(
+        safe, info_key="semantic_report_path", filename="semantic_report.json"
+    )
+    report = load_json(report_path) if report_path else None
+    if not report:
+        return jsonify({"ok": False, "error": "semantic_report not found", "task_id": safe}), 404
+
+    return jsonify(
+        {
+            "ok": True,
+            "task_id": safe,
+            "report_path": str(report_path),
+            "summary": report_summary(report, kind="semantic"),
+        }
+    )
 
 
-def _report_path_for_task(task_id: str) -> Path | None:
-    with STATE_LOCK:
-        task = AUTO_TASKS.get(task_id)
-    if not task:
-        return None
-    info = task.get("info") or {}
-    report_path = info.get("semantic_report_path")
-    if report_path:
-        p = Path(report_path)
-        if p.is_file():
-            return p
-    project_uuid = info.get("project_uuid")
-    if project_uuid:
-        candidate = _MANIFESTS_DIR / project_uuid / "semantic_report.json"
-        if candidate.is_file():
-            return candidate
-    return None
+@bp.get("/api/semantic/<task_id>/segment/<segment_id>")
+def api_semantic_segment(task_id: str, segment_id: str):
+    safe = safe_task_id(task_id)
+    if not safe:
+        return jsonify({"ok": False, "error": "invalid task_id"}), 400
+
+    report_path = resolve_report_path(
+        safe, info_key="semantic_report_path", filename="semantic_report.json"
+    )
+    report = load_json(report_path) if report_path else None
+    if not report:
+        return jsonify({"ok": False, "error": "semantic_report not found", "task_id": safe}), 404
+
+    item = segment_from_report(report, segment_id)
+    if item is None:
+        return jsonify({"ok": False, "error": "segment not found", "segment_id": segment_id}), 404
+    return jsonify({"ok": True, "task_id": safe, "segment_id": segment_id, "segment": item})
 
 
 @bp.get("/api/semantic/<task_id>")
 def api_semantic_report(task_id: str):
-    safe = Path(task_id).name
-    if not safe or safe != task_id:
+    safe = safe_task_id(task_id)
+    if not safe:
         return jsonify({"ok": False, "error": "invalid task_id"}), 400
 
-    report_path = _report_path_for_task(safe)
+    report_path = resolve_report_path(
+        safe, info_key="semantic_report_path", filename="semantic_report.json"
+    )
     if not report_path:
         return jsonify({"ok": False, "error": "semantic_report not found", "task_id": safe}), 404
 
-    report = _load_json(report_path)
+    report = load_json(report_path)
     if not report:
         return jsonify({"ok": False, "error": "semantic_report unreadable", "task_id": safe}), 404
 
@@ -67,5 +90,6 @@ def api_semantic_report(task_id: str):
             "task_id": safe,
             "report_path": str(report_path),
             "semantic_report": report,
+            "summary": report_summary(report, kind="semantic"),
         }
     )

@@ -1,0 +1,107 @@
+[
+  {
+    "index": 0,
+    "text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+    "plain_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+    "translation_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+    "file": null,
+    "source_word_map": {
+      "segment_index": 0,
+      "segment_start_ms": 1200,
+      "segment_end_ms": 11000,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "我们陆下八代单纯",
+          "start_ms": 1200,
+          "end_ms": 3000,
+          "confidence": 0.5
+        },
+        {
+          "text": "此时单保",
+          "start_ms": 3000,
+          "end_ms": 4280,
+          "confidence": 0.5
+        },
+        {
+          "text": "有惊呀",
+          "start_ms": 4280,
+          "end_ms": 5160,
+          "confidence": 0.5
+        },
+        {
+          "text": "你怀孕了",
+          "start_ms": 5160,
+          "end_ms": 6240,
+          "confidence": 0.5
+        },
+        {
+          "text": "陆下有厚了",
+          "start_ms": 6240,
+          "end_ms": 7600,
+          "confidence": 0.5
+        },
+        {
+          "text": "要是能一几个男",
+          "start_ms": 7600,
+          "end_ms": 9720,
+          "confidence": 0.5
+        },
+        {
+          "text": "那就更完美了",
+          "start_ms": 9720,
+          "end_ms": 11000,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+    "start_ms": 1200,
+    "end_ms": 5570,
+    "slot_ms": 4370,
+    "meaning_fit_source": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+    "needs_manual_review": true,
+    "text_adaptation_reason": "fit_failed",
+    "audio_strategy_reason": "",
+    "meaning_fit_status": "fit_failed",
+    "residual_overflow_ms": 5185,
+    "meaning_fit_method": "original",
+    "predicted_tts_ms": 9555,
+    "meaning_fit_attempted": true,
+    "meaning_fit_applied": false,
+    "meaning_fit_reason": "fit_failed",
+    "success": false,
+    "tts_status": "failed",
+    "tts_error": {
+      "error_type": "VoiceGenerationError",
+      "segment_id": "e16e6e1ad06d4d9592e4ec16f94b0ace",
+      "segment_index": 0,
+      "segment_number": 1,
+      "current": 1,
+      "total": 1,
+      "text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+      "original_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+      "tts_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+      "voice": "uk-UA-OstapNeural",
+      "engine": "Edge-TTS",
+      "engine_id": "edge-offline",
+      "language": "uk",
+      "tts_file_path": "output\\sessions\\ebbeff6917d54c228ed83ffa27822afc\\ebbeff69_seg0000.mp3",
+      "error_code": "RuntimeError",
+      "error_message": "No audio was received. Please verify that your parameters are correct.",
+      "reason": "No audio was received. Please verify that your parameters are correct.",
+      "traceback": "NoneType: None\n",
+      "duration_ms": 4488.82,
+      "task_id": "ebbeff6917d54c228ed83ffa27822afc",
+      "timestamp_ms": 1784729168581,
+      "timestamp": "2026-07-22T14:06:08.581000+00:00",
+      "stage": "TTS",
+      "pipeline_state": "PARTIAL"
+    },
+    "container_status": "red",
+    "tts_text": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男那就更完美了妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了你跟月子前一场义外 一日月前我和群辞非同时被绑架 内腕他营喝绑子 所以这个孩子是绑费的 你跟月子前的意外这孩子是绑费的.",
+    "tts_file_path": null,
+    "status": "empty"
+  }
+]

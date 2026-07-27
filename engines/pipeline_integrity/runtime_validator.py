@@ -25,7 +25,11 @@ from engines.pipeline_integrity.runtime_recovery import recover_missing_audio
 from engines.pipeline_integrity.runtime_registry import get_or_create_registry
 from engines.pipeline_integrity.tts_artifact_lifecycle import get_tts_lifecycle
 from engines.pipeline_integrity.tts_segment_fields import resolve_segment_audio_ref
-from engines.pipeline_integrity.uuid_chain import UUID_FIELDS, ensure_project_uuids
+from engines.pipeline_integrity.uuid_chain import (
+    UNIQUE_UUID_FIELDS,
+    UUID_FIELDS,
+    ensure_project_uuids,
+)
 from engines.pipeline_integrity.wav_ownership import get_wav_owner, stamp_wav_owner
 
 logger = logging.getLogger("tubedub.runtime_validator")
@@ -115,8 +119,19 @@ def validate_runtime(
             require_contract_versions(info)
             checks.append(_check("contract_versions", True))
         except Exception as exc:
-            checks.append(_check("contract_versions", False, str(exc)))
-            errors.append(f"contract: {exc}")
+            # Engine-first path may lock text without an earlier stamp — heal
+            # once instead of blocking a healthy handoff over bookkeeping.
+            try:
+                from engines.pipeline_integrity.contract_versions import (
+                    stamp_contract_versions,
+                )
+
+                stamp_contract_versions(info)
+                require_contract_versions(info)
+                checks.append(_check("contract_versions", True, "stamped_at_validate"))
+            except Exception:
+                checks.append(_check("contract_versions", False, str(exc)))
+                errors.append(f"contract: {exc}")
 
     # Segments exist
     if not segments:
@@ -129,17 +144,22 @@ def validate_runtime(
     try:
         ensure_project_uuids(segments)
         missing_uuid = 0
-        seen: dict[str, set[str]] = {f: set() for f in UUID_FIELDS}
+        seen: dict[str, set[str]] = {f: set() for f in UNIQUE_UUID_FIELDS}
         dup = 0
         for seg in segments:
             if not isinstance(seg, dict):
                 continue
             if seg.get("merged_into") or seg.get("merged_into_id"):
                 continue
+            # Presence: every identity field (incl. source ancestry) must be set.
             for f in UUID_FIELDS:
                 val = str(seg.get(f) or "").strip()
                 if not val:
                     missing_uuid += 1
+            # Uniqueness: only per-segment identity IDs (NOT source_segment_uuid).
+            for f in UNIQUE_UUID_FIELDS:
+                val = str(seg.get(f) or "").strip()
+                if not val:
                     continue
                 if val in seen[f]:
                     dup += 1
@@ -189,6 +209,14 @@ def validate_runtime(
                 continue
             if seg.get("tts_status") == "failed" or seg.get("status") == "failed":
                 continue
+            try:
+                from engines.pipeline_integrity.slot_budget import segment_tts_exempt
+
+                if segment_tts_exempt(seg):
+                    continue
+            except Exception:
+                if seg.get("tts_blocked") or seg.get("skip_tts"):
+                    continue
             stamp_wav_owner(seg)
             registry.upsert_from_segment(seg, actor=f"validate:{stage_n}", compute_hash=False)
             ref = resolve_segment_audio_ref(seg)
@@ -273,6 +301,14 @@ def validate_runtime(
                 continue
             if seg.get("merged_into") or seg.get("merged_into_id"):
                 continue
+            try:
+                from engines.pipeline_integrity.slot_budget import segment_tts_exempt
+
+                if segment_tts_exempt(seg):
+                    continue
+            except Exception:
+                if seg.get("tts_blocked") or seg.get("skip_tts"):
+                    continue
             if not (seg.get("file") or seg.get("tts_file_path") or seg.get("tts_uuid")):
                 empty_refs += 1
             if not (seg.get("segment_uuid") or seg.get("segment_id")):

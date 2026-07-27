@@ -261,6 +261,39 @@ def api_dub_studio_track_add_plugin(project_id: str, track_id: str):
         return jsonify({"ok": False, "error": "not found"}), 404
 
 
+@bp.delete("/api/dub-studio/projects/<project_id>/tracks/<track_id>/plugins/<int:index>")
+def api_dub_studio_track_remove_plugin(project_id: str, track_id: str, index: int):
+    blocked = _guard()
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+    try:
+        track = _svc().remove_track_plugin(project_id, track_id, index)
+        return jsonify({"ok": True, "track": track.to_dict()})
+    except KeyError:
+        return jsonify({"ok": False, "error": "not found"}), 404
+    except IndexError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+
+
+@bp.patch("/api/dub-studio/projects/<project_id>/tracks/<track_id>/plugins/<int:index>")
+def api_dub_studio_track_patch_plugin(project_id: str, track_id: str, index: int):
+    blocked = _guard()
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+    data = request.get_json(silent=True) or {}
+    if "enabled" not in data:
+        return jsonify({"ok": False, "error": "enabled required"}), 400
+    try:
+        track = _svc().set_fx_enabled(
+            project_id, track_id, index, enabled=bool(data.get("enabled"))
+        )
+        return jsonify({"ok": True, "track": track.to_dict()})
+    except KeyError:
+        return jsonify({"ok": False, "error": "not found"}), 404
+    except IndexError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+
+
 @bp.get("/api/dub-studio/download/<path:relpath>")
 def api_dub_studio_download(relpath: str):
     blocked = _guard()
@@ -298,11 +331,23 @@ def api_dub_studio_preview_fx(project_id: str):
     if blocked:
         return jsonify({"ok": False, "error": blocked}), 403
     data = request.get_json(silent=True) or {}
-    input_path = Path(str(data.get("input_path") or ""))
-    if not input_path.is_file():
-        return jsonify({"ok": False, "error": "input_path not found"}), 400
-    job_id = _svc().preview_fx(project_id, input_path=input_path, fx_slots=data.get("fx_chain") or [])
-    return jsonify({"ok": True, "job_id": job_id})
+    raw_path = str(data.get("input_path") or "").strip()
+    input_path = Path(raw_path) if raw_path else None
+    try:
+        job_id = _svc().preview_fx(
+            project_id,
+            input_path=input_path,
+            fx_slots=data.get("fx_chain"),
+            track_id=data.get("track_id"),
+            segment_id=data.get("segment_id"),
+        )
+        return jsonify({"ok": True, "job_id": job_id})
+    except KeyError:
+        return jsonify({"ok": False, "error": "not found"}), 404
+    except FileNotFoundError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @bp.get("/api/dub-studio/preview/<job_id>")

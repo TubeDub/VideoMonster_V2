@@ -17,6 +17,9 @@ def _owner_ok() -> bool:
 
     if not is_owner_host():
         return False
+    addr = (request.remote_addr or "").strip().lower()
+    if addr not in ("127.0.0.1", "::1", "localhost"):
+        return False
     token = os.getenv("VM_OWNER_TOKEN", "").strip() or "vm-owner-local"
     header = request.headers.get("X-VM-Owner-Token", "")
     body = (request.get_json(silent=True) or {}).get("owner_token", "")
@@ -129,24 +132,42 @@ def api_owner_cleanup_apply():
     return jsonify(apply_cleanup(APP_DIR, keys, confirmed=confirmed))
 
 
+def _open_allowed_dir(path: str | Path) -> tuple[Path | None, str]:
+    """Open only directories under app dir or configured model storage root."""
+    from engines.model_manager.storage import get_storage_root
+    from engines.path_safety import is_under_root
+
+    raw = Path(str(path or "").strip() or get_storage_root(APP_DIR))
+    try:
+        resolved = raw.resolve()
+    except OSError:
+        return None, "invalid_path"
+    if not resolved.is_dir():
+        return None, "not_found"
+    storage_root = Path(get_storage_root(APP_DIR)).resolve()
+    if not (is_under_root(resolved, APP_DIR) or is_under_root(resolved, storage_root)):
+        return None, "path_forbidden"
+    return resolved, ""
+
+
+def _shell_open_dir(path: Path) -> None:
+    if os.name == "nt":
+        subprocess.Popen(["explorer", str(path)])
+    else:
+        subprocess.Popen(["xdg-open", str(path)])
+
+
 @bp.post("/api/owner/components/open-folder")
 def api_owner_open_component_folder():
     if err := _guard():
         return err
 
     path = str((request.get_json(silent=True) or {}).get("path", "")).strip()
-    if not path:
-        from engines.model_manager.storage import get_storage_root
-
-        path = str(get_storage_root(APP_DIR))
-    p = Path(path)
-    if not p.is_dir():
-        return jsonify({"ok": False, "error": "not_found"}), 404
-    if os.name == "nt":
-        subprocess.Popen(["explorer", str(p)])
-    else:
-        subprocess.Popen(["xdg-open", str(p)])
-    return jsonify({"ok": True})
+    resolved, err_code = _open_allowed_dir(path)
+    if not resolved:
+        return jsonify({"ok": False, "error": err_code}), 404 if err_code == "not_found" else 403
+    _shell_open_dir(resolved)
+    return jsonify({"ok": True, "path": str(resolved)})
 
 
 @bp.post("/api/owner/storage/open-folder")
@@ -156,8 +177,8 @@ def api_owner_open_folder():
     from engines.model_manager.storage import get_storage_root
 
     path = str((request.get_json(silent=True) or {}).get("path") or get_storage_root(APP_DIR))
-    if os.name == "nt":
-        subprocess.Popen(["explorer", path])
-    else:
-        subprocess.Popen(["xdg-open", path])
-    return jsonify({"ok": True})
+    resolved, err_code = _open_allowed_dir(path)
+    if not resolved:
+        return jsonify({"ok": False, "error": err_code}), 404 if err_code == "not_found" else 403
+    _shell_open_dir(resolved)
+    return jsonify({"ok": True, "path": str(resolved)})

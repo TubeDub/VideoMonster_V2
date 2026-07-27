@@ -1,0 +1,47 @@
+{
+  "summary": {
+    "task_id": "eccbb8b6136b48328720b5b0331c153b",
+    "source": "pre_build_timed_dub_track",
+    "segment_count": 1,
+    "bleed_risk_count": 0,
+    "adaptation_executed_with_overflow": 0,
+    "scheduler_equals_timing_map_count": 1
+  },
+  "segments": [
+    {
+      "stage": "pre_build_timed_dub_track",
+      "index": 0,
+      "segment_uuid": "",
+      "translation_uuid": "",
+      "tts_uuid": "",
+      "audio_uuid": "",
+      "start_ms": 1200,
+      "end_ms": 5570,
+      "slot_ms": 4370,
+      "timing_map_start_ms": 1200,
+      "timing_map_end_ms": 5570,
+      "original_duration_ms": 0,
+      "predicted_duration_ms": 0,
+      "tts_duration_ms": 0,
+      "fitted_ms": 0,
+      "actual_duration_ms": 0,
+      "adapted_duration_ms": 0,
+      "scheduler_duration_ms": 4370,
+      "render_clip_start": 1200,
+      "render_clip_end": 5570,
+      "real_audio_end_ms": null,
+      "overflow_ms": 0,
+      "underflow_ms": 0,
+      "adaptation_status": "ADAPTATION NOT EXECUTED",
+      "adaptation_executed": false,
+      "decision": "",
+      "video_adapt_mode": null,
+      "fitted_file": true,
+      "file": true,
+      "container_status": null,
+      "slot_vs_audio_delta_ms": null,
+      "scheduler_matches_timing_map": true,
+      "bleed_risk": false
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+=== DUBBING ENGINE REPORT task=1258b2b68dcd4f2ca96b704124f260d5 run=f9fb0696 ===
+lang=uk  segments=1  elapsed=0.09s
+adapted=1  skipped=0  strategies={'direct': 0, 'adapted': 0, 'video_adapt': 0, 'merge_next': 1, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=merge_next pred=28846ms slot=4603ms
+       IN : Ми в родині осма покоління працювали над простотою. Це раз гаряча гарячка: тепер
+       OUT: Ми в родині осма покоління працювали над простотою. Це раз гаряча гарячка: тепер
+       [punct] added_terminal_period
+       [stress] ok
+       [timing] strategy=merge_next pred=28846ms slot=4603ms prev_end=0ms overflow=526.7% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=28846ms slot=4603ms ratio=6.27; voice_quality_risk: projected_atempo=6.27 (max=1.2) — recomme

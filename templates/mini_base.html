@@ -6,46 +6,20 @@
   <title>{% block title %}TubeDub{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <style>
-    body { background: var(--bg, #12121e); padding: 0; margin: 0; min-height: 100vh; }
-    .mini-header {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 20px;
-      background: var(--panel, #1a1a2e);
-      border-bottom: 1px solid var(--border, #2a2a45);
-    }
-    .mini-header .logo  { font-weight: 700; font-size: 15px; color: var(--accent, #6b7eff); }
-    .mini-header a.back { font-size: 13px; color: var(--text2, #888); text-decoration: none; }
-    .mini-header a.back:hover { color: var(--text, #e8e8f5); }
-    .mini-header .spacer { flex: 1; }
-    .mini-header .mini-label {
-      font-size: 13px; color: var(--text2, #888);
-      border: 1px solid var(--border, #2a2a45);
-      border-radius: 6px; padding: 4px 10px;
-    }
-    .mini-content { padding: 20px; max-width: 900px; margin: 0 auto; }
-    #vm-notify-container {
-      position: fixed; bottom: 20px; right: 16px; z-index: 9999;
-      display: flex; flex-direction: column; gap: 8px; pointer-events: none;
-    }
-    #vm-notify-container .vm-toast { pointer-events: all; }
-    @keyframes vmToastIn  { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
-    @keyframes vmToastOut { from { opacity:1; transform:translateX(0); }  to { opacity:0; transform:translateX(30px); } }
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style> body { background: var(--bg, #12121e); padding: 0; margin: 0; min-height: 100vh; } .mini-header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: var(--panel, #1a1a2e); border-bottom: 1px solid var(--border, #2a2a45); } .mini-header .logo { font-weight: 700; font-size: 15px; color: var(--accent, #5b9cf5); } .mini-header a.back { font-size: 13px; color: var(--text2, #888); text-decoration: none; } .mini-header a.back:hover { color: var(--text, #e8e8f5); } .mini-header .spacer { flex: 1; } .mini-header .mini-label { font-size: 13px; color: var(--text2, #888); border: 1px solid var(--border, #2a2a45); border-radius: 6px; padding: 4px 10px; } .mini-content { padding: 20px; max-width: 900px; margin: 0 auto; } #vm-notify-container { position: fixed; bottom: 20px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; } #vm-notify-container .vm-toast { pointer-events: all; } @keyframes vmToastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } } @keyframes vmToastOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(30px); } }
   </style>
 </head>
 <body>
   <header class="mini-header">
-    <span class="logo">🎬 TubeDub</span>
+    <span class="logo">TubeDub</span>
     <span class="mini-label">Мини-приложение</span>
     <div class="spacer"></div>
     <a class="back" href="{{ back_url | default('/') }}">← Назад</a>
   </header>
-  <div class="mini-content">
-    {% block content %}{% endblock %}
+  <div class="mini-content">{% block content %}{% endblock %}
   </div>
   <div id="vm-notify-container"></div>
-  <script src="/static/js/main.js"></script>
-  {% block scripts %}{% endblock %}
+  <script src="/static/js/main.js"></script> {% block scripts %}{% endblock %}
 </body>
 </html>

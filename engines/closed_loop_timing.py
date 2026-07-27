@@ -860,7 +860,12 @@ def run_closed_loop_timing(
         if max_iterations is not None
         else _env_int("VM_CLOSED_LOOP_MAX_ITERS", MAX_REWRITE_ITERATIONS)
     )
-    max_iters = max(1, min(max_iters, 5))
+    # Allow 0 = pause-only Happy Path (no text rewrite). Previously max(1, …)
+    # forced at least one rewrite attempt even when caller asked for pause-only.
+    if max_iterations is not None and int(max_iterations) <= 0:
+        max_iters = 0
+    else:
+        max_iters = max(1, min(max_iters, 5))
 
     try:
         from engines.translation_adapt import begin_llm_run

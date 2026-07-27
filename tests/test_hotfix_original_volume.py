@@ -11,10 +11,15 @@ def test_resolve_custom_mix_when_original_gt_zero():
     assert r0["mix_mode"] == "full_dub"
     assert r0["mix_volumes"]["original_volume"] == 0.0
 
+    # Stale wizard 20% on mute styles → stay full_dub
     r20 = resolve_dub_style("modern", original_volume=0.2)
-    assert r20["mix_mode"] == "custom"
-    assert abs(r20["mix_volumes"]["original_volume"] - 0.2) < 1e-6
-    assert abs(r20["mix_volumes"]["background_volume"] - 0.2) < 1e-6
+    assert r20["mix_mode"] == "full_dub"
+    assert r20["mix_volumes"]["original_volume"] == 0.0
+
+    # Documentary intentionally keeps underlay
+    r_doc = resolve_dub_style("documentary")
+    assert r_doc["mix_mode"] == "custom"
+    assert r_doc["mix_volumes"]["original_volume"] > 0.1
 
 
 def test_approve_updates_mix_volumes_backup(monkeypatch):

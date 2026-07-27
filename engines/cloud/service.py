@@ -30,7 +30,7 @@ class CloudPlatformService:
         self.store = CloudStore(self.app_dir)
         self.manager = CloudFileManager(self.app_dir, self.store)
         self.cache = CachePolicyEngine(self.app_dir, self.store)
-        self.remote_jobs = RemoteJobQueue()
+        self.remote_jobs = RemoteJobQueue(app_dir)
         self.transfer_state = TransferState(self.store.state_dir / "transfers")
         self.queue = BackgroundSyncQueue(self.app_dir, max_workers=cfg["max_workers"])
         self._wire_queue()

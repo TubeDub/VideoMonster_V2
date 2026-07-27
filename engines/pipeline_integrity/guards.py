@@ -159,6 +159,14 @@ class RuntimeIntegrityGuard:
             if require_tts and row.get("merged_into") is None and not row.get("merged_into_id"):
                 if row.get("tts_status") == "failed" or row.get("status") == "failed":
                     continue
+                try:
+                    from engines.pipeline_integrity.slot_budget import segment_tts_exempt
+
+                    if segment_tts_exempt(row):
+                        continue
+                except Exception:
+                    if row.get("tts_blocked") or row.get("skip_tts"):
+                        continue
                 fname = resolve_segment_audio_ref(row)
                 if not fname:
                     raise RuntimeIntegrityError(
@@ -281,40 +289,6 @@ class StageSnapshotGuard:
                     )
                     continue
                 if key not in allowed_set:
-                    # #region agent log
-                    try:
-                        import json
-                        import time
-
-                        with open(
-                            r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log",
-                            "a",
-                            encoding="utf-8",
-                        ) as _df:
-                            _df.write(
-                                json.dumps(
-                                    {
-                                        "sessionId": "ee98a6",
-                                        "runId": "slot-fit-integrity",
-                                        "hypothesisId": "H1",
-                                        "location": "guards.py:StageSnapshotGuard",
-                                        "message": "disallowed_mutation",
-                                        "data": {
-                                            "stage": stage,
-                                            "field": key,
-                                            "segment_id": sid,
-                                            "field_allowed_now": key
-                                            in set(allowed_fields_for_stage(stage)),
-                                        },
-                                        "timestamp": int(time.time() * 1000),
-                                    },
-                                    ensure_ascii=False,
-                                )
-                                + "\n"
-                            )
-                    except Exception:
-                        pass
-                    # #endregion
                     violations.append(
                         {
                             "segment_id": sid,
@@ -465,11 +439,28 @@ class PipelineValidator:
             and not s.get("archived")
             and not s.get("segment_archived")
         ]
-        with_file = [s for s in active if resolve_segment_audio_ref(s)]
-        if not with_file:
+        try:
+            from engines.pipeline_integrity.slot_budget import segment_tts_exempt
+
+            voiceable = [s for s in active if not segment_tts_exempt(s)]
+        except Exception:
+            voiceable = [
+                s
+                for s in active
+                if not (s.get("tts_blocked") or s.get("skip_tts"))
+            ]
+        with_file = [s for s in voiceable if resolve_segment_audio_ref(s)]
+        if voiceable and not with_file:
             raise PipelineValidationError(
                 "no active segments with TTS files",
                 stage=stage,
+            )
+        if not voiceable:
+            # All segments quality-blocked — not a missing-file bug
+            raise PipelineValidationError(
+                "all active segments TTS-blocked (translation rejected)",
+                stage=stage,
+                details={"tts_blocked": True, "active": len(active)},
             )
 
         file_names = [Path(str(resolve_segment_audio_ref(s) or "")).name for s in with_file]

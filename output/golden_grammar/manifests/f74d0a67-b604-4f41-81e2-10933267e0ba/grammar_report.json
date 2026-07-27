@@ -1,0 +1,253 @@
+{
+  "grammar_agent_version": "1.0",
+  "openddf_agent": "Grammar/v1",
+  "project_uuid": "f74d0a67-b604-4f41-81e2-10933267e0ba",
+  "task_id": "golden-grammar-run",
+  "status": "success",
+  "avg_scores": {
+    "grammar": 1.0,
+    "syntax": 1.0,
+    "style": 1.0,
+    "naturalness": 1.0,
+    "pronunciation": 1.0,
+    "readability": 1.0,
+    "meaning": 1.0,
+    "overall": 1.0
+  },
+  "variants_generated": 9,
+  "llm_used": false,
+  "rule_rewrite_used": true,
+  "segment_count": 3,
+  "warnings": [],
+  "errors": [],
+  "execution_time_ms": 63.7,
+  "decision_log": [
+    "segment_count=3",
+    "target_lang=ru",
+    "segment_0:passes1-5 complete len=53",
+    "segment_0:retry attempt=2 meaning=0.500 len_ok=True",
+    "segment_0:selected=A overall=0.900 meaning=0.500 len_ratio=1.060",
+    "segment_0:meaning=1.000",
+    "segment_1:passes1-5 complete len=25",
+    "segment_1:selected=A overall=1.000 meaning=1.000 len_ratio=1.000",
+    "segment_1:meaning=1.000",
+    "segment_2:passes1-5 complete len=31",
+    "segment_2:selected=A overall=1.000 meaning=1.000 len_ratio=1.000",
+    "segment_2:meaning=1.000"
+  ],
+  "per_segment": [
+    {
+      "index": 0,
+      "timing_text": "Он сказал что George Smith пошёл домой 12.05.2024.",
+      "grammar_text": "Он сказал, что George Smith пошёл домой 12.05.2024.",
+      "selected_variant": "A",
+      "candidates": [
+        {
+          "label": "A",
+          "text": "Он сказал, что George Smith пошёл домой 12. 05. 2024.",
+          "source": "rule",
+          "length_ratio": 1.06,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 0.5,
+            "overall": 0.9
+          }
+        },
+        {
+          "label": "B",
+          "text": "Он сказал, что George Smith пошёл домой 12. 05. 2024.",
+          "source": "rule",
+          "length_ratio": 1.06,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 0.5,
+            "overall": 0.9
+          }
+        },
+        {
+          "label": "C",
+          "text": "Он сказал, что George Smith пошёл домой 12. 05. 2024.",
+          "source": "rule",
+          "length_ratio": 1.06,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 0.5,
+            "overall": 0.9
+          }
+        }
+      ],
+      "scores": {
+        "grammar": 1.0,
+        "syntax": 1.0,
+        "style": 1.0,
+        "naturalness": 1.0,
+        "pronunciation": 1.0,
+        "readability": 1.0,
+        "meaning": 1.0,
+        "overall": 1.0
+      },
+      "decision_log": [
+        "selected=A overall=0.900 meaning=0.500 len_ratio=1.060",
+        "meaning=1.000"
+      ],
+      "llm_used": false
+    },
+    {
+      "index": 1,
+      "timing_text": "Вау!!! Это удивительно!",
+      "grammar_text": "Вау!!! Это удивительно!",
+      "selected_variant": "A",
+      "candidates": [
+        {
+          "label": "A",
+          "text": "Вау!!! Это удивительно!",
+          "source": "rule",
+          "length_ratio": 1.0,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 1.0,
+            "overall": 1.0
+          }
+        },
+        {
+          "label": "B",
+          "text": "Вау!!! Это удивительно!",
+          "source": "rule",
+          "length_ratio": 1.0,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 1.0,
+            "overall": 1.0
+          }
+        },
+        {
+          "label": "C",
+          "text": "Вау!!! Это удивительно!",
+          "source": "rule",
+          "length_ratio": 1.0,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 1.0,
+            "overall": 1.0
+          }
+        }
+      ],
+      "scores": {
+        "grammar": 1.0,
+        "syntax": 1.0,
+        "style": 1.0,
+        "naturalness": 1.0,
+        "pronunciation": 1.0,
+        "readability": 1.0,
+        "meaning": 1.0,
+        "overall": 1.0
+      },
+      "decision_log": [
+        "selected=A overall=1.000 meaning=1.000 len_ratio=1.000",
+        "meaning=1.000"
+      ],
+      "llm_used": false
+    },
+    {
+      "index": 2,
+      "timing_text": "Мне грустно потому что он ушёл.",
+      "grammar_text": "Мне грустно потому что он ушёл.",
+      "selected_variant": "A",
+      "candidates": [
+        {
+          "label": "A",
+          "text": "Мне грустно потому что он ушёл.",
+          "source": "rule",
+          "length_ratio": 1.0,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 1.0,
+            "overall": 1.0
+          }
+        },
+        {
+          "label": "B",
+          "text": "Мне грустно потому что он ушёл.",
+          "source": "rule",
+          "length_ratio": 1.0,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 1.0,
+            "overall": 1.0
+          }
+        },
+        {
+          "label": "C",
+          "text": "Мне грустно потому что он ушёл.",
+          "source": "rule",
+          "length_ratio": 1.0,
+          "scores": {
+            "grammar": 1.0,
+            "syntax": 1.0,
+            "style": 1.0,
+            "naturalness": 1.0,
+            "pronunciation": 1.0,
+            "readability": 1.0,
+            "meaning": 1.0,
+            "overall": 1.0
+          }
+        }
+      ],
+      "scores": {
+        "grammar": 1.0,
+        "syntax": 1.0,
+        "style": 1.0,
+        "naturalness": 1.0,
+        "pronunciation": 1.0,
+        "readability": 1.0,
+        "meaning": 1.0,
+        "overall": 1.0
+      },
+      "decision_log": [
+        "selected=A overall=1.000 meaning=1.000 len_ratio=1.000",
+        "meaning=1.000"
+      ],
+      "llm_used": false
+    }
+  ]
+}

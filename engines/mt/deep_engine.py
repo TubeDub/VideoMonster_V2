@@ -40,15 +40,53 @@ class DeepTranslatorEngine(BaseMTEngine):
 
         try:
             tr = GoogleTranslator(source=deep_lang(src), target=deep_lang(tgt))
-            chunk = 4500
-            if len(clean) <= chunk:
-                result = tr.translate(clean)
+            chunks = _chunk_for_mt(clean, src)
+            if len(chunks) == 1:
+                result = tr.translate(chunks[0])
             else:
-                parts = [tr.translate(clean[i : i + chunk]) for i in range(0, len(clean), chunk)]
-                result = " ".join(parts)
+                parts = []
+                for ch in chunks:
+                    try:
+                        parts.append(tr.translate(ch))
+                    except Exception as e:
+                        logger.warning("[MT/deep] chunk failed: %s", e)
+                result = " ".join(p for p in parts if p)
         except Exception as e:
             ms = (time.perf_counter() - t0) * 1000.0
             return MTResult(text="", engine_id=self.id, error=str(e), offline=False, elapsed_ms=ms)
 
         ms = (time.perf_counter() - t0) * 1000.0
         return MTResult(text=str(result or "").strip(), engine_id=self.id, offline=False, elapsed_ms=ms)
+
+
+def _chunk_for_mt(text: str, src: str) -> list[str]:
+    """Split long CJK/ASR blobs so Google does not truncate mid-meaning."""
+    import re
+
+    clean = str(text or "").strip()
+    if not clean:
+        return []
+    # Byte/char soft limit well under Google's ~5k
+    limit = 180 if src in ("zh", "ja", "ko") else 4500
+    if len(clean) <= limit:
+        return [clean]
+    if src in ("zh", "ja", "ko"):
+        # Prefer CJK punctuation / spaces
+        parts = re.split(r"(?<=[。！？；，、\s])", clean)
+        parts = [p for p in parts if p and p.strip()]
+        if len(parts) <= 1:
+            # Fixed-width windows
+            return [clean[i : i + limit] for i in range(0, len(clean), limit)]
+        out: list[str] = []
+        buf = ""
+        for p in parts:
+            if len(buf) + len(p) <= limit:
+                buf += p
+            else:
+                if buf.strip():
+                    out.append(buf.strip())
+                buf = p
+        if buf.strip():
+            out.append(buf.strip())
+        return out or [clean]
+    return [clean[i : i + limit] for i in range(0, len(clean), limit)]

@@ -1,0 +1,132 @@
+{
+  "task_id": "df956516c8d04c8fac15d97599212503",
+  "project_uuid": "d2123c37-f261-4b0b-9b0c-8ce2d1e91b63",
+  "agent": "VoiceVerification/v1",
+  "summary": {
+    "segment_count": 1,
+    "passed_count": 0,
+    "failed_count": 1,
+    "retries": 3
+  },
+  "segment_count": 1,
+  "passed_count": 0,
+  "failed_count": 1,
+  "segments": [
+    {
+      "index": 0,
+      "segment_id": "381f22c853c84717b18ba2a44d08e0ab",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "recognized_text": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місце вручення квітів.\nА якщо необхідно, то збережимо сюрприз.",
+      "final_metrics": {
+        "similarity": 0.9721,
+        "missing_words": [
+          "зателефонувати",
+          "узгодити",
+          "збережемо"
+        ],
+        "truncated_words": [],
+        "language_match": true,
+        "audio_completeness": 2.2737,
+        "asr_confidence": 0.75,
+        "recognized_text": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місце вручення квітів.\nА якщо необхідно, то збережимо сюрприз.",
+        "issues": [
+          "duration_overflow"
+        ],
+        "route_to": "timing",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо ",
+          "recognized_preview": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місце вручення квітів, а якщо не обхідно, то збережим",
+          "metrics": {
+            "similarity": 0.9402,
+            "missing_words": [
+              "зателефонувати",
+              "узгодити",
+              "місце",
+              "вручення",
+              "квітів",
+              "необхідно",
+              "збережемо"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 1.9549,
+            "asr_confidence": 0.75,
+            "recognized_text": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місцев ручення відів.\nА якщо не опхідно, то збережимо сюрприз.",
+            "issues": [
+              "missing_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "timing",
+          "issues": [
+            "duration_overflow"
+          ],
+          "expected_preview": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо ",
+          "recognized_preview": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місце вручення квітів, а якщо необхідно, то збережимо",
+          "metrics": {
+            "similarity": 0.9683,
+            "missing_words": [
+              "зателефонувати",
+              "узгодити",
+              "необхідно",
+              "збережемо"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 2.2737,
+            "asr_confidence": 0.75,
+            "recognized_text": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місце вручення квітів, а якщо не обхідно, то збережимо сюрприз.",
+            "issues": [
+              "duration_overflow"
+            ],
+            "route_to": "timing",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "timing",
+          "issues": [
+            "duration_overflow"
+          ],
+          "expected_preview": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо ",
+          "recognized_preview": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місце вручення квітів.\nА якщо необхідно, то збережимо",
+          "metrics": {
+            "similarity": 0.9721,
+            "missing_words": [
+              "зателефонувати",
+              "узгодити",
+              "збережемо"
+            ],
+            "truncated_words": [],
+            "language_match": true,
+            "audio_completeness": 2.2737,
+            "asr_confidence": 0.75,
+            "recognized_text": "Ми можемо самі зателавонувати одержувачу і у згодити зручний час і місце вручення квітів, а якщо необхідно, то збережимо сюрприз.",
+            "issues": [
+              "duration_overflow"
+            ],
+            "route_to": "timing",
+            "pass": false
+          }
+        }
+      ]
+    }
+  ]
+}

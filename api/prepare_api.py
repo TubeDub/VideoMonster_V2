@@ -130,15 +130,33 @@ def api_prepare_storage_skip():
 def api_prepare_storage_root():
     from engines.model_manager import set_storage_root
     from engines.model_manager.config import load_config, mark_storage_wizard_done, save_config
+    from engines.request_guards import is_local_request
+
+    if not is_local_request(request):
+        return jsonify({"error": "localhost_only", "ok": False}), 403
 
     cfg = load_config(APP_DIR)
     data = request.get_json(silent=True) or {}
     path = str(data.get("path", "")).strip()
     if not path:
         return jsonify({"error": "path required"}), 400
+    base = Path(path)
+    # Must be an absolute existing directory (drive / folder chosen in UI wizard).
+    if not base.is_absolute() or not base.exists() or not base.is_dir():
+        return jsonify({"error": "path must be an existing absolute directory"}), 400
     sub = data.get("subdir") or "VideoMonster/models"
-    target = Path(path) / sub if sub else Path(path)
-    result = set_storage_root(APP_DIR, target)
+    # Prevent path traversal via subdir (e.g. ../../Windows).
+    sub_parts = Path(str(sub)).parts
+    if any(p in ("..", "") for p in sub_parts) or Path(str(sub)).is_absolute():
+        return jsonify({"error": "invalid subdir"}), 400
+    target = base / sub if sub else base
+    try:
+        target_resolved = target.resolve()
+        if not str(target_resolved).startswith(str(base.resolve())):
+            return jsonify({"error": "invalid storage target"}), 400
+    except OSError as exc:
+        return jsonify({"error": str(exc)}), 400
+    result = set_storage_root(APP_DIR, target_resolved)
     if result.get("ok"):
         cfg = load_config(APP_DIR)
         cfg["storage_wizard_done"] = True

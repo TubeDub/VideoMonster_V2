@@ -47,10 +47,12 @@ _LOCAL_CANDIDATES = [
     ("openai-compatible", "127.0.0.1", 8080, "http://127.0.0.1:8080/v1", "http://127.0.0.1:8080/v1/models", "openai"),
 ]
 
-# Preferred chat models when auto-selecting (best multilingual instruct first).
+# Preferred chat models when auto-selecting. Heavy models (deepseek / qwen*) are
+# intentionally ABSENT — they stall on CPU and are disabled by the kill-switch.
+# Kept only as a last-resort list if a developer re-enables heavy LLM.
 _MODEL_PREFERENCE = (
-    "deepseek", "qwen2.5", "qwen3", "qwen", "llama3.1", "llama3.2", "llama3", "llama",
-    "gemma2", "gemma", "mistral", "mixtral", "phi3", "phi", "aya", "command-r",
+    "llama3.2", "llama3.1", "llama3", "llama",
+    "gemma2", "gemma", "mistral", "phi3", "phi", "aya", "command-r",
 )
 
 # Minimum parameter size (billions) for reliable multilingual rephrase/adaptation.
@@ -117,6 +119,13 @@ def discover_local_llm(force: bool = False) -> dict[str, Any] | None:
     on every segment. No manual configuration is required — if Ollama / LM Studio
     / an OpenAI-compatible server is up, it is detected automatically.
     """
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            return None
+    except Exception:
+        pass
     if _auto_discovery_disabled():
         return None
     now = time.time()
@@ -162,6 +171,23 @@ def resolve_llm_endpoint() -> dict[str, Any]:
       3. Cloud OpenAI when an API key is present
       4. Nothing available
     """
+    # Engine-first policy: heavy generative LLMs (Qwen/DeepSeek/Ollama) are OFF
+    # by default. The dubbing pipeline uses MT + rules instead.
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            return {
+                "available": False,
+                "source": None,
+                "base_url": "",
+                "provider": "none",
+                "api_key": None,
+                "models": [],
+                "disabled_by": "heavy_llm_kill_switch",
+            }
+    except Exception:
+        pass
     env_base = os.getenv("VM_LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
     api_key = _cloud_api_key()
     if env_base:

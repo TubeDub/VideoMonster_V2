@@ -1,0 +1,18 @@
+=== PROFESSIONAL DUBBING task= ===
+groups=1
+
+--- Group 1 indices=[0] ---
+Original Translation: Перше речення. Друге, з паузами.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Перше</emphasis> речення.<break time="350ms"/> <emphasis level="reduced">Друге</emphasis>,<break time="220ms"/> з паузами.<break time="350ms"/></speak>
+Segment duration: 8000 ms
+Est TTS before: 2370 ms
+Est TTS after: 3882 ms
+Fill %: 48.5
+Rate: -18%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Перше', 'type': 'name'}
+  Accent: {'word': 'Друге', 'type': 'name'}
+  Decision: underfill 29.6% → rate -18%
+  Decision: place_delay 220ms from source rhythm

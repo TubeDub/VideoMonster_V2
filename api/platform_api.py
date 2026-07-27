@@ -52,15 +52,56 @@ def api_live_start():
     uri = (data.get("url") or data.get("path") or data.get("source") or "").strip()
     if not uri:
         return _err("url or path required")
-    from engines.live.pipeline import LiveTranslationPipeline
+    # Local filesystem sources must stay under uploads/output (no arbitrary path read).
+    if not uri.lower().startswith(("http://", "https://", "rtmp://", "rtmps://", "srt://")):
+        from engines.path_safety import resolve_under_roots
 
-    sid = LiveTranslationPipeline(APP_DIR).start(
-        uri,
-        tgt_lang=data.get("tgt_lang") or "ru",
-        src_lang=data.get("src_lang"),
-        voice=data.get("voice") or "",
-    )
-    return jsonify({"ok": True, "session_id": sid})
+        hit = resolve_under_roots(
+            uri,
+            [APP_DIR / "uploads", APP_DIR / "output", APP_DIR / "projects"],
+            basename_fallback=True,
+        )
+        if hit is None:
+            return _err("local_source_outside_allowlist", 400)
+        uri = str(hit)
+    from engines.live.pipeline import LiveTranslationPipeline
+    from engines.live.preflight import preflight_live
+
+    pf = preflight_live(require_stt=True)
+    if not pf.get("ok") and data.get("require_engines", True):
+        return jsonify(
+            {
+                "ok": False,
+                "error": "; ".join(pf.get("issues") or ["live preflight failed"]),
+                "preflight": pf,
+            }
+        ), 503
+    try:
+        sid = LiveTranslationPipeline(APP_DIR).start(
+            uri,
+            tgt_lang=data.get("tgt_lang") or "ru",
+            src_lang=data.get("src_lang"),
+            voice=data.get("voice") or "",
+        )
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)[:400]}), 500
+    return jsonify({"ok": True, "session_id": sid, "preflight": pf})
+
+
+@bp.get("/api/platform/live/preflight")
+def api_live_preflight():
+    blocked = _guard("live")
+    if blocked:
+        return _err(blocked, 403)
+    from engines.live.preflight import preflight_live
+
+    return jsonify({"ok": True, **preflight_live()})
+
+def _safe_session_id(session_id: str) -> str | None:
+    safe = Path(str(session_id or "")).name
+    if not safe or safe != str(session_id):
+        return None
+    return safe
 
 
 @bp.post("/api/platform/live/stop/<session_id>")
@@ -68,9 +109,12 @@ def api_live_stop(session_id: str):
     blocked = _guard("live")
     if blocked:
         return _err(blocked, 403)
+    safe = _safe_session_id(session_id)
+    if not safe:
+        return _err("invalid_session_id", 400)
     from engines.live.pipeline import LiveTranslationPipeline
 
-    LiveTranslationPipeline(APP_DIR).stop(session_id)
+    LiveTranslationPipeline(APP_DIR).stop(safe)
     return jsonify({"ok": True})
 
 
@@ -79,13 +123,16 @@ def api_live_stream(session_id: str):
     blocked = _guard("live")
     if blocked:
         return _err(blocked, 403)
+    safe = _safe_session_id(session_id)
+    if not safe:
+        return _err("invalid_session_id", 400)
     from engines.live.pipeline import LiveTranslationPipeline
 
     after = int(request.args.get("after") or 0)
 
     def generate():
         pipe = LiveTranslationPipeline(APP_DIR)
-        for ev in pipe.subscribe_events(session_id, after=after, timeout_sec=300.0):
+        for ev in pipe.subscribe_events(safe, after=after, timeout_sec=300.0):
             yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
 
     return Response(stream_with_context(generate()), mimetype="text/event-stream")
@@ -93,12 +140,28 @@ def api_live_stream(session_id: str):
 
 @bp.get("/api/platform/live/diagnostics/<session_id>")
 def api_live_diagnostics(session_id: str):
+    safe = _safe_session_id(session_id)
+    if not safe:
+        return _err("invalid_session_id", 400)
     from engines.live.pipeline import LiveTranslationPipeline
 
-    return jsonify(LiveTranslationPipeline(APP_DIR).diagnostics(session_id))
+    try:
+        return jsonify(LiveTranslationPipeline(APP_DIR).diagnostics(safe))
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)[:400], "session_id": safe}), 500
 
 
 # ── Etap 2: Streaming Studio ─────────────────────────────
+
+
+@bp.get("/api/platform/streaming/capabilities")
+def api_streaming_capabilities():
+    blocked = _guard("streaming")
+    if blocked:
+        return _err(blocked, 403)
+    from engines.streaming_studio.session import probe_streaming_capabilities
+
+    return jsonify({"ok": True, **probe_streaming_capabilities()})
 
 
 @bp.post("/api/platform/streaming/session/start")
@@ -115,6 +178,7 @@ def api_streaming_start():
         microphone=bool(data.get("microphone", True)),
         system_audio=bool(data.get("system_audio")),
         rtmp_url=str(data.get("rtmp_url") or ""),
+        input_file=str(data.get("input_file") or data.get("path") or ""),
     )
     session = StreamingSession.create(APP_DIR, spec)
     with _LOCK:
@@ -133,7 +197,7 @@ def api_streaming_stop(session_id: str):
         session = _STREAMING.get(session_id)
     if not session:
         return _err("Session not found", 404)
-    return jsonify(session.stop_record())
+    return jsonify(session.stop_all() if hasattr(session, "stop_all") else session.stop_record())
 
 
 @bp.post("/api/platform/streaming/rtmp/<session_id>")
@@ -148,6 +212,30 @@ def api_streaming_rtmp(session_id: str):
         return _err("Session not found", 404)
     return jsonify(session.start_rtmp(data.get("rtmp_url")))
 
+
+@bp.post("/api/platform/streaming/file-to-rtmp")
+def api_streaming_file_to_rtmp():
+    """Record→stream shortcut: local media file → RTMP via FFmpeg."""
+    blocked = _guard("streaming")
+    if blocked:
+        return _err(blocked, 403)
+    data = request.get_json(silent=True) or {}
+    path = (data.get("path") or data.get("input_file") or "").strip()
+    if not path:
+        return _err("path required")
+    from engines.streaming_studio.session import CaptureSpec, StreamingSession
+
+    spec = CaptureSpec(
+        microphone=False,
+        rtmp_url=str(data.get("rtmp_url") or ""),
+        input_file=path,
+    )
+    session = StreamingSession.create(APP_DIR, spec)
+    with _LOCK:
+        _STREAMING[session.session_id] = session
+    result = session.file_to_rtmp(path, data.get("rtmp_url"))
+    result["session_id"] = session.session_id
+    return jsonify(result)
 
 # ── Etap 3: AI Live Dub ──────────────────────────────────
 
@@ -366,3 +454,75 @@ def api_assistant_review():
         router_reason=data.get("router_reason") or "",
     )
     return jsonify({"ok": True, "issues": issues})
+
+
+# ── Realtime Interpreter + Screen Dub (MVP on live pipeline) ──
+
+
+@bp.post("/api/platform/interpreter/start")
+def api_interpreter_start():
+    blocked = _guard("live")
+    if blocked:
+        return _err(blocked, 403)
+    data = request.get_json(silent=True) or {}
+    uri = (data.get("url") or data.get("path") or data.get("source") or "").strip()
+    if not uri:
+        return _err("url or path required")
+    from engines.interpreter import start_realtime_interpreter
+
+    sess = start_realtime_interpreter(
+        APP_DIR,
+        uri,
+        src_lang=data.get("src_lang") or "auto",
+        tgt_lang=data.get("tgt_lang") or "ru",
+        voice=data.get("voice") or "",
+    )
+    return jsonify(
+        {
+            "ok": True,
+            "session": sess.to_dict(),
+            "events_url": f"/api/platform/live/stream/{sess.live_session_id}",
+        }
+    )
+
+
+@bp.post("/api/platform/screen-dub/start")
+def api_screen_dub_start():
+    blocked = _guard("live")
+    if blocked:
+        return _err(blocked, 403)
+    data = request.get_json(silent=True) or {}
+    uri = (data.get("url") or data.get("path") or data.get("source") or "").strip()
+    if not uri:
+        return _err("url or path required")
+    from engines.interpreter import start_screen_dub
+
+    sess = start_screen_dub(
+        APP_DIR,
+        uri,
+        src_lang=data.get("src_lang") or "auto",
+        tgt_lang=data.get("tgt_lang") or "ru",
+        voice=data.get("voice") or "",
+    )
+    return jsonify(
+        {
+            "ok": True,
+            "session": sess.to_dict(),
+            "events_url": f"/api/platform/live/stream/{sess.live_session_id}",
+        }
+    )
+
+
+@bp.post("/api/platform/interpreter/stop/<session_id>")
+def api_interpreter_stop(session_id: str):
+    from engines.interpreter import stop_session
+
+    ok = stop_session(APP_DIR, session_id)
+    return jsonify({"ok": ok})
+
+
+@bp.get("/api/platform/interpreter/sessions")
+def api_interpreter_sessions():
+    from engines.interpreter import list_sessions
+
+    return jsonify({"ok": True, "sessions": list_sessions()})

@@ -57,8 +57,13 @@ def is_mt_engine_ready(app_dir: Path, engine_id: str, src: str, tgt: str) -> boo
     if engine_id == "argos":
         return _argos_ready(src, tgt)
     if engine_id == "nllb":
+        if not (_has_package("transformers") and _has_package("torch")):
+            return False
         return verify_hf_model(app_dir, NLLB_MODEL_ID)
     if engine_id == "marian":
+        # Honest gate: model weights alone are useless without torch/transformers.
+        if not (_has_package("transformers") and _has_package("torch")):
+            return False
         return verify_hf_model(app_dir, f"Helsinki-NLP/opus-mt-{src}-{tgt}")
     return True
 
@@ -189,6 +194,16 @@ def ensure_mt_leg(app_dir: Path, src: str, tgt: str) -> dict:
         notes.append(f"argos {src}->{tgt} unavailable — use marian")
     ensure_mt_engine(app_dir, eng, src, tgt)
     notes.append(f"ok {eng} {src}->{tgt}")
+    # CJK→uk/ru: also prepare English pivot legs (offline Argos zh→en + Marian en→uk)
+    if src in ("zh", "ja", "ko") and tgt in ("uk", "ru", "en"):
+        try:
+            if tgt != "en":
+                ensure_mt_engine(app_dir, "argos", src, "en")
+                notes.append(f"ok pivot {src}->en (argos)")
+                ensure_mt_engine(app_dir, "marian", "en", tgt)
+                notes.append(f"ok pivot en->{tgt} (marian)")
+        except Exception as exc:
+            notes.append(f"pivot prep skipped: {exc}")
     return {"ok": True, "engine": eng, "notes": notes}
 
 def ensure_mt(app_dir: Path, src: str, tgt: str) -> None:
@@ -328,16 +343,24 @@ def load_whisper(app_dir: Path, size: str):
     root = str(hub_dir(app_dir))
     last_exc: BaseException | None = None
 
+    # Missing requested size must NOT abort the dub — walk smaller sizes
+    # that may already be on disk (CJK bump to «small» with only «tiny»
+    # prepared was raising ModelNotPreparedError and killing STT).
+    missing_requested = False
     for try_size in _whisper_fallback_sizes(size):
         if not verify_whisper(app_dir, try_size):
-            if try_size == size and (is_offline_only() or not downloads_permitted()):
-                raise ModelNotPreparedError(
-                    f"Whisper {size} не установлен",
-                    component="whisper",
-                )
-            if try_size != size:
+            if try_size == size:
+                missing_requested = True
+                if is_offline_only() or not downloads_permitted():
+                    logger.warning(
+                        "[ModelManager] Whisper %s not on disk (offline/no-download) "
+                        "— trying smaller prepared sizes",
+                        size,
+                    )
+                    continue
+                assert_downloads_allowed("whisper load")
+            else:
                 continue
-            assert_downloads_allowed("whisper load")
         attempts = [
             (device, compute_type),
             ("cpu", "int8"),
@@ -360,8 +383,11 @@ def load_whisper(app_dir: Path, size: str):
                 )
                 _WHISPER_CACHE[try_size] = model
                 if try_size != size:
+                    # Alias so repeated requests for the missing size reuse
+                    # the smaller model without re-walking the chain.
+                    _WHISPER_CACHE[size] = model
                     logger.warning(
-                        "[ModelManager] Whisper %s OOM/load fail → using %s (%s/%s)",
+                        "[ModelManager] Whisper %s unavailable/OOM → using %s (%s/%s)",
                         size,
                         try_size,
                         dev,
@@ -388,6 +414,11 @@ def load_whisper(app_dir: Path, size: str):
                 )
                 continue
 
+    if missing_requested and (is_offline_only() or not downloads_permitted()):
+        raise ModelNotPreparedError(
+            f"Whisper {size} не установлен",
+            component="whisper",
+        )
     if last_exc is not None:
         raise last_exc
     raise RuntimeError(f"Whisper {size}: failed to load")

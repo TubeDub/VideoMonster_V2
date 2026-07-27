@@ -243,20 +243,60 @@ class DubStudioService:
         self,
         project_id: str,
         *,
-        input_path: Path,
-        fx_slots: list[dict[str, Any]],
+        input_path: Path | None = None,
+        fx_slots: list[dict[str, Any]] | None = None,
+        track_id: str | None = None,
+        segment_id: str | None = None,
     ) -> str:
         """In-memory preview job id — non-blocking FX render to RAM buffer path."""
+        project = self.store.load(project_id)
+        if not project:
+            raise KeyError(project_id)
+
+        resolved_path = Path(input_path) if input_path else None
+        if resolved_path and not resolved_path.is_file() and not resolved_path.is_absolute():
+            cand = self.app_dir / resolved_path
+            if cand.is_file():
+                resolved_path = cand
+
+        if (not resolved_path or not resolved_path.is_file()) and segment_id:
+            seg = next((s for s in project.segments if s.segment_id == segment_id), None)
+            if seg:
+                ver = next((v for v in seg.versions if v.version_id == seg.active_version_id), None)
+                if ver and ver.audio_path:
+                    resolved_path = Path(ver.audio_path)
+
+        if (not resolved_path or not resolved_path.is_file()) and project.segments:
+            for seg in project.segments:
+                ver = next((v for v in seg.versions if v.version_id == seg.active_version_id), None)
+                if ver and ver.audio_path and Path(ver.audio_path).is_file():
+                    resolved_path = Path(ver.audio_path)
+                    break
+
+        if not resolved_path or not resolved_path.is_file():
+            raise FileNotFoundError("no preview audio input")
+
+        slots_src = fx_slots
+        if slots_src is None and track_id:
+            track = next((t for t in project.tracks if t.track_id == track_id), None)
+            if track:
+                slots_src = [s.to_dict() for s in track.fx_chain]
+        if slots_src is None:
+            slots_src = []
+
         work = self.app_dir / "output" / "dub_studio" / project_id / "preview"
         work.mkdir(parents=True, exist_ok=True)
         specs = [
-            FxSlotSpec(s.get("plugin_id", ""), bool(s.get("enabled", True)), dict(s.get("params") or {}))
-            for s in fx_slots
+            FxSlotSpec(
+                str(s.get("plugin_id", "")),
+                bool(s.get("enabled", True)),
+                dict(s.get("params") or {}),
+            )
+            for s in slots_src
             if s.get("plugin_id")
         ]
         chain = FxChain(specs)
         job_id = str(uuid.uuid4())
-        out = work / f"preview_{job_id}.wav"
 
         def _done(result):
             try:
@@ -264,7 +304,7 @@ class DubStudioService:
             except Exception:
                 pass
 
-        self.fx_pipeline.submit(chain, input_path, work, on_done=_done)
+        self.fx_pipeline.submit(chain, resolved_path, work, on_done=_done)
         return job_id
 
     def get_preview_buffer(self, job_id: str) -> bytes | None:
@@ -342,6 +382,49 @@ class DubStudioService:
         slot = FxSlot(plugin_id=plugin_id, enabled=True, params={})
         track.plugin_slots.append(slot)
         track.fx_chain.append(slot)
+        self.store.save(project)
+        return track
+
+    def remove_track_plugin(self, project_id: str, track_id: str, index: int) -> StudioTrack:
+        project = self.store.load(project_id)
+        if not project:
+            raise KeyError(project_id)
+        track = next((t for t in project.tracks if t.track_id == track_id), None)
+        if not track:
+            raise KeyError(track_id)
+        if index < 0 or index >= len(track.fx_chain):
+            raise IndexError("fx index out of range")
+        removed = track.fx_chain.pop(index)
+        # Keep plugin_slots in sync when parallel list exists
+        if index < len(track.plugin_slots):
+            track.plugin_slots.pop(index)
+        else:
+            for i, s in enumerate(list(track.plugin_slots)):
+                if s.plugin_id == removed.plugin_id:
+                    track.plugin_slots.pop(i)
+                    break
+        self.store.save(project)
+        return track
+
+    def set_fx_enabled(
+        self,
+        project_id: str,
+        track_id: str,
+        index: int,
+        *,
+        enabled: bool,
+    ) -> StudioTrack:
+        project = self.store.load(project_id)
+        if not project:
+            raise KeyError(project_id)
+        track = next((t for t in project.tracks if t.track_id == track_id), None)
+        if not track:
+            raise KeyError(track_id)
+        if index < 0 or index >= len(track.fx_chain):
+            raise IndexError("fx index out of range")
+        track.fx_chain[index].enabled = bool(enabled)
+        if index < len(track.plugin_slots):
+            track.plugin_slots[index].enabled = bool(enabled)
         self.store.save(project)
         return track
 

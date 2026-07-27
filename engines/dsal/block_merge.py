@@ -248,12 +248,30 @@ def apply_semantic_block_merges(
             zip(plan.indices, members, parts)
         ):
             used.add(idx)
+            part = str(part or "").strip()
             if part:
                 apply_translated_text_to_segment(seg, part)
+            else:
+                # Clear stale neighbor leftovers — never leave old text when
+                # redistribute assigned this slot nothing.
+                # stamp_authoritative_final_text no-ops on empty; clear manually.
+                for _k in (
+                    "text",
+                    "plain_text",
+                    "tts_text",
+                    "text_for_tts",
+                    "final_text",
+                    "translation_text",
+                    "voice_input",
+                ):
+                    seg[_k] = ""
+                if idx != primary:
+                    seg["merged_into"] = primary
+                    seg["archived"] = True
             stamp_dsal_on_segment(
                 seg,
                 adapt_duration_semantic(
-                    part or _seg_text(seg),
+                    part or "",
                     source_hint=sources[local],
                     slot_ms=slots[local],
                     tgt_lang=tgt_lang,

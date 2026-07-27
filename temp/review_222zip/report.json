@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "0c605a1c7f7d48f3b2a20915d3efdfc0",
+  "created_at": "2026-07-22T15:58:31.977998+00:00",
+  "task_id": "0c605a1c7f7d48f3b2a20915d3efdfc0",
+  "stage": "STUDIO",
+  "developer": {
+    "error_code": "RUNTIMEERROR",
+    "stage": "STUDIO",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "STUDIO",
+    "task_id": "0c605a1c7f7d48f3b2a20915d3efdfc0",
+    "error_type": "RuntimeError",
+    "message": "Критическая ошибка языка: сегмент #0 (meaning_collapse) — финальный текст не соответствует uk. Превью: Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо "
+  },
+  "exception": {
+    "type": "RuntimeError",
+    "message": "Критическая ошибка языка: сегмент #0 (meaning_collapse) — финальный текст не соответствует uk. Превью: Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо "
+  },
+  "timeline_event_count": 44
+}

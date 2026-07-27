@@ -1,0 +1,57 @@
+{
+  "translation_agent_version": "4.0",
+  "project_uuid": "e41e1f93-f4b1-40e9-9c7e-0349152ba398",
+  "task_id": "0c605a1c7f7d48f3b2a20915d3efdfc0",
+  "status": "success",
+  "translator_used": "argos",
+  "segment_count": 1,
+  "success_count": 1,
+  "retries": 0,
+  "fallback_used": false,
+  "warnings": [],
+  "errors": [],
+  "execution_time_ms": 23228.0,
+  "avg_confidence": {
+    "avg_overall": 0.9125,
+    "avg_translation": 0.9125,
+    "avg_entity": 1.0,
+    "avg_terminology": 1.0,
+    "avg_language": 1.0
+  },
+  "entity_validation": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1
+  },
+  "terminology_validation": {
+    "ok": true,
+    "confidence": 1.0,
+    "inconsistent_terms": [],
+    "glossary_size": 0
+  },
+  "language_validation": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1
+  },
+  "decision_log": [
+    "segment_count=1",
+    "source_lang_corrected es->zh",
+    "lang=zh->uk",
+    "attempt=1 translator=argos confidence=0.75",
+    "pass6_completeness ok fixed=0"
+  ],
+  "per_segment_confidence": [
+    {
+      "index": 0,
+      "confidence": {
+        "translation": 0.75,
+        "entity": 1.0,
+        "terminology": 1.0,
+        "language": 1.0,
+        "overall": 0.9125
+      },
+      "translator_used": "argos"
+    }
+  ]
+}

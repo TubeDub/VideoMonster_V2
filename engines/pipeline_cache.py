@@ -112,8 +112,48 @@ def load_whisper_cache(
     path = _cache_root(app_dir) / "whisper" / f"{key}.json"
     hit = _read_json(path)
     if hit:
+        # Reject sparse caches that leave most of the video undubbed
+        timing = hit.get("timing_map") or []
+        if timing and not _timing_coverage_ok(timing):
+            logger.warning(
+                "[Cache] Whisper HIT rejected — sparse coverage key=%s segs=%d",
+                key,
+                len(timing),
+            )
+            try:
+                path.unlink(missing_ok=True)
+            except Exception:
+                pass
+            return None
         logger.info("[Cache] Whisper HIT key=%s", key)
     return hit
+
+
+def _timing_coverage_ok(timing_map: list, *, min_span_ratio: float = 0.35) -> bool:
+    """True when STT slots span a meaningful portion of the detected speech window."""
+    if not timing_map:
+        return False
+    starts, ends = [], []
+    for t in timing_map:
+        if isinstance(t, dict):
+            s, e = int(t.get("start", 0) or 0), int(t.get("end", 0) or 0)
+        elif isinstance(t, (list, tuple)) and len(t) >= 2:
+            s, e = int(t[0]), int(t[1])
+        else:
+            continue
+        if e > s:
+            starts.append(s)
+            ends.append(e)
+    if not starts:
+        return False
+    # Single tiny island on a long video is never OK
+    if len(starts) == 1 and (ends[0] - starts[0]) < 8000:
+        return False
+    span = max(ends) - min(starts)
+    # Prefer multi-segment; allow single long block covering >= 20s
+    if len(starts) >= 3:
+        return True
+    return span >= 20000
 
 
 def save_whisper_cache(

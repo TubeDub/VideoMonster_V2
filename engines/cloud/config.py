@@ -45,4 +45,24 @@ def cloud_config() -> dict[str, Any]:
         "default_provider": os.getenv("VM_CLOUD_DEFAULT_PROVIDER", "local"),
         "tubedub_cloud_url": os.getenv("VM_TUBEDUB_CLOUD_URL", ""),
         "remote_jobs_enabled": _flag("VM_CLOUD_REMOTE_JOBS"),
+        "oauth_providers": ("google_drive", "onedrive", "dropbox"),
+    }
+
+
+def oauth_env_hint(provider_id: str) -> dict[str, Any]:
+    """Document required env vars for a provider (no secrets leaked)."""
+    from engines.cloud.oauth import OAUTH_SPECS, credential_status
+
+    spec = OAUTH_SPECS.get(provider_id) or {}
+    st = credential_status(provider_id)
+    return {
+        "provider_id": provider_id,
+        "configured": st.configured,
+        "missing": st.missing,
+        "env_keys": [
+            spec.get("client_id_env"),
+            spec.get("client_secret_env"),
+            spec.get("redirect_env"),
+        ],
+        "oauth_status": st.oauth_status,
     }

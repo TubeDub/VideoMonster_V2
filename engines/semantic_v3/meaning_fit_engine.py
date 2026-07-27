@@ -108,45 +108,6 @@ def fit_meaning_units_to_target(
             adapted=best.text,
             baseline=baseline or best.text,
         )
-        # region agent log
-        try:
-            import json
-            import time
-            from pathlib import Path
-
-            _dbg = Path(__file__).resolve().parents[2] / "debug-e4d146.log"
-            with _dbg.open("a", encoding="utf-8") as _f:
-                _f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "e4d146",
-                            "runId": "meaning-preservation-v2",
-                            "hypothesisId": "MP1,MP2,MP3",
-                            "location": "meaning_fit_engine.py:gate",
-                            "message": "Meaning preservation gate",
-                            "data": {
-                                "unitId": getattr(unit, "unit_id", "?"),
-                                "srcWords": len((unit.text or "").split()),
-                                "adaptedWords": len((best.text or "").split()),
-                                "finalWords": len((final_text or "").split()),
-                                "fallback": bool(mp_report.fallback),
-                                "coverage": mp_report.coverage,
-                                "entityScore": mp_report.entity_preservation_score,
-                                "eventScore": mp_report.event_preservation_score,
-                                "narrativeOk": mp_report.narrative_passed,
-                                "sentenceOk": mp_report.sentence_integrity_passed,
-                                "reasons": list(mp_report.reasons)[:6],
-                                "strategy": getattr(best, "strategy", ""),
-                            },
-                            "timestamp": int(time.time() * 1000),
-                        },
-                        ensure_ascii=False,
-                    )
-                    + "\n"
-                )
-        except OSError:
-            pass
-        # endregion
         if mp_report.fallback:
             logger.warning(
                 "MeaningPreservation FALLBACK unit=%s reasons=%s",

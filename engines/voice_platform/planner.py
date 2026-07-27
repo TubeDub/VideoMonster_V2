@@ -191,6 +191,8 @@ def plan_multi_speaker(
         if speaker in pref:
             try:
                 v = resolve_voice(external_id=pref[speaker])
+                if v.provider == "mock" or v.external_id == "mock-default":
+                    raise LookupError(f"preferred voice resolves to mock: {pref[speaker]}")
                 mem.assign(
                     speaker,
                     v.voice_uuid,
@@ -198,8 +200,16 @@ def plan_multi_speaker(
                     language=default_language,
                 )
                 continue
-            except Exception:
-                pass
+            except Exception as exc:
+                # Prefer logging over silent wrong-voice assignment.
+                import logging
+
+                logging.getLogger("tubedub.voice_platform").warning(
+                    "preferred voice resolve failed for speaker=%s voice=%s: %s",
+                    speaker,
+                    pref.get(speaker),
+                    exc,
+                )
         if pool:
             v = pool[i % len(pool)]
             # If pool collapses to one voice, still assign consistently

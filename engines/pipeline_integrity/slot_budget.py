@@ -242,11 +242,26 @@ def enforce_slot_budget_or_raise(
     return report
 
 
+def segment_tts_exempt(seg: dict[str, Any]) -> bool:
+    """Segment intentionally has no TTS (quality block) — must not require a WAV."""
+    if not isinstance(seg, dict):
+        return False
+    if seg.get("tts_blocked") or seg.get("skip_tts"):
+        return True
+    if "FAIL" in str(seg.get("tqe_status") or "").upper() and not str(
+        seg.get("approved_text") or ""
+    ).strip():
+        return True
+    return False
+
+
 def segment_tts_allowed(seg: dict[str, Any]) -> bool:
     """Per-row TTS gate after SlotBudgetFirst."""
     if not isinstance(seg, dict):
         return False
     if seg.get("merged_into") is not None or seg.get("archived"):
+        return False
+    if segment_tts_exempt(seg):
         return False
     if seg.get("slot_budget_blocked") or seg.get("tts_gate") == "blocked_slot_budget":
         return False

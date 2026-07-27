@@ -15,13 +15,14 @@ from pydub.silence import detect_nonsilent
 
 logger = logging.getLogger(__name__)
 
-# ─── Quality-first constants ──────────────────────────────────────────────────
+# ─── Quality-first constants (TZ Stage 3) ─────────────────────────────────────
 # atempo is the LAST RESORT — listener must not hear unnatural speed.
-# Priority: natural speech > stress marks > lip sync > exact duration match.
-_ATEMPO_MIN = 0.95  # TZ v4.0 P2: ±5% audio fit after LOCK
-_ATEMPO_ABSOLUTE_MAX = 1.05      # hard ceiling — was 1.18; capped at barely-noticeable
-_ATEMPO_EMERGENCY_MAX = 1.12     # red overflow >15% after DSAL exhausted
-DUB_MAX_ATEMPO = 1.05            # per-segment cap  — was 1.15
+# Hard ceiling 1.20 — never 1.5–2.0. Prefer 1.15–1.18 when possible.
+_ATEMPO_MIN = 0.95
+_ATEMPO_ABSOLUTE_MAX = 1.20      # TZ Stage 3 hard ceiling
+_ATEMPO_EMERGENCY_MAX = 1.20     # never above 1.20
+DUB_MAX_ATEMPO = 1.18            # preferred per-segment cap
+HAPPY_PATH_MAX_ATEMPO = 1.20
 DUB_SLOT_TOLERANCE_MS = 75
 
 # Video-adaptation window: if overflow ≤ this %, prefer gap-borrow / video
@@ -144,7 +145,9 @@ def detect_significant_underfill(tts_ms: int, slot_ms: int) -> bool:
 
 def _parse_timing(item: Any) -> tuple[int, int]:
     if isinstance(item, dict):
-        return int(item["start"]), int(item["end"])
+        start = item.get("start", item.get("start_ms", 0))
+        end = item.get("end", item.get("end_ms", 0))
+        return int(start or 0), int(end or 0)
     if isinstance(item, (list, tuple)) and len(item) >= 2:
         return int(item[0]), int(item[1])
     return 0, 0
@@ -390,17 +393,16 @@ def compress_internal_pauses(
 
 
 def _atempo_hard_cap(max_atempo: float) -> float:
-    """Allow up to emergency 1.12 when caller requests it; else ±5%."""
+    """Never exceed TZ Stage 3 ceiling (1.20)."""
     requested = float(max_atempo)
-    if requested > _ATEMPO_ABSOLUTE_MAX + 0.001:
-        return max(1.0, min(_ATEMPO_EMERGENCY_MAX, requested))
-    return max(1.0, min(_ATEMPO_ABSOLUTE_MAX, requested))
+    ceiling = float(_ATEMPO_ABSOLUTE_MAX)
+    return max(1.0, min(ceiling, requested))
 
 
 def _gentle_atempo_factor(need: float, *, max_atempo: float = _ATEMPO_ABSOLUTE_MAX) -> float:
     """
     Minimal speech speed-up — LAST RESORT.
-    Default ±5%; emergency path may request up to 1.12 for red overflow >15%.
+    Soft steps toward need, hard-capped at max_atempo (≤1.20).
     """
     cap = _atempo_hard_cap(max_atempo)
     if need <= 1.0:
@@ -409,6 +411,8 @@ def _gentle_atempo_factor(need: float, *, max_atempo: float = _ATEMPO_ABSOLUTE_M
         return min(need, min(1.02, cap))
     if need <= 1.08:
         return min(need, min(1.04, cap))
+    if need <= 1.15:
+        return min(need, min(1.12, cap))
     return min(need, cap)
 
 
@@ -558,8 +562,10 @@ def fit_segment_audio(
     if fitted_ms > hard_cap and not no_speech_trim:
         # Before chopping speech: emergency atempo toward hard_cap so we cut
         # fewer trailing words (and avoid mid-syllable hard clips).
+        # TZ №2: never speed up speech unless atempo was explicitly allowed —
+        # default path must keep atempo == 1.0 (no robotic acceleration).
         need_cap = fitted_ms / max(hard_cap, 1)
-        if need_cap > 1.02:
+        if allow_atempo and need_cap > 1.02:
             emergency = _gentle_atempo_factor(
                 need_cap, max_atempo=_ATEMPO_EMERGENCY_MAX
             )
@@ -593,12 +599,47 @@ def fit_segment_audio(
                 fitted_ms,
             )
     elif fitted_ms > hard_cap and no_speech_trim:
-        strategy = strategy + "+no_trim_overflow" if strategy != "none" else "no_trim_overflow"
-        logger.debug(
-            "timing_fit: speech trim skipped (no_speech_trim) overflow=%dms hard_cap=%dms",
-            fitted_ms - hard_cap,
-            hard_cap,
+        # TZ Stage 3 Happy Path: never chop words — try atempo ≤1.20, else keep overflow.
+        need_cap = fitted_ms / max(hard_cap, 1)
+        if allow_atempo and need_cap > 1.02:
+            emergency = _gentle_atempo_factor(
+                need_cap, max_atempo=min(float(max_atempo), _ATEMPO_ABSOLUTE_MAX)
+            )
+            if emergency > 1.001:
+                tmp_em = work / f"{src.stem}_spd_cap.wav"
+                try:
+                    _atempo(
+                        cur,
+                        emergency,
+                        tmp_em,
+                        max_atempo=min(float(max_atempo), _ATEMPO_ABSOLUTE_MAX),
+                    )
+                    cur = tmp_em
+                    audio = AudioSegment.from_file(str(tmp_em))
+                    fitted_ms = len(audio)
+                    atempo = max(float(atempo), float(emergency))
+                    tag = "atempo_no_trim"
+                    strategy = tag if strategy == "none" else strategy + f"+{tag}"
+                except Exception as exc:
+                    logger.debug("timing_fit: atempo without trim failed: %s", exc)
+        overflow_left = max(0, fitted_ms - hard_cap)
+        strategy = (
+            strategy + "+no_trim_overflow" if strategy != "none" else "no_trim_overflow"
         )
+        logger.warning(
+            "timing_fit: NO speech trim — slot=%dms tts=%dms atempo=%.3f "
+            "fitted=%dms overflow=%dms strategy=%s",
+            hard_cap,
+            orig_ms,
+            atempo,
+            fitted_ms,
+            overflow_left,
+            strategy,
+        )
+
+    # Speech length before natural pause pad — used to sync Review text after trim.
+    speech_ms = int(fitted_ms)
+    speech_trimmed = "trim_overlap" in str(strategy or "")
 
     if fitted_ms < effective_slot:
         # Add only a natural post-sentence pause (80–220 ms based on punctuation).
@@ -622,10 +663,12 @@ def fit_segment_audio(
 
     out = work / f"{src.stem}_fitted.wav"
     audio.export(out, format="wav")
-    return str(out), {
+    meta = {
         "slot_ms": slot_end - slot_start,
         "effective_slot_ms": effective_slot,
         "tts_ms": orig_ms,
+        "speech_ms": speech_ms,
+        "speech_trimmed": speech_trimmed,
         "fitted_ms": len(audio),
         "atempo": round(atempo, 4),
         "pause_added_ms": pause_added_ms,
@@ -634,7 +677,19 @@ def fit_segment_audio(
         "inter_pause_ms": pause_ms,
         "strategy": strategy,
         "overflow_ms": overflow_ms,
+        "no_speech_trim": bool(no_speech_trim),
     }
+    logger.info(
+        "timing_fit: slot_ms=%s tts_ms=%s atempo=%.3f overflow_ms=%s strategy=%s "
+        "no_speech_trim=%s",
+        meta["slot_ms"],
+        meta["tts_ms"],
+        meta["atempo"],
+        meta["overflow_ms"],
+        meta["strategy"],
+        meta["no_speech_trim"],
+    )
+    return str(out), meta
 
 
 def _segment_start_delays(
@@ -774,12 +829,18 @@ def build_gap_adjusted_track(
                     "place_start": place_start,
                     "original_start_ms": start,
                     "slot_end_ms": end,
+                    "slot_ms": int(meta.get("slot_ms") or max(0, end - start)),
                     "delay_ms": delay,
                     "fitted_ms": fitted_ms,
+                    "tts_ms": int(meta.get("tts_ms") or 0),
+                    "speech_ms": int(meta.get("speech_ms") or fitted_ms),
+                    "speech_trimmed": bool(meta.get("speech_trimmed")),
+                    "pause_added_ms": int(meta.get("pause_added_ms") or 0),
                     "pause_compressed_ms": meta.get("pause_compressed_ms", 0),
                     "strategy": meta.get("strategy", "none"),
                     "overflow_ms": meta.get("overflow_ms", 0),
                     "atempo": meta.get("atempo", 1.0),
+                    "no_speech_trim": bool(meta.get("no_speech_trim")),
                 }
             )
             log_lines.append(

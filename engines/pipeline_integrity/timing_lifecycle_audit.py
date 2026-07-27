@@ -13,12 +13,25 @@ from typing import Any
 
 logger = logging.getLogger("tubedub.timing_lifecycle_audit")
 
-_DEBUG_LOG = Path(r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log")
-_OUT_DIR = Path(r"c:\Users\serhii\Desktop\VideoMonster_V2\_tmp_timing_audit")
+_APP_DIR = Path(__file__).resolve().parents[2]
+_DEBUG_LOG = _APP_DIR / "debug-ee98a6.log"
+_OUT_DIR = _APP_DIR / "_tmp_timing_audit"
+
+
+def _debug_enabled() -> bool:
+    import os
+
+    return (os.getenv("VM_DEBUG_NDJSON") or "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
 
 
 def _append_debug(hypothesis_id: str, location: str, message: str, data: dict[str, Any]) -> None:
-    # #region agent log
+    if not _debug_enabled():
+        return
     try:
         payload = {
             "sessionId": "ee98a6",
@@ -33,7 +46,6 @@ def _append_debug(hypothesis_id: str, location: str, message: str, data: dict[st
             f.write(json.dumps(payload, ensure_ascii=False) + "\n")
     except Exception:
         pass
-    # #endregion
 
 
 def _i(v: Any, default: int = 0) -> int:
@@ -195,13 +207,14 @@ def dump_pre_merge_timing_audit(
         ),
     }
     report = {"summary": summary, "segments": rows}
-    try:
-        _OUT_DIR.mkdir(parents=True, exist_ok=True)
-        path = _OUT_DIR / f"pre_merge_{task_id or 'unknown'}.json"
-        path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-        summary["report_path"] = str(path)
-    except Exception:
-        pass
+    if _debug_enabled():
+        try:
+            _OUT_DIR.mkdir(parents=True, exist_ok=True)
+            path = _OUT_DIR / f"pre_merge_{task_id or 'unknown'}.json"
+            path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+            summary["report_path"] = str(path)
+        except Exception:
+            pass
     _append_debug(
         "H1",
         "timing_lifecycle_audit.py:dump_pre_merge",

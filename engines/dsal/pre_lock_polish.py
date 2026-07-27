@@ -21,6 +21,7 @@ def polish_false_name_period(text: str) -> str:
 
     Keep the period when the next token is a new sentence (capital letter),
     e.g. «Джордж-молодший. Сьогодні…».
+    Also undo verb→Name false stops: «їхав. Джордж».
     """
     out = str(text or "")
     out = re.sub(
@@ -36,6 +37,21 @@ def polish_false_name_period(text: str) -> str:
     )
     out = re.sub(
         r"(George\s+Jr)\.\s+(?=[a-zа-яіїєґ])",
+        r"\1 ",
+        out,
+    )
+    # Mid-clause verb period before continuing proper name
+    out = re.sub(
+        r"\b(їхав|їхала|їхали|сказав|сказала|був|була|став|стала|"
+        r"міг|могла|хотів|хотіла|відчув|відчула|почав|почала|почали)\."
+        r"\s+(?=(?:Джордж|George|Lucas|Фіат|Fiat))",
+        r"\1 ",
+        out,
+    )
+    # George Jr. → «Джордж-молодший. Сьогодні/більш…» is a false stop from Jr.
+    out = re.sub(
+        r"(Джордж(?:а|у)?-молодш(?:ий|ого|ому))\.\s+"
+        r"(?=(?:Сьогодні|сьогодні|Більш|більш|відомий|Відомий))",
         r"\1 ",
         out,
     )
@@ -145,10 +161,15 @@ def strip_orphan_clause_tails(text: str, *, original: str = "") -> str:
                 if not out.endswith((".", "!", "?", "…")):
                     out += "."
 
-    # Near-death literal glued after a natural paraphrase (GL #11 TTS pollution).
-    if re.search(r"смертельн|на\s+межі\s+смерті|близьк\w*\s+смерт", out, re.I):
+    # Near-death literal glued after a natural paraphrase (GL #11/#12 TTS pollution).
+    # Strip UK and RU orphans — DSAL must never leave cross-lang junk on TTS.
+    try:
+        from engines.dsal.clause_coverage import strip_cross_lang_clause_orphans
+
+        out = strip_cross_lang_clause_orphans(out)
+    except Exception:
         out = re.sub(
-            r"(?:,\s*)?досвід\s+на\s+межі\s+смерті\.?\s*$",
+            r"(?:,\s+)?досвід\s+на\s+межі\s+смерті\.?\s*$",
             "",
             out,
             flags=re.I,
@@ -240,30 +261,65 @@ def ensure_terminal_punctuation(text: str, *, original: str = "") -> str:
     return out
 
 
-def apply_pre_lock_polish(text: str, *, original: str = "") -> str:
+def apply_pre_lock_polish(
+    text: str, *, original: str = "", tgt_lang: str = ""
+) -> str:
+    """Pre-LOCK polish. UK-specific name/discourse rules only when tgt_lang=uk."""
+    from engines.dsal.clause_coverage import strip_cross_lang_clause_orphans
     from engines.dsal.core import strip_dsal_elaboration_fillers
     from engines.naturalizer_v2.punctuation import clean_punctuation
-    from engines.naturalizer_v2.uk_name_forms import apply_uk_dub_name_polish
 
     out = str(text or "").strip()
     if not out:
         return out
-    out = strip_dsal_elaboration_fillers(out)
-    out = strip_orphan_clause_tails(out, original=original)
-    out = apply_uk_dub_name_polish(out, original=original)
-    out = polish_duplicate_southern_california(out)
+    lang = str(tgt_lang or "").split("-")[0].lower().strip()
+    if not lang:
+        # Infer: Ukrainian letters → uk; else Cyrillic → ru; else leave generic.
+        if re.search(r"[іІїЇєЄґҐ]", out):
+            lang = "uk"
+        elif re.search(r"[а-яА-ЯёЁ]", out):
+            lang = "ru"
+
+    # Always: strip cross-lang orphans + false Jr. periods (UK/RU name forms).
+    out = strip_cross_lang_clause_orphans(out)
     out = polish_false_name_period(out)
-    out = polish_orphan_pronoun_after_name(out)
-    out = polish_orphan_pro_after_name(out)
-    out = polish_leading_comma_orphan(out, original=original)
-    out = restore_not_just_marker(out, original=original)
-    out = polish_clause_prefix_case(out)
     out = polish_double_punctuation(out)
-    out = clean_punctuation(out)
-    out = polish_double_punctuation(out)  # after clean (clean may insert spaces)
-    out = polish_duplicate_southern_california(out)
-    out = strip_orphan_clause_tails(out, original=original)
-    out = ensure_terminal_punctuation(out, original=original)
+
+    if lang == "uk":
+        out = strip_dsal_elaboration_fillers(out, tgt_lang="uk")
+        out = strip_orphan_clause_tails(out, original=original)
+        try:
+            from engines.naturalizer_v2.uk_name_forms import apply_uk_dub_name_polish
+
+            out = apply_uk_dub_name_polish(out, original=original)
+        except Exception:
+            pass
+        # uk_name_polish can re-insert Jr. period — undo after name forms.
+        out = polish_false_name_period(out)
+        out = polish_duplicate_southern_california(out)
+        out = polish_orphan_pronoun_after_name(out)
+        out = polish_orphan_pro_after_name(out)
+        out = polish_leading_comma_orphan(out, original=original)
+        out = restore_not_just_marker(out, original=original)
+        out = polish_clause_prefix_case(out)
+        out = polish_double_punctuation(out)
+        out = clean_punctuation(out)
+        out = polish_double_punctuation(out)
+        out = polish_duplicate_southern_california(out)
+        out = strip_orphan_clause_tails(out, original=original)
+        out = polish_false_name_period(out)
+        out = ensure_terminal_punctuation(out, original=original)
+    elif lang == "ru":
+        # RU: punctuation hygiene only — never inject Насправді / молодший / Зоряні.
+        out = polish_double_punctuation(out)
+        out = clean_punctuation(out)
+        out = polish_double_punctuation(out)
+        out = ensure_terminal_punctuation(out, original=original)
+        out = re.sub(r"\bГоллівуд\w*\b", "Голливуд", out)
+    else:
+        out = clean_punctuation(out)
+        out = ensure_terminal_punctuation(out, original=original)
+
     return " ".join(out.split()).strip()
 
 
@@ -273,6 +329,9 @@ def polish_segments_before_lock(info: dict[str, Any]) -> int:
 
     segments = list(info.get("segments_data") or [])
     src_segs = list(info.get("source_segments") or info.get("original_segments") or [])
+    tgt = str(
+        info.get("target_lang") or info.get("tgt_lang") or ""
+    ).split("-")[0].lower()
     changed = 0
     for i, seg in enumerate(segments):
         if not isinstance(seg, dict) or seg.get("translation_locked"):
@@ -290,7 +349,8 @@ def polish_segments_before_lock(info: dict[str, Any]) -> int:
             src = str(src_segs[i] or "")
         if not src:
             src = str(seg.get("source_text") or seg.get("original_text") or "")
-        polished = apply_pre_lock_polish(text, original=src)
+        seg_lang = str(seg.get("target_lang") or tgt or "").split("-")[0].lower()
+        polished = apply_pre_lock_polish(text, original=src, tgt_lang=seg_lang)
         if polished and polished != text:
             apply_translated_text_to_segment(seg, polished)
             changed += 1

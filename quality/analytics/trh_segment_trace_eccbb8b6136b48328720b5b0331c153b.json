@@ -1,0 +1,45 @@
+{
+  "schema": "tubedub.trh.segment_trace.v1",
+  "task_id": "eccbb8b6136b48328720b5b0331c153b",
+  "created_at": "2026-07-23T12:47:19Z",
+  "segments": [
+    {
+      "index": 0,
+      "original": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+      "raw_mt": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "naturalized": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "retry": "",
+      "judge": "",
+      "approved": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "original_preview": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+      "raw_mt_preview": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "naturalized_preview": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "approved_preview": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "dirty_mt_score": 0.0,
+      "dirty": false,
+      "dirty_reasons": [],
+      "english_leak": false,
+      "naturalizer_called": true,
+      "naturalizer_applied": false,
+      "naturalizer_skip_reason": "catp_B,catp_mode:safe,catp_variant:B,no_changes",
+      "rules_applied": [
+        "catp_B",
+        "catp_mode:safe",
+        "catp_variant:B",
+        "no_changes"
+      ],
+      "llm_used": false,
+      "changed_text": false,
+      "retry_count": 0,
+      "judge_used": false,
+      "tps_path": "fast",
+      "route": "direct",
+      "tqe_status": "PASS",
+      "reason_codes": [],
+      "dsal_applied": false,
+      "dsal_skip_reason": "",
+      "entities": [],
+      "quality_score": 100.0
+    }
+  ]
+}

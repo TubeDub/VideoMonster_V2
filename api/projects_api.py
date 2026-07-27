@@ -29,7 +29,7 @@ def api_projects_list():
         stat = f.stat()
         projects.append({
             "type":      "dub",
-            "icon":      "🎬",
+            "icon":      "film",
             "label":     "Дубляж",
             "filename":  f.name,
             "title":     f.stem,
@@ -44,7 +44,7 @@ def api_projects_list():
         stat = f.stat()
         projects.append({
             "type":      "dub",
-            "icon":      "🎬",
+            "icon":      "film",
             "label":     "Дубляж",
             "filename":  f.name,
             "title":     f.stem,
@@ -59,7 +59,7 @@ def api_projects_list():
         stat = f.stat()
         projects.append({
             "type":      "tts",
-            "icon":      "🔊",
+            "icon":      "speaker",
             "label":     "Озвучка",
             "filename":  f.name,
             "title":     f.stem,
@@ -75,7 +75,7 @@ def api_projects_list():
         stat = f.stat()
         projects.append({
             "type":      "vmr",
-            "icon":      "📖",
+            "icon":      "book",
             "label":     "Reader",
             "filename":  f.name,
             "title":     f.stem,

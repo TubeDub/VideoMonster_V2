@@ -1,4 +1,7 @@
-"""Clause coverage + restore for DSAL (TZ v4.0 P1)."""
+"""Clause coverage + restore for DSAL (TZ v4.0 P1).
+
+Language-aware: never append Ukrainian clause glue into Russian (or vice versa).
+"""
 
 from __future__ import annotations
 
@@ -6,46 +9,113 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-# EN clause pattern → UK phrase + optional token aliases that count as "covered"
-# position: prefix = prepend when EN opens with clause; suffix = append; inline = integrated glue
-_ClauseSpec = tuple[re.Pattern[str], str, tuple[str, ...], str]
+# EN clause pattern → (phrase, aliases, position) per target language
+# position: prefix | suffix | inline
+_ClauseLang = dict[str, tuple[str, tuple[str, ...], str]]
 
-_CLAUSE_MAP: list[_ClauseSpec] = [
+_CLAUSE_SPECS: list[tuple[re.Pattern[str], _ClauseLang]] = [
     (
         re.compile(r"between\s+father\s+and\s+son", re.I),
-        "між батьком і сином",
-        ("батьком", "сином", "батько", "син"),
-        "prefix",
+        {
+            "uk": (
+                "між батьком і сином",
+                ("батьком", "сином", "батько", "син"),
+                "prefix",
+            ),
+            "ru": (
+                "между отцом и сыном",
+                ("отцом", "сыном", "отец", "сын"),
+                "prefix",
+            ),
+        },
     ),
     (
         re.compile(r"every\s+dinner", re.I),
-        "за кожною вечерею",
-        ("вечер", "вечеря", "вечерею"),
-        "suffix",
+        {
+            "uk": (
+                "за кожною вечерею",
+                ("вечер", "вечеря", "вечерею", "ужин"),
+                "suffix",
+            ),
+            "ru": (
+                "за каждым ужином",
+                ("ужин", "вечера", "вечером"),
+                "suffix",
+            ),
+        },
     ),
     (
         re.compile(r"(?:this\s+)?huge\s+argument|huge\s+argument", re.I),
-        "велика суперечка",
-        ("суперечк", "сварк", "конфлікт"),
-        "suffix",
+        {
+            "uk": (
+                "велика суперечка",
+                ("суперечк", "сварк", "конфлікт", "спор"),
+                "suffix",
+            ),
+            "ru": (
+                "огромный спор",
+                ("спор", "ссор", "конфликт", "руган"),
+                "suffix",
+            ),
+        },
     ),
     (
         re.compile(r"\breal\s+job\b", re.I),
-        "справжню роботу",
-        ("робот", "справжн"),
-        "inline",
+        {
+            "uk": (
+                "справжню роботу",
+                ("робот", "справжн"),
+                "inline",
+            ),
+            "ru": (
+                "настоящую работу",
+                ("работ", "настоящ"),
+                "inline",
+            ),
+        },
     ),
     (
         re.compile(r"near[- ]death\s+experience", re.I),
-        "досвід на межі смерті",
-        # Naturalized UK often uses «майже смертельного досвіду» — count as covered
-        # so DSAL does not append the literal phrase as an orphan TTS tail.
-        ("межі смерті", "близьк", "смертельн", "смерті", "на межі"),
-        "inline",
+        {
+            "uk": (
+                "досвід на межі смерті",
+                (
+                    "межі смерті",
+                    "близьк",
+                    "смертельн",
+                    "передсмерт",
+                    "смерті",
+                    "на межі",
+                ),
+                "inline",
+            ),
+            "ru": (
+                "опыт на грани смерти",
+                (
+                    "околосмерт",
+                    "предсмерт",
+                    "на грани",
+                    "смерти",
+                    "смертельн",
+                    "близк",
+                ),
+                "inline",
+            ),
+        },
     ),
 ]
 
-_DINNER_ARG_COMBINED = "майже кожної вечері між ними виникала велика суперечка"
+_DINNER_ARG_COMBINED = {
+    "uk": "майже кожної вечері між ними виникала велика суперечка",
+    "ru": "почти каждый ужин между ними превращался в огромный спор",
+}
+
+# Legacy UK-only orphan that must never survive on any target (GL #12 RU TTS).
+_CROSS_LANG_ORPHANS = (
+    re.compile(r"(?:,\s+)?досвід\s+на\s+межі\s+смерті\.?\s*$", re.I),
+    re.compile(r"\s+досвід\s+на\s+межі\s+смерті(?=[,.!?]|$)", re.I),
+    re.compile(r"(?:,\s+)?опыт\s+на\s+грани\s+смерти\.?\s*$", re.I),
+)
 
 
 @dataclass
@@ -66,8 +136,25 @@ class ClauseCoverageResult:
         }
 
 
-def _uk_has_aliases(uk: str, aliases: tuple[str, ...]) -> bool:
-    uk_l = uk.lower()
+def _norm_lang(tgt_lang: str = "", text: str = "") -> str:
+    """Resolve target lang. Never force-default to uk when unknown.
+
+    Empty → infer from text; if still unknown return '' so restore refuses
+    to inject any language's clause glue.
+    """
+    lang = str(tgt_lang or "").split("-")[0].lower().strip()
+    if lang in ("uk", "ru"):
+        return lang
+    sample = str(text or "")
+    if re.search(r"[іІїЇєЄґҐ]", sample):
+        return "uk"
+    if re.search(r"[а-яА-ЯёЁ]", sample):
+        return "ru"
+    return ""
+
+
+def _uk_has_aliases(text: str, aliases: tuple[str, ...]) -> bool:
+    uk_l = text.lower()
     return any(a.lower() in uk_l for a in aliases)
 
 
@@ -85,7 +172,6 @@ def _en_source_incomplete(en: str) -> bool:
         return True
     if en_s[-1] in ".!?…":
         return False
-    # ASR mid-clause cut — trailing fragment without a closing verb phrase.
     if re.search(
         r"(?:if\s+he\s+came\s+this\s+huge\s+argument|huge\s+argument)\s*$",
         en_s,
@@ -95,26 +181,50 @@ def _en_source_incomplete(en: str) -> bool:
     return len(en_s.split()) >= 6
 
 
-def compute_clause_coverage(en: str, uk: str) -> ClauseCoverageResult:
-    """Coverage of known critical EN clauses in UK text (0–1)."""
+def _clause_for_lang(
+    lang_map: _ClauseLang, lang: str
+) -> tuple[str, tuple[str, ...], str] | None:
+    if not lang:
+        return None
+    if lang in lang_map:
+        return lang_map[lang]
+    return None
+
+
+def strip_cross_lang_clause_orphans(text: str) -> str:
+    """Remove DSAL near-death orphans in either UK or RU form."""
+    out = str(text or "")
+    for pat in _CROSS_LANG_ORPHANS:
+        out = pat.sub("", out)
+    return " ".join(out.split()).strip()
+
+
+def compute_clause_coverage(
+    en: str, uk: str, *, tgt_lang: str = ""
+) -> ClauseCoverageResult:
+    """Coverage of known critical EN clauses in target text (0–1)."""
     en_s = str(en or "")
     uk_s = str(uk or "")
+    lang = _norm_lang(tgt_lang, uk_s)
     if not en_s.strip():
         return ClauseCoverageResult(1.0, 0, 0, [], [])
 
     total = 0
     covered = 0
     missing: list[str] = []
-    for pat, phrase, aliases, _pos in _CLAUSE_MAP:
+    for pat, lang_map in _CLAUSE_SPECS:
         if not pat.search(en_s):
             continue
+        spec = _clause_for_lang(lang_map, lang)
+        if not spec:
+            continue
+        phrase, aliases, _pos = spec
         total += 1
         if phrase.lower() in uk_s.lower() or _uk_has_aliases(uk_s, aliases):
             covered += 1
         else:
             missing.append(phrase)
 
-    # Also count generic punct-split clauses with token overlap (same idea as QA)
     src_clauses = [
         c.strip()
         for c in re.split(r"[,;:.!?—–]", en_s)
@@ -142,68 +252,93 @@ def compute_clause_coverage(en: str, uk: str) -> ClauseCoverageResult:
         return ClauseCoverageResult(round(generic_ratio, 3), 0, 0, [], [])
 
     mapped = covered / total
-    # Critical mapped clauses dominate: if all known clauses present, pass gate.
     if mapped >= 1.0:
         return ClauseCoverageResult(1.0, total, covered, missing, [])
     blended = round(0.7 * mapped + 0.3 * generic_ratio, 3)
     return ClauseCoverageResult(blended, total, covered, missing, [])
 
 
-def _integrate_dinner_argument(out: str) -> tuple[str, str]:
-    """Natural combined glue for dinner + huge argument on the same segment."""
+def _integrate_dinner_argument(out: str, *, lang: str) -> tuple[str, str]:
+    phrase = _DINNER_ARG_COMBINED.get(lang) or ""
+    if not phrase:
+        return " ".join(str(out).split()).rstrip(" ."), ""
     base = " ".join(str(out).split()).rstrip(" .")
-    if _DINNER_ARG_COMBINED.lower() in base.lower():
-        return base, _DINNER_ARG_COMBINED
+    if phrase.lower() in base.lower():
+        return base, phrase
     if base and base[-1] not in ".!?":
-        integrated = f"{base}, {_DINNER_ARG_COMBINED}"
+        integrated = f"{base}, {phrase}"
     else:
-        integrated = f"{base.rstrip('.')} {_DINNER_ARG_COMBINED}"
-    return integrated, _DINNER_ARG_COMBINED
+        integrated = f"{base.rstrip('.')} {phrase}"
+    return integrated, phrase
 
 
-def restore_missing_clauses(uk: str, en: str) -> tuple[str, ClauseCoverageResult]:
-    """Insert missing critical UK phrases when EN contains the clause."""
+def restore_missing_clauses(
+    uk: str, en: str, *, tgt_lang: str = ""
+) -> tuple[str, ClauseCoverageResult]:
+    """Insert missing critical target-language phrases when EN contains the clause.
+
+    Never append Ukrainian glue into Russian text (GL Review #12: «досвід…» on RU).
+    """
     if not en or not uk:
-        cov = compute_clause_coverage(en, uk)
-        return uk, cov
+        cov = compute_clause_coverage(en, uk, tgt_lang=tgt_lang)
+        return strip_cross_lang_clause_orphans(uk or ""), cov
 
     en_s = str(en)
-    out = " ".join(str(uk).split()).rstrip(" .")
+    out = strip_cross_lang_clause_orphans(" ".join(str(uk).split()).rstrip(" ."))
+    lang = _norm_lang(tgt_lang, out)
     uk_l = out.lower()
     restored: list[str] = []
 
-    dinner_pat = _CLAUSE_MAP[1][0]
-    argument_pat = _CLAUSE_MAP[2][0]
+    dinner_spec = _clause_for_lang(_CLAUSE_SPECS[1][1], lang)
+    argument_spec = _clause_for_lang(_CLAUSE_SPECS[2][1], lang)
+    dinner_pat = _CLAUSE_SPECS[1][0]
+    argument_pat = _CLAUSE_SPECS[2][0]
     has_dinner = bool(dinner_pat.search(en_s))
     has_argument = bool(argument_pat.search(en_s))
-    dinner_missing = has_dinner and not (
-        _CLAUSE_MAP[1][1].lower() in uk_l or _uk_has_aliases(out, _CLAUSE_MAP[1][2])
+    dinner_missing = bool(
+        dinner_spec
+        and has_dinner
+        and dinner_spec[0].lower() not in uk_l
+        and not _uk_has_aliases(out, dinner_spec[1])
     )
-    argument_missing = has_argument and not (
-        _CLAUSE_MAP[2][1].lower() in uk_l or _uk_has_aliases(out, _CLAUSE_MAP[2][2])
+    argument_missing = bool(
+        argument_spec
+        and has_argument
+        and argument_spec[0].lower() not in uk_l
+        and not _uk_has_aliases(out, argument_spec[1])
     )
 
-    if dinner_missing and argument_missing and not _en_source_incomplete(en_s):
-        out, phrase = _integrate_dinner_argument(out)
-        restored.append(phrase)
-        uk_l = out.lower()
+    if (
+        lang
+        and dinner_missing
+        and argument_missing
+        and not _en_source_incomplete(en_s)
+    ):
+        out, phrase = _integrate_dinner_argument(out, lang=lang)
+        if phrase:
+            restored.append(phrase)
+            uk_l = out.lower()
 
-    for pat, phrase, aliases, position in _CLAUSE_MAP:
+    dinner_phrase = dinner_spec[0] if dinner_spec else ""
+    argument_phrase = argument_spec[0] if argument_spec else ""
+
+    for pat, lang_map in _CLAUSE_SPECS:
         if not pat.search(en_s):
             continue
+        spec = _clause_for_lang(lang_map, lang)
+        if not spec:
+            continue
+        phrase, aliases, position = spec
         if phrase.lower() in uk_l or _uk_has_aliases(out, aliases):
             continue
-        if phrase in restored or _DINNER_ARG_COMBINED.lower() in uk_l:
-            if phrase in ("за кожною вечерею", "велика суперечка"):
+        combined = _DINNER_ARG_COMBINED.get(lang, "")
+        if phrase in restored or (combined and combined.lower() in uk_l):
+            if phrase in (dinner_phrase, argument_phrase):
                 continue
-        # Skip orphan ASR tail clauses that would glue awkwardly onto a full sentence.
         if position == "suffix" and _en_source_incomplete(en_s):
-            if phrase in ("за кожною вечерею", "велика суперечка"):
+            if phrase in (dinner_phrase, argument_phrase):
                 continue
 
-        # Prefix only when the EN clause actually opens the segment.
-        # Otherwise mega-segments get "між батьком і сином, …" glued at the
-        # start even when that clause appears mid-paragraph → meaning salad.
         if position == "prefix" and _en_clause_at_start(en_s, pat):
             if out and out[0].islower():
                 out = out[0].upper() + out[1:]
@@ -217,8 +352,9 @@ def restore_missing_clauses(uk: str, en: str) -> tuple[str, ClauseCoverageResult
                 out = f"{out}, {phrase}"
             else:
                 out = f"{out.rstrip('.')} {phrase}"
-        elif "вечер" in phrase or "суперечк" in phrase:
-            out = f"{out}, і {phrase}"
+        elif phrase in (dinner_phrase, argument_phrase):
+            glue = "и" if lang == "ru" else "і"
+            out = f"{out}, {glue} {phrase}"
         elif out and out[-1] not in ".!?":
             out = f"{out}, {phrase}"
         else:
@@ -229,6 +365,15 @@ def restore_missing_clauses(uk: str, en: str) -> tuple[str, ClauseCoverageResult
     if restored and not out.endswith((".", "!", "?", "…")):
         out += "."
 
-    cov = compute_clause_coverage(en, out)
+    out = strip_cross_lang_clause_orphans(out)
+    cov = compute_clause_coverage(en, out, tgt_lang=lang)
     cov.restored_phrases = restored
     return " ".join(out.split()), cov
+
+
+# Back-compat: old module-level name used by tests
+_CLAUSE_MAP = [
+    (pat, lang_map["uk"][0], lang_map["uk"][1], lang_map["uk"][2])
+    for pat, lang_map in _CLAUSE_SPECS
+    if "uk" in lang_map
+]

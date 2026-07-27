@@ -138,6 +138,10 @@ def compute_quality_score_v2(
     composite = sum(dims[k] * weights[k] for k in weights) * 100.0
     # Blend with legacy score so thresholds stay familiar.
     final = 0.55 * float(base_score) + 0.45 * composite
+    if base.get("cjk_meaning_collapse") or metrics.get("cjk_meaning_collapse") or metrics.get("meaning_collapse"):
+        final = min(final, 18.0)
+    if base.get("cjk_garbage") or metrics.get("cjk_garbage"):
+        final = 0.0
     details = {
         **base,
         **metrics,

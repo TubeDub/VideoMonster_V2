@@ -121,6 +121,7 @@ function syncSegmentsFromSource() {
   })
     .then(r => r.json())
     .then(d => {
+      if (d.error) { setStatus("Ошибка: " + d.error); return; }
       const lines = (d.cleaned || text).split("\n").filter(l => l.trim());
       const map = d.timing_map || [];
       studioSegments = lines.map((line, i) => {
@@ -138,7 +139,8 @@ function syncSegmentsFromSource() {
       window.studioSegments = studioSegments;
       if (window._studioTimeline) window._studioTimeline.syncFromStudioJs();
       setStatus(`Сегментов: ${studioSegments.length}`);
-    });
+    })
+    .catch(e => setStatus("Ошибка: " + e));
 }
 
 function applySegmentsToSource() {
@@ -156,7 +158,7 @@ function exportSubs(format) {
     : (document.getElementById("translated-box")?.value || "")
         .split("\n")
         .filter(l => l.trim())
-        .map((text, i) => ({ index: i + 1, start_ms: i * 3200, end_ms: i * 3200 + 3000, text: l.trim() }));
+        .map((text, i) => ({ index: i + 1, start_ms: i * 3200, end_ms: i * 3200 + 3000, text: text.trim() }));
 
   if (!segments.length) { setStatus("Нет сегментов для экспорта"); return; }
 
@@ -170,13 +172,15 @@ function exportSubs(format) {
       if (d.error) { setStatus("Ошибка: " + d.error); return; }
       if (d.download) window.location.href = d.download;
       setStatus(`Экспорт ${format.toUpperCase()} готов`);
-    });
+    })
+    .catch(e => setStatus("Ошибка экспорта: " + e));
 }
 
 function goRedub() {
   applySegmentsToSource();
   const sourceText = document.getElementById("source-box")?.value || "";
   const translatedText = document.getElementById("translated-box")?.value || "";
+  setStatus("Подготовка к дубляжу…");
   fetch("/api/studio/prepare_redub", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -192,7 +196,8 @@ function goRedub() {
     .then(d => {
       if (d.error) { setStatus("Ошибка: " + d.error); return; }
       window.location.href = d.route || `/dub?redub=${d.redub_id}`;
-    });
+    })
+    .catch(e => setStatus("Ошибка: " + e));
 }
 
 function doTranslateOnly() {
@@ -215,12 +220,14 @@ function doCleanOnly() {
   })
     .then(r => r.json())
     .then(d => {
+      if (d.error) { setStatus("Ошибка: " + d.error); return; }
       const box = document.getElementById("source-box");
       if (box) { box.value = d.cleaned; box.dispatchEvent(new Event("input")); }
       timingMap = d.timing_map || [];
       syncSegmentsFromSource();
       setStatus(`Очищено: ${d.lines} строк, тайм-кодов: ${timingMap.length}`);
     })
+    .catch(e => setStatus("Ошибка очистки: " + e))
     .finally(() => _workBusy(false));
 }
 
@@ -229,19 +236,25 @@ function _runTranslate(clean) {
   if (!text) { setStatus("Нет текста"); return; }
   const target = document.getElementById("target-lang")?.value
     || getDefaultTargetLang();
+  const doClean = clean !== undefined
+    ? !!clean
+    : (typeof getAutoClean === "function" ? getAutoClean() : true);
+  const translateMode = (typeof getTranslateMode === "function")
+    ? getTranslateMode()
+    : ((typeof loadSettings === "function" && loadSettings().translateMode) || "auto");
   setStatus("Перевод...");
   _workBusy(true);
   fetch("/api/translate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, target, clean }),
+    body: JSON.stringify({ text, target, clean: doClean, mode: translateMode }),
   })
     .then(r => r.json())
     .then(d => {
       if (d.error) { setStatus("Ошибка: " + d.error); return; }
       const tb = document.getElementById("translated-box");
       if (tb) { tb.value = d.translated; tb.dispatchEvent(new Event("input")); }
-      if (clean && d.cleaned) {
+      if (doClean && d.cleaned) {
         const sb = document.getElementById("source-box");
         if (sb) { sb.value = d.cleaned; sb.dispatchEvent(new Event("input")); }
       }
@@ -379,20 +392,20 @@ function showTimedAudio(d) {
 function showProgress(on) {
   const bar = document.getElementById("progress-bar");
   if (bar) bar.style.display = on ? "block" : "none";
-  if (on) {
-    const fill = document.getElementById("progress-fill");
-    if (fill) { fill.style.width = "0%"; _animateProgress(fill); }
+  const fill = document.getElementById("progress-fill");
+  if (!fill) return;
+  if (fill._timer) {
+    clearInterval(fill._timer);
+    fill._timer = null;
   }
-}
-
-function _animateProgress(fill) {
-  let pct = 0;
-  const timer = setInterval(() => {
-    pct = Math.min(pct + Math.random() * 8, 90);
-    fill.style.width = pct + "%";
-    if (pct >= 90) clearInterval(timer);
-  }, 300);
-  fill._timer = timer;
+  if (on) {
+    fill.style.width = "35%";
+    fill.classList.add("prepare-active");
+  } else {
+    fill.style.width = "100%";
+    fill.classList.remove("prepare-active");
+    setTimeout(() => { fill.style.width = "0%"; }, 200);
+  }
 }
 
 function saveDocument() {
@@ -401,6 +414,7 @@ function saveDocument() {
   const voice = document.getElementById("voice-select")?.value || getDefaultVoice();
   const useTiming = document.getElementById("use-timing")?.checked || false;
   const timingMode = document.getElementById("timing-mode")?.value || "exact";
+  setStatus("Сохранение VMR…");
   fetch("/api/save_vmr", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -415,8 +429,11 @@ function saveDocument() {
   })
     .then(r => r.json())
     .then(d => {
+      if (d.error) { setStatus("Ошибка: " + d.error); return; }
       if (d.download) window.location.href = d.download;
-    });
+      else setStatus("VMR сохранён");
+    })
+    .catch(e => setStatus("Ошибка сохранения: " + e));
 }
 
 function downloadTxt() {
@@ -429,6 +446,20 @@ function initStudioTextPage() {
   initCounts();
   renderSegmentsEditor();
   loadUniversalImport();
+
+  const voiceSel = document.getElementById("voice-select");
+  const langSel = document.getElementById("target-lang");
+  const defVoice = typeof getDefaultVoice === "function" ? getDefaultVoice() : null;
+  const defLang = typeof getDefaultTargetLang === "function" ? getDefaultTargetLang() : null;
+  if (langSel && defLang) {
+    const hasLang = Array.from(langSel.options).some(o => o.value === defLang);
+    if (hasLang) langSel.value = defLang;
+  }
+  if (voiceSel && defVoice) {
+    const hasVoice = Array.from(voiceSel.options).some(o => o.value === defVoice);
+    if (hasVoice) voiceSel.value = defVoice;
+  }
+
   const dev = document.cookie.includes("vm_client_dev_mode=1") ||
     localStorage.getItem("vm_client_dev_mode") === "1";
   fetch("/api/features/check/dub_studio").then(function (r) { return r.json(); }).then(function (data) {

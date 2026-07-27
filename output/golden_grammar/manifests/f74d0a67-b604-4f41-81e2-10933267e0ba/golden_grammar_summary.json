@@ -1,0 +1,41 @@
+{
+  "project_uuid": "f74d0a67-b604-4f41-81e2-10933267e0ba",
+  "status": "success",
+  "avg_scores": {
+    "grammar": 1.0,
+    "syntax": 1.0,
+    "style": 1.0,
+    "naturalness": 1.0,
+    "pronunciation": 1.0,
+    "readability": 1.0,
+    "meaning": 1.0,
+    "overall": 1.0
+  },
+  "rule_rewrite_used": true,
+  "llm_used": false,
+  "checks": [
+    {
+      "index": 0,
+      "timing_text": "Он сказал что George Smith пошёл домой 12.05.2024.",
+      "grammar_text": "Он сказал, что George Smith пошёл домой 12.05.2024.",
+      "length_ratio": 1.02,
+      "ok": true
+    },
+    {
+      "index": 1,
+      "timing_text": "Вау!!! Это удивительно!",
+      "grammar_text": "Вау!!! Это удивительно!",
+      "length_ratio": 1.0,
+      "ok": true
+    },
+    {
+      "index": 2,
+      "timing_text": "Мне грустно потому что он ушёл.",
+      "grammar_text": "Мне грустно потому что он ушёл.",
+      "length_ratio": 1.0,
+      "ok": true
+    }
+  ],
+  "all_ok": true,
+  "grammar_report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\golden_grammar\\manifests\\f74d0a67-b604-4f41-81e2-10933267e0ba\\grammar_report.json"
+}

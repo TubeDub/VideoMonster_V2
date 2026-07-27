@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "235942b050eb4df39ff6489390922845",
+    "groups": 1,
+    "style_id": "professional",
+    "elapsed_sec": 0.768
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {},
+      "plain_text": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів,<break time=\"184ms\"/> а<break time=\"184ms\"/> якщо необхідно,<break time=\"184ms\"/> то збережемо сюрприз.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4370,
+      "est_ms_before": 9481,
+      "est_ms_after": 10199,
+      "fill_percent": 233.4,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 217.0% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4370,
+        "slot_ms": 4370,
+        "internal_gaps_ms": [],
+        "speech_ratio": 1.0,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    }
+  ]
+}

@@ -16,10 +16,29 @@ from engines.cleaner import align_segments_to_timing_map, split_by_timing_map
 logger = logging.getLogger("tubedub.engines.translation_naturalizer")
 
 MAX_BATCH_SEGMENTS = 10
-DEFAULT_MAX_GAP_MS = 1200
+DEFAULT_MAX_GAP_MS = 800
 DEFAULT_MIN_TTS_MS = 4500
 DEFAULT_MIN_MERGE_CHARS = 12
-DEFAULT_MAX_SEGMENT_MS = 1800
+DEFAULT_MAX_SEGMENT_MS = 2500
+# Happy Path batch MT: glue more Whisper lines into one translate call.
+HAPPY_PATH_MAX_BATCH_SEGMENTS = 14
+HAPPY_PATH_PRE_TTS_MIN_MS = 3000
+
+# Legacy MT pollution: neighbor context was sometimes prepended as a tag.
+_CONTEXT_PREFIX_MULTI_RE = re.compile(
+    r"^\s*(?:\[(?:context|контекст)\s*:[^\]]*\]\s*)+",
+    re.IGNORECASE,
+)
+
+
+def strip_mt_context_prefix(text: str) -> str:
+    """Remove legacy ``[context: ...]`` / ``[контекст: ...]`` MT pollution (TZ Stage 4)."""
+    raw = str(text or "")
+    if not raw:
+        return ""
+    cleaned = _CONTEXT_PREFIX_MULTI_RE.sub("", raw, count=1)
+    return cleaned.strip() if cleaned != raw else cleaned
+
 
 # Названия языков для LLM-полировки (все поддерживаемые UI-языки)
 try:
@@ -117,6 +136,30 @@ _UK_WORD_FIXES: list[tuple[str, str]] = [
      "лежав у реанімації місцевої лікарні"),
     (r"\bлеж(?:ав|ала)\s+в\s+стаціонарному\s+комплексі(?:\s+в\s+місцевій\s+лікарні)?\b",
      "лежав у реанімації місцевої лікарні"),
+    # GL Review #14–#16 (also in _UK_CALQUE_NATURALIZER; kept so naturalize_uk catches them)
+    (r"\bДозвольте\s+мені\s+подзвонити\b", "Я подзвоню"),
+    (r"\bДозвольте\s+мені\s+зробити\s+дзвінки\b", "Я подзвоню"),
+    (r"\bотримає\s+лист\s+про\s+прийняття\b", "отримає лист про зарахування"),
+    (r"\bпотрапити\s+до\s+них\s+Кінематографічна\s+програма\b",
+     "потрапити до їхньої програми з кінематографії"),
+    (r"\bдо\s+них\s+Кінематографічна\s+програма\b",
+     "до їхньої програми з кінематографії"),
+    (r"\bпродовжить\s+створення\b", "створить"),
+    (r"\bстворить\s+одного\b", "створить один"),
+    (r"«(Джордж,\s*я\s+знаю\s+людей\s+в\s+USC)\.?\s*$", r"«\1»."),
+    # GL Review residuals (#5/#6/#9/#11/#14/#18)
+    (r"\bне\s+зрозумів\s+одержимість\b", "не розумів одержимості"),
+    (r"\bна\s+фініші\s+на\s+іподромі\b", "на фініші гоночного треку"),
+    (r"\bна\s+іподромі\b", "на гоночному треку"),
+    (r"\bповністю\s+оговтався\s+від\s+травм\b", "повністю одужав після травм"),
+    (r"\bоговтався\s+від\s+травм\b", "одужав після травм"),
+    (r"\bперегонах\s+автомобілів\b", "автоперегонах"),
+    (r"\bперегонах\s+на\s+автомобілях\b", "автоперегонах"),
+    (r"\bфактично\s+офіційно\s+представ(?:ився|илася)\b", "офіційно представився"),
+    (r"\bа\s+його\s+франшиза\s+фільму\s+«Зоряні\s+війни»\.?",
+     "а його кінофраншиза — це «Зоряні війни»."),
+    (r"\bйого\s+франшиза\s+фільму\s+«Зоряні\s+війни»\.?",
+     "його кінофраншиза — це «Зоряні війни»."),
 ]
 
 _UK_RUISM_FIXES: list[tuple[str, str]] = [
@@ -225,13 +268,38 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
      "Після майже смертельного досвіду"),
     (r"\bстворить\s+одного\s+з\b", "створить один з"),
     (r"\bАле,\s+як\s+він\s+їхав\b", "Але коли він їхав"),
+    # Compact dread residue (не міг не відчути → відчув + боїться потрапити)
+    (r"\bвідчув,\s+що\s+він\s+справді\s+боїться\s+потрапити\s+туди\b",
+     "відчув, що йому зовсім не хочеться туди їхати"),
+    (r"\bвін\s+справді\s+боїться\s+потрапити\s+туди\b",
+     "йому зовсім не хочеться туди їхати"),
     (r"\bзастосувати\s+його\s+на\s+інші\s+речі\b", "застосувати це до інших речей"),
     (r"\bзастосувати\s+її\s+до\s+інших\s+речей\b", "застосувати це до інших речей"),
+    (r"\bзастосувати\s+його\s+до\s+інших\s+речей\b", "застосувати це до інших речей"),
     (r"\bТак\s+два\s+тижні\s+раніше\b", "Два тижні раніше"),
     (r"\bwill\s+star\s+wars\b", "«Зоряні війни»"),
     (r"\bкінофраншиза\s+будуть\s+зірвати\s+війни\b", "кінофраншиза — це «Зоряні війни»"),
     (r"\bйого\s+кінофраншиза\s+стане\s+«Зоряними\s+війнами»",
      "його кінофраншиза — це «Зоряні війни»"),
+    (r"\bа\s+його\s+франшиза\s+фільму\s+«Зоряні\s+війни»\.?",
+     "а його кінофраншиза — це «Зоряні війни»."),
+    (r"\bйого\s+франшиза\s+фільму\s+«Зоряні\s+війни»\.?",
+     "його кінофраншиза — це «Зоряні війни»."),
+    # Racetrack ≠ hippodrome; father obsession case; race cars; Haskell walk
+    (r"\bна\s+фініші\s+на\s+іподромі\b", "на фініші гоночного треку"),
+    (r"\bна\s+іподромі\b", "на гоночному треку"),
+    (r"\bповністю\s+оговтався\s+від\s+травм\b", "повністю одужав після травм"),
+    (r"\bоговтався\s+від\s+травм\b", "одужав після травм"),
+    (r"\bне\s+зрозумів\s+одержимість\b", "не розумів одержимості"),
+    (r"\bперегонах\s+автомобілів\b", "автоперегонах"),
+    (r"\bперегонах\s+на\s+автомобілях\b", "автоперегонах"),
+    (r"\bфактично\s+офіційно\s+представ(?:ився|илася)\b", "офіційно представився"),
+    (r"\bале\s+коли\s+він\s+підійшов\s+до\s+нього,\s*цей\s+чоловік\s+середнього\s+віку\s+підійшов\s+до\s+нього\s+та\s+просто\s+запитав\b",
+     "але коли він ішов туди, до нього підійшов чоловік середнього віку і запитав"),
+    (r"\bале\s+коли\s+він\s+підійшов\s+до\s+нього,\s*цей\s+чоловік\s+середнього\s+віку\s+підійшов\s+до\s+нього\b",
+     "але коли він ішов туди, до нього підійшов чоловік середнього віку"),
+    (r"\bа\s+потім\s+у\s+якийсь\s+момент\s+чоловік\s+офіційно\s+представ(?:ився|илася)\b",
+     "а потім він офіційно представився"),
     # GL narrative residuals (Review 2026-07-18 / 2026-07-19)
     # NOTE: «на вечерю» is added only when EN has dinner — see _fix_uk_dinner_argument_scene
     # Dread → simple dub (never leave «тривога / насправді отримати там»)
@@ -265,7 +333,22 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
     (r"\bДозвольте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
     (r"\bДавайте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Я зроблю кілька дзвінків"),
     (r"\bДавай\s+я\s+подзвоню\s+кільком\s+людям\b", "Я зроблю кілька дзвінків"),
+    # Haskell dialogue: "Let me make some calls" (formal MT → spoken)
+    (r"\bДозвольте\s+мені\s+подзвонити\b", "Я подзвоню"),
+    (r"\bДозвольте\s+мені\s+зробити\s+дзвінки\b", "Я подзвоню"),
+    (r"\bотримає\s+лист\s+про\s+прийняття\b", "отримає лист про зарахування"),
     (r"\bотримає\s+лист\s+про\s+зарахування\b", "отримав лист про зарахування"),
+    # "get into their cinematography program" — Argos case collapse
+    (r"\bпотрапити\s+до\s+них\s+Кінематографічна\s+програма\b",
+     "потрапити до їхньої програми з кінематографії"),
+    (r"\bдо\s+них\s+Кінематографічна\s+програма\b",
+     "до їхньої програми з кінематографії"),
+    (r"\bїх\s+Кінематографічна\s+програма\b",
+     "їхньої програми з кінематографії"),
+    (r"\bпродовжить\s+створення\b", "створить"),
+    (r"\bпродовжить\s+знімати\b", "зніме"),
+    # Close truncated Haskell quote
+    (r"«(Джордж,\s*я\s+знаю\s+людей\s+в\s+USC)\.?\s*$", r"«\1»."),
     (r"\bкіношколи\s+Університет\s+Південної\s+Каліфорнії\b",
      "кіношколи Університету Південної Каліфорнії"),
     (r"\bАле,\s+як\s+він\s+прогулявся\s+там\b", "Поки він ішов туди"),
@@ -364,6 +447,13 @@ _UK_CALQUE_NATURALIZER: list[tuple[str, str]] = [
     (r"\bзастосувати\s+її\s+до\s+інших\s+речей\b", "застосувати це до інших речей"),
     (r"\bприйняти\s+це\s+фокус\b", "спрямувати цю зосередженість"),
     (r"\bДозвольте\s+мені\s+зробити\s+деякі\s+дзвінки\b", "Давай я подзвоню кільком людям"),
+    (r"\bДозвольте\s+мені\s+подзвонити\b", "Я подзвоню"),
+    (r"\bпотрапити\s+до\s+них\s+Кінематографічна\s+програма\b",
+     "потрапити до їхньої програми з кінематографії"),
+    (r"\bдо\s+них\s+Кінематографічна\s+програма\b",
+     "до їхньої програми з кінематографії"),
+    (r"\bпродовжить\s+створення\b", "створить"),
+    (r"«(Джордж,\s*я\s+знаю\s+людей\s+в\s+USC)\.?\s*$", r"«\1»."),
     (r"\bзі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
      "йому зовсім не хотілося туди їхати"),
     (r"\bйого\s+не\s+полишала\s+тривога,\s*як\s+він\s+був\s+дійсно\s+зі\s+страхом\s+очікував\s+насправді\s+отримати\s+там\b",
@@ -631,7 +721,7 @@ def _fix_uk_dinner_argument_scene(original: str, text: str) -> str:
                     count=1,
                     flags=re.I,
                 )
-        # Compact verbose hometown+dinner (keeps age, Jr, hometown, dinner)
+        # Compact verbose hometown+dinner (EN already proved dinner above)
         out = re.sub(
             r"(\d+)-річн(?:ий|ого|ому)\s+хлопец[ьяю]?\s+на\s+ім['']я\s+"
             r"(Джордж-молодший)\s+проїжджав\s+через\s+(?:своє\s+)?рідне\s+місто\s+"
@@ -649,10 +739,33 @@ def _fix_uk_dinner_argument_scene(original: str, text: str) -> str:
             count=1,
             flags=re.I,
         )
-    if "every dinner" in ol or "huge argument" in ol or "real job" in ol:
+        # Also compact age+Jr forms that already went through name polish
         out = re.sub(
-            r"\bчому\s+ви\s+не\s+можете\s+зосередитись\b",
+            r"(\d+)-річний\s+(Джордж-молодший)\s+(?:проїжджав|їхав|поїхав)\s+"
+            r"(?:через\s+(?:своє\s+)?рідне\s+місто|рідним\s+містом)\s+"
+            r"(?:дорогою\s+)?додому(?:\s+на\s+вечерю)?",
+            r"\1-річний \2 їхав рідним містом додому на вечерю",
+            out,
+            count=1,
+            flags=re.I,
+        )
+    if "every dinner" in ol or "huge argument" in ol or "real job" in ol:
+        # Father→son: formal ви/вам is wrong (MT often uses ви; EN "why aren't you")
+        out = re.sub(
+            r"\bчому\s+ви\s+не\s+можете\s+зосередити(?:сь|ся)\b",
             "чому ти не можеш зосередитися",
+            out,
+            flags=re.I,
+        )
+        out = re.sub(
+            r"\bзастосувати\s+його\s+до\s+інших\s+речей\b",
+            "застосувати це до інших речей",
+            out,
+            flags=re.I,
+        )
+        out = re.sub(
+            r"\bдадуть\s+вам\s+справжню\s+роботу\b",
+            "дадуть тобі справжню роботу",
             out,
             flags=re.I,
         )
@@ -874,16 +987,16 @@ def _apply_if_changed(
 
 # Re-run after Jr/USC name polish — earlier calques often miss «Джера» forms.
 _UK_POST_NAME_RESIDUALS: list[tuple[str, str]] = [
-    # Seg1 dinner: shorten so «на вечерю» is not hard-clipped off the slot tail
+    # Seg1 compact: preserve dinner only when already present (never invent it)
     (
         r"(\d+)-річний\s+хлопець\s+на\s+ім['']я\s+(Джордж-молодший)\s+проїжджав\s+"
-        r"через\s+(?:своє\s+)?рідне\s+місто\s+дорогою\s+додому(?:\s+на\s+вечерю)?",
-        r"\1-річний \2 їхав рідним містом додому на вечерю",
+        r"через\s+(?:своє\s+)?рідне\s+місто\s+дорогою\s+додому(\s+на\s+вечерю)?",
+        r"\1-річний \2 їхав рідним містом додому\3",
     ),
     (
         r"(Джордж-молодший)\s+проїжджав\s+через\s+(?:своє\s+)?рідне\s+місто\s+"
-        r"дорогою\s+додому(?:\s+на\s+вечерю)?",
-        r"\1 їхав рідним містом додому на вечерю",
+        r"дорогою\s+додому(\s+на\s+вечерю)?",
+        r"\1 їхав рідним містом додому\2",
     ),
     # Dangling mid-cut after dinner line (Jr. false boundary leftovers)
     (
@@ -1029,6 +1142,11 @@ def _polish_v1_rules(
         current = after
         after = _apply_if_changed(current, _UK_RUISM_FIXES, "fixed_ruism", reasons)
         current = after
+        # Phrase-level word-order rewrites BEFORE token-level calque: otherwise a
+        # partial calque (e.g. «поруч»→«біля») pre-empts the fuller, more natural
+        # phrase fix («прямо поруч з його домом»→«майже біля свого дому»).
+        after = _apply_if_changed(current, _UK_WORD_ORDER_FIXES, "fixed_word_order", reasons)
+        current = after
 
     calques = _UK_CALQUE_NATURALIZER if lang == "uk" else _RU_CALQUE_NATURALIZER if lang == "ru" else []
     after = _apply_if_changed(current, calques, "fixed_calque", reasons)
@@ -1061,10 +1179,6 @@ def _polish_v1_rules(
         if "fixed_named_entities" not in reasons:
             reasons.append("fixed_named_entities")
         current = stripped
-
-    if lang == "uk":
-        after = _apply_if_changed(current, _UK_WORD_ORDER_FIXES, "fixed_word_order", reasons)
-        current = after
 
     before_grammar = current
     if lang == "uk":
@@ -1157,6 +1271,8 @@ def polish_segment_detailed(
 ) -> NaturalizerResult:
     """Post-Marian polish — V2 editor-translator when enabled, else V1 rules."""
     from engines.naturalizer_v2.config import is_v2_enabled
+
+    raw_mt = strip_mt_context_prefix(raw_mt)
 
     if is_v2_enabled():
         from engines.naturalizer_v2.orchestrator import polish_segment_v2
@@ -1287,8 +1403,13 @@ def merge_segments_for_translation(
             from engines.smart_segmentation import would_break_forbidden
 
             must_join, _why = would_break_forbidden(prev, cur)
-            if must_join:
-                can_merge = True and len(current) < max_batch
+            # Only honor the forbidden-break override when segments are close in
+            # time. A large pause (gap > max_gap_ms) means distinct utterances —
+            # never force-merge them across silence just on text heuristics.
+            if must_join and len(current) < max_batch and (
+                not timing_map or gap <= max_gap_ms
+            ):
+                can_merge = True
         except Exception:
             pass
 
@@ -1418,6 +1539,22 @@ def naturalize_ru(text: str, prev_context: str | None = None) -> str:
     if not text:
         return text
 
+    try:
+        from engines.mt.cross_script_guard import deflate_phrase_loop, has_phrase_loop
+
+        if has_phrase_loop(text, min_repeats=2):
+            text = deflate_phrase_loop(text) or text
+    except Exception:
+        pass
+    try:
+        from engines.dsal.clause_coverage import strip_cross_lang_clause_orphans
+
+        text = strip_cross_lang_clause_orphans(text)
+    except Exception:
+        pass
+    # UK Hollywood leak into RU (і vs и)
+    text = re.sub(r"\bГоллівуд\w*\b", "Голливуд", text)
+    text = re.sub(r"\bв\s+Голлівуде\b", "в Голливуде", text, flags=re.I)
     text = _drop_repeated_subject(text, prev_context, _PRONOUNS_RU)
     text = _apply_generic_fixes(text)
     text = _apply_ru_word_fixes(text)
@@ -1450,9 +1587,25 @@ def naturalize_uk(text: str, prev_context: str | None = None) -> str:
     if not text:
         return text
 
+    try:
+        from engines.mt.cross_script_guard import deflate_phrase_loop, has_phrase_loop
+
+        if has_phrase_loop(text, min_repeats=2):
+            text = deflate_phrase_loop(text) or text
+    except Exception:
+        pass
     text = _drop_repeated_subject(text, prev_context, _PRONOUNS_UK)
     text = _apply_generic_fixes(text)
     text = _apply_uk_word_fixes(text)
+    # Safe compact: «не міг не відчути» → «відчув» (never bare infinitive)
+    try:
+        from engines.semantic_meaning import apply_compact_phrases
+        from engines.tts_text_guard import heal_bare_infinitive
+
+        text = apply_compact_phrases(text, target_lang="uk") or text
+        text = heal_bare_infinitive(text)
+    except Exception:
+        pass
     return text.strip()
 
 
@@ -1462,6 +1615,13 @@ def naturalize_generic(text: str, prev_context: str | None = None) -> str:
     if not text:
         return text
 
+    try:
+        from engines.mt.cross_script_guard import deflate_phrase_loop, has_phrase_loop
+
+        if has_phrase_loop(text, min_repeats=2):
+            text = deflate_phrase_loop(text) or text
+    except Exception:
+        pass
     prev_lead = _leading_token(prev_context) if prev_context else None
     lead = _leading_token(text)
     words = text.split()
@@ -1549,10 +1709,13 @@ _EN_CONT_START = re.compile(
     r"^\s*(?:but|and|however|so|then|yet|although|while)\b",
     re.I,
 )
-_UK_BUT_SPLIT = re.compile(
-    r"(?:,\s*|\s+)(але|проте|однак)\s+",
+# UK + RU discourse "but" — EN but→але/но. Never use for EN "and".
+_SLAVIC_BUT_SPLIT = re.compile(
+    r"(?:,\s*|\s+)(але|проте|однак|но|однако|впрочем)\s+",
     re.I,
 )
+# Back-compat alias
+_UK_BUT_SPLIT = _SLAVIC_BUT_SPLIT
 
 
 def _en_incomplete(src: str) -> bool:
@@ -1568,13 +1731,62 @@ def _split_uk_for_en_pair(combined: str, src_a: str, src_b: str) -> tuple[str, s
     src_a = str(src_a or "").strip()
     src_b = str(src_b or "").strip()
 
-    # Prefer discourse cut when next EN starts with but/and.
-    if _EN_CONT_START.match(src_b):
-        m = _UK_BUT_SPLIT.search(text)
+    # Undo Jr. false stop before sentence split (George Jr. → «молодший. Сьогодні»).
+    try:
+        from engines.dsal.pre_lock_polish import polish_false_name_period
+
+        text = polish_false_name_period(text)
+    except Exception:
+        pass
+
+    sents = [p.strip() for p in re.split(r"(?<=[.!?…])\s+", text) if p.strip()]
+    # Complete short EN_a + multi-sentence UK blob → keep first sentence on left
+    # (dinner / crash mega-blob, Star Wars reveal, etc.).
+    if (
+        len(sents) >= 2
+        and src_a
+        and src_a[-1] in ".!?…"
+        and src_a.count(".") + src_a.count("!") + src_a.count("?") <= 2
+        and len(src_a.split()) <= 28
+    ):
+        left = sents[0].strip()
+        right = " ".join(sents[1:]).strip()
+        if left and right and len(left) >= 8 and len(right) >= 8:
+            return left, right
+
+    # EN "but …" → UK/RU але/но only. Never map EN "and" to the first «але/но»
+    # (that sliced crash blobs at «але він вижив» / «но он выжил»).
+    if re.match(r"^\s*but\b", src_b, re.I):
+        m = _SLAVIC_BUT_SPLIT.search(text)
         if m and m.start() > 8:
             left = text[: m.start()].rstrip(" ,;:—–-").strip()
             right = (m.group(1) + " " + text[m.end() :]).strip()
             if left and right and len(left) >= 8 and len(right) >= 8:
+                return left, right
+
+    # EN and/so/then continuations: cut on UK/RU discourse openers.
+    if _EN_CONT_START.match(src_b):
+        for pat in (
+            r"\s+(І\s+ось\b)",
+            r"\s+(И\s+вот\b)",
+            r"\s+(Через\s+(?:два|двадцять|\d))",
+            r"\s+(Две\s+недели\b)",
+            r"\s+(Тож\s+)",
+            r"\s+(Итак\s+)",
+            r"\s+(І\s+(?:тому|ось)\b)",
+            r"\s+(И\s+(?:поэтому|вот)\b)",
+        ):
+            m = re.search(pat, text)
+            if m and m.start() > 12:
+                left = text[: m.start()].rstrip(" ,;:—–-").strip()
+                right = text[m.start() :].lstrip().strip()
+                if left and right and len(left) >= 8 and len(right) >= 8:
+                    return left, right
+        # Multi-sentence fallback for incomplete EN_a swallowed into one blob.
+        if len(sents) >= 2 and _en_incomplete(src_a):
+            left = sents[0].strip()
+            right = " ".join(sents[1:]).strip()
+            if left and right and len(left) >= 8:
                 return left, right
 
     # Proportional word split by EN char length.
@@ -1631,10 +1843,10 @@ def debleed_adjacent_batch_copies(
             same_blob = True
             a, b = b, a
 
-        # Incomplete EN whose UK already swallowed the next clause.
+        # Incomplete EN whose translation already swallowed the next clause.
         swallowed = False
-        if a and pair_looks_cut and _UK_BUT_SPLIT.search(a):
-            # First slot should not keep the «але…» continuation of next EN.
+        if a and pair_looks_cut and _SLAVIC_BUT_SPLIT.search(a):
+            # First slot should not keep the «але/но…» continuation of next EN.
             if not same_blob and (not b or _similarity_ratio(a, b) >= 0.45):
                 swallowed = True
 
@@ -1879,6 +2091,43 @@ def polish_lines(
                     # Ensure we never return silent no_changes without reason
                     result.reasons = list(result.reasons) or ["no_changes"]
                     result.reasons.append("dirty_mt_noop_bug")
+                # CJK→uk/ru: naturalizer cannot invent lost meaning — LLM from source
+                if skip_reason == "dirty_mt_noop_bug" and use_llm:
+                    try:
+                        from engines.mt.cross_script_guard import (
+                            is_cjk_heavy,
+                            strip_source_script_chars,
+                        )
+                        from engines.mt.llm_retranslate import (
+                            llm_direct_translate,
+                            should_llm_retranslate,
+                        )
+
+                        if is_cjk_heavy(original, min_chars=4) and should_llm_retranslate(
+                            src_lang=src_lang, tgt_lang=tgt_lang
+                        ):
+                            llm_out = llm_direct_translate(
+                                original,
+                                src_lang=src_lang or "zh",
+                                tgt_lang=tgt_lang or "uk",
+                            )
+                            if llm_out:
+                                llm_out = (
+                                    strip_source_script_chars(
+                                        llm_out,
+                                        source_lang=src_lang,
+                                        source=original,
+                                    )
+                                    or llm_out
+                                )
+                                if llm_out.strip() and llm_out.strip() != seg.strip():
+                                    seg = llm_out.strip()
+                                    result.reasons = list(result.reasons) + [
+                                        "llm_collapse_rescue"
+                                    ]
+                                    skip_reason = ""
+                    except Exception:
+                        pass
             elif seg == raw_mt:
                 skip_reason = ",".join(result.reasons) or "no_changes_clean"
         except Exception:

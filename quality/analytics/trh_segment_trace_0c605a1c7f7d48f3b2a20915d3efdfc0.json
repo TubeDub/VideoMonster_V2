@@ -1,0 +1,49 @@
+{
+  "schema": "tubedub.trh.segment_trace.v1",
+  "task_id": "0c605a1c7f7d48f3b2a20915d3efdfc0",
+  "created_at": "2026-07-22T15:50:45Z",
+  "segments": [
+    {
+      "index": 0,
+      "original": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+      "raw_mt": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "naturalized": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "retry": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "judge": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "approved": "",
+      "original_preview": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义外 一日月前 我和群辞非同时被绑架 内腕他营喝绑子 所以 这个孩子是绑费的 你跟月子前的意外 这孩子是绑费的",
+      "raw_mt_preview": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "naturalized_preview": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення квітів, а якщо необхідно, то збережемо сюрприз.",
+      "approved_preview": "",
+      "dirty_mt_score": 0.55,
+      "dirty": true,
+      "dirty_reasons": [
+        "cjk_meaning_collapse",
+        "meaning_collapse"
+      ],
+      "english_leak": false,
+      "naturalizer_called": true,
+      "naturalizer_applied": false,
+      "naturalizer_skip_reason": "dirty_mt_noop_bug",
+      "rules_applied": [
+        "dirty_mt:cjk_meaning_collapse,meaning_collapse"
+      ],
+      "llm_used": false,
+      "changed_text": false,
+      "retry_count": 1,
+      "judge_used": false,
+      "tps_path": "manual",
+      "route": "manual",
+      "tqe_status": "FAIL_MANUAL_REVIEW",
+      "reason_codes": [
+        "dirty_mt_noop",
+        "meaning_collapse",
+        "cjk_meaning_collapse"
+      ],
+      "dsal_applied": false,
+      "dsal_skip_reason": "",
+      "entities": [],
+      "quality_score": 73.0
+    }
+  ]
+}

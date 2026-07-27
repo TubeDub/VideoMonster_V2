@@ -127,43 +127,6 @@ def resolve_need_adaptation(
 
     delta = duration_delta_ms(seg)
     if delta > DURATION_DELTA_FORCE_ADAPT_MS:
-        # #region agent log
-        try:
-            import json
-            import time
-
-            with open(
-                r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log",
-                "a",
-                encoding="utf-8",
-            ) as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "ee98a6",
-                            "runId": "need-adapt-force",
-                            "hypothesisId": "N1",
-                            "location": "adaptation_decision.py:resolve_need_adaptation",
-                            "message": "force_need_adaptation_duration_delta",
-                            "data": {
-                                "segment_id": str(seg.get("segment_id") or ""),
-                                "original_ms": segment_original_duration_ms(seg),
-                                "tts_ms": segment_tts_duration_ms(seg),
-                                "delta_ms": delta,
-                                "caller_need": need_adaptation,
-                                "overflow_ms": ov,
-                                "underflow_ms": und,
-                                "forced": True,
-                            },
-                            "timestamp": int(time.time() * 1000),
-                        },
-                        ensure_ascii=False,
-                    )
-                    + "\n"
-                )
-        except Exception:
-            pass
-        # #endregion
         need = True
         seg["need_adaptation"] = True
         seg["need_adaptation_force_reason"] = (
@@ -227,48 +190,6 @@ def stamp_need_adaptation_gate(
     seg["adaptation_decision"] = prev
     seg["need_adaptation"] = bool(need)
 
-    # #region agent log
-    try:
-        import json
-        import time
-
-        with open(
-            r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log",
-            "a",
-            encoding="utf-8",
-        ) as f:
-            f.write(
-                json.dumps(
-                    {
-                        "sessionId": "ee98a6",
-                        "runId": "need-adapt-stamp",
-                        "hypothesisId": "N2",
-                        "location": "adaptation_decision.py:stamp_need_adaptation_gate",
-                        "message": "stamped_need_adaptation_after_tts",
-                        "data": {
-                            "segment_id": str(seg.get("segment_id") or ""),
-                            "index": index,
-                            "source": source,
-                            "need_adaptation": bool(need),
-                            "force_reason": str(
-                                seg.get("need_adaptation_force_reason") or ""
-                            ),
-                            "delta_ms": snap["duration_delta_ms"],
-                            "original_ms": snap["original_duration_ms"],
-                            "tts_ms": snap["tts_duration_ms"],
-                            "stored_need": (seg.get("adaptation_decision") or {}).get(
-                                "need_adaptation"
-                            ),
-                        },
-                        "timestamp": int(time.time() * 1000),
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
-    except Exception:
-        pass
-    # #endregion
     return bool(need)
 
 

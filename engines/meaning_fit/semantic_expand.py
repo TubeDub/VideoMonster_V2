@@ -75,8 +75,10 @@ def semantic_expand(
     *,
     original_en: str = "",
     force: bool = False,
+    tgt_lang: str = "uk",
 ) -> FitResult:
     text = str(text_uk or "").strip()
+    lang = str(tgt_lang or "uk").split("-")[0].lower()
     if not (force or (meaning_fit_flag() and meaning_fit_expand_flag())):
         return FitResult(
             text_uk=text,
@@ -110,6 +112,19 @@ def semantic_expand(
             verdict=pred0.verdict,
             success=pred0.verdict == "OK",
             method="semantic_expand",
+        )
+
+    if lang != "uk":
+        return FitResult(
+            text_uk=text,
+            status="already_fits",
+            reason="non_uk_skip_uk_expand",
+            predicted_ms=pred0.predicted_ms,
+            slot_ms=slot_ms,
+            verdict=pred0.verdict,
+            success=True,
+            method="none",
+            meta={"tgt_lang": lang, "skipped_uk_rules": True},
         )
 
     cand = _rule_expand(text)

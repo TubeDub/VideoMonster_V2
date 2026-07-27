@@ -2,7 +2,7 @@
   "version": 1,
   "pairs": {
     "en->ru": ["marian"],
-    "en->uk": ["marian"],
+    "en->uk": ["marian", "argos"],
     "ru->uk": ["marian"],
     "uk->ru": ["marian"],
     "en->de": ["marian"],
@@ -11,6 +11,15 @@
     "en->es": ["marian"],
     "en->it": ["marian"],
     "en->tr": ["argos"],
-    "en->ja": ["argos"]
+    "en->ja": ["argos"],
+    "zh->uk": ["nllb", "marian"],
+    "zh->ru": ["nllb", "marian"],
+    "zh->en": ["nllb", "argos", "marian"],
+    "ja->uk": ["nllb", "marian"],
+    "ja->ru": ["nllb", "marian"],
+    "ja->en": ["nllb", "argos"],
+    "ko->uk": ["nllb", "marian"],
+    "ko->ru": ["nllb", "marian"],
+    "ko->en": ["nllb", "argos"]
   }
 }

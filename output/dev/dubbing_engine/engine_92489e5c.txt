@@ -1,0 +1,9 @@
+=== DUBBING ENGINE REPORT task=eccbb8b6136b48328720b5b0331c153b run=92489e5c ===
+lang=uk  segments=1  elapsed=0.16s
+adapted=1  skipped=0  strategies={'direct': 0, 'adapted': 0, 'video_adapt': 0, 'merge_next': 1, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=merge_next pred=7435ms slot=4370ms
+       [timing] strategy=merge_next pred=7435ms slot=4370ms prev_end=0ms overflow=70.1% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied; severe_overflow: predicted=7435ms slot=4370ms ratio=1.70; voice_quality_risk: projected_atempo=1.70 

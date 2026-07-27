@@ -33,14 +33,28 @@ class CloudFileManager:
         for pid, cls in PROVIDER_REGISTRY.items():
             prov_cfg = (settings.get("providers") or {}).get(pid) or {}
             if pid != "local" and not prov_cfg.get("enabled"):
-                out.append(
-                    {
-                        "provider_id": pid,
-                        "label": cls.label,
-                        "connected": False,
-                        "enabled": False,
-                    }
-                )
+                row = {
+                    "provider_id": pid,
+                    "label": cls.label,
+                    "connected": False,
+                    "enabled": False,
+                }
+                if pid in ("google_drive", "onedrive", "dropbox"):
+                    try:
+                        from engines.cloud.oauth import oauth_meta_for_provider
+
+                        row["meta"] = oauth_meta_for_provider(pid, app_dir=self.app_dir)
+                        row["error"] = (
+                            "Provider disabled — enable in settings; "
+                            + (
+                                "OAuth hard-gated"
+                                if row["meta"].get("oauth_remote_gated")
+                                else f"OAuth {row['meta'].get('oauth_status')}"
+                            )
+                        )
+                    except Exception:
+                        pass
+                out.append(row)
                 continue
             try:
                 st = cls(self.app_dir, prov_cfg).connect()

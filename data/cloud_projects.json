@@ -1,0 +1,62 @@
+{
+  "projects": [
+    {
+      "project_id": "4e528c30-27df-4181-b8a9-85cfe9fb3656",
+      "title": "video_29576dd038_OUTPUT_c6466bc5",
+      "storage_mode": "local_only",
+      "provider_id": "local",
+      "local_paths": [
+        "video_29576dd038_OUTPUT_c6466bc5.mp4"
+      ],
+      "remote_prefix": "projects/4e528c30-27df-4181-b8a9-85cfe9fb3656",
+      "sync_state": "idle",
+      "versions": [
+        {
+          "version_id": "9d57ea09-b03f-4c78-a0f0-935c79e35cf9",
+          "created_ms": 1784826738204,
+          "label": "v1",
+          "files": [
+            "video_29576dd038_OUTPUT_c6466bc5.mp4"
+          ],
+          "note": ""
+        }
+      ],
+      "tags": [],
+      "created_ms": 1784826738204,
+      "updated_ms": 1784826738204,
+      "meta": {
+        "sha256": "638c70d9b703d2891f50eb32577ec033e6aa265b31a3b413dd9232eda6650944",
+        "size_bytes": 13859861
+      }
+    },
+    {
+      "project_id": "3ec34c9c-3a47-47c2-9f0e-e076dd5e0bae",
+      "title": "video_20742df3df_OUTPUT_1721539b",
+      "storage_mode": "local_only",
+      "provider_id": "local",
+      "local_paths": [
+        "video_20742df3df_OUTPUT_1721539b.mp4"
+      ],
+      "remote_prefix": "projects/3ec34c9c-3a47-47c2-9f0e-e076dd5e0bae",
+      "sync_state": "idle",
+      "versions": [
+        {
+          "version_id": "3e267778-f980-4957-9dc9-5e3a5a2f40e2",
+          "created_ms": 1784899667995,
+          "label": "v1",
+          "files": [
+            "video_20742df3df_OUTPUT_1721539b.mp4"
+          ],
+          "note": ""
+        }
+      ],
+      "tags": [],
+      "created_ms": 1784899667995,
+      "updated_ms": 1784899667995,
+      "meta": {
+        "sha256": "0277ac8f53dee24f4f8f5f7479cb7459204f144130250da6c6599ab3f3bfef37",
+        "size_bytes": 13859910
+      }
+    }
+  ]
+}

@@ -61,13 +61,40 @@ FEATURES = {
 
 
 def _license_secret() -> bytes:
+    """HMAC secret for key signing. Never use a public hardcoded fallback."""
+    import secrets
+    import threading
+
     env = os.getenv("VM_LICENSE_SECRET", "").strip()
     if env:
         return env.encode("utf-8")
     secret_file = APP_DIR / "data" / "license_secret.txt"
-    if secret_file.exists():
-        return secret_file.read_text(encoding="utf-8").strip().encode("utf-8")
-    return b"VideoMonster-V2-Owner-Change-This-Secret"
+    try:
+        if secret_file.exists():
+            raw = secret_file.read_text(encoding="utf-8").strip()
+            if raw:
+                return raw.encode("utf-8")
+    except OSError as exc:
+        logger.error("Cannot read license secret file: %s", exc)
+
+    # Auto-create a per-install secret once (owner_first_run may also create it).
+    lock = getattr(_license_secret, "_lock", None)
+    if lock is None:
+        lock = threading.Lock()
+        _license_secret._lock = lock  # type: ignore[attr-defined]
+    with lock:
+        try:
+            if secret_file.exists():
+                raw = secret_file.read_text(encoding="utf-8").strip()
+                if raw:
+                    return raw.encode("utf-8")
+        except OSError:
+            pass
+        secret_file.parent.mkdir(parents=True, exist_ok=True)
+        token = secrets.token_urlsafe(32)
+        secret_file.write_text(token, encoding="utf-8")
+        logger.warning("Created new license secret at %s", secret_file)
+        return token.encode("utf-8")
 
 
 def _device_id() -> str:
@@ -131,8 +158,11 @@ def _load_json(path: Path, default: Any) -> Any:
 
 
 def _save_json(path: Path, data: Any) -> None:
+    """Atomic JSON write — avoids torn ``license.json`` on crash/power loss."""
+    from engines.storage.atomic import atomic_write_json
+
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    atomic_write_json(path, data)
 
 
 def _is_revoked(key: str) -> bool:

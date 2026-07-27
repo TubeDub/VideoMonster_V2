@@ -38,11 +38,23 @@ def translation_confidence(
             return 0.05
     except Exception:
         pass
+    # Fluent nonsense (flower delivery / pregnancy flip) must not score ~0.9
+    try:
+        from engines.mt.cross_script_guard import is_meta_waffle, meaning_collapse
+
+        if is_meta_waffle(translated):
+            return 0.05
+        if meaning_collapse(source, translated):
+            return 0.08
+    except Exception:
+        pass
     src_w = len(str(source or "").split())
     tr_w = len(str(translated or "").split())
     base = 0.85 if translator_name == "cloud" else 0.75
     if translator_name == "deep-translator":
         base = 0.72
+    if translator_name == "argos":
+        base = 0.55
     if str(translated).strip() == str(source or "").strip():
         base *= 0.5
     if src_w >= 15 and tr_w > 0:

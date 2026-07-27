@@ -4,113 +4,81 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dub.css') }}">
 {% endblock %}
 {% block content %}
-<div class="page-header-row">
-  <h1>🌍 Перевод</h1>
-  <div class="header-controls">
-    <select id="target-lang" class="select-control" style="max-width:180px;">
-      {% for name, code in languages.items() %}
-        <option value="{{ code }}" {% if code == 'ru' %}selected{% endif %}>→ {{ name }}</option>
-      {% endfor %}
+<div class="page-header-row"><h1>Перевод</h1>
+  <div class="header-controls"><select id="target-lang" class="select-control" style="max-width:180px;"> {% for name, code in languages.items() %}
+        <option value="{{ code }}" {% if code == 'ru' %}selected{% endif %}>→ {{ name }}</option> {% endfor %}
     </select>
   </div>
 </div>
 
-<p class="char-count" style="margin-bottom:12px;">
-  Перевод текста, SRT, аудио и видео — тот же движок, что при полном дубляже.
+<p class="char-count" style="margin-bottom:12px;">Перевод текста, SRT, аудио и видео — тот же движок, что при полном дубляже.
 </p>
 
-<div class="two-column-layout">
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">Исходный текст</span>
-      <div class="panel-actions">
-        <button type="button" class="btn btn-sm" onclick="pasteText('source-box')">📋 Вставить</button>
-        <button type="button" class="btn btn-sm" onclick="clearTranslate()">🗑 Очистить</button>
-        <button type="button" class="btn btn-sm" onclick="triggerSrt()">📂 Загрузить SRT</button>
-        <button type="button" class="btn btn-sm" onclick="triggerVideoStt()">🎬 Считать текст с видео</button>
-        <button type="button" class="btn btn-sm" onclick="triggerAudioStt()">🎵 Считать текст с аудио</button>
+<div class="two-column-layout"><div class="panel"><div class="panel-header"><span class="panel-title">Исходный текст</span>
+      <div class="panel-actions"><button type="button" class="btn btn-sm" onclick="pasteText('source-box')">Вставить</button>
+        <button type="button" class="btn btn-sm" onclick="clearTranslate()">Очистить</button>
+        <button type="button" class="btn btn-sm" onclick="triggerSrt()">Загрузить SRT</button>
+        <button type="button" class="btn btn-sm" onclick="triggerVideoStt()">Считать текст с видео</button>
+        <button type="button" class="btn btn-sm" onclick="triggerAudioStt()">Считать текст с аудио</button>
         <input type="file" id="srt-input" accept=".srt,.vtt,.txt" style="display:none" onchange="loadSrt(this)"/>
         <input type="file" id="video-input" accept="video/*,.mp4,.mkv,.avi,.mov,.webm,.mpeg,.mpg,.flv,.ts,.m4v" style="display:none" onchange="onVideoSelected(this)"/>
         <input type="file" id="audio-input" accept="audio/*,.mp3,.wav,.flac,.ogg,.opus,.aac,.m4a,.wma,.aiff" style="display:none" onchange="onAudioSelected(this)"/>
       </div>
     </div>
-    <textarea id="source-box" class="text-area" style="height:320px"
-      placeholder="Текст, SRT, результат Whisper с видео или аудио…"></textarea>
-    <div class="panel-footer">
-      <span id="detected-lang" class="detected-label">Язык: определится автоматически</span>
+    <textarea id="source-box" class="text-area" style="height:320px" placeholder="Текст, SRT, результат Whisper с видео или аудио…"></textarea>
+    <div class="panel-footer"><span id="detected-lang" class="detected-label">Язык: определится автоматически</span>
       <span id="source-chars" class="char-count">0 симв.</span>
     </div>
   </div>
 
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">Переведённый текст</span>
-      <div class="panel-actions">
-        <button type="button" class="btn btn-sm" onclick="copyText('result-box')">📋 Копировать</button>
-        <button type="button" class="btn btn-sm" onclick="downloadTranslation()">📄 Скачать</button>
+  <div class="panel"><div class="panel-header"><span class="panel-title">Переведённый текст</span>
+      <div class="panel-actions"><button type="button" class="btn btn-sm" onclick="copyText('result-box')">Копировать</button>
+        <button type="button" class="btn btn-sm" onclick="downloadTranslation()">Скачать</button>
       </div>
     </div>
-    <textarea id="result-box" class="text-area" style="height:320px"
-      placeholder="Результат Universal Translation Pipeline…" readonly></textarea>
-    <div class="panel-footer">
-      <span id="result-chars" class="char-count">0 симв.</span>
+    <textarea id="result-box" class="text-area" style="height:320px" placeholder="Результат Universal Translation Pipeline…" readonly></textarea>
+    <div class="panel-footer"><span id="result-chars" class="char-count">0 симв.</span>
     </div>
   </div>
 </div>
 
-<div class="action-row">
-  <button type="button" class="btn btn-primary btn-large" onclick="doTranslate(true)">🌍 Перевести</button>
-  <button type="button" class="btn btn-secondary btn-large" onclick="openInReader()">📖 Открыть в «Чтение книги»</button>
-  <button type="button" class="btn btn-secondary btn-large dev-only" id="btn-translate-inspector"
-    style="display:none;" onclick="openTranslateInspector()" disabled>
-    🔬 Проверить перевод
+<div class="action-row"><button type="button" class="btn btn-primary btn-large" onclick="doTranslate(true)">Перевести</button>
+  <button type="button" class="btn btn-secondary btn-large" onclick="openInReader()">Открыть в «Чтение книги»</button>
+  <button type="button" class="btn btn-secondary btn-large dev-only" id="btn-translate-inspector" style="display:none;" onclick="openTranslateInspector()" disabled>Проверить перевод
   </button>
 </div>
 
-<div class="panel" style="margin-top:16px;">
-  <div class="panel-header">
-    <span class="panel-title">Журнал перевода</span>
+<div class="panel" style="margin-top:16px;"><div class="panel-header"><span class="panel-title">Журнал перевода</span>
   </div>
-  <p class="char-count" style="margin:0 0 12px;">
-    Подробный лог сохраняется после каждого перевода — для диагностики и отправки отчёта.
+  <p class="char-count" style="margin:0 0 12px;">Подробный лог сохраняется после каждого перевода — для диагностики и отправки отчёта.
   </p>
-  <div class="row-group" style="flex-wrap:wrap;gap:8px;">
-    <button type="button" class="btn btn-sm" onclick="openLastTranslateLog()">📄 Открыть последний лог</button>
-    <button type="button" class="btn btn-sm" onclick="openTranslateLogsFolder()">📁 Открыть папку с логами</button>
-    <button type="button" class="btn btn-sm" onclick="copyFullTranslateReport()">📋 Копировать полный отчёт</button>
-    <button type="button" class="btn btn-sm" onclick="clearTranslateLogs()">🗑 Очистить логи</button>
+  <div class="row-group" style="flex-wrap:wrap;gap:8px;"><button type="button" class="btn btn-sm" onclick="openLastTranslateLog()">Открыть последний лог</button>
+    <button type="button" class="btn btn-sm" onclick="openTranslateLogsFolder()">Открыть папку с логами</button>
+    <button type="button" class="btn btn-sm" onclick="copyFullTranslateReport()">Копировать полный отчёт</button>
+    <button type="button" class="btn btn-sm" onclick="clearTranslateLogs()">Очистить логи</button>
   </div>
   <div id="translate-log-hint" class="char-count" style="margin-top:10px;"></div>
 </div>
 
-<div id="status-bar" class="status-bar">
-  <span id="status-text">Готов к работе</span>
+<div id="status-bar" class="status-bar"><span id="status-text">Готов к работе</span>
 </div>
 
-<div id="prepare-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:420px;width:92%;">
-    <h2 style="margin:0 0 8px;font-size:18px;">Подготовка</h2>
+<div id="prepare-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;align-items:center;justify-content:center;"><div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;max-width:420px;width:92%;"><h2 style="margin:0 0 8px;font-size:18px;">Подготовка</h2>
     <p id="prepare-status-text" style="font-size:13px;color:var(--text2);margin:0 0 16px;">Идёт загрузка языкового пакета…</p>
-    <div class="progress-bar" style="display:block;margin-bottom:12px;">
-      <div id="prepare-fill" class="progress-fill" style="width:0%;"></div>
+    <div class="progress-bar" style="display:block;margin-bottom:12px;"><div id="prepare-fill" class="progress-fill" style="width:0%;"></div>
     </div>
     <div id="prepare-percent" style="font-size:12px;color:var(--text2);">0%</div>
     <p id="prepare-error" style="display:none;color:#f87171;font-size:12px;margin-top:12px;"></p>
   </div>
 </div>
 
-<div id="tr-inspector-overlay" class="ti-overlay dev-only" style="display:none;" role="dialog"
-  aria-labelledby="tr-inspector-title">
-  <div class="ti-panel">
-    <div class="ti-header">
-      <h2 id="tr-inspector-title">Диагностика перевода</h2>
-      <button type="button" class="btn btn-sm" onclick="closeTranslateInspector()">✕</button>
+<div id="tr-inspector-overlay" class="ti-overlay dev-only" style="display:none;" role="dialog" aria-labelledby="tr-inspector-title"><div class="ti-panel"><div class="ti-header"><h2 id="tr-inspector-title">Диагностика перевода</h2>
+      <button type="button" class="btn btn-sm" onclick="closeTranslateInspector()" aria-label="Закрыть">✕</button>
     </div>
     <div id="tr-inspector-summary" class="ti-summary"></div>
-    <div class="ti-toolbar">
-      <label>Сегмент:</label>
+    <div class="ti-toolbar"><label>Сегмент:</label>
       <select id="tr-inspector-seg" class="ti-seg-select" onchange="selectTranslateInspectorSeg(this.value)"></select>
-      <button type="button" class="btn btn-sm" onclick="copyInspectorReport()">📋 Копировать полный отчёт</button>
+      <button type="button" class="btn btn-sm" onclick="copyInspectorReport()">Копировать полный отчёт</button>
     </div>
     <div id="tr-inspector-body" class="ti-body"></div>
   </div>

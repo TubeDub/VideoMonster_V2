@@ -1,0 +1,73 @@
+{
+  "translation_agent_version": "4.0",
+  "project_uuid": "d2123c37-f261-4b0b-9b0c-8ce2d1e91b63",
+  "task_id": "df956516c8d04c8fac15d97599212503",
+  "status": "success",
+  "translator_used": "deep-translator",
+  "segment_count": 1,
+  "success_count": 0,
+  "retries": 6,
+  "fallback_used": true,
+  "warnings": [
+    "segment_0:mt_still_collapsed 21->6"
+  ],
+  "errors": [],
+  "execution_time_ms": 119969.4,
+  "avg_confidence": {
+    "avg_overall": 0.6675,
+    "avg_translation": 0.6675,
+    "avg_entity": 1.0,
+    "avg_terminology": 1.0,
+    "avg_language": 1.0
+  },
+  "entity_validation": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1
+  },
+  "terminology_validation": {
+    "ok": true,
+    "confidence": 1.0,
+    "inconsistent_terms": [],
+    "glossary_size": 0
+  },
+  "language_validation": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1
+  },
+  "decision_log": [
+    "segment_count=1",
+    "lang=es->uk",
+    "attempt=1 translator=argos confidence=0.05",
+    "low_confidence=0.05 retry=1",
+    "attempt=2 translator=argos confidence=0.05",
+    "low_confidence=0.05 retry=2",
+    "attempt=3 translator=argos confidence=0.05",
+    "low_confidence=0.05 retry=3",
+    "fallback_to=deep-translator",
+    "attempt=4 translator=deep-translator confidence=0.05",
+    "low_confidence=0.05 retry=1",
+    "attempt=5 translator=deep-translator confidence=0.05",
+    "low_confidence=0.05 retry=2",
+    "attempt=6 translator=deep-translator confidence=0.05",
+    "low_confidence=0.05 retry=3",
+    "exhausted_fallback_chain_try_rule_mt",
+    "rule_fallback_ok translator=deep-translator src=es",
+    "segment_0:mt_collapse src_words=21 tr_words=6 → sentence_retranslate",
+    "pass6_completeness ok fixed=1"
+  ],
+  "per_segment_confidence": [
+    {
+      "index": 0,
+      "confidence": {
+        "translation": 0.05,
+        "entity": 1.0,
+        "terminology": 1.0,
+        "language": 1.0,
+        "overall": 0.6675
+      },
+      "translator_used": "deep-translator"
+    }
+  ]
+}

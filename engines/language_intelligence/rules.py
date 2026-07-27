@@ -63,6 +63,7 @@ UK_CALQUE_RULES: list[tuple[str, str, str]] = [
 KEEP_LATIN: list[str] = [
     "Fiat", "USC", "U.S.C.", "Hollywood", "Lucasfilm", "Disney", "Netflix",
     "YouTube", "Google", "NASA", "MIT", "iPhone", "ChatGPT",
+    "Apple", "Pro", "Max", "Plus", "Air", "Ultra", "SE", "Android", "Samsung",
 ]
 
 PREFERRED_UA_TITLES: dict[str, str] = {

@@ -1,0 +1,20 @@
+=== PROFESSIONAL DUBBING task=eccbb8b6136b48328720b5b0331c153b ===
+groups=1
+
+--- Group 1 indices=[0] ---
+Original Translation: Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Нам</emphasis> вісім поколінь прості,<break time="184ms"/> і в цей момент ви вагітні,<break time="184ms"/> ви товсті,<break time="184ms"/> ви вагітні,<break time="184ms"/> а<break time="184ms"/> якщо ні,<break time="184ms"/> то це ідеально.<break time="350ms"/></speak>
+Segment duration: 4370 ms
+Est TTS before: 7692 ms
+Est TTS after: 8962 ms
+Fill %: 205.1
+Rate: +0%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Нам', 'type': 'name'}
+  Decision: natural rate -6%
+  Decision: overfill 176.0% → light faster +0% (pauses scaled)

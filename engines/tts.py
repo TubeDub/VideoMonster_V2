@@ -41,8 +41,10 @@ DEFAULT_VOICE = "ru-RU-DmitryNeural"
 TTS_RETRIES = 3          # п.45 — попытки перед ошибкой
 TTS_RETRY_DELAY = 1.5   # секунд между попытками
 TTS_SEGMENT_TIMEOUT = 120  # секунд на один сегмент (защита от зависания на 65%)
+# Align parallel group timeout with single-segment timeout (was 30s → premature silence_gap).
 PIPELINE_TTS_GROUP_TIMEOUT = float(
-    (os.getenv("VM_PIPELINE_SEGMENT_TIMEOUT_SEC") or "30").strip() or "30"
+    (os.getenv("VM_PIPELINE_SEGMENT_TIMEOUT_SEC") or str(TTS_SEGMENT_TIMEOUT)).strip()
+    or str(TTS_SEGMENT_TIMEOUT)
 )
 
 
@@ -407,6 +409,7 @@ async def _generate_groups_parallel_async(
             path = str(path_obj)
             item_rate = item.get("rate") or rate
             item_pitch = item.get("pitch") or pitch
+            item_voice = str(item.get("voice") or voice or "").strip() or voice
             ctx.setdefault("segment_id", segment_uuid)
             ctx.setdefault("segment_uuid", segment_uuid)
             ctx.setdefault("tts_file_path", path)
@@ -414,7 +417,7 @@ async def _generate_groups_parallel_async(
                 await asyncio.wait_for(
                     _generate_single(
                         text,
-                        voice,
+                        item_voice,
                         path,
                         rate=item_rate,
                         pitch=item_pitch,
@@ -515,7 +518,16 @@ def cleanup_old_files(max_age_seconds: int = 3600) -> None:
 
 
 def get_output_path(filename: str) -> Path:
-    """Возвращает Path к файлу, если он существует."""
+    """Возвращает Path к файлу, если он существует и лежит под OUTPUT_DIR."""
+    from engines.path_safety import is_under_root
+
     safe = Path(filename).name
-    path = OUTPUT_DIR / safe
+    if not safe or safe != Path(filename).name:
+        return None
+    try:
+        path = (OUTPUT_DIR / safe).resolve()
+    except OSError:
+        return None
+    if not is_under_root(path, OUTPUT_DIR):
+        return None
     return path if path.exists() else None

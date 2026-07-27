@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}AI Director — TubeDub{% endblock %}
+{% block content %}
+<div class="page-header"><h1>AI Director</h1>
+  <p class="subtitle">Отчёт режиссёра дубляжа — quality gate, creative briefs, issues</p>
+</div>
+
+<div class="card" style="padding:16px;margin-bottom:16px;"><label style="font-size:13px;">Task ID
+    <input id="dir-task-id" class="input-control" placeholder="auto-dub task id" style="width:100%;max-width:420px;margin-top:4px;"/>
+  </label>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="directorLoad()">Загрузить отчёт</button>
+    <button class="btn" onclick="directorValidateLocal()">Локальная проверка сегментов</button>
+    <button class="btn" onclick="directorLoadRecent()">Обновить список</button>
+  </div>
+</div>
+
+<div class="card" style="padding:16px;margin-bottom:16px;"><h3 style="margin:0 0 8px;font-size:14px;">Недавние отчёты</h3>
+  <div id="dir-recent" style="font-size:12px;">…</div>
+</div>
+
+<div class="card" style="padding:16px;margin-bottom:16px;"><h3 style="margin:0 0 8px;font-size:14px;">Статус</h3>
+  <pre id="dir-status" style="font-size:12px;white-space:pre-wrap;">Введите task id…</pre>
+</div>
+
+<div class="card" style="padding:16px;"><h3 style="margin:0 0 8px;font-size:14px;">Creative briefs / issues</h3>
+  <div id="dir-briefs" style="font-size:12px;"></div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/director.js"></script>
+{% endblock %}

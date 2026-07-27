@@ -277,7 +277,16 @@ class PassiveOpenDDFSession:
         extra_paths: list[Path] = []
         app_root = Path(__file__).resolve().parent.parent.parent
         task_diag = app_root / "output" / "diagnostics" / self.run_id
-        for fname in ("audio_extraction_report.json", "ffmpeg_stderr.log", "traceback.txt"):
+        for fname in (
+            "audio_extraction_report.json",
+            "ffmpeg_stderr.log",
+            "traceback.txt",
+            # Unified Language Validation diagnostics (TZ P0)
+            "language_validator.log",
+            "confidence_scores.json",
+            "recovery_trace.json",
+            "decision_trace.json",
+        ):
             candidate = task_diag / fname
             if candidate.is_file():
                 extra_paths.append(candidate)

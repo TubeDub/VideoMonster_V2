@@ -1,0 +1,90 @@
+{
+  "project_id": "14da2552-0e80-5f5c-b869-9d2e6ff21f8b",
+  "title": "14da2552-0e80-5f5c-b869-9d2e6ff21f8b",
+  "storage_version": 1,
+  "created_at": 1784818460.7626808,
+  "updated_at": 1784818460.772793,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "415ccd1bf85444e58d3221c1393de892",
+  "legacy_project_uuid": "",
+  "studio_session": {
+    "session_id": "415ccd1bf85444e58d3221c1393de892",
+    "task_id": "415ccd1bf85444e58d3221c1393de892",
+    "segments": [],
+    "timing_map": [],
+    "source_segments": [],
+    "tracks": {
+      "original": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Original Voice",
+        "i18n_key": "studio.track.original",
+        "color": "#22c55e"
+      },
+      "user_voice": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "User Voice",
+        "i18n_key": "studio.track.user_voice",
+        "color": "#ec4899"
+      },
+      "music": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Music",
+        "i18n_key": "studio.track.music",
+        "color": "#a855f7"
+      },
+      "sfx": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "SFX",
+        "i18n_key": "studio.track.sfx",
+        "color": "#64748b"
+      },
+      "tts": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Dub Voice",
+        "i18n_key": "studio.track.dub",
+        "color": "#f59e0b"
+      }
+    },
+    "voice": "ru-RU-DmitryNeural",
+    "lang": "ru",
+    "plugin_order": [
+      "eq",
+      "compressor"
+    ],
+    "duration_ms": 68333,
+    "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_570088139a.mp4",
+    "video_preview": "video_570088139a.mp4",
+    "original_audio": null,
+    "task_status": "pipeline_failed",
+    "output_file": null,
+    "studio_url": "/studio?task_id=415ccd1bf85444e58d3221c1393de892",
+    "pipeline_error": {
+      "title": "Ошибка дубляжа",
+      "stage": "STT",
+      "error_type": "ModelNotPreparedError",
+      "error_code": "PIPELINE_CRITICAL",
+      "reason_short": "Критическая ошибка пайплайна.",
+      "reason": "Whisper small не установлен",
+      "pipeline_state": "STOPPED",
+      "timestamp": "2026-07-23T14:45:51.382000+00:00",
+      "voice_engine": "Edge-TTS",
+      "detail_block": "Stage: STT\nengine: Edge-TTS\nException:\nModelNotPreparedError\nError code:\nPIPELINE_CRITICAL\nReason:\nWhisper small не установлен\nPipeline:\nSTOPPED\ntimestamp:\n2026-07-23T14:45:51.382000+00:00"
+    }
+  },
+  "tdproj": {},
+  "metadata": {},
+  "source": "legacy_studio_session",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\studio_sessions\\415ccd1bf85444e58d3221c1393de892.json"
+}

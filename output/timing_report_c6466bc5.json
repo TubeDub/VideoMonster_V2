@@ -1,0 +1,119 @@
+{
+  "engine": "closed_loop_timing",
+  "segment_count": 1,
+  "avg_timing_score": 30.0,
+  "segments_score_ge_95": 0,
+  "kpi_target_score": 95,
+  "overflow_threshold_ms": 100,
+  "underflow_threshold_ms": 450,
+  "max_rewrite_iterations": 5,
+  "closed_loop": {
+    "engine": "closed_loop_timing",
+    "checked": 1,
+    "ok": 0,
+    "rewritten": 1,
+    "pause_only": 0,
+    "failed": 1,
+    "retries": 3,
+    "deviations": 1,
+    "fixed": 1,
+    "adaptation_executed": true,
+    "resegmented": 0,
+    "issues": [
+      {
+        "idx": 0,
+        "code": "overflow",
+        "final_status": "failed_no_rewrite",
+        "tts_ms": 22746,
+        "slot_ms": 4737,
+        "overflow_ms": 18009,
+        "underflow_ms": 0,
+        "rewrite_reason": "duration_overflow:no_rewrite"
+      }
+    ],
+    "avg_timing_score": 30.0,
+    "segments_score_ge_95": 0,
+    "budgets": [
+      {
+        "index": 0,
+        "slot_start": 1200,
+        "slot_end": 5937,
+        "slot_duration": 4737,
+        "tts_duration": 22746,
+        "measured_duration": 22746,
+        "delta": 18009,
+        "overflow": 18009,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 3,
+        "pause_adjustments_ms": 31072,
+        "pause_stages": [
+          "lead_trim:234",
+          "tail_trim:957",
+          "pause_compress:9508",
+          "lead_trim:247",
+          "tail_trim:978",
+          "pause_compress:5544",
+          "lead_trim:247",
+          "tail_trim:999",
+          "pause_compress:5549",
+          "lead_trim:247",
+          "tail_trim:999",
+          "pause_compress:5549"
+        ],
+        "timing_score": 30.0,
+        "rewrite_reason": "duration_overflow:no_rewrite",
+        "final_status": "failed_no_rewrite",
+        "original_duration": 47736,
+        "provider_fatal": false
+      }
+    ],
+    "requires_llm_adaptation": {
+      "count": 1,
+      "segment_indices": [
+        0
+      ],
+      "reason": "closed_loop_unresolved"
+    }
+  },
+  "timeline_validation": {
+    "ok": true,
+    "segment_overlap": [],
+    "speech_overlap": [],
+    "gap_analysis": [],
+    "problem_indices": []
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original_duration": 47736,
+      "tts_duration": 22746,
+      "slot_duration": 4737,
+      "slot_start": 1200,
+      "slot_end": 5937,
+      "delta": 18009,
+      "overflow": 18009,
+      "underflow": 0,
+      "rewrite_iterations": 3,
+      "pause_adjustments": 31072,
+      "pause_stages": [
+        "lead_trim:234",
+        "tail_trim:957",
+        "pause_compress:9508",
+        "lead_trim:247",
+        "tail_trim:978",
+        "pause_compress:5544",
+        "lead_trim:247",
+        "tail_trim:999",
+        "pause_compress:5549",
+        "lead_trim:247",
+        "tail_trim:999",
+        "pause_compress:5549"
+      ],
+      "timing_score": 30.0,
+      "final_status": "failed_no_rewrite",
+      "rewrite_reason": "duration_overflow:no_rewrite",
+      "status": "overflow"
+    }
+  ]
+}

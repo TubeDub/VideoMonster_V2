@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import threading
 import time
@@ -372,17 +373,18 @@ class StorageManager:
             raise FileNotFoundError(f"Project not found: {project_id}")
 
         dest_path = Path(dest)
-        if dest_path.suffix != ".zip":
-            dest_path = dest_path.with_suffix(".vmproj.zip")
+        # Keep multi-suffix names like ``*.vmproj.zip`` intact on Windows/pathlib.
+        if not dest_path.name.lower().endswith(".zip"):
+            dest_path = dest_path.parent / f"{dest_path.name}.vmproj.zip"
 
         dest_path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = dest_path.with_suffix(".vmproj.zip.writing")
+        tmp = dest_path.parent / f"{dest_path.name}.writing"
         try:
             with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zf:
                 for file in project_dir.rglob("*"):
                     if file.is_file():
                         zf.write(file, file.relative_to(project_dir))
-            tmp.replace(dest_path)
+            os.replace(tmp, dest_path)
         except BaseException:
             tmp.unlink(missing_ok=True)
             raise
@@ -404,8 +406,10 @@ class StorageManager:
         project_dir = self.paths.project_dir(record.project_id)
         project_dir.mkdir(parents=True, exist_ok=True)
 
+        from engines.path_safety import safe_extractall
+
         with zipfile.ZipFile(archive_path, "r") as zf:
-            zf.extractall(project_dir)
+            safe_extractall(zf, project_dir)
 
         # Load imported payload but always assign a fresh project_id.
         pj = project_dir / "project.json"

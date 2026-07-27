@@ -46,10 +46,30 @@ def is_severe_mt_collapse(
     min_ratio: float = 0.28,
 ) -> bool:
     """True when MT output covers far too little of a long source (meaning loss)."""
-    src_w = len(str(source or "").split())
-    tr_w = len(str(translated or "").split())
+    src = str(source or "").strip()
+    tr = str(translated or "").strip()
+    if not tr:
+        return True
+
+    # CJK sources have few whitespace tokens — use character density.
+    try:
+        from engines.mt.cjk_meaning import cjk_char_count, is_cjk_heavy
+
+        if is_cjk_heavy(src, min_chars=12):
+            src_c = max(1, cjk_char_count(src))
+            tr_letters = len(re.findall(r"[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]", tr))
+            if is_cjk_heavy(tr, min_chars=8):
+                # Source script leaked into MT — treat as collapse
+                return True
+            # Very short Cyrillic vs long CJK blob
+            if src_c >= 40 and tr_letters < max(12, int(src_c * 0.15)):
+                return True
+            return False
+    except Exception:
+        pass
+
+    src_w = len(src.split())
+    tr_w = len(tr.split())
     if src_w < min_src_words:
         return False
-    if not str(translated or "").strip():
-        return True
     return tr_w < max(8, int(src_w * min_ratio))

@@ -8,6 +8,24 @@ from typing import Any
 
 from engines.voice_platform.types import SynthesisResult
 
+# Engines that can satisfy Voice Platform cloning (order = probe preference).
+CLONE_PROVIDER_IDS: tuple[str, ...] = (
+    "xtts",
+    "coqui",
+    "openvoice",
+    "fishspeech",
+    "cosyvoice",
+)
+
+_CLONE_MISSING_RU = (
+    "Клонирование голоса недоступно — нужен движок "
+    "xtts/coqui, openvoice, fishspeech или cosyvoice"
+)
+_CLONE_HINT_RU = (
+    "Установите и настройте один из движков: "
+    "xtts / coqui / openvoice / fishspeech / cosyvoice"
+)
+
 
 class VoiceCloneAdapter(ABC):
     """Any cloning-capable engine plugs in here — Dub Engine stays unaware."""
@@ -48,8 +66,9 @@ class NullCloneAdapter(VoiceCloneAdapter):
     ) -> SynthesisResult:
         return SynthesisResult(
             ok=False,
-            error="No cloning adapter available",
+            error=_CLONE_MISSING_RU,
             provider=self.adapter_id,
+            meta={"error_code": "CLONE_ENGINE_MISSING", "required_engines": list(CLONE_PROVIDER_IDS)},
         )
 
 
@@ -101,8 +120,8 @@ def register_clone_adapter(adapter: VoiceCloneAdapter) -> None:
 
 def get_clone_adapter() -> VoiceCloneAdapter:
     if not _CLONE_ADAPTERS:
-        # Auto-discover cloning providers
-        for pid in ("xtts", "openvoice", "fishspeech", "cosyvoice"):
+        # Auto-discover cloning providers (coqui/XTTS first — real synthesize path)
+        for pid in CLONE_PROVIDER_IDS:
             bridge = ProviderCloneBridge(pid)
             if bridge.is_available():
                 register_clone_adapter(bridge)
@@ -112,6 +131,39 @@ def get_clone_adapter() -> VoiceCloneAdapter:
         if a.is_available():
             return a
     return _CLONE_ADAPTERS[-1]
+
+
+def probe_clone_engines() -> tuple[list[str], list[str]]:
+    """Return (available_engine_ids, missing_engine_ids) without mutating registry."""
+    available: list[str] = []
+    missing: list[str] = []
+    for pid in CLONE_PROVIDER_IDS:
+        try:
+            if ProviderCloneBridge(pid).is_available():
+                available.append(pid)
+            else:
+                missing.append(pid)
+        except Exception:
+            missing.append(pid)
+    return available, missing
+
+
+def clone_readiness() -> dict[str, Any]:
+    """Structured readiness for UI/API — prefer RU message over bare 503."""
+    adapter = get_clone_adapter()
+    available = bool(adapter.is_available())
+    avail_engines, missing_engines = probe_clone_engines()
+    return {
+        "ok": True,
+        "available": available,
+        "adapter_id": getattr(adapter, "adapter_id", "unknown"),
+        "required_engines": list(CLONE_PROVIDER_IDS),
+        "available_engines": avail_engines,
+        "missing_engines": missing_engines,
+        "error_code": None if available else "CLONE_ENGINE_MISSING",
+        "message": None if available else _CLONE_MISSING_RU,
+        "hint": None if available else _CLONE_HINT_RU,
+    }
 
 
 def clone_voice(

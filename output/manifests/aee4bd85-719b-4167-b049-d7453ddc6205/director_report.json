@@ -1,0 +1,52 @@
+{
+  "director_agent_version": "1.0",
+  "openddf_agent": "Director/v1",
+  "project_uuid": "aee4bd85-719b-4167-b049-d7453ddc6205",
+  "task_id": "89965028e8b947c0baafd073b240bdc3",
+  "status": "success",
+  "segment_count": 1,
+  "llm_used_count": 1,
+  "rule_only_count": 0,
+  "llm_skipped": false,
+  "validation_ok": true,
+  "warnings": [],
+  "errors": [],
+  "execution_time_ms": 197506.0,
+  "decision_log": [
+    "segment_0:emotion=Neutral style=conversational speed=normal llm=True"
+  ],
+  "per_segment": [
+    {
+      "emotion": "Neutral",
+      "speech_style": "conversational",
+      "speaking_speed": "normal",
+      "formality": 0.5,
+      "humor": 0.0,
+      "sarcasm": 0.0,
+      "aggression": 0.0,
+      "calmness": 0.5,
+      "emotional_intensity": 0.3,
+      "allowed_compression": 0.2,
+      "allowed_expansion": 0.3,
+      "adaptation_priority": 0.6,
+      "meaning_priority": 0.95,
+      "lip_sync_priority": 0.7,
+      "naturalness_priority": 0.75,
+      "utterance_goal": "inform",
+      "literal_phrasing_importance": 0.4,
+      "deep_semantic_adaptation_needed": false,
+      "segment_id": 0,
+      "speaker_id": "default",
+      "language": "it",
+      "maximum_duration_ms": 4335,
+      "preferred_duration_ms": 3988,
+      "decision_reasons": [
+        "rule_engine",
+        "rule:formal_markers",
+        "rule:high_word_density",
+        "rule:default_inform",
+        "llm_structured_brief"
+      ]
+    }
+  ]
+}

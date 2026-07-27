@@ -222,7 +222,23 @@ def api_cloud_remote_jobs():
             payload=data.get("payload") or {},
         )
     except NotImplementedError as e:
-        return jsonify({"ok": False, "error": str(e)}), 501
+        from engines.cloud.remote_jobs import (
+            CLOUD_TARGET_MSG_EN,
+            CLOUD_TARGET_MSG_RU,
+            CloudTargetUnavailableError,
+        )
+
+        payload = {
+            "ok": False,
+            "error": "cloud_target_unavailable",
+            "message": getattr(e, "message_en", None) or str(e) or CLOUD_TARGET_MSG_EN,
+            "message_ru": getattr(e, "message_ru", None) or CLOUD_TARGET_MSG_RU,
+            "target": str(data.get("target") or "cloud"),
+        }
+        if isinstance(e, CloudTargetUnavailableError):
+            payload["message"] = e.message_en
+            payload["message_ru"] = e.message_ru
+        return jsonify(payload), 501
     except ValueError as e:
         return jsonify({"ok": False, "error": str(e)}), 400
     return jsonify({"ok": True, "job": job})
@@ -247,3 +263,95 @@ def api_cloud_project_move(project_id: str):
         return jsonify({"ok": False, "error": "dest_provider_id required"}), 400
     project = _svc().manager.move_between_providers(project_id, dest)
     return jsonify({"ok": True, "project": project.to_dict()})
+
+
+# ── OAuth scaffolding (Google / OneDrive / Dropbox) ───────
+
+
+@bp.get("/api/cloud/oauth/status")
+def api_cloud_oauth_status_all():
+    blocked = _guard()
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+    from engines.cloud.oauth import OAUTH_SPECS, credential_status
+
+    rows = [credential_status(pid, app_dir=APP_DIR).to_dict() for pid in OAUTH_SPECS]
+    return jsonify({"ok": True, "providers": rows, "local_mirror_fallback": True})
+
+
+@bp.get("/api/cloud/oauth/<provider_id>/status")
+def api_cloud_oauth_status(provider_id: str):
+    blocked = _guard()
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+    from engines.cloud.oauth import OAUTH_SPECS, credential_status
+
+    if provider_id not in OAUTH_SPECS:
+        return jsonify({"ok": False, "error": "unknown_oauth_provider"}), 404
+    st = credential_status(provider_id, app_dir=APP_DIR)
+    return jsonify({"ok": True, **st.to_dict(), "local_mirror_available": True})
+
+
+@bp.get("/api/cloud/oauth/<provider_id>/authorize")
+def api_cloud_oauth_authorize(provider_id: str):
+    blocked = _guard()
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+    from engines.request_guards import require_local_mutating
+    from engines.cloud.oauth import OAUTH_SPECS, build_authorize_url
+
+    denied = require_local_mutating(request, action="oauth_authorize")
+    if denied is not None:
+        return denied
+    if provider_id not in OAUTH_SPECS:
+        return jsonify({"ok": False, "error": "unknown_oauth_provider"}), 404
+    result = build_authorize_url(provider_id, app_dir=APP_DIR)
+    code = 200 if result.get("ok") else 503
+    return jsonify(result), code
+
+
+@bp.get("/api/cloud/oauth/<provider_id>/callback")
+def api_cloud_oauth_callback(provider_id: str):
+    """OAuth redirect URI handler — exchanges code for tokens."""
+    blocked = _guard()
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+    from engines.request_guards import require_local_mutating
+    from engines.cloud.oauth import OAUTH_SPECS, exchange_code
+
+    denied = require_local_mutating(request, action="oauth_callback")
+    if denied is not None:
+        return denied
+    if provider_id not in OAUTH_SPECS:
+        return jsonify({"ok": False, "error": "unknown_oauth_provider"}), 404
+    err = (request.args.get("error") or "").strip()
+    if err:
+        return jsonify({"ok": False, "error": err, "description": request.args.get("error_description")}), 400
+    code = (request.args.get("code") or "").strip()
+    state = (request.args.get("state") or "").strip()
+    if not code:
+        return jsonify({"ok": False, "error": "code required"}), 400
+    try:
+        result = exchange_code(provider_id, code, app_dir=APP_DIR, state=state)
+    except PermissionError as e:
+        return jsonify({"ok": False, "error": str(e), "local_mirror_available": True}), 503
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+    status = 200 if result.get("ok") else 400
+    return jsonify(result), status
+
+
+@bp.post("/api/cloud/oauth/<provider_id>/disconnect")
+def api_cloud_oauth_disconnect(provider_id: str):
+    blocked = _guard()
+    if blocked:
+        return jsonify({"ok": False, "error": blocked}), 403
+    from engines.request_guards import require_local_mutating
+    from engines.cloud.oauth import OAUTH_SPECS, disconnect
+
+    denied = require_local_mutating(request, action="oauth_disconnect")
+    if denied is not None:
+        return denied
+    if provider_id not in OAUTH_SPECS:
+        return jsonify({"ok": False, "error": "unknown_oauth_provider"}), 404
+    return jsonify(disconnect(provider_id, app_dir=APP_DIR))

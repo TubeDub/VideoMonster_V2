@@ -299,10 +299,13 @@ def prepare_tts_groups_semantic(
     task_id: str,
     app_dir: Path,
     adapt_text: bool = True,
+    segments_data: list | None = None,
 ) -> tuple[list[dict], SemanticAdaptationLog]:
     """Adapt each TTS group text to its timing window before synthesis.
 
     When adapt_text=False, groups pass through unchanged (TTS uses approved Final).
+    When text is shortened, also update ``plain_text`` and stamp the head
+    segment so Review/audits stay aligned with what TTS will speak.
     """
     log = SemanticAdaptationLog(app_dir, task_id=task_id)
     if not adapt_text:
@@ -331,7 +334,26 @@ def prepare_tts_groups_semantic(
         )
         if rec:
             log.add(rec)
-        out_groups.append({**group, "text": adapted})
+        updated = {**group, "text": adapted}
+        if adapted and adapted != text:
+            updated["plain_text"] = adapted
+            if (
+                segments_data is not None
+                and 0 <= head < len(segments_data)
+                and isinstance(segments_data[head], dict)
+            ):
+                try:
+                    from engines.translation_validation import (
+                        stamp_authoritative_final_text,
+                    )
+
+                    stamp_authoritative_final_text(segments_data[head], adapted)
+                except Exception:
+                    segments_data[head]["text"] = adapted
+                    segments_data[head]["plain_text"] = adapted
+                    segments_data[head]["tts_text"] = adapted
+                    segments_data[head]["text_for_tts"] = adapted
+        out_groups.append(updated)
 
     return out_groups, log
 

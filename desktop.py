@@ -217,33 +217,6 @@ def main() -> None:
         f"http://127.0.0.1:{port}/dub\n"
         "Остановите сервер: Ctrl+C в этом окне терминала."
     )
-    # #region agent log
-    try:
-        import json as _json
-
-        with open(
-            r"c:\Users\serhii\Desktop\VideoMonster_V2\debug-ee98a6.log",
-            "a",
-            encoding="utf-8",
-        ) as _df:
-            _df.write(
-                _json.dumps(
-                    {
-                        "sessionId": "ee98a6",
-                        "runId": "server-down",
-                        "hypothesisId": "H7",
-                        "location": "desktop.py:main",
-                        "message": "webview_closed_flask_kept_alive",
-                        "data": {"port": port, "flask_alive": flask_thread.is_alive()},
-                        "timestamp": int(time.time() * 1000),
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
-    except Exception:
-        pass
-    # #endregion
     try:
         while flask_thread.is_alive():
             flask_thread.join(timeout=1.0)

@@ -89,7 +89,7 @@
       "release_channel": "DEVELOPER",
       "feature_id": "enterprise_translation",
       "api_namespace": "enterprise_translation",
-      "adapter": "",
+      "adapter": "enterprise_translation",
       "dependencies": ["translation"],
       "description": "Enterprise translation layer"
     },
@@ -99,7 +99,7 @@
       "release_channel": "DEVELOPER",
       "feature_id": "word_timing",
       "api_namespace": "word_timing",
-      "adapter": "",
+      "adapter": "word_timing",
       "dependencies": ["dubbing"],
       "description": "Per-word timing through pipeline"
     },
@@ -109,7 +109,7 @@
       "release_channel": "DEVELOPER",
       "feature_id": "professional_dubbing",
       "api_namespace": "professional_dubbing",
-      "adapter": "",
+      "adapter": "professional_dubbing",
       "dependencies": ["dubbing"],
       "description": "Prosody and professional dub controls"
     },
@@ -121,7 +121,7 @@
       "api_namespace": "dub_studio",
       "adapter": "dub_studio",
       "dependencies": ["dubbing", "audio"],
-      "description": "Multi-track dub studio (architecture only)"
+      "description": "Multi-track dub studio"
     },
     {
       "id": "project",
@@ -139,27 +139,27 @@
       "release_channel": "DEVELOPER",
       "feature_id": "developer_tools",
       "api_namespace": "developer",
-      "adapter": "",
+      "adapter": "developer_tools",
       "dependencies": ["core"],
       "description": "Developer panel and diagnostics"
     },
     {
       "id": "cloud_platform",
       "label": "Cloud Platform",
-      "release_channel": "DISABLED",
+      "release_channel": "DEVELOPER",
       "feature_id": "cloud_platform",
       "api_namespace": "cloud",
-      "adapter": "",
+      "adapter": "cloud_platform",
       "dependencies": ["core"],
       "description": "Cloud sync and remote jobs"
     },
     {
       "id": "live_translation",
       "label": "Live Translation",
-      "release_channel": "DISABLED",
+      "release_channel": "DEVELOPER",
       "feature_id": "live_translation",
       "api_namespace": "live",
-      "adapter": "",
+      "adapter": "live_translation",
       "dependencies": ["translation", "tts"],
       "description": "Real-time translation"
     }

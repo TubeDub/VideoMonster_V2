@@ -24,6 +24,17 @@ LEGACY_STYLE_ALIASES: dict[str, str] = {
     "language_learning": "documentary",
 }
 
+# TZ Stage 6: original+dub "language learning" mix — Pro / explicit only.
+PRO_ONLY_UNDERLAY_STYLES = frozenset(
+    {
+        "language_learning",
+        "mix",
+        "classic_voiceover",
+        "classic",
+        "documentary",
+    }
+)
+
 ORIGINAL_VOLUME_PRESETS = (0.0, 0.20, 0.38, 0.40, 0.50, 0.70, 1.0)
 
 STABLE_BASELINE_TAG = "stable-2026-06-17"
@@ -46,6 +57,27 @@ def normalize_style_id(style_id: str | None) -> str:
     if reg.get(key):
         return key
     return DEFAULT_DUB_STYLE
+
+
+def gate_style_for_user_mode(
+    style_id: str | None,
+    user_mode: str | None = None,
+    *,
+    raw_request: str | None = None,
+) -> tuple[str, bool]:
+    """Force full_dub Happy Path style in Simple when underlay mix is requested.
+
+    Returns ``(normalized_style_id, was_gated)``.
+    Pro / developer keep language_learning / documentary underlay.
+    """
+    raw = (raw_request or style_id or "").strip().lower()
+    normalized = normalize_style_id(style_id or raw or DEFAULT_DUB_STYLE)
+    mode = (user_mode or "basic").strip().lower()
+    if mode in ("pro", "professional", "advanced", "developer", "dev"):
+        return normalized, False
+    if raw in PRO_ONLY_UNDERLAY_STYLES or normalized in PRO_ONLY_UNDERLAY_STYLES:
+        return DEFAULT_DUB_STYLE, True
+    return normalized, False
 
 
 def get_dub_style(style_id: str | None) -> DubStylePreset:
@@ -105,9 +137,20 @@ def resolve_dub_style(
     original_volume: float | None = None,
 ) -> dict[str, Any]:
     preset = get_dub_style(style_id)
+    # Full-mute styles (cinematic/modern/professional): preset volume is 0.
+    # Only honor an explicit override when the caller truly wants underlay
+    # (e.g. documentary) — never let a stale UI default of 20% undo full_dub.
+    preset_mute = (
+        preset.mix_mode == "full_dub" and float(preset.original_volume or 0) <= 0.001
+    )
     orig = preset.original_volume
     if original_volume is not None:
-        orig = max(0.0, min(1.0, float(original_volume)))
+        ov = max(0.0, min(1.0, float(original_volume)))
+        if preset_mute and ov > 0.001 and ov <= 0.25:
+            # Likely stale wizard default (20%) — keep true full_dub mute
+            orig = 0.0
+        else:
+            orig = ov
 
     if preset.skip_tts:
         mix_mode = "original_only"

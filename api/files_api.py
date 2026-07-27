@@ -79,10 +79,16 @@ def api_save_vmr():
 @bp.get("/api/download_vmr/<filename>")
 def api_download_vmr(filename):
     """Скачивает VMR-документ."""
-    safe = Path(filename).name
-    path = OUTPUT_DIR / safe
+    from engines.path_safety import is_under_root
 
-    if not path.exists() or not safe.endswith(".vmr"):
+    safe = Path(filename).name
+    if not safe.endswith(".vmr") or safe != Path(filename).name:
+        abort(404)
+    try:
+        path = (OUTPUT_DIR / safe).resolve()
+    except OSError:
+        abort(404)
+    if not path.is_file() or not is_under_root(path, OUTPUT_DIR):
         abort(404)
 
     return send_file(
@@ -96,12 +102,16 @@ def api_download_vmr(filename):
 @bp.post("/api/save_txt")
 def api_save_txt():
     """Сохраняет текст как TXT-файл."""
+    from engines.path_safety import is_under_root, safe_filename
+
     data = request.get_json(silent=True) or {}
     text = data.get("text", "")
-    name = data.get("name", "document")
+    name = safe_filename(data.get("name", "document"), default="document")
 
     filename = f"{name}_{uuid.uuid4().hex[:6]}.txt"
-    path = OUTPUT_DIR / filename
+    path = (OUTPUT_DIR / filename).resolve()
+    if not is_under_root(path, OUTPUT_DIR):
+        return jsonify({"error": "invalid_name"}), 400
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
@@ -112,10 +122,16 @@ def api_save_txt():
 @bp.get("/api/dl_txt/<filename>")
 def api_dl_txt(filename):
     """Скачивает TXT-файл."""
-    safe = Path(filename).name
-    path = OUTPUT_DIR / safe
+    from engines.path_safety import is_under_root
 
-    if not path.exists() or not safe.endswith(".txt"):
+    safe = Path(filename).name
+    if not safe.endswith(".txt") or safe != Path(filename).name:
+        abort(404)
+    try:
+        path = (OUTPUT_DIR / safe).resolve()
+    except OSError:
+        abort(404)
+    if not path.is_file() or not is_under_root(path, OUTPUT_DIR):
         abort(404)
 
     return send_file(

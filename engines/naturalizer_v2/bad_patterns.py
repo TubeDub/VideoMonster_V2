@@ -75,6 +75,11 @@ _BAD_MT_PATTERNS: list[tuple[str, str]] = [
     (r"\bвідомий\s+сьогодні,?\s*як\b", "uk_stiff_known_today_as"),
     (r"\bвзяти\s+деякі\s+фотографії\b", "uk_stiff_take_some_photos"),
     (r"\bпросто\s+не\s+розумів\s+одержимості\s+сина\b", "uk_stiff_obsession"),
+    # zh→uk collapsed / agreement garbage that previously got Fast QA PASS
+    (r"поколінь\s+прості", "uk_bad_agreement_pokolin"),
+    (r"вісім\s+поколінь\s+прості", "uk_nonsense_eight_generations"),
+    (r"ви\s+товсті,\s*ви\s+вагітні", "uk_nonsense_fat_pregnant"),
+    (r"ви\s+вагітні,\s*ви\s+товсті", "uk_nonsense_pregnant_fat"),
 ]
 
 

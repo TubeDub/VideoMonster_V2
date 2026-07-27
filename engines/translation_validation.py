@@ -36,6 +36,48 @@ def texts_equivalent_for_ownership(a: str, b: str) -> bool:
     return bool(na) and na == nb
 
 
+def _token_coverage_for_ownership(owned: str, larger: str) -> float:
+    ot = normalize_text_for_ownership(owned).split()
+    if not ot:
+        return 0.0
+    st = set(normalize_text_for_ownership(larger).split())
+    return sum(1 for t in ot if t in st) / len(ot)
+
+
+def is_shared_mt_blob_reclaim(
+    owned: str,
+    semantic: str,
+    *,
+    min_extra: int = 24,
+    raw_mt: str = "",
+) -> bool:
+    """True when ``semantic`` looks like a multi-segment MT blob extending ``owned``.
+
+    Debleed often leaves a correct per-slot split in final/raw while stale
+    ``semantic_engine_text`` still holds the shared pre-split blob. Preferring
+    that blob re-injects neighbor text into TTS. Paraphrased fuller semantics
+    (not a contiguous superstring of the owned split) are allowed through.
+    """
+    o = normalize_text_for_ownership(owned)
+    s = normalize_text_for_ownership(semantic)
+    if not o or not s or o == s:
+        return False
+    if len(s) < len(o) + min_extra:
+        return False
+    if o in s:
+        return True
+    prefix = o[: min(48, len(o))]
+    if prefix and s.startswith(prefix):
+        return True
+    # Soft: semantic still mirrors an unsplit raw blob while owned is the
+    # debleeded piece (wording may drift slightly: USC vs full university name).
+    raw_n = normalize_text_for_ownership(raw_mt)
+    if raw_n and raw_n == s and len(o.split()) >= 5:
+        if _token_coverage_for_ownership(owned, semantic) >= 0.8:
+            return True
+    return False
+
+
 def _semantic_authority_text(seg: dict[str, Any], audit: dict[str, Any] | None = None) -> str:
     a = audit or {}
     return str(
@@ -73,6 +115,11 @@ def prefer_semantic_authority(
         return False
     if not raw:
         return False
+    # Refuse multi-segment blob reclaim disguised as "richer semantic".
+    if is_shared_mt_blob_reclaim(cur, sem, raw_mt=raw) or is_shared_mt_blob_reclaim(
+        raw, sem, raw_mt=raw
+    ):
+        return False
     if texts_equivalent_for_ownership(cur, raw):
         return not texts_equivalent_for_ownership(sem, raw)
     if not should_prefer_semantic_over_raw_mt(
@@ -85,7 +132,7 @@ def prefer_semantic_authority(
     try:
         from engines.dsal.clause_coverage import restore_missing_clauses
 
-        restored, cov = restore_missing_clauses(raw, source)
+        restored, cov = restore_missing_clauses(raw, source, tgt_lang="")
         if cov.restored_phrases and texts_equivalent_for_ownership(cur, restored):
             return True
     except Exception:
@@ -166,6 +213,34 @@ def resolve_post_quality_text(
         or ""
     ).strip()
     source = str(seg.get("original_text") or seg.get("source_text") or a.get("whisper_text") or "")
+    # If voice_input was polluted with an unsplit MT blob, prefer debleeded Final.
+    owned_anchor = str(
+        seg.get("final_text")
+        or a.get("final_text")
+        or seg.get("translated_text")
+        or ""
+    ).strip()
+    if owned_anchor and candidate and not texts_equivalent_for_ownership(
+        owned_anchor, candidate
+    ):
+        cand_n = normalize_text_for_ownership(candidate)
+        anc_n = normalize_text_for_ownership(owned_anchor)
+        longer = len(cand_n) > len(anc_n) + 24
+        if is_shared_mt_blob_reclaim(owned_anchor, candidate, raw_mt=raw):
+            candidate = owned_anchor
+        elif longer and _token_coverage_for_ownership(owned_anchor, candidate) >= 0.85 and (
+            is_shared_mt_blob_reclaim(owned_anchor, semantic, raw_mt=raw)
+            or (
+                raw
+                and texts_equivalent_for_ownership(semantic, raw)
+                and _token_coverage_for_ownership(owned_anchor, raw) >= 0.8
+            )
+            or (
+                raw
+                and texts_equivalent_for_ownership(candidate, raw)
+            )
+        ):
+            candidate = owned_anchor
     if prefer_semantic_authority(
         semantic=semantic,
         candidate=candidate,
@@ -173,6 +248,11 @@ def resolve_post_quality_text(
         source=source,
     ):
         return semantic
+    # Belt: never let a stale semantic blob displace an owned split candidate.
+    if candidate and semantic and is_shared_mt_blob_reclaim(
+        candidate, semantic, raw_mt=raw
+    ):
+        return candidate
     return candidate
 
 
@@ -211,6 +291,16 @@ def stamp_authoritative_final_text(
         final = strip_stress_marks(final)
     except Exception:
         pass
+    # Phrase-loop / bare-infinitive hygiene before locking TTS fields
+    try:
+        from engines.mt.cross_script_guard import deflate_phrase_loop, has_phrase_loop
+
+        if has_phrase_loop(final):
+            deflated = deflate_phrase_loop(final)
+            if deflated and not has_phrase_loop(deflated):
+                final = deflated
+    except Exception:
+        pass
     existing_engine = str(seg.get("semantic_engine_text") or "").strip()
     raw_anchor = str(
         seg.get("translated_text")
@@ -220,6 +310,7 @@ def stamp_authoritative_final_text(
     seg["final_text"] = final
     seg["voice_input"] = final
     seg["text_for_tts"] = final
+    seg["tts_text"] = final
     seg["plain_text"] = final
     seg["translation_text"] = final
     # Keep Raw MT immutable once present
@@ -231,15 +322,24 @@ def stamp_authoritative_final_text(
     seg["grammar_text"] = final
     seg["timing_text"] = final
     seg["semantic_text"] = final
-    if preserve_semantic_engine and existing_engine and prefer_semantic_authority(
-        semantic=existing_engine,
-        candidate=final,
-        raw_mt=str((audit or {}).get("raw_translation") or raw_anchor or ""),
-        source=str(seg.get("original_text") or ""),
+    if (
+        preserve_semantic_engine
+        and existing_engine
+        and not is_shared_mt_blob_reclaim(final, existing_engine)
+        and prefer_semantic_authority(
+            semantic=existing_engine,
+            candidate=final,
+            raw_mt=str((audit or {}).get("raw_translation") or raw_anchor or ""),
+            source=str(seg.get("original_text") or ""),
+        )
     ):
         seg["semantic_engine_text"] = existing_engine
     else:
-        seg["semantic_engine_text"] = existing_engine or final
+        # Drop stale multi-segment blob; keep engine only when it is not a reclaim.
+        if existing_engine and not is_shared_mt_blob_reclaim(final, existing_engine):
+            seg["semantic_engine_text"] = existing_engine
+        else:
+            seg["semantic_engine_text"] = final
     if audit is not None:
         audit["final_text"] = final
         audit["tts_text"] = final
@@ -271,6 +371,16 @@ def validate_segment_for_target(
             "detected_language": "empty",
             "target_language": normalize_lang(target_lang),
         }
+    if not bad and original:
+        try:
+            from engines.mt.cross_script_guard import meaning_collapse, source_script_leak
+
+            if source_script_leak(original, stripped, target_lang=target_lang):
+                bad, code = True, "source_script_leak"
+            elif meaning_collapse(original, stripped, target_lang=target_lang):
+                bad, code = True, "meaning_collapse"
+        except Exception:
+            pass
     return {
         "pass": not bad,
         "fail": bad,
@@ -475,6 +585,37 @@ def build_validation_rows_from_info(
     return rows
 
 
+def _retry_candidate_bad(
+    source: str,
+    translated: str,
+    *,
+    source_lang: str,
+    target_lang: str,
+) -> tuple[bool, str]:
+    """Reject script leaks and meaning_collapse (Argos zh→uk fluent nonsense)."""
+    bad, code = is_critical_language_mismatch(
+        translated, target_lang=target_lang, original=source, source_lang=source_lang
+    )
+    if bad:
+        return True, code
+    if not source or not translated:
+        return False, ""
+    try:
+        from engines.mt.cross_script_guard import meaning_collapse, source_script_leak
+
+        if source_script_leak(
+            source, translated, source_lang=source_lang, target_lang=target_lang
+        ):
+            return True, "source_script_leak"
+        if meaning_collapse(
+            source, translated, source_lang=source_lang, target_lang=target_lang
+        ):
+            return True, "meaning_collapse"
+    except Exception:
+        pass
+    return False, ""
+
+
 def retry_segment_translation(
     text: str,
     *,
@@ -509,8 +650,8 @@ def retry_segment_translation(
             max_retries=1,
         )
         translated = str(result.translated or "").strip()
-        bad, code = is_critical_language_mismatch(
-            translated, target_lang=tgt_n, original=src
+        bad, code = _retry_candidate_bad(
+            src, translated, source_lang=src_n, target_lang=tgt_n
         )
         attempts.append(
             {
@@ -534,8 +675,8 @@ def retry_segment_translation(
         dt = DeepTranslatorWrapper()
         if dt.is_available():
             translated = str(dt.translate(src, src_n, tgt_n) or "").strip()
-            bad, code = is_critical_language_mismatch(
-                translated, target_lang=tgt_n, original=src
+            bad, code = _retry_candidate_bad(
+                src, translated, source_lang=src_n, target_lang=tgt_n
             )
             attempts.append(
                 {
@@ -550,6 +691,31 @@ def retry_segment_translation(
                 return translated, attempts
     except Exception as exc:
         attempts.append({"attempt": max_retries + 1, "error": str(exc)})
+
+    # Final recovery: LLM direct from source (fixes Argos zh→uk meaning collapse)
+    try:
+        from engines.mt.llm_retranslate import llm_direct_translate, should_llm_retranslate
+
+        if should_llm_retranslate(src_lang=src_n, tgt_lang=tgt_n):
+            translated = str(
+                llm_direct_translate(src, src_lang=src_n, tgt_lang=tgt_n) or ""
+            ).strip()
+            bad, code = _retry_candidate_bad(
+                src, translated, source_lang=src_n, target_lang=tgt_n
+            )
+            attempts.append(
+                {
+                    "attempt": max_retries + 2,
+                    "translator": "llm-direct-retranslate",
+                    "success": bool(translated) and not bad,
+                    "language_mismatch": code if bad else "",
+                    "text_preview": translated[:200],
+                }
+            )
+            if translated and not bad:
+                return translated, attempts
+    except Exception as exc:
+        attempts.append({"attempt": max_retries + 2, "error": str(exc)})
 
     return "", attempts
 
@@ -886,6 +1052,35 @@ def recover_mismatched_segments(
             registry=registry,
         )
 
+        if not translated:
+            # Last resort: scrub / LLM salvage (zh→uk Argos collapse)
+            try:
+                from engines.pipeline_language_gate import salvage_collapsed_segment_text
+
+                salvaged, method = salvage_collapsed_segment_text(
+                    text=voice_input,
+                    original=str(original or ""),
+                    approved=str(
+                        (audit or {}).get("approved_text")
+                        or seg.get("approved_text")
+                        or ""
+                    ),
+                    target_lang=tgt,
+                    source_lang=src,
+                )
+                if salvaged:
+                    translated = salvaged
+                    attempts = list(attempts or []) + [
+                        {
+                            "attempt": "salvage",
+                            "translator": f"salvage:{method}",
+                            "success": True,
+                            "text_preview": salvaged[:200],
+                        }
+                    ]
+            except Exception:
+                pass
+
         if translated:
             apply_translated_text_to_segment(seg, translated)
             if not audit:
@@ -895,10 +1090,11 @@ def recover_mismatched_segments(
             audit["raw_translation"] = translated
             audit["final_text"] = translated
             audit["tts_text"] = translated
-            fixed += 1
             after = validate_segment_for_target(
                 translated, target_lang=tgt, original=original
             )
+            if after["pass"]:
+                fixed += 1
         else:
             after = before
             seg["translation_error"] = (

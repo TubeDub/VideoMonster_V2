@@ -1,0 +1,76 @@
+{
+  "task_id": "0c605a1c7f7d48f3b2a20915d3efdfc0",
+  "run_id": "598ed1c2",
+  "lang": "uk",
+  "elapsed_sec": 0.143,
+  "segments_total": 1,
+  "segments_adapted": 1,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 0,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 1,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "我们陆下八代单纯 此时单保 有惊呀 你怀孕了 陆下有厚了 要是能一几个男 那就更完美了 妈 若是我一生的 无论是你 不能想 就怀孕了 我怀孕了 你跟月子前一场义",
+      "input": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення",
+      "output": "Ми можемо самі зателефонувати одержувачу і узгодити зручний час і місце вручення",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 10320,
+      "slot_ms": 4370,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=10320ms slot=4370ms prev_end=0ms overflow=136.2% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied",
+        "severe_overflow: predicted=10320ms slot=4370ms ratio=2.36",
+        "voice_quality_risk: projected_atempo=2.36 (max=1.2) — recommend text adaptation"
+      ]
+    }
+  ]
+}

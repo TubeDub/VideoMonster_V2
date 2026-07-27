@@ -96,14 +96,20 @@ class UrlIngest:
             except Exception as e:
                 return IngestResult(ok=False, source_type="url", error=str(e), engine="yt-dlp")
 
-        # Direct stream URL (HLS/RTSP) without yt-dlp
-        if uri.lower().endswith((".m3u8", ".mpd")) or "m3u8" in uri.lower():
+        # Direct stream URL (HLS/RTSP/RTMP) without yt-dlp
+        low = uri.lower()
+        if (
+            low.endswith((".m3u8", ".mpd"))
+            or "m3u8" in low
+            or low.startswith(("rtsp://", "rtmp://", "rtsps://"))
+        ):
+            source_type = "rtsp" if low.startswith("rtsp") else ("rtmp" if low.startswith("rtmp") else "hls")
             return IngestResult(
                 ok=True,
-                source_type="hls",
+                source_type=source_type,
                 stream_url=uri,
                 title=uri,
-                engine="direct-hls",
+                engine=f"direct-{source_type}",
             )
 
         return IngestResult(
@@ -111,7 +117,7 @@ class UrlIngest:
             source_type="url",
             error=(
                 "Install yt-dlp for YouTube/Twitch/Vimeo URLs, "
-                "or provide direct HLS/RTSP link."
+                "or provide direct HLS/RTSP/RTMP link / local media file."
             ),
             engine="none",
         )

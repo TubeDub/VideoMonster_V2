@@ -1,0 +1,25 @@
+{
+  "project_id": "1721539b423542ecaa95dfb4e8cb9d5a",
+  "locked": false,
+  "speakers": {
+    "seg-0": {
+      "speaker_uuid": "seg-0",
+      "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    }
+  }
+}

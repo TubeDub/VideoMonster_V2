@@ -244,17 +244,46 @@ def _completeness_rank(text: str) -> int:
     return 1 if ok else 0
 
 
-def _fallback_usable(text: str, *, tgt_lang: str = "") -> bool:
-    """True when a fallback string is valid TTS text in the target language."""
+def _fallback_usable(
+    text: str,
+    *,
+    tgt_lang: str = "",
+    source: str = "",
+    source_lang: str = "",
+) -> bool:
+    """True when a fallback string is valid TTS text in the target language.
+
+    Never treats Argos phrase-loops / meaning-collapse dumps as usable —
+    that was the ``_tmp_3333`` integrity→raw_mt brick path.
+    """
     ok, _ = validate_tts_text(text, tgt_lang=tgt_lang or None)
     if not ok:
         return False
+    try:
+        from engines.mt.cross_script_guard import has_phrase_loop, meaning_collapse
+
+        if has_phrase_loop(text):
+            return False
+        if source and meaning_collapse(
+            source,
+            text,
+            source_lang=source_lang or None,
+            target_lang=tgt_lang or None,
+        ):
+            return False
+    except Exception:
+        pass
     if not tgt_lang:
         return True
     try:
         from engines.pipeline_language_gate import is_critical_language_mismatch
 
-        bad, _ = is_critical_language_mismatch(text, target_lang=tgt_lang)
+        bad, _ = is_critical_language_mismatch(
+            text,
+            target_lang=tgt_lang,
+            original=source,
+            source_lang=source_lang,
+        )
         return not bad
     except Exception:
         return True
@@ -266,6 +295,7 @@ def enforce_tts_integrity(
     fallbacks: list[str] | None = None,
     source: str = "",
     tgt_lang: str = "",
+    source_lang: str = "",
 ) -> dict[str, Any]:
     """Guarantee a safe, complete TTS string.
 
@@ -273,7 +303,7 @@ def enforce_tts_integrity(
         text        — the text that MUST be sent to TTS (never empty/cut),
         changed     — whether we replaced the candidate,
         chosen      — where the final text came from
-                      (candidate | fallback[i] | source | candidate_forced),
+                      (candidate | scrubbed | fallback[i] | source | candidate_forced),
         issues      — issues detected on the candidate,
         rejected    — [{text, issues}] for each fallback we skipped,
         reason      — short human/machine reason.
@@ -281,15 +311,17 @@ def enforce_tts_integrity(
     Selection order (TЗ §6/§8 — prefer a whole, slightly-long sentence over a
     clipped one; never emit empty; never truncate):
         1. candidate, if valid;
-        2. first valid fallback (fullest complete translation);
-        3. source (last resort, non-empty);
-        4. candidate normalized (forced) — only if literally nothing else exists.
+        2. scrub residual source-script from candidate (CJK tail in UK dub);
+        3. first valid fallback (never collapsed Raw MT);
+        4. source (last resort, non-empty, target-script only);
+        5. candidate normalized (forced) — only if literally nothing else exists.
     """
     cand = normalize_spaces(candidate)
     cand_ok, cand_issues = validate_tts_text(cand, tgt_lang=tgt_lang or None)
     rejected: list[dict[str, Any]] = []
+    _usable_kw = {"tgt_lang": tgt_lang, "source": source, "source_lang": source_lang}
 
-    if cand_ok and _fallback_usable(cand, tgt_lang=tgt_lang):
+    if cand_ok and _fallback_usable(cand, **_usable_kw):
         return {
             "text": cand,
             "changed": cand != str(candidate or ""),
@@ -299,14 +331,106 @@ def enforce_tts_integrity(
             "reason": "candidate_valid",
         }
 
+    # Phrase-loop dump: collapse repeats before Raw-MT fallback / foreign scrub.
+    try:
+        from engines.mt.cross_script_guard import deflate_phrase_loop, has_phrase_loop
+
+        if has_phrase_loop(cand):
+            deflated = normalize_spaces(deflate_phrase_loop(cand))
+            if deflated and deflated != cand and _fallback_usable(
+                deflated, **_usable_kw
+            ):
+                return {
+                    "text": deflated,
+                    "changed": True,
+                    "chosen": "deflate_phrase_loop",
+                    "issues": cand_issues,
+                    "rejected": rejected,
+                    "reason": "phrase_loop_deflated",
+                }
+    except Exception:
+        pass
+
+    # Foreign-script residue: scrub before falling back to Raw MT (zh→uk dump).
+    if "foreign_script" in cand_issues or not cand_ok:
+        try:
+            from engines.mt.cross_script_guard import (
+                has_phrase_loop,
+                meaning_collapse,
+                strip_source_script_chars,
+            )
+
+            scrubbed = normalize_spaces(
+                strip_source_script_chars(
+                    cand, source_lang=source_lang or None, source=source or None
+                )
+            )
+            scrub_ok = False
+            if scrubbed and scrubbed != cand and not has_phrase_loop(scrubbed):
+                # Soft accept: ignore incomplete_sentence after scrubbed tails
+                s_ok, s_iss = validate_tts_text(scrubbed, tgt_lang=tgt_lang or None)
+                soft_ok = s_ok or (
+                    set(s_iss) <= {"incomplete_sentence"} and len(scrubbed) >= 24
+                )
+                if soft_ok and not contains_foreign_script(scrubbed, tgt_lang):
+                    if not (
+                        source
+                        and meaning_collapse(
+                            source,
+                            scrubbed,
+                            source_lang=source_lang or None,
+                            target_lang=tgt_lang or None,
+                        )
+                    ):
+                        try:
+                            from engines.pipeline_language_gate import (
+                                is_critical_language_mismatch,
+                            )
+
+                            bad, _ = is_critical_language_mismatch(
+                                scrubbed,
+                                target_lang=tgt_lang,
+                                original=source,
+                                source_lang=source_lang,
+                            )
+                            scrub_ok = not bad
+                        except Exception:
+                            scrub_ok = True
+            if scrub_ok:
+                return {
+                    "text": scrubbed,
+                    "changed": True,
+                    "chosen": "scrubbed",
+                    "issues": cand_issues,
+                    "rejected": rejected,
+                    "reason": "stripped_source_script_residue",
+                }
+        except Exception:
+            pass
+
     # Candidate is broken — try the fuller fallbacks in priority order.
     for i, fb in enumerate(fallbacks or []):
         fb_norm = normalize_spaces(fb)
         if not fb_norm or fb_norm == cand:
             continue
-        if not _fallback_usable(fb_norm, tgt_lang=tgt_lang):
+        if not _fallback_usable(fb_norm, **_usable_kw):
             _, iss = validate_tts_text(fb_norm, tgt_lang=tgt_lang or None)
-            rejected.append({"text": fb_norm[:200], "issues": iss})
+            extra = list(iss)
+            try:
+                from engines.mt.cross_script_guard import has_phrase_loop, meaning_collapse
+
+                if has_phrase_loop(fb_norm):
+                    extra.append("phrase_loop")
+                if source and meaning_collapse(
+                    source,
+                    fb_norm,
+                    source_lang=source_lang or None,
+                    target_lang=tgt_lang or None,
+                ):
+                    extra.append("meaning_collapse")
+            except Exception:
+                pass
+            rejected.append({"text": fb_norm[:200], "issues": extra})
             continue
         return {
             "text": fb_norm,
@@ -318,7 +442,7 @@ def enforce_tts_integrity(
         }
 
     src_norm = normalize_spaces(source)
-    if src_norm and _fallback_usable(src_norm, tgt_lang=tgt_lang):
+    if src_norm and _fallback_usable(src_norm, **_usable_kw):
         return {
             "text": src_norm,
             "changed": True,
@@ -327,7 +451,7 @@ def enforce_tts_integrity(
             "rejected": rejected,
             "reason": "reverted_to_source",
         }
-    if src_norm and not _fallback_usable(src_norm, tgt_lang=tgt_lang):
+    if src_norm and not _fallback_usable(src_norm, **_usable_kw):
         rejected.append(
             {
                 "text": src_norm[:200],
@@ -353,6 +477,7 @@ def enforce_pre_tts_integrity(
     audits: list[dict[str, Any]] | None = None,
     source_segments: list[str] | None = None,
     target_lang: str = "",
+    source_lang: str = "",
 ) -> tuple[list[str], dict[str, Any]]:
     """Apply the integrity gate to every final segment before TTS.
 
@@ -373,8 +498,10 @@ def enforce_pre_tts_integrity(
 
     for i, seg in enumerate(segments):
         row = audit_by_idx.get(i, {})
-        # Fullest → shortest complete candidates, best fallback first.
+        # Prefer approved / naturalized over Raw MT — Raw last and often unusable
+        # after meaning_collapse (zh→uk Argos loops).
         fallbacks = [
+            str(row.get("approved_text") or ""),
             str(row.get("naturalized_text") or ""),
             str(row.get("semantic_text") or ""),
             str(row.get("final_text") or ""),
@@ -384,9 +511,17 @@ def enforce_pre_tts_integrity(
         if source_segments and i < len(source_segments):
             source = str(source_segments[i] or "")
         source = source or str(row.get("original") or row.get("whisper_text") or "")
+        src_lang = (
+            source_lang
+            or str(row.get("source_lang") or row.get("detected_lang") or "")
+        )
 
         decision = enforce_tts_integrity(
-            seg, fallbacks=fallbacks, source=source, tgt_lang=target_lang
+            seg,
+            fallbacks=fallbacks,
+            source=source,
+            tgt_lang=target_lang,
+            source_lang=src_lang,
         )
         out.append(decision["text"])
         if decision["changed"] and decision["chosen"] != "candidate":

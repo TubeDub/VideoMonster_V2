@@ -126,6 +126,7 @@ def ordered_engines_for_pair(
         return []
 
     bench_order = load_pair_rankings(app_dir).get(pk, [])
+    cjk_src = src in ("zh", "ja", "ko")
     scored: list[tuple[float, BaseMTEngine]] = []
     for eng in available:
         rank_bonus = 0.0
@@ -133,6 +134,31 @@ def ordered_engines_for_pair(
             rank_bonus = (len(bench_order) - bench_order.index(eng.id)) * 5.0
         rt = _runtime_engine_score(app_dir, pk, eng.id)
         rt_score = rt if rt >= 0 else (100 - eng.priority)
+        # CJK→* : prefer online deep when offline Marian/NLLB missing; demote Argos
+        if cjk_src:
+            if eng.id == "deep":
+                rank_bonus += 25.0
+            elif eng.id == "nllb":
+                rank_bonus += 15.0
+            elif eng.id == "argos":
+                # Argos zh→uk/ru invents flower waffle / birth-flips — last resort only
+                if tgt in ("uk", "ru", "be"):
+                    rank_bonus -= 55.0
+                else:
+                    rank_bonus -= 20.0
+        # en→uk/ru: Argos can emit flower waffle — keep behind deep when Marian absent
+        if src == "en" and tgt in ("uk", "ru") and eng.id == "deep":
+            rank_bonus += 8.0
+        if src == "en" and tgt in ("uk", "ru") and eng.id == "argos":
+            rank_bonus -= 12.0
+        # Skip Argos entirely for CJK→Cyrillic when deep/nllb/marian present
+        if (
+            cjk_src
+            and tgt in ("uk", "ru", "be")
+            and eng.id == "argos"
+            and any(e.id in ("deep", "nllb", "marian") for e in available)
+        ):
+            continue
         scored.append((rt_score + rank_bonus, eng))
 
     scored.sort(key=lambda x: x[0], reverse=True)
@@ -253,6 +279,63 @@ def translate_with_best_engine(
                 retries=meta["mt_retries"],
             )
         return result.text, meta
+
+    # Offline primary/fallback empty — try online deep unless offline lock / mode
+    offline_lock = False
+    try:
+        from engines.model_manager.runtime import is_offline_only
+
+        offline_lock = bool(is_offline_only())
+    except Exception:
+        pass
+    if (os.getenv("VM_MT_MODE") or os.getenv("VM_DUB_MODE") or "").strip().lower() == "offline":
+        offline_lock = True
+
+    if offline_lock:
+        meta["engine"] = "failed"
+        meta["quality_score"] = 0.0
+        meta["router_reason"] = "offline_mode_no_engine"
+        meta["error"] = (
+            "Offline MT failed: Argos/Marian/NLLB unavailable for this pair. "
+            "Prepare language packs before dubbing, or switch mode to online/auto."
+        )
+        meta["error_ru"] = (
+            "Офлайн-перевод недоступен: нет Argos/Marian/NLLB для этой пары. "
+            "Подготовьте языковые пакеты до дубляжа или включите online/auto."
+        )
+        return text, meta
+
+    deep = get_engine_by_id("deep")
+    if deep and deep.supports_pair(src, tgt) and "deep" not in meta["engines_tried"]:
+        meta["engines_tried"].append("deep")
+        try:
+            result = deep.translate(text, src, tgt)
+        except Exception as exc:
+            logger.warning("[MT] deep %s→%s failed: %s", src, tgt, exc)
+            result = None
+        if result is not None and _hard_success(result):
+            try:
+                from engines.mt.cross_script_guard import is_meta_waffle
+
+                if is_meta_waffle(result.text):
+                    result = None
+            except Exception:
+                pass
+        if result is not None and _hard_success(result):
+            score, metrics = compute_quality_score(
+                text, result.text, src_lang=src, tgt_lang=tgt
+            )
+            meta.update(
+                {
+                    "engine": result.engine_id,
+                    "engine_version": result.engine_version,
+                    "quality_score": round(score, 2),
+                    "quality_details": metrics,
+                    "router_reason": "online_deep_fallback",
+                    "mt_retries": int(meta.get("mt_retries", 0)) + 1,
+                }
+            )
+            return result.text, meta
 
     meta["engine"] = "failed"
     meta["quality_score"] = 0.0

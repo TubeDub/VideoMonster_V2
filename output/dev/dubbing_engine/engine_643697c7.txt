@@ -1,0 +1,12 @@
+=== DUBBING ENGINE REPORT task=1721539b423542ecaa95dfb4e8cb9d5a run=643697c7 ===
+lang=uk  segments=1  elapsed=0.11s
+adapted=1  skipped=0  strategies={'direct': 0, 'adapted': 0, 'video_adapt': 0, 'merge_next': 1, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=merge_next pred=46598ms slot=4737ms
+       IN : Наше восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця.
+       OUT: Наше восьме покоління родини Лу має лише одного спадкоємця та одного спадкоємця.
+       [stress] ok
+       [timing] strategy=merge_next pred=46598ms slot=4737ms prev_end=0ms overflow=883.7% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=46598ms slot=4737ms ratio=9.84; voice_quality_risk: projected_atempo=9.84 (max=1.2) — recomme

@@ -105,6 +105,58 @@ class ArgosEngine(BaseMTEngine):
         ms = (time.perf_counter() - t0) * 1000.0
         if not result or result == clean:
             return MTResult(text="", engine_id=self.id, error="unchanged", offline=True, elapsed_ms=ms)
+        # Argos en→uk (and similar) can emit canned flower-delivery waffle
+        try:
+            from engines.mt.cross_script_guard import (
+                has_phrase_loop,
+                is_meta_waffle,
+                source_script_leak,
+            )
+
+            if is_meta_waffle(result):
+                logger.warning(
+                    "[MT/Argos] rejected meta-waffle hallucination %s→%s: %s",
+                    src,
+                    tgt,
+                    result[:80],
+                )
+                return MTResult(
+                    text="",
+                    engine_id=self.id,
+                    error="meta_waffle",
+                    offline=True,
+                    elapsed_ms=ms,
+                )
+            if has_phrase_loop(result, min_repeats=3):
+                logger.warning(
+                    "[MT/Argos] rejected phrase-loop hallucination %s→%s: %s",
+                    src,
+                    tgt,
+                    result[:80],
+                )
+                return MTResult(
+                    text="",
+                    engine_id=self.id,
+                    error="phrase_loop",
+                    offline=True,
+                    elapsed_ms=ms,
+                )
+            if source_script_leak(clean, result, source_lang=src, target_lang=tgt):
+                logger.warning(
+                    "[MT/Argos] rejected source-script leak %s→%s: %s",
+                    src,
+                    tgt,
+                    result[:80],
+                )
+                return MTResult(
+                    text="",
+                    engine_id=self.id,
+                    error="source_script_leak",
+                    offline=True,
+                    elapsed_ms=ms,
+                )
+        except Exception:
+            pass
         return MTResult(text=result, engine_id=self.id, engine_version=self.version, offline=True, elapsed_ms=ms)
 
 

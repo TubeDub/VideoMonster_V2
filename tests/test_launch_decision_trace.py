@@ -66,6 +66,7 @@ def test_forbidden_not_called_reason_rejected():
 def test_meaning_first_path_records_stage_success(tmp_path: Path, monkeypatch):
     """Phase2 full run emits SUCCESS for every in-pipeline stage."""
     log_path = tmp_path / "phase2_trace.ndjson"
+    monkeypatch.setenv("VM_DEBUG_NDJSON", "1")
     monkeypatch.setattr(
         "engines.semantic_v3.launch_decision_trace._DEFAULT_DEBUG_LOG_PATH",
         log_path,

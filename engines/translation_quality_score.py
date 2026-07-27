@@ -134,6 +134,24 @@ def compute_quality_metrics(
     placeholder_leaks = detect_placeholder_leaks(tr)
     placeholder_leak_count = len(placeholder_leaks)
     cjk_garbage = has_cjk_garbage(tr)
+    cjk_meaning_collapse = False
+    meaning_collapse_hit = False
+    try:
+        from engines.mt.cross_script_guard import meaning_collapse
+
+        collapse = meaning_collapse(
+            orig, tr, source_lang=src, target_lang=tgt
+        )
+        if collapse:
+            meaning_collapse_hit = True
+            if collapse.get("source_script") == "cjk" or (src or "").startswith(
+                ("zh", "ja", "ko")
+            ):
+                cjk_meaning_collapse = True
+            else:
+                cjk_meaning_collapse = True  # score path uses this flag generically
+    except Exception:
+        pass
     from engines.mt.qe import runtime_qe_penalties
 
     qe = runtime_qe_penalties(orig, tr, src_lang=src, tgt_lang=tgt)
@@ -172,6 +190,8 @@ def compute_quality_metrics(
         "placeholder_leaks": placeholder_leaks,
         "placeholder_leak_count": placeholder_leak_count,
         "cjk_garbage": cjk_garbage,
+        "cjk_meaning_collapse": cjk_meaning_collapse,
+        "meaning_collapse": meaning_collapse_hit,
         "length_ratio_penalty": qe["length_ratio_penalty"],
         "intro_pattern_penalty": qe.get("intro_pattern_penalty", 0.0),
         "qe_penalty": qe["qe_penalty"],
@@ -274,6 +294,10 @@ def compute_quality_score(
 
     if metrics.get("cjk_garbage"):
         score = 0.0
+    if metrics.get("cjk_meaning_collapse") or metrics.get("meaning_collapse"):
+        # Cross-script / hallucinated MT — never look like a good score
+        score = min(score, 18.0)
+        score -= 40.0
 
     if tgt in _CYRILLIC_TARGETS and _CJK_RE.search(str(translated or "")):
         metrics["cjk_garbage"] = True
@@ -307,6 +331,8 @@ def should_switch_route(score: float, metrics: dict[str, Any]) -> bool:
     if metrics.get("placeholder_leak_count", 0) > 0:
         return True
     if metrics.get("no_cyrillic_pct", 0) > 55:
+        return True
+    if metrics.get("cjk_garbage") or metrics.get("cjk_meaning_collapse") or metrics.get("meaning_collapse"):
         return True
     return False
 

@@ -27,6 +27,69 @@ def _is_ssml(text: str) -> bool:
     return str(text or "").lstrip().startswith("<speak")
 
 
+_UNSAFE_REASON_CODES = frozenset(
+    {
+        "meaning_collapse",
+        "cjk_meaning_collapse",
+        "source_script_leak",
+        "meaning_loss",
+        "meaning_collapse",
+    }
+)
+
+
+def _tts_blocked(seg: dict | None, audit: dict | None = None) -> bool:
+    """True when MT failure must not be shown/voiced as Final/TTS."""
+    s = seg or {}
+    a = audit or {}
+    if s.get("tts_blocked") or s.get("skip_tts") or a.get("tts_blocked"):
+        return True
+    reasons = set()
+    for src in (
+        s.get("tps_reason_codes"),
+        a.get("reason_codes"),
+        s.get("dirty_reasons"),
+        (s.get("trh") or {}).get("reason_codes") if isinstance(s.get("trh"), dict) else None,
+        (s.get("trh") or {}).get("dirty_reasons") if isinstance(s.get("trh"), dict) else None,
+        a.get("dirty_reasons"),
+    ):
+        if isinstance(src, (list, tuple, set)):
+            reasons.update(str(x) for x in src if x)
+    for w in a.get("validation_warnings") or []:
+        if isinstance(w, dict) and w.get("code"):
+            reasons.add(str(w.get("code")))
+    if reasons & _UNSAFE_REASON_CODES:
+        # Collapse / script-leak codes always block TTS — even if TPS wrongly
+        # stamped PASS with a non-empty approved_text (see _tmp_3333).
+        return True
+    # Live detect: collapsed MT still sitting in nat/raw while Final empty
+    try:
+        from engines.mt.cross_script_guard import meaning_collapse, source_script_leak
+
+        original = str(
+            s.get("source_text")
+            or a.get("original")
+            or a.get("whisper_text")
+            or ""
+        )
+        candidate = str(
+            s.get("rejected_translation")
+            or a.get("naturalized_text")
+            or a.get("raw_translation")
+            or s.get("naturalized_text")
+            or ""
+        ).strip()
+        final_now = str(s.get("final_text") or s.get("text") or a.get("final_text") or "").strip()
+        if candidate and not final_now and (
+            meaning_collapse(original, candidate)
+            or source_script_leak(original, candidate)
+        ):
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def _dedupe_warnings(warnings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: set[tuple] = set()
     out: list[dict[str, Any]] = []
@@ -89,6 +152,72 @@ def _resolve_final_text(seg: dict, audit: dict) -> str:
         except Exception:
             return text
 
+    def _soft_blocked_nat_ok(candidate: str) -> bool:
+        """Allow healed UK nat when TTS was wiped only for healable phrase loops."""
+        if not candidate or _is_ssml(candidate):
+            return False
+        reasons = set(
+            (seg or {}).get("tps_reason_codes")
+            or (audit or {}).get("reason_codes")
+            or []
+        )
+        block_reason = str((seg or {}).get("tts_blocked_reason") or "")
+        soft_reasons = {"phrase_loop", "meaning_collapse", "dirty_mt_noop"}
+        if reasons and not reasons <= soft_reasons and block_reason not in soft_reasons:
+            if block_reason not in ("", "phrase_loop", "meaning_collapse"):
+                return False
+            if reasons & {"source_script_leak", "cjk_meaning_collapse", "meaning_loss"}:
+                return False
+        try:
+            from engines.mt.cross_script_guard import (
+                has_phrase_loop,
+                meaning_collapse,
+                source_script_leak,
+            )
+
+            src = str(
+                (seg or {}).get("original_text")
+                or (seg or {}).get("source_text")
+                or audit.get("whisper_text")
+                or ""
+            )
+            if has_phrase_loop(candidate, min_repeats=2):
+                return False
+            if source_script_leak(src, candidate):
+                return False
+            hit = meaning_collapse(src, candidate) if src else None
+            if hit and set(hit.get("reasons") or []) - {"phrase_loop"}:
+                return False
+            return True
+        except Exception:
+            return bool(candidate)
+
+    # Blocked hallucination / wrong-script: never resurrect dirty MT,
+    # but do surface a clean healed naturalized after phrase-loop wipe.
+    if _tts_blocked(seg, audit):
+        if _soft_blocked_nat_ok(nat):
+            return _heal(nat)
+        raw_blocked = str(audit.get("raw_translation") or "").strip()
+        if _soft_blocked_nat_ok(raw_blocked):
+            return _heal(raw_blocked)
+        return ""
+
+    # After hard audio trim: Final must equal spoken prefix (not uncut paragraph).
+    if bool(
+        (seg or {}).get("voice_truncated")
+        or audit.get("voice_truncated")
+        or ((seg or {}).get("timing_meta") or {}).get("speech_trimmed")
+    ):
+        spoken = _first_plain_text(
+            audit,
+            seg,
+            keys=("spoken_fit_text", "tts_text", "plain_text", "final_text"),
+        )
+        if not spoken:
+            spoken = str(((seg or {}).get("timing_meta") or {}).get("spoken_fit_text") or "").strip()
+        if spoken and not _is_ssml(spoken):
+            return _heal(spoken)
+
     # TPS Single Approved Text
     approved = str(
         (seg or {}).get("approved_text") or audit.get("approved_text") or ""
@@ -129,6 +258,16 @@ def _resolve_final_text(seg: dict, audit: dict) -> str:
     val = str(seg.get("text") or "").strip()
     if val and not _is_ssml(val):
         return _heal(val)
+    # Manual FAIL: still show clean healed nat (phrase-loop wipe recovery).
+    tqe = str(
+        (seg or {}).get("tqe_status") or audit.get("tqe_status") or ""
+    ).upper()
+    if "FAIL" in tqe or (seg or {}).get("needs_manual_review"):
+        if _soft_blocked_nat_ok(nat):
+            return _heal(nat)
+        if _soft_blocked_nat_ok(raw):
+            return _heal(raw)
+        return ""
     return nat if nat and not _is_ssml(nat) else ""
 
 
@@ -138,6 +277,12 @@ def _resolve_text_for_tts(seg: dict, audit: dict, *, final: str, tts_synthesized
     Never return SSML markup to the Review UI (it confuses operators and is not
     the spoken plain string). Stress marks are stripped for display.
     """
+    if _tts_blocked(seg, audit):
+        # Match Final recovery: healed nat after phrase-loop wipe is voiceable.
+        if final:
+            return final
+        return ""
+
     def _clean(val: str) -> str:
         s = str(val or "").strip()
         if not s:
@@ -157,9 +302,44 @@ def _resolve_text_for_tts(seg: dict, audit: dict, *, final: str, tts_synthesized
 
     if not tts_synthesized:
         return _clean(final) or final
-    for key in ("tts_text", "plain_text"):
-        val = _clean(str(audit.get(key) or seg.get(key) or ""))
+    for key in ("tts_text", "plain_text", "spoken_fit_text"):
+        val = _clean(
+            str(
+                audit.get(key)
+                or seg.get(key)
+                or ((seg.get("timing_meta") or {}).get(key) if key == "spoken_fit_text" else "")
+                or ""
+            )
+        )
         if val and not _is_ssml(val):
+            # After hard audio trim (trim_overlap), spoken is shorter on purpose —
+            # never resurrect the uncut Final (Review must match what plays).
+            try:
+                from engines.tts_audio_text_sync import prefer_spoken_over_longer_final
+
+                chosen = prefer_spoken_over_longer_final(
+                    final=final, spoken=val, seg=seg, audit=audit
+                )
+                if chosen == val:
+                    return val
+            except Exception:
+                pass
+            # Prefer Final when TTS was destructively shortened (filler drop /
+            # shared-blob chop) so Review does not show a lie vs approved Final.
+            # Skip this bias when voice was truncated to the slot.
+            voice_cut = bool(
+                seg.get("voice_truncated")
+                or audit.get("voice_truncated")
+                or ((seg.get("timing_meta") or {}).get("speech_trimmed"))
+            )
+            if not voice_cut:
+                try:
+                    from engines.semantic_meaning import is_truncated_adaptation
+
+                    if final and is_truncated_adaptation(final, val):
+                        return _clean(final) or final
+                except Exception:
+                    pass
             return val
     return _clean(final) or final
 
@@ -323,8 +503,31 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
     warning_count = 0
     qa_invoked_any = False
     for i, src in enumerate(source_segments):
-        audit = audit_by_idx.get(i, {})
-        seg = segments_data[i] if i < len(segments_data) else {}
+        # Mutate the live audit row so QA fingerprint / warning cache persist.
+        audit = audit_by_idx.get(i)
+        if not isinstance(audit, dict):
+            audit = {}
+            audit_by_idx[i] = audit
+            if isinstance(audits, list):
+                audits.append(audit)
+                audit["index"] = i
+        seg = (
+            dict(segments_data[i])
+            if i < len(segments_data) and isinstance(segments_data[i], dict)
+            else {}
+        )
+        original = str(src or audit.get("whisper_text") or "")
+        audit.setdefault("original", original)
+        seg.setdefault("source_text", original)
+        trh = seg.get("trh") if isinstance(seg.get("trh"), dict) else {}
+        if trh:
+            audit.setdefault("reason_codes", trh.get("reason_codes") or [])
+            audit.setdefault("dirty_reasons", trh.get("dirty_reasons") or [])
+            audit.setdefault("tqe_status", trh.get("tqe_status") or "")
+            if trh.get("tps_path") == "manual" or "FAIL" in str(
+                trh.get("tqe_status") or ""
+            ).upper():
+                seg.setdefault("needs_manual_review", True)
         raw = str(audit.get("raw_translation") or "")
         semantic = _resolve_semantic_text(seg, audit)
         final = _resolve_final_text(seg, audit)
@@ -346,7 +549,6 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
         text_for_tts = _resolve_text_for_tts(
             seg, audit, final=final, tts_synthesized=tts_synthesized
         )
-        original = str(src or audit.get("whisper_text") or "")
 
         warnings, qa_invoked, qa_applied = _resolve_review_warnings(
             audit,
@@ -363,25 +565,61 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
         qa_invoked_any = qa_invoked_any or qa_invoked
         warning_count += len(warnings)
 
-        if not qd and raw.strip():
+        _qs_raw = audit.get("quality_score")
+        try:
+            _qs_num = float(_qs_raw) if _qs_raw not in (None, "") else 0.0
+        except (TypeError, ValueError):
+            _qs_num = 0.0
+        try:
+            _qd_num = float(qd.get("quality_score") or 0)
+        except (TypeError, ValueError):
+            _qd_num = 0.0
+        _need_recompute = (
+            bool(raw.strip())
+            and (
+                not qd
+                or _qs_raw in (None, "", 0, 0.0, "0", "0.0")
+                or _qs_num <= 0
+                or _qd_num <= 0
+            )
+        )
+        if _need_recompute:
             try:
                 from engines.quality_score_v2 import compute_quality_score_v2
 
                 computed_score, computed_qd = compute_quality_score_v2(
-                    original, raw, src_lang=src_lang, tgt_lang=tgt_lang,
-                    naturalized=naturalized,
+                    original,
+                    raw,
+                    src_lang=src_lang,
+                    tgt_lang=tgt_lang,
+                    naturalized=naturalized or final or text_for_tts,
                 )
             except Exception:
                 from engines.translation_quality_score import compute_quality_score
 
                 computed_score, computed_qd = compute_quality_score(
-                    original, raw, src_lang=src_lang, tgt_lang=tgt_lang
+                    original,
+                    naturalized or final or raw,
+                    src_lang=src_lang,
+                    tgt_lang=tgt_lang,
                 )
-            qd = {**computed_qd, **qd}
-            if not audit.get("quality_score"):
+            # Computed wins over stale zeros / empty placeholders in old qd.
+            qd = {**qd, **(computed_qd or {})}
+            if computed_score and (
+                _qs_raw in (None, "", 0, 0.0, "0", "0.0") or _qs_num <= 0
+            ):
                 audit["quality_score"] = computed_score
+                audit["quality_details"] = qd
 
-        quality_score = float(audit.get("quality_score") or qd.get("quality_score") or 0)
+        try:
+            quality_score = float(
+                audit.get("quality_score") or qd.get("quality_score") or 0
+            )
+        except (TypeError, ValueError):
+            quality_score = 0.0
+        # Dim values may be 0–1 fractions — scale for Review display
+        if 0 < quality_score <= 1.0:
+            quality_score = round(quality_score * 100.0, 1)
 
         slot_ms_val = float(seg.get("slot_ms") or audit.get("duration_ms") or 0)
         playback_ms_val = float(
@@ -425,6 +663,40 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
                 "tts": 0.0,
                 "overall": round(quality_score, 1),
             }
+
+        # Review honesty for already-muxed tasks: if speech was hard-trimmed to
+        # the slot, show the spoken prefix — not the uncut paragraph.
+        try:
+            from engines.tts_audio_text_sync import estimate_spoken_prefix
+
+            slot_i = int(slot_ms_val or 0)
+            tts_i = int(
+                playback_ms_val
+                or seg.get("tts_ms")
+                or (diagnostics or {}).get("tts_ms")
+                or 0
+            )
+            overflow_i = int(
+                (diagnostics or {}).get("overflow_ms")
+                or seg.get("overflow_ms")
+                or 0
+            )
+            voice_cut = bool(
+                (diagnostics or {}).get("voice_truncated")
+                or seg.get("voice_truncated")
+                or ((seg.get("timing_meta") or {}).get("speech_trimmed"))
+                or (overflow_i > 120 and tts_i > slot_i > 0)
+            )
+            if voice_cut and final and tts_i > slot_i > 0:
+                spoken_ms = max(1, min(slot_i, tts_i - overflow_i if overflow_i else slot_i))
+                spoken_prefix = estimate_spoken_prefix(
+                    final, tts_ms=tts_i, spoken_ms=spoken_ms
+                )
+                if spoken_prefix and len(spoken_prefix) + 8 < len(final):
+                    final = spoken_prefix
+                    text_for_tts = spoken_prefix
+        except Exception:
+            pass
 
         rows.append(
             {

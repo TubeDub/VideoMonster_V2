@@ -1,0 +1,248 @@
+{
+  "timing_agent_version": "1.0",
+  "openddf_agent": "Timing/v1",
+  "project_uuid": "8e896f83-1e3e-41ca-850d-4cba7720beeb",
+  "task_id": "golden-timing-run",
+  "status": "warning",
+  "avg_scores": {
+    "slot_fit": 0.6667,
+    "meaning": 1.0,
+    "naturalness": 0.85,
+    "integrity": 1.0,
+    "timing": 0.6667,
+    "overall": 0.6667
+  },
+  "rule_rewrite_used": true,
+  "llm_rewrite_used": false,
+  "micro_stretch_used": true,
+  "micro_stretch_segments": 1,
+  "segment_count": 3,
+  "warnings": [
+    "segment_0:fallback_semantic_text"
+  ],
+  "errors": [],
+  "execution_time_ms": 70.2,
+  "decision_log": [
+    "segment_count=3",
+    "target_lang=ru",
+    "segment_0:brief_compression=0.35 expansion=0.15",
+    "segment_0:pass1 predicted=6370 slot=1500 dir=shorten",
+    "segment_0:brief_fit_threshold=0.850 compression=0.35",
+    "segment_0:attempt=1 direction=shorten",
+    "segment_0:overflow delta_ms=4870",
+    "segment_0:selected=A slot_fit=0.000 predicted=5629 slot=1500",
+    "segment_0:attempt=2 direction=shorten",
+    "segment_0:overflow delta_ms=4129",
+    "segment_0:selected=B slot_fit=0.000 predicted=5185 slot=1500",
+    "segment_0:attempt=3 direction=shorten",
+    "segment_0:overflow delta_ms=3685",
+    "segment_0:selected=A slot_fit=0.000 predicted=5185 slot=1500",
+    "segment_0:final_aggressive_shorten",
+    "segment_0:fallback_semantic_text",
+    "segment_1:brief_compression=0.35 expansion=0.15",
+    "segment_1:pass1 predicted=384 slot=3500 dir=expand",
+    "segment_1:brief_fit_threshold=0.850 compression=0.35",
+    "segment_1:attempt=1 direction=expand",
+    "segment_1:underflow delta_ms=-3116",
+    "segment_1:selected=C slot_fit=0.425 predicted=2307 slot=3500",
+    "segment_1:attempt=2 direction=expand",
+    "segment_1:underflow delta_ms=-1193",
+    "segment_1:selected=B slot_fit=1.000 predicted=3076 slot=3500",
+    "segment_2:brief_compression=0.35 expansion=0.15",
+    "segment_2:pass1 predicted=814 slot=2000 dir=expand",
+    "segment_2:brief_fit_threshold=0.850 compression=0.35",
+    "segment_2:attempt=1 direction=expand",
+    "segment_2:underflow delta_ms=-1186",
+    "segment_2:selected=B slot_fit=1.000 predicted=1703 slot=2000"
+  ],
+  "per_segment": [
+    {
+      "index": 0,
+      "original_ms": 6370,
+      "predicted_ms": 6370,
+      "slot_ms": 1500,
+      "semantic_text": "Он сказал что George Smith пошёл домой в настоящее время потому что было очень поздно.",
+      "timing_text": "Он сказал что George Smith пошёл домой в настоящее время потому что было очень поздно.",
+      "selected_variant": "fallback",
+      "slot_fit_score": 0.0,
+      "attempts": 3,
+      "direction": "shorten",
+      "rule_rewrite_used": true,
+      "llm_rewrite_used": false,
+      "micro_stretch_recommended": true,
+      "candidates": [
+        {
+          "label": "A",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было очень поздно.",
+          "predicted_ms": 5629,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "B",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было поздно.",
+          "predicted_ms": 5185,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "C",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было очень поздно.",
+          "predicted_ms": 5629,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "A",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было очень поздно.",
+          "predicted_ms": 5629,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "B",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было поздно.",
+          "predicted_ms": 5185,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "C",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было очень поздно.",
+          "predicted_ms": 5629,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "A",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было поздно.",
+          "predicted_ms": 5185,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "B",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было поздно.",
+          "predicted_ms": 5185,
+          "slot_fit_score": 0.0
+        },
+        {
+          "label": "C",
+          "text": "Он сказал, что George Smith пошёл домой сейчас потому что было поздно.",
+          "predicted_ms": 5185,
+          "slot_fit_score": 0.0
+        }
+      ],
+      "decision_log": [
+        "brief_fit_threshold=0.850 compression=0.35",
+        "attempt=1 direction=shorten",
+        "overflow delta_ms=4870",
+        "selected=A slot_fit=0.000 predicted=5629 slot=1500",
+        "attempt=2 direction=shorten",
+        "overflow delta_ms=4129",
+        "selected=B slot_fit=0.000 predicted=5185 slot=1500",
+        "attempt=3 direction=shorten",
+        "overflow delta_ms=3685",
+        "selected=A slot_fit=0.000 predicted=5185 slot=1500",
+        "final_aggressive_shorten",
+        "fallback_semantic_text"
+      ]
+    },
+    {
+      "index": 1,
+      "original_ms": 384,
+      "predicted_ms": 3076,
+      "slot_ms": 3500,
+      "semantic_text": "Да.",
+      "timing_text": "Ну, Да — вот так, ведь так, знаете?",
+      "selected_variant": "B",
+      "slot_fit_score": 1.0,
+      "attempts": 2,
+      "direction": "expand",
+      "rule_rewrite_used": true,
+      "llm_rewrite_used": false,
+      "micro_stretch_recommended": false,
+      "candidates": [
+        {
+          "label": "A",
+          "text": "Да, понимаете?",
+          "predicted_ms": 1037,
+          "slot_fit_score": 0.15
+        },
+        {
+          "label": "B",
+          "text": "Ну, Да, знаете?",
+          "predicted_ms": 1153,
+          "slot_fit_score": 0.15
+        },
+        {
+          "label": "C",
+          "text": "Да — вот так, ведь так?",
+          "predicted_ms": 2307,
+          "slot_fit_score": 0.425
+        },
+        {
+          "label": "A",
+          "text": "Да — вот так, ведь так, понимаете?",
+          "predicted_ms": 2692,
+          "slot_fit_score": 0.623
+        },
+        {
+          "label": "B",
+          "text": "Ну, Да — вот так, ведь так, знаете?",
+          "predicted_ms": 3076,
+          "slot_fit_score": 1.0
+        },
+        {
+          "label": "C",
+          "text": "Да — вот так, ведь так — вот так, ведь так?",
+          "predicted_ms": 4230,
+          "slot_fit_score": 0.5321
+        }
+      ],
+      "decision_log": [
+        "brief_fit_threshold=0.850 compression=0.35",
+        "attempt=1 direction=expand",
+        "underflow delta_ms=-3116",
+        "selected=C slot_fit=0.425 predicted=2307 slot=3500",
+        "attempt=2 direction=expand",
+        "underflow delta_ms=-1193",
+        "selected=B slot_fit=1.000 predicted=3076 slot=3500"
+      ]
+    },
+    {
+      "index": 2,
+      "original_ms": 814,
+      "predicted_ms": 1703,
+      "slot_ms": 2000,
+      "semantic_text": "Привет мир.",
+      "timing_text": "Ну, Привет мир, знаете?",
+      "selected_variant": "B",
+      "slot_fit_score": 1.0,
+      "attempts": 1,
+      "direction": "expand",
+      "rule_rewrite_used": true,
+      "llm_rewrite_used": false,
+      "micro_stretch_recommended": false,
+      "candidates": [
+        {
+          "label": "A",
+          "text": "Привет мир, понимаете?",
+          "predicted_ms": 1629,
+          "slot_fit_score": 0.7336
+        },
+        {
+          "label": "B",
+          "text": "Ну, Привет мир, знаете?",
+          "predicted_ms": 1703,
+          "slot_fit_score": 1.0
+        },
+        {
+          "label": "C",
+          "text": "Привет мир — вот так, ведь так?",
+          "predicted_ms": 2692,
+          "slot_fit_score": 0.2288
+        }
+      ],
+      "decision_log": [
+        "brief_fit_threshold=0.850 compression=0.35",
+        "attempt=1 direction=expand",
+        "underflow delta_ms=-1186",
+        "selected=B slot_fit=1.000 predicted=1703 slot=2000"
+      ]
+    }
+  ]
+}

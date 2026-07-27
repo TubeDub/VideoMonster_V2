@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "db4a484cfe354a80b12a8245795a963d",
+  "created_at": "2026-07-24T13:44:49.195066+00:00",
+  "task_id": "db4a484cfe354a80b12a8245795a963d",
+  "stage": "studio_handoff",
+  "developer": {
+    "error_code": "HANDOFF_VIOLATION",
+    "stage": "studio_handoff",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "studio_handoff",
+    "task_id": "db4a484cfe354a80b12a8245795a963d",
+    "error_type": "HandoffViolation",
+    "message": "Studio Handoff blocked: runtime integrity failed"
+  },
+  "exception": {
+    "type": "HandoffViolation",
+    "message": "Studio Handoff blocked: runtime integrity failed"
+  },
+  "timeline_event_count": 44
+}

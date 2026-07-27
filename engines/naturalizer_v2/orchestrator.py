@@ -29,17 +29,26 @@ def polish_segment_v2(
     src_lang: str | None = None,
     prev_context: str | None = None,
     app_dir=None,
-    use_llm: bool = True,
+    use_llm: bool = False,
     entity_token_map: dict[str, str] | None = None,
     slot_ms: int = 0,
     reserve_ms: int | None = None,
 ) -> dict[str, Any]:
     """
-    V2 naturalization: rule pass → quality check → LLM rewrite → CATP length gate.
-    Returns dict compatible with NaturalizerResult extension.
+    V2 naturalization: rule pass → quality check → (optional) LLM rewrite → CATP.
+    Default ``use_llm=False`` — engine-first (MT + rules). Heavy LLMs are gated
+    by ``engines.llm_kill_switch``.
     """
     from engines.translation_naturalizer import NaturalizerResult, _polish_v1_rules
     from engines.translation_quality import accept_naturalizer_change
+
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            use_llm = False
+    except Exception:
+        use_llm = False
 
     raw = str(raw_mt or "").strip()
     if not raw:
@@ -322,7 +331,33 @@ def polish_segment_v2(
             logger.debug("CATP skipped: %s", exc)
             warnings.append(f"catp_error:{exc}")
 
-    if current == raw and not reasons:
+    # Guarantee entity restoration survives CATP. CATP builds its variants from
+    # the raw/safe baselines, which may still carry mask tokens (e.g. TITLE_SW_1)
+    # when the restoration happened after the snapshot — a rollback would then leak
+    # the raw token into the dub. Re-apply restoration as the final, idempotent
+    # step so masks never reach output.
+    if entity_token_map:
+        current, re_restored = restore_entities(
+            current,
+            entity_token_map,
+            original=original,
+            tgt_lang=tgt_lang,
+            app_dir=base_dir,
+        )
+        if re_restored:
+            if "restored_entities" not in reasons:
+                reasons.append("restored_entities")
+            for ent in re_restored:
+                if ent not in restored:
+                    restored.append(ent)
+
+    # If the polished text is identical to the raw input, nothing effectively
+    # changed — surface a clean ["no_changes"] instead of CATP bookkeeping noise
+    # (catp_variant/catp_mode). CATP details remain in the returned `catp` meta.
+    non_bookkeeping = [
+        r for r in reasons if not r.startswith("catp_") and r != "no_changes"
+    ]
+    if current == raw and not non_bookkeeping:
         reasons = ["no_changes"]
 
     return {

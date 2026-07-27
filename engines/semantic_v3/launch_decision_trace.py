@@ -135,9 +135,17 @@ def _validate_reason(reason: Any) -> str:
 def _write_ndjson(payload: Mapping[str, Any], log_path: Path | None = None) -> None:
     """Append a single NDJSON record to the runtime debug log.
 
-    Best effort: OSError is logged but never re-raised (so tracing can
-    never break the pipeline it's diagnosing).
+    Off unless VM_DEBUG_NDJSON=1, or an explicit *log_path* override is
+    passed (tests). Best effort: OSError never re-raised.
     """
+    explicit = log_path is not None
+    if not explicit and (os.getenv("VM_DEBUG_NDJSON") or "").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        return
     path = Path(log_path) if log_path is not None else _DEFAULT_DEBUG_LOG_PATH
     line = json.dumps(payload, ensure_ascii=False, sort_keys=False)
     try:

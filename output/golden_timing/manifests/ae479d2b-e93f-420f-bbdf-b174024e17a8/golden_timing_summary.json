@@ -1,0 +1,36 @@
+{
+  "project_uuid": "ae479d2b-e93f-420f-bbdf-b174024e17a8",
+  "status": "warning",
+  "avg_scores": {
+    "slot_fit": 0.6667,
+    "meaning": 1.0,
+    "naturalness": 0.85,
+    "integrity": 1.0,
+    "timing": 0.6667,
+    "overall": 0.6667
+  },
+  "rule_rewrite_used": true,
+  "llm_rewrite_used": false,
+  "checks": [
+    {
+      "index": 0,
+      "semantic_text": "Он сказал что George Smith пошёл домой в настоящее время потому что было очень поздно.",
+      "timing_text": "Он сказал что George Smith пошёл домой в настоящее время потому что было очень поздно.",
+      "ok": true
+    },
+    {
+      "index": 1,
+      "semantic_text": "Да.",
+      "timing_text": "Ну, Да — вот так, ведь так, знаете?",
+      "ok": true
+    },
+    {
+      "index": 2,
+      "semantic_text": "Привет мир.",
+      "timing_text": "Ну, Привет мир, знаете?",
+      "ok": true
+    }
+  ],
+  "all_ok": true,
+  "timing_report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\golden_timing\\manifests\\ae479d2b-e93f-420f-bbdf-b174024e17a8\\timing_report.json"
+}

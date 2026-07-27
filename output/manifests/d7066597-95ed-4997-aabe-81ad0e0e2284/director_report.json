@@ -1,0 +1,52 @@
+{
+  "director_agent_version": "1.0",
+  "openddf_agent": "Director/v1",
+  "project_uuid": "d7066597-95ed-4997-aabe-81ad0e0e2284",
+  "task_id": "c6466bc551ab4b6fba58b9431c3c6e80",
+  "status": "success",
+  "segment_count": 1,
+  "llm_used_count": 1,
+  "rule_only_count": 0,
+  "llm_skipped": false,
+  "validation_ok": true,
+  "warnings": [],
+  "errors": [],
+  "execution_time_ms": 212136.5,
+  "decision_log": [
+    "segment_0:emotion=Sad style=dramatic speed=normal llm=True"
+  ],
+  "per_segment": [
+    {
+      "emotion": "Sad",
+      "speech_style": "dramatic",
+      "speaking_speed": "normal",
+      "formality": 0.5,
+      "humor": 0.0,
+      "sarcasm": 0.0,
+      "aggression": 0.2,
+      "calmness": 0.8,
+      "emotional_intensity": 0.9,
+      "allowed_compression": 0.3,
+      "allowed_expansion": 0.5,
+      "adaptation_priority": 0.6,
+      "meaning_priority": 0.95,
+      "lip_sync_priority": 0.7,
+      "naturalness_priority": 0.75,
+      "utterance_goal": "inform",
+      "literal_phrasing_importance": 0.3,
+      "deep_semantic_adaptation_needed": true,
+      "segment_id": 0,
+      "speaker_id": "default",
+      "language": "sv",
+      "maximum_duration_ms": 4737,
+      "preferred_duration_ms": 4358,
+      "decision_reasons": [
+        "rule_engine",
+        "rule:formal_markers",
+        "rule:high_word_density",
+        "rule:default_inform",
+        "llm_structured_brief"
+      ]
+    }
+  ]
+}

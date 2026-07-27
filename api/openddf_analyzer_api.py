@@ -114,12 +114,16 @@ def api_analyzer_audio(task_id: str, segment_index: int, kind: str):
     if not path:
         return jsonify({"error": "no audio path"}), 404
 
-    p = Path(path)
-    if not p.is_file():
-        p = OUTPUT_DIR / path
-    if not p.is_file():
-        p = APP_DIR / "output" / str(path)
-    if not p.is_file():
+    from engines.path_safety import is_under_root, resolve_under_roots
+
+    p = resolve_under_roots(
+        path,
+        [OUTPUT_DIR, APP_DIR / "uploads"],
+        basename_fallback=True,
+    )
+    if p is None or not p.is_file():
+        return jsonify({"error": "file missing"}), 404
+    if not is_under_root(p, OUTPUT_DIR) and not is_under_root(p, APP_DIR / "uploads"):
         return jsonify({"error": "file missing"}), 404
 
     return send_file(p, mimetype="audio/mpeg", conditional=True)

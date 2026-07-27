@@ -420,9 +420,17 @@ def test_hf7_na_imya_takes_nominative():
         use_llm=False,
         app_dir=ROOT,
     )[0]
-    assert "на ім'я Джордж-молодший" in out or "на ім’я Джордж-молодший" in out
+    # Nominative after name gloss (full «на ім'я …» or compressed subject form).
+    assert (
+        "на ім'я Джордж-молодший" in out
+        or "на ім’я Джордж-молодший" in out
+        or "18-річний Джордж-молодший" in out
+        or "18-річний хлопець на ім'я Джордж" in out
+        or "18-річний хлопець на ім’я Джордж" in out
+    )
     assert "на ім'я Джорджа-молодшого" not in out
     assert "на ім’я Джорджа-молодшого" not in out
+    assert "18-річному хлопчику" not in out
 
 
 def test_hf7_gender_agreement_and_smash_verb():
@@ -563,3 +571,24 @@ def test_hf8_near_death_not_appended_when_paraphrased():
     polluted = uk.rstrip(".") + ", досвід на межі смерті"
     clean = strip_orphan_clause_tails(polluted, original=en)
     assert "досвід на межі смерті" not in clean
+
+
+def test_zh_uk_nonsense_mt_is_dirty_and_fails_fast_qa():
+    """Regression: zh→uk collapsed garbage must never pass dirty/meaning guards."""
+    from engines.mt.dirty_mt import compute_dirty_mt_score
+    from engines.mt.cross_script_guard import meaning_collapse
+    from engines.naturalizer_v2.bad_patterns import has_bad_mt
+
+    zh = (
+        "我们录下八代单纯绑架费的，这个时候你们怀孕了，你们就绑了孩子，"
+        "如果没有意外的话，这就是完美的。"
+    )
+    uk = (
+        "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, "
+        "ви вагітні, а якщо ні, то це ідеально."
+    )
+    dirty = compute_dirty_mt_score(zh, uk, tgt_lang="uk")
+    assert dirty.dirty and dirty.score >= 0.5
+    assert has_bad_mt(uk)
+    collapse = meaning_collapse(zh, uk, source_lang="zh", target_lang="uk")
+    assert collapse is not None

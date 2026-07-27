@@ -171,14 +171,17 @@ def analyze_duration(
     )
 
 
-def strip_dsal_elaboration_fillers(text: str) -> str:
+def strip_dsal_elaboration_fillers(text: str, *, tgt_lang: str = "uk") -> str:
     """Remove timing-only DSAL fillers that harm meaning when left in text.
 
-    Never strip sentence-initial «Насправді» (EN «In fact»).
+    UK-only: never strip/restore «Насправді» on Russian (or other) targets.
     """
     out = str(text or "")
     if not out.strip():
         return out
+    lang = str(tgt_lang or "uk").split("-")[0].lower()
+    if lang != "uk":
+        return out.strip()
     # Protect discourse-initial Насправді from filler wipe.
     _NAS = "\u0000NASPRAVDI\u0000"
     out = re.sub(r"(?i)^(\s*)насправді\b", r"\1" + _NAS, out, count=1)
@@ -199,10 +202,15 @@ def strip_dsal_elaboration_fillers(text: str) -> str:
 
 
 def _rule_expand_uk(text: str, *, need_ms: int, tgt_lang: str) -> tuple[str, list[str]]:
-    """Lengthen via meaning-preserving synonym swaps only — no filler padding."""
+    """Lengthen via meaning-preserving synonym swaps only — no filler padding.
+
+    UK synonym table only — never rewrite Russian/other with UK forms.
+    """
     stages: list[str] = []
     current = " ".join(str(text or "").split())
     if not current or need_ms <= 0:
+        return current, stages
+    if str(tgt_lang or "").split("-")[0].lower() != "uk":
         return current, stages
     base_ms = estimate_tts_duration_ms(current, tgt_lang)
     target_ms = base_ms + need_ms
@@ -228,10 +236,15 @@ def _rule_expand_uk(text: str, *, need_ms: int, tgt_lang: str) -> tuple[str, lis
 def _rule_compress_uk(
     text: str, *, slot_ms: int, source_hint: str, tgt_lang: str
 ) -> tuple[str, list[str]]:
-    """Compress toward slot. Keeps partial wins; never all-or-nothing discard."""
+    """Compress toward slot. Keeps partial wins; never all-or-nothing discard.
+
+    UK synonym/elaboration tables only — skip for non-UK targets.
+    """
     stages: list[str] = []
     current = " ".join(str(text or "").split())
     if not current or slot_ms <= 0:
+        return current, stages
+    if str(tgt_lang or "").split("-")[0].lower() != "uk":
         return current, stages
 
     target_ms = int(slot_ms * (1.0 + BAND_GREEN))
@@ -298,9 +311,13 @@ def adapt_duration_semantic(
     method = "none"
 
     # P1: clause restore whenever coverage below threshold (even on green)
-    cov: ClauseCoverageResult = compute_clause_coverage(source_hint, current)
+    cov: ClauseCoverageResult = compute_clause_coverage(
+        source_hint, current, tgt_lang=tgt_lang
+    )
     if cov.coverage < CLAUSE_COVERAGE_MIN or cov.missing:
-        current, cov = restore_missing_clauses(current, source_hint)
+        current, cov = restore_missing_clauses(
+            current, source_hint, tgt_lang=tgt_lang
+        )
         if cov.restored_phrases:
             stages.extend(f"clause_restore:{p}" for p in cov.restored_phrases)
             method = "clause_restore"
@@ -355,19 +372,31 @@ def adapt_duration_semantic(
             )
             if not mid.compress_required:
                 break
-        current, cov2 = restore_missing_clauses(current, source_hint)
+        current, cov2 = restore_missing_clauses(
+            current, source_hint, tgt_lang=tgt_lang
+        )
         if cov2.restored_phrases:
             stages.extend(f"clause_reapply:{p}" for p in cov2.restored_phrases)
             cov = cov2
 
-    final_cov = compute_clause_coverage(source_hint, current)
+    final_cov = compute_clause_coverage(
+        source_hint, current, tgt_lang=tgt_lang
+    )
     if final_cov.coverage < CLAUSE_COVERAGE_MIN or final_cov.missing:
-        current, final_cov = restore_missing_clauses(current, source_hint)
+        current, final_cov = restore_missing_clauses(
+            current, source_hint, tgt_lang=tgt_lang
+        )
         if final_cov.restored_phrases:
             stages.extend(f"clause_final:{p}" for p in final_cov.restored_phrases)
             method = method if method != "none" else "clause_restore"
 
-    current = strip_dsal_elaboration_fillers(current)
+    current = strip_dsal_elaboration_fillers(current, tgt_lang=tgt_lang)
+    try:
+        from engines.dsal.clause_coverage import strip_cross_lang_clause_orphans
+
+        current = strip_cross_lang_clause_orphans(current)
+    except Exception:
+        pass
     changed = current != original
     final = analyze_duration(
         slot_ms=slot_ms,

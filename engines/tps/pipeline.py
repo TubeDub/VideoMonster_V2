@@ -62,10 +62,17 @@ class TPSBatchResult:
 
 
 def _tps_naturalizer_use_llm() -> bool:
-    """LLM rewrite for dirty/bad MT. Default auto (=on when gateway available)."""
+    """LLM rewrite for dirty/bad MT. Default OFF (engine-first: MT + rules)."""
     import os
 
-    mode = os.getenv("TPS_NATURALIZER_LLM", "auto").strip().lower()
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            return False
+    except Exception:
+        pass
+    mode = os.getenv("TPS_NATURALIZER_LLM", "off").strip().lower()
     if mode in ("0", "false", "no", "off"):
         return False
     if mode in ("1", "true", "yes", "on"):
@@ -171,6 +178,48 @@ def _retry_meaning_grammar(
     out = text
     codes = set(reason_codes)
 
+    def _llm_cjk_rescue(candidate_src: str, current: str) -> tuple[str, int]:
+        """LLM direct from source for CJK→uk/ru when polish cannot recover meaning."""
+        calls = 0
+        try:
+            from engines.mt.cross_script_guard import (
+                meaning_collapse,
+                source_script_leak,
+                strip_source_script_chars,
+            )
+            from engines.mt.llm_retranslate import (
+                llm_direct_translate,
+                should_llm_retranslate,
+            )
+
+            if not should_llm_retranslate(src_lang=src_lang, tgt_lang=tgt_lang):
+                return current, 0
+            llm_cand = llm_direct_translate(
+                candidate_src,
+                src_lang=src_lang or "zh",
+                tgt_lang=tgt_lang or "uk",
+            )
+            if not llm_cand:
+                return current, 0
+            calls = 1
+            cleaned = strip_source_script_chars(
+                llm_cand, source_lang=src_lang, source=candidate_src
+            ) or llm_cand
+            if source_script_leak(
+                candidate_src, cleaned, source_lang=src_lang, target_lang=tgt_lang
+            ):
+                return current, calls
+            if meaning_collapse(
+                candidate_src, cleaned, source_lang=src_lang, target_lang=tgt_lang
+            ):
+                # Never ship still-collapsed LLM output — even when current is a loop.
+                # Accepting collapsed "cleaned" led to PASS+CJK approved (_tmp_3333).
+                return current, calls
+            return cleaned, calls
+        except Exception as exc:
+            logger.debug("cjk llm rescue failed: %s", exc)
+            return current, calls
+
     # TRH: dirty_mt_noop / entity_breakage / en_word_leak → force re-naturalize + canon
     if codes & {
         "dirty_mt_noop",
@@ -180,9 +229,13 @@ def _retry_meaning_grammar(
         "english_leak",
         "en_word_leak",
         "nonsense_calque",
+        "phrase_loop",
     }:
         try:
-            from engines.mt.dirty_mt import apply_temporary_entity_repair
+            from engines.mt.dirty_mt import (
+                apply_temporary_entity_repair,
+                residual_dirty_after_naturalize,
+            )
             from engines.trh.canon_repair import apply_canon_repair
             from engines.translation_naturalizer import polish_lines
 
@@ -202,13 +255,36 @@ def _retry_meaning_grammar(
             out, _t3 = apply_canon_repair(out, original=original, tgt_lang=tgt_lang)
             if _tps_naturalizer_use_llm():
                 llm_calls += 1
+            # dirty_mt_noop on CJK: polish alone cannot recover — LLM from source
+            if residual_dirty_after_naturalize(
+                original, out, tgt_lang=tgt_lang
+            ) or "dirty_mt_noop" in codes:
+                rescued, c = _llm_cjk_rescue(original, out)
+                llm_calls += c
+                # _llm_cjk_rescue already rejects leak/collapse; accept only if changed.
+                if rescued and rescued != out:
+                    out = rescued
         except Exception as exc:
             logger.debug("dirty_mt retry polish failed: %s", exc)
 
-    # Meaning / collapse → sentence Argos retranslate (offline, preferred)
-    if codes & {"meaning_loss", "severe_truncation", "meaning_collapse", "empty"}:
+    # Meaning / collapse / CJK leak → Argos sentence retry, then LLM direct (zh→uk/ru)
+    if codes & {
+        "meaning_loss",
+        "severe_truncation",
+        "meaning_collapse",
+        "empty",
+        "source_script_leak",
+        "cjk_meaning_collapse",
+        "phrase_loop",
+    }:
         try:
             from engines.mt.argos_engine import ArgosEngine
+            from engines.mt.cross_script_guard import (
+                has_phrase_loop,
+                meaning_collapse,
+                source_script_leak,
+                strip_source_script_chars,
+            )
             from engines.mt.sentence_split import (
                 is_severe_mt_collapse,
                 split_mt_sentences,
@@ -221,13 +297,44 @@ def _retry_meaning_grammar(
                 piece = str(r.text or "").strip()
                 pieces.append(piece if piece else sent)
             candidate = " ".join(pieces).strip()
-            if candidate and (
-                not is_severe_mt_collapse(original, candidate)
-                or len(candidate.split()) > len(out.split())
-            ):
-                out = candidate
+
+            def _retry_ok(cand: str) -> bool:
+                if not cand:
+                    return False
+                cleaned = strip_source_script_chars(
+                    cand, source_lang=src_lang, source=original
+                )
+                check = cleaned or cand
+                if source_script_leak(
+                    original, check, source_lang=src_lang, target_lang=tgt_lang
+                ):
+                    return False
+                if meaning_collapse(
+                    original, check, source_lang=src_lang, target_lang=tgt_lang
+                ):
+                    return False
+                if has_phrase_loop(check):
+                    return False
+                if is_severe_mt_collapse(original, check):
+                    return False
+                return True
+
+            if _retry_ok(candidate):
+                out = (
+                    strip_source_script_chars(
+                        candidate, source_lang=src_lang, source=original
+                    )
+                    or candidate
+                )
+            else:
+                rescued, c = _llm_cjk_rescue(original, out)
+                llm_calls += c
+                if rescued and _retry_ok(rescued):
+                    out = rescued
+                # Else keep prior text — do not accept flower/collapsed hallucinations
+            # Else keep prior text — do not accept flower-delivery hallucinations
         except Exception as exc:
-            logger.debug("meaning retry argos failed: %s", exc)
+            logger.debug("meaning retry failed: %s", exc)
 
     # Grammar / incomplete → light rule polish only (no LLM on retry by default)
     if codes & {
@@ -404,6 +511,18 @@ def run_tps_pipeline(
         retry_text = ""
         judge_text = ""
 
+        # Preempt healable phrase loops before QA / live unsafe wipe.
+        try:
+            from engines.mt.cross_script_guard import deflate_phrase_loop, has_phrase_loop
+
+            if text and has_phrase_loop(text, min_repeats=2):
+                deflated = deflate_phrase_loop(text)
+                if deflated and not has_phrase_loop(deflated, min_repeats=2):
+                    text = deflated
+                    naturalized = deflated
+        except Exception:
+            pass
+
         try:
             from engines.mt.dirty_mt import compute_dirty_mt_score
 
@@ -486,6 +605,9 @@ def run_tps_pipeline(
             if qa2.passed:
                 path = TPSPath.RETRY
                 status = TQEStatus.PASS
+                # Drop stale fail codes from pre-retry QA — PASS must not carry
+                # meaning_collapse while approving text (_tmp_3333).
+                reasons = list(qa2.reason_codes)
                 metrics.retry_path_count += 1
             else:
                 reasons = list(qa2.reason_codes) or reasons
@@ -502,6 +624,7 @@ def run_tps_pipeline(
                 if ok:
                     path = TPSPath.LLM_JUDGE
                     status = TQEStatus.PASS
+                    reasons = []
                     metrics.llm_judge_count += 1
                 else:
                     # Re-check after judge candidate
@@ -520,6 +643,7 @@ def run_tps_pipeline(
                     if qa3.passed:
                         path = TPSPath.LLM_JUDGE
                         status = TQEStatus.PASS
+                        reasons = list(qa3.reason_codes)
                         metrics.llm_judge_count += 1
                     else:
                         path = TPSPath.MANUAL
@@ -531,6 +655,42 @@ def run_tps_pipeline(
         elapsed = (time.perf_counter() - t0) * 1000
         metrics.segment_ms.append(elapsed)
         metrics.llm_calls.append(llm_calls)
+
+        # Live gate: never PASS/approve if candidate still collapses or leaks source script.
+        if status == TQEStatus.PASS:
+            try:
+                from engines.mt.cross_script_guard import (
+                    meaning_collapse,
+                    source_script_leak,
+                )
+
+                live_codes: list[str] = []
+                if source_script_leak(
+                    original, text, source_lang=src_lang, target_lang=tgt_lang
+                ):
+                    live_codes.append("source_script_leak")
+                if meaning_collapse(
+                    original, text, source_lang=src_lang, target_lang=tgt_lang
+                ):
+                    live_codes.append("meaning_collapse")
+                    if (src_lang or "").lower().startswith(("zh", "ja", "ko")) or any(
+                        "\u4e00" <= ch <= "\u9fff" for ch in (original or "")[:80]
+                    ):
+                        live_codes.append("cjk_meaning_collapse")
+                if live_codes:
+                    logger.warning(
+                        "TPS demote PASS→MANUAL idx=%s live_unsafe=%s",
+                        i,
+                        live_codes,
+                    )
+                    status = TQEStatus.FAIL_MANUAL_REVIEW
+                    path = TPSPath.MANUAL
+                    reasons = sorted(set(reasons) | set(live_codes))
+                    if i not in manual:
+                        manual.append(i)
+                    metrics.manual_review_count += 1
+            except Exception as live_exc:
+                logger.debug("TPS live unsafe gate skipped: %s", live_exc)
 
         if i < len(segments_data) and isinstance(segments_data[i], dict):
             try:
@@ -580,19 +740,133 @@ def run_tps_pipeline(
                     segments_data[i]["selected_variant"] = nat_meta.get("selected_variant") or ""
             out_texts.append(text)
         else:
-            # Manual — keep best text but do not lock as PASS
+            # Manual — keep diagnostic text but do NOT ship CJK hallucinations to TTS.
+            # Healable phrase-loop echoes must not blank Final/TTS when deflate works.
+            try:
+                from engines.mt.cross_script_guard import (
+                    deflate_phrase_loop,
+                    has_phrase_loop,
+                    meaning_collapse,
+                    source_script_leak,
+                )
+
+                if text and (
+                    "phrase_loop" in reasons
+                    or has_phrase_loop(text, min_repeats=2)
+                ):
+                    deflated = deflate_phrase_loop(text)
+                    if deflated and not has_phrase_loop(deflated, min_repeats=2):
+                        qa_fix = run_fast_qa(
+                            original,
+                            deflated,
+                            context={
+                                "target_lang": tgt_lang,
+                                "source_lang": src_lang,
+                                "index": i,
+                                "raw_mt": raw_mt,
+                                "naturalized": deflated,
+                                "app_dir": str(base),
+                            },
+                        )
+                        if qa_fix.passed and not source_script_leak(
+                            original,
+                            deflated,
+                            source_lang=src_lang,
+                            target_lang=tgt_lang,
+                        ):
+                            text = deflated
+                            naturalized = deflated
+                            status = TQEStatus.PASS
+                            path = TPSPath.RETRY
+                            reasons = list(qa_fix.reason_codes)
+                            if i < len(segments_data) and isinstance(
+                                segments_data[i], dict
+                            ):
+                                approve_segment(
+                                    segments_data[i],
+                                    text,
+                                    tqe_status=status.value,
+                                    path=path.value,
+                                    task_id=task_id,
+                                    index=i,
+                                )
+                                segments_data[i]["raw_mt"] = raw_mt
+                                segments_data[i]["naturalized_text"] = naturalized
+                                segments_data[i]["tts_blocked"] = False
+                                segments_data[i]["skip_tts"] = False
+                                segments_data[i]["needs_manual_review"] = False
+                            out_texts.append(text)
+                            results.append(
+                                TPSSegmentResult(
+                                    index=i,
+                                    status=status,
+                                    path=path,
+                                    text=text,
+                                    original=original,
+                                    reason_codes=reasons,
+                                    llm_calls=llm_calls,
+                                    elapsed_ms=elapsed,
+                                    needs_manual_review=False,
+                                )
+                            )
+                            continue
+            except Exception as heal_exc:
+                logger.debug("TPS phrase_loop heal-before-wipe skipped: %s", heal_exc)
+
+            unsafe = set(reasons) & {
+                "cjk_meaning_collapse",
+                "meaning_collapse",
+                "source_script_leak",
+                "meaning_loss",
+            }
+            # phrase_loop-only collapse is voiceable after deflate; keep text.
+            if unsafe == {"meaning_collapse"} and "phrase_loop" in set(reasons):
+                try:
+                    from engines.mt.cross_script_guard import (
+                        deflate_phrase_loop,
+                        has_phrase_loop,
+                        meaning_collapse as _mc,
+                    )
+
+                    probe = deflate_phrase_loop(text) or text
+                    hit = _mc(
+                        original, probe, source_lang=src_lang, target_lang=tgt_lang
+                    )
+                    if probe and not has_phrase_loop(probe, min_repeats=2) and (
+                        not hit or hit.get("reasons") == ["phrase_loop"]
+                    ):
+                        text = probe
+                        naturalized = probe
+                        unsafe = set()
+                except Exception:
+                    pass
+            tts_safe = text
+            if unsafe & {
+                "cjk_meaning_collapse",
+                "meaning_collapse",
+                "source_script_leak",
+            }:
+                # Hallucination / wrong-script MT must not be voiced
+                tts_safe = ""
             if i < len(segments_data) and isinstance(segments_data[i], dict):
                 segments_data[i]["tqe_status"] = status.value
                 segments_data[i]["tps_path"] = path.value
                 segments_data[i]["approved_text"] = ""
-                segments_data[i]["text"] = text
-                segments_data[i]["final_text"] = text
+                segments_data[i]["rejected_translation"] = text
+                segments_data[i]["text"] = tts_safe
+                segments_data[i]["final_text"] = tts_safe
+                segments_data[i]["plain_text"] = tts_safe
                 segments_data[i]["raw_mt"] = raw_mt
                 segments_data[i]["naturalized_text"] = naturalized
                 segments_data[i]["needs_manual_review"] = True
+                segments_data[i]["tps_reason_codes"] = list(reasons)
+                if tts_safe == "" and text:
+                    segments_data[i]["tts_blocked"] = True
+                    segments_data[i]["tts_blocked_reason"] = sorted(unsafe)[0] if unsafe else "manual_fail"
+                    segments_data[i]["skip_tts"] = True
                 if isinstance(nat_meta.get("catp"), dict):
                     segments_data[i]["catp"] = dict(nat_meta["catp"])
-            out_texts.append(text)
+            out_texts.append(tts_safe)
 
         results.append(
             TPSSegmentResult(

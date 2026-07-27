@@ -129,6 +129,14 @@ def can_call_llm(task_id: str, segment_idx: int | None) -> tuple[bool, str]:
     Returns (True, "") when a call may proceed, else (False, reason).
     Never raises — callers must use rule-based fallback when False.
     """
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            _record_llm_decision(task_id, segment_idx, False, "heavy_llm_disabled")
+            return False, "heavy_llm_disabled"
+    except Exception:
+        pass
     maybe_reset_circuit_after_cooldown()
     try:
         from engines.translation_adapt import (
@@ -171,6 +179,13 @@ def is_available() -> bool:
     for the rest of a run instead of waiting on it segment after segment (P0
     no-hang).
     """
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            return False
+    except Exception:
+        pass
     maybe_reset_circuit_after_cooldown()
     try:
         from engines.translation_adapt import circuit_open, llm_rephrase_available
@@ -230,6 +245,19 @@ def chat(
     When ``count_budget`` is True, ``can_call_llm`` is consulted first; on
     block returns None + records skip reason (never raises).
     """
+    try:
+        from engines.llm_kill_switch import is_heavy_llm_disabled
+
+        if is_heavy_llm_disabled():
+            try:
+                from engines.translation_adapt import record_llm_skip
+
+                record_llm_skip("heavy_llm_disabled")
+            except Exception:
+                pass
+            return None
+    except Exception:
+        pass
     if not task_id:
         try:
             from engines.translation_adapt import llm_budget_status

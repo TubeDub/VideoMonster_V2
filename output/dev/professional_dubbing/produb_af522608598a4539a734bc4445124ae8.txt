@@ -1,0 +1,293 @@
+=== PROFESSIONAL DUBBING task=af522608598a4539a734bc4445124ae8 ===
+groups=21
+
+--- Group 1 indices=[0] ---
+Original Translation: 18-річний хлопець на ім'я Джордж-молодший проїхав че́рез своє рідне місто.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">18</emphasis>-річний хлопець на ім'я <emphasis level="reduced">Джордж</emphasis>-молодший проїхав че́рез своє рідне місто.<break time="350ms"/></speak>
+Segment duration: 4527 ms
+Est TTS before: 5481 ms
+Est TTS after: 5889 ms
+Fill %: 130.1
+Rate: -1%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': '18', 'type': 'number'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 121.1% → light faster -1% (pauses scaled)
+
+--- Group 2 indices=[1] ---
+Original Translation: Але́ коли́ ві́н їхав. Джордж-молодший відчути.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Але́ коли́ ві́н їхав.<break time="350ms"/> <emphasis level="reduced">Джордж</emphasis>-молодший відчути.<break time="350ms"/></speak>
+Segment duration: 5483 ms
+Est TTS before: 3407 ms
+Est TTS after: 4887 ms
+Fill %: 89.1
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 62.1% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+  Decision: leading contrast pause before clause
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 3 indices=[2] ---
+Original Translation: Джордж-молодший був ду́же розумною дитиною. але́ ві́н тако́ж ду́же легко відволікався.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis>-молодший був ду́же розумною дитиною.<break time="350ms"/> але́ ві́н тако́ж ду́же легко відволікався.<break time="350ms"/></speak>
+Segment duration: 8904 ms
+Est TTS before: 6370 ms
+Est TTS after: 8413 ms
+Fill %: 94.5
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 71.5% → rate -19%
+
+--- Group 4 indices=[3] ---
+Original Translation: І в той момент його́ батько дійсно купив йому маленьку італійську машину під назвою Фіат. але́ його́ батько.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І в той момент його́ батько дійсно купив йому маленьку італійську машину під назвою <emphasis level="reduced">Фіат</emphasis>.<break time="350ms"/> але́ його́ батько.<break time="350ms"/></speak>
+Segment duration: 10263 ms
+Est TTS before: 8000 ms
+Est TTS after: 10353 ms
+Fill %: 100.9
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Фіат', 'type': 'name'}
+  Decision: underfill 77.9% → rate -19%
+
+--- Group 5 indices=[4] ---
+Original Translation: Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, які дадуть вам справжню роботу?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Наприклад</emphasis>,<break time="184ms"/> чому ви не можете зосередитися на цьому й застосувати його до інших речей,<break time="184ms"/> які дадуть вам <emphasis level="moderate">справжню роботу</emphasis>?<break time="350ms"/></speak>
+Segment duration: 5038 ms
+Est TTS before: 8666 ms
+Est TTS after: 9384 ms
+Fill %: 186.3
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Наприклад', 'type': 'name'}
+  Accent: {'word': 'справжню роботу', 'type': 'key_phrase'}
+  Decision: natural rate -5%
+  Decision: overfill 172.0% → light faster +1% (pauses scaled)
+
+--- Group 6 indices=[5] ---
+Original Translation: І тому́ практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І тому́ практично <emphasis level="moderate">кожна вечеря</emphasis> в ці дні перетворювалася на величезну суперечку між батьком і сином.<break time="350ms"/></speak>
+Segment duration: 4620 ms
+Est TTS before: 7333 ms
+Est TTS after: 7683 ms
+Fill %: 166.3
+Rate: +1%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'кожна вечеря', 'type': 'key_phrase'}
+  Decision: natural rate -5%
+  Decision: overfill 158.7% → light faster +1% (pauses scaled)
+
+--- Group 7 indices=[6] ---
+Original Translation: І ось Джордж. ві́н підійшов до цього перехрестя. де воно бу́ло прямо біля його́ дому. і ві́н почав повертати.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І ось <emphasis level="reduced">Джордж</emphasis>.<break time="350ms"/> ві́н підійшов до цього перехрестя.<break time="350ms"/> де воно бу́ло прямо біля його́ дому.<break time="350ms"/> і ві́н почав повертати.<break time="350ms"/></speak>
+Segment duration: 9241 ms
+Est TTS before: 8074 ms
+Est TTS after: 10705 ms
+Fill %: 115.8
+Rate: -13%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 87.4% → rate -13%
+
+--- Group 8 indices=[7] ---
+Original Translation: Че́рез два тижні Джордж-молодший лежав у реанімації місцевої лікарні. тож за два тижні до того. коли́ Джордж робив поворот. а по́тім щось трапилося.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Че́рез два тижні <emphasis level="reduced">Джордж</emphasis>-молодший лежав у реанімації місцевої лікарні.<break time="350ms"/> тож за два тижні до того.<break time="350ms"/> коли́ <emphasis level="reduced">Джордж</emphasis> робив поворот.<break time="350ms"/> а<break time="200ms"/> по́тім щось трапилося.<break time="350ms"/></speak>
+Segment duration: 17290 ms
+Est TTS before: 10962 ms
+Est TTS after: 14710 ms
+Fill %: 85.1
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 63.4% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 9 indices=[8] ---
+Original Translation: Че́рез два роки Джордж-молодший. яки́й до цього моменту вже́ повністю оговтався від травм.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Че́рез два роки <emphasis level="reduced">Джордж</emphasis>-молодший. яки́й до цього моменту вже́ повністю оговтався від травм.<break time="350ms"/></speak>
+Segment duration: 7433 ms
+Est TTS before: 6666 ms
+Est TTS after: 7787 ms
+Fill %: 104.8
+Rate: -11%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 89.7% → rate -11%
+
+--- Group 10 indices=[9] ---
+Original Translation: Тож пі́сля свого передсмертного досвіду Джордж-молодший зрозумів.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Тож</emphasis> пі́сля свого передсмертного досвіду <emphasis level="reduced">Джордж</emphasis>-молодший зрозумів.<break time="350ms"/></speak>
+Segment duration: 7533 ms
+Est TTS before: 4814 ms
+Est TTS after: 6145 ms
+Fill %: 81.6
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Тож', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 63.9% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 11 indices=[10] ---
+Original Translation: Тож Джордж-молодший вирішив. що справді бі́льше не хоче брати участь у перегонах автомобілів.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Тож Джордж</emphasis>-молодший вирішив.<break time="350ms"/> що справді бі́льше не хоче брати участь у перегонах автомобілів.<break time="350ms"/></speak>
+Segment duration: 10171 ms
+Est TTS before: 6888 ms
+Est TTS after: 9029 ms
+Fill %: 88.8
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Тож Джордж', 'type': 'name'}
+  Decision: underfill 67.7% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 12 indices=[11] ---
+Original Translation: Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю Ес Сі. але́ пі́сля того.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Насправді Джордж</emphasis>-молодший подав заявку на престижну програму кінематографії в Ю <emphasis level="reduced">Ес Сі</emphasis>.<break time="350ms"/> але́ пі́сля того.<break time="350ms"/></speak>
+Segment duration: 9258 ms
+Est TTS before: 7703 ms
+Est TTS after: 9915 ms
+Fill %: 107.1
+Rate: -18%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Насправді Джордж', 'type': 'name'}
+  Accent: {'word': 'Ес Сі', 'type': 'name'}
+  Decision: underfill 83.2% → rate -18%
+
+--- Group 13 indices=[12] ---
+Original Translation: Тепер Джордж-молодший підійшов до подіуму. щоб зробити декілька фотографій водія-переможця.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Тепер Джордж</emphasis>-молодший підійшов до подіуму.<break time="350ms"/> щоб зробити декілька фотографій водія-переможця.<break time="350ms"/></speak>
+Segment duration: 9900 ms
+Est TTS before: 6740 ms
+Est TTS after: 8853 ms
+Fill %: 89.4
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Тепер Джордж', 'type': 'name'}
+  Decision: underfill 68.1% → rate -19%
+
+--- Group 14 indices=[13] ---
+Original Translation: І тоді́ в якийсь момент цей чоловік фактично офіційно представився як Хаскелл Векслер і сказав.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І тоді́ в якийсь момент цей чоловік фактично офіційно представився як <emphasis level="reduced">Хаскелл Векслер</emphasis> і сказав.<break time="350ms"/></speak>
+Segment duration: 7400 ms
+Est TTS before: 7037 ms
+Est TTS after: 7756 ms
+Fill %: 104.8
+Rate: -5%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Хаскелл Векслер', 'type': 'name'}
+  Decision: natural rate -5%
+
+--- Group 15 indices=[14] ---
+Original Translation: І Джордж-молодший розповів Хаскеллу про те.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І <emphasis level="reduced">Джордж</emphasis>-молодший розповів <emphasis level="reduced">Хаскеллу</emphasis> про те.<break time="350ms"/></speak>
+Segment duration: 5734 ms
+Est TTS before: 3185 ms
+Est TTS after: 4206 ms
+Fill %: 73.4
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Хаскеллу', 'type': 'name'}
+  Decision: underfill 55.5% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 16 indices=[15] ---
+Original Translation: І коли́ Хаскелл почув це.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І коли́ <emphasis level="reduced">Хаскелл</emphasis> почув це.<break time="350ms"/></speak>
+Segment duration: 3286 ms
+Est TTS before: 1923 ms
+Est TTS after: 2704 ms
+Fill %: 82.3
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Хаскелл', 'type': 'name'}
+  Decision: underfill 58.5% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 17 indices=[16] ---
+Original Translation: Дозволь мені подзвонити. І справді.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Дозволь</emphasis> мені подзвонити.<break time="350ms"/> І справді.<break time="350ms"/></speak>
+Segment duration: 7493 ms
+Est TTS before: 2592 ms
+Est TTS after: 3917 ms
+Fill %: 52.3
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Дозволь', 'type': 'name'}
+  Decision: underfill 34.6% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 18 indices=[17] ---
+Original Translation: Але́ цей момент у житті Джорджа-молодшого не лише змінив його́ життя назавжди.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><break time="360ms"/>Але́ цей момент у житті <emphasis level="reduced">Джорджа</emphasis>-молодшого не лише змінив його́ життя назавжди.<break time="350ms"/></speak>
+Segment duration: 4004 ms
+Est TTS before: 5777 ms
+Est TTS after: 6487 ms
+Fill %: 162.0
+Rate: +1%
+  Pause: {'before': 'start', 'ms': 360, 'type': 'source_lead'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джорджа', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 144.3% → light faster +1% (pauses scaled)
+  Decision: leading contrast pause before clause
+
+--- Group 19 indices=[18] ---
+Original Translation: Це тако́ж назавжди повністю змінило б кіно в цілому.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Це тако́ж назавжди повністю змінило б кіно в цілому.<break time="350ms"/></speak>
+Segment duration: 8979 ms
+Est TTS before: 3851 ms
+Est TTS after: 4999 ms
+Fill %: 55.7
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 42.9% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 20 indices=[19] ---
+Original Translation: Його́ фільм став частиною найуспішнішої кінофраншизи всіх часів.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Його</emphasis>́ фільм став частиною найуспішнішої кінофраншизи всіх часів.<break time="350ms"/></speak>
+Segment duration: 4620 ms
+Est TTS before: 4740 ms
+Est TTS after: 5344 ms
+Fill %: 115.7
+Rate: -5%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Його', 'type': 'name'}
+  Decision: natural rate -5%
+
+--- Group 21 indices=[20] ---
+Original Translation: Джордж-молодший. Сьогодні більш відомий як Джордж Лукас.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis>-молодший.<break time="350ms"/> <emphasis level="reduced">Сьогодні</emphasis> більш відомий як <emphasis level="reduced">Джордж Лукас</emphasis>.<break time="350ms"/></speak>
+Segment duration: 6066 ms
+Est TTS before: 4148 ms
+Est TTS after: 5769 ms
+Fill %: 95.1
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Сьогодні', 'type': 'name'}
+  Accent: {'word': 'Джордж Лукас', 'type': 'name'}
+  Decision: underfill 68.4% → rate -19%

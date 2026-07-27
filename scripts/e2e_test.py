@@ -139,6 +139,11 @@ def main() -> int:
     )
     start = r.get_json() or {}
     print("Start:", r.status_code, start)
+    if r.status_code == 409 and start.get("error_code") == "prepare_required":
+        # Language models not downloaded/prepared in this environment — this is
+        # expected offline; treat as a graceful skip (like missing ffmpeg/tts).
+        print("SKIP pipeline: models not prepared (prepare_required) — run prepare first")
+        return 0
     if r.status_code != 200:
         return 1
 

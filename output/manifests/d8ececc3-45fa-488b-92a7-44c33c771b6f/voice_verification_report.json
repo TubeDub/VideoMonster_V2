@@ -1,0 +1,180 @@
+{
+  "task_id": "eccbb8b6136b48328720b5b0331c153b",
+  "project_uuid": "d8ececc3-45fa-488b-92a7-44c33c771b6f",
+  "agent": "VoiceVerification/v1",
+  "summary": {
+    "segment_count": 1,
+    "passed_count": 0,
+    "failed_count": 1,
+    "retries": 3
+  },
+  "segment_count": 1,
+  "passed_count": 0,
+  "failed_count": 1,
+  "segments": [
+    {
+      "index": 0,
+      "segment_id": "482a9bc4739f459397bd17c1507b3009",
+      "pass": false,
+      "retry_count": 3,
+      "expected_text": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+      "recognized_text": "Нам вісім поколень прости, і в цим момент вивагітні витовсті, вивагітні, а якщо ні, то це ідеально.",
+      "final_metrics": {
+        "similarity": 0.9424,
+        "missing_words": [
+          "поколінь",
+          "прості",
+          "цей",
+          "ви",
+          "вагітні",
+          "ви",
+          "товсті",
+          "ви",
+          "вагітні"
+        ],
+        "truncated_words": [
+          "то",
+          "це",
+          "ідеально"
+        ],
+        "language_match": true,
+        "audio_completeness": 2.0156,
+        "asr_confidence": 0.75,
+        "recognized_text": "Нам вісім поколень прости, і в цим момент вивагітні витовсті, вивагітні, а якщо ні, то це ідеально.",
+        "issues": [
+          "missing_words",
+          "truncated_words",
+          "duration_overflow"
+        ],
+        "route_to": "semantic",
+        "pass": false
+      },
+      "events": [
+        {
+          "attempt": 1,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально",
+          "recognized_preview": "Нам вісім поколі інпрості, і в цим момент вивагітні витовсті, вивагітні, а якщо ні, то це ідеально.",
+          "metrics": {
+            "similarity": 0.8889,
+            "missing_words": [
+              "прості",
+              "ви",
+              "вагітні",
+              "ви",
+              "товсті",
+              "ви",
+              "вагітні",
+              "це",
+              "ідеально"
+            ],
+            "truncated_words": [
+              "то",
+              "це",
+              "ідеально"
+            ],
+            "language_match": true,
+            "audio_completeness": 1.6895,
+            "asr_confidence": 0.75,
+            "recognized_text": "Нам вісім поколінь прости, і в цим момент вивагінні, витофсті, вивагінні, а якщо ні, то цей дална.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 2,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально",
+          "recognized_preview": "Нам вісім поколіні прости, і в цим момент вивагітні, витовсті, вивагітні, а якщо ні, то це ідеально.",
+          "metrics": {
+            "similarity": 0.9424,
+            "missing_words": [
+              "поколінь",
+              "прості",
+              "цей",
+              "ви",
+              "вагітні",
+              "ви",
+              "товсті",
+              "ви",
+              "вагітні"
+            ],
+            "truncated_words": [
+              "поколінь",
+              "то",
+              "це",
+              "ідеально"
+            ],
+            "language_match": true,
+            "audio_completeness": 2.0156,
+            "asr_confidence": 0.75,
+            "recognized_text": "Нам вісім поколі інпрості, і в цим момент вивагітні витовсті, вивагітні, а якщо ні, то це ідеально.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        },
+        {
+          "attempt": 3,
+          "route_to": "semantic",
+          "issues": [
+            "missing_words",
+            "truncated_words",
+            "duration_overflow"
+          ],
+          "expected_preview": "Нам вісім поколінь прості, і в цей момент ви вагітні, ви товсті, ви вагітні, а якщо ні, то це ідеально.",
+          "recognized_preview": "Нам вісім поколень прости, і в цим момент вивагітні витовсті, вивагітні, а якщо ні, то це ідеально.",
+          "metrics": {
+            "similarity": 0.9424,
+            "missing_words": [
+              "поколінь",
+              "прості",
+              "цей",
+              "ви",
+              "вагітні",
+              "ви",
+              "товсті",
+              "ви",
+              "вагітні"
+            ],
+            "truncated_words": [
+              "то",
+              "це",
+              "ідеально"
+            ],
+            "language_match": true,
+            "audio_completeness": 2.0156,
+            "asr_confidence": 0.75,
+            "recognized_text": "Нам вісім поколіні прости, і в цим момент вивагітні, витовсті, вивагітні, а якщо ні, то це ідеально.",
+            "issues": [
+              "missing_words",
+              "truncated_words",
+              "duration_overflow"
+            ],
+            "route_to": "semantic",
+            "pass": false
+          }
+        }
+      ]
+    }
+  ]
+}

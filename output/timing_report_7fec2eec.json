@@ -1,0 +1,54 @@
+{
+  "engine": "closed_loop_timing",
+  "segment_count": 1,
+  "avg_timing_score": 70.0,
+  "segments_score_ge_95": 0,
+  "kpi_target_score": 95,
+  "overflow_threshold_ms": 100,
+  "underflow_threshold_ms": 450,
+  "max_rewrite_iterations": 5,
+  "closed_loop": {
+    "engine": "closed_loop_timing",
+    "checked": 0,
+    "ok": 0,
+    "rewritten": 0,
+    "pause_only": 0,
+    "failed": 0,
+    "retries": 0,
+    "deviations": 0,
+    "fixed": 0,
+    "adaptation_executed": false,
+    "resegmented": 0,
+    "issues": [],
+    "avg_timing_score": 0.0,
+    "segments_score_ge_95": 0,
+    "budgets": []
+  },
+  "timeline_validation": {
+    "ok": true,
+    "segment_overlap": [],
+    "speech_overlap": [],
+    "gap_analysis": [],
+    "problem_indices": []
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original_duration": 0,
+      "tts_duration": 0,
+      "slot_duration": 4370,
+      "slot_start": 1200,
+      "slot_end": 5570,
+      "delta": -4370,
+      "overflow": 0,
+      "underflow": 0,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 0,
+      "pause_stages": [],
+      "timing_score": 70.0,
+      "final_status": "failed",
+      "rewrite_reason": "",
+      "status": "failed"
+    }
+  ]
+}

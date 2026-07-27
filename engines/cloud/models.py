@@ -109,6 +109,7 @@ class ProviderStatus:
     upload_bps: float | None = None
     download_bps: float | None = None
     error: str = ""
+    meta: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

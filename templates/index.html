@@ -3,83 +3,61 @@
 {% block content %}
 
 <!-- ═══ RECOVERY BANNER (п.34/56/110) ════════════════════════════ -->
-<div id="recovery-banner" style="display:none;margin-bottom:16px;">
-  <div class="recovery-card">
-    <span class="recovery-icon">🔄</span>
-    <div class="recovery-body">
-      <strong>Обнаружен незавершённый дубляж</strong>
+<div id="recovery-banner" style="display:none;margin-bottom:16px;"><div class="recovery-card"><span class="recovery-icon ui-ico ui-ico--md"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg></span>
+    <div class="recovery-body"><strong>Обнаружен незавершённый дубляж</strong>
       <span id="recovery-desc">Продолжить работу с предыдущего места?</span>
     </div>
-    <div class="recovery-actions">
-      <a id="recovery-link" href="/dub" class="btn btn-primary btn-sm">Продолжить →</a>
+    <div class="recovery-actions"><a id="recovery-link" href="/dub" class="btn btn-primary btn-sm">Продолжить →</a>
       <button class="btn btn-sm" onclick="dismissRecovery()">Позже</button>
     </div>
   </div>
 </div>
 
 <!-- ═══ HERO ═══════════════════════════════════════════════════ -->
-<div class="vm-hero">
-  <div class="vm-hero-inner">
-    <div class="vm-hero-badge">🎬 TubeDub</div>
+<div class="vm-hero"><div class="vm-hero-inner"><div class="vm-hero-badge">TubeDub</div>
     <h1 class="vm-hero-title">Дубляж за одну кнопку</h1>
-    <p class="vm-hero-sub">
-      Загрузите видео — TubeDub сам распознаёт речь, переводит и озвучивает нейросетью. Вы получаете готовый MP4.
+    <p class="vm-hero-sub">Загрузите видео — TubeDub сам распознаёт речь, переводит и озвучивает нейросетью. Вы получаете готовый MP4.
     </p>
-    <div class="vm-hero-cta">
-      <a href="/dub" class="btn btn-primary btn-large">🤖 Начать авто-дубляж</a>
-      <a href="/studio" class="btn btn-secondary btn-large">🎙 Открыть студию</a>
+    <div class="vm-hero-cta"><a href="/dub" class="btn btn-primary btn-large">Начать авто-дубляж</a>
+      <a href="/studio" class="btn btn-secondary btn-large">Открыть студию</a>
       <span id="vm-update-badge" class="vm-update-badge" style="display:none;" title="Доступно обновление"></span>
     </div>
-    <div id="stress-test-btn-wrap" style="display:none;margin-top:14px;text-align:center;">
-      <button type="button" class="btn btn-secondary" id="btn-stress-test" title="Developer / Owner only">🧪 Stress Test</button>
+    <div id="stress-test-btn-wrap" style="display:none;margin-top:14px;text-align:center;"><button type="button" class="btn btn-secondary" id="btn-stress-test" title="Developer / Owner only">Stress Test</button>
     </div>
-    <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <div data-vm-update-widget data-vm-update-meta="home-update-meta"></div>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><div data-vm-update-widget data-vm-update-meta="home-update-meta"></div>
       <span id="home-update-meta" class="vm-update-meta"></span>
     </div>
   </div>
 </div>
 
 <!-- ═══ СЦЕНАРИИ "Я ХОЧУ" (п.105) ═══════════════════════════════ -->
-<div class="scenarios-block">
-  <div class="scenarios-title">Что хотите сделать?</div>
-  <div class="scenarios-grid">
-    <a href="/dub" class="scenario-card scenario-card--primary">
-      <div class="sc-icon">🎬</div>
-      <div class="sc-body">
-        <strong>Сделать дубляж видео</strong>
+<div class="scenarios-block"><div class="scenarios-title">Что хотите сделать?</div>
+  <div class="scenarios-grid"><a href="/dub" class="scenario-card scenario-card--primary"><div class="sc-icon sc-icon--dub" aria-hidden="true"></div>
+      <div class="sc-body"><strong>Сделать дубляж видео</strong>
         <span>Загрузите видео — получите перевод и озвучку на нужном языке</span>
       </div>
       <div class="sc-arrow">→</div>
     </a>
-    <a href="/voice" class="scenario-card">
-      <div class="sc-icon">🎤</div>
-      <div class="sc-body">
-        <strong>Озвучить текст</strong>
+    <a href="/voice" class="scenario-card"><div class="sc-icon sc-icon--voice" aria-hidden="true"></div>
+      <div class="sc-body"><strong>Озвучить текст</strong>
         <span>Введите или вставьте текст — скачайте MP3 с голосом</span>
       </div>
       <div class="sc-arrow">→</div>
     </a>
-    <a href="/reader" class="scenario-card">
-      <div class="sc-icon">📚</div>
-      <div class="sc-body">
-        <strong>Озвучить книгу</strong>
+    <a href="/reader" class="scenario-card"><div class="sc-icon sc-icon--book" aria-hidden="true"></div>
+      <div class="sc-body"><strong>Озвучить книгу</strong>
         <span>Откройте TXT, EPUB, PDF — слушайте или скачайте аудиокнигу</span>
       </div>
       <div class="sc-arrow">→</div>
     </a>
-    <a href="/translate" class="scenario-card">
-      <div class="sc-icon">🌍</div>
-      <div class="sc-body">
-        <strong>Перевести текст или SRT</strong>
+    <a href="/translate" class="scenario-card"><div class="sc-icon sc-icon--translate" aria-hidden="true"></div>
+      <div class="sc-body"><strong>Перевести текст или SRT</strong>
         <span>Автоопределение языка, перевод на 30+ языков</span>
       </div>
       <div class="sc-arrow">→</div>
     </a>
-    <a href="/studio" class="scenario-card">
-      <div class="sc-icon">🎞</div>
-      <div class="sc-body">
-        <strong>Работать в Студии</strong>
+    <a href="/studio" class="scenario-card"><div class="sc-icon sc-icon--studio" aria-hidden="true"></div>
+      <div class="sc-body"><strong>Работать в Студии</strong>
         <span>Перевод + озвучка + SRT в одном окне</span>
       </div>
       <div class="sc-arrow">→</div>
@@ -88,109 +66,82 @@
 </div>
 
 <!-- ═══ SYSTEM HEALTH ══════════════════════════════════════════ -->
-<div class="sys-panel" id="sys-panel">
-  <div class="sys-panel-header">
-    <span id="sys-overall-icon">⏳</span>
+<div class="sys-panel" id="sys-panel"><div class="sys-panel-header"><span id="sys-overall-icon" class="status-dot status-dot--pending" aria-hidden="true"></span>
     <strong id="sys-overall-msg" style="flex:1;">Проверка компонентов…</strong>
-    <button class="btn btn-sm" onclick="checkSystem()" id="sys-retry-btn" style="display:none;">🔄 Повторить</button>
+    <button class="btn btn-sm" onclick="checkSystem()" id="sys-retry-btn" style="display:none;">Повторить</button>
   </div>
   <div id="sys-checks-row" class="sys-checks-row" style="display:none;"></div>
 </div>
 
 <!-- ═══ QUICK START ════════════════════════════════════════════ -->
-<div class="qs-block">
-  <h2 class="section-title">⚡ Быстрый старт</h2>
-  <div class="qs-steps">
-    <div class="qs-step">
-      <div class="qs-num">1</div>
-      <div class="qs-body">
-        <strong>Загрузите видео</strong>
+<div class="qs-block"><h2 class="section-title">Быстрый старт</h2>
+  <div class="qs-steps"><div class="qs-step"><div class="qs-num">1</div>
+      <div class="qs-body"><strong>Загрузите видео</strong>
         <span>MP4, MKV, MOV, AVI — любой язык, без субтитров</span>
       </div>
     </div>
     <div class="qs-arrow">→</div>
-    <div class="qs-step">
-      <div class="qs-num">2</div>
-      <div class="qs-body">
-        <strong>Выберите язык и голос</strong>
+    <div class="qs-step"><div class="qs-num">2</div>
+      <div class="qs-body"><strong>Выберите язык и голос</strong>
         <span>Русский, English, Español и ещё 20+ языков</span>
       </div>
     </div>
     <div class="qs-arrow">→</div>
-    <div class="qs-step">
-      <div class="qs-num">3</div>
-      <div class="qs-body">
-        <strong>Нажмите «Дубляж»</strong>
+    <div class="qs-step"><div class="qs-num">3</div>
+      <div class="qs-body"><strong>Нажмите «Дубляж»</strong>
         <span>TubeDub сделает всё остальное автоматически</span>
       </div>
     </div>
     <div class="qs-arrow">→</div>
-    <div class="qs-step qs-step-done">
-      <div class="qs-num" style="background:var(--success);">✓</div>
-      <div class="qs-body">
-        <strong>Готово!</strong>
+    <div class="qs-step qs-step-done"><div class="qs-num" style="background:var(--success);">✓</div>
+      <div class="qs-body"><strong>Готово!</strong>
         <span>Скачайте MP4 или исправьте сегменты без перезапуска</span>
       </div>
     </div>
   </div>
-  <div style="text-align:center;margin-top:16px;">
-    <a href="/dub" class="btn btn-primary">🚀 Попробовать прямо сейчас →</a>
+  <div style="text-align:center;margin-top:16px;"><a href="/dub" class="btn btn-primary">Попробовать прямо сейчас →</a>
   </div>
 </div>
 
 <!-- ═══ FEATURE CARDS ══════════════════════════════════════════ -->
 <h2 class="section-title" style="margin-top:28px;">Все функции</h2>
-<div class="cards-grid">
-
-  <a href="/dub" class="feature-card feature-card--highlight">
-    <div class="card-icon">🎬</div>
-    <div class="card-body">
-      <h2>Авто-дубляж</h2>
+<div class="cards-grid"><a href="/dub" class="feature-card feature-card--highlight"><div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+    <div class="card-body"><h2>Авто-дубляж</h2>
       <p>Видео → STT → Перевод → TTS → MP4. Один клик — готовый результат.</p>
     </div>
-    <div class="card-tag">⭐ Главное</div>
+    <div class="card-tag">Главное</div>
   </a>
 
-  <a href="/studio" class="feature-card">
-    <div class="card-icon">🎙️</div>
-    <div class="card-body">
-      <h2>Студия</h2>
+  <a href="/studio" class="feature-card"><div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/></svg></div>
+    <div class="card-body"><h2>Студия</h2>
       <p>Перевод + озвучка в одном окне. SRT с таймингом за один шаг.</p>
     </div>
     <div class="card-arrow">→</div>
   </a>
 
-  <a href="/voice" class="feature-card">
-    <div class="card-icon">🔊</div>
-    <div class="card-body">
-      <h2>Озвучка текста</h2>
+  <a href="/voice" class="feature-card"><div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a4 4 0 0 1 0 7"/></svg></div>
+    <div class="card-body"><h2>Озвучка текста</h2>
       <p>Нейросетевые голоса Microsoft Edge. Скачайте MP3 или встройте в видео.</p>
     </div>
     <div class="card-arrow">→</div>
   </a>
 
-  <a href="/translate" class="feature-card">
-    <div class="card-icon">🌍</div>
-    <div class="card-body">
-      <h2>Перевод</h2>
+  <a href="/translate" class="feature-card"><div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></div>
+    <div class="card-body"><h2>Перевод</h2>
       <p>Google Translate онлайн + Argos офлайн. SRT с сохранением тайминга.</p>
     </div>
     <div class="card-arrow">→</div>
   </a>
 
-  <a href="/reader" class="feature-card">
-    <div class="card-icon">📖</div>
-    <div class="card-body">
-      <h2>Чтение книги</h2>
+  <a href="/reader" class="feature-card"><div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2V5z"/><path d="M6 3v16"/></svg></div>
+    <div class="card-body"><h2>Чтение книги</h2>
       <p>Читайте и озвучивайте TXT, SRT, EPUB, PDF, DOCX. Закладки, прогресс.</p>
     </div>
     <div class="card-arrow">→</div>
   </a>
 
-  <a href="/projects" class="feature-card">
-    <div class="card-icon">📁</div>
-    <div class="card-body">
-      <h2>Проекты</h2>
+  <a href="/projects" class="feature-card"><div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7V5a2 2 0 0 1 2-2h4l2 2"/></svg></div>
+    <div class="card-body"><h2>Проекты</h2>
       <p>История всех дубляжей, озвучек и документов. Скачать или удалить.</p>
     </div>
     <div class="card-arrow">→</div>
@@ -199,48 +150,35 @@
 </div>
 
 <!-- ═══ RECENT PROJECTS ════════════════════════════════════════ -->
-<div id="recent-section" style="margin-top:28px;display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <h2 class="section-title" style="margin:0;">🕐 Последние проекты</h2>
+<div id="recent-section" style="margin-top:28px;display:none;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 class="section-title" style="margin:0;">Последние проекты</h2>
     <a href="/projects" class="btn btn-sm">Все проекты →</a>
   </div>
   <div id="recent-grid" class="cards-grid"></div>
 </div>
 
 <!-- ═══ TIPS ══════════════════════════════════════════════════ -->
-<div class="tips-block" style="margin-top:28px;">
-  <div class="tip-item">
-    <span class="tip-icon">💡</span>
-    <div>
-      <strong>Исправьте ошибки без перезапуска</strong>
+<div class="tips-block" style="margin-top:28px;"><div class="tip-item"><span class="tip-icon ui-ico ui-ico--md ui-ico--muted"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 10a3 3 0 1 1 4.5 2.6c-.7.5-1.5 1.1-1.5 2.4"/><circle cx="12" cy="18" r="0.6"/></svg></span>
+    <div><strong>Исправьте ошибки без перезапуска</strong>
       <span>После дубляжа откройте редактор сегментов — переозвучьте любой фрагмент отдельно.</span>
     </div>
   </div>
-  <div class="tip-item">
-    <span class="tip-icon">🌐</span>
-    <div>
-      <strong>Работает без интернета</strong>
+  <div class="tip-item"><span class="tip-icon ui-ico ui-ico--md ui-ico--muted"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span>
+    <div><strong>Работает без интернета</strong>
       <span>Установите Argos Translate + faster-whisper — всё будет работать офлайн.</span>
     </div>
   </div>
-  <div class="tip-item">
-    <span class="tip-icon">⌨️</span>
-    <div>
-      <strong>Мини-приложения</strong>
+  <div class="tip-item"><span class="tip-icon ui-ico ui-ico--md ui-ico--muted"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10.01"/><line x1="10" y1="10" x2="10" y2="10.01"/><line x1="14" y1="10" x2="14" y2="10.01"/><line x1="18" y1="10" x2="18" y2="10.01"/><line x1="8" y1="14" x2="16" y2="14"/></svg></span>
+    <div><strong>Мини-приложения</strong>
       <span>Каждая функция доступна отдельно: <a href="/mini/dub">/mini/dub</a>, <a href="/mini/voice">/mini/voice</a> и т.д.</span>
     </div>
   </div>
 </div>
 
 <!-- Stress Test modal (Developer / Owner) -->
-<div id="stress-test-overlay" class="st-overlay" style="display:none;" aria-hidden="true">
-  <div class="st-modal" role="dialog" aria-labelledby="st-title">
-    <h2 id="st-title">Stress Test</h2>
-    <div class="st-progress-wrap">
-      <div class="st-progress-bar"><div id="st-progress-fill" class="st-progress-fill"></div></div>
+<div id="stress-test-overlay" class="st-overlay" style="display:none;" aria-hidden="true"><div class="st-modal" role="dialog" aria-labelledby="st-title"><h2 id="st-title">Stress Test</h2>
+    <div class="st-progress-wrap"><div class="st-progress-bar"><div id="st-progress-fill" class="st-progress-fill"></div></div>
     </div>
-    <div class="st-grid">
-      <div><span class="st-label">Видео</span><strong id="st-video">—</strong></div>
+    <div class="st-grid"><div><span class="st-label">Видео</span><strong id="st-video">—</strong></div>
       <div><span class="st-label">Текущий этап</span><strong id="st-stage">—</strong></div>
       <div><span class="st-label">Ошибок</span><strong id="st-errors">0</strong></div>
       <div><span class="st-label">Успешно</span><strong id="st-passed">0</strong></div>
@@ -248,8 +186,7 @@
       <div><span class="st-label">ETA</span><strong id="st-eta">—</strong></div>
     </div>
     <p id="st-message" class="st-message"></p>
-    <div id="st-done-actions" class="st-actions" style="display:none;">
-      <p>✅ Все тесты завершены. Открыть отчёт?</p>
+    <div id="st-done-actions" class="st-actions" style="display:none;"><p> Все тесты завершены. Открыть отчёт?</p>
       <button type="button" class="btn btn-primary btn-sm" id="st-open-report">Да</button>
       <button type="button" class="btn btn-secondary btn-sm" id="st-close-modal">Нет</button>
     </div>
@@ -261,323 +198,182 @@
 <!-- ════════════════════════════════════════════════════════════ -->
 <style>
 /* ── HERO ── */
-.vm-hero {
-  background: linear-gradient(135deg, rgba(79,142,247,.12) 0%, rgba(123,97,255,.08) 100%);
-  border: 1px solid rgba(79,142,247,.25);
-  border-radius: 16px;
-  padding: 32px 28px;
-  margin-bottom: 20px;
+.vm-hero { background: var(--panel-solid); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 32px; margin-bottom: 20px; position: relative; overflow: hidden;
 }
-.vm-hero-inner { max-width: 680px; }
-.vm-hero-badge {
-  display: inline-flex; align-items: center;
-  background: rgba(79,142,247,.15); border: 1px solid rgba(79,142,247,.3);
-  border-radius: 20px; padding: 4px 14px;
-  font-size: 12px; font-weight: 600; color: var(--accent);
-  margin-bottom: 12px;
+.vm-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 80% at 0% 0%, rgba(91,156,245,.12) 0%, transparent 55%), linear-gradient(180deg, rgba(255,255,255,.02) 0%, transparent 40%); pointer-events: none;
 }
-.vm-hero-title {
-  font-size: 30px; font-weight: 800; line-height: 1.2;
-  margin-bottom: 10px;
-  background: linear-gradient(90deg, #e2e8f0 40%, #7b9ff5 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+.vm-hero-inner { max-width: 640px; position: relative; }
+.vm-hero-badge { display: inline-flex; align-items: center; background: var(--accent-dim); border: 1px solid rgba(91,156,245,.28); border-radius: var(--radius-xs); padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px;
 }
-.vm-hero-sub {
-  font-size: 14px; color: var(--text2); line-height: 1.7;
-  margin-bottom: 20px; max-width: 540px;
+.vm-hero-title { font-size: 32px; font-weight: 700; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 12px; color: var(--text);
 }
-.vm-hero-cta { display: flex; gap: 10px; flex-wrap: wrap; }
-
-/* ── SYSTEM PANEL ── */
-.sys-panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  transition: border-color .3s;
+.vm-hero-sub { font-size: 14px; color: var(--text2); line-height: 1.65; margin-bottom: 22px; max-width: 520px;
 }
-.sys-panel.status-ok    { border-color: var(--success); }
-.sys-panel.status-warn  { border-color: #f6ad55; }
-.sys-panel.status-error { border-color: var(--danger); }
-.sys-panel-header {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
-  font-size: 13px;
+.vm-hero-cta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; } /* ── SYSTEM PANEL ── */
+.sys-panel { background: var(--panel-solid); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; transition: border-color .3s;
 }
-.sys-checks-row {
-  display: flex; flex-wrap: wrap; gap: 8px;
-  padding: 0 16px 14px;
+.sys-panel.status-ok { border-color: rgba(62,207,142,.45); }
+.sys-panel.status-warn { border-color: rgba(232,184,74,.45); }
+.sys-panel.status-error { border-color: rgba(240,113,120,.45); }
+.sys-panel-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-size: 13px;
 }
-.sys-check-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 11px; border-radius: 20px; font-size: 12px;
-  border: 1px solid var(--border);
-  background: var(--panel2);
-  cursor: default;
+.sys-checks-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 14px;
 }
-.sys-check-chip.ok    { border-color: rgba(62,207,142,.35); color: var(--success); }
-.sys-check-chip.fail  { border-color: rgba(245,101,101,.35); color: var(--danger); }
-.sys-check-chip.warn  { border-color: rgba(246,173,85,.35); color: #f6ad55; }
-.sys-check-chip .chip-hint {
-  font-size: 11px; color: var(--text2);
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; padding: 1px 5px; margin-left: 2px;
+.sys-check-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: var(--radius-xs); font-size: 12px; border: 1px solid var(--border); background: var(--panel2); cursor: default;
 }
-
-/* ── QUICK START ── */
-.qs-block {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px; margin-bottom: 20px;
+.sys-check-chip.ok { border-color: rgba(62,207,142,.35); color: var(--success); }
+.sys-check-chip.fail { border-color: rgba(240,113,120,.35); color: var(--danger); }
+.sys-check-chip.warn { border-color: rgba(232,184,74,.35); color: var(--amber); }
+.sys-check-chip .chip-hint { font-size: 11px; color: var(--text2); background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; margin-left: 2px;
+} /* ── QUICK START ── */
+.qs-block { background: var(--panel-solid); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px;
 }
-.section-title {
-  font-size: 16px; font-weight: 700; color: var(--text);
-  margin-bottom: 14px;
+.section-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; margin-bottom: 14px;
 }
-.qs-steps {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+.qs-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
 }
-.qs-step {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--panel2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 12px 14px; flex: 1; min-width: 140px;
+.qs-step { display: flex; align-items: center; gap: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; flex: 1; min-width: 140px;
 }
-.qs-num {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--accent); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px; flex-shrink: 0;
+.qs-num { width: 28px; height: 28px; border-radius: 8px; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(91,156,245,.25); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0;
 }
 .qs-body { display: flex; flex-direction: column; gap: 2px; }
 .qs-body strong { font-size: 13px; font-weight: 600; }
-.qs-body span   { font-size: 11px; color: var(--text2); line-height: 1.4; }
-.qs-arrow {
-  font-size: 18px; color: var(--text2);
-  flex-shrink: 0;
+.qs-body span { font-size: 11px; color: var(--text2); line-height: 1.4; }
+.qs-arrow { font-size: 16px; color: var(--text3); flex-shrink: 0;
 }
-@media(max-width:768px) {
-  .qs-steps { flex-direction: column; align-items: stretch; }
-  .qs-arrow { transform: rotate(90deg); align-self: center; }
-  .vm-hero-title { font-size: 22px; }
-  .vm-hero { padding: 22px 18px; }
-}
-
-/* ── FEATURE CARD HIGHLIGHT ── */
-.feature-card--highlight {
-  border-color: rgba(79,142,247,.4);
-  background: linear-gradient(135deg, rgba(79,142,247,.1) 0%, var(--panel) 100%);
+@media(max-width:768px) { .qs-steps { flex-direction: column; align-items: stretch; } .qs-arrow { transform: rotate(90deg); align-self: center; } .vm-hero-title { font-size: 24px; } .vm-hero { padding: 24px 18px; }
+} /* ── FEATURE CARD HIGHLIGHT ── */
+.feature-card--highlight { border-color: rgba(91,156,245,.35); background: linear-gradient(135deg, rgba(91,156,245,.08) 0%, var(--panel) 100%);
 }
 .feature-card--highlight:hover { border-color: var(--accent); }
-.card-tag {
-  margin-left: auto; font-size: 11px; font-weight: 600;
-  background: var(--accent); color: #fff;
-  border-radius: 5px; padding: 2px 7px; flex-shrink: 0;
-  align-self: flex-start;
+.card-tag { margin-left: auto; font-size: 11px; font-weight: 600; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(91,156,245,.25); border-radius: 5px; padding: 2px 7px; flex-shrink: 0; align-self: flex-start;
+} /* ── RECENT PROJECTS (mini cards) ── */
+.recent-mini-card { background: var(--panel-solid); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; text-decoration: none; color: var(--text); display: flex; flex-direction: column; gap: 5px; transition: border-color .15s, background .15s;
 }
-
-/* ── RECENT PROJECTS (mini cards) ── */
-.recent-mini-card {
-  background: var(--panel2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px; text-decoration: none; color: var(--text);
-  display: flex; flex-direction: column; gap: 5px;
-  transition: border-color .2s;
-}
-.recent-mini-card:hover { border-color: var(--accent); }
-.rmc-icon  { font-size: 22px; }
+.recent-mini-card:hover { border-color: var(--border2); background: var(--bg3); }
+.rmc-icon { color: var(--accent); display: inline-flex; align-items: center; }
+.rmc-icon .ui-ico { width: 18px; height: 18px; }
 .rmc-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rmc-meta  { font-size: 11px; color: var(--text2); }
-
-/* ── RECOVERY BANNER ── */
-.recovery-card {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  background: linear-gradient(135deg, rgba(167,139,250,.12) 0%, rgba(96,165,250,.08) 100%);
-  border: 1px solid rgba(167,139,250,.35);
-  border-radius: 12px; padding: 14px 18px;
+.rmc-meta { font-size: 11px; color: var(--text2); } /* ── RECOVERY BANNER ── */
+.recovery-card { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--accent-dim); border: 1px solid rgba(91,156,245,.3); border-radius: var(--radius); padding: 14px 18px;
 }
-.recovery-icon { font-size: 24px; flex-shrink: 0; }
+.recovery-icon { font-size: 18px; flex-shrink: 0; opacity: .8; }
 .recovery-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
 .recovery-body strong { font-size: 14px; font-weight: 600; }
-.recovery-body span   { font-size: 12px; color: var(--text2); }
-.recovery-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-
-/* ── SCENARIOS (п.105) ── */
-.scenarios-block {
-  margin-bottom: 20px;
+.recovery-body span { font-size: 12px; color: var(--text2); }
+.recovery-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; } /* ── SCENARIOS ── */
+.scenarios-block { margin-bottom: 20px;
 }
-.scenarios-title {
-  font-size: 13px; font-weight: 600; color: var(--text2);
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 10px;
+.scenarios-title { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
 }
-.scenarios-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.scenarios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
 }
-.scenarios-grid .scenario-card:first-child {
-  grid-column: 1 / -1;
+.scenarios-grid .scenario-card:first-child { grid-column: 1 / -1;
 }
-.scenario-card {
-  display: flex; align-items: center; gap: 14px;
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px 18px;
-  text-decoration: none; color: var(--text);
-  transition: border-color .2s, background .2s, transform .15s;
-  cursor: pointer;
+.scenario-card { display: flex; align-items: center; gap: 14px; background: var(--panel-solid); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; text-decoration: none; color: var(--text); transition: border-color .15s, background .15s, transform .15s; cursor: pointer;
 }
-.scenario-card:hover {
-  border-color: var(--accent);
-  background: rgba(79,142,247,.06);
-  transform: translateY(-1px);
+.scenario-card:hover { border-color: var(--border2); background: var(--bg3); transform: translateY(-1px);
 }
-.scenario-card--primary {
-  background: linear-gradient(135deg, rgba(79,142,247,.13) 0%, rgba(123,97,255,.08) 100%);
-  border-color: rgba(79,142,247,.4);
+.scenario-card--primary { background: linear-gradient(135deg, rgba(91,156,245,.1) 0%, var(--panel-solid) 70%); border-color: rgba(91,156,245,.32);
 }
 .scenario-card--primary:hover { border-color: var(--accent); }
-.sc-icon { font-size: 28px; flex-shrink: 0; }
-.sc-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.sc-body strong { font-size: 14px; font-weight: 600; }
-.sc-body span   { font-size: 12px; color: var(--text2); line-height: 1.4; }
-.sc-arrow { font-size: 18px; color: var(--text2); flex-shrink: 0; opacity: .6; }
-@media(max-width:640px) {
-  .scenarios-grid { grid-template-columns: 1fr; }
-  .scenarios-grid .scenario-card:first-child { grid-column: auto; }
+.sc-icon { width: 40px; height: 40px; flex-shrink: 0; border-radius: 10px; background: var(--bg3); border: 1px solid var(--border); position: relative;
 }
-
-/* ── TIPS ── */
-.tips-block {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px 20px;
-  display: flex; flex-direction: column; gap: 12px;
-  margin-bottom: 24px;
+.sc-icon::after { content: ''; position: absolute; inset: 11px; border-radius: 2px; background: var(--text2); opacity: .7;
+}
+.sc-icon--dub::after { inset: 12px 10px; background: var(--accent); opacity: 1; clip-path: polygon(0 0, 100% 50%, 0 100%); border-radius: 0;
+}
+.sc-icon--voice::after { border-radius: 50%; inset: 12px; background: var(--success); opacity: .85;
+}
+.sc-icon--book::after { inset: 10px 12px; background: var(--amber); opacity: .85; border-radius: 1px;
+}
+.sc-icon--translate::after { width: 14px; height: 14px; inset: auto; top: 13px; left: 13px; border: 2px solid var(--accent2); background: transparent; border-radius: 50%; opacity: 1; box-sizing: border-box;
+}
+.sc-icon--studio::after { inset: 11px; background: linear-gradient(90deg, var(--accent) 30%, transparent 30%, transparent 40%, var(--text2) 40%, var(--text2) 55%, transparent 55%, transparent 65%, var(--success) 65%); opacity: .9; border-radius: 1px;
+}
+.sc-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.sc-body strong { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.sc-body span { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.sc-arrow { font-size: 16px; color: var(--text3); flex-shrink: 0; transition: transform .15s, color .15s; }
+.scenario-card:hover .sc-arrow { color: var(--accent); transform: translateX(2px); }
+@media(max-width:640px) { .scenarios-grid { grid-template-columns: 1fr; } .scenarios-grid .scenario-card:first-child { grid-column: auto; }
+} /* ── TIPS ── */
+.tips-block { background: var(--panel-solid); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;
 }
 .tip-item { display: flex; align-items: flex-start; gap: 12px; }
-.tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.tip-icon { flex-shrink: 0; margin-top: 1px; color: var(--accent); opacity: .9; }
+.tip-icon.ui-ico { width: 18px; height: 18px; }
+.recovery-icon.ui-ico { width: 20px; height: 20px; color: var(--accent); }
 .tip-item div { display: flex; flex-direction: column; gap: 2px; }
 .tip-item strong { font-size: 13px; }
-.tip-item span   { font-size: 12px; color: var(--text2); line-height: 1.5; }
-.tip-item a      { color: var(--accent); text-decoration: none; }
+.tip-item span { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.tip-item a { color: var(--accent); text-decoration: none; }
 .tip-item a:hover{ text-decoration: underline; }
 </style>
 
 <script>
 /* ─── SYSTEM CHECK ─── */
 async function checkSystem() {
-  const panel   = document.getElementById('sys-panel');
-  const iconEl  = document.getElementById('sys-overall-icon');
-  const msgEl   = document.getElementById('sys-overall-msg');
-  const rowEl   = document.getElementById('sys-checks-row');
-  const retryBtn= document.getElementById('sys-retry-btn');
-  iconEl.textContent = '⏳'; msgEl.textContent = 'Проверка компонентов…';
-
+  const panel = document.getElementById('sys-panel');
+  const iconEl = document.getElementById('sys-overall-icon');
+  const msgEl = document.getElementById('sys-overall-msg');
+  const rowEl = document.getElementById('sys-checks-row');
+  const retryBtn = document.getElementById('sys-retry-btn');
+  const setDot = (level) => { iconEl.className = 'status-dot status-dot--' + level; iconEl.textContent = ''; };
+  setDot('pending');
+  msgEl.textContent = 'Проверка компонентов…';
   try {
     const r = await fetch('/api/system/diagnostics');
     const d = await r.json();
-
     const level = d.level || (d.ready ? 'ok' : 'error');
     if (level === 'ok') {
-      iconEl.textContent = '✅'; msgEl.textContent = d.summary || 'Всё готово к работе';
-      panel.className = 'sys-panel status-ok'; retryBtn.style.display = 'none';
+      setDot('ok');
+      msgEl.textContent = d.summary || 'Всё готово к работе';
+      panel.className = 'sys-panel status-ok';
+      retryBtn.style.display = 'none';
     } else if (level === 'error') {
-      iconEl.textContent = '⚠️';
+      setDot('err');
       msgEl.textContent = d.summary || ('Проблемы: ' + (d.problems || []).map(p => p.label).join(', '));
-      panel.className = 'sys-panel status-error'; retryBtn.style.display = '';
+      panel.className = 'sys-panel status-error';
+      retryBtn.style.display = '';
     } else {
-      iconEl.textContent = '🟡'; msgEl.textContent = d.summary || 'Готово с предупреждениями';
-      panel.className = 'sys-panel status-warn'; retryBtn.style.display = '';
+      setDot('warn');
+      msgEl.textContent = d.summary || 'Готово с предупреждениями';
+      panel.className = 'sys-panel status-warn';
+      retryBtn.style.display = '';
     }
-
+    const chipDot = (cls) => cls === 'ok' ? 'ok' : (cls === 'fail' ? 'err' : 'warn');
     rowEl.style.display = 'flex';
     rowEl.innerHTML = (d.checks || []).map(c => {
-      const cls  = c.ok ? 'ok' : (c.critical ? 'fail' : 'warn');
-      const ico  = c.ok ? '✅' : (c.critical ? '❌' : '⚠️');
-      const hint = !c.ok && c.hint
-        ? `<span class="chip-hint" title="Как установить">${c.hint}</span>`
-        : '';
-      return `<span class="sys-check-chip ${cls}">${ico} ${c.label}${hint}</span>`;
+      const cls = c.ok ? 'ok' : (c.critical ? 'fail' : 'warn');
+      const hint = !c.ok && c.hint ? `<span class="chip-hint" title="Как установить">${c.hint}</span>` : '';
+      return `<span class="sys-check-chip ${cls}"><span class="status-dot status-dot--${chipDot(cls)}"></span> ${c.label}${hint}</span>`;
     }).join('');
-
     if (d.disk_free_gb > 0) {
       const diskClass = d.disk_free_gb > 5 ? 'ok' : d.disk_free_gb > 1 ? 'warn' : 'fail';
-      const diskIco   = d.disk_free_gb > 5 ? '✅' : '⚠️';
-      rowEl.innerHTML += `<span class="sys-check-chip ${diskClass}">${diskIco} Диск: ${d.disk_free_gb} ГБ свободно</span>`;
+      rowEl.innerHTML += `<span class="sys-check-chip ${diskClass}"><span class="status-dot status-dot--${chipDot(diskClass)}"></span> Диск: ${d.disk_free_gb} ГБ свободно</span>`;
     }
-
     if (d.python_ver) {
-      rowEl.innerHTML += `<span class="sys-check-chip ok" style="opacity:.6;">🐍 Python ${d.python_ver}</span>`;
+      rowEl.innerHTML += `<span class="sys-check-chip ok" style="opacity:.6;"><span class="status-dot status-dot--ok"></span> Python ${d.python_ver}</span>`;
     }
-
-  } catch(e) {
-    iconEl.textContent = '❓'; msgEl.textContent = 'Не удалось проверить систему';
+  } catch (e) {
+    setDot('err');
+    msgEl.textContent = 'Не удалось проверить систему';
     retryBtn.style.display = '';
   }
-}
-
-/* ─── RECENT PROJECTS ─── */
-async function loadRecentProjects() {
-  try {
-    const r  = await fetch('/api/projects/list');
-    const d  = await r.json();
-    const ps = (d.projects || []).slice(0, 4);
-    if (!ps.length) return;
-
-    const sec  = document.getElementById('recent-section');
-    const grid = document.getElementById('recent-grid');
-    sec.style.display = 'block';
-    grid.innerHTML = ps.map(p => {
-      const date = new Date(p.created * 1000).toLocaleDateString('ru');
-      return `
-        <a href="${p.download}" download class="recent-mini-card">
-          <div class="rmc-icon">${p.icon}</div>
+} /* ─── RECENT PROJECTS ─── */
+async function loadRecentProjects() { try { const r = await fetch('/api/projects/list'); const d = await r.json(); const ps = (d.projects || []).slice(0, 4); if (!ps.length) return; const sec = document.getElementById('recent-section'); const grid = document.getElementById('recent-grid'); sec.style.display = 'block'; grid.innerHTML = ps.map(p => { const date = new Date(p.created * 1000).toLocaleDateString('ru'); return `
+        <a href="${p.download}" download class="recent-mini-card"><div class="rmc-icon">${(window.vmIcon && vmIcon.html(p.icon, "ui-ico--md")) || p.icon}</div>
           <div class="rmc-title" title="${escH(p.title)}">${escH(p.title)}</div>
           <div class="rmc-meta">${p.label} · ${date}${p.size_mb > 0 ? ' · ' + p.size_mb + ' МБ' : ''}</div>
-        </a>`;
-    }).join('');
-  } catch(e) {}
-}
-
-function escH(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-checkSystem();
-loadRecentProjects();
-
-/* ─── RECOVERY (п.34/56/110) ─── */
-function checkRecovery() {
-  try {
-    const raw = localStorage.getItem('vm_active_task');
-    if (!raw) return;
-    const task = JSON.parse(raw);
-    if (!task.taskId) return;
-
-    fetch('/api/auto_dub/status/' + task.taskId)
-      .then(r => r.json())
-      .then(d => {
-        if (d.error || d.status === 'done' || d.status === 'error') {
-          localStorage.removeItem('vm_active_task');
-          return;
-        }
-        const banner  = document.getElementById('recovery-banner');
-        const desc    = document.getElementById('recovery-desc');
-        const name    = task.videoName ? `«${task.videoName.slice(0,30)}»` : 'Видео';
-        const mins    = Math.round((Date.now() - (task.startedAt || Date.now())) / 60000);
-        const ago     = mins > 0 ? ` · ${mins} мин. назад` : '';
-        desc.textContent = name + ago + ' — дубляж не завершён';
-        banner.style.display = 'block';
-      })
-      .catch(() => localStorage.removeItem('vm_active_task'));
-  } catch(e) {}
-}
-
-function dismissRecovery() {
-  localStorage.removeItem('vm_active_task');
-  document.getElementById('recovery-banner').style.display = 'none';
-}
-
-checkRecovery();
+        </a>`; }).join(''); } catch(e) {}
+} function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+} checkSystem();
+loadRecentProjects(); /* ─── RECOVERY (п.34/56/110) ─── */
+function checkRecovery() { try { const raw = localStorage.getItem('vm_active_task'); if (!raw) return; const task = JSON.parse(raw); if (!task.taskId) return; fetch('/api/auto_dub/status/' + task.taskId) .then(r => r.json()) .then(d => { if (d.error || d.status === 'done' || d.status === 'error') { localStorage.removeItem('vm_active_task'); return; }
+        const banner = document.getElementById('recovery-banner'); const desc = document.getElementById('recovery-desc'); const name = task.videoName ? `«${task.videoName.slice(0,30)}»` : 'Видео'; const mins = Math.round((Date.now() - (task.startedAt || Date.now())) / 60000); const ago = mins > 0 ? ` · ${mins} мин. назад` : ''; desc.textContent = name + ago + ' — дубляж не завершён'; banner.style.display = 'block'; }) .catch(() => localStorage.removeItem('vm_active_task')); } catch(e) {}
+} function dismissRecovery() { localStorage.removeItem('vm_active_task'); document.getElementById('recovery-banner').style.display = 'none';
+} checkRecovery();
 </script>
 <script src="/static/js/stress_test.js"></script>
 <script>if (typeof initStressTestUI === 'function') initStressTestUI();</script>

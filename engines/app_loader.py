@@ -41,6 +41,20 @@ _CORE_BLUEPRINTS: tuple[tuple[str, str], ...] = (
     ("api.streamdub_api", "bp"),
 )
 
+# Must load or the process aborts — desktop shell depends on these.
+_ESSENTIAL_CORE: frozenset[str] = frozenset(
+    {
+        "api.system_api",
+        "api.files_api",
+        "api.license_api",
+        "api.prepare_api",
+        "api.modules_api",
+        "api.feature_flags_api",
+        "api.tts_api",
+        "api.translate_api",
+    }
+)
+
 _HEAVY_BLUEPRINTS: tuple[tuple[str, str], ...] = (
     ("api.reader_api", "bp"),
     ("api.dub_api", "bp"),
@@ -63,6 +77,8 @@ _HEAVY_BLUEPRINTS: tuple[tuple[str, str], ...] = (
 
 _heavy_lock = threading.Lock()
 _heavy_loaded = False
+_heavy_failures: list[str] = []
+_core_failures: list[str] = []
 
 
 def _import_bp(module_path: str, attr: str):
@@ -70,9 +86,36 @@ def _import_bp(module_path: str, attr: str):
     return getattr(mod, attr)
 
 
+def heavy_blueprint_status() -> dict:
+    """Surface degraded heavy-API load state for /api/system/check."""
+    return {
+        "loaded": _heavy_loaded,
+        "failures": list(_heavy_failures),
+        "degraded": bool(_heavy_failures),
+        "core_failures": list(_core_failures),
+        "core_degraded": bool(_core_failures),
+    }
+
+
 def register_core_blueprints(app: Flask) -> None:
+    """Register core blueprints; non-essential failures degrade instead of crash."""
+    _core_failures.clear()
     for module_path, attr in _CORE_BLUEPRINTS:
-        app.register_blueprint(_import_bp(module_path, attr))
+        try:
+            app.register_blueprint(_import_bp(module_path, attr))
+        except Exception as exc:
+            msg = f"{module_path}: {exc}"
+            if module_path in _ESSENTIAL_CORE:
+                logger.exception("Essential core blueprint failed: %s", msg)
+                raise
+            _core_failures.append(msg)
+            logger.error("Non-essential core blueprint skipped: %s", msg)
+    if _core_failures:
+        logger.error(
+            "Core blueprints degraded (%d): %s",
+            len(_core_failures),
+            "; ".join(_core_failures[:5]),
+        )
 
 
 def register_heavy_blueprints(app: Flask, *, feature_manager=None) -> None:
@@ -80,11 +123,13 @@ def register_heavy_blueprints(app: Flask, *, feature_manager=None) -> None:
     with _heavy_lock:
         if _heavy_loaded:
             return
+        failures: list[str] = []
         try:
             for module_path, attr in _HEAVY_BLUEPRINTS:
                 try:
                     app.register_blueprint(_import_bp(module_path, attr))
                 except Exception as exc:
+                    failures.append(f"{module_path}: {exc}")
                     logger.warning("Blueprint %s failed: %s", module_path, exc)
 
             if feature_manager:
@@ -100,14 +145,14 @@ def register_heavy_blueprints(app: Flask, *, feature_manager=None) -> None:
                     from api.platform_sdk_api import bp as platform_sdk_bp
 
                     app.register_blueprint(platform_sdk_bp)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    failures.append(f"api.platform_sdk_api: {exc}")
                 try:
                     from api.enterprise_api import bp as enterprise_bp
 
                     app.register_blueprint(enterprise_bp)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    failures.append(f"api.enterprise_api: {exc}")
                 if feature_manager.blueprint_enabled("dub_studio_api"):
                     from api.dub_studio_api import bp as dub_studio_bp
 
@@ -118,12 +163,22 @@ def register_heavy_blueprints(app: Flask, *, feature_manager=None) -> None:
 
                 app.register_blueprint(stress_test_bp)
             except Exception as exc:
+                failures.append(f"engines.stress_test.api: {exc}")
                 logger.warning("stress_test blueprint skipped: %s", exc)
         finally:
+            _heavy_failures.clear()
+            _heavy_failures.extend(failures)
             # Mark loaded even if optional blueprints fail — avoids retrying on every
             # request after Flask has already handled its first HTTP dispatch.
             _heavy_loaded = True
-            logger.info("Heavy blueprints registered")
+            if failures:
+                logger.error(
+                    "Heavy blueprints registered with %d failure(s): %s",
+                    len(failures),
+                    "; ".join(failures[:5]),
+                )
+            else:
+                logger.info("Heavy blueprints registered")
 
 
 def start_background_blueprint_load(app: Flask, *, feature_manager=None) -> None:

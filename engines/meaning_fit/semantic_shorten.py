@@ -42,21 +42,15 @@ _UK_SYNONYM_COMPACT: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\bпо\s+довгій\s+вулиці\s+до\s+великого\s+будинку\b", re.I), "вулицею до будинку"),
     (re.compile(r"\bстару\s+книжку\b", re.I), "книжку"),
     (re.compile(r"\bпочала\s+уважно\s+читати\s+кожну\s+сторінку\b", re.I), "уважно читала"),
-    # Spoken filler / redundancy (Meaning Fit — other words, same sense)
+    # Spoken filler / redundancy — keep mild discourse words (насправді/дійсно/
+    # просто/дуже) so Review Final == TTS and tts_truncation does not fire.
+    # Collapse filler «у той момент» once — never invent loops; loops handled elsewhere.
     (re.compile(r"\bу\s+той\s+момент,?\s+коли\b", re.I), "коли"),
     (re.compile(r"\bв\s+той\s+момент,?\s+коли\b", re.I), "коли"),
-    (re.compile(r"\bАле\s+коли\s+він\s+їхав,\s+", re.I), "Але "),
+    # Do NOT strip «Але коли він їхав,» — that destroyed narrative + triggered mid-clause dots.
     (re.compile(r"\bзовсім\s+не\s+хотілося\b", re.I), "не хотілося"),
-    (re.compile(r"\bдійсно\s+", re.I), ""),
-    (re.compile(r"\bнасправді\s+", re.I), ""),
-    # Filler «просто» only — never strip «не просто» (= EN not just / not merely).
-    (re.compile(r"(?<![Нн]е )просто\s+", re.I), ""),
-    (re.compile(r"\bдуже\s+легко\b", re.I), "легко"),
-    (re.compile(r"\bдуже\s+розумним\b", re.I), "розумним"),
-    (re.compile(r"\bневеликий\s+італійський\s+автомобіль\s+під\s+назвою\s+", re.I), "італійський "),
-    (re.compile(r"\bавтомобіль\s+під\s+назвою\s+", re.I), ""),
+    (re.compile(r"\bневеликий\s+італійський\s+автомобіль\s+під\s+назвою\s+", re.I), "маленький італійський "),
     (re.compile(r"\bхоч\s+і\s+сам\s+подарував\s+йому\b", re.I), "хоч подарував йому"),
-    (re.compile(r"\bбільше\s+не\s+хоче\b", re.I), "не хоче"),
     (re.compile(r"\bзнову\s+захопився\b", re.I), "захопився"),
     # GL overflow paraphrases (same meaning, shorter TTS)
     (
@@ -288,8 +282,14 @@ def _rule_shorten(text: str, *, original_en: str = "") -> str | None:
     return out
 
 
-def _try_llm_shorten(text: str, *, slot_ms: int, original_en: str = "") -> str | None:
+def _try_llm_shorten(
+    text: str, *, slot_ms: int, original_en: str = "", tgt_lang: str = "uk"
+) -> str | None:
     """Optional LLM paraphrase; never required for goat offline path."""
+    lang = str(tgt_lang or "uk").split("-")[0].lower()
+    if lang != "uk":
+        # UK LLM shorten prompts must not rewrite other targets.
+        return None
     try:
         from engines.naturalizer_v2.llm_rewrite import rewrite_segment_llm
     except Exception:
@@ -298,7 +298,7 @@ def _try_llm_shorten(text: str, *, slot_ms: int, original_en: str = "") -> str |
         out = rewrite_segment_llm(
             text,
             original=original_en or text,
-            tgt_lang="uk",
+            tgt_lang=lang,
             mode="shorten",
         )
         if isinstance(out, dict):
@@ -319,9 +319,15 @@ def semantic_shorten(
     original_en: str = "",
     use_llm: bool = False,
     force: bool = False,
+    tgt_lang: str = "uk",
 ) -> FitResult:
-    """Shorten by paraphrase. Reject truncate/chop."""
+    """Shorten by paraphrase. Reject truncate/chop.
+
+    UK paraphrase tables only — non-UK targets keep original text (slot
+    overflow handled by soft_compress / video_adapt, not UK glue).
+    """
     text = str(text_uk or "").strip()
+    lang = str(tgt_lang or "uk").split("-")[0].lower()
     if not (force or (meaning_fit_flag() and meaning_fit_shorten_flag())):
         return FitResult(
             text_uk=text,
@@ -346,12 +352,27 @@ def semantic_shorten(
             method="none",
         )
 
+    if lang != "uk":
+        return FitResult(
+            text_uk=text,
+            status="already_fits",
+            reason="non_uk_skip_uk_paraphrase",
+            predicted_ms=pred0.predicted_ms,
+            slot_ms=slot_ms,
+            verdict=pred0.verdict,
+            success=True,
+            method="none",
+            meta={"tgt_lang": lang, "skipped_uk_rules": True},
+        )
+
     candidates: list[str] = []
     ruled = _rule_shorten(text, original_en=original_en)
     if ruled:
         candidates.append(ruled)
     if use_llm:
-        llm = _try_llm_shorten(text, slot_ms=slot_ms, original_en=original_en)
+        llm = _try_llm_shorten(
+            text, slot_ms=slot_ms, original_en=original_en, tgt_lang=lang
+        )
         if llm:
             candidates.append(llm)
 
