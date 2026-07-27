@@ -240,27 +240,40 @@ class UniversalTranslationPipeline:
             )
 
         groups = merge_segments_for_translation(mt_segments, timing_map)
+        _hp_batch = False
         try:
             from engines.happy_path import happy_path_batch_translate
             from engines.translation_naturalizer import (
-                HAPPY_PATH_MAX_BATCH_SEGMENTS,
-                merge_segments_for_translation as _merge_tr,
+                merge_segments_for_translation_happy_path as _merge_hp,
             )
 
-            if happy_path_batch_translate(task_id=self.task_id):
-                groups = _merge_tr(
-                    mt_segments,
-                    timing_map,
-                    max_gap_ms=800,
-                    max_batch=HAPPY_PATH_MAX_BATCH_SEGMENTS,
-                )
+            _hp_batch = bool(happy_path_batch_translate(task_id=self.task_id))
+            if _hp_batch:
+                groups = _merge_hp(mt_segments, timing_map)
                 logger.info(
-                    "happy_path batch MT: %d source segs → %d translate groups",
+                    "happy_path batch MT: segments_before=%d → translate_groups=%d "
+                    "adaptation_path=happy_path",
                     len(mt_segments),
                     len(groups),
                 )
-        except Exception:
-            pass
+                try:
+                    from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+
+                    if self.task_id:
+                        with STATE_LOCK:
+                            _t = AUTO_TASKS.get(str(self.task_id))
+                            if isinstance(_t, dict):
+                                _info = _t.setdefault("info", {})
+                                _info["mt_batch_mode"] = "happy_path"
+                                _info["mt_batch_segments"] = len(mt_segments)
+                                _info["mt_batch_groups"] = len(groups)
+                                _info["adaptation_path"] = _info.get(
+                                    "adaptation_path"
+                                ) or "happy_path"
+                except Exception:
+                    pass
+        except Exception as _hp_batch_exc:
+            logger.debug("happy_path batch MT skipped: %s", _hp_batch_exc)
         index_to_group: dict[int, tuple[int, ...]] = {}
         for group in groups:
             gt = tuple(group)

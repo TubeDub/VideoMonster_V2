@@ -16,7 +16,7 @@ from engines.cleaner import align_segments_to_timing_map, split_by_timing_map
 logger = logging.getLogger("tubedub.engines.translation_naturalizer")
 
 MAX_BATCH_SEGMENTS = 10
-DEFAULT_MAX_GAP_MS = 800
+DEFAULT_MAX_GAP_MS = 900
 DEFAULT_MIN_TTS_MS = 4500
 DEFAULT_MIN_MERGE_CHARS = 12
 DEFAULT_MAX_SEGMENT_MS = 2500
@@ -1344,6 +1344,9 @@ def _timing_end(item: Any) -> int:
 def _gap_ms(timing_map: Sequence[Any], idx: int) -> int:
     if idx <= 0 or not timing_map:
         return 0
+    if idx >= len(timing_map) or (idx - 1) >= len(timing_map):
+        # Misaligned timing_map vs segments — treat as a hard break, not a crash.
+        return 10**9
     return max(0, _timing_start(timing_map[idx]) - _timing_end(timing_map[idx - 1]))
 
 
@@ -1376,8 +1379,14 @@ def merge_segments_for_translation(
     timing_map: Sequence[Any] | None = None,
     max_gap_ms: int = DEFAULT_MAX_GAP_MS,
     max_batch: int = MAX_BATCH_SEGMENTS,
+    *,
+    cross_sentence: bool = False,
 ) -> List[List[int]]:
-    """Группы индексов для пакетного перевода (соседние короткие реплики Whisper)."""
+    """Группы индексов для пакетного перевода (соседние короткие реплики Whisper).
+
+    ``cross_sentence`` (Happy Path): allow glue across .!? so MT sees real
+    paragraph context; ``split_by_timing_map`` redistributes after translate.
+    """
     if not segments:
         return []
 
@@ -1395,9 +1404,14 @@ def merge_segments_for_translation(
         can_merge = (
             len(current) < max_batch
             and (not timing_map or gap <= max_gap_ms)
-            and not ends_sentence
+            and (cross_sentence or not ends_sentence)
             and (cur or prev)
-            and (short_prev or short_cur or gap <= max_gap_ms)
+            and (
+                cross_sentence
+                or short_prev
+                or short_cur
+                or gap <= max_gap_ms
+            )
         )
         try:
             from engines.smart_segmentation import would_break_forbidden
@@ -1421,6 +1435,27 @@ def merge_segments_for_translation(
 
     groups.append(current)
     return groups
+
+
+def merge_segments_for_translation_happy_path(
+    segments: List[str],
+    timing_map: Sequence[Any] | None = None,
+    *,
+    max_gap_ms: int | None = None,
+    max_batch: int | None = None,
+) -> List[List[int]]:
+    """Happy Path batch groups — cross-sentence, larger blocks (TZ Stage 2)."""
+    try:
+        from engines.segment_merger import HAPPY_PATH_MAX_GAP_MS as _gap
+    except Exception:
+        _gap = 900
+    return merge_segments_for_translation(
+        segments,
+        timing_map,
+        max_gap_ms=int(max_gap_ms if max_gap_ms is not None else _gap),
+        max_batch=int(max_batch if max_batch is not None else HAPPY_PATH_MAX_BATCH_SEGMENTS),
+        cross_sentence=True,
+    )
 
 
 def merge_segments_for_tts(
@@ -1478,6 +1513,14 @@ def build_tts_groups(
     if not segments:
         return []
 
+    # Guard: never IndexError when timing_map is shorter than segments.
+    try:
+        from engines.segment_merger import ensure_timing_map_for_segments
+
+        timing_map = ensure_timing_map_for_segments(segments, timing_map)
+    except Exception:
+        timing_map = list(timing_map or [])
+
     index_groups = merge_segments_for_tts(
         segments, timing_map, min_duration_ms=min_duration_ms, max_gap_ms=max_gap_ms
     )
@@ -1487,8 +1530,9 @@ def build_tts_groups(
         text = " ".join(p for p in parts if p).strip()
         if not text:
             continue
-        start = _timing_start(timing_map[indices[0]]) if timing_map else 0
-        end = _timing_end(timing_map[indices[-1]]) if timing_map else 0
+        i0, i1 = indices[0], indices[-1]
+        start = _timing_start(timing_map[i0]) if timing_map and i0 < len(timing_map) else 0
+        end = _timing_end(timing_map[i1]) if timing_map and i1 < len(timing_map) else start
         groups.append({"indices": indices, "text": text, "timing": [start, end]})
     return groups
 

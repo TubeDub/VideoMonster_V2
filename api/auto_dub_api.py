@@ -8616,7 +8616,7 @@ def _run_pipeline_inner(
         profiler.start("segmentation")
         # Adaptive mode uses pause-based merge as Whisper starting point, then
         # Adaptive Segmentation 2.0 reshapes for dubbing (separate stage).
-        # Happy Path (TZ Stage 2): glue to ≥4.5–6s, pause < 0.8s.
+        # Happy Path (TZ Stage 2): glue to ≥5.0s, pause < 0.9s — mandatory.
         _hp_seg = False
         try:
             from engines.happy_path import skip_advanced_text_shorteners as _hp_skip
@@ -8637,15 +8637,21 @@ def _run_pipeline_inner(
             merged_lines, merged_timing = merge_stt_segments_happy_path(
                 raw_lines, timing_map or raw_timing_backup
             )
+            _before_n = len(raw_lines)
+            _after_n = len(merged_lines or [])
             with STATE_LOCK:
                 task["info"]["stt_merge_mode"] = "happy_path"
-                task["info"]["stt_merge_before"] = len(raw_lines)
-                task["info"]["stt_merge_after"] = len(merged_lines or [])
+                task["info"]["stt_merge_before"] = _before_n
+                task["info"]["stt_merge_after"] = _after_n
+                # TZ Stage 2 report aliases
+                task["info"]["segments_before"] = _before_n
+                task["info"]["segments_after"] = _after_n
             logger.info(
-                "Task %s: Happy Path STT merge %d → %d (min≥5s, gap≤0.8s)",
+                "Task %s: Happy Path STT merge segments_before=%d → "
+                "segments_after=%d (min≥5.0s, gap<0.9s)",
                 task_id,
-                len(raw_lines),
-                len(merged_lines or []),
+                _before_n,
+                _after_n,
             )
         else:
             from engines.segment_merger import merge_stt_segments
@@ -8695,6 +8701,25 @@ def _run_pipeline_inner(
         if seg_lines:
             source_text = "\n".join(seg_lines)
             timing_map = seg_timing
+            # Keep source/timing lengths locked after Happy Path glue.
+            try:
+                from engines.segment_merger import ensure_timing_map_for_segments
+
+                timing_map = ensure_timing_map_for_segments(
+                    seg_lines,
+                    timing_map,
+                    duration_ms=target_duration_ms or _video_duration_ms(video_path),
+                )
+                seg_timing = timing_map
+            except Exception:
+                pass
+            with STATE_LOCK:
+                if _hp_seg:
+                    task["info"]["segments_before"] = task["info"].get(
+                        "segments_before", raw_count
+                    )
+                    task["info"]["segments_after"] = len(seg_lines)
+                    task["info"]["stt_merge_after"] = len(seg_lines)
 
         profiler.stop("segmentation")
 
@@ -9013,6 +9038,17 @@ def _run_pipeline_inner(
                         _run_adaptive = bool(_ff_adaptive("adaptive_segmentation"))
                     except Exception:
                         _run_adaptive = False
+            # Happy Path TZ Stage 2: do NOT reshape after mandatory ≥5s glue —
+            # Adaptive Seg can reintroduce micro-slots and defeat batch MT.
+            if _hp_seg and _run_adaptive:
+                _run_adaptive = False
+                with STATE_LOCK:
+                    task["info"]["adaptive_segmentation_skipped"] = "happy_path"
+                logger.info(
+                    "Task %s: Adaptive Segmentation skipped (happy_path — "
+                    "keep STT glue blocks)",
+                    task_id,
+                )
             if _run_adaptive and seg_lines:
                 from engines.adaptive_segmentation import adapt_source_segments
 
@@ -11716,6 +11752,18 @@ def _run_pipeline_inner(
                     task["info"]["pre_tts_merge_ms"] = _tts_min_ms
             except Exception:
                 pass
+            try:
+                from engines.segment_merger import ensure_timing_map_for_segments
+
+                current_timing_map_snapshot = ensure_timing_map_for_segments(
+                    segments,
+                    current_timing_map_snapshot,
+                    duration_ms=int(target_duration_ms or 0) or None,
+                )
+                with STATE_LOCK:
+                    task["info"]["timing_map_backup"] = list(current_timing_map_snapshot)
+            except Exception as _tm_align_exc:
+                logger.debug("pre-TTS timing_map align skipped: %s", _tm_align_exc)
             try:
                 tts_groups = build_tts_groups(
                     segments,

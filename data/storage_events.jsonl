@@ -1053,3 +1053,7 @@
 {"event": "PROJECT_MIGRATED", "ts": 1785161693.8971386, "payload": {"project_id": "ed3ed7be-b499-5222-94ef-d129c4dc7b8a", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785161693.93604, "payload": {"project_id": "f6a7bc17-cda9-5b16-9975-265f4515ca8c", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785161693.9671106, "payload": {"project_id": "33622637-6a1e-5851-9c33-91e338b1ec49", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785163997.9905446, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1785164512.0465577, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785164512.2553217, "payload": {"project_id": "f8d88a38-6436-5208-acff-38e141c3127d", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785164512.5728135, "payload": {"project_id": "b191a7cc-b51a-5866-bea0-a47203f15f5c", "source": "tdproj"}}

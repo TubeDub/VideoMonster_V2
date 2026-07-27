@@ -12,11 +12,11 @@ from typing import Any, List, Sequence
 logger = logging.getLogger("tubedub.engines.segment_merger")
 
 MIN_SAFE_SEGMENT_MS = 4500
-# Happy Path (TZ Stage 2): target 4.5–6s blocks, glue across short pauses.
+# Happy Path (TZ Stage 2): target 5.0s blocks (floor 4.5s), glue across short pauses.
 HAPPY_PATH_MIN_SAFE_MS = 5000
-HAPPY_PATH_MAX_GAP_MS = 800
+HAPPY_PATH_MAX_GAP_MS = 900  # pause < 0.9s
 MAX_MERGED_SPAN_MS = 14000
-MAX_GAP_MS = 800  # pause < 0.8s (TZ Stage 2); was 1200
+MAX_GAP_MS = 900  # align default with Happy Path pause window
 SHORT_SEGMENT_MS = 2500  # pre-TTS / filler shorts (< 2.5–3s)
 
 # CJK / Arabic etc. — sentence ends are not Latin .!?
@@ -226,16 +226,29 @@ def merge_stt_segments_happy_path(
     max_span_ms: int = MAX_MERGED_SPAN_MS,
     speaker_ids: Sequence[Any] | None = None,
 ) -> tuple[List[str], List[dict]]:
-    """TZ Stage 2 Happy Path STT glue: ≥4.5–6s blocks, pause < 0.8s."""
-    return merge_stt_segments(
+    """TZ Stage 2 Happy Path STT glue: ≥5.0s (floor 4.5s), pause < 0.9s."""
+    safe = max(4500, int(min_safe_ms or HAPPY_PATH_MIN_SAFE_MS))
+    gap = max(900, int(max_gap_ms or HAPPY_PATH_MAX_GAP_MS))
+    # Never allow a looser-than-requested gap below the TZ floor of 900ms.
+    gap = max(gap, HAPPY_PATH_MAX_GAP_MS)
+    texts, timing = merge_stt_segments(
         segments,
         timing_map,
-        min_safe_ms=max(4500, int(min_safe_ms or HAPPY_PATH_MIN_SAFE_MS)),
-        max_gap_ms=min(800, int(max_gap_ms or HAPPY_PATH_MAX_GAP_MS)),
+        min_safe_ms=safe,
+        max_gap_ms=gap,
         max_span_ms=max_span_ms,
         fill_to_min=True,
         speaker_ids=speaker_ids,
     )
+    logger.info(
+        "happy_path_stt_merge: segments_before=%d segments_after=%d "
+        "min_safe_ms=%d max_gap_ms=%d",
+        len(segments or []),
+        len(texts or []),
+        safe,
+        gap,
+    )
+    return texts, timing
 
 
 def merge_stt_by_sentences(

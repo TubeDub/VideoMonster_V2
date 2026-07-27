@@ -17,36 +17,6 @@
   },
   "install_log": [
     {
-      "ts": "2026-07-10T19:09:44.107540+00:00",
-      "level": "info",
-      "message": "Pulling model llama3.1:8b"
-    },
-    {
-      "ts": "2026-07-10T19:15:33.984708+00:00",
-      "level": "info",
-      "message": "Model ready"
-    },
-    {
-      "ts": "2026-07-10T19:16:40.303072+00:00",
-      "level": "info",
-      "message": "Verification OK"
-    },
-    {
-      "ts": "2026-07-10T19:16:42.266225+00:00",
-      "level": "info",
-      "message": "Install state recovered → ready (post-restart)"
-    },
-    {
-      "ts": "2026-07-10T19:25:04.114617+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-10T23:50:33.124570+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
       "ts": "2026-07-11T18:24:36.168016+00:00",
       "level": "info",
       "message": "Backend GUI/launcher suppressed (headless mode)"
@@ -1013,6 +983,36 @@
     },
     {
       "ts": "2026-07-26T21:55:26.305540+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-27T14:53:20.928480+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-27T14:53:21.029697+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-27T14:53:21.512416+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-27T15:01:55.287290+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-27T15:01:55.338420+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-27T15:01:56.555902+00:00",
       "level": "info",
       "message": "Backend GUI/launcher suppressed (headless mode)"
     }
