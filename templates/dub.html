@@ -19,8 +19,8 @@
         <select id="model-size" class="select-control">
             <option value="tiny">tiny</option>
             <option value="base">base</option>
-            <option value="small">small</option>
-            <option value="medium" selected>medium</option>
+            <option value="small" selected>small</option>
+            <option value="medium">medium</option>
             <option value="large">large</option>
         </select>
         <select id="content-mode" class="select-control">
@@ -164,12 +164,12 @@
                     <select id="wizard-model-size" class="select-control" style="max-width:220px;">
                         <option value="tiny">tiny — быстро</option>
                         <option value="base">base</option>
-                        <option value="small">small</option>
-                        <option value="medium" selected>medium — баланс</option>
+                        <option value="small" selected>small — Simple (быстро)</option>
+                        <option value="medium">medium — Pro</option>
                         <option value="large">large — точнее</option>
                     </select>
                     <p class="wizard-whisper-model-hint char-count" data-i18n="dub.whisper_model_hint">
-                        Больше модель — лучше качество, дольше подготовка и распознавание.
+                        Simple: small + beam=1. Medium/large — для Pro; в Simple сервер сам ограничит до small.
                     </p>
                 </div>
                 <details class="wizard-adaptive-seg" id="wizard-adaptive-seg">

@@ -1,0 +1,202 @@
+{
+  "task_id": "71964f3e335d432a8cc5f6121d467b22",
+  "index": 8,
+  "original": "Let me make some calls and sure enough, not long after this fateful meeting, George Jr. would receive an acceptance letter from USC's film school but this moment in George Jr.'s life did not just alter George's life forever.",
+  "translation": "Нехай я зроблю деякі дзвінки і впевнено, що недовго після того, як ця доляльна зустріч, Джордж Жр. отримає акцептовий лист з кіношколи США, але в цей момент життя Джорджа Джера не тільки змінив життя Георга назавжди.",
+  "reason": "EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:USC; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: USC",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.47,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "entity_missing",
+          "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+          "severity": "critical"
+        },
+        {
+          "code": "preserved_token",
+          "token": "USC",
+          "severity": "critical"
+        }
+      ],
+      "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'USC', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:USC",
+      "retry_strategy": "Entity Correction Strategy",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 6.37,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.9
+      ],
+      "confidence": {
+        "entity_preservation": 0.5,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.9
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.33,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.44,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "WARN",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "too_long_for_slot",
+          "severity": "major",
+          "detail": "est_ms=18000 slot_ms=11177 ratio=1.61"
+        }
+      ],
+      "explanation": "too_long_for_slot",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8,
+        "slot_ms": 11177
+      },
+      "review_time_ms": 0.11,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.97
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 0.7,
+        "overall_confidence": 0.97
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.08,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.9783,
+  "retry_history": [
+    {
+      "ok": true,
+      "strategy": "argos_sentence_retranslate",
+      "text": "Нехай я зроблю деякі дзвінки і впевнено, що недовго після того, як ця доляльна зустріч, Джордж Жр. отримає акцептовий лист з кіношколи США, але в цей момент життя Джорджа Джера не тільки змінив життя Георга назавжди."
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Entity Correction Strategy",
+  "ts": 1785268408713
+}

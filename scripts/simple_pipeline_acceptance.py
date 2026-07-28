@@ -103,7 +103,7 @@ def main() -> int:
             "target_lang": "uk",
             "source_lang": "en",
             "voice": "uk-UA-OstapNeural",
-            "model_size": "tiny",
+            "model_size": "medium",
             "dub_style": "modern",
             "user_mode": "basic",
             "ui_lang": "uk",
@@ -362,6 +362,84 @@ def main() -> int:
         except Exception:
             pass
         out["pipeline"]["mt_speedup"] = _mt
+        # Stage 8 STT speedup metrics
+        _stt = {
+            "stt_wall_sec": info.get("stt_wall_sec"),
+            "stt_model": info.get("stt_model") or info.get("model_size"),
+            "stt_device": info.get("stt_device"),
+            "stt_compute_type": info.get("stt_compute_type"),
+            "stt_beam_size": info.get("stt_beam_size"),
+            "stt_vad_filter": info.get("stt_vad_filter"),
+            "stt_engine": info.get("stt_engine"),
+            "stt_segments_raw": info.get("stt_segments_raw"),
+            "stt_segments_after_glue": info.get("stt_segments_after_glue")
+            or info.get("stt_merge_after")
+            or info.get("segments_after"),
+            "stt_cache_hit": info.get("stt_cache_hit"),
+            "simple_stt_locked": info.get("simple_stt_locked"),
+            "voice_verification_skipped": info.get("voice_verification_skipped"),
+            "detail": info.get("stt_speedup"),
+        }
+        try:
+            _stf = APP_DIR / "output" / f"stt_speedup_{task_id}.json"
+            if _stf.is_file():
+                _std = json.loads(_stf.read_text(encoding="utf-8"))
+                for k, v in _std.items():
+                    if _stt.get(k) in (None, "", {}) and v is not None:
+                        _stt[k] = v
+                if isinstance(_std.get("stt_wall_sec"), (int, float)):
+                    _stt["stt_wall_sec"] = _std.get("stt_wall_sec")
+        except Exception:
+            pass
+        out["pipeline"]["stt_speedup"] = _stt
+        out["checks"]["stt_metrics_present"] = isinstance(
+            _stt.get("stt_wall_sec"), (int, float)
+        )
+        out["checks"]["stt_model_ok"] = str(_stt.get("stt_model") or "") in (
+            "tiny",
+            "base",
+            "small",
+        )
+        out["checks"]["stt_beam_ok"] = int(_stt.get("stt_beam_size") or 0) == 1
+        out["checks"]["stt_simple_locked"] = bool(_stt.get("simple_stt_locked"))
+        out["checks"]["stt_no_vv_asr"] = str(
+            info.get("voice_verification_skipped") or ""
+        ) == "simple_stt_lock" or info.get("voice_verification_asr_allowed") is False
+        # Warm STT cache probe (same uploaded video path + model knobs)
+        try:
+            from engines.pipeline_cache import load_whisper_cache
+            from engines.simple_stt_policy import resolve_simple_stt_model
+
+            _m = resolve_simple_stt_model("medium")
+            _vp = str(
+                info.get("video_path")
+                or (APP_DIR / "uploads" / up.get("filename", clip.name))
+            )
+            if not Path(_vp).is_file():
+                _vp = str(APP_DIR / "uploads" / up.get("filename", clip.name))
+            _t_warm = time.perf_counter()
+            _wh2 = load_whisper_cache(
+                APP_DIR,
+                _vp,
+                model_size=_m,
+                source_lang="en",
+                beam_size=int(_stt.get("stt_beam_size") or 1),
+                compute_type=str(_stt.get("stt_compute_type") or "int8"),
+                device=str(_stt.get("stt_device") or "cpu"),
+            )
+            _warm_sec = round(time.perf_counter() - _t_warm, 3)
+            out["pipeline"]["stt_cache_warm"] = {
+                "hit": bool(_wh2),
+                "wall_sec": _warm_sec,
+                "model": _m,
+                "video_path": _vp,
+            }
+            out["checks"]["stt_cache_warm_ok"] = bool(_wh2) or bool(
+                _stt.get("stt_cache_hit")
+            )
+        except Exception as _stt_warm_exc:
+            out["pipeline"]["stt_cache_warm_error"] = str(_stt_warm_exc)
+            out["checks"]["stt_cache_warm_ok"] = False
         # Stage timings from pipeline_timing JSON if present
         try:
             from pathlib import Path as _P

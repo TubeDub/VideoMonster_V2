@@ -1,0 +1,13 @@
+{
+  "task_id": "71964f3e335d432a8cc5f6121d467b22",
+  "mt_wall_sec": 96.815,
+  "mt_segments": 12,
+  "mt_batch_size": 10,
+  "mt_calls": 2,
+  "mt_engine": "marian_batch",
+  "mt_cache_hits": 0,
+  "mt_cache_misses": 12,
+  "mt_concurrency_used": 1,
+  "mt_retries": 0,
+  "mt_path": "stage7_batch_cache"
+}

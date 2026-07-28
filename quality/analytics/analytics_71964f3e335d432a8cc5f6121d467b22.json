@@ -1,0 +1,18 @@
+{
+  "segments_total": 12,
+  "passed": 8,
+  "rejected": 4,
+  "retry_count": 4,
+  "retry_average": 0.333,
+  "average_review_time_ms": 18.3,
+  "average_confidence": 0.9867,
+  "entity_loss": 16,
+  "meaning_loss": 6,
+  "grammar_errors": 0,
+  "timing_errors": 2,
+  "narrative_errors": 0,
+  "llm_usage": 0,
+  "retry_success_rate": 0.0,
+  "fallback_usage": 0,
+  "gate_passed": false
+}

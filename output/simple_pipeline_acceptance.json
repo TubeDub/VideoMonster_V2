@@ -4,13 +4,13 @@
       "status": 200,
       "body": {
         "status": "running",
-        "task_id": "2b40012630aa48e691e733fa7e15ef37"
+        "task_id": "9ae3700980ca4e0383c900b68582936f"
       }
     },
-    "task_id": "2b40012630aa48e691e733fa7e15ef37",
+    "task_id": "9ae3700980ca4e0383c900b68582936f",
     "status": "done",
-    "output_file": "video_b4078caf73_OUTPUT_2b400126.mp4",
-    "elapsed_sec": 331.3,
+    "output_file": "video_ccf56a18f6_OUTPUT_9ae37009.mp4",
+    "elapsed_sec": 208.5,
     "last_status": {
       "status": "done",
       "step": "Готово",
@@ -20,24 +20,24 @@
     "happy_path": true,
     "simple_pipeline": true,
     "simple_auto_mix_done": true,
-    "segments_before": 21,
-    "segments_after": 11,
+    "segments_before": 25,
+    "segments_after": 9,
     "translation_parity": {
       "applied": true,
-      "segments": 10,
+      "segments": 7,
       "bleed_count": 0,
       "actions": []
     },
     "text_slot_fit": {
       "applied": true,
-      "changed": 7,
-      "segments": 10,
+      "changed": 6,
+      "segments": 7,
       "rows": [
         {
-          "text": "Джордж молодший справді був дуже розумною дитиною, але також дуже легко відволікся.",
-          "slot_ms": 8626,
-          "predicted_ms_before": 5555,
-          "predicted_ms_after": 6148,
+          "text": "Джордж молодший справді був дуже розумною дитиною, але він також дуже легко відволікся, і через те, що він дійсно не займався чимось серйозним, окрім автомобілів, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+          "slot_ms": 20085,
+          "predicted_ms_before": 11407,
+          "predicted_ms_after": 16740,
           "action": "expand",
           "changed": true,
           "reasons": [
@@ -47,23 +47,23 @@
           "idx": 0
         },
         {
-          "text": "У той момент батько купив йому маленьку італійську машину, яка називається фіат, але його батько, незважаючи на те, що він був тим, хто дав йому фіат, не захопив свого сина машинами.",
-          "slot_ms": 11764,
-          "predicted_ms_before": 14740,
-          "predicted_ms_after": 13481,
-          "action": "shorten",
+          "text": "Джордж він прийшов на це перехрестя, де воно було поруч з його домом і він почав робити поворот, коли почув цей гучний звук, а потім все потемніло, ось як це було тоді, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+          "slot_ms": 18714,
+          "predicted_ms_before": 10888,
+          "predicted_ms_after": 18461,
+          "action": "expand",
           "changed": true,
           "reasons": [
-            "soft_sync_shorten"
+            "rule_expand"
           ],
           "meaning_truncated": false,
           "idx": 1
         },
         {
-          "text": "Джордж прийшов на цей перетин, де він справді був біля свого дому, і він почав повертатися, коли почув цей гучний звук, а потім все потемніло, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
-          "slot_ms": 18760,
-          "predicted_ms_before": 9925,
-          "predicted_ms_after": 15769,
+          "text": "Через два тижні Джордж молодший лежав у лікарняному ліжку у реанімації місцевої лікарні. Саме так: через два тижні джордж молодший лежав, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+          "slot_ms": 17369,
+          "predicted_ms_before": 6518,
+          "predicted_ms_after": 14888,
           "action": "expand",
           "changed": true,
           "reasons": [
@@ -73,89 +73,56 @@
           "idx": 2
         },
         {
-          "text": "Через два тижні Джордж молодший лежав у лікарняному ліжку у реанімаційному відділенні місцевої лікарні.",
-          "slot_ms": 9318,
-          "predicted_ms_before": 7629,
-          "predicted_ms_after": 7629,
-          "action": "unchanged",
-          "changed": false,
-          "reasons": [],
+          "text": "Через два роки Джордж молодший повністю одужав від поранень, що стояли на фінішній лінії на гоночному треку і підняв фотоапарат, ось як це було тоді, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+          "slot_ms": 18126,
+          "predicted_ms_before": 9481,
+          "predicted_ms_after": 15777,
+          "action": "expand",
+          "changed": true,
+          "reasons": [
+            "rule_expand"
+          ],
           "meaning_truncated": false,
           "idx": 3
         },
         {
-          "text": "Що ж, це був інший автомобіль, що Кінґ їхав дорогою і розбився в машину Джорджа так сильно.",
-          "slot_ms": 7958,
-          "predicted_ms_before": 10740,
-          "predicted_ms_after": 6740,
-          "action": "shorten",
-          "changed": true,
-          "reasons": [
-            "clause_paraphrase"
-          ],
-          "meaning_truncated": false,
-          "idx": 4
-        },
-        {
-          "text": "Через два роки Джордж молодший повністю одужав від поранень, стояв на фінішній лінії на гоночному треку і підняв фотоапарат, ось як це було тоді — ось як це було тоді.",
-          "slot_ms": 12360,
-          "predicted_ms_before": 9185,
-          "predicted_ms_after": 12370,
-          "action": "expand",
-          "changed": true,
-          "reasons": [
-            "rule_expand"
-          ],
-          "meaning_truncated": false,
-          "idx": 5
-        },
-        {
-          "text": "Джордж молодший зрештою вирішив, що не хоче більше керувати автом.",
-          "slot_ms": 6102,
-          "predicted_ms_before": 4296,
-          "predicted_ms_after": 4888,
-          "action": "expand",
-          "changed": true,
-          "reasons": [
-            "rule_expand"
-          ],
-          "meaning_truncated": false,
-          "idx": 6
-        },
-        {
-          "text": "Замість цього, він взяв цю камеру і повернувся в своє старе хобі фотографії.",
-          "slot_ms": 4848,
-          "predicted_ms_before": 6148,
-          "predicted_ms_after": 5629,
+          "text": "Замість цього він взяв цю камеру і повернувся в своє старе хобі фотографії.",
+          "slot_ms": 4742,
+          "predicted_ms_before": 6074,
+          "predicted_ms_after": 5555,
           "action": "shorten",
           "changed": true,
           "reasons": [
             "drop_fillers"
           ],
           "meaning_truncated": false,
-          "idx": 7
+          "idx": 4
         },
         {
-          "text": "По суті, Джордж молодший подав заяву на престижну кінематографічну програму в університеті Південної Каліфорнії.",
-          "slot_ms": 9169,
-          "predicted_ms_before": 8296,
-          "predicted_ms_after": 8296,
+          "text": "Джордж молодший подав заяву на престижну кінематографічну програму в університеті Південної Каліфорнії, але після того, як відіслав заяву, він був упевнений.",
+          "slot_ms": 8946,
+          "predicted_ms_before": 13925,
+          "predicted_ms_after": 11629,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "severe_overflow",
+            "drop_fillers",
+            "clause_paraphrase"
+          ],
+          "meaning_truncated": false,
+          "idx": 5
+        },
+        {
+          "text": "Джордж молодший підійшов до подіуму, щоб сфотографувати переможного водія, але коли він йшов туди, підійшов чоловік середнього віку.",
+          "slot_ms": 6847,
+          "predicted_ms_before": 9777,
+          "predicted_ms_after": 9777,
           "action": "unchanged",
           "changed": false,
           "reasons": [],
           "meaning_truncated": false,
-          "idx": 8
-        },
-        {
-          "text": "Джордж молодший підійшов до подіуму, щоб сфотографувати переможний поїзд.",
-          "slot_ms": 7284,
-          "predicted_ms_before": 5407,
-          "predicted_ms_after": 5407,
-          "action": "unchanged",
-          "changed": false,
-          "reasons": [],
-          "meaning_truncated": false,
-          "idx": 9
+          "idx": 6
         }
       ]
     },
@@ -165,95 +132,86 @@
     "meaning_fit_skipped": "happy_path",
     "examples": [
       {
-        "index": 1,
-        "original": "That is except for cars. And at that point his father actually bought him a small Italian car called a fiat. But his father, despite being the one who literally",
-        "translation": "У той момент батько купив йому маленьку італійську машину, яка називається фіат, але його батько, незважаючи на те, що він був тим, хто дав йому фіат, не захопи"
+        "index": 0,
+        "original": "actually getting there. So George Jr. was a very smart kid, but he also got distracted really easily and because of that he really had not pursued anything all ",
+        "translation": "Джордж молодший справді був дуже розумною дитиною, але він також дуже легко відволікся, і через те, що він дійсно не займався чимось серйозним, окрім автомобілі"
       },
       {
-        "index": 2,
-        "original": "Like why aren't you able to take that focus and apply it to other things so we'll get your real job. And so basically every dinner these days, it became this hu",
-        "translation": "Джордж прийшов на цей перетин, де він справді був біля свого дому, і почав повертатися, коли почув цей гучний звук, а потім все потемніло, ось як це було тоді, "
+        "index": 1,
+        "original": "Like why aren't you able to take that focus and apply it to other things that will get you a real job. And so basically every dinner these days it became this h",
+        "translation": "Джордж він прийшов на це перехрестя, де воно було поруч з його домом і він почав робити поворот, коли почув цей гучний звук, а потім все потемніло, ось як це бу"
       }
     ],
     "timing_summary": {
-      "n": 7,
+      "n": 6,
       "max_atempo": 1.08,
       "atempo_over_1_08": false,
       "bleed_count": 0,
-      "underfill_count": 1,
+      "underfill_count": 4,
       "underfill_unresolved_count": 0,
-      "max_underfill_ms": 3865,
+      "max_underfill_ms": 8021,
       "underfill_summary": {
-        "count": 1,
+        "count": 4,
         "unresolved": 0,
-        "max_underfill_ms": 3865,
-        "slot_shrunk": 1,
-        "fill_ok": 7,
-        "n": 7
+        "max_underfill_ms": 8021,
+        "slot_shrunk": 4,
+        "fill_ok": 6,
+        "n": 6
       },
       "fill_rows": [
         {
           "idx": 0,
-          "slot_ms": 8626,
-          "tts_ms": 7440,
-          "fill_ratio": 0.8625,
-          "underfill_ms": 1186,
-          "slot_shrunk": false,
+          "slot_ms": 20085,
+          "tts_ms": 13632,
+          "fill_ratio": 0.6787,
+          "underfill_ms": 6453,
+          "slot_shrunk": true,
           "atempo": 1.0
         },
         {
           "idx": 1,
-          "slot_ms": 11863,
-          "tts_ms": 13752,
-          "fill_ratio": 1.1592,
-          "underfill_ms": 0,
-          "slot_shrunk": false,
+          "slot_ms": 18714,
+          "tts_ms": 12860,
+          "fill_ratio": 0.6872,
+          "underfill_ms": 5854,
+          "slot_shrunk": true,
           "atempo": 1.0
         },
         {
           "idx": 2,
-          "slot_ms": 18760,
-          "tts_ms": 35496,
-          "fill_ratio": 1.507,
-          "underfill_ms": 0,
-          "slot_shrunk": false,
-          "atempo": 1.08
+          "slot_ms": 17369,
+          "tts_ms": 12504,
+          "fill_ratio": 0.7199,
+          "underfill_ms": 4865,
+          "slot_shrunk": true,
+          "atempo": 1.0
         },
         {
           "idx": 3,
-          "slot_ms": 12360,
-          "tts_ms": 12264,
-          "fill_ratio": 0.9922,
-          "underfill_ms": 96,
-          "slot_shrunk": false,
+          "slot_ms": 24921,
+          "tts_ms": 16900,
+          "fill_ratio": 0.6781,
+          "underfill_ms": 8021,
+          "slot_shrunk": true,
           "atempo": 1.0
         },
         {
           "idx": 4,
-          "slot_ms": 6102,
-          "tts_ms": 5304,
-          "fill_ratio": 0.8692,
-          "underfill_ms": 798,
+          "slot_ms": 9346,
+          "tts_ms": 9534,
+          "fill_ratio": 1.0201,
+          "underfill_ms": 0,
           "slot_shrunk": false,
           "atempo": 1.0
         },
         {
           "idx": 5,
-          "slot_ms": 4917,
-          "tts_ms": 12264,
-          "fill_ratio": 1.9555,
+          "slot_ms": 6847,
+          "tts_ms": 8275,
+          "fill_ratio": 1.0305,
           "underfill_ms": 0,
           "slot_shrunk": false,
           "atempo": 1.08
-        },
-        {
-          "idx": 6,
-          "slot_ms": 9169,
-          "tts_ms": 5304,
-          "fill_ratio": 0.5785,
-          "underfill_ms": 3865,
-          "slot_shrunk": true,
-          "atempo": 1.0
         }
       ]
     },
@@ -261,82 +219,177 @@
     "audio_trim_text_sync_skipped": "happy_path_final_tts_lock",
     "final_tts_relocked_pre_groups": true,
     "tts_speedup": {
-      "tts_wall_sec": 0.049,
-      "tts_segments_total": 10,
-      "tts_cache_hits": 10,
-      "tts_cache_misses": 0,
+      "tts_wall_sec": 10.062,
+      "tts_segments_total": 6,
+      "tts_cache_hits": 0,
+      "tts_cache_misses": 6,
       "tts_concurrency_used": 6,
       "tts_retries": 0,
       "tts_skips_existing": 0,
       "detail": {
-        "tts_cache_hits": 10,
-        "tts_cache_misses": 0,
+        "tts_cache_hits": 0,
+        "tts_cache_misses": 6,
         "tts_skips_existing": 0,
         "tts_retries": 0,
-        "tts_segments_total": 10,
+        "tts_segments_total": 6,
         "tts_concurrency_used": 6,
-        "tts_wall_sec": 0.049,
+        "tts_wall_sec": 10.062,
         "tts_rate_limit_backs": 0
       },
       "path": "stage6_parallel_cache",
-      "task_id": "2b40012630aa48e691e733fa7e15ef37",
+      "task_id": "9ae3700980ca4e0383c900b68582936f",
       "tts_rate_limit_backs": 0
     },
     "mt_speedup": {
-      "mt_wall_sec": 0.0,
-      "mt_segments": 10,
-      "mt_batch_size": 0,
-      "mt_calls": 0,
-      "mt_engine": "job_cache",
-      "mt_cache_hits": 10,
-      "mt_cache_misses": 0,
+      "mt_wall_sec": 25.198,
+      "mt_segments": 7,
+      "mt_batch_size": 10,
+      "mt_calls": 1,
+      "mt_engine": "marian_batch",
+      "mt_cache_hits": 0,
+      "mt_cache_misses": 7,
       "mt_concurrency_used": 1,
       "mt_retries": 0,
-      "mt_path": "job_translate_cache",
+      "mt_path": "marian_batch",
       "detail": {
-        "mt_wall_sec": 0.0,
-        "mt_segments": 10,
-        "mt_batch_size": 0,
-        "mt_calls": 0,
-        "mt_engine": "job_cache",
-        "mt_cache_hits": 10,
-        "mt_cache_misses": 0,
+        "mt_wall_sec": 25.198,
+        "mt_segments": 7,
+        "mt_batch_size": 10,
+        "mt_calls": 1,
+        "mt_engine": "marian_batch",
+        "mt_cache_hits": 0,
+        "mt_cache_misses": 7,
         "mt_concurrency_used": 1,
         "mt_retries": 0,
-        "mt_path": "job_translate_cache"
+        "mt_path": "marian_batch",
+        "translate_method": "marian_batch",
+        "translation_agent_path": false,
+        "llm_adaptation_used": false,
+        "simple_mt_locked": true,
+        "translation_timing": {
+          "marian_sec": 25.2,
+          "llm_adaptation_sec": 0.0,
+          "validation_sec": 0.0,
+          "post_processing_sec": 0.0,
+          "translation_total_sec": 25.2,
+          "segment_count": 7,
+          "marian_segments_done": 7,
+          "llm_segments_done": 0,
+          "current_subphase": "done",
+          "ui_buckets": {
+            "marian_mt": 25.2,
+            "llm_adaptation": 0.0,
+            "post_processing": 0.0
+          },
+          "phase_status": {
+            "marian_mt": "done",
+            "llm_adaptation": "skipped",
+            "post_processing": "skipped"
+          },
+          "hidden_buckets": [
+            "llm_adaptation",
+            "post_processing"
+          ],
+          "segment_stats": {
+            "marian_mt": {
+              "segments": 7,
+              "sec": 25.2,
+              "avg_sec_per_segment": 3.6,
+              "status": "done"
+            },
+            "llm_adaptation": {
+              "segments": 0,
+              "sec": 0.0,
+              "avg_sec_per_segment": 0.0,
+              "status": "skipped"
+            },
+            "post_processing": {
+              "segments": 0,
+              "sec": 0.0,
+              "avg_sec_per_segment": 0.0,
+              "status": "skipped"
+            }
+          },
+          "ui_labels": {
+            "marian_mt": "Marian MT",
+            "llm_adaptation": "Qwen / LLM Adaptation",
+            "post_processing": "Post-processing"
+          },
+          "llm_adaptation_used": false,
+          "simple_mt_locked": true
+        }
       },
-      "task_id": "2b40012630aa48e691e733fa7e15ef37"
+      "task_id": "9ae3700980ca4e0383c900b68582936f",
+      "translate_method": "marian_batch",
+      "translation_agent_path": false,
+      "llm_adaptation_used": false,
+      "simple_mt_locked": true
+    },
+    "stt_speedup": {
+      "stt_wall_sec": 82.812,
+      "stt_model": "small",
+      "stt_device": "cpu",
+      "stt_compute_type": "int8",
+      "stt_beam_size": 1,
+      "stt_vad_filter": true,
+      "stt_engine": "faster-whisper",
+      "stt_segments_raw": 25,
+      "stt_segments_after_glue": 9,
+      "stt_cache_hit": false,
+      "simple_stt_locked": true,
+      "voice_verification_skipped": "simple_stt_lock",
+      "detail": {
+        "stt_wall_sec": 82.812,
+        "stt_model": "small",
+        "stt_device": "cpu",
+        "stt_compute_type": "int8",
+        "stt_beam_size": 1,
+        "stt_vad_filter": true,
+        "stt_engine": "faster-whisper",
+        "stt_segments_raw": 25,
+        "stt_cache_hit": false,
+        "stt_word_timestamps": false,
+        "stt_segments_after_glue": 9
+      },
+      "task_id": "9ae3700980ca4e0383c900b68582936f",
+      "stt_word_timestamps": false
+    },
+    "stt_cache_warm": {
+      "hit": true,
+      "wall_sec": 0.013,
+      "model": "small",
+      "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_ccf56a18f6.mp4"
     },
     "stage_timings": {
-      "extract": 1.004,
-      "whisper": 17.112,
-      "translation": 0.0,
+      "extract": 1.492,
+      "whisper": 82.812,
+      "translation": 25.2,
       "natural": 0.0,
       "validation": 0.0,
       "translation_post": 0.0,
-      "tts": 2.062,
-      "slot_fit": 2.654,
+      "tts": 11.101,
+      "slot_fit": 1.62,
       "timing": 0.0,
       "mux": 0.0,
       "export": 0.0
     },
     "tts_cache_replay": {
-      "tts_cache_hits": 9,
-      "tts_cache_misses": 0,
+      "tts_cache_hits": 1,
+      "tts_cache_misses": 5,
       "tts_skips_existing": 0,
       "tts_retries": 0,
-      "tts_segments_total": 9,
+      "tts_segments_total": 6,
       "tts_concurrency_used": 6,
-      "tts_wall_sec": 0.047,
+      "tts_wall_sec": 3.65,
       "tts_rate_limit_backs": 0
     },
     "mt_cache_replay": {
-      "mt_wall_sec": 0.105,
-      "mt_segments": 10,
+      "mt_wall_sec": 0.005,
+      "mt_segments": 7,
       "mt_batch_size": 10,
       "mt_calls": 0,
       "mt_engine": "cache",
-      "mt_cache_hits": 10,
+      "mt_cache_hits": 7,
       "mt_cache_misses": 0,
       "mt_concurrency_used": 1,
       "mt_retries": 0,
@@ -354,15 +407,21 @@
     "review_tts_mismatch": 0,
     "fill_ok_ratio": 1.0,
     "fill_majority_ok": true,
-    "underfill_count": 1,
+    "underfill_count": 4,
     "review_equals_tts": true,
     "fit_text_drift": 1,
     "fit_preserved": false,
+    "stt_metrics_present": true,
+    "stt_model_ok": true,
+    "stt_beam_ok": true,
+    "stt_simple_locked": true,
+    "stt_no_vv_asr": true,
+    "stt_cache_warm_ok": true,
     "tts_concurrency_ok": true,
     "mt_metrics_present": true,
-    "tts_cache_replay_hits": 9,
+    "tts_cache_replay_hits": 1,
     "tts_cache_ok": true,
-    "mt_cache_replay_hits": 10,
+    "mt_cache_replay_hits": 7,
     "mt_cache_ok": true,
     "mt_parity_ok": true
   }

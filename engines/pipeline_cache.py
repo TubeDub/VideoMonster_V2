@@ -104,11 +104,15 @@ def load_whisper_cache(
     *,
     model_size: str,
     source_lang: str | None,
+    beam_size: int | None = None,
+    compute_type: str | None = None,
+    device: str | None = None,
 ) -> dict[str, Any] | None:
-    key = file_fingerprint(
-        video_path,
-        extra=f"whisper|{model_size}|{source_lang or 'auto'}",
+    extra = (
+        f"whisper|{model_size}|{source_lang or 'auto'}"
+        f"|beam={beam_size or ''}|dev={device or ''}|ct={compute_type or ''}"
     )
+    key = file_fingerprint(video_path, extra=extra)
     path = _cache_root(app_dir) / "whisper" / f"{key}.json"
     hit = _read_json(path)
     if hit:
@@ -165,11 +169,15 @@ def save_whisper_cache(
     source_text: str,
     timing_map: list,
     detected_lang: str,
+    beam_size: int | None = None,
+    compute_type: str | None = None,
+    device: str | None = None,
 ) -> None:
-    key = file_fingerprint(
-        video_path,
-        extra=f"whisper|{model_size}|{source_lang or 'auto'}",
+    extra = (
+        f"whisper|{model_size}|{source_lang or 'auto'}"
+        f"|beam={beam_size or ''}|dev={device or ''}|ct={compute_type or ''}"
     )
+    key = file_fingerprint(video_path, extra=extra)
     path = _cache_root(app_dir) / "whisper" / f"{key}.json"
     _write_json(
         path,
@@ -178,6 +186,10 @@ def save_whisper_cache(
             "source_text": source_text,
             "timing_map": timing_map,
             "detected_lang": detected_lang,
+            "model_size": model_size,
+            "beam_size": beam_size,
+            "device": device,
+            "compute_type": compute_type,
         },
     )
     logger.info("[Cache] Whisper SAVE key=%s", key)

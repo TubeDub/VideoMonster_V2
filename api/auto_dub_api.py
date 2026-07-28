@@ -4643,6 +4643,17 @@ def api_auto_dub_start():
     model_size = data.get("model_size", "tiny")
     if model_size not in allowed_models:
         model_size = "tiny"
+    # Stage 8: Simple UI often sends medium — cap to fast default before pipeline.
+    try:
+        from engines.happy_path import is_simple_mode
+        from engines.simple_stt_policy import resolve_simple_stt_model
+
+        if is_simple_mode({"user_mode": _user_mode}):
+            model_size = resolve_simple_stt_model(model_size)
+    except Exception:
+        if _user_mode in ("basic", "simple"):
+            if model_size in ("medium", "large"):
+                model_size = "small"
 
     ui_lang = _resolve_ui_lang(data.get("ui_lang"))
 
@@ -8708,39 +8719,116 @@ def _run_pipeline_inner(
         else:
             from engines.pipeline_cache import load_whisper_cache, save_whisper_cache
 
+            # Stage 8: Simple/Happy Path — cap model at small, beam=1, no word TS.
+            _stt_beam = None
+            _stt_vad = True
+            _stt_device = ""
+            _stt_compute = ""
+            try:
+                from engines.simple_stt_policy import (
+                    apply_simple_stt_policy,
+                    should_force_simple_stt,
+                )
+
+                with STATE_LOCK:
+                    _info_stt = dict(task.get("info") or {})
+                if should_force_simple_stt(_info_stt):
+                    apply_simple_stt_policy(_info_stt, requested_model=model_size)
+                    model_size = str(_info_stt.get("stt_model") or model_size)
+                    _stt_beam = int(_info_stt.get("stt_beam_size") or 1)
+                    stt_word_timestamps = False
+                    _stt_device = str(_info_stt.get("stt_device") or "")
+                    _stt_compute = str(_info_stt.get("stt_compute_type") or "")
+                    with STATE_LOCK:
+                        task["info"].update(
+                            {
+                                k: _info_stt[k]
+                                for k in (
+                                    "model_size",
+                                    "stt_model",
+                                    "stt_engine",
+                                    "stt_beam_size",
+                                    "stt_vad_filter",
+                                    "stt_word_timestamps",
+                                    "stt_device",
+                                    "stt_compute_type",
+                                    "stt_best_of",
+                                    "simple_stt_locked",
+                                    "voice_verification_asr_allowed",
+                                    "post_tts_restt_allowed",
+                                )
+                                if k in _info_stt
+                            }
+                        )
+                    logger.info(
+                        "Task %s: Simple STT lock model=%s beam=%s device=%s/%s",
+                        task_id,
+                        model_size,
+                        _stt_beam,
+                        _stt_device,
+                        _stt_compute,
+                    )
+            except Exception as _s8_pol_exc:
+                logger.debug("Simple STT policy skipped: %s", _s8_pol_exc)
+
+            if not _stt_device:
+                try:
+                    from engines.hardware_probe import probe_whisper_device
+
+                    _stt_device, _stt_compute = probe_whisper_device()
+                except Exception:
+                    _stt_device, _stt_compute = "cpu", "int8"
+
             _set_step(task_id, "transcribe", 15.0)
+            _update_progress_detail(
+                task_id,
+                phase="transcribe",
+                live_message=f"Распознавание речи ({model_size} / {_stt_device})…",
+                stt_model=model_size,
+                stt_device=_stt_device,
+            )
             profiler.start("whisper")
             if pipeline_timer is not None:
                 pipeline_timer.start("whisper")
+            _stt_t0 = time.perf_counter()
             wh_hit = load_whisper_cache(
                 APP_DIR,
                 video_path,
                 model_size=model_size,
                 source_lang=source_lang,
+                beam_size=_stt_beam,
+                compute_type=_stt_compute,
+                device=_stt_device,
             )
+            _stt_cache_hit = bool(wh_hit)
             if wh_hit:
                 source_text = str(wh_hit.get("source_text") or "")
                 timing_map = copy.deepcopy(wh_hit.get("timing_map") or [])
                 detected_lang = str(wh_hit.get("detected_lang") or source_lang or "en")
                 profiler.set_meta(whisper_cache="hit")
             else:
-                from engines.stt_engine import transcribe
+                from engines.stt_engine import get_last_stt_meta, transcribe
 
                 with _blocking_progress_heartbeat(
                     task_id,
                     "transcribe",
                     interval=20.0,
                     messages=[
-                        "Загрузка модели Whisper…",
+                        f"Загрузка Whisper {model_size} ({_stt_device})…",
                         "Распознавание речи…",
                         "Whisper обрабатывает аудио…",
                     ],
                 ):
+                    _tr_kwargs = {
+                        "language": source_lang,
+                        "model_size": model_size,
+                        "word_timestamps": stt_word_timestamps,
+                    }
+                    if _stt_beam is not None:
+                        _tr_kwargs["beam_size"] = _stt_beam
                     source_text, _, timing_map, detected_lang = transcribe(
                         stt_audio_path,
-                        language=source_lang,
-                        model_size=model_size,
-                        word_timestamps=stt_word_timestamps,
+                        **_tr_kwargs,
                     )
                 # Sparse STT (1 short island) — retry with forced CJK lang if needed
                 try:
@@ -8768,9 +8856,22 @@ def _run_pipeline_inner(
                             language=_force,
                             model_size=model_size,
                             word_timestamps=stt_word_timestamps,
+                            beam_size=_stt_beam,
                         )
                 except Exception as _stt_retry_exc:
                     logger.debug("STT coverage retry skipped: %s", _stt_retry_exc)
+                try:
+                    _meta_fw = get_last_stt_meta()
+                    if _meta_fw.get("stt_device"):
+                        _stt_device = str(_meta_fw.get("stt_device"))
+                    if _meta_fw.get("stt_compute_type"):
+                        _stt_compute = str(_meta_fw.get("stt_compute_type"))
+                    if _meta_fw.get("stt_beam_size") is not None:
+                        _stt_beam = int(_meta_fw.get("stt_beam_size"))
+                    if _meta_fw.get("stt_model"):
+                        model_size = str(_meta_fw.get("stt_model"))
+                except Exception:
+                    pass
                 save_whisper_cache(
                     APP_DIR,
                     video_path,
@@ -8779,11 +8880,70 @@ def _run_pipeline_inner(
                     source_text=source_text,
                     timing_map=timing_map,
                     detected_lang=detected_lang,
+                    beam_size=_stt_beam,
+                    compute_type=_stt_compute,
+                    device=_stt_device,
                 )
                 profiler.set_meta(whisper_cache="miss")
+            _stt_wall = round(time.perf_counter() - _stt_t0, 3)
             profiler.stop("whisper")
             if pipeline_timer is not None:
                 pipeline_timer.stop("whisper")
+                try:
+                    pipeline_timer.set_meta(
+                        stt_wall_sec=_stt_wall,
+                        stt_model=model_size,
+                        stt_device=_stt_device,
+                        stt_compute_type=_stt_compute,
+                        stt_beam_size=_stt_beam if _stt_beam is not None else "",
+                        stt_cache_hit=_stt_cache_hit,
+                    )
+                except Exception:
+                    pass
+
+            _stt_stats = {
+                "stt_wall_sec": _stt_wall,
+                "stt_model": model_size,
+                "stt_device": _stt_device,
+                "stt_compute_type": _stt_compute,
+                "stt_beam_size": int(_stt_beam) if _stt_beam is not None else (
+                    1 if model_size in ("tiny", "base", "small") else 5
+                ),
+                "stt_vad_filter": True,
+                "stt_engine": "faster-whisper",
+                "stt_segments_raw": len(timing_map or []),
+                "stt_cache_hit": _stt_cache_hit,
+                "stt_word_timestamps": bool(stt_word_timestamps),
+            }
+            with STATE_LOCK:
+                info_stt = task.setdefault("info", {})
+                info_stt.update(_stt_stats)
+                info_stt["model_size"] = model_size
+                info_stt["stt_speedup"] = dict(_stt_stats)
+            try:
+                import json as _json_s8
+
+                (APP_DIR / "output" / f"stt_speedup_{task_id}.json").write_text(
+                    _json_s8.dumps(
+                        {"task_id": task_id, **_stt_stats},
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
+                    encoding="utf-8",
+                )
+            except Exception:
+                pass
+            logger.info(
+                "Task %s: STT wall=%.2fs model=%s device=%s/%s beam=%s cache=%s segs=%d",
+                task_id,
+                _stt_wall,
+                model_size,
+                _stt_device,
+                _stt_compute,
+                _stt_stats["stt_beam_size"],
+                "hit" if _stt_cache_hit else "miss",
+                len(timing_map or []),
+            )
 
             logger.debug(
                 "STT completed lang=%s chars=%s",
@@ -8798,6 +8958,9 @@ def _run_pipeline_inner(
                 phase="segment_prep",
                 live_message="Whisper finished — preparing segments",
                 substep="stt_done",
+                stt_wall_sec=_stt_wall,
+                stt_model=model_size,
+                stt_device=_stt_device,
             )
         _open_ddf.record_agent(
             task_id, "Whisper/STT", called=True,
@@ -8910,9 +9073,15 @@ def _run_pipeline_inner(
                 task["info"]["stt_merge_mode"] = "happy_path"
                 task["info"]["stt_merge_before"] = _before_n
                 task["info"]["stt_merge_after"] = _after_n
+                task["info"]["stt_segments_after_glue"] = _after_n
                 # TZ Stage 2 report aliases
                 task["info"]["segments_before"] = _before_n
                 task["info"]["segments_after"] = _after_n
+                _speed = task["info"].get("stt_speedup")
+                if isinstance(_speed, dict):
+                    _speed = dict(_speed)
+                    _speed["stt_segments_after_glue"] = _after_n
+                    task["info"]["stt_speedup"] = _speed
             logger.info(
                 "Task %s: Happy Path STT merge segments_before=%d → "
                 "segments_after=%d (min≥5.0s, gap<0.9s)",
@@ -8920,6 +9089,19 @@ def _run_pipeline_inner(
                 _before_n,
                 _after_n,
             )
+            try:
+                import json as _json_glue
+
+                _glue_path = APP_DIR / "output" / f"stt_speedup_{task_id}.json"
+                if _glue_path.is_file():
+                    _gj = _json_glue.loads(_glue_path.read_text(encoding="utf-8"))
+                    _gj["stt_segments_after_glue"] = _after_n
+                    _glue_path.write_text(
+                        _json_glue.dumps(_gj, ensure_ascii=False, indent=2),
+                        encoding="utf-8",
+                    )
+            except Exception:
+                pass
         else:
             from engines.segment_merger import merge_stt_segments
 
@@ -14698,24 +14880,40 @@ def _run_pipeline_inner(
 
             with STATE_LOCK:
                 _vv_info = dict(task.get("info") or {})
-            try:
-                _run_voice_verification_for_task(
-                    task_id=task_id,
-                    segments_data=segments_data,
-                    task_info=_vv_info,
-                    voice=voice,
-                    target_lang=target_lang,
-                    tts_rate=tts_rate,
-                    tts_pitch=tts_pitch,
-                    manifest_path=str(_vv_info.get("manifest_path") or ""),
-                )
+            # Stage 8: Simple — no post-TTS re-STT / voice-verification ASR.
+            _skip_vv = bool(
+                _vv_info.get("simple_pipeline")
+                or _vv_info.get("happy_path")
+                or _vv_info.get("simple_stt_locked")
+                or _vv_info.get("voice_verification_asr_allowed") is False
+                or _vv_info.get("post_tts_restt_allowed") is False
+            )
+            if _skip_vv:
                 with STATE_LOCK:
-                    task["info"].update(_vv_info)
-                    task["info"]["segments_data"] = segments_data
-            except Exception as vv_exc:
-                logger.warning(
-                    "Task %s: voice_verification skipped: %s", task_id, vv_exc
+                    task["info"]["voice_verification_skipped"] = "simple_stt_lock"
+                logger.info(
+                    "Task %s: voice_verification ASR skipped (Simple STT lock)",
+                    task_id,
                 )
+            else:
+                try:
+                    _run_voice_verification_for_task(
+                        task_id=task_id,
+                        segments_data=segments_data,
+                        task_info=_vv_info,
+                        voice=voice,
+                        target_lang=target_lang,
+                        tts_rate=tts_rate,
+                        tts_pitch=tts_pitch,
+                        manifest_path=str(_vv_info.get("manifest_path") or ""),
+                    )
+                    with STATE_LOCK:
+                        task["info"].update(_vv_info)
+                        task["info"]["segments_data"] = segments_data
+                except Exception as vv_exc:
+                    logger.warning(
+                        "Task %s: voice_verification skipped: %s", task_id, vv_exc
+                    )
 
             try:
                 from engines.autodub.project_package import build_autodub_project_package

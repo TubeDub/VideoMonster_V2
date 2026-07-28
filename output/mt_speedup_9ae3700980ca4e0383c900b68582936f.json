@@ -1,0 +1,17 @@
+{
+  "task_id": "9ae3700980ca4e0383c900b68582936f",
+  "translate_method": "marian_batch",
+  "mt_wall_sec": 25.198,
+  "mt_segments": 7,
+  "mt_batch_size": 10,
+  "mt_calls": 1,
+  "mt_engine": "marian_batch",
+  "mt_cache_hits": 0,
+  "mt_cache_misses": 7,
+  "mt_concurrency_used": 1,
+  "mt_retries": 0,
+  "mt_path": "marian_batch",
+  "translation_agent_path": false,
+  "llm_adaptation_used": false,
+  "simple_mt_locked": true
+}

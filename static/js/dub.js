@@ -498,9 +498,11 @@ function syncWizardModelSize(fromUi) {
   const ui = document.getElementById('wizard-model-size');
   if (!hidden || !ui) return;
   const allowed = ['tiny', 'base', 'small', 'medium', 'large'];
+  // Stage 8: Simple default is small (was medium — multi-minute STT).
+  const DEFAULT_WHISPER = 'small';
   if (fromUi) {
-    let v = String(ui.value || 'medium');
-    if (!allowed.includes(v)) v = 'medium';
+    let v = String(ui.value || DEFAULT_WHISPER);
+    if (!allowed.includes(v)) v = DEFAULT_WHISPER;
     hidden.value = v;
     ui.value = v;
     try {
@@ -509,14 +511,16 @@ function syncWizardModelSize(fromUi) {
       localStorage.setItem('vm_settings', JSON.stringify(s));
     } catch (_) {}
   } else {
-    let v = String(hidden.value || 'medium');
+    let v = String(hidden.value || DEFAULT_WHISPER);
     try {
       const s = typeof loadSettings === 'function' ? loadSettings() : {};
       if (s.whisperSize && allowed.includes(String(s.whisperSize))) {
         v = String(s.whisperSize);
       }
     } catch (_) {}
-    if (!allowed.includes(v)) v = 'medium';
+    if (!allowed.includes(v)) v = DEFAULT_WHISPER;
+    // Migrate legacy UI default medium → small for Happy Path wizard.
+    if (v === 'medium') v = DEFAULT_WHISPER;
     hidden.value = v;
     ui.value = v;
   }
@@ -539,7 +543,7 @@ function updateWizardSummary() {
   const styleName = styleRow
     ? t(styleRow.i18n_key || `dub.style_${styleId}`, styleId)
     : styleId;
-  const whisper = document.getElementById('model-size')?.value || 'medium';
+  const whisper = document.getElementById('model-size')?.value || 'small';
   box.innerHTML = `
     <dl class="wizard-summary-list">
       <dt>${escHtml(t('dub.video', 'Видео'))}</dt>
@@ -2037,7 +2041,7 @@ async function runComponentPrepare() {
     target_lang: document.getElementById('target-lang')?.value || 'ru',
     whisper_size: (function () {
       if (typeof syncWizardModelSize === 'function') syncWizardModelSize(true);
-      return document.getElementById('model-size')?.value || 'medium';
+      return document.getElementById('model-size')?.value || 'small';
     })(),
     feature: 'dub',
     ui_lang: uiLang,
@@ -2152,7 +2156,7 @@ async function startDub() {
     tts_engine: (document.getElementById('tts-engine') || {}).value || 'edge-offline',
     model_size: (function () {
       if (typeof syncWizardModelSize === 'function') syncWizardModelSize(true);
-      return document.getElementById('model-size')?.value || 'medium';
+      return document.getElementById('model-size')?.value || 'small';
     })(),
     ui_lang: uiLang,
     content_mode: (document.getElementById('content-mode') || {}).value || 'movie',

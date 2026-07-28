@@ -96,14 +96,31 @@ def apply_simple_pipeline_policy(
         "simple_mt_locked": True,
         "translation_agent_path": False,
         "llm_adaptation_used": False,
+        # Stage 8: fast STT defaults (small + beam1); no post-TTS re-STT.
+        "simple_stt_locked": True,
+        "voice_verification_asr_allowed": False,
+        "post_tts_restt_allowed": False,
+        "stt_engine": "faster-whisper",
+        "stt_beam_size": 1,
+        "stt_vad_filter": True,
+        "stt_word_timestamps": False,
     }
     task_info.update(policy)
+    try:
+        from engines.simple_stt_policy import apply_simple_stt_policy
+
+        apply_simple_stt_policy(
+            task_info, requested_model=str(task_info.get("model_size") or "") or None
+        )
+    except Exception as _stt_pol_exc:
+        logger.debug("simple_stt policy stamp skipped: %s", _stt_pol_exc)
     logger.info(
-        "simple_pipeline: policy ON mode=%s auto_mix=%s atempo=%.2f–%.2f",
+        "simple_pipeline: policy ON mode=%s auto_mix=%s atempo=%.2f–%.2f stt=%s",
         task_info.get("user_mode"),
         task_info.get("simple_auto_mix"),
         float(task_info.get("min_atempo") or 0.95),
         float(task_info.get("max_atempo") or 1.08),
+        task_info.get("stt_model") or task_info.get("model_size"),
     )
     return task_info
 

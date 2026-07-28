@@ -1,0 +1,106 @@
+=== PROFESSIONAL DUBBING task=9ae3700980ca4e0383c900b68582936f ===
+groups=6
+
+--- Group 1 indices=[0] ---
+Original Translation: Джордж молодший справді був дуже розумною дитиною, але він також дуже легко відволікся, і через те, що він дійсно не займався чимось серйозним, окрім автомобілів, ось як це було тоді, ось як це було тоді — ось як це було тоді.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis> молодший справді був дуже розумною дитиною,<break time="220ms"/> але він також дуже легко відволікся,<break time="220ms"/> і через те,<break time="220ms"/> що він дійсно не займався чимось серйозним,<break time="220ms"/> окрім автомобілів,<break time="220ms"/> ось як це було тоді,<break time="220ms"/> ось як це було тоді — ось як це було тоді.<break time="350ms"/></speak>
+Segment duration: 20085 ms
+Est TTS before: 16740 ms
+Est TTS after: 21907 ms
+Fill %: 109.1
+Rate: -19%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 83.3% → rate -19%
+
+--- Group 2 indices=[1] ---
+Original Translation: Джордж він прийшов на це перехрестя, де воно було поруч з його домом і він почав робити поворот, коли почув цей гучний звук, а потім все потемніло, ось як це було тоді,
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis> він прийшов на це перехрестя,<break time="220ms"/> де воно було поруч з його домом і він почав робити поворот,<break time="220ms"/> коли почув цей гучний звук,<break time="220ms"/> а<break time="200ms"/> потім все потемніло,<break time="220ms"/> ось як це було тоді,<break time="220ms"/></speak>
+Segment duration: 18714 ms
+Est TTS before: 12444 ms
+Est TTS after: 16252 ms
+Fill %: 86.8
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: underfill 66.5% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 3 indices=[2] ---
+Original Translation: Через два тижні Джордж молодший лежав у лікарняному ліжку у реанімації місцевої лікарні. Саме так: через два тижні джордж молодший лежав, ось як це було тоді, ось як це було тоді — ось як це було тоді.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Через</emphasis> два тижні <emphasis level="reduced">Джордж</emphasis> молодший лежав у лікарняному ліжку у реанімації місцевої лікарні.<break time="350ms"/> <emphasis level="reduced">Саме</emphasis> так:<break time="350ms"/> через два тижні джордж молодший лежав,<break time="220ms"/> ось як це було тоді,<break time="220ms"/> ось як це було тоді — ось як це було тоді.<break time="350ms"/><
+Segment duration: 17369 ms
+Est TTS before: 14888 ms
+Est TTS after: 18998 ms
+Fill %: 109.4
+Rate: -16%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ':', 'ms': 350, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Через', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Саме', 'type': 'name'}
+  Decision: underfill 85.7% → rate -16%
+
+--- Group 4 indices=[3] ---
+Original Translation: Через два роки Джордж молодший повністю одужав від поранень, що стояли на фінішній лінії на гоночному треку і підняв фотоапарат, ось як це було тоді, Замість цього він взяв цю камеру і повернувся в своє старе хобі фотографії.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Через</emphasis> два роки <emphasis level="reduced">Джордж</emphasis> молодший повністю одужав від поранень,<break time="220ms"/> що стояли на фінішній лінії на гоночному треку і підняв фотоапарат,<break time="220ms"/> ось як це було тоді,<break time="220ms"/> <emphasis level="reduced">Замість</emphasis> цього він взяв цю камеру і повернувся в своє старе хобі фотографії.<break time="350ms"
+Segment duration: 24921 ms
+Est TTS before: 16666 ms
+Est TTS after: 21211 ms
+Fill %: 85.1
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Через', 'type': 'name'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Замість', 'type': 'name'}
+  Decision: underfill 66.9% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 5 indices=[4] ---
+Original Translation: Джордж молодший подав заяву на престижну кінематографічну програму в університеті Південної Каліфорнії, але після того, як відіслав заяву, він був упевнений.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis> молодший подав заяву на престижну кінематографічну програму в університеті <emphasis level="reduced">Південної Каліфорнії</emphasis>,<break time="184ms"/> але після того,<break time="184ms"/> як відіслав заяву,<break time="184ms"/> він був упевнений.<break time="350ms"/></speak>
+Segment duration: 8946 ms
+Est TTS before: 11629 ms
+Est TTS after: 12531 ms
+Fill %: 140.1
+Rate: +0%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Accent: {'word': 'Південної Каліфорнії', 'type': 'name'}
+  Decision: natural rate -6%
+  Decision: overfill 130.0% → light faster +0% (pauses scaled)
+
+--- Group 6 indices=[5] ---
+Original Translation: Джордж молодший підійшов до подіуму, щоб сфотографувати переможного водія, але коли він йшов туди, підійшов чоловік середнього віку.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джордж</emphasis> молодший підійшов до подіуму,<break time="184ms"/> щоб сфотографувати переможного водія,<break time="184ms"/> але коли він йшов туди,<break time="184ms"/> підійшов чоловік середнього віку.<break time="350ms"/></speak>
+Segment duration: 6847 ms
+Est TTS before: 9777 ms
+Est TTS after: 10679 ms
+Fill %: 156.0
+Rate: +0%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джордж', 'type': 'name'}
+  Decision: natural rate -6%
+  Decision: overfill 142.8% → light faster +0% (pauses scaled)

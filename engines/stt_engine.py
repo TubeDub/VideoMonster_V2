@@ -22,6 +22,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 _MODEL_CACHE: dict = {}
+_LAST_STT_META: dict = {}
+
+
+def get_last_stt_meta() -> dict:
+    return dict(_LAST_STT_META)
+
+
+def _set_last_stt_meta(**fields) -> None:
+    _LAST_STT_META.clear()
+    _LAST_STT_META.update(fields)
 
 
 # ─────────────────────────────────────────────
@@ -35,6 +45,8 @@ def transcribe(
     model_size: str = "tiny",
     *,
     word_timestamps: bool | None = None,
+    beam_size: int | None = None,
+    vad_filter: bool | None = None,
 ) -> tuple[str, str, list[dict[str, int]], str]:
     """
     Распознаёт речь.
@@ -69,6 +81,8 @@ def transcribe(
             language,
             model_size,
             word_timestamps=word_timestamps,
+            beam_size=beam_size,
+            vad_filter=vad_filter,
         )
     except ImportError:
         pass
@@ -88,6 +102,8 @@ def transcribe(
                     language,
                     "tiny",
                     word_timestamps=word_timestamps,
+                    beam_size=beam_size,
+                    vad_filter=vad_filter,
                 )
             except Exception as retry_exc:
                 logger.error("[STT] tiny fallback failed: %s", retry_exc)
@@ -114,6 +130,8 @@ def transcribe(
                             language,
                             "tiny",
                             word_timestamps=word_timestamps,
+                            beam_size=beam_size,
+                            vad_filter=vad_filter,
                         )
                     except Exception as retry_exc:
                         logger.error("[STT] tiny retry failed: %s", retry_exc)
@@ -206,17 +224,43 @@ def _transcribe_faster_whisper(
     model_size: str,
     *,
     word_timestamps: bool = False,
+    beam_size: int | None = None,
+    vad_filter: bool | None = None,
 ) -> tuple[str, str, list[dict[str, int]], str]:
 
     model = _get_faster_model(model_size)
 
-    beam_size = 1 if model_size == "tiny" else 5
+    # Stage 8: tiny/base/small → beam 1; medium/large keep 5 unless overridden.
+    if beam_size is None:
+        beam_size = 1 if model_size in ("tiny", "base", "small") else 5
+    else:
+        beam_size = max(1, int(beam_size))
+    use_vad = True if vad_filter is None else bool(vad_filter)
+
+    try:
+        from engines.hardware_probe import probe_whisper_device
+
+        _dev, _ctype = probe_whisper_device()
+    except Exception:
+        _dev, _ctype = "cpu", "int8"
+
+    _set_last_stt_meta(
+        stt_engine="faster-whisper",
+        stt_model=str(model_size),
+        stt_device=_dev,
+        stt_compute_type=_ctype,
+        stt_beam_size=int(beam_size),
+        stt_vad_filter=bool(use_vad),
+        stt_word_timestamps=bool(word_timestamps),
+        stt_best_of=1,
+    )
 
     segments_gen, info = model.transcribe(
         audio_path,
         language=language or None,
         beam_size=beam_size,
-        vad_filter=True,
+        best_of=1,
+        vad_filter=use_vad,
         word_timestamps=word_timestamps,
     )
 
@@ -244,6 +288,8 @@ def _transcribe_faster_whisper(
                     det0,
                     better,
                     word_timestamps=word_timestamps,
+                    beam_size=beam_size,
+                    vad_filter=use_vad,
                 )
             except Exception as upgrade_exc:
                 logger.warning(
@@ -283,6 +329,8 @@ def _transcribe_faster_whisper(
         timing_map.append(entry)
 
         srt_blocks.append(f"{i}\n" f"{start_srt} --> {end_srt}\n" f"{text}\n")
+
+    _LAST_STT_META["stt_segments_raw"] = len(timing_map)
 
     return (
         "\n".join(text_lines),
