@@ -56,8 +56,11 @@ _DEFAULT_PUNCT_PAUSE_MS = 120
 _MIN_NATURAL_PAUSE_MS = 80
 _MAX_NATURAL_PAUSE_MS = 200
 
-# Significant underfill: if TTS fills < 55% of slot the silence is noticeable.
-UNDERFILL_SIGNIFICANT_THRESH = 0.55
+# Significant underfill: TTS fills < 80% of slot → noticeable dead air (Stage 5).
+UNDERFILL_SIGNIFICANT_THRESH = 0.80
+# Tail after speech when shrinking an underfilled slot (natural pause only).
+_SLOT_SHRINK_PAD_MIN_MS = 80
+_SLOT_SHRINK_PAD_MAX_MS = 200
 
 
 # ─── Overflow classification ──────────────────────────────────────────────────
@@ -138,9 +141,75 @@ def natural_sentence_pause_ms(text: str) -> int:
 
 def detect_significant_underfill(tts_ms: int, slot_ms: int) -> bool:
     """True when TTS is significantly shorter than slot — risk of long dead air."""
-    if slot_ms <= 0:
+    if slot_ms <= 0 or tts_ms <= 0:
         return False
     return tts_ms < slot_ms * UNDERFILL_SIGNIFICANT_THRESH
+
+
+def underfill_metrics(tts_ms: int, slot_ms: int) -> dict[str, Any]:
+    """Per-segment fill diagnostics (Stage 5)."""
+    slot = max(0, int(slot_ms or 0))
+    tts = max(0, int(tts_ms or 0))
+    fill_ratio = (float(tts) / float(slot)) if slot > 0 else 0.0
+    underfill_ms = max(0, slot - tts)
+    significant = bool(slot > 0 and tts > 0 and fill_ratio < UNDERFILL_SIGNIFICANT_THRESH)
+    return {
+        "slot_ms": slot,
+        "tts_ms": tts,
+        "fill_ratio": round(fill_ratio, 4),
+        "underfill_ms": underfill_ms,
+        "underfill_significant": significant,
+    }
+
+
+def shrink_underfilled_slot_end(
+    slot_start: int,
+    slot_end: int,
+    speech_ms: int,
+    *,
+    next_start: int | None = None,
+    text_hint: str = "",
+) -> tuple[int, dict[str, Any]]:
+    """Shrink slot end toward speech end when underfilled — no long dead-air pad.
+
+    end ≈ start + speech_ms + 80–200ms; never collide with the next segment.
+    Does not slow the voice (atempo stays ≥ 0.95 elsewhere).
+    """
+    start = int(slot_start)
+    end = int(slot_end)
+    slot_ms = max(0, end - start)
+    speech = max(0, int(speech_ms or 0))
+    meta = {
+        "slot_shrunk": False,
+        "slot_end_before": end,
+        "slot_end_after": end,
+        "slot_ms_before": slot_ms,
+        "slot_ms_after": slot_ms,
+    }
+    if slot_ms <= 0 or speech <= 0:
+        return end, meta
+    fill_ratio = speech / float(slot_ms)
+    if fill_ratio >= UNDERFILL_SIGNIFICANT_THRESH:
+        return end, meta
+
+    pad = natural_sentence_pause_ms(text_hint)
+    pad = max(_SLOT_SHRINK_PAD_MIN_MS, min(_SLOT_SHRINK_PAD_MAX_MS, pad))
+    new_end = start + speech + pad
+    if next_start is not None:
+        new_end = min(new_end, max(start + 180, int(next_start) - 20))
+    new_end = max(start + min(speech, slot_ms), min(new_end, end))
+    if new_end >= end:
+        return end, meta
+    meta.update(
+        {
+            "slot_shrunk": True,
+            "slot_end_after": int(new_end),
+            "slot_ms_after": int(new_end - start),
+            "shrink_pad_ms": pad,
+            "fill_ratio_before": round(fill_ratio, 4),
+        }
+    )
+    return int(new_end), meta
 
 
 def _parse_timing(item: Any) -> tuple[int, int]:
@@ -634,12 +703,12 @@ def fit_segment_audio(
     speech_trimmed = "trim_overlap" in str(strategy or "")
 
     if fitted_ms < effective_slot:
-        # Add only a natural post-sentence pause (80–220 ms based on punctuation).
-        # We do NOT fill the entire slot with silence — that creates dead air after speech.
-        # FFmpeg adelay handles exact timeline placement; audio length can be shorter than slot.
+        # Natural post-sentence pause only (80–200 ms). Never pad the rest of
+        # the old slot with silence — that is dead air (Stage 5).
         natural_pause = natural_sentence_pause_ms(text_hint)
         remaining = effective_slot - fitted_ms
-        pause_added_ms = min(natural_pause, remaining)
+        # Cap pause tightly; residual underfill is handled by slot shrink.
+        pause_added_ms = min(natural_pause, remaining, _SLOT_SHRINK_PAD_MAX_MS)
         if pause_added_ms > 0:
             audio = audio + AudioSegment.silent(duration=pause_added_ms)
     elif fitted_ms > effective_slot:
@@ -652,6 +721,25 @@ def fit_segment_audio(
         )
 
     overflow_ms = max(0, fitted_ms - effective_slot)
+    # Never slow voice below Happy Path floor (dead-air must not use atempo<0.95).
+    if atempo < _ATEMPO_MIN:
+        atempo = _ATEMPO_MIN
+
+    speech_for_fill = int(speech_ms)
+    fill_orig = underfill_metrics(speech_for_fill, slot_end - slot_start)
+    shrunk_end, shrink_meta = shrink_underfilled_slot_end(
+        slot_start,
+        slot_end,
+        speech_for_fill,
+        next_start=next_start,
+        text_hint=text_hint,
+    )
+    if shrink_meta.get("slot_shrunk"):
+        tag = "slot_shrink"
+        strategy = tag if strategy == "none" else strategy + f"+{tag}"
+    fill_eff = underfill_metrics(
+        speech_for_fill, max(0, int(shrunk_end) - slot_start)
+    )
 
     out = work / f"{src.stem}_fitted.wav"
     audio.export(out, format="wav")
@@ -670,16 +758,37 @@ def fit_segment_audio(
         "strategy": strategy,
         "overflow_ms": overflow_ms,
         "no_speech_trim": bool(no_speech_trim),
+        # Original-slot fill (acceptance); shrink is a structural fix, not success-by-silence.
+        "fill_ratio": fill_orig.get("fill_ratio"),
+        "underfill_ms": fill_orig.get("underfill_ms"),
+        "underfill_significant": fill_orig.get("underfill_significant"),
+        "fill_ratio_effective": fill_eff.get("fill_ratio"),
+        "slot_shrunk": bool(shrink_meta.get("slot_shrunk")),
+        "slot_end_ms": int(shrunk_end),
+        "slot_ms_effective": int(max(0, shrunk_end - slot_start)),
+        "underfill_resolved_by_shrink": bool(
+            shrink_meta.get("slot_shrunk") and fill_orig.get("underfill_significant")
+        ),
     }
+    if fill_orig.get("underfill_significant") and not shrink_meta.get("slot_shrunk"):
+        meta["underfill_unresolved"] = True
+        logger.warning(
+            "timing_fit: underfill unresolved slot=%dms speech=%dms fill=%.2f",
+            slot_end - slot_start,
+            speech_for_fill,
+            float(fill_orig.get("fill_ratio") or 0),
+        )
     logger.info(
         "timing_fit: slot_ms=%s tts_ms=%s atempo=%.3f overflow_ms=%s strategy=%s "
-        "no_speech_trim=%s",
+        "no_speech_trim=%s fill=%.2f shrink=%s",
         meta["slot_ms"],
         meta["tts_ms"],
         meta["atempo"],
         meta["overflow_ms"],
         meta["strategy"],
         meta["no_speech_trim"],
+        float(meta.get("fill_ratio") or 0),
+        meta.get("slot_shrunk"),
     )
     return str(out), meta
 
@@ -820,8 +929,13 @@ def build_gap_adjusted_track(
                     "idx": i,
                     "place_start": place_start,
                     "original_start_ms": start,
-                    "slot_end_ms": end,
+                    "slot_end_ms": int(meta.get("slot_end_ms") or end),
                     "slot_ms": int(meta.get("slot_ms") or max(0, end - start)),
+                    "slot_ms_effective": int(
+                        meta.get("slot_ms_effective")
+                        or meta.get("slot_ms")
+                        or max(0, end - start)
+                    ),
                     "delay_ms": delay,
                     "fitted_ms": fitted_ms,
                     "tts_ms": int(meta.get("tts_ms") or 0),
@@ -833,6 +947,14 @@ def build_gap_adjusted_track(
                     "overflow_ms": meta.get("overflow_ms", 0),
                     "atempo": meta.get("atempo", 1.0),
                     "no_speech_trim": bool(meta.get("no_speech_trim")),
+                    "fill_ratio": meta.get("fill_ratio"),
+                    "underfill_ms": meta.get("underfill_ms"),
+                    "underfill_significant": bool(meta.get("underfill_significant")),
+                    "slot_shrunk": bool(meta.get("slot_shrunk")),
+                    "fill_ratio_effective": meta.get("fill_ratio_effective"),
+                    "underfill_resolved_by_shrink": bool(
+                        meta.get("underfill_resolved_by_shrink")
+                    ),
                 }
             )
             log_lines.append(
@@ -841,6 +963,8 @@ def build_gap_adjusted_track(
                 f"pause_borrowed_ms={meta['pause_borrowed_ms']} "
                 f"pause_compressed_ms={meta.get('pause_compressed_ms', 0)} "
                 f"strategy={meta.get('strategy', 'none')} overflow_ms={meta.get('overflow_ms', 0)} "
+                f"fill_ratio={meta.get('fill_ratio')} underfill_ms={meta.get('underfill_ms')} "
+                f"slot_shrunk={meta.get('slot_shrunk')} "
                 f"inter_pause_ms={meta['inter_pause_ms']} place_start={place_start} delay_ms={delay}"
             )
             if on_segment_progress:

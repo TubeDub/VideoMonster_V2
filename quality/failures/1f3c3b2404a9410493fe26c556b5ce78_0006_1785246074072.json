@@ -1,0 +1,202 @@
+{
+  "task_id": "1f3c3b2404a9410493fe26c556b5ce78",
+  "index": 6,
+  "original": "That in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+  "translation": "Що в деяких випадках він став його потенціалом. Так Джордж Жр. вирішив, що він дійсно не хоче перегонів.",
+  "reason": "MeaningReviewer: event_missing; meaning_collapse; MeaningReviewer/event_missing: \\brace\\b|\\bracing\\b; MeaningReviewer/meaning_collapse: no mapped events preserved",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 6
+      },
+      "review_time_ms": 0.54,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "entities_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 6
+      },
+      "review_time_ms": 5.65,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "event_missing",
+          "detail": "\\brace\\b|\\bracing\\b",
+          "severity": "major"
+        },
+        {
+          "code": "meaning_collapse",
+          "severity": "critical",
+          "detail": "no mapped events preserved"
+        }
+      ],
+      "explanation": "event_missing; meaning_collapse",
+      "retry_strategy": "Meaning Preservation Strategy",
+      "metadata": {
+        "index": 6
+      },
+      "review_time_ms": 0.29,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.9
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 0.6,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.9
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "WARN",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "broken_sentence_boundary",
+          "severity": "major",
+          "detail": "lowercase after period"
+        }
+      ],
+      "explanation": "broken_sentence_boundary",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 6
+      },
+      "review_time_ms": 1.01,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.94
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 0.6,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.94
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "timing_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 6,
+        "slot_ms": 6102
+      },
+      "review_time_ms": 0.07,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 6
+      },
+      "review_time_ms": 0.2,
+      "retry_count": 1,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.9733,
+  "retry_history": [
+    {
+      "ok": true,
+      "strategy": "argos_sentence_retranslate",
+      "text": "Що в деяких випадках він став його потенціалом. Так Джордж Жр. вирішив, що він дійсно не хоче перегонів."
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Meaning Preservation Strategy",
+  "ts": 1785246074072
+}

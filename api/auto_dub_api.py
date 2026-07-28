@@ -4175,6 +4175,15 @@ def _build_timed_dub_track(
                     "strategy": place.get("strategy"),
                     "speech_trimmed": place.get("speech_trimmed"),
                     "no_speech_trim": place.get("no_speech_trim"),
+                    "fill_ratio": place.get("fill_ratio"),
+                    "underfill_ms": place.get("underfill_ms"),
+                    "underfill_significant": place.get("underfill_significant"),
+                    "slot_shrunk": place.get("slot_shrunk"),
+                    "slot_ms_effective": place.get("slot_ms_effective"),
+                    "fill_ratio_effective": place.get("fill_ratio_effective"),
+                    "underfill_resolved_by_shrink": place.get(
+                        "underfill_resolved_by_shrink"
+                    ),
                 }
             )
         # Stage 4: attach final_tts_text + text-fit preds for lip/scene diagnostics.
@@ -4200,6 +4209,18 @@ def _build_timed_dub_track(
                         _row["predicted_ms_after"] = _tf.get("predicted_ms_after")
                         _row["text_fit_applied"] = _tf.get("text_fit_applied")
                         _row["meaning_truncated"] = _tf.get("meaning_truncated")
+                # Ensure fill metrics even if placement omitted them.
+                if _row.get("fill_ratio") is None:
+                    try:
+                        from engines.timing_fit import underfill_metrics as _ufm
+
+                        _um = _ufm(
+                            int(_row.get("speech_ms") or _row.get("tts_ms") or 0),
+                            int(_row.get("slot_ms") or 0),
+                        )
+                        _row.update(_um)
+                    except Exception:
+                        pass
             atempos = [float(r.get("atempo") or 1.0) for r in timing_rows]
             if atempos and (max(atempos) > 1.0801 or min(atempos) < 0.949):
                 logger.warning(
@@ -4208,13 +4229,45 @@ def _build_timed_dub_track(
                     min(atempos),
                     max(atempos),
                 )
+            _sig = [
+                r
+                for r in timing_rows
+                if r.get("underfill_significant")
+                and not r.get("underfill_resolved_by_shrink")
+            ]
+            _all_under = [
+                int(r.get("underfill_ms") or 0)
+                for r in timing_rows
+                if int(r.get("underfill_ms") or 0) > 0
+            ]
             task_info["timing_fit_segments"] = timing_rows
+            task_info["underfill_count"] = len(
+                [r for r in timing_rows if r.get("underfill_significant")]
+            )
+            task_info["underfill_unresolved_count"] = len(_sig)
+            task_info["max_underfill_ms"] = max(_all_under) if _all_under else 0
+            task_info["underfill_summary"] = {
+                "count": task_info["underfill_count"],
+                "unresolved": task_info["underfill_unresolved_count"],
+                "max_underfill_ms": task_info["max_underfill_ms"],
+                "slot_shrunk": sum(1 for r in timing_rows if r.get("slot_shrunk")),
+                "fill_ok": sum(
+                    1
+                    for r in timing_rows
+                    if float(r.get("fill_ratio") or 0) >= 0.80
+                    or r.get("underfill_resolved_by_shrink")
+                ),
+                "n": len(timing_rows),
+            }
             logger.info(
-                "Task %s: timing_fit summary segs=%d overflow=%d trimmed=%d",
+                "Task %s: timing_fit summary segs=%d overflow=%d trimmed=%d "
+                "underfill=%d max_underfill_ms=%d",
                 task_id,
                 len(timing_rows),
                 sum(1 for r in timing_rows if int(r.get("overflow_ms") or 0) > 0),
                 sum(1 for r in timing_rows if r.get("speech_trimmed")),
+                task_info["underfill_count"],
+                task_info["max_underfill_ms"],
             )
     except Exception as _tlog_exc:
         logger.debug("timing_fit summary skipped: %s", _tlog_exc)

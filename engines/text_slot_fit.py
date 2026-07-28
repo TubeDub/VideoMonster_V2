@@ -16,10 +16,12 @@ logger = logging.getLogger("tubedub.text_slot_fit")
 
 # Target band: predicted TTS within ±15% of slot.
 FIT_TOLERANCE = 0.15
-# Stage 4: shorten when predicted > slot * 1.08
+# Stage 4/5: shorten when predicted > slot * 1.08
 OVERFLOW_FIT_RATIO = 1.08
-# Mild underfill: leave natural pause, do not slow voice / expand aggressively.
-UNDERFILL_EXPAND_RATIO = 0.75
+# Stage 5: expand (or avoid overshoot) when predicted < slot * 0.80 — dead air.
+UNDERFILL_EXPAND_RATIO = 0.80
+# Soft expand aim — leave a little natural room under the slot.
+EXPAND_AIM_RATIO = 0.92
 MIN_WORD_RETENTION = 0.55
 MIN_WORD_RETENTION_SEVERE = 0.35
 SEVERE_OVERFLOW_RATIO = 1.50
@@ -158,23 +160,39 @@ def _keep_leading_complete_sentences(
     *,
     min_words: int,
 ) -> tuple[str, bool]:
-    """Drop trailing full sentences until near slot; never leave a truncated clause."""
+    """Drop trailing full sentences until near slot; never leave a truncated clause.
+
+    Stage 5: stay inside [0.80×slot, 1.08×slot] when possible — do not overshoot
+    into dead-air underfill just to avoid a mild overflow.
+    """
     parts = _split_sentences(text)
     if len(parts) < 2:
         return text, False
-    target = max(200, int(slot_ms * OVERFLOW_FIT_RATIO))
+    target_hi = max(200, int(slot_ms * OVERFLOW_FIT_RATIO))
+    target_lo = max(200, int(slot_ms * UNDERFILL_EXPAND_RATIO))
     kept: list[str] = []
     for p in parts:
         trial = " ".join(kept + [p]).strip()
-        if estimate_tts_ms(trial, lang) <= target or not kept:
+        pred = estimate_tts_ms(trial, lang)
+        if pred <= target_hi or not kept:
             kept.append(p)
-        else:
-            break
+            continue
+        # Prefer mild overflow over underfill when the next sentence still fits
+        # the hard overflow band loosely (≤ 1.15×) and current is under floor.
+        cur_pred = estimate_tts_ms(" ".join(kept).strip(), lang) if kept else 0
+        if cur_pred < target_lo and pred <= int(slot_ms * 1.15):
+            kept.append(p)
+        break
     cand = " ".join(kept).strip()
     # Drop a trailing incomplete sentence if keep stopped mid-thought.
     while kept and not _is_complete_thought(" ".join(kept).strip()):
         kept.pop()
         cand = " ".join(kept).strip()
+    # If still underfilled and original fits the overflow cap, keep original.
+    if cand and estimate_tts_ms(cand, lang) < target_lo:
+        orig_pred = estimate_tts_ms(text, lang)
+        if orig_pred <= target_hi and _is_complete_thought(text):
+            return text, False
     if (
         cand
         and cand != text
@@ -341,15 +359,176 @@ def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], b
     return out, reasons, meaning_truncated
 
 
-def _light_expand(text: str, slot_ms: int, lang: str) -> tuple[str, list[str]]:
-    """Optional mild expand — no LLM required; skip if nothing safe."""
-    t = str(text or "").strip()
-    if not t or len(t.split()) > 8:
-        return t, []
-    pred = estimate_tts_ms(t, lang)
-    if pred >= slot_ms * UNDERFILL_EXPAND_RATIO:
-        return t, []
-    return t, []
+def _rule_expand_once(text: str, lang: str, source_hint: str = "") -> str:
+    """One soft expansion pass — restate / pace only, no invented facts."""
+    t = " ".join(str(text or "").split()).strip()
+    if not t:
+        return t
+    lang0 = str(lang or "uk").split("-")[0].lower()
+    # Unpack tight punctuation into spoken cadence.
+    cand = re.sub(r"\s*;\s*", ". ", t)
+    cand = re.sub(r"\s*—\s*", ", ", cand)
+    cand = " ".join(cand.split()).strip()
+
+    # Light pacing inserts that do not add claims.
+    if lang0 == "uk":
+        inserts = (
+            (r"\bТож\b", "Тож тоді"),
+            (r"\bОтже\b", "Отже тоді"),
+            (r"\bАле\b", "Але при цьому"),
+            (r"\bІ\b", "І також"),
+        )
+        restoratives = (
+            (" був ", " справді був "),
+            (" була ", " справді була "),
+            (" стали ", " тоді стали "),
+            (" вирішив", " зрештою вирішив"),
+            (" подав ", " тоді подав "),
+        )
+    elif lang0 == "ru":
+        inserts = (
+            (r"\bИтак\b", "Итак тогда"),
+            (r"\bНо\b", "Но при этом"),
+            (r"\bИ\b", "И также"),
+        )
+        restoratives = (
+            (" был ", " действительно был "),
+            (" была ", " действительно была "),
+            (" решил", " в итоге решил"),
+        )
+    else:
+        inserts = (
+            (r"\bSo\b", "So then"),
+            (r"\bBut\b", "But then"),
+            (r"\bAnd\b", "And also"),
+        )
+        restoratives = (
+            (" was ", " really was "),
+            (" decided", " eventually decided"),
+        )
+
+    # Prefer one restorative substitution first (fact-neutral intensifier).
+    for a, b in restoratives:
+        if a in cand and b not in cand:
+            trial = cand.replace(a, b, 1)
+            if _is_complete_thought(trial) or _COMPLETE_END.search(trial):
+                return trial
+
+    for pat, repl in inserts:
+        trial = re.sub(pat, repl, cand, count=1)
+        if trial != cand and (_is_complete_thought(trial) or _COMPLETE_END.search(trial)):
+            return trial
+
+    # Soft restatement of the final sentence using source hint length cue only —
+    # append a short echo of the last clause already present (no new entities).
+    parts = _split_sentences(cand)
+    if parts:
+        last = parts[-1].rstrip(".!?…")
+        words = last.split()
+        if 4 <= len(words) <= 18:
+            echo = " ".join(words[: min(6, len(words))])
+            if lang0 == "uk":
+                tail = f" Саме так: {echo.lower()}."
+            elif lang0 == "ru":
+                tail = f" Именно так: {echo.lower()}."
+            else:
+                tail = f" That is: {echo.lower()}."
+            trial = (cand.rstrip() + tail).strip()
+            # Avoid silly echo if last sentence already short / already echoed.
+            if "Саме так:" not in cand and "Именно так:" not in cand and "That is:" not in cand:
+                if _is_complete_thought(trial) or _COMPLETE_END.search(trial):
+                    return trial
+
+    # If English source is clearly longer, add a neutral pacing clause once.
+    hint = " ".join(str(source_hint or "").split()).strip()
+    if hint and len(hint.split()) > len(t.split()) + 4:
+        if lang0 == "uk" and not cand.endswith(("...", "…")):
+            trial = cand.rstrip(".!?…") + " — ось як це було тоді."
+            if _is_complete_thought(trial) or trial.endswith("."):
+                return trial if trial.endswith(".") else trial + "."
+        if lang0 == "ru" and not cand.endswith(("...", "…")):
+            trial = cand.rstrip(".!?…") + " — вот как это было тогда."
+            return trial if trial.endswith(".") else trial + "."
+    return cand
+
+
+def expand_text_to_slot(
+    text: str,
+    slot_ms: int,
+    lang: str = "uk",
+    *,
+    source_hint: str = "",
+) -> tuple[str, list[str]]:
+    """Grow underfilled speech toward the slot without inventing facts.
+
+    Returns (text, reasons). Used before TTS on Happy Path / Simple.
+    """
+    reasons: list[str] = []
+    out = " ".join(str(text or "").split()).strip()
+    slot = max(0, int(slot_ms or 0))
+    if not out or slot <= 0:
+        return out, reasons
+
+    floor = max(200, int(slot * UNDERFILL_EXPAND_RATIO))
+    aim = max(floor, int(slot * EXPAND_AIM_RATIO))
+    pred = estimate_tts_ms(out, lang)
+    if pred >= floor:
+        return out, reasons
+
+    # Optional LLM expand (same gate as soft_sync) — still meaning-safe.
+    try:
+        from engines.soft_sync import expand_text_for_slot
+
+        llm_out = expand_text_for_slot(
+            out, slot_ms=slot, lang=lang, source_hint=source_hint
+        )
+        llm_out = " ".join(str(llm_out or "").split()).strip()
+        if (
+            llm_out
+            and llm_out != out
+            and _is_complete_thought(llm_out)
+            and estimate_tts_ms(llm_out, lang) > pred
+            and estimate_tts_ms(llm_out, lang) <= int(slot * OVERFLOW_FIT_RATIO * 1.05)
+        ):
+            out = llm_out
+            pred = estimate_tts_ms(out, lang)
+            reasons.append("llm_expand")
+            if pred >= floor:
+                return out, reasons
+    except Exception:
+        pass
+
+    # Rule-based passes until near aim or no progress.
+    for _ in range(4):
+        if estimate_tts_ms(out, lang) >= aim:
+            break
+        nxt = _rule_expand_once(out, lang, source_hint=source_hint)
+        if not nxt or nxt == out:
+            break
+        if not (_is_complete_thought(nxt) or _COMPLETE_END.search(nxt)):
+            break
+        nxt_pred = estimate_tts_ms(nxt, lang)
+        if nxt_pred <= pred:
+            break
+        if nxt_pred > int(slot * OVERFLOW_FIT_RATIO * 1.08):
+            break
+        out = nxt
+        pred = nxt_pred
+        if "rule_expand" not in reasons:
+            reasons.append("rule_expand")
+
+    return out, reasons
+
+
+def _light_expand(
+    text: str,
+    slot_ms: int,
+    lang: str,
+    *,
+    source_hint: str = "",
+) -> tuple[str, list[str]]:
+    """Backward-compatible wrapper — real expand (Stage 5)."""
+    return expand_text_to_slot(text, slot_ms, lang, source_hint=source_hint)
 
 
 def fit_text_to_slot(
@@ -375,6 +554,7 @@ def fit_text_to_slot(
         )
 
     hi = int(slot * OVERFLOW_FIT_RATIO)
+    lo = int(slot * UNDERFILL_EXPAND_RATIO)
     reasons: list[str] = []
     out = original
     action = "unchanged"
@@ -383,8 +563,25 @@ def fit_text_to_slot(
     if before > hi:
         out, reasons, meaning_truncated = _safe_shorten(original, slot, lang)
         action = "shorten" if out != original else "unchanged"
-    elif allow_expand and before < int(slot * UNDERFILL_EXPAND_RATIO):
-        out, reasons = _light_expand(original, slot, lang)
+        # Stage 5: if shorten overshot into dead air, expand back toward the band.
+        after_short = estimate_tts_ms(out, lang)
+        if (
+            allow_expand
+            and after_short < lo
+            and out.strip()
+            and not meaning_truncated
+        ):
+            expanded, er = expand_text_to_slot(
+                out, slot, lang, source_hint=source_hint
+            )
+            if expanded and expanded != out:
+                out = expanded
+                reasons = list(reasons) + er + ["expand_after_shorten"]
+                action = "expand" if estimate_tts_ms(out, lang) >= lo else "shorten"
+    elif allow_expand and before < lo:
+        out, reasons = expand_text_to_slot(
+            original, slot, lang, source_hint=source_hint
+        )
         action = "expand" if out != original else "unchanged"
     else:
         action = "unchanged"

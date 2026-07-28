@@ -231,9 +231,33 @@ def main() -> int:
                     "max_atempo": max(atempos) if atempos else None,
                     "atempo_over_1_08": any(a > 1.0801 for a in atempos),
                     "bleed_count": sum(1 for b in bleed if b),
+                    "underfill_count": info.get("underfill_count"),
+                    "underfill_unresolved_count": info.get(
+                        "underfill_unresolved_count"
+                    ),
+                    "max_underfill_ms": info.get("max_underfill_ms"),
+                    "underfill_summary": info.get("underfill_summary"),
+                    "fill_rows": [
+                        {
+                            "idx": r.get("idx"),
+                            "slot_ms": r.get("slot_ms"),
+                            "tts_ms": r.get("tts_ms") or r.get("speech_ms"),
+                            "fill_ratio": r.get("fill_ratio"),
+                            "underfill_ms": r.get("underfill_ms"),
+                            "slot_shrunk": r.get("slot_shrunk"),
+                            "atempo": r.get("atempo"),
+                        }
+                        for r in timing_rows
+                    ],
                 },
             }
         )
+        fill_ok_n = 0
+        for r in timing_rows:
+            fr = float(r.get("fill_ratio") or 0)
+            if fr >= 0.80 or r.get("underfill_resolved_by_shrink"):
+                fill_ok_n += 1
+        fill_ok_ratio = (fill_ok_n / len(timing_rows)) if timing_rows else 0.0
         out["checks"] = {
             "mp4_done": out["pipeline"].get("status") == "done",
             "simple_path": bool(info.get("simple_pipeline") or info.get("happy_path")),
@@ -247,6 +271,9 @@ def main() -> int:
                 if isinstance(r, dict) and r.get("meaning_truncated")
             ),
             "review_tts_mismatch": 0,
+            "fill_ok_ratio": round(fill_ok_ratio, 3),
+            "fill_majority_ok": fill_ok_ratio >= 0.80,
+            "underfill_count": int(info.get("underfill_count") or 0),
         }
         # Review Final == final_tts_text
         mism = 0

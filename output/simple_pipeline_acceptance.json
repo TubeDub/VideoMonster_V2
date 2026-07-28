@@ -4,13 +4,13 @@
       "status": 200,
       "body": {
         "status": "running",
-        "task_id": "a0d12680b34041f99a6f436ac212acdf"
+        "task_id": "1f3c3b2404a9410493fe26c556b5ce78"
       }
     },
-    "task_id": "a0d12680b34041f99a6f436ac212acdf",
+    "task_id": "1f3c3b2404a9410493fe26c556b5ce78",
     "status": "done",
-    "output_file": "video_67ec01a93a_OUTPUT_a0d12680.mp4",
-    "elapsed_sec": 449.9,
+    "output_file": "video_0c31bbdc81_OUTPUT_1f3c3b24.mp4",
+    "elapsed_sec": 1129.8,
     "last_status": {
       "status": "done",
       "step": "Готово",
@@ -47,17 +47,19 @@
           "idx": 0
         },
         {
-          "text": "Це за винятком автомобілів. І в той момент його батько купив йому маленький італійський автомобіль під назвою «фіат».",
+          "text": "Це за винятком автомобілів. І також також також також в той момент його батько купив йому маленький італійський автомобіль під назвою «фіат».",
           "slot_ms": 11764,
           "predicted_ms_before": 18592,
-          "predicted_ms_after": 8666,
-          "action": "shorten",
+          "predicted_ms_after": 10444,
+          "action": "expand",
           "changed": true,
           "reasons": [
             "severe_overflow",
             "drop_fillers",
             "soft_sync_shorten",
-            "keep_leading_sentences"
+            "keep_leading_sentences",
+            "rule_expand",
+            "expand_after_shorten"
           ],
           "meaning_truncated": false,
           "idx": 1
@@ -105,29 +107,33 @@
           "idx": 4
         },
         {
-          "text": "Через два роки Джордж-молодший, який до цього моменту повністю оговтався від травм, стояв на фініші на іподромі і підняв камеру.",
+          "text": "Через два роки Джордж-молодший, який до цього моменту повністю оговтався від травм, стояв на фініші на іподромі і підняв камеру, ось як це було тоді — ось як це було тоді.",
           "slot_ms": 12360,
           "predicted_ms_before": 16296,
-          "predicted_ms_after": 9481,
-          "action": "shorten",
+          "predicted_ms_after": 12666,
+          "action": "expand",
           "changed": true,
           "reasons": [
             "clause_paraphrase",
-            "keep_leading_sentences"
+            "keep_leading_sentences",
+            "rule_expand",
+            "expand_after_shorten"
           ],
           "meaning_truncated": false,
           "idx": 5
         },
         {
-          "text": "Що певним чином він витрачав свій потенціал.",
+          "text": "Що певним чином він витрачав свій потенціал. Саме так: що певним чином він витрачав свій.",
           "slot_ms": 6102,
           "predicted_ms_before": 10148,
-          "predicted_ms_after": 3259,
-          "action": "shorten",
+          "predicted_ms_after": 6592,
+          "action": "expand",
           "changed": true,
           "reasons": [
             "severe_overflow",
-            "keep_leading_sentences"
+            "keep_leading_sentences",
+            "rule_expand",
+            "expand_after_shorten"
           ],
           "meaning_truncated": false,
           "idx": 6
@@ -182,7 +188,7 @@
       {
         "index": 1,
         "original": "That is except for cars. And at that point his father actually bought him a small Italian car called a fiat. But his father, despite being the one who literally",
-        "translation": "Це за винятком автомобілів. І в той момент його батько купив йому маленький італійський автомобіль під назвою «фіат»."
+        "translation": "Це за винятком автомобілів. І також також в той момент його батько купив йому маленький італійський автомобіль під назвою «фіат»."
       },
       {
         "index": 2,
@@ -192,9 +198,112 @@
     ],
     "timing_summary": {
       "n": 10,
-      "max_atempo": 1.04,
+      "max_atempo": 1.06,
       "atempo_over_1_08": false,
-      "bleed_count": 0
+      "bleed_count": 0,
+      "underfill_count": 0,
+      "underfill_unresolved_count": 0,
+      "max_underfill_ms": 3424,
+      "underfill_summary": {
+        "count": 0,
+        "unresolved": 0,
+        "max_underfill_ms": 3424,
+        "slot_shrunk": 0,
+        "fill_ok": 10,
+        "n": 10
+      },
+      "fill_rows": [
+        {
+          "idx": 0,
+          "slot_ms": 9026,
+          "tts_ms": 12336,
+          "fill_ratio": 1.0838,
+          "underfill_ms": 0,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        },
+        {
+          "idx": 1,
+          "slot_ms": 11764,
+          "tts_ms": 10608,
+          "fill_ratio": 0.9017,
+          "underfill_ms": 1156,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        },
+        {
+          "idx": 2,
+          "slot_ms": 18760,
+          "tts_ms": 15336,
+          "fill_ratio": 0.8175,
+          "underfill_ms": 3424,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        },
+        {
+          "idx": 3,
+          "slot_ms": 9318,
+          "tts_ms": 8184,
+          "fill_ratio": 0.8783,
+          "underfill_ms": 1134,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        },
+        {
+          "idx": 4,
+          "slot_ms": 7958,
+          "tts_ms": 7944,
+          "fill_ratio": 0.9982,
+          "underfill_ms": 14,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        },
+        {
+          "idx": 5,
+          "slot_ms": 12360,
+          "tts_ms": 12912,
+          "fill_ratio": 1.0447,
+          "underfill_ms": 0,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        },
+        {
+          "idx": 6,
+          "slot_ms": 6265,
+          "tts_ms": 8544,
+          "fill_ratio": 1.0289,
+          "underfill_ms": 0,
+          "slot_shrunk": false,
+          "atempo": 1.06
+        },
+        {
+          "idx": 7,
+          "slot_ms": 5084,
+          "tts_ms": 6384,
+          "fill_ratio": 1.0576,
+          "underfill_ms": 0,
+          "slot_shrunk": false,
+          "atempo": 1.04
+        },
+        {
+          "idx": 8,
+          "slot_ms": 9169,
+          "tts_ms": 7464,
+          "fill_ratio": 0.814,
+          "underfill_ms": 1705,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        },
+        {
+          "idx": 9,
+          "slot_ms": 7284,
+          "tts_ms": 6888,
+          "fill_ratio": 0.9456,
+          "underfill_ms": 396,
+          "slot_shrunk": false,
+          "atempo": 1.0
+        }
+      ]
     },
     "final_tts_locked": true,
     "audio_trim_text_sync_skipped": "happy_path_final_tts_lock",
@@ -209,6 +318,9 @@
     "final_tts_locked": true,
     "meaning_truncated_count": 0,
     "review_tts_mismatch": 0,
+    "fill_ok_ratio": 1.0,
+    "fill_majority_ok": true,
+    "underfill_count": 0,
     "review_equals_tts": true,
     "fit_text_drift": 0,
     "fit_preserved": true
