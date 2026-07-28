@@ -311,6 +311,8 @@ def stamp_authoritative_final_text(
     seg["voice_input"] = final
     seg["text_for_tts"] = final
     seg["tts_text"] = final
+    seg["final_tts_text"] = final
+    seg["spoken_text_source"] = "final_tts_text"
     seg["plain_text"] = final
     seg["translation_text"] = final
     # Keep Raw MT immutable once present
@@ -343,6 +345,7 @@ def stamp_authoritative_final_text(
     if audit is not None:
         audit["final_text"] = final
         audit["tts_text"] = final
+        audit["final_tts_text"] = final
         if not str(audit.get("raw_translation") or "").strip() and raw_anchor:
             audit["raw_translation"] = raw_anchor
         if not audit.get("semantic_text"):

@@ -240,7 +240,49 @@ def main() -> int:
             "atempo_ok": not (out["pipeline"]["timing_summary"].get("atempo_over_1_08")),
             "bleed_ok": (out["pipeline"]["timing_summary"].get("bleed_count") or 0) == 0,
             "elapsed_under_30min": out["pipeline"]["elapsed_sec"] < 1800,
+            "final_tts_locked": bool(info.get("final_tts_locked")),
+            "meaning_truncated_count": sum(
+                1
+                for r in (info.get("text_slot_fit") or {}).get("rows") or []
+                if isinstance(r, dict) and r.get("meaning_truncated")
+            ),
+            "review_tts_mismatch": 0,
         }
+        # Review Final == final_tts_text
+        mism = 0
+        fit_drift = 0
+        fit_by_idx = {
+            int(r.get("idx", -1)): r
+            for r in (info.get("text_slot_fit") or {}).get("rows") or []
+            if isinstance(r, dict)
+        }
+        for i, s in enumerate(sd):
+            if not isinstance(s, dict):
+                continue
+            final = str(
+                s.get("final_tts_text") or s.get("final_text") or s.get("text") or ""
+            ).strip()
+            spoken = str(s.get("tts_text") or s.get("text_for_tts") or final).strip()
+            if final and spoken and final != spoken:
+                mism += 1
+            fr = fit_by_idx.get(i)
+            if fr and fr.get("changed"):
+                fitted = str(fr.get("text") or "").strip()
+                # Allow tiny whitespace drift; reject resurrection of pre-fit length.
+                if fitted and final and abs(len(final) - len(fitted)) > 24:
+                    if len(final) > len(fitted) + 24:
+                        fit_drift += 1
+        out["checks"]["review_tts_mismatch"] = mism
+        out["checks"]["review_equals_tts"] = mism == 0
+        out["checks"]["fit_text_drift"] = fit_drift
+        out["checks"]["fit_preserved"] = fit_drift == 0
+        out["pipeline"]["final_tts_locked"] = info.get("final_tts_locked")
+        out["pipeline"]["audio_trim_text_sync_skipped"] = info.get(
+            "audio_trim_text_sync_skipped"
+        )
+        out["pipeline"]["final_tts_relocked_pre_groups"] = info.get(
+            "final_tts_relocked_pre_groups"
+        )
     except Exception as exc:
         out["pipeline"]["info_error"] = str(exc)
 

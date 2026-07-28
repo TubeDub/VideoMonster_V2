@@ -882,31 +882,64 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
             else:
                 from engines.translation_validation import is_shared_mt_blob_reclaim
 
-                final_owned = str(row.get("final_text") or "").strip()
-                semantic_polished = str(
-                    row.get("semantic_text") or row.get("semantic_engine_text") or ""
+                # Stage 4: fitted/locked spoken text beats stale semantic audit blobs.
+                fitted_snap = list(info.get("fitted_tts_texts") or [])
+                locked = str(
+                    (fitted_snap[i] if i < len(fitted_snap) else "")
+                    or prev_row.get("final_tts_text")
+                    or row.get("final_tts_text")
+                    or ""
                 ).strip()
-                naturalized = str(row.get("naturalized_text") or "").strip()
-                # Prefer debleeded Final over a stale multi-segment semantic blob.
-                if (
-                    final_owned
-                    and semantic_polished
-                    and is_shared_mt_blob_reclaim(final_owned, semantic_polished)
-                ):
-                    polished = final_owned
-                    row["semantic_text"] = final_owned
-                    row["semantic_engine_text"] = final_owned
+                passed = str(seg or "").strip()
+                if info.get("final_tts_locked") and (locked or passed):
+                    text = locked or passed
+                    polished = text
+                    if row:
+                        row["final_text"] = text
+                        row["tts_text"] = text
+                        row["final_tts_text"] = text
+                        row["semantic_text"] = text
+                        row["semantic_engine_text"] = text
                 else:
-                    polished = str(
-                        semantic_polished
-                        or final_owned
-                        or naturalized
-                        or ""
+                    final_owned = str(row.get("final_text") or "").strip()
+                    semantic_polished = str(
+                        row.get("semantic_text") or row.get("semantic_engine_text") or ""
                     ).strip()
-                if polished and not polished.lstrip().startswith("<speak"):
-                    text = polished
-                elif final_owned:
-                    text = final_owned
+                    naturalized = str(row.get("naturalized_text") or "").strip()
+                    # Prefer debleeded Final over a stale multi-segment semantic blob.
+                    if (
+                        final_owned
+                        and semantic_polished
+                        and is_shared_mt_blob_reclaim(final_owned, semantic_polished)
+                    ):
+                        polished = final_owned
+                        row["semantic_text"] = final_owned
+                        row["semantic_engine_text"] = final_owned
+                    elif locked:
+                        polished = locked
+                    else:
+                        # Prefer Final / passed segment over longer semantic when Final
+                        # was already shortened by text-slot fit.
+                        if (
+                            final_owned
+                            and semantic_polished
+                            and len(semantic_polished) > len(final_owned) + 12
+                        ):
+                            polished = final_owned
+                        else:
+                            polished = str(
+                                semantic_polished
+                                or final_owned
+                                or naturalized
+                                or passed
+                                or ""
+                            ).strip()
+                    if polished and not polished.lstrip().startswith("<speak"):
+                        text = polished
+                    elif final_owned:
+                        text = final_owned
+                    elif passed:
+                        text = passed
                 # Do NOT fall back to source language text for target-track TTS
             raw_keep = str(
                 row.get("raw_translation")
@@ -924,6 +957,10 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
                 "translation_text": text,
                 "translated_text": raw_keep or text,
                 "final_text": text,
+                "final_tts_text": text,
+                "tts_text": text,
+                "text_for_tts": text,
+                "spoken_text_source": "final_tts_text",
                 "file": None,
             }
             # Preserve TPS / TRH block flags across review rebuild
@@ -940,9 +977,17 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
                 "naturalized_text",
                 "trh",
                 "segment_id",
+                "final_tts_text",
+                "tts_text_hash",
+                "spoken_text_source",
+                "final_tts_source",
+                "text_slot_fit",
             ):
                 if prev_row.get(key) not in (None, ""):
                     entry[key] = prev_row.get(key)
+            if text and info.get("final_tts_locked"):
+                entry["final_tts_text"] = text
+                entry["spoken_text_source"] = "final_tts_text"
             if blocked:
                 entry["tts_blocked"] = True
                 entry["skip_tts"] = True
@@ -985,7 +1030,27 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
                 semantic = str(
                     row.get("semantic_text") or row.get("semantic_engine_text") or ""
                 ).strip()
-                if (
+                if info.get("final_tts_locked"):
+                    # Keep Review Final == fitted spoken text; never resurrect
+                    # a longer stale semantic blob after text-slot fit.
+                    stamp_authoritative_final_text(
+                        segments_data[-1],
+                        text,
+                        audit=row,
+                        preserve_semantic_engine=False,
+                    )
+                    try:
+                        from engines.tts_text_authority import stamp_final_tts_text
+
+                        stamp_final_tts_text(
+                            segments_data[-1],
+                            text,
+                            audit=row,
+                            source="review_populate_locked",
+                        )
+                    except Exception:
+                        segments_data[-1]["final_tts_text"] = text
+                elif (
                     not final_now
                     or (raw_mt and texts_equivalent_for_ownership(final_now, raw_mt))
                     or prefer_semantic_authority(
@@ -1000,7 +1065,9 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
                         audit=row,
                         preserve_semantic_engine=True,
                     )
-                if row.get("semantic_text") or row.get("semantic_engine_text"):
+                if info.get("final_tts_locked"):
+                    pass
+                elif row.get("semantic_text") or row.get("semantic_engine_text"):
                     pass
                 elif polished and raw_mt and polished != raw_mt:
                     row["semantic_text"] = polished
@@ -4110,7 +4177,37 @@ def _build_timed_dub_track(
                     "no_speech_trim": place.get("no_speech_trim"),
                 }
             )
+        # Stage 4: attach final_tts_text + text-fit preds for lip/scene diagnostics.
         if task_info is not None and timing_rows:
+            _sd_log = list(task_info.get("segments_data") or [])
+            for _row in timing_rows:
+                _i = int(_row.get("idx") if _row.get("idx") is not None else -1)
+                if 0 <= _i < len(_sd_log) and isinstance(_sd_log[_i], dict):
+                    _seg = _sd_log[_i]
+                    _row["final_tts_text"] = str(
+                        _seg.get("final_tts_text")
+                        or _seg.get("tts_text")
+                        or _seg.get("text")
+                        or ""
+                    )[:300]
+                    _row["tts_text_hash"] = _seg.get("tts_text_hash")
+                    _row["spoken_text_source"] = _seg.get("spoken_text_source") or (
+                        "final_tts_text" if _seg.get("final_tts_text") else ""
+                    )
+                    _tf = _seg.get("text_slot_fit") or {}
+                    if isinstance(_tf, dict):
+                        _row["predicted_ms_before"] = _tf.get("predicted_ms_before")
+                        _row["predicted_ms_after"] = _tf.get("predicted_ms_after")
+                        _row["text_fit_applied"] = _tf.get("text_fit_applied")
+                        _row["meaning_truncated"] = _tf.get("meaning_truncated")
+            atempos = [float(r.get("atempo") or 1.0) for r in timing_rows]
+            if atempos and (max(atempos) > 1.0801 or min(atempos) < 0.949):
+                logger.warning(
+                    "Task %s: atempo outside Simple band 0.95–1.08 (min=%.3f max=%.3f)",
+                    task_id,
+                    min(atempos),
+                    max(atempos),
+                )
             task_info["timing_fit_segments"] = timing_rows
             logger.info(
                 "Task %s: timing_fit summary segs=%d overflow=%d trimmed=%d",
@@ -4122,27 +4219,35 @@ def _build_timed_dub_track(
     except Exception as _tlog_exc:
         logger.debug("timing_fit summary skipped: %s", _tlog_exc)
     # Hard trim cut speech but left full paragraph in Final — sync Review text.
+    # Happy Path / Stage 4: never rewrite Final after TTS (Review == voiced text).
     try:
-        from engines.tts_audio_text_sync import apply_audio_trim_text_sync
+        _skip_trim_sync = bool(_happy_path_timing)
+        if task_info is not None and task_info.get("final_tts_locked"):
+            _skip_trim_sync = True
+        if not _skip_trim_sync:
+            from engines.tts_audio_text_sync import apply_audio_trim_text_sync
 
-        audits = list((task_info or {}).get("translation_audits") or [])
-        trim_synced = apply_audio_trim_text_sync(
-            segments_data,
-            list((overlap_report or {}).get("fitted_placements") or []),
-            placed_seg_indices=placed_seg_indices,
-            audits=audits,
-        )
-        if trim_synced and task_info is not None:
-            task_info["translation_audits"] = audits
-            task_info["audio_trim_text_synced"] = int(trim_synced)
-            logger.info(
-                "Task %s: audio_trim_text_sync updated %s segment(s)",
-                task_id,
-                trim_synced,
+            audits = list((task_info or {}).get("translation_audits") or [])
+            trim_synced = apply_audio_trim_text_sync(
+                segments_data,
+                list((overlap_report or {}).get("fitted_placements") or []),
+                placed_seg_indices=placed_seg_indices,
+                audits=audits,
             )
-        if overlap_report is not None:
-            overlap_report["audio_trim_text_synced"] = int(trim_synced)
-            overlap_report["placed_seg_indices"] = list(placed_seg_indices)
+            if trim_synced and task_info is not None:
+                task_info["translation_audits"] = audits
+                task_info["audio_trim_text_synced"] = int(trim_synced)
+                logger.info(
+                    "Task %s: audio_trim_text_sync updated %s segment(s)",
+                    task_id,
+                    trim_synced,
+                )
+            if overlap_report is not None:
+                overlap_report["audio_trim_text_synced"] = int(trim_synced)
+                overlap_report["placed_seg_indices"] = list(placed_seg_indices)
+        elif task_info is not None:
+            task_info["audio_trim_text_synced"] = 0
+            task_info["audio_trim_text_sync_skipped"] = "happy_path_final_tts_lock"
     except Exception as _trim_sync_exc:
         logger.warning(
             "Task %s: audio_trim_text_sync skipped: %s",
@@ -9891,6 +9996,7 @@ def _run_pipeline_inner(
                                 "predicted_ms_after": _a.get("predicted_ms_after"),
                                 "slot_ms": _a.get("slot_ms"),
                                 "text_fit_applied": bool(_a.get("changed")),
+                                "meaning_truncated": bool(_a.get("meaning_truncated")),
                                 "translation_bleed": bool(
                                     _bleed_fit[_i_f] if _i_f < len(_bleed_fit) else False
                                 ),
@@ -9901,13 +10007,33 @@ def _run_pipeline_inner(
                             }
                             if _a.get("changed"):
                                 logger.info(
-                                    "text_fit seg#%d slot=%s pred %s→%s bleed=%s",
+                                    "text_fit seg#%d slot=%s pred %s→%s truncated=%s",
                                     _i_f,
                                     _a.get("slot_ms"),
                                     _a.get("predicted_ms_before"),
                                     _a.get("predicted_ms_after"),
-                                    _bleed_fit[_i_f] if _i_f < len(_bleed_fit) else False,
+                                    _a.get("meaning_truncated"),
                                 )
+                    # Stage 4: lock final_tts_text BEFORE Review — Review == TTS.
+                    try:
+                        from engines.tts_text_authority import lock_segments_final_tts
+
+                        _aud_lock = list(task["info"].get("translation_audits") or [])
+                        segments = lock_segments_final_tts(
+                            _sd_fit,
+                            list(segments),
+                            audits=_aud_lock,
+                            source="text_slot_fit",
+                        )
+                        task["info"]["translation_audits"] = _aud_lock
+                        task["info"]["final_tts_locked"] = True
+                        # Immutable snapshot — restore before TTS if anything rewrites Final.
+                        task["info"]["fitted_tts_texts"] = list(segments)
+                        task["info"]["fitted_tts_source"] = "text_slot_fit"
+                    except Exception as _lock_exc:
+                        logger.warning(
+                            "Task %s: final_tts lock skipped: %s", task_id, _lock_exc
+                        )
                     task["info"]["segments_data"] = _sd_fit
                 logger.info(
                     "Task %s: text_slot_fit changed=%d/%d (atempo cap 1.08)",
@@ -10504,16 +10630,59 @@ def _run_pipeline_inner(
                     )
                     for r in _dub_engine_results
                 ]
-            # Happy Path text-fit reinforce before TTS (natural rate > atempo).
+            # Happy Path: do NOT re-fit after Review (Stage 4 — Review == TTS).
+            # Re-lock spoken buffer from final_tts_text only.
             try:
                 from engines.happy_path import skip_advanced_text_shorteners as _hp_sc
-                from engines.text_slot_fit import fit_text_to_slot
+                from engines.tts_text_authority import (
+                    lock_segments_final_tts,
+                    resolve_final_tts_text,
+                )
 
                 with STATE_LOCK:
                     _info_sc = dict(task.get("info") or {})
                     _sd_sc = list(task["info"].get("segments_data") or [])
-                _tm_sc = list(current_timing_map_snapshot or [])
+                    _aud_sc = list(task["info"].get("translation_audits") or [])
                 if _hp_sc(_info_sc):
+                    _locked_texts = []
+                    for _i_sc, _seg_sc in enumerate(_sd_sc):
+                        if isinstance(_seg_sc, dict):
+                            _lt = resolve_final_tts_text(_seg_sc)
+                        else:
+                            _lt = ""
+                        if not _lt and _i_sc < len(segments):
+                            _lt = str(segments[_i_sc] or "")
+                        _locked_texts.append(_lt)
+                    if len(_locked_texts) < len(segments):
+                        _locked_texts.extend(
+                            str(segments[i] or "")
+                            for i in range(len(_locked_texts), len(segments))
+                        )
+                    segments = lock_segments_final_tts(
+                        _sd_sc,
+                        _locked_texts[: len(segments)]
+                        if len(_locked_texts) >= len(segments)
+                        else _locked_texts
+                        + [""] * (len(segments) - len(_locked_texts)),
+                        audits=_aud_sc,
+                        source="pre_tts_lock",
+                    )
+                    with STATE_LOCK:
+                        task["info"]["segments_data"] = _sd_sc
+                        task["info"]["translation_audits"] = _aud_sc
+                        task["info"]["text_slot_fit_pre_tts"] = {
+                            "skipped": "happy_path_review_sync",
+                            "locked": len(segments),
+                        }
+                    logger.info(
+                        "Task %s: final_tts_text re-locked pre-TTS (no post-Review fit)",
+                        task_id,
+                    )
+                else:
+                    # Pro/advanced may still reinforce fit (legacy path).
+                    from engines.text_slot_fit import fit_text_to_slot
+
+                    _tm_sc = list(current_timing_map_snapshot or [])
                     _sc_rows = []
                     for _i_sc, _txt_sc in enumerate(list(segments)):
                         if not str(_txt_sc or "").strip():
@@ -10545,40 +10714,25 @@ def _run_pipeline_inner(
                             _sc_rows.append(_fit.to_dict())
                             if _i_sc < len(_sd_sc) and isinstance(_sd_sc[_i_sc], dict):
                                 try:
-                                    from engines.translation_validation import (
-                                        stamp_authoritative_final_text,
+                                    from engines.tts_text_authority import (
+                                        stamp_final_tts_text,
                                     )
 
-                                    stamp_authoritative_final_text(
-                                        _sd_sc[_i_sc], _fit.text
+                                    stamp_final_tts_text(
+                                        _sd_sc[_i_sc],
+                                        _fit.text,
+                                        source="text_slot_fit_pre_tts",
                                     )
                                 except Exception:
                                     _sd_sc[_i_sc]["text"] = _fit.text
-                                    _sd_sc[_i_sc]["final_text"] = _fit.text
-                                    _sd_sc[_i_sc]["tts_text"] = _fit.text
+                                    _sd_sc[_i_sc]["final_tts_text"] = _fit.text
                     if _sc_rows:
                         with STATE_LOCK:
                             task["info"]["text_slot_fit_pre_tts"] = {
                                 "changed": len(_sc_rows),
                                 "rows": _sc_rows[:40],
                             }
-                            if _sd_sc:
-                                task["info"]["segments_data"] = _sd_sc
-                                _aud_sc = task["info"].get("translation_audits") or []
-                                _aby = {int(a.get("index", -1)): a for a in _aud_sc}
-                                for _i_sc2, _txt2 in enumerate(segments):
-                                    _row = _aby.get(_i_sc2)
-                                    if _row is None or not str(_txt2 or "").strip():
-                                        continue
-                                    if str(_row.get("tts_text") or "") != _txt2:
-                                        _row["tts_text"] = _txt2
-                                        _row["final_text"] = _txt2
-                                        _row["naturalized_text"] = _txt2
-                        logger.info(
-                            "Task %s: text_slot_fit pre-TTS changed=%d",
-                            task_id,
-                            len(_sc_rows),
-                        )
+                            task["info"]["segments_data"] = _sd_sc
             except Exception as _sc_exc:
                 logger.debug("text_slot_fit pre-TTS skipped: %s", _sc_exc)
             _engine_meta = {
@@ -11888,6 +12042,56 @@ def _run_pipeline_inner(
                         _freeze_exc,
                     )
 
+            # Stage 4: after freeze/guards, force spoken buffers from fitted snapshot.
+            try:
+                from engines.happy_path import skip_advanced_text_shorteners as _hp_relock
+                from engines.tts_text_authority import (
+                    lock_segments_final_tts,
+                    resolve_final_tts_text,
+                )
+
+                with STATE_LOCK:
+                    _info_rl = dict(task.get("info") or {})
+                    _sd_rl = list(task["info"].get("segments_data") or segments_data)
+                    _aud_rl = list(task["info"].get("translation_audits") or [])
+                    _fitted_rl = list(task["info"].get("fitted_tts_texts") or [])
+                if _hp_relock(_info_rl) and (
+                    _info_rl.get("final_tts_locked") or _fitted_rl
+                ):
+                    _texts_rl = []
+                    for _i_rl, _seg_rl in enumerate(_sd_rl):
+                        _t_rl = ""
+                        if _i_rl < len(_fitted_rl):
+                            _t_rl = str(_fitted_rl[_i_rl] or "").strip()
+                        if not _t_rl and isinstance(_seg_rl, dict):
+                            _t_rl = resolve_final_tts_text(_seg_rl)
+                        if not _t_rl and _i_rl < len(segments):
+                            _t_rl = str(segments[_i_rl] or "")
+                        _texts_rl.append(_t_rl)
+                    segments = lock_segments_final_tts(
+                        _sd_rl,
+                        _texts_rl,
+                        audits=_aud_rl,
+                        source="pre_tts_fitted_snapshot",
+                    )
+                    segments_data = _sd_rl
+                    with STATE_LOCK:
+                        task["info"]["segments_data"] = _sd_rl
+                        task["info"]["translation_audits"] = _aud_rl
+                        task["info"]["final_tts_relocked_pre_groups"] = True
+                        task["info"]["fitted_tts_texts"] = list(_texts_rl)
+                    logger.info(
+                        "Task %s: fitted_tts_texts restored before TTS groups (%d)",
+                        task_id,
+                        len(_texts_rl),
+                    )
+            except Exception as _relock_exc:
+                logger.debug(
+                    "Task %s: pre-group final_tts relock skipped: %s",
+                    task_id,
+                    _relock_exc,
+                )
+
             # After review / timing-aware pass, TTS uses approved Final without extra rewrite.
             adapt_tts_text = not (
                 review_before_tts
@@ -11938,8 +12142,15 @@ def _run_pipeline_inner(
                     if s.get("merged_into") is not None or s.get("archived"):
                         segments.append("")
                         continue
+                    try:
+                        from engines.tts_text_authority import resolve_final_tts_text
+
+                        _spoken = resolve_final_tts_text(s)
+                    except Exception:
+                        _spoken = ""
                     segments.append(
-                        str(
+                        _spoken
+                        or str(
                             s.get("plain_text")
                             or s.get("translation_text")
                             or s.get("text")
@@ -12022,6 +12233,43 @@ def _run_pipeline_inner(
                 )
             except TypeError:
                 tts_groups = build_tts_groups(segments, current_timing_map_snapshot)
+
+            # Stage 4: stamp group.final_tts_text from locked segment authority.
+            try:
+                from engines.tts_text_authority import (
+                    assert_tts_matches_final,
+                    resolve_final_tts_text,
+                    text_hash,
+                )
+
+                for _g in tts_groups:
+                    _idxs = list(_g.get("indices") or [])
+                    if not _idxs:
+                        continue
+                    _hi = int(_idxs[0])
+                    _exp = ""
+                    if 0 <= _hi < len(segments_data) and isinstance(
+                        segments_data[_hi], dict
+                    ):
+                        _exp = resolve_final_tts_text(segments_data[_hi])
+                    if not _exp and 0 <= _hi < len(segments):
+                        _exp = str(segments[_hi] or "")
+                    if _exp:
+                        _g["final_tts_text"] = _exp
+                        _g["plain_text"] = _exp
+                        # Keep SSML in text only if already set; else plain.
+                        if not str(_g.get("text") or "").lstrip().startswith("<speak"):
+                            _g["text"] = _exp
+                        _g["tts_text_hash"] = text_hash(_exp)
+                        _g["spoken_text_source"] = "final_tts_text"
+                        assert_tts_matches_final(
+                            str(_g.get("text") or ""),
+                            _exp,
+                            index=_hi,
+                            task_id=task_id,
+                        )
+            except Exception as _auth_exc:
+                logger.debug("Task %s: TTS authority stamp skipped: %s", task_id, _auth_exc)
 
             tts_groups, semantic_log = prepare_tts_groups_semantic(
                 tts_groups,
@@ -12432,6 +12680,20 @@ def _run_pipeline_inner(
                 for g_idx, group in enumerate(tts_groups):
                     indices = group["indices"]
                     text = resolve_tts_input_text(group)
+                    try:
+                        from engines.tts_text_authority import (
+                            assert_tts_matches_final,
+                            text_hash,
+                        )
+
+                        _exp_g = str(group.get("final_tts_text") or text)
+                        assert_tts_matches_final(
+                            text, _exp_g, index=indices[0] if indices else -1, task_id=task_id
+                        )
+                        group["tts_text_hash"] = text_hash(text)
+                        group["spoken_text_source"] = "final_tts_text"
+                    except Exception:
+                        pass
                     if text:
                         head_idx = indices[0] if indices else 0
                         if 0 <= head_idx < len(segments_data) and not segment_tts_allowed(

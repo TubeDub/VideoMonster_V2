@@ -12,13 +12,16 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
 
 
 def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
-    """Priority: authoritative final (semantic over stale raw) then legacy fields."""
+    """Priority: locked final_tts_text, then authoritative final, then legacy."""
     if seg.get("tts_blocked") or seg.get("skip_tts"):
         return ""
     if "FAIL" in str(seg.get("tqe_status") or "").upper() and not str(
         seg.get("approved_text") or ""
     ).strip():
         return ""
+    locked = str(seg.get("final_tts_text") or "").strip()
+    if locked:
+        return locked
     from engines.translation_validation import (
         is_shared_mt_blob_reclaim,
         resolve_post_quality_text,
@@ -91,8 +94,16 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
 def resolve_tts_input_text(group: dict[str, Any]) -> str:
     """
     Text sent to the TTS engine for a group.
-    Pronunciation / SSML / pauses live in group plain_text or SSML text — not segment.plain_text.
+    Prefer locked final_tts_text / plain_text — never a divergent buffer.
     """
+    try:
+        from engines.tts_text_authority import resolve_group_spoken_text
+
+        locked = resolve_group_spoken_text(group)
+        if locked:
+            return locked
+    except Exception:
+        pass
     plain = str(group.get("plain_text") or "").strip()
     ssml_or_plain = str(group.get("text") or "").strip()
     text = plain if plain else ssml_or_plain

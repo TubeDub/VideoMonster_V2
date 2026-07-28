@@ -30,6 +30,7 @@ _SEG_TEXT_KEYS = (
     "text",
     "plain_text",
     "final_text",
+    "final_tts_text",
     "tts_text",
     "text_for_tts",
     "voice_input",
@@ -146,7 +147,11 @@ def sync_segments_from_audits(
         original = ""
         if source_segments and i < len(source_segments):
             original = str(source_segments[i] or "")
-        final = _norm_space(
+        # Stage 4: locked final_tts_text wins over stale audit semantic blobs.
+        locked = _norm_space(
+            seg.get("final_tts_text") or row.get("final_tts_text") or ""
+        )
+        final = locked or _norm_space(
             row.get("final_text")
             or row.get("semantic_text")
             or row.get("naturalized_text")
@@ -162,6 +167,7 @@ def sync_segments_from_audits(
         spoken = _norm_space(
             seg.get("spoken_fit_text")
             or (seg.get("timing_meta") or {}).get("spoken_fit_text")
+            or locked
             or row.get("tts_text")
             or seg.get("tts_text")
             or ""
@@ -216,7 +222,9 @@ def freeze_spoken_to_review_final(
             out.append("")
             continue
         final = _norm_space(
-            seg.get("approved_text")
+            seg.get("final_tts_text")
+            or row.get("final_tts_text")
+            or seg.get("approved_text")
             or row.get("final_text")
             or seg.get("final_text")
             or row.get("semantic_text")
@@ -235,14 +243,21 @@ def freeze_spoken_to_review_final(
                     "text",
                     "plain_text",
                     "final_text",
+                    "final_tts_text",
                     "tts_text",
                     "text_for_tts",
                     "translation_text",
+                    "semantic_text",
+                    "semantic_engine_text",
                 ):
                     seg[key] = final
+                seg["spoken_text_source"] = "final_tts_text"
             if row:
                 row["final_text"] = final
                 row["tts_text"] = final
+                row["final_tts_text"] = final
+                row["semantic_text"] = final
+                row["semantic_engine_text"] = final
         out.append(final)
     return out
 
@@ -272,6 +287,37 @@ def align_info_for_translation_review(info: dict[str, Any]) -> dict[str, Any]:
     """Mutate task info audits/segments so Review Final == Text for TTS."""
     sources = list(info.get("source_segments") or [])
     audits = list(info.get("translation_audits") or [])
+    # Stage 4: if fitted snapshot exists, force audits/segments to it first.
+    fitted = list(info.get("fitted_tts_texts") or [])
+    if info.get("final_tts_locked") and fitted:
+        by_idx = _audit_by_index(audits)
+        sd = list(info.get("segments_data") or [])
+        for i, text in enumerate(fitted):
+            final = _norm_space(text)
+            if not final:
+                continue
+            if i < len(sd) and isinstance(sd[i], dict):
+                for key in _SEG_TEXT_KEYS:
+                    sd[i][key] = final
+                sd[i]["final_tts_text"] = final
+                sd[i]["spoken_text_source"] = "final_tts_text"
+            row = by_idx.get(i)
+            if row is not None:
+                row["final_text"] = final
+                row["tts_text"] = final
+                row["final_tts_text"] = final
+                row["semantic_text"] = final
+                row["semantic_engine_text"] = final
+        info["segments_data"] = sd
+        info["translation_audits"] = audits
+        info["review_align"] = {
+            "fitted_snapshot_restored": len(fitted),
+            "debleed_changed": 0,
+            "synced_segments": len(fitted),
+            "semantic_snapped": 0,
+        }
+        return info.get("review_align") or {}
+
     report = debleed_audit_fields(audits, sources)
     semantic_snapped = _snap_stale_semantic_blobs(audits)
     sd = list(info.get("segments_data") or [])

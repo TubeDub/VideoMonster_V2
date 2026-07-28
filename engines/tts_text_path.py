@@ -12,11 +12,24 @@ def final_texts_from_info(info: dict[str, Any]) -> list[str]:
     """Per-segment Final text for TTS — agent pipeline fields take precedence.
 
     TPS: when approved_text is set, it is the single source of truth (Review == TTS).
+    Stage 4: prefer locked ``final_tts_text`` when present.
     """
     from engines.translation_validation import resolve_final_text
 
     segments_data = info.get("segments_data") or []
     audits = info.get("translation_audits") or []
+
+    # Stage 4 authority
+    if segments_data and any(
+        isinstance(s, dict) and str(s.get("final_tts_text") or "").strip()
+        for s in segments_data
+    ):
+        from engines.tts_text_authority import resolve_final_tts_text
+
+        return [
+            resolve_final_tts_text(s if isinstance(s, dict) else {})
+            for s in segments_data
+        ]
 
     # TPS Single Approved Text
     if info.get("tps") and segments_data:
@@ -51,7 +64,12 @@ def final_texts_from_info(info: dict[str, Any]) -> list[str]:
                 out.append(seg_final)
                 continue
         row = by_idx.get(i, {})
-        text = str(row.get("final_text") or row.get("tts_text") or "").strip()
+        text = str(
+            row.get("final_tts_text")
+            or row.get("final_text")
+            or row.get("tts_text")
+            or ""
+        ).strip()
         out.append(text)
     return out
 

@@ -1,0 +1,72 @@
+=== DUBBING ENGINE REPORT task=acf647efb258474ca3333d20de6e5b23 run=354ff423 ===
+lang=uk  segments=10  elapsed=0.53s
+adapted=8  skipped=0  strategies={'direct': 2, 'adapted': 0, 'video_adapt': 0, 'merge_next': 8, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=merge_next pred=11423ms slot=8626ms
+       IN : Дістатися туди. Тож Джордж-молодший був дуже розумною дитиною, але також дуже ле
+       OUT: Дістатися туди. Тож Джордж-молодший був ду́же розумною дитиною, але́ тако́ж ду́ж
+       [stress] ok
+       [timing] strategy=merge_next pred=11423ms slot=8626ms prev_end=0ms overflow=32.4% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr; severe_overflow: predicted=11423ms slot=8626ms ratio=1.32; voice_quality_risk: projected_at
+  [✓] seg#01 strategy=merge_next pred=18636ms slot=11764ms
+       IN : Це за винятком автомобілів. І в той момент його батько дійсно купив йому маленьк
+       OUT: Це за винятком автомобілів. І в той момент його́ батько дійсно купив йому малень
+       [stress] ok
+       [phonetics] fixed: Fiat→Фіат
+       [timing] strategy=merge_next pred=18636ms slot=11764ms prev_end=8626ms overflow=58.4% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:Fiat; severe_overflow: predicted=18636ms slot=11764ms ratio=1.58; voice_quality_risk: projected_atempo=1.
+  [✓] seg#02 strategy=merge_next pred=28748ms slot=18760ms
+       IN : Наприклад, чому ви не можете зосередитися на цьому й застосувати це до інших реч
+       OUT: Наприклад, чому ви не можете зосередитися на цьому й застосувати це до інших реч
+       [stress] ok
+       [timing] strategy=merge_next pred=28748ms slot=18760ms prev_end=22562ms overflow=53.2% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=28748ms slot=18760ms ratio=1.53; voice_quality_risk: projected_atempo=1.53 (max=1.2) — recomm
+  [✓] seg#03 strategy=merge_next pred=14340ms slot=9318ms
+       IN : Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсив
+       OUT: Че́рез два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенси
+       [stress] ok
+       [timing] strategy=merge_next pred=14340ms slot=9318ms prev_end=43503ms overflow=53.9% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; severe_overflow: predicted=14340ms slot=9318ms ratio=1.54; voice_quality_risk: projected_atemp
+  [✓] seg#04 strategy=direct pred=6361ms slot=7958ms
+       IN : Що ж, це був інший автомобіль, який Кінг мчав дорогою і так сильно врізався в ма
+       OUT: Що ж, це був інший автомобіль, яки́й Кінг мчав дорогою і так сильно врізався в м
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#05 strategy=merge_next pred=15411ms slot=12360ms
+       IN : Два роки Джордж-молодший, який до цього моменту повністю одужав після травм, сто
+       OUT: Два роки Джордж-молодший, яки́й до цього моменту повністю одужав пі́сля травм, с
+       [stress] ok
+       [timing] strategy=merge_next pred=15411ms slot=12360ms prev_end=64526ms overflow=24.7% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; voice_quality_risk: projected_atempo=1.25 (max=1.2) — recommend text adaptation
+  [✓] seg#06 strategy=merge_next pred=8763ms slot=6102ms
+       IN : Певним чином він витрачав свій потенціал. тож Джордж-молодший вирішив, що справд
+       OUT: Певним чином ві́н витрачав свій потенціал. тож Джордж-молодший вирішив, що справ
+       [stress] ok
+       [timing] strategy=merge_next pred=8763ms slot=6102ms prev_end=79032ms overflow=43.6% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr; severe_overflow: predicted=8763ms slot=6102ms ratio=1.44; voice_quality_risk: projected_ate
+  [✓] seg#07 strategy=merge_next pred=6410ms slot=4848ms
+       IN : Натомість він узяв цей фотоапарат і повернувся до свого старого хобі фотографії.
+       OUT: Натомість ві́н узяв цей фотоапарат і повернувся до свого старого хобі фотографії
+       [stress] ok
+       [timing] strategy=merge_next pred=6410ms slot=4848ms prev_end=86961ms overflow=32.2% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=6410ms slot=4848ms ratio=1.32; voice_quality_risk: projected_atempo=1.32 (max=1.2) — recommen
+  [✓] seg#08 strategy=merge_next pred=12096ms slot=9169ms
+       IN : Насправді Джордж-молодший подав заявку на престижну програму кінематографії в US
+       OUT: Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Ю 
+       [stress] ok
+       [phonetics] fixed: USC→Ю Ес Сі
+       [timing] strategy=merge_next pred=12096ms slot=9169ms prev_end=92032ms overflow=31.9% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:University of Southern California; missing_entity:California; missing_entity:George Jr; missing_entity:So
+  [✓] seg#09 strategy=direct pred=6728ms slot=7284ms
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; missing_entity:Smittelaged Man; stress_not_applied

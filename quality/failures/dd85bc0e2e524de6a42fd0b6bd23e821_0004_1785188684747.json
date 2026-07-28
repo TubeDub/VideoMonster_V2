@@ -1,0 +1,195 @@
+{
+  "task_id": "dd85bc0e2e524de6a42fd0b6bd23e821",
+  "index": 4,
+  "original": "Well, what it was is another car King speeding down the road and smashed into George's car so hard that George Jr. was ejected from the car but he survived.",
+  "translation": "Що ж, це був інший автомобіль, який Кінг мчав дорогою і так сильно врізався в машину Джорджа.",
+  "reason": "EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'King', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:King; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'King', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: King",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "PASS",
+      "metrics": {
+        "error_count": 0
+      },
+      "errors": [],
+      "explanation": "fast_qa_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 4
+      },
+      "review_time_ms": 0.13,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "entity_missing",
+          "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'King', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+          "severity": "critical"
+        },
+        {
+          "code": "preserved_token",
+          "token": "King",
+          "severity": "major"
+        }
+      ],
+      "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'King', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:King",
+      "retry_strategy": "Entity Correction Strategy",
+      "metadata": {
+        "index": 4
+      },
+      "review_time_ms": 1.96,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.9
+      ],
+      "confidence": {
+        "entity_preservation": 0.5,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.9
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 4
+      },
+      "review_time_ms": 0.1,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 4
+      },
+      "review_time_ms": 0.05,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "timing_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 4,
+        "slot_ms": 7958
+      },
+      "review_time_ms": 0.02,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 4
+      },
+      "review_time_ms": 0.02,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.9833,
+  "retry_history": [
+    {
+      "ok": false,
+      "reason": "cannot import name 'chat_completion' from 'engines.llm_adaptation_mode' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\llm_adaptation_mode.py)"
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Entity Correction Strategy",
+  "ts": 1785188684747
+}

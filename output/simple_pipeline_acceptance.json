@@ -4,13 +4,13 @@
       "status": 200,
       "body": {
         "status": "running",
-        "task_id": "5016c840ac134549a4efd7896d3feb73"
+        "task_id": "a0d12680b34041f99a6f436ac212acdf"
       }
     },
-    "task_id": "5016c840ac134549a4efd7896d3feb73",
+    "task_id": "a0d12680b34041f99a6f436ac212acdf",
     "status": "done",
-    "output_file": "video_d712432992_OUTPUT_5016c840.mp4",
-    "elapsed_sec": 957.0,
+    "output_file": "video_67ec01a93a_OUTPUT_a0d12680.mp4",
+    "elapsed_sec": 449.9,
     "last_status": {
       "status": "done",
       "step": "Готово",
@@ -30,75 +30,92 @@
     },
     "text_slot_fit": {
       "applied": true,
-      "changed": 5,
+      "changed": 9,
       "segments": 10,
       "rows": [
         {
-          "text": "дістатися туди. Тож Джордж-молодший був дуже розумною дитиною, але також дуже легко відволікався. І через це він насправді нічим настільки серйозно не займався.",
+          "text": "дістатися туди. Тож Джордж-молодший був розумною дитиною, але також легко відволікався. І через це він нічим настільки серйозно не займався.",
           "slot_ms": 8626,
           "predicted_ms_before": 11851,
-          "predicted_ms_after": 11851,
-          "action": "unchanged",
-          "changed": false,
-          "reasons": [],
-          "idx": 0
-        },
-        {
-          "text": "Це за винятком автомобілів. І в той момент його батько дійсно купив йому маленький італійський автомобіль під назвою «фіат». Але його батько, незважаючи на те, що він дав йому фіат, він не зрозумів одержимість свого сина автомобілями.",
-          "slot_ms": 11764,
-          "predicted_ms_before": 18592,
-          "predicted_ms_after": 17333,
-          "action": "shorten",
-          "changed": true,
-          "reasons": [
-            "severe_overflow",
-            "soft_sync_shorten"
-          ],
-          "idx": 1
-        },
-        {
-          "text": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, щоб ми отримали вашу справжню роботу. І тому практично кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином.",
-          "slot_ms": 18760,
-          "predicted_ms_before": 28592,
-          "predicted_ms_after": 16444,
-          "action": "shorten",
-          "changed": true,
-          "reasons": [
-            "severe_overflow",
-            "severe_keep_leading"
-          ],
-          "idx": 2
-        },
-        {
-          "text": "Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні. два тижні тому, коли Джордж робив той поворот, а потім щось сталося.",
-          "slot_ms": 9318,
-          "predicted_ms_before": 13629,
-          "predicted_ms_after": 13185,
+          "predicted_ms_after": 10370,
           "action": "shorten",
           "changed": true,
           "reasons": [
             "drop_fillers"
           ],
+          "meaning_truncated": false,
+          "idx": 0
+        },
+        {
+          "text": "Це за винятком автомобілів. І в той момент його батько купив йому маленький італійський автомобіль під назвою «фіат».",
+          "slot_ms": 11764,
+          "predicted_ms_before": 18592,
+          "predicted_ms_after": 8666,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "severe_overflow",
+            "drop_fillers",
+            "soft_sync_shorten",
+            "keep_leading_sentences"
+          ],
+          "meaning_truncated": false,
+          "idx": 1
+        },
+        {
+          "text": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, щоб ми отримали вашу справжню роботу. І тому кожна вечеря в ці дні перетворювалася на величезну суперечку між батьком і сином.",
+          "slot_ms": 18760,
+          "predicted_ms_before": 28592,
+          "predicted_ms_after": 15703,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "severe_overflow",
+            "drop_fillers",
+            "keep_leading_sentences"
+          ],
+          "meaning_truncated": false,
+          "idx": 2
+        },
+        {
+          "text": "Через два тижні Джордж-молодший лежав на лікарняному ліжку у відділенні інтенсивної терапії місцевої лікарні.",
+          "slot_ms": 9318,
+          "predicted_ms_before": 13629,
+          "predicted_ms_after": 8074,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "drop_fillers",
+            "keep_leading_sentences"
+          ],
+          "meaning_truncated": false,
           "idx": 3
         },
         {
-          "text": "Що ж, це був інший автомобіль, який Кінг мчав дорогою і так сильно врізався в машину Джорджа, що Джорджа-молодшого викинуло з машини, але він вижив.",
+          "text": "Що ж, це був інший автомобіль, який Кінг мчав дорогою і так сильно врізався в машину Джорджа.",
           "slot_ms": 7958,
           "predicted_ms_before": 10962,
-          "predicted_ms_after": 10962,
-          "action": "unchanged",
-          "changed": false,
-          "reasons": [],
+          "predicted_ms_after": 6888,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "clause_paraphrase"
+          ],
+          "meaning_truncated": false,
           "idx": 4
         },
         {
-          "text": "Через два роки Джордж-молодший, який до цього моменту повністю оговтався від травм, стояв на фініші на іподромі і підняв камеру. Тож після свого передсмертного досвіду Джордж-молодший зрозумів, що тато справді мав рацію.",
+          "text": "Через два роки Джордж-молодший, який до цього моменту повністю оговтався від травм, стояв на фініші на іподромі і підняв камеру.",
           "slot_ms": 12360,
           "predicted_ms_before": 16296,
-          "predicted_ms_after": 16296,
-          "action": "unchanged",
-          "changed": false,
-          "reasons": [],
+          "predicted_ms_after": 9481,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "clause_paraphrase",
+            "keep_leading_sentences"
+          ],
+          "meaning_truncated": false,
           "idx": 5
         },
         {
@@ -110,8 +127,9 @@
           "changed": true,
           "reasons": [
             "severe_overflow",
-            "severe_keep_leading"
+            "keep_leading_sentences"
           ],
+          "meaning_truncated": false,
           "idx": 6
         },
         {
@@ -122,29 +140,36 @@
           "action": "unchanged",
           "changed": false,
           "reasons": [],
+          "meaning_truncated": false,
           "idx": 7
         },
         {
-          "text": "Насправді Джордж-молодший подав заявку на престижну програму кінематографії в Університеті Південної Каліфорнії.",
+          "text": "Джордж-молодший подав заявку на престижну програму кінематографії в Університеті Південної Каліфорнії.",
           "slot_ms": 9169,
           "predicted_ms_before": 14000,
-          "predicted_ms_after": 8296,
+          "predicted_ms_after": 7555,
           "action": "shorten",
           "changed": true,
           "reasons": [
             "severe_overflow",
-            "severe_keep_leading"
+            "drop_fillers",
+            "clause_paraphrase",
+            "keep_leading_sentences"
           ],
+          "meaning_truncated": false,
           "idx": 8
         },
         {
-          "text": "Тепер Джордж молодший підійшов до подіуму, щоб зробити кілька фотографій переможної гонки. Але коли він підійшов туди, підійшов Убитий Чоловік.",
+          "text": "Тепер Джордж молодший підійшов до подіуму, щоб зробити кілька фотографій переможної гонки.",
           "slot_ms": 7284,
           "predicted_ms_before": 10592,
-          "predicted_ms_after": 10592,
-          "action": "unchanged",
-          "changed": false,
-          "reasons": [],
+          "predicted_ms_after": 6666,
+          "action": "shorten",
+          "changed": true,
+          "reasons": [
+            "keep_leading_sentences"
+          ],
+          "meaning_truncated": false,
           "idx": 9
         }
       ]
@@ -157,26 +182,35 @@
       {
         "index": 1,
         "original": "That is except for cars. And at that point his father actually bought him a small Italian car called a fiat. But his father, despite being the one who literally",
-        "translation": "Це за винятком автомобілів. І в той момент його́ батько дійсно купив йому маленький італійський автомобіль під назвою «Фіат»."
+        "translation": "Це за винятком автомобілів. І в той момент його батько купив йому маленький італійський автомобіль під назвою «фіат»."
       },
       {
         "index": 2,
         "original": "Like why aren't you able to take that focus and apply it to other things so we'll get your real job. And so basically every dinner these days, it became this hu",
-        "translation": "Наприклад, чому ви не можете зосередитися на цьому й застосувати це до інших речей, щоб ми отримали вашу справжню роботу. І тому́ практично кожна вечеря в ці дн"
+        "translation": "Наприклад, чому ви не можете зосередитися на цьому й застосувати його до інших речей, щоб ми отримали вашу справжню роботу. І тому кожна вечеря в ці дні перетво"
       }
     ],
     "timing_summary": {
       "n": 10,
-      "max_atempo": 1.08,
+      "max_atempo": 1.04,
       "atempo_over_1_08": false,
       "bleed_count": 0
-    }
+    },
+    "final_tts_locked": true,
+    "audio_trim_text_sync_skipped": "happy_path_final_tts_lock",
+    "final_tts_relocked_pre_groups": true
   },
   "checks": {
     "mp4_done": true,
     "simple_path": true,
     "atempo_ok": true,
     "bleed_ok": true,
-    "elapsed_under_30min": true
+    "elapsed_under_30min": true,
+    "final_tts_locked": true,
+    "meaning_truncated_count": 0,
+    "review_tts_mismatch": 0,
+    "review_equals_tts": true,
+    "fit_text_drift": 0,
+    "fit_preserved": true
   }
 }
