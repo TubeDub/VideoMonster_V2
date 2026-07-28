@@ -4,13 +4,13 @@
       "status": 200,
       "body": {
         "status": "running",
-        "task_id": "1f3c3b2404a9410493fe26c556b5ce78"
+        "task_id": "7360327ccb33410d94367d3cabf9c480"
       }
     },
-    "task_id": "1f3c3b2404a9410493fe26c556b5ce78",
+    "task_id": "7360327ccb33410d94367d3cabf9c480",
     "status": "done",
-    "output_file": "video_0c31bbdc81_OUTPUT_1f3c3b24.mp4",
-    "elapsed_sec": 1129.8,
+    "output_file": "video_d3894d87ee_OUTPUT_7360327c.mp4",
+    "elapsed_sec": 506.7,
     "last_status": {
       "status": "done",
       "step": "Готово",
@@ -36,7 +36,7 @@
         {
           "text": "дістатися туди. Тож Джордж-молодший був розумною дитиною, але також легко відволікався. І через це він нічим настільки серйозно не займався.",
           "slot_ms": 8626,
-          "predicted_ms_before": 11851,
+          "predicted_ms_before": 11481,
           "predicted_ms_after": 10370,
           "action": "shorten",
           "changed": true,
@@ -215,9 +215,9 @@
       "fill_rows": [
         {
           "idx": 0,
-          "slot_ms": 9026,
+          "slot_ms": 8952,
           "tts_ms": 12336,
-          "fill_ratio": 1.0838,
+          "fill_ratio": 1.0922,
           "underfill_ms": 0,
           "slot_shrunk": false,
           "atempo": 1.0
@@ -269,18 +269,18 @@
         },
         {
           "idx": 6,
-          "slot_ms": 6265,
+          "slot_ms": 6102,
           "tts_ms": 8544,
-          "fill_ratio": 1.0289,
+          "fill_ratio": 1.0557,
           "underfill_ms": 0,
           "slot_shrunk": false,
           "atempo": 1.06
         },
         {
           "idx": 7,
-          "slot_ms": 5084,
+          "slot_ms": 4935,
           "tts_ms": 6384,
-          "fill_ratio": 1.0576,
+          "fill_ratio": 1.0896,
           "underfill_ms": 0,
           "slot_shrunk": false,
           "atempo": 1.04
@@ -307,7 +307,52 @@
     },
     "final_tts_locked": true,
     "audio_trim_text_sync_skipped": "happy_path_final_tts_lock",
-    "final_tts_relocked_pre_groups": true
+    "final_tts_relocked_pre_groups": true,
+    "tts_speedup": {
+      "tts_wall_sec": 0.048,
+      "tts_segments_total": 10,
+      "tts_cache_hits": 10,
+      "tts_cache_misses": 0,
+      "tts_concurrency_used": 6,
+      "tts_retries": 0,
+      "tts_skips_existing": 0,
+      "detail": {
+        "tts_cache_hits": 10,
+        "tts_cache_misses": 0,
+        "tts_skips_existing": 0,
+        "tts_retries": 0,
+        "tts_segments_total": 10,
+        "tts_concurrency_used": 6,
+        "tts_wall_sec": 0.048,
+        "tts_rate_limit_backs": 0
+      },
+      "path": "stage6_parallel_cache",
+      "task_id": "7360327ccb33410d94367d3cabf9c480",
+      "tts_rate_limit_backs": 0
+    },
+    "stage_timings": {
+      "extract": 0.991,
+      "whisper": 19.309,
+      "translation": 0.0,
+      "natural": 0.0,
+      "validation": 0.0,
+      "translation_post": 0.0,
+      "tts": 1.703,
+      "slot_fit": 2.232,
+      "timing": 0.0,
+      "mux": 0.0,
+      "export": 0.0
+    },
+    "tts_cache_replay": {
+      "tts_cache_hits": 10,
+      "tts_cache_misses": 0,
+      "tts_skips_existing": 0,
+      "tts_retries": 0,
+      "tts_segments_total": 10,
+      "tts_concurrency_used": 6,
+      "tts_wall_sec": 0.04,
+      "tts_rate_limit_backs": 0
+    }
   },
   "checks": {
     "mp4_done": true,
@@ -323,6 +368,9 @@
     "underfill_count": 0,
     "review_equals_tts": true,
     "fit_text_drift": 0,
-    "fit_preserved": true
+    "fit_preserved": true,
+    "tts_concurrency_ok": true,
+    "tts_cache_replay_hits": 10,
+    "tts_cache_ok": true
   }
 }

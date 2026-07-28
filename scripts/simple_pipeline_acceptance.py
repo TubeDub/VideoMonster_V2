@@ -310,6 +310,95 @@ def main() -> int:
         out["pipeline"]["final_tts_relocked_pre_groups"] = info.get(
             "final_tts_relocked_pre_groups"
         )
+        # Stage 6 TTS speedup metrics
+        _speed = {
+            "tts_wall_sec": info.get("tts_wall_sec"),
+            "tts_segments_total": info.get("tts_segments_total"),
+            "tts_cache_hits": info.get("tts_cache_hits"),
+            "tts_cache_misses": info.get("tts_cache_misses"),
+            "tts_concurrency_used": info.get("tts_concurrency_used"),
+            "tts_retries": info.get("tts_retries"),
+            "tts_skips_existing": info.get("tts_skips_existing"),
+            "detail": info.get("tts_speedup"),
+            "path": info.get("tts_engine_path"),
+        }
+        try:
+            _sf = APP_DIR / "output" / f"tts_speedup_{task_id}.json"
+            if _sf.is_file():
+                _sd = json.loads(_sf.read_text(encoding="utf-8"))
+                for k, v in _sd.items():
+                    if _speed.get(k) in (None, "", {}) and v is not None:
+                        _speed[k] = v
+                if _sd.get("path"):
+                    _speed["path"] = _sd.get("path")
+                if isinstance(_sd.get("tts_wall_sec"), (int, float)):
+                    _speed["tts_wall_sec"] = _sd.get("tts_wall_sec")
+        except Exception:
+            pass
+        out["pipeline"]["tts_speedup"] = _speed
+        # Stage timings from pipeline_timing JSON if present
+        try:
+            from pathlib import Path as _P
+
+            _pt = _P("output") / f"pipeline_timing_{task_id}.json"
+            if _pt.is_file():
+                _ptj = json.loads(_pt.read_text(encoding="utf-8"))
+                out["pipeline"]["stage_timings"] = _ptj.get("stages") or _ptj.get(
+                    "seconds"
+                ) or _ptj
+        except Exception:
+            pass
+        out["checks"]["tts_concurrency_ok"] = int(
+            info.get("tts_concurrency_used") or 0
+        ) >= 5 or int(info.get("tts_segments_total") or 0) <= 3
+        # Cache replay: re-synth same finals → expect cache hits
+        try:
+            from engines.tts_cache import default_cache_dir
+            from engines.tts_parallel import synthesize_segments_parallel
+
+            replay_items = []
+            voice0 = str(info.get("voice") or info.get("tts_voice") or "uk-UA-OstapNeural")
+            rate0 = str(info.get("tts_rate") or "-5%")
+            pitch0 = str(info.get("tts_pitch") or "")
+            for i, s in enumerate(sd):
+                if not isinstance(s, dict):
+                    continue
+                txt = str(
+                    s.get("final_tts_text") or s.get("tts_text") or s.get("text") or ""
+                ).strip()
+                if not txt:
+                    continue
+                replay_items.append(
+                    {
+                        "index": i,
+                        "text": txt,
+                        "voice": voice0,
+                        "out_path": str(
+                            APP_DIR
+                            / "output"
+                            / "tts_cache_replay"
+                            / f"{task_id[:8]}_{i:04d}.mp3"
+                        ),
+                        "rate": str(s.get("tts_synth_rate") or rate0 or "-5%"),
+                        "pitch": str(s.get("tts_synth_pitch") or pitch0 or ""),
+                        "engine_id": "edge-offline",
+                    }
+                )
+            if replay_items:
+                _r2, st2 = synthesize_segments_parallel(
+                    replay_items,
+                    concurrency=6,
+                    cache_dir=default_cache_dir(),
+                    warmup=0,
+                    use_cache=True,
+                    skip_existing=False,
+                )
+                out["pipeline"]["tts_cache_replay"] = st2
+                out["checks"]["tts_cache_replay_hits"] = int(st2.get("tts_cache_hits") or 0)
+                out["checks"]["tts_cache_ok"] = int(st2.get("tts_cache_hits") or 0) > 0
+        except Exception as _creplay:
+            out["pipeline"]["tts_cache_replay_error"] = str(_creplay)
+            out["checks"]["tts_cache_ok"] = False
     except Exception as exc:
         out["pipeline"]["info_error"] = str(exc)
 

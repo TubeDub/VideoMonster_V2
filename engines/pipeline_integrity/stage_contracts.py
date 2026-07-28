@@ -171,6 +171,10 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             "need_adaptation_force_reason",
             "adaptation_decision",
             "original_duration_ms",
+            # Stage 6 TTS speedup metadata (cache / synth prosody stamps)
+            "tts_cache_hit",
+            "tts_synth_rate",
+            "tts_synth_pitch",
         }
     ),
     "slot_fit": frozenset(

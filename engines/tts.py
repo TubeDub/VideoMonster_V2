@@ -110,6 +110,7 @@ async def _generate_single(
     if not text:
         return
 
+    text_for_cache = text
     # Add Unicode stress marks for natural intonation (UA/RU neural voices support U+0301)
     try:
         from engines.stress_marks import add_stress_marks
@@ -136,6 +137,35 @@ async def _generate_single(
                 effective_pitch = _sanitize_pitch(params.get("pitch")) or effective_pitch
         except Exception:
             pass
+
+        # Stage 6: disk cache hit before Edge call (key = pre-stress text).
+        try:
+            from engines.tts_cache import (
+                default_cache_dir,
+                lookup_tts_cache,
+                materialize_cached,
+                store_tts_cache,
+            )
+
+            cached = lookup_tts_cache(
+                text_for_cache,
+                voice,
+                rate=effective_rate,
+                pitch=str(effective_pitch or ""),
+                engine_id=eid,
+                cache_dir=default_cache_dir(),
+                ext=Path(path).suffix or ".mp3",
+            )
+            if cached is not None and materialize_cached(cached, path):
+                logger.info(
+                    "[TTS] tts_cache_hit path=%s segment_id=%s",
+                    path,
+                    ctx.get("segment_id", "-"),
+                )
+                return
+        except Exception as _cache_exc:
+            logger.debug("[TTS] cache lookup skipped: %s", _cache_exc)
+
         kwargs: dict = {"text": text, "voice": voice, "rate": effective_rate}
         if effective_pitch:
             kwargs["pitch"] = effective_pitch
@@ -148,6 +178,18 @@ async def _generate_single(
                 )
                 if not Path(path).exists() or Path(path).stat().st_size == 0:
                     raise RuntimeError(f"TTS produced empty file: {path}")
+                try:
+                    store_tts_cache(
+                        path,
+                        text_for_cache,
+                        voice,
+                        rate=effective_rate,
+                        pitch=str(effective_pitch or ""),
+                        engine_id=eid,
+                        cache_dir=default_cache_dir(),
+                    )
+                except Exception:
+                    pass
                 return
             except asyncio.TimeoutError:
                 last_err = TimeoutError(
@@ -355,11 +397,17 @@ def generate_audio(
 
 
 def _tts_max_concurrent() -> int:
-    raw = (os.getenv("VM_TTS_PARALLEL") or "3").strip()
+    """Prefer EDGE_TTS_CONCURRENCY (Stage 6), else VM_TTS_PARALLEL; default 6, cap 8."""
     try:
-        return max(1, min(6, int(raw)))
-    except ValueError:
-        return 3
+        from engines.tts_parallel import resolve_edge_tts_concurrency
+
+        return resolve_edge_tts_concurrency(None)
+    except Exception:
+        raw = (os.getenv("EDGE_TTS_CONCURRENCY") or os.getenv("VM_TTS_PARALLEL") or "6").strip()
+        try:
+            return max(1, min(8, int(raw)))
+        except ValueError:
+            return 6
 
 
 async def _generate_groups_parallel_async(

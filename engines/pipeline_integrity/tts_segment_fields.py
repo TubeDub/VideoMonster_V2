@@ -7,7 +7,16 @@ from pathlib import Path
 from typing import Any
 
 TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
-    {"tts_text", "tts_file_path", "playback_duration", "status"}
+    {
+        "tts_text",
+        "tts_file_path",
+        "playback_duration",
+        "status",
+        # Stage 6 speedup stamps (parallel + disk cache)
+        "tts_cache_hit",
+        "tts_synth_rate",
+        "tts_synth_pitch",
+    }
 )
 
 

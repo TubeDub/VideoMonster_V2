@@ -9657,6 +9657,13 @@ def _run_pipeline_inner(
                     _conveyor_done = False
                     if not skip_tts:
                         try:
+                            from engines.happy_path import skip_advanced_text_shorteners as _hp_fc
+
+                            with STATE_LOCK:
+                                _info_fc_gate = dict(task.get("info") or {})
+                            # Stage 6: Simple owns TTS via parallel+cache — skip full conveyor TTS.
+                            if _hp_fc(_info_fc_gate) or _info_fc_gate.get("simple_pipeline"):
+                                raise RuntimeError("skip_full_conveyor_simple_stage6")
                             from engines.pipeline_orchestrator.dub_conveyor_bridge import (
                                 try_run_full_conveyor,
                             )
@@ -12645,30 +12652,46 @@ def _run_pipeline_inner(
                 _pipeline_mode = str(task["info"].get("pipeline_mode") or "")
                 _streaming_voice_done = bool(task["info"].get("streaming_voice_done"))
                 _manifest_vp = str(task["info"].get("manifest_path") or "")
-
-            _skip_batch_tts = _streaming_voice_done
-            with STATE_LOCK:
-                _conveyor_tts_done = bool(task["info"].get("conveyor_tts_done"))
-            if _conveyor_tts_done:
-                _skip_batch_tts = True
-                for seg in segments_data:
-                    f = seg.get("file")
-                    if f and f not in tts_files:
-                        tts_files.append(f)
-                logger.info(
-                    "Task %s: batch TTS skipped — full conveyor (%d files)",
-                    task_id,
-                    len(tts_files),
+                _simple_batch_tts = bool(
+                    task["info"].get("simple_pipeline")
+                    or task["info"].get("happy_path")
                 )
-            if _pipeline_mode == "streaming" and not _streaming_voice_done:
-                _skip_batch_tts = _run_streaming_voice_for_task(
+
+            # Stage 6: Simple/Happy Path always owns TTS via parallel+cache batch.
+            # Conveyor/streaming may have run earlier — ignore their skip flags here.
+            _skip_batch_tts = False
+            if not _simple_batch_tts:
+                _skip_batch_tts = _streaming_voice_done
+                with STATE_LOCK:
+                    _conveyor_tts_done = bool(task["info"].get("conveyor_tts_done"))
+                if _conveyor_tts_done:
+                    _skip_batch_tts = True
+                    for seg in segments_data:
+                        f = seg.get("file")
+                        if f and f not in tts_files:
+                            tts_files.append(f)
+                    logger.info(
+                        "Task %s: batch TTS skipped — full conveyor (%d files)",
+                        task_id,
+                        len(tts_files),
+                    )
+                if _pipeline_mode == "streaming" and not _streaming_voice_done:
+                    _skip_batch_tts = _run_streaming_voice_for_task(
+                        task_id,
+                        segments_data,
+                        voice=voice,
+                        target_lang=target_lang,
+                        tts_rate=tts_rate,
+                        tts_pitch=tts_pitch,
+                        manifest_path=_manifest_vp,
+                    )
+            else:
+                with STATE_LOCK:
+                    task["info"]["tts_batch_forced"] = "simple_stage6"
+                    # Keep any prior conveyor files as skip-existing candidates only.
+                logger.info(
+                    "Task %s: Simple Stage6 batch TTS (ignore conveyor/streaming skip)",
                     task_id,
-                    segments_data,
-                    voice=voice,
-                    target_lang=target_lang,
-                    tts_rate=tts_rate,
-                    tts_pitch=tts_pitch,
-                    manifest_path=_manifest_vp,
                 )
 
             def _parallel_tts_progress(g_idx: int, groups_total: int, groups_done: int) -> None:
@@ -12804,16 +12827,155 @@ def _run_pipeline_inner(
                         "Edge TTS обрабатывает группу…",
                     ],
                 ):
-                    parallel_results = generate_tts_groups_parallel(
-                        work_items,
-                        voice,
-                        rate=tts_rate,
-                        pitch=tts_pitch,
-                        engine_id=tts_engine_id,
-                        on_group_done=_parallel_tts_progress,
-                        output_dir=_artifacts_dir(task.get("info")),
-                        task_id=base_id,
-                    )
+                    # Stage 6: parallel Edge + disk cache + skip existing (Simple default).
+                    _tts_stats: dict = {}
+                    try:
+                        from engines.tts_cache import default_cache_dir
+                        from engines.tts_parallel import (
+                            resolve_edge_tts_concurrency,
+                            synthesize_segments_parallel,
+                        )
+
+                        try:
+                            (APP_DIR / "output" / f"tts_speedup_{task_id}.json").write_text(
+                                '{"path":"stage6_entering"}',
+                                encoding="utf-8",
+                            )
+                        except Exception:
+                            pass
+
+                        _conc = resolve_edge_tts_concurrency(None)
+                        _art = _artifacts_dir(task.get("info"))
+                        _parallel_items = []
+                        for wi in work_items:
+                            _g = int(wi.get("g_idx", 0))
+                            _out = _art / f"{base_id}_g{_g:04d}.mp3"
+                            _ctx_p = str(
+                                (wi.get("tts_context") or {}).get("tts_file_path") or ""
+                            )
+                            if _ctx_p:
+                                _out = Path(_ctx_p)
+                            _parallel_items.append(
+                                {
+                                    **wi,
+                                    "index": _g,
+                                    "g_idx": _g,
+                                    "out_path": str(_out),
+                                    "engine_id": tts_engine_id,
+                                }
+                            )
+
+                        # Progress only from main thread — avoid STATE_LOCK in workers.
+                        _done_box = {"n": 0}
+
+                        def _on_fast_done(_idx: int, _done: int) -> None:
+                            _done_box["n"] = int(_done)
+
+                        parallel_results, _tts_stats = synthesize_segments_parallel(
+                            _parallel_items,
+                            concurrency=_conc,
+                            cache_dir=default_cache_dir(),
+                            warmup=min(2, max(0, len(_parallel_items) - 1)),
+                            on_done=_on_fast_done,
+                        )
+                        _parallel_tts_progress(
+                            0, total_groups, int(_done_box.get("n") or len(parallel_results))
+                        )
+                        with STATE_LOCK:
+                            task["info"]["tts_speedup"] = dict(_tts_stats)
+                            task["info"]["tts_wall_sec"] = _tts_stats.get("tts_wall_sec")
+                            task["info"]["tts_segments_total"] = _tts_stats.get(
+                                "tts_segments_total"
+                            )
+                            task["info"]["tts_cache_hits"] = _tts_stats.get(
+                                "tts_cache_hits"
+                            )
+                            task["info"]["tts_cache_misses"] = _tts_stats.get(
+                                "tts_cache_misses"
+                            )
+                            task["info"]["tts_concurrency_used"] = _tts_stats.get(
+                                "tts_concurrency_used"
+                            )
+                            task["info"]["tts_retries"] = _tts_stats.get("tts_retries")
+                            task["info"]["tts_skips_existing"] = _tts_stats.get(
+                                "tts_skips_existing"
+                            )
+                            task["info"]["tts_engine_path"] = "stage6_parallel_cache"
+                        # Persist speedup metrics to disk (acceptance / STAGE6 report).
+                        try:
+                            import json as _json_s6
+
+                            _s6_path = APP_DIR / "output" / f"tts_speedup_{task_id}.json"
+                            _s6_path.write_text(
+                                _json_s6.dumps(
+                                    {
+                                        "task_id": task_id,
+                                        "path": "stage6_parallel_cache",
+                                        **dict(_tts_stats),
+                                    },
+                                    ensure_ascii=False,
+                                    indent=2,
+                                ),
+                                encoding="utf-8",
+                            )
+                        except Exception:
+                            pass
+                        logger.info(
+                            "Task %s: Stage6 TTS parallel wall=%.2fs conc=%s hits=%s misses=%s skips=%s",
+                            task_id,
+                            float(_tts_stats.get("tts_wall_sec") or 0),
+                            _tts_stats.get("tts_concurrency_used"),
+                            _tts_stats.get("tts_cache_hits"),
+                            _tts_stats.get("tts_cache_misses"),
+                            _tts_stats.get("tts_skips_existing"),
+                        )
+                    except Exception as _s6_exc:
+                        logger.warning(
+                            "Task %s: Stage6 TTS parallel failed (%s) — fallback generate_tts_groups_parallel",
+                            task_id,
+                            _s6_exc,
+                        )
+                        try:
+                            from engines.tts_parallel import (
+                                resolve_edge_tts_concurrency as _rconc,
+                            )
+
+                            _fb_conc = _rconc(None)
+                        except Exception:
+                            _fb_conc = 6
+                        parallel_results = generate_tts_groups_parallel(
+                            work_items,
+                            voice,
+                            rate=tts_rate,
+                            pitch=tts_pitch,
+                            engine_id=tts_engine_id,
+                            on_group_done=_parallel_tts_progress,
+                            output_dir=_artifacts_dir(task.get("info")),
+                            task_id=base_id,
+                            max_concurrent=_fb_conc,
+                        )
+                        with STATE_LOCK:
+                            task["info"]["tts_engine_path"] = "legacy_parallel_fallback"
+                            task["info"]["tts_stage6_error"] = str(_s6_exc)
+                            task["info"]["tts_concurrency_used"] = _fb_conc
+                        try:
+                            import json as _json_s6e
+
+                            (APP_DIR / "output" / f"tts_speedup_{task_id}.json").write_text(
+                                _json_s6e.dumps(
+                                    {
+                                        "task_id": task_id,
+                                        "path": "legacy_parallel_fallback",
+                                        "error": str(_s6_exc),
+                                        "tts_concurrency_used": _fb_conc,
+                                    },
+                                    ensure_ascii=False,
+                                    indent=2,
+                                ),
+                                encoding="utf-8",
+                            )
+                        except Exception:
+                            pass
 
                 for res in parallel_results:
                     g_idx = int(res.get("g_idx", 0))
@@ -12857,6 +13019,16 @@ def _run_pipeline_inner(
                             audio_filename=one_files[0],
                             task_info=_tts_info_local,
                         )
+                        if head_idx < len(segments_data) and isinstance(
+                            segments_data[head_idx], dict
+                        ):
+                            if res.get("rate") is not None:
+                                segments_data[head_idx]["tts_synth_rate"] = res.get("rate")
+                            if res.get("pitch") is not None:
+                                segments_data[head_idx]["tts_synth_pitch"] = res.get("pitch")
+                            segments_data[head_idx]["tts_cache_hit"] = bool(
+                                res.get("cache_hit")
+                            )
                     else:
                         _commit_tts_group_result(
                             segments_data,
