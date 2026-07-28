@@ -92,7 +92,10 @@ def apply_simple_pipeline_policy(
         "segmentation_mode": "happy_path",
         # Stage 7: never fall into AI-Core streaming_text after MT.
         "tps_skip_orchestrator": True,
-        "mt_path": "stage7_batch_cache",
+        "mt_path": "marian_batch",
+        "simple_mt_locked": True,
+        "translation_agent_path": False,
+        "llm_adaptation_used": False,
     }
     task_info.update(policy)
     logger.info(

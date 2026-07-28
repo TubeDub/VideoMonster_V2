@@ -661,6 +661,16 @@ function resolveSubstepStatus(timing, key, subphase) {
   return 'pending';
 }
 
+function isSimpleMtUi(d, timing) {
+  if (timing && timing.simple_mt_locked) return true;
+  if (timing && timing.llm_adaptation_used === false && timing.hidden_buckets) return true;
+  if (d && (d.simple_mt_locked || d.simple_pipeline || d.happy_path)) return true;
+  if (d && d.llm_adaptation_used === false && (d.translate_method === 'marian_batch' || d.translate_method === 'mt_cache')) {
+    return true;
+  }
+  return false;
+}
+
 function updateTranslationSubsteps(d) {
   const wrap = document.getElementById('wizard-translate-substeps');
   if (!wrap) return;
@@ -678,6 +688,17 @@ function updateTranslationSubsteps(d) {
   const stats = timing.segment_stats || {};
   const subphase = pd.translation_subphase || timing.current_subphase || '';
   const totalSeg = Number(pd.total_segments || timing.segment_count || 0);
+  const hidden = new Set(timing.hidden_buckets || []);
+  const simpleMt = isSimpleMtUi(d, timing);
+  if (simpleMt) {
+    hidden.add('llm_adaptation');
+    // Light post only if backend explicitly enables it (default: hide in Simple).
+    if ((timing.phase_status || {}).post_processing === 'skipped') {
+      hidden.add('post_processing');
+    } else if (!timing.phase_status) {
+      hidden.add('post_processing');
+    }
+  }
 
   const secs = TRANSLATION_SUB_KEYS.map((key) => {
     const row = stats[key] || {};
@@ -688,6 +709,10 @@ function updateTranslationSubsteps(d) {
   TRANSLATION_SUB_KEYS.forEach((key, idx) => {
     const row = wrap.querySelector(`.wizard-substep[data-sub="${key}"]`);
     if (!row) return;
+    const hideRow = hidden.has(key);
+    row.hidden = hideRow;
+    row.classList.toggle('is-hidden-simple', hideRow);
+    if (hideRow) return;
     const labelEl = row.querySelector('.wizard-substep-label');
     const timeEl = row.querySelector('.wizard-substep-time');
     const statusEl = row.querySelector('.wizard-substep-status');
@@ -698,7 +723,18 @@ function updateTranslationSubsteps(d) {
       labelEl.textContent = customLabel || t(labelDef.key, labelDef.fallback);
     }
 
-    const status = resolveSubstepStatus(timing, key, subphase);
+    let status = resolveSubstepStatus(timing, key, subphase);
+    if (status === 'skipped') {
+      row.classList.add('skipped');
+      row.classList.remove('done', 'active', 'pending');
+      if (timeEl) timeEl.textContent = '—';
+      if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.title = t('dub.sub_skipped', 'Пропущено в Simple');
+      }
+      if (fillEl) fillEl.style.width = '0%';
+      return;
+    }
     const sec = secs[idx];
     const segStat = stats[key] || {};
     let segDone = Number(segStat.segments || 0);
@@ -711,6 +747,7 @@ function updateTranslationSubsteps(d) {
     row.classList.toggle('done', status === 'done');
     row.classList.toggle('active', status === 'active');
     row.classList.toggle('pending', status === 'pending');
+    row.classList.remove('skipped');
 
     if (timeEl) {
       const avg = Number(segStat.avg_sec_per_segment || 0);

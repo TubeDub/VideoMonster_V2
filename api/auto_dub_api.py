@@ -5392,6 +5392,16 @@ def api_auto_dub_status(task_id):
             "progress_detail": dict(info.get("progress_detail") or {}),
             "translation_timing": info.get("translation_timing_breakdown")
             or info.get("translation_timing"),
+            "simple_pipeline": bool(info.get("simple_pipeline")),
+            "happy_path": bool(info.get("happy_path")),
+            "simple_mt_locked": bool(info.get("simple_mt_locked")),
+            "llm_adaptation_used": bool(info.get("llm_adaptation_used")),
+            "translate_method": info.get("translate_method"),
+            "translation_agent_path": bool(info.get("translation_agent_path")),
+            "mt_wall_sec": info.get("mt_wall_sec"),
+            "mt_engine": info.get("mt_engine"),
+            "mt_cache_hits": info.get("mt_cache_hits"),
+            "mt_cache_misses": info.get("mt_cache_misses"),
             "tts_failures": list(info.get("tts_failures") or []),
             "last_tts_error": info.get("last_tts_error"),
             "pipeline_error": info.get("pipeline_error"),
@@ -7665,6 +7675,65 @@ def _prepare_translated_segments(
     Гибридный перевод: пакеты с контекстом + натурализация + выравнивание timing_map.
     Никогда не бросает ValueError — только лог + авто-recovery.
     """
+    # Stage 7b: Simple must never enter UniversalTranslationPipeline / Qwen here.
+    try:
+        from engines.simple_mt_path import run_locked_simple_mt, use_locked_simple_mt
+
+        with STATE_LOCK:
+            _info_prep = dict((AUTO_TASKS.get(task_id) or {}).get("info") or {})
+        if use_locked_simple_mt(_info_prep):
+            logger.info(
+                "Task %s: _prepare_translated_segments redirected to locked Simple MT",
+                task_id,
+            )
+            segs, stats = run_locked_simple_mt(
+                list(source_segments),
+                translation_source_lang,
+                target_lang,
+                app_dir=APP_DIR,
+            )
+            if translate_meta is not None:
+                translate_meta.append(
+                    {
+                        "pipeline": str(stats.get("translate_method") or "marian_batch"),
+                        "translation_sec": float(stats.get("mt_wall_sec") or 0),
+                        "marian_sec": float(stats.get("mt_wall_sec") or 0),
+                        "llm_adaptation_sec": 0.0,
+                        "llm_adaptation_used": False,
+                        "translation_agent": False,
+                        **{
+                            k: stats.get(k)
+                            for k in (
+                                "mt_wall_sec",
+                                "mt_engine",
+                                "mt_cache_hits",
+                                "mt_cache_misses",
+                                "mt_calls",
+                                "translate_method",
+                            )
+                        },
+                    }
+                )
+            with STATE_LOCK:
+                if task_id in AUTO_TASKS:
+                    from engines.simple_mt_path import stamp_simple_mt_lock
+
+                    info = AUTO_TASKS[task_id].setdefault("info", {})
+                    stamp_simple_mt_lock(info)
+                    info["translate_method"] = str(
+                        stats.get("translate_method") or "marian_batch"
+                    )
+                    for k, v in stats.items():
+                        if k == "translation_timing":
+                            info["translation_timing"] = v
+                        else:
+                            info[k] = v
+            return segs
+    except Exception as _redir_exc:
+        logger.warning(
+            "Task %s: Simple MT redirect failed in prepare: %s", task_id, _redir_exc
+        )
+
     from engines.cleaner import align_segments_to_timing_map, split_by_timing_map
 
     lp = LOCALIZATION.get(ui_lang, LOCALIZATION["ru"])
@@ -9556,11 +9625,38 @@ def _run_pipeline_inner(
                         "mt_cache_misses": 0,
                         "mt_concurrency_used": 1,
                         "mt_retries": 0,
-                        "mt_path": "job_translate_cache",
+                        "mt_path": "mt_cache",
+                        "translate_method": "mt_cache",
+                        "translation_agent_path": False,
+                        "llm_adaptation_used": False,
+                        "simple_mt_locked": True,
                     }
+                    try:
+                        from engines.simple_mt_path import (
+                            build_simple_mt_ui_timing,
+                            stamp_simple_mt_lock,
+                            use_locked_simple_mt,
+                        )
+
+                        if use_locked_simple_mt(task["info"]):
+                            stamp_simple_mt_lock(task["info"])
+                            translate_method = "mt_cache"
+                            _ui = build_simple_mt_ui_timing(
+                                subphase="done",
+                                wall_sec=0.0,
+                                segments_done=len(segments),
+                                segments_total=len(segments),
+                                cache_mode=True,
+                            )
+                            task["info"]["translation_timing"] = _ui
+                            task["info"]["translation_timing_breakdown"] = _ui
+                            _mt_cache_stats["translation_timing"] = _ui
+                    except Exception:
+                        pass
                     task["info"]["mt_speedup"] = dict(_mt_cache_stats)
                     for _k, _v in _mt_cache_stats.items():
-                        task["info"][_k] = _v
+                        if _k != "translation_timing":
+                            task["info"][_k] = _v
                     if task["info"].get("simple_pipeline") or task["info"].get(
                         "happy_path"
                     ):
@@ -9568,10 +9664,17 @@ def _run_pipeline_inner(
                     if translate_meta is not None:
                         translate_meta.append(
                             {
-                                "pipeline": "cache_hit",
+                                "pipeline": "mt_cache",
                                 "translation_sec": 0.0,
                                 "marian_sec": 0.0,
-                                **_mt_cache_stats,
+                                "llm_adaptation_sec": 0.0,
+                                "llm_adaptation_used": False,
+                                "translation_agent": False,
+                                **{
+                                    k: v
+                                    for k, v in _mt_cache_stats.items()
+                                    if k != "translation_timing"
+                                },
                             }
                         )
                 try:
@@ -9593,75 +9696,82 @@ def _run_pipeline_inner(
                         "manifest_path"
                     )
                     _info_mt_gate = dict(task.get("info") or {})
-                _simple_mt_fast = bool(
-                    _info_mt_gate.get("simple_pipeline")
-                    or _info_mt_gate.get("happy_path")
+                from engines.simple_mt_path import (
+                    run_locked_simple_mt,
+                    stamp_simple_mt_lock,
+                    use_locked_simple_mt,
                 )
+
+                _simple_mt_fast = use_locked_simple_mt(_info_mt_gate)
                 _stage7_done = False
-                # Stage 7: Simple skips AI-Core translation agent (deep-translator +
-                # heavy retries) — batch MT + disk cache, 1:1 parity.
+                # Stage 7b LOCK: Simple/Happy Path → ONLY Marian batch + cache.
+                # Never Director / AI-Core translation agent / Qwen adaptation.
                 if _simple_mt_fast:
                     try:
-                        from engines.mt_batch import translate_segments_batch
-                        from engines.mt_cache import default_cache_dir
                         from engines.translation_quality_log import (
                             synthesize_audits_from_segments,
                         )
 
-                        t_mt0 = time.perf_counter()
+                        with STATE_LOCK:
+                            stamp_simple_mt_lock(task.setdefault("info", {}))
+                            task["info"]["translate_method"] = "marian_batch"
 
-                        def _mt_prog(done: int, total: int) -> None:
+                        def _mt_prog(done: int, total: int, ui: dict) -> None:
                             frac = done / max(total, 1)
                             with STATE_LOCK:
                                 t = AUTO_TASKS.get(task_id)
                                 if t and t.get("status") == "running":
                                     t["progress"] = round(55.0 + frac * 8.0, 1)
+                                    info_p = t.setdefault("info", {})
+                                    info_p["translation_timing"] = dict(ui or {})
+                                    info_p["llm_adaptation_used"] = False
+                            cache_mode = bool(
+                                (ui or {}).get("ui_labels", {}).get("marian_mt")
+                                == "Кэш перевода"
+                            )
                             _update_progress_detail(
                                 task_id,
                                 phase="translate",
                                 segments_done=done,
                                 total_segments=total,
                                 operation="translation",
-                                live_message="Перевод: Stage7 batch MT…",
+                                translation_subphase="marian_mt",
+                                translation_timing=dict(ui or {}),
+                                live_message=(
+                                    "Перевод: кэш…"
+                                    if cache_mode
+                                    else "Перевод: Marian MT…"
+                                ),
                             )
 
-                        segments, _mt_stats = translate_segments_batch(
+                        segments, _mt_stats = run_locked_simple_mt(
                             list(source_segments_snapshot),
                             translation_source_lang,
                             target_lang,
-                            batch_size=10,
-                            cache_dir=default_cache_dir(),
                             app_dir=APP_DIR,
-                            prefer_marian=True,
                             on_progress=_mt_prog,
                         )
-                        if len(segments) != len(source_segments_snapshot):
-                            raise RuntimeError(
-                                f"stage7 mt parity: {len(segments)}!="
-                                f"{len(source_segments_snapshot)}"
-                            )
-                        translate_method = "stage7_batch_cache"
-                        _stage7_done = True
-                        _mt_stats = dict(_mt_stats or {})
-                        _mt_stats["mt_wall_sec"] = round(
-                            float(
-                                _mt_stats.get("mt_wall_sec")
-                                or (time.perf_counter() - t_mt0)
-                            ),
-                            3,
+                        translate_method = str(
+                            _mt_stats.get("translate_method") or "marian_batch"
                         )
+                        _stage7_done = True
                         meta = {
-                            "pipeline": "stage7_batch_cache",
+                            "pipeline": translate_method,
                             "naturalizer_executed": False,
                             "naturalizer_applied": False,
                             "timing_aware_executed": False,
                             "timing_aware_applied": False,
+                            "translation_agent": False,
+                            "llm_adaptation_used": False,
                             "translation_sec": float(_mt_stats.get("mt_wall_sec") or 0),
                             "marian_sec": float(_mt_stats.get("mt_wall_sec") or 0),
                             "naturalizer_sec": 0.0,
                             "llm_adaptation_sec": 0.0,
-                            "engines": [str(_mt_stats.get("mt_engine") or "batch")],
+                            "engines": [str(_mt_stats.get("mt_engine") or "marian")],
                             "groups": int(_mt_stats.get("mt_calls") or 0),
+                            "translation_timing_breakdown": _mt_stats.get(
+                                "translation_timing"
+                            ),
                             **{
                                 k: _mt_stats.get(k)
                                 for k in (
@@ -9675,6 +9785,10 @@ def _run_pipeline_inner(
                                     "mt_concurrency_used",
                                     "mt_retries",
                                     "mt_path",
+                                    "translate_method",
+                                    "translation_agent_path",
+                                    "llm_adaptation_used",
+                                    "simple_mt_locked",
                                 )
                             },
                         }
@@ -9685,20 +9799,25 @@ def _run_pipeline_inner(
                             segments,
                             translation_source_lang,
                             target_lang,
-                            engine=str(_mt_stats.get("mt_engine") or "stage7"),
+                            engine=str(_mt_stats.get("mt_engine") or "marian_batch"),
                         )
                         with STATE_LOCK:
                             info_s7 = task.setdefault("info", {})
+                            stamp_simple_mt_lock(info_s7)
                             info_s7["translate_method"] = translate_method
-                            info_s7["mt_path"] = "stage7_batch_cache"
+                            info_s7["mt_path"] = translate_method
                             info_s7["translation_audits"] = [
                                 {k: v for k, v in a.__dict__.items()}
                                 for a in stage7_audits
                             ]
                             info_s7["mt_speedup"] = dict(_mt_stats)
                             for _k, _v in _mt_stats.items():
-                                info_s7[_k] = _v
-                            info_s7["translation_agent_status"] = "success"
+                                if _k == "translation_timing":
+                                    info_s7["translation_timing"] = _v
+                                    info_s7["translation_timing_breakdown"] = _v
+                                else:
+                                    info_s7[_k] = _v
+                            info_s7["translation_agent_status"] = "skipped_simple_mt"
                             info_s7["tps_skip_orchestrator"] = True
                             _sd0 = list(info_s7.get("segments_data") or [])
                             if not _sd0 or len(_sd0) != len(segments):
@@ -9731,7 +9850,15 @@ def _run_pipeline_inner(
                                 APP_DIR / "output" / f"mt_speedup_{task_id}.json"
                             ).write_text(
                                 _json_s7.dumps(
-                                    {"task_id": task_id, **dict(_mt_stats)},
+                                    {
+                                        "task_id": task_id,
+                                        "translate_method": translate_method,
+                                        **{
+                                            k: _mt_stats.get(k)
+                                            for k in _mt_stats
+                                            if k != "translation_timing"
+                                        },
+                                    },
                                     ensure_ascii=False,
                                     indent=2,
                                 ),
@@ -9745,41 +9872,49 @@ def _run_pipeline_inner(
                             translation_source_lang,
                             target_lang,
                             segments,
-                            route_label="stage7",
-                            engine=str(_mt_stats.get("mt_engine") or "batch"),
+                            route_label=translate_method,
+                            engine=str(_mt_stats.get("mt_engine") or "marian"),
                             quality_score=0.0,
                         )
-                        profiler.set_meta(translate_cache="stage7")
+                        profiler.set_meta(translate_cache=translate_method)
                         logger.info(
-                            "Task %s: Stage7 MT wall=%.2fs calls=%s hits=%s misses=%s engine=%s",
+                            "Task %s: Simple MT LOCK method=%s wall=%.2fs engine=%s hits=%s",
                             task_id,
+                            translate_method,
                             float(_mt_stats.get("mt_wall_sec") or 0),
-                            _mt_stats.get("mt_calls"),
-                            _mt_stats.get("mt_cache_hits"),
-                            _mt_stats.get("mt_cache_misses"),
                             _mt_stats.get("mt_engine"),
+                            _mt_stats.get("mt_cache_hits"),
                         )
                     except Exception as _s7_exc:
-                        logger.warning(
-                            "Task %s: Stage7 MT failed (%s) — fallback prepare_translated",
+                        # Simple must NOT fall back to AI-Core / Qwen path.
+                        logger.error(
+                            "Task %s: Simple MT LOCK failed (%s) — no agent/Qwen fallback",
                             task_id,
                             _s7_exc,
                         )
                         with STATE_LOCK:
+                            stamp_simple_mt_lock(task.setdefault("info", {}))
                             task["info"]["mt_stage7_error"] = str(_s7_exc)
-                            task["info"]["tps_skip_orchestrator"] = True
-                        segments = _prepare_translated_segments(
-                            task_id,
-                            source_segments_snapshot,
-                            timing_map_for_translate,
-                            translation_source_lang,
-                            target_lang,
-                            ui_lang,
-                            translate_meta=translate_meta,
+                            task["info"]["translate_method"] = "marian_batch_failed"
+                        from engines.dubbing_engine.pipeline_failure_diag import (
+                            STAGE_TRANSLATION,
                         )
-                        translate_method = "stage7_fallback_prepare"
-                        _stage7_done = True
+
+                        _fail(
+                            task_id,
+                            [
+                                lp.get(
+                                    "translate_failed",
+                                    "Ошибка перевода (Simple Marian batch).",
+                                )
+                            ],
+                            stage=STAGE_TRANSLATION,
+                            exc=_s7_exc,
+                            error_code="SIMPLE_MT_FAILED",
+                        )
+                        return
                 if (not _stage7_done) and _manifest_path and Path(_manifest_path).is_file():
+                    # Pro/Studio only — Simple already returned or set _stage7_done.
                     _agent_segments = _build_agent_segments(
                         source_segments_snapshot, timing_map_for_translate
                     )
