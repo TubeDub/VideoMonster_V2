@@ -1,7 +1,7 @@
 {
   "events": [
     {
-      "ts_ms": 1785260813008,
+      "ts_ms": 1785262734205,
       "event": "boot_ok",
       "feature_id": "core",
       "message": "engines",
@@ -11,7 +11,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813046,
+      "ts_ms": 1785262734239,
       "event": "boot_ok",
       "feature_id": "translation",
       "message": "engines/translation_pipeline.py",
@@ -21,7 +21,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813049,
+      "ts_ms": 1785262734242,
       "event": "boot_ok",
       "feature_id": "tts",
       "message": "engines/tts.py",
@@ -31,7 +31,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813051,
+      "ts_ms": 1785262734245,
       "event": "boot_ok",
       "feature_id": "dubbing",
       "message": "api/auto_dub_api.py",
@@ -41,7 +41,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813054,
+      "ts_ms": 1785262734248,
       "event": "boot_ok",
       "feature_id": "audio",
       "message": "engines/dub_engine.py",
@@ -51,7 +51,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813058,
+      "ts_ms": 1785262734251,
       "event": "boot_ok",
       "feature_id": "source_separation",
       "message": "engines/source_separation.py",
@@ -61,7 +61,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813060,
+      "ts_ms": 1785262734253,
       "event": "boot_ok",
       "feature_id": "video",
       "message": "engines/ffmpeg_paths.py",
@@ -71,7 +71,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813063,
+      "ts_ms": 1785262734256,
       "event": "boot_ok",
       "feature_id": "voice_ducking",
       "message": "engines/audio_mix_config.py",
@@ -81,7 +81,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813065,
+      "ts_ms": 1785262734263,
       "event": "boot_ok",
       "feature_id": "ui",
       "message": "templates",
@@ -91,7 +91,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813067,
+      "ts_ms": 1785262734265,
       "event": "skipped",
       "feature_id": "heavy_llm",
       "message": "disabled",
@@ -101,7 +101,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813069,
+      "ts_ms": 1785262734267,
       "event": "skipped",
       "feature_id": "strict_llm_adaptation",
       "message": "disabled",
@@ -111,7 +111,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813073,
+      "ts_ms": 1785262734268,
       "event": "boot_ok",
       "feature_id": "enterprise_translation",
       "message": "engines/enterprise_translation",
@@ -121,7 +121,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813076,
+      "ts_ms": 1785262734272,
       "event": "skipped",
       "feature_id": "identity_guard",
       "message": "disabled",
@@ -131,7 +131,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813077,
+      "ts_ms": 1785262734273,
       "event": "boot_ok",
       "feature_id": "overflow_inspector",
       "message": "engines/pipeline_integrity/overflow_inspector.py",
@@ -141,7 +141,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813081,
+      "ts_ms": 1785262734278,
       "event": "skipped",
       "feature_id": "revision_manager",
       "message": "disabled",
@@ -151,7 +151,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813083,
+      "ts_ms": 1785262734280,
       "event": "boot_ok",
       "feature_id": "segment_normalizer",
       "message": "engines/pipeline_integrity/segment_normalizer.py",
@@ -161,7 +161,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813086,
+      "ts_ms": 1785262734282,
       "event": "skipped",
       "feature_id": "slot_budget",
       "message": "disabled",
@@ -171,7 +171,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813089,
+      "ts_ms": 1785262734287,
       "event": "boot_ok",
       "feature_id": "smart_segmentation",
       "message": "engines/pipeline_integrity/segment_normalizer.py",
@@ -181,7 +181,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813093,
+      "ts_ms": 1785262734288,
       "event": "boot_ok",
       "feature_id": "word_timing",
       "message": "engines/word_timing_map",
@@ -191,7 +191,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813099,
+      "ts_ms": 1785262734290,
       "event": "boot_ok",
       "feature_id": "adaptive_segmentation",
       "message": "engines/adaptive_segmentation",
@@ -201,7 +201,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813102,
+      "ts_ms": 1785262734297,
       "event": "boot_ok",
       "feature_id": "meaning_fit",
       "message": "engines/meaning_fit",
@@ -211,7 +211,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813108,
+      "ts_ms": 1785262734301,
       "event": "boot_ok",
       "feature_id": "meaning_fit_before_lock",
       "message": "engines/meaning_fit",
@@ -221,7 +221,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813110,
+      "ts_ms": 1785262734303,
       "event": "boot_ok",
       "feature_id": "meaning_fit_expand",
       "message": "engines/meaning_fit",
@@ -231,7 +231,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813112,
+      "ts_ms": 1785262734304,
       "event": "boot_ok",
       "feature_id": "meaning_fit_shorten",
       "message": "engines/meaning_fit",
@@ -241,7 +241,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813116,
+      "ts_ms": 1785262734306,
       "event": "boot_ok",
       "feature_id": "professional_dubbing",
       "message": "engines/professional_dubbing",
@@ -251,7 +251,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813118,
+      "ts_ms": 1785262734310,
       "event": "boot_ok",
       "feature_id": "semantic_v3",
       "message": "engines/semantic_v3",
@@ -261,7 +261,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813120,
+      "ts_ms": 1785262734312,
       "event": "boot_ok",
       "feature_id": "voice_studio",
       "message": "engines/recording_studio",
@@ -271,7 +271,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813122,
+      "ts_ms": 1785262734313,
       "event": "skipped",
       "feature_id": "catp",
       "message": "disabled",
@@ -281,7 +281,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813124,
+      "ts_ms": 1785262734315,
       "event": "boot_ok",
       "feature_id": "ocr",
       "message": "api/ocr_api.py",
@@ -291,7 +291,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813126,
+      "ts_ms": 1785262734317,
       "event": "boot_ok",
       "feature_id": "dub_studio",
       "message": "engines/dub_studio",
@@ -301,7 +301,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813128,
+      "ts_ms": 1785262734318,
       "event": "boot_ok",
       "feature_id": "rasm",
       "message": "engines/rasm",
@@ -311,7 +311,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813130,
+      "ts_ms": 1785262734320,
       "event": "skipped",
       "feature_id": "soft_sync",
       "message": "disabled",
@@ -321,7 +321,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813132,
+      "ts_ms": 1785262734322,
       "event": "skipped",
       "feature_id": "emotion_tts",
       "message": "disabled",
@@ -331,7 +331,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813133,
+      "ts_ms": 1785262734324,
       "event": "boot_ok",
       "feature_id": "developer_tools",
       "message": "engines/dev_diagnostics.py",
@@ -341,7 +341,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813135,
+      "ts_ms": 1785262734326,
       "event": "boot_ok",
       "feature_id": "translation_inspector",
       "message": "engines/translation_inspector.py",
@@ -351,7 +351,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813137,
+      "ts_ms": 1785262734329,
       "event": "boot_ok",
       "feature_id": "pipeline_inspector",
       "message": "engines/translation_diagnostics.py",
@@ -361,7 +361,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813140,
+      "ts_ms": 1785262734332,
       "event": "boot_ok",
       "feature_id": "pipeline_platform",
       "message": "engines/pipeline_platform",
@@ -371,7 +371,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813143,
+      "ts_ms": 1785262734334,
       "event": "skipped",
       "feature_id": "ai_director",
       "message": "disabled",
@@ -381,7 +381,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813145,
+      "ts_ms": 1785262734337,
       "event": "skipped",
       "feature_id": "ai_assistant",
       "message": "disabled",
@@ -391,7 +391,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813147,
+      "ts_ms": 1785262734340,
       "event": "boot_ok",
       "feature_id": "user_recording",
       "message": "api/recording_api.py",
@@ -401,7 +401,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813149,
+      "ts_ms": 1785262734343,
       "event": "skipped",
       "feature_id": "advanced_adaptation",
       "message": "disabled",
@@ -411,7 +411,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813151,
+      "ts_ms": 1785262734346,
       "event": "boot_ok",
       "feature_id": "live_translation",
       "message": "engines/live",
@@ -421,7 +421,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813154,
+      "ts_ms": 1785262734348,
       "event": "skipped",
       "feature_id": "live_stream",
       "message": "disabled",
@@ -431,7 +431,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813156,
+      "ts_ms": 1785262734350,
       "event": "skipped",
       "feature_id": "ai_studio",
       "message": "disabled",
@@ -441,7 +441,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813159,
+      "ts_ms": 1785262734352,
       "event": "skipped",
       "feature_id": "voice_trainer",
       "message": "disabled",
@@ -451,7 +451,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813161,
+      "ts_ms": 1785262734354,
       "event": "skipped",
       "feature_id": "singing_trainer",
       "message": "disabled",
@@ -461,7 +461,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813163,
+      "ts_ms": 1785262734357,
       "event": "skipped",
       "feature_id": "realtime_interpreter",
       "message": "disabled",
@@ -471,7 +471,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813165,
+      "ts_ms": 1785262734362,
       "event": "skipped",
       "feature_id": "screen_dub",
       "message": "disabled",
@@ -481,7 +481,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813167,
+      "ts_ms": 1785262734364,
       "event": "skipped",
       "feature_id": "advanced_voice_cloning",
       "message": "disabled",
@@ -491,7 +491,7 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813169,
+      "ts_ms": 1785262734366,
       "event": "boot_ok",
       "feature_id": "cloud_platform",
       "message": "engines/cloud",
@@ -501,11 +501,11 @@
       "meta": {}
     },
     {
-      "ts_ms": 1785260813172,
+      "ts_ms": 1785262734368,
       "event": "bootstrap_done",
       "feature_id": "",
-      "message": "{\"ok\": true, \"loaded\": [\"core\", \"translation\", \"tts\", \"dubbing\", \"audio\", \"source_separation\", \"video\", \"voice_ducking\", \"ui\", \"enterprise_translation\", \"overflow_inspector\", \"segment_normalizer\", \"smart_segmentation\", \"word_timing\", \"adaptive_segmentation\", \"meaning_fit\", \"meaning_fit_before_lock\", \"meaning_fit_expand\", \"meaning_fit_shorten\", \"professional_dubbing\", \"semantic_v3\", \"voice_studio\", \"ocr\", \"dub_studio\", \"rasm\", \"developer_tools\", \"translation_inspector\", \"pipeline_inspector\", \"pipeline_platform\", \"user_recording\", \"live_translation\", \"cloud_platform\"], \"failed\": [], \"duration_ms\": 164.3}",
-      "duration_ms": 164.3,
+      "message": "{\"ok\": true, \"loaded\": [\"core\", \"translation\", \"tts\", \"dubbing\", \"audio\", \"source_separation\", \"video\", \"voice_ducking\", \"ui\", \"enterprise_translation\", \"overflow_inspector\", \"segment_normalizer\", \"smart_segmentation\", \"word_timing\", \"adaptive_segmentation\", \"meaning_fit\", \"meaning_fit_before_lock\", \"meaning_fit_expand\", \"meaning_fit_shorten\", \"professional_dubbing\", \"semantic_v3\", \"voice_studio\", \"ocr\", \"dub_studio\", \"rasm\", \"developer_tools\", \"translation_inspector\", \"pipeline_inspector\", \"pipeline_platform\", \"user_recording\", \"live_translation\", \"cloud_platform\"], \"failed\": [], \"duration_ms\": 162.54}",
+      "duration_ms": 162.54,
       "memory_mb": null,
       "error": null,
       "meta": {}

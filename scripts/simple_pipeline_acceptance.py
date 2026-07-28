@@ -336,6 +336,32 @@ def main() -> int:
         except Exception:
             pass
         out["pipeline"]["tts_speedup"] = _speed
+        # Stage 7 MT speedup metrics
+        _mt = {
+            "mt_wall_sec": info.get("mt_wall_sec"),
+            "mt_segments": info.get("mt_segments"),
+            "mt_batch_size": info.get("mt_batch_size"),
+            "mt_calls": info.get("mt_calls"),
+            "mt_engine": info.get("mt_engine"),
+            "mt_cache_hits": info.get("mt_cache_hits"),
+            "mt_cache_misses": info.get("mt_cache_misses"),
+            "mt_concurrency_used": info.get("mt_concurrency_used"),
+            "mt_retries": info.get("mt_retries"),
+            "mt_path": info.get("mt_path"),
+            "detail": info.get("mt_speedup"),
+        }
+        try:
+            _mf = APP_DIR / "output" / f"mt_speedup_{task_id}.json"
+            if _mf.is_file():
+                _md = json.loads(_mf.read_text(encoding="utf-8"))
+                for k, v in _md.items():
+                    if _mt.get(k) in (None, "", {}) and v is not None:
+                        _mt[k] = v
+                if isinstance(_md.get("mt_wall_sec"), (int, float)):
+                    _mt["mt_wall_sec"] = _md.get("mt_wall_sec")
+        except Exception:
+            pass
+        out["pipeline"]["mt_speedup"] = _mt
         # Stage timings from pipeline_timing JSON if present
         try:
             from pathlib import Path as _P
@@ -351,6 +377,9 @@ def main() -> int:
         out["checks"]["tts_concurrency_ok"] = int(
             info.get("tts_concurrency_used") or 0
         ) >= 5 or int(info.get("tts_segments_total") or 0) <= 3
+        out["checks"]["mt_metrics_present"] = isinstance(
+            _mt.get("mt_wall_sec"), (int, float)
+        )
         # Cache replay: re-synth same finals → expect cache hits
         try:
             from engines.tts_cache import default_cache_dir
@@ -399,6 +428,47 @@ def main() -> int:
         except Exception as _creplay:
             out["pipeline"]["tts_cache_replay_error"] = str(_creplay)
             out["checks"]["tts_cache_ok"] = False
+        # Stage 7 MT cache replay on source lines
+        try:
+            from engines.mt_batch import translate_segments_batch
+            from engines.mt_cache import default_cache_dir as _mt_cdir
+
+            srcs = []
+            for s in sd:
+                if not isinstance(s, dict):
+                    continue
+                src = str(
+                    s.get("original")
+                    or s.get("original_text")
+                    or s.get("source_text")
+                    or s.get("whisper_text")
+                    or ""
+                ).strip()
+                if src:
+                    srcs.append(src)
+            if not srcs:
+                srcs = [
+                    str(x or "").strip()
+                    for x in (info.get("source_segments") or [])
+                    if str(x or "").strip()
+                ]
+            if srcs:
+                _tr2, st_mt = translate_segments_batch(
+                    srcs,
+                    str(info.get("source_lang") or "en"),
+                    str(info.get("target_lang") or "uk"),
+                    batch_size=10,
+                    cache_dir=_mt_cdir(),
+                    app_dir=APP_DIR,
+                    prefer_marian=True,
+                )
+                out["pipeline"]["mt_cache_replay"] = st_mt
+                out["checks"]["mt_cache_replay_hits"] = int(st_mt.get("mt_cache_hits") or 0)
+                out["checks"]["mt_cache_ok"] = int(st_mt.get("mt_cache_hits") or 0) > 0
+                out["checks"]["mt_parity_ok"] = len(_tr2) == len(srcs)
+        except Exception as _mreplay:
+            out["pipeline"]["mt_cache_replay_error"] = str(_mreplay)
+            out["checks"]["mt_cache_ok"] = False
     except Exception as exc:
         out["pipeline"]["info_error"] = str(exc)
 

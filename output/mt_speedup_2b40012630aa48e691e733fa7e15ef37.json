@@ -1,0 +1,13 @@
+{
+  "task_id": "2b40012630aa48e691e733fa7e15ef37",
+  "mt_wall_sec": 0.0,
+  "mt_segments": 10,
+  "mt_batch_size": 0,
+  "mt_calls": 0,
+  "mt_engine": "job_cache",
+  "mt_cache_hits": 10,
+  "mt_cache_misses": 0,
+  "mt_concurrency_used": 1,
+  "mt_retries": 0,
+  "mt_path": "job_translate_cache"
+}

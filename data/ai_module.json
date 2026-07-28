@@ -17,36 +17,6 @@
   },
   "install_log": [
     {
-      "ts": "2026-07-15T09:08:38.430950+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-15T14:53:37.488596+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-15T14:53:39.267955+00:00",
-      "level": "info",
-      "message": "Headless AI server started"
-    },
-    {
-      "ts": "2026-07-15T14:53:46.810149+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-16T15:18:12.215412+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-16T16:32:27.018163+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
       "ts": "2026-07-16T22:36:15.412367+00:00",
       "level": "info",
       "message": "Backend GUI/launcher suppressed (headless mode)"
@@ -1013,6 +983,36 @@
     },
     {
       "ts": "2026-07-28T17:46:55.750163+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-28T18:12:52.919931+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-28T18:12:52.967854+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-28T18:12:54.084244+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-28T18:18:56.132423+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-07-28T18:18:56.181750+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-07-28T18:18:56.793506+00:00",
       "level": "info",
       "message": "Backend GUI/launcher suppressed (headless mode)"
     }

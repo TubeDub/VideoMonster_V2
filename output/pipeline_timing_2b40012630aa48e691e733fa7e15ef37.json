@@ -1,0 +1,19 @@
+{
+  "task_id": "2b40012630aa48e691e733fa7e15ef37",
+  "updated_at": "2026-07-28T18:23:59.324621+00:00",
+  "total_sec": 292.187,
+  "stages": {
+    "extract": 1.004,
+    "whisper": 17.112,
+    "translation": 0.0,
+    "natural": 0.0,
+    "validation": 0.0,
+    "translation_post": 0.0,
+    "tts": 2.062,
+    "slot_fit": 2.654,
+    "timing": 0.0,
+    "mux": 0.0,
+    "export": 0.0
+  },
+  "meta": {}
+}

@@ -213,13 +213,8 @@ def save_translate_cache(
     engine: str = "",
     quality_score: float = 0.0,
 ) -> None:
-    key = segments_fingerprint(
-        segments,
-        src_lang,
-        tgt_lang,
-        route_label=route_label,
-        engine=engine,
-    )
+    # Key must match load_translate_cache (src+tgt+segments only) or warm hits never fire.
+    key = segments_fingerprint(segments, src_lang, tgt_lang)
     path = _cache_root(app_dir) / "translate" / f"{key}.json"
     _write_json(
         path,

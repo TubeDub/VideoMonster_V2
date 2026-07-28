@@ -1,0 +1,54 @@
+=== DUBBING ENGINE REPORT task=8a510b5f014642489b6f6aa0a5467b3e run=1dabe752 ===
+lang=uk  segments=10  elapsed=0.44s
+adapted=2  skipped=0  strategies={'direct': 8, 'adapted': 0, 'video_adapt': 0, 'merge_next': 2, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=6281ms slot=8626ms
+       IN : Джордж молодший справді був дуже розумною дитиною, але також дуже легко відволік
+       OUT: Джордж молодший справді був ду́же розумною дитиною, але́ тако́ж ду́же легко відв
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr
+  [✓] seg#01 strategy=merge_next pred=13973ms slot=11764ms
+       IN : У той момент батько купив йому маленьку італійську машину, яка називається фіат,
+       OUT: У той момент батько купив йому маленьку італійську машину, яка називається фіат,
+       [stress] ok
+       [timing] strategy=merge_next pred=13973ms slot=11764ms prev_end=8626ms overflow=18.8% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:FIAT; missing_entity:Italian
+  [✓] seg#02 strategy=direct pred=14251ms slot=18760ms
+       IN : Джордж прийшов на цей перетин, де він справді був біля свого дому, і він почав п
+       OUT: Джордж прийшов на цей перетин, де ві́н справді був біля свого дому, і ві́н почав
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#03 strategy=direct pred=8076ms slot=9318ms
+       IN : Через два тижні Джордж молодший лежав у лікарняному ліжку у реанімаційному відді
+       OUT: Че́рез два тижні Джордж молодший лежав у лікарняному ліжку у реанімаційному відд
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#04 strategy=direct pred=6361ms slot=7958ms
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; stress_not_applied
+  [✓] seg#05 strategy=direct pred=12265ms slot=12360ms
+       IN : Через два роки Джордж молодший повністю одужав від поранень, стояв на фінішній л
+       OUT: Че́рез два роки Джордж молодший повністю одужав від поранень, стояв на фінішній 
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#06 strategy=direct pred=4823ms slot=6102ms
+       IN : Джордж молодший зрештою вирішив, що не хоче більше керувати автом.
+       OUT: Джордж молодший зрештою вирішив, що не хоче бі́льше керувати автом.
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr
+  [✓] seg#07 strategy=merge_next pred=5656ms slot=4848ms
+       IN : Замість цього, він взяв цю камеру і повернувся в своє старе хобі фотографії.
+       OUT: Замість цього, ві́н взяв цю камеру і повернувся в своє старе хобі фотографії.
+       [stress] ok
+       [timing] strategy=merge_next pred=5656ms slot=4848ms prev_end=86961ms overflow=16.7% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#08 strategy=direct pred=8781ms slot=9169ms
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:University of Southern California; missing_entity:California; missing_entity:Southern California; stress_
+  [✓] seg#09 strategy=direct pred=5448ms slot=7284ms
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:Smittelaged Man; stress_not_applied

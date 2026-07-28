@@ -1,0 +1,240 @@
+{
+  "task_id": "2b40012630aa48e691e733fa7e15ef37",
+  "created_at": "2026-07-28T18:19:07+00:00",
+  "agents": [
+    {
+      "agent_name": "Planner/v3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "LOCAL_ONLY",
+      "fallback_used": true,
+      "timestamp": "2026-07-28T18:19:07+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "AudioExtraction",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "extracted",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:19:08+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 902.2,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_b4078caf73.mp4",
+        "audio_tracks": 1
+      },
+      "output_metrics": {
+        "output_path": "output\\sessions\\2b40012630aa48e691e733fa7e15ef37\\2b400126_extracted.mp3",
+        "report_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\diagnostics\\2b40012630aa48e691e733fa7e15ef37\\audio_extraction_report.json",
+        "ffmpeg_returncode": 0
+      }
+    },
+    {
+      "agent_name": "Whisper/STT",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "detected_lang=en",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:19:25+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Translation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "cache",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:19:26+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "VoicePrep/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "voice_prep_validated",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:19:31+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 26.2,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segment_count": 10
+      },
+      "output_metrics": {
+        "ready_count": 10
+      }
+    },
+    {
+      "agent_name": "voice_preparation",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:19:31+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 26.2,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {
+        "segments": 10
+      },
+      "output_metrics": {
+        "ready_count": 10,
+        "segment_count": 10,
+        "input_summary": {
+          "segment_count": 10
+        },
+        "output_summary": {
+          "ready_count": 10
+        }
+      }
+    },
+    {
+      "agent_name": "ArchitectureValidation/4.3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": null,
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:19:31+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "peer_returns": 30,
+        "active_agents": 1,
+        "contract_violations": 0,
+        "ux_validation_passed": true
+      }
+    },
+    {
+      "agent_name": "SlotFit",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "total=10 compressed=10 overflow=0",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:20:04+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "VoiceVerification/v1",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "passed=0/10",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:23:27+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 30,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "segment_count": 10,
+        "passed_count": 0,
+        "failed_count": 10,
+        "retries": 30
+      }
+    },
+    {
+      "agent_name": "StudioReady",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "pipeline_complete_before_mix",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:23:32+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Mix",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "output=video_b4078caf73_OUTPUT_2b400126.mp4",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:23:59+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Mix",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "output=video_b4078caf73_OUTPUT_2b400126.mp4",
+      "fallback_used": false,
+      "timestamp": "2026-07-28T18:24:23+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    }
+  ],
+  "segment_attention": [],
+  "summary": {
+    "total_agents": 12,
+    "failed_agents": 0,
+    "fallback_used": 1,
+    "warnings": 0,
+    "total_execution_time_ms": 954.6,
+    "total_llm_calls": 0
+  },
+  "saved_at": "2026-07-28T18:24:23+00:00"
+}

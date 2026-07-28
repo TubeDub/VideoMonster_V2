@@ -9545,12 +9545,241 @@ def _run_pipeline_inner(
                         },
                     )
                     task["info"]["translation_trace_log"] = trace.path
+                    # Stage 7 metrics + skip streaming text on Simple warm hit.
+                    _mt_cache_stats = {
+                        "mt_wall_sec": 0.0,
+                        "mt_segments": len(segments),
+                        "mt_batch_size": 0,
+                        "mt_calls": 0,
+                        "mt_engine": "job_cache",
+                        "mt_cache_hits": len(segments),
+                        "mt_cache_misses": 0,
+                        "mt_concurrency_used": 1,
+                        "mt_retries": 0,
+                        "mt_path": "job_translate_cache",
+                    }
+                    task["info"]["mt_speedup"] = dict(_mt_cache_stats)
+                    for _k, _v in _mt_cache_stats.items():
+                        task["info"][_k] = _v
+                    if task["info"].get("simple_pipeline") or task["info"].get(
+                        "happy_path"
+                    ):
+                        task["info"]["tps_skip_orchestrator"] = True
+                    if translate_meta is not None:
+                        translate_meta.append(
+                            {
+                                "pipeline": "cache_hit",
+                                "translation_sec": 0.0,
+                                "marian_sec": 0.0,
+                                **_mt_cache_stats,
+                            }
+                        )
+                try:
+                    import json as _json_s7c
+
+                    (APP_DIR / "output" / f"mt_speedup_{task_id}.json").write_text(
+                        _json_s7c.dumps(
+                            {"task_id": task_id, **_mt_cache_stats},
+                            ensure_ascii=False,
+                            indent=2,
+                        ),
+                        encoding="utf-8",
+                    )
+                except Exception:
+                    pass
             else:
                 with STATE_LOCK:
                     _manifest_path = (AUTO_TASKS.get(task_id, {}).get("info") or {}).get(
                         "manifest_path"
                     )
-                if _manifest_path and Path(_manifest_path).is_file():
+                    _info_mt_gate = dict(task.get("info") or {})
+                _simple_mt_fast = bool(
+                    _info_mt_gate.get("simple_pipeline")
+                    or _info_mt_gate.get("happy_path")
+                )
+                _stage7_done = False
+                # Stage 7: Simple skips AI-Core translation agent (deep-translator +
+                # heavy retries) — batch MT + disk cache, 1:1 parity.
+                if _simple_mt_fast:
+                    try:
+                        from engines.mt_batch import translate_segments_batch
+                        from engines.mt_cache import default_cache_dir
+                        from engines.translation_quality_log import (
+                            synthesize_audits_from_segments,
+                        )
+
+                        t_mt0 = time.perf_counter()
+
+                        def _mt_prog(done: int, total: int) -> None:
+                            frac = done / max(total, 1)
+                            with STATE_LOCK:
+                                t = AUTO_TASKS.get(task_id)
+                                if t and t.get("status") == "running":
+                                    t["progress"] = round(55.0 + frac * 8.0, 1)
+                            _update_progress_detail(
+                                task_id,
+                                phase="translate",
+                                segments_done=done,
+                                total_segments=total,
+                                operation="translation",
+                                live_message="Перевод: Stage7 batch MT…",
+                            )
+
+                        segments, _mt_stats = translate_segments_batch(
+                            list(source_segments_snapshot),
+                            translation_source_lang,
+                            target_lang,
+                            batch_size=10,
+                            cache_dir=default_cache_dir(),
+                            app_dir=APP_DIR,
+                            prefer_marian=True,
+                            on_progress=_mt_prog,
+                        )
+                        if len(segments) != len(source_segments_snapshot):
+                            raise RuntimeError(
+                                f"stage7 mt parity: {len(segments)}!="
+                                f"{len(source_segments_snapshot)}"
+                            )
+                        translate_method = "stage7_batch_cache"
+                        _stage7_done = True
+                        _mt_stats = dict(_mt_stats or {})
+                        _mt_stats["mt_wall_sec"] = round(
+                            float(
+                                _mt_stats.get("mt_wall_sec")
+                                or (time.perf_counter() - t_mt0)
+                            ),
+                            3,
+                        )
+                        meta = {
+                            "pipeline": "stage7_batch_cache",
+                            "naturalizer_executed": False,
+                            "naturalizer_applied": False,
+                            "timing_aware_executed": False,
+                            "timing_aware_applied": False,
+                            "translation_sec": float(_mt_stats.get("mt_wall_sec") or 0),
+                            "marian_sec": float(_mt_stats.get("mt_wall_sec") or 0),
+                            "naturalizer_sec": 0.0,
+                            "llm_adaptation_sec": 0.0,
+                            "engines": [str(_mt_stats.get("mt_engine") or "batch")],
+                            "groups": int(_mt_stats.get("mt_calls") or 0),
+                            **{
+                                k: _mt_stats.get(k)
+                                for k in (
+                                    "mt_wall_sec",
+                                    "mt_segments",
+                                    "mt_batch_size",
+                                    "mt_calls",
+                                    "mt_engine",
+                                    "mt_cache_hits",
+                                    "mt_cache_misses",
+                                    "mt_concurrency_used",
+                                    "mt_retries",
+                                    "mt_path",
+                                )
+                            },
+                        }
+                        if translate_meta is not None:
+                            translate_meta.append(meta)
+                        stage7_audits = synthesize_audits_from_segments(
+                            source_segments_snapshot,
+                            segments,
+                            translation_source_lang,
+                            target_lang,
+                            engine=str(_mt_stats.get("mt_engine") or "stage7"),
+                        )
+                        with STATE_LOCK:
+                            info_s7 = task.setdefault("info", {})
+                            info_s7["translate_method"] = translate_method
+                            info_s7["mt_path"] = "stage7_batch_cache"
+                            info_s7["translation_audits"] = [
+                                {k: v for k, v in a.__dict__.items()}
+                                for a in stage7_audits
+                            ]
+                            info_s7["mt_speedup"] = dict(_mt_stats)
+                            for _k, _v in _mt_stats.items():
+                                info_s7[_k] = _v
+                            info_s7["translation_agent_status"] = "success"
+                            info_s7["tps_skip_orchestrator"] = True
+                            _sd0 = list(info_s7.get("segments_data") or [])
+                            if not _sd0 or len(_sd0) != len(segments):
+                                _sd0 = [
+                                    {
+                                        "index": i,
+                                        "text": str(segments[i] or ""),
+                                        "translated_text": str(segments[i] or ""),
+                                        "plain_text": str(segments[i] or ""),
+                                        "original": str(
+                                            source_segments_snapshot[i]
+                                            if i < len(source_segments_snapshot)
+                                            else ""
+                                        ),
+                                    }
+                                    for i in range(len(segments))
+                                ]
+                            else:
+                                for i, row in enumerate(_sd0):
+                                    if not isinstance(row, dict):
+                                        continue
+                                    row["translated_text"] = str(segments[i] or "")
+                                    row["text"] = str(segments[i] or "")
+                                    row["plain_text"] = str(segments[i] or "")
+                            info_s7["segments_data"] = _sd0
+                        try:
+                            import json as _json_s7
+
+                            (
+                                APP_DIR / "output" / f"mt_speedup_{task_id}.json"
+                            ).write_text(
+                                _json_s7.dumps(
+                                    {"task_id": task_id, **dict(_mt_stats)},
+                                    ensure_ascii=False,
+                                    indent=2,
+                                ),
+                                encoding="utf-8",
+                            )
+                        except Exception:
+                            pass
+                        save_translate_cache(
+                            APP_DIR,
+                            source_segments_snapshot,
+                            translation_source_lang,
+                            target_lang,
+                            segments,
+                            route_label="stage7",
+                            engine=str(_mt_stats.get("mt_engine") or "batch"),
+                            quality_score=0.0,
+                        )
+                        profiler.set_meta(translate_cache="stage7")
+                        logger.info(
+                            "Task %s: Stage7 MT wall=%.2fs calls=%s hits=%s misses=%s engine=%s",
+                            task_id,
+                            float(_mt_stats.get("mt_wall_sec") or 0),
+                            _mt_stats.get("mt_calls"),
+                            _mt_stats.get("mt_cache_hits"),
+                            _mt_stats.get("mt_cache_misses"),
+                            _mt_stats.get("mt_engine"),
+                        )
+                    except Exception as _s7_exc:
+                        logger.warning(
+                            "Task %s: Stage7 MT failed (%s) — fallback prepare_translated",
+                            task_id,
+                            _s7_exc,
+                        )
+                        with STATE_LOCK:
+                            task["info"]["mt_stage7_error"] = str(_s7_exc)
+                            task["info"]["tps_skip_orchestrator"] = True
+                        segments = _prepare_translated_segments(
+                            task_id,
+                            source_segments_snapshot,
+                            timing_map_for_translate,
+                            translation_source_lang,
+                            target_lang,
+                            ui_lang,
+                            translate_meta=translate_meta,
+                        )
+                        translate_method = "stage7_fallback_prepare"
+                        _stage7_done = True
+                if (not _stage7_done) and _manifest_path and Path(_manifest_path).is_file():
                     _agent_segments = _build_agent_segments(
                         source_segments_snapshot, timing_map_for_translate
                     )
@@ -9653,7 +9882,7 @@ def _run_pipeline_inner(
                         "translation_agent_v1" if _used_agent else "naturalizer_per_group_fallback"
                     )
                     profiler.set_meta(translate_cache="agent")
-                else:
+                elif not _stage7_done:
                     _conveyor_done = False
                     if not skip_tts:
                         try:
@@ -10166,6 +10395,8 @@ def _run_pipeline_inner(
                     _tps_enabled = False
                     with STATE_LOCK:
                         task["info"]["tps_skipped"] = "happy_path"
+                        # Stage 7: do not fall into streaming_text orchestrator (~90–110s).
+                        task["info"]["tps_skip_orchestrator"] = True
                     logger.info(
                         "Task %s: TPS skipped (happy_path — text_slot_fit only)",
                         task_id,

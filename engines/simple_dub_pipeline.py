@@ -90,6 +90,9 @@ def apply_simple_pipeline_policy(
         or "edge-offline",
         # Segmentation: Happy Path glue, never adaptive re-split.
         "segmentation_mode": "happy_path",
+        # Stage 7: never fall into AI-Core streaming_text after MT.
+        "tps_skip_orchestrator": True,
+        "mt_path": "stage7_batch_cache",
     }
     task_info.update(policy)
     logger.info(
