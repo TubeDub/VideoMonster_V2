@@ -1,0 +1,158 @@
+{
+  "project_id": "da8cc67e2a124c96a1c4db910a088172",
+  "locked": false,
+  "speakers": {
+    "seg-0": {
+      "speaker_uuid": "seg-0",
+      "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    },
+    "seg-1": {
+      "speaker_uuid": "seg-1",
+      "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    },
+    "seg-2": {
+      "speaker_uuid": "seg-2",
+      "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    },
+    "seg-3": {
+      "speaker_uuid": "seg-3",
+      "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    },
+    "seg-4": {
+      "speaker_uuid": "seg-4",
+      "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    },
+    "seg-5": {
+      "speaker_uuid": "seg-5",
+      "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    },
+    "seg-6": {
+      "speaker_uuid": "seg-6",
+      "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "ea350f18-66e1-50a6-85a5-0e46a0b14a9a"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    },
+    "seg-7": {
+      "speaker_uuid": "seg-7",
+      "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94",
+      "style_profile": "professional",
+      "emotion_profile": "calm",
+      "history": [
+        {
+          "event": "assign",
+          "voice_uuid": "a3880b2a-3514-53b2-a624-adf3251bcc94"
+        },
+        {
+          "event": "use",
+          "emotion": "calm",
+          "tempo": 0.95
+        }
+      ],
+      "consistency_score": 100.0,
+      "language": "uk"
+    }
+  }
+}

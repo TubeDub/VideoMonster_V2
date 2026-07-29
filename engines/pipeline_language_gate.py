@@ -372,6 +372,20 @@ def heal_phrase_loops_in_segments(
         if seg.get("merged_into") is not None:
             continue
         primary = str(seg.get("text") or seg.get("plain_text") or "").strip()
+        # Strip invented Stage-5 pacing pads before loop detection.
+        try:
+            from engines.text_slot_fit import strip_slot_pad_fillers
+
+            cleaned_primary = strip_slot_pad_fillers(primary)
+            if cleaned_primary != primary and cleaned_primary:
+                for key in _PHRASE_LOOP_TEXT_KEYS:
+                    cur = str(seg.get(key) or "")
+                    if cur:
+                        seg[key] = strip_slot_pad_fillers(cur)
+                primary = cleaned_primary
+                seg["slot_pad_stripped"] = True
+        except Exception:
+            pass
         # Detect loops a bit earlier (min_repeats=2) so Review/TTS catch
         # «у той момент у той момент» before synthesis.
         looped = bool(primary) and has_phrase_loop(primary, min_repeats=2)

@@ -419,37 +419,41 @@ def _rule_expand_once(text: str, lang: str, source_hint: str = "") -> str:
         if trial != cand and (_is_complete_thought(trial) or _COMPLETE_END.search(trial)):
             return trial
 
-    # Soft restatement of the final sentence using source hint length cue only —
-    # append a short echo of the last clause already present (no new entities).
-    parts = _split_sentences(cand)
-    if parts:
-        last = parts[-1].rstrip(".!?…")
-        words = last.split()
-        if 4 <= len(words) <= 18:
-            echo = " ".join(words[: min(6, len(words))])
-            if lang0 == "uk":
-                tail = f" Саме так: {echo.lower()}."
-            elif lang0 == "ru":
-                tail = f" Именно так: {echo.lower()}."
-            else:
-                tail = f" That is: {echo.lower()}."
-            trial = (cand.rstrip() + tail).strip()
-            # Avoid silly echo if last sentence already short / already echoed.
-            if "Саме так:" not in cand and "Именно так:" not in cand and "That is:" not in cand:
-                if _is_complete_thought(trial) or _COMPLETE_END.search(trial):
-                    return trial
-
-    # If English source is clearly longer, add a neutral pacing clause once.
-    hint = " ".join(str(source_hint or "").split()).strip()
-    if hint and len(hint.split()) > len(t.split()) + 4:
-        if lang0 == "uk" and not cand.endswith(("...", "…")):
-            trial = cand.rstrip(".!?…") + " — ось як це було тоді."
-            if _is_complete_thought(trial) or trial.endswith("."):
-                return trial if trial.endswith(".") else trial + "."
-        if lang0 == "ru" and not cand.endswith(("...", "…")):
-            trial = cand.rstrip(".!?…") + " — вот как это было тогда."
-            return trial if trial.endswith(".") else trial + "."
+    # Do NOT invent pacing filler ("ось як це було тоді" / "Саме так: …").
+    # Those poisoned Review Final and looped under repeated expand (George Jr. RCA).
+    # Underfill is resolved by mild intensifiers above and/or slot shrink in timing_fit.
     return cand
+
+
+def strip_slot_pad_fillers(text: str) -> str:
+    """Remove Stage-5 invented pacing pads from Review/TTS text."""
+    t = " ".join(str(text or "").split()).strip()
+    if not t:
+        return t
+    # Repeated pacing clause (UK/RU/EN)
+    for pat in (
+        r"(?:,?\s*—\s*)?ось як це було тоді\.?",
+        r"(?:,?\s*—\s*)?вот как это было тогда\.?",
+        r"(?:,?\s*—\s*)?that's how it was then\.?",
+        r"(?:,?\s*—\s*)?that is how it was then\.?",
+    ):
+        t = re.sub(pat, "", t, flags=re.IGNORECASE)
+    # Echo restatements
+    for pat in (
+        r"\s*Саме так:\s*[^.!?…]+[.!?…]?",
+        r"\s*Именно так:\s*[^.!?…]+[.!?…]?",
+        r"\s*That is:\s*[^.!?…]+[.!?…]?",
+    ):
+        t = re.sub(pat, "", t, flags=re.IGNORECASE)
+    t = re.sub(r"\s{2,}", " ", t)
+    t = re.sub(r"\s+([,.;:!?])", r"\1", t)
+    t = re.sub(r"([,;:]){2,}", r"\1", t)
+    t = t.strip(" ,;—-")
+    if t and t[-1] not in ".!?…":
+        # Keep terminal punctuation if we stripped a trailing pad after a clause.
+        if re.search(r"[.!?…]\s*$", str(text or "")):
+            pass
+    return " ".join(t.split()).strip()
 
 
 def expand_text_to_slot(
@@ -464,7 +468,7 @@ def expand_text_to_slot(
     Returns (text, reasons). Used before TTS on Happy Path / Simple.
     """
     reasons: list[str] = []
-    out = " ".join(str(text or "").split()).strip()
+    out = strip_slot_pad_fillers(" ".join(str(text or "").split()).strip())
     slot = max(0, int(slot_ms or 0))
     if not out or slot <= 0:
         return out, reasons
@@ -517,6 +521,10 @@ def expand_text_to_slot(
         if "rule_expand" not in reasons:
             reasons.append("rule_expand")
 
+    cleaned = strip_slot_pad_fillers(out)
+    if cleaned != out:
+        reasons.append("strip_pad_fillers")
+        out = cleaned
     return out, reasons
 
 
@@ -540,7 +548,7 @@ def fit_text_to_slot(
     allow_expand: bool = True,
 ) -> TextFitResult:
     """One Happy Path step: paraphrase length toward slot without chopping speech."""
-    original = " ".join(str(text or "").split()).strip()
+    original = strip_slot_pad_fillers(" ".join(str(text or "").split()).strip())
     slot = max(0, int(slot_ms or 0))
     before = estimate_tts_ms(original, lang)
     if not original or slot <= 0:

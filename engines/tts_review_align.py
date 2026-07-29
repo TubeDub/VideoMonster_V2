@@ -208,10 +208,24 @@ def freeze_spoken_to_review_final(
     audits: list | None = None,
     source_segments: list[str] | None = None,
 ) -> list[str]:
-    """Return segment strings forced to Review Final (post-approval TTS freeze)."""
+    """Return segment strings forced to Review Final (post-approval TTS freeze).
+
+    Length is locked to ``segments_data`` when present so TTS groups cannot
+    reference indices past the live segment rows (2.zip IndexError RCA).
+    """
+    try:
+        from engines.text_slot_fit import strip_slot_pad_fillers
+    except Exception:
+
+        def strip_slot_pad_fillers(t: str) -> str:  # type: ignore[misc]
+            return " ".join(str(t or "").split()).strip()
+
     by_idx = _audit_by_index(audits or [])
     out: list[str] = []
-    n = max(len(segments or []), len(segments_data or []), max(by_idx.keys(), default=-1) + 1)
+    if segments_data:
+        n = len(segments_data)
+    else:
+        n = max(len(segments or []), max(by_idx.keys(), default=-1) + 1)
     for i in range(n):
         seg = segments_data[i] if i < len(segments_data) and isinstance(segments_data[i], dict) else {}
         row = by_idx.get(i) or {}
@@ -232,6 +246,7 @@ def freeze_spoken_to_review_final(
             or (segments[i] if i < len(segments) else "")
             or ""
         )
+        final = strip_slot_pad_fillers(final)
         if final:
             final = _restore_terminal(
                 final,

@@ -405,6 +405,49 @@ def main() -> int:
         out["checks"]["stt_no_vv_asr"] = str(
             info.get("voice_verification_skipped") or ""
         ) == "simple_stt_lock" or info.get("voice_verification_asr_allowed") is False
+        # Stage 9: single voice + no pad fillers
+        try:
+            from engines.simple_voice_lock import collect_unique_voices
+            from engines.text_slot_fit import strip_slot_pad_fillers
+
+            _voices = collect_unique_voices(sd)
+            out["pipeline"]["unique_voices"] = _voices
+            out["pipeline"]["unique_voices_used"] = int(
+                info.get("unique_voices_used") or len(_voices) or 0
+            )
+            out["pipeline"]["simple_voice_locked"] = bool(
+                info.get("simple_voice_locked")
+            )
+            out["pipeline"]["tts_voice"] = info.get("tts_voice") or info.get(
+                "pipeline_voice"
+            )
+            out["checks"]["voice_unique_ok"] = len(_voices) <= 1
+            out["checks"]["simple_voice_locked"] = bool(
+                info.get("simple_voice_locked")
+            )
+            pad_hits = 0
+            for s in sd:
+                if not isinstance(s, dict):
+                    continue
+                blob = " ".join(
+                    str(s.get(k) or "")
+                    for k in (
+                        "final_tts_text",
+                        "final_text",
+                        "tts_text",
+                        "text",
+                        "naturalized_text",
+                    )
+                )
+                if "ось як це було тоді" in blob.lower() or "Саме так:" in blob:
+                    pad_hits += 1
+                cleaned = strip_slot_pad_fillers(blob)
+                if "ось як це було тоді" in cleaned.lower():
+                    pad_hits += 1
+            out["checks"]["no_slot_pad_filler"] = pad_hits == 0
+            out["pipeline"]["slot_pad_filler_hits"] = pad_hits
+        except Exception as _v9:
+            out["pipeline"]["stage9_voice_error"] = str(_v9)
         # Warm STT cache probe (same uploaded video path + model knobs)
         try:
             from engines.pipeline_cache import load_whisper_cache

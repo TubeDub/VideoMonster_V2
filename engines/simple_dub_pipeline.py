@@ -104,6 +104,9 @@ def apply_simple_pipeline_policy(
         "stt_beam_size": 1,
         "stt_vad_filter": True,
         "stt_word_timestamps": False,
+        # Stage 9: one Edge voice for the whole Simple clip (no Ostap/Polina flip).
+        "simple_voice_locked": True,
+        "voice_platform_multi_speaker_allowed": False,
     }
     task_info.update(policy)
     try:

@@ -1,0 +1,69 @@
+{
+  "task_id": "da8cc67e2a124c96a1c4db910a088172",
+  "mt_wall_sec": 0.0,
+  "mt_segments": 9,
+  "mt_batch_size": 0,
+  "mt_calls": 0,
+  "mt_engine": "job_cache",
+  "mt_cache_hits": 9,
+  "mt_cache_misses": 0,
+  "mt_concurrency_used": 1,
+  "mt_retries": 0,
+  "mt_path": "mt_cache",
+  "translate_method": "mt_cache",
+  "translation_agent_path": false,
+  "llm_adaptation_used": false,
+  "simple_mt_locked": true,
+  "translation_timing": {
+    "marian_sec": 0.0,
+    "llm_adaptation_sec": 0.0,
+    "validation_sec": 0.0,
+    "post_processing_sec": 0.0,
+    "translation_total_sec": 0.0,
+    "segment_count": 9,
+    "marian_segments_done": 9,
+    "llm_segments_done": 0,
+    "current_subphase": "done",
+    "ui_buckets": {
+      "marian_mt": 0.0,
+      "llm_adaptation": 0.0,
+      "post_processing": 0.0
+    },
+    "phase_status": {
+      "marian_mt": "done",
+      "llm_adaptation": "skipped",
+      "post_processing": "skipped"
+    },
+    "hidden_buckets": [
+      "llm_adaptation",
+      "post_processing"
+    ],
+    "segment_stats": {
+      "marian_mt": {
+        "segments": 9,
+        "sec": 0.0,
+        "avg_sec_per_segment": 0.0,
+        "status": "done"
+      },
+      "llm_adaptation": {
+        "segments": 0,
+        "sec": 0.0,
+        "avg_sec_per_segment": 0.0,
+        "status": "skipped"
+      },
+      "post_processing": {
+        "segments": 0,
+        "sec": 0.0,
+        "avg_sec_per_segment": 0.0,
+        "status": "skipped"
+      }
+    },
+    "ui_labels": {
+      "marian_mt": "Кэш перевода",
+      "llm_adaptation": "Qwen / LLM Adaptation",
+      "post_processing": "Post-processing"
+    },
+    "llm_adaptation_used": false,
+    "simple_mt_locked": true
+  }
+}

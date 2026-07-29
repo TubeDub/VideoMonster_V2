@@ -38,12 +38,14 @@ def mt_cache_key(
     *,
     engine: str = "auto",
 ) -> str:
+    # v2: Marian oversized split — invalidate truncated v1 cache entries.
     payload = "|".join(
         [
             normalize_mt_cache_text(text),
             str(source_lang or "").strip().lower(),
             str(target_lang or "").strip().lower(),
             str(engine or "auto").strip().lower(),
+            "v2_osplit",
         ]
     )
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()

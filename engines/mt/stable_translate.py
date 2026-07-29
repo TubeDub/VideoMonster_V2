@@ -115,12 +115,30 @@ def translate_direct_marian(
     t0 = time.perf_counter()
     num_beams = 1 if use_stable_mt() else 4
 
-    try:
+    def _infer_one(piece: str) -> str:
         with _MARIAN_INFER_LOCK:
-            batch = tok([clean], return_tensors="pt", padding=True, truncation=True, max_length=512)
+            batch = tok(
+                [piece],
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=512,
+            )
             with torch.no_grad():
-                out = model.generate(**batch, max_length=512, num_beams=num_beams)
-            result = tok.decode(out[0], skip_special_tokens=True).strip()
+                out_ids = model.generate(**batch, max_length=512, num_beams=num_beams)
+            return tok.decode(out_ids[0], skip_special_tokens=True).strip()
+
+    try:
+        from engines.mt.oversized_guard import (
+            is_oversized_mt_unit,
+            translate_oversized_safely,
+        )
+
+        if is_oversized_mt_unit(clean):
+            result = translate_oversized_safely(clean, _infer_one)
+            meta["oversized_split"] = True
+        else:
+            result = _infer_one(clean)
     except Exception as exc:
         ms = (time.perf_counter() - t0) * 1000.0
         logger.error("[StableMT] infer failed seg=%s %s→%s: %s", segment_index, src, tgt, exc)
@@ -189,27 +207,61 @@ def translate_batch_marian(
 
     batch_texts = [cleaned[i] for i in non_empty_idx]
     try:
-        with _MARIAN_INFER_LOCK:
-            batch = tok(
-                batch_texts,
-                return_tensors="pt",
-                padding=True,
-                truncation=True,
-                max_length=512,
-            )
-            with torch.no_grad():
-                generated = model.generate(**batch, max_length=512, num_beams=num_beams)
-            decoded = [
-                tok.decode(row, skip_special_tokens=True).strip()
-                for row in generated
-            ]
+        from engines.mt.oversized_guard import (
+            is_oversized_mt_unit,
+            translate_oversized_safely,
+        )
+
+        # If any unit is oversized, translate those via split; batch the rest.
+        decoded_map: dict[int, str] = {}
+        oversized_idx: set[int] = set()
+        batch_idx: list[int] = []
+        batch_payload: list[str] = []
+        for i, src_text in zip(non_empty_idx, batch_texts):
+            if is_oversized_mt_unit(src_text):
+                oversized_idx.add(i)
+
+                def _infer_piece(piece: str, _tok=tok, _model=model, _beams=num_beams) -> str:
+                    with _MARIAN_INFER_LOCK:
+                        b = _tok(
+                            [piece],
+                            return_tensors="pt",
+                            padding=True,
+                            truncation=True,
+                            max_length=512,
+                        )
+                        with torch.no_grad():
+                            gen = _model.generate(**b, max_length=512, num_beams=_beams)
+                        return _tok.decode(gen[0], skip_special_tokens=True).strip()
+
+                decoded_map[i] = translate_oversized_safely(src_text, _infer_piece)
+            else:
+                batch_idx.append(i)
+                batch_payload.append(src_text)
+
+        if batch_payload:
+            with _MARIAN_INFER_LOCK:
+                batch = tok(
+                    batch_payload,
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=512,
+                )
+                with torch.no_grad():
+                    generated = model.generate(**batch, max_length=512, num_beams=num_beams)
+                decoded = [
+                    tok.decode(row, skip_special_tokens=True).strip()
+                    for row in generated
+                ]
+            for i, tr in zip(batch_idx, decoded):
+                decoded_map[i] = tr
     except Exception as exc:
         logger.error("[StableMT] batch infer failed: %s", exc)
         return [("", {"engine": "failed", "error": str(exc)}) for _ in cleaned]
 
     ms = (time.perf_counter() - t0) * 1000.0
     per_ms = ms / max(len(non_empty_idx), 1)
-    decoded_map = dict(zip(non_empty_idx, decoded))
     for i, src_text in enumerate(cleaned):
         if not src_text:
             out.append(("", {"engine": "none", "batch": True}))
@@ -223,6 +275,7 @@ def translate_batch_marian(
             "batch": True,
             "elapsed_ms": round(per_ms, 1),
             "engine_version": name,
+            "oversized_split": i in oversized_idx,
         }
         if result:
             score, qd = compute_quality_score(src_text, result, src_lang=src, tgt_lang=tgt)

@@ -1,0 +1,727 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "d5ac19b783ec46d4abc92bd9b20051ac",
+    "groups": 9,
+    "style_id": "professional",
+    "elapsed_sec": 3.73
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {},
+      "plain_text": "18-річний Джордж Молодший поїхав додому на вечерю по дорозі додому, але коли він їхав, Джордж молодший не міг не відчувати, що він справді боїться потрапити туди, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">18</emphasis>-річний <emphasis level=\"reduced\">Джордж Молодший</emphasis> поїхав додому на вечерю по дорозі додому,<break time=\"220ms\"/> але коли він їхав,<break time=\"220ms\"/> <emphasis level=\"reduced\">Джордж</emphasis> молодший не міг не відчувати,<break time=\"220ms\"/> що він справді боїться потрапити туди,<break time=\"220ms\"/> ось як це було тоді,<break time=\"220ms\"/> ось як це було тоді — ось як це було тоді.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-17%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "18",
+          "type": "number"
+        },
+        {
+          "word": "Джордж Молодший",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 16740,
+      "est_ms_after": 21282,
+      "fill_percent": 107.1,
+      "underfill": true,
+      "decisions": [
+        "underfill 84.3% → rate -17%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 75,
+        "tail_silence_ms": 0,
+        "speech_ms": 18940,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          85,
+          130,
+          143,
+          103,
+          92,
+          80
+        ],
+        "speech_ratio": 0.954,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 1,
+      "indices": [
+        1
+      ],
+      "voice_hint": {},
+      "plain_text": "І тоді його батько купив йому маленьку італійську машину Фіат, але його батько, незважаючи на те, що він був тим, хто дав йому Файта, він не захопився машинами свого сина.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">І тоді його батько купив йому маленьку італійську машину <emphasis level=\"reduced\">Фіат</emphasis>,<break time=\"220ms\"/> але його батько,<break time=\"220ms\"/> незважаючи на те,<break time=\"220ms\"/> що він був тим,<break time=\"220ms\"/> хто дав йому <emphasis level=\"reduced\">Файта</emphasis>,<break time=\"220ms\"/> він не захопився машинами свого сина.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Фіат",
+          "type": "name"
+        },
+        {
+          "word": "Файта",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 12666,
+      "est_ms_after": 16798,
+      "fill_percent": 84.6,
+      "underfill": true,
+      "decisions": [
+        "underfill 63.8% → rate -19%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 18765,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          93,
+          90,
+          95,
+          108,
+          112,
+          80,
+          83,
+          89
+        ],
+        "speech_ratio": 0.945,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 2,
+      "indices": [
+        2
+      ],
+      "voice_hint": {},
+      "plain_text": "Наприклад, чому ти не можеш зосередити свою увагу на інших речах.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Наприклад</emphasis>,<break time=\"220ms\"/> чому ти не можеш зосередити свою увагу на інших речах.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Наприклад",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 4814,
+      "est_ms_after": 6406,
+      "fill_percent": 32.3,
+      "underfill": true,
+      "decisions": [
+        "underfill 24.2% → rate -19%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 19216,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          108,
+          116,
+          105,
+          113
+        ],
+        "speech_ratio": 0.967,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 3,
+      "indices": [
+        3
+      ],
+      "voice_hint": {},
+      "plain_text": "І, по суті, кожна вечеря в наші дні стала величезним аргументом між батьком і сином, і Джордж прийшов на це перехрестя, де воно було прямо біля його дому і він почав робити поворот, коли він почув цей гучний звук, а потім все потемніло.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">І,<break time=\"220ms\"/> <emphasis level=\"moderate\">по суті</emphasis>,<break time=\"220ms\"/> <emphasis level=\"moderate\">кожна вечеря</emphasis> в наші дні стала величезним аргументом між батьком і сином,<break time=\"220ms\"/> і <emphasis level=\"reduced\">Джордж</emphasis> прийшов на це перехрестя,<break time=\"220ms\"/> де воно було прямо біля його дому і він почав робити поворот,<break time=\"220ms\"/> коли він почув цей гучний звук,<break time=\"220ms\"/> а потім все потемніло.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-13%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "кожна вечеря",
+          "type": "key_phrase"
+        },
+        {
+          "word": "по суті",
+          "type": "key_phrase"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 17481,
+      "est_ms_after": 21640,
+      "fill_percent": 108.9,
+      "underfill": true,
+      "decisions": [
+        "underfill 88.0% → rate -13%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 19433,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          110,
+          113
+        ],
+        "speech_ratio": 0.978,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 4,
+      "indices": [
+        4
+      ],
+      "voice_hint": {},
+      "plain_text": "Через два тижні Джордж молодший лежав у лікарняному ліжку у реанімаційному відділенні місцевої лікарні. Саме так: через два тижні джордж молодший лежав, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Через</emphasis> два тижні <emphasis level=\"reduced\">Джордж</emphasis> молодший лежав у лікарняному ліжку у реанімаційному відділенні місцевої лікарні.<break time=\"350ms\"/> <emphasis level=\"reduced\">Саме</emphasis> так:<break time=\"350ms\"/> через два тижні джордж молодший лежав,<break time=\"220ms\"/> ось як це було тоді,<break time=\"220ms\"/> ось як це було тоді — ось як це було тоді.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ":",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Через",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Саме",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 16000,
+      "est_ms_after": 20813,
+      "fill_percent": 104.8,
+      "underfill": true,
+      "decisions": [
+        "underfill 80.6% → rate -19%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 19194,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          80,
+          129,
+          92,
+          116,
+          109
+        ],
+        "speech_ratio": 0.966,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 5,
+      "indices": [
+        5
+      ],
+      "voice_hint": {},
+      "plain_text": "Через два роки Джордж молодший повністю одужав від поранень, стояв на фінішній лінії на гоночному треку і підняв фотоапарат, ось як це було тоді, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Через</emphasis> два роки <emphasis level=\"reduced\">Джордж</emphasis> молодший повністю одужав від поранень,<break time=\"220ms\"/> стояв на фінішній лінії на гоночному треку і підняв фотоапарат,<break time=\"220ms\"/> ось як це було тоді,<break time=\"220ms\"/> ось як це було тоді,<break time=\"220ms\"/> ось як це було тоді — ось як це було тоді.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Через",
+          "type": "name"
+        },
+        {
+          "word": "Джордж",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 15481,
+      "est_ms_after": 19886,
+      "fill_percent": 100.1,
+      "underfill": true,
+      "decisions": [
+        "underfill 77.9% → rate -19%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 19597,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          93,
+          88,
+          85
+        ],
+        "speech_ratio": 0.987,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 6,
+      "indices": [
+        6
+      ],
+      "voice_hint": {},
+      "plain_text": "Замість цього він взяв свою камеру і повернувся в своє старе хобі фотографії.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Замість</emphasis> цього він взяв свою камеру і повернувся в своє старе хобі фотографії.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Замість",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 5703,
+      "est_ms_after": 7203,
+      "fill_percent": 36.3,
+      "underfill": true,
+      "decisions": [
+        "underfill 28.7% → rate -19%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 19583,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          93,
+          88,
+          99
+        ],
+        "speech_ratio": 0.986,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 7,
+      "indices": [
+        7
+      ],
+      "voice_hint": {},
+      "plain_text": "Джордж молодший подав заяву на престижну кінематографічну програму в університеті Південної Каліфорнії, але після того, як відіслав заяву, він був упевнений.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Джордж</emphasis> молодший подав заяву на престижну кінематографічну програму в університеті <emphasis level=\"reduced\">Південної Каліфорнії</emphasis>,<break time=\"220ms\"/> але після того,<break time=\"220ms\"/> як відіслав заяву,<break time=\"220ms\"/> він був упевнений.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Південної Каліфорнії",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 11629,
+      "est_ms_after": 15040,
+      "fill_percent": 75.7,
+      "underfill": true,
+      "decisions": [
+        "underfill 58.5% → rate -19%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 18517,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          99,
+          84,
+          127,
+          93,
+          86,
+          99,
+          90,
+          152
+        ],
+        "speech_ratio": 0.932,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 8,
+      "indices": [
+        8
+      ],
+      "voice_hint": {},
+      "plain_text": "Джордж молодший підійшов до подіуму, щоб сфотографувати переможця, але коли він проходив туди, біля нього підійшов чоловік середнього віку, попросив Джорджа Молодшого про фотографію, а потім він, формально представив себе Хаскелом Уекслером, і він сказав, що він справді був кінематографом у Голлівуді і Джордж Молодший. розповів Хаскел про те, як він нещодавно подався до США, щоб спробувати потрапити до своєї кінематографії, і коли Хаскел почув це він сказав, ось як це було тоді, ось як це було тоді — ось як це було тоді.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Джордж</emphasis> молодший підійшов до подіуму,<break time=\"184ms\"/> щоб сфотографувати переможця,<break time=\"184ms\"/> але коли він проходив туди,<break time=\"184ms\"/> біля нього підійшов чоловік середнього віку,<break time=\"184ms\"/> попросив <emphasis level=\"reduced\">Джорджа Молодшого</emphasis> про фотографію,<break time=\"184ms\"/> а<break time=\"184ms\"/> потім він,<break time=\"184ms\"/> формально представив себе <emphasis level=\"reduced\">Хаскелом Уекслером</emphasis>,<break time=\"184ms\"/> і він сказав,<break time=\"184ms\"/> що він справді був кінематографом у Голлівуді і Джордж Молодший.<break time=\"350ms\"/> розповів Хаскел про те,<break time=\"184ms\"/> як він нещодавно подався до США,<break time=\"184ms\"/> щоб спробувати потрапити до своєї кінематографії,<break time=\"184ms\"/> і коли Хаскел почув це він сказав,<break time=\"184ms\"/> ось як це було тоді,<break time=\"184ms\"/> ось як це було тоді — ось як це було тоді.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джордж",
+          "type": "name"
+        },
+        {
+          "word": "Джорджа Молодшого",
+          "type": "name"
+        },
+        {
+          "word": "Хаскелом Уекслером",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 19863,
+      "est_ms_before": 38962,
+      "est_ms_after": 42054,
+      "fill_percent": 211.7,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 196.2% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 19218,
+        "slot_ms": 19863,
+        "internal_gaps_ms": [
+          152,
+          109,
+          158,
+          80
+        ],
+        "speech_ratio": 0.968,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    }
+  ]
+}

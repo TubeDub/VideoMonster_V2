@@ -1,0 +1,82 @@
+{
+  "task_id": "da8cc67e2a124c96a1c4db910a088172",
+  "success": true,
+  "output_path": "output\\sessions\\da8cc67e2a124c96a1c4db910a088172\\da8cc67e_extracted.mp3",
+  "error": "",
+  "ffmpeg_cmd": [
+    "C:\\Users\\serhii\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.EXE",
+    "-y",
+    "-i",
+    "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_4a6cfc3397.mp4",
+    "-map",
+    "0:a:0",
+    "-vn",
+    "-acodec",
+    "mp3",
+    "-ar",
+    "16000",
+    "-ac",
+    "1",
+    "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\da8cc67e2a124c96a1c4db910a088172\\da8cc67e_extracted.mp3"
+  ],
+  "ffmpeg_returncode": 0,
+  "ffmpeg_stderr": "ffmpeg version 8.1.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers\n  built with gcc 15.2.0 (Rev13, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-cairo --enable-fontconfig --enable-iconv --enable-gnutls --enable-lcms2 --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-liboapv --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libsvtjpegxs --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-libshaderc --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-openal --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint --enable-whisper\n  libavutil      60. 26.101 / 60. 26.101\n  libavcodec     62. 28.101 / 62. 28.101\n  libavformat    62. 12.101 / 62. 12.101\n  libavdevice    62.  3.101 / 62.  3.101\n  libavfilter    11. 14.101 / 11. 14.101\n  libswscale      9.  5.101 /  9.  5.101\n  libswresample   6.  3.101 /  6.  3.101\nInput #0, mov,mp4,m4a,3gp,3g2,mj2, from 'C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_4a6cfc3397.mp4':\n  Metadata:\n    major_brand     : mp42\n    minor_version   : 0\n    compatible_brands: isommp42\n    encoder         : Google\n  Duration: 00:02:58.77, start: 0.000000, bitrate: 597 kb/s\n  Stream #0:0[0x1](und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p(tv, bt709, progressive), 360x640 [SAR 1:1 DAR 9:16], 403 kb/s, 29.97 fps, 29.97 tbr, 30k tbn (default)\n    Metadata:\n      handler_name    : ISO Media file produced by Google Inc.\n  Stream #0:1[0x2](eng): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 192 kb/s (default)\n    Metadata:\n      handler_name    : ISO Media file produced by Google Inc.\nStream mapping:\n  Stream #0:1 -> #0:0 (aac (native) -> mp3 (libmp3lame))\nPress [q] to stop, [?] for help\nOutput #0, mp3, to 'C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\da8cc67e2a124c96a1c4db910a088172\\da8cc67e_extracted.mp3':\n  Metadata:\n    major_brand     : mp42\n    minor_version   : 0\n    compatible_brands: isommp42\n    TSSE            : Lavf62.12.101\n  Stream #0:0(eng): Audio: mp3, 16000 Hz, mono, fltp (default)\n    Metadata:\n      encoder         : Lavc62.28.101 libmp3lame\n      handler_name    : ISO Media file produced by Google Inc.\nsize=     256KiB time=00:01:48.14 bitrate=  19.4kbits/s speed= 209x elapsed=0:00:00.51    \n[out#0/mp3 @ 00000206012cf800] video:0KiB audio:524KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.059268%\nsize=     524KiB time=00:02:58.77 bitrate=  24.0kbits/s speed= 207x elapsed=0:00:00.86    \n",
+  "retry_count": 0,
+  "probe": {
+    "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_4a6cfc3397.mp4",
+    "exists": true,
+    "size_bytes": 13356976,
+    "ffprobe_available": true,
+    "container": "mov,mp4,m4a,3gp,3g2,mj2",
+    "duration_s": 178.773333,
+    "video_codec": "h264",
+    "audio_tracks": [
+      {
+        "index": 1,
+        "codec": "aac",
+        "channels": 2,
+        "sample_rate": "48000",
+        "language": "eng",
+        "title": null
+      }
+    ],
+    "selected_track": {
+      "index": 1,
+      "codec": "aac",
+      "channels": 2,
+      "sample_rate": "48000",
+      "language": "eng",
+      "title": null
+    },
+    "ffprobe_error": null
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "ffmpeg_cmd": [
+        "C:\\Users\\serhii\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.EXE",
+        "-y",
+        "-i",
+        "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_4a6cfc3397.mp4",
+        "-map",
+        "0:a:0",
+        "-vn",
+        "-acodec",
+        "mp3",
+        "-ar",
+        "16000",
+        "-ac",
+        "1",
+        "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\da8cc67e2a124c96a1c4db910a088172\\da8cc67e_extracted.mp3"
+      ],
+      "ffmpeg_returncode": 0,
+      "ffmpeg_stderr": "ffmpeg version 8.1.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers\n  built with gcc 15.2.0 (Rev13, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-cairo --enable-fontconfig --enable-iconv --enable-gnutls --enable-lcms2 --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-liboapv --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libsvtjpegxs --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-libshaderc --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-openal --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint --enable-whisper\n  libavutil      60. 26.101 / 60. 26.101\n  libavcodec     62. 28.101 / 62. 28.101\n  libavformat    62. 12.101 / 62. 12.101\n  libavdevice    62.  3.101 / 62.  3.101\n  libavfilter    11. 14.101 / 11. 14.101\n  libswscale      9.  5.101 /  9.  5.101\n  libswresample   6.  3.101 /  6.  3.101\nInput #0, mov,mp4,m4a,3gp,3g2,mj2, from 'C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_4a6cfc3397.mp4':\n  Metadata:\n    major_brand     : mp42\n    minor_version   : 0\n    compatible_brands: isommp42\n    encoder         : Google\n  Duration: 00:02:58.77, start: 0.000000, bitrate: 597 kb/s\n  Stream #0:0[0x1](und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p(tv, bt709, progressive), 360x640 [SAR 1:1 DAR 9:16], 403 kb/s, 29.97 fps, 29.97 tbr, 30k tbn (default)\n    Metadata:\n      handler_name    : ISO Media file produced by Google Inc.\n  Stream #0:1[0x2](eng): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 192 kb/s (default)\n    Metadata:\n      handler_name    : ISO Media file produced by Google Inc.\nStream mapping:\n  Stream #0:1 -> #0:0 (aac (native) -> mp3 (libmp3lame))\nPress [q] to stop, [?] for help\nOutput #0, mp3, to 'C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\sessions\\da8cc67e2a124c96a1c4db910a088172\\da8cc67e_extracted.mp3':\n  Metadata:\n    major_brand     : mp42\n    minor_version   : 0\n    compatible_brands: isommp42\n    TSSE            : Lavf62.12.101\n  Stream #0:0(eng): Audio: mp3, 16000 Hz, mono, fltp (default)\n    Metadata:\n      encoder         : Lavc62.28.101 libmp3lame\n      handler_name    : ISO Media file produced by Google Inc.\nsize=     256KiB time=00:01:48.14 bitrate=  19.4kbits/s speed= 209x elapsed=0:00:00.51    \n[out#0/mp3 @ 00000206012cf800] video:0KiB audio:524KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.059268%\nsize=     524KiB time=00:02:58.77 bitrate=  24.0kbits/s speed= 207x elapsed=0:00:00.86    \n",
+      "ffmpeg_stdout": "",
+      "exception": null
+    }
+  ],
+  "traceback": null,
+  "failure_reason": null,
+  "output_size_bytes": 536862,
+  "operation_duration_ms": 995.4
+}

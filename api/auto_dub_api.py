@@ -940,6 +940,27 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
                         text = final_owned
                     elif passed:
                         text = passed
+                # Stage 9: strip invented slot-pad fillers before Review UI.
+                try:
+                    from engines.text_slot_fit import strip_slot_pad_fillers
+
+                    cleaned = strip_slot_pad_fillers(text)
+                    if cleaned != text:
+                        text = cleaned
+                        polished = cleaned
+                        if row:
+                            for _rk in (
+                                "final_text",
+                                "tts_text",
+                                "final_tts_text",
+                                "semantic_text",
+                                "semantic_engine_text",
+                                "naturalized_text",
+                            ):
+                                if row.get(_rk):
+                                    row[_rk] = strip_slot_pad_fillers(str(row.get(_rk) or ""))
+                except Exception:
+                    pass
                 # Do NOT fall back to source language text for target-track TTS
             raw_keep = str(
                 row.get("raw_translation")
@@ -5406,6 +5427,9 @@ def api_auto_dub_status(task_id):
             "simple_pipeline": bool(info.get("simple_pipeline")),
             "happy_path": bool(info.get("happy_path")),
             "simple_mt_locked": bool(info.get("simple_mt_locked")),
+            "simple_voice_locked": bool(info.get("simple_voice_locked")),
+            "tts_voice": info.get("tts_voice") or info.get("pipeline_voice") or info.get("voice"),
+            "unique_voices_used": info.get("unique_voices_used"),
             "llm_adaptation_used": bool(info.get("llm_adaptation_used")),
             "translate_method": info.get("translate_method"),
             "translation_agent_path": bool(info.get("translation_agent_path")),
@@ -12801,6 +12825,12 @@ def _run_pipeline_inner(
                         )
                         task["info"]["segments_data"] = _sd_fr2
                     segments_data = _sd_fr2
+                    # Keep text list index-aligned with live rows (2.zip RCA).
+                    if len(segments) > len(segments_data):
+                        segments = list(segments[: len(segments_data)])
+                    elif len(segments) < len(segments_data):
+                        while len(segments) < len(segments_data):
+                            segments.append("")
                 except Exception as _fr2_exc:
                     logger.debug("post-SlotBudget review freeze skipped: %s", _fr2_exc)
 
@@ -12841,6 +12871,24 @@ def _run_pipeline_inner(
                 )
             except TypeError:
                 tts_groups = build_tts_groups(segments, current_timing_map_snapshot)
+
+            # Drop groups whose head index no longer maps into segments_data
+            # (freeze/audits can briefly diverge from live rows — 2.zip RCA).
+            _n_sd = len(segments_data)
+            _kept_groups = []
+            for _g in tts_groups:
+                _idxs = [int(i) for i in (_g.get("indices") or [])]
+                if not _idxs or not (0 <= _idxs[0] < _n_sd):
+                    logger.warning(
+                        "Task %s: drop TTS group indices=%s (segments_data=%d)",
+                        task_id,
+                        _idxs,
+                        _n_sd,
+                    )
+                    continue
+                _g["indices"] = [i for i in _idxs if 0 <= i < _n_sd] or _idxs[:1]
+                _kept_groups.append(_g)
+            tts_groups = _kept_groups
 
             # Stage 4: stamp group.final_tts_text from locked segment authority.
             try:
@@ -12921,20 +12969,76 @@ def _run_pipeline_inner(
             )
 
             # Voice Platform: lock speaker→voice before synthesis (soft-fail).
+            # Stage 9 Simple: NEVER multi-voice — pin pipeline_voice on all segs.
             try:
-                voice = _apply_voice_platform_assignments(
-                    task_id,
-                    segments_data,
-                    default_voice=voice,
-                    target_lang=target_lang,
-                    style_id=str(_style_id or "Movie"),
+                from engines.simple_voice_lock import (
+                    lock_simple_pipeline_voice,
+                    should_lock_simple_voice,
                 )
+
+                with STATE_LOCK:
+                    _vinfo = dict(task.get("info") or {})
+                if should_lock_simple_voice(_vinfo):
+                    voice = lock_simple_pipeline_voice(
+                        segments_data,
+                        pipeline_voice=voice,
+                        task_info=_vinfo,
+                    ).get("pipeline_voice") or voice
+                    with STATE_LOCK:
+                        task["info"].update(
+                            {
+                                k: _vinfo[k]
+                                for k in (
+                                    "simple_voice_locked",
+                                    "pipeline_voice",
+                                    "tts_voice",
+                                    "unique_voices_used",
+                                    "unique_voices",
+                                    "voice_lock_pinned_segments",
+                                    "voice_platform_skipped",
+                                    "voice",
+                                )
+                                if k in _vinfo
+                            }
+                        )
+                        task["info"]["segments_data"] = segments_data
+                    logger.info(
+                        "Task %s: Simple voice lock tts_voice=%s unique=1",
+                        task_id,
+                        voice,
+                    )
+                else:
+                    voice = _apply_voice_platform_assignments(
+                        task_id,
+                        segments_data,
+                        default_voice=voice,
+                        target_lang=target_lang,
+                        style_id=str(_style_id or "Movie"),
+                    )
             except Exception as _vp_exc:
                 logger.warning(
                     "Task %s: voice platform assignment soft-fail: %s",
                     task_id,
                     _vp_exc,
                 )
+                try:
+                    from engines.simple_voice_lock import (
+                        lock_simple_pipeline_voice,
+                        should_lock_simple_voice,
+                    )
+
+                    with STATE_LOCK:
+                        _vinfo2 = dict(task.get("info") or {})
+                    if should_lock_simple_voice(_vinfo2):
+                        lock_simple_pipeline_voice(
+                            segments_data,
+                            pipeline_voice=voice,
+                            task_info=_vinfo2,
+                        )
+                        with STATE_LOCK:
+                            task["info"].update(_vinfo2)
+                except Exception:
+                    pass
 
             # Build per-segment TTS input trace using plain_text (same as actual TTS input).
             # group["text"] may be SSML; plain_text is what actually goes to edge_tts.
@@ -13298,6 +13402,30 @@ def _run_pipeline_inner(
                     len(tts_files),
                 )
             elif use_parallel_tts and len(tts_groups) > 1:
+                # Stage 9: re-pin one voice immediately before synth (Simple).
+                try:
+                    from engines.simple_voice_lock import (
+                        lock_simple_pipeline_voice,
+                        should_lock_simple_voice,
+                    )
+
+                    with STATE_LOCK:
+                        _vpin = dict(task.get("info") or {})
+                    if should_lock_simple_voice(_vpin):
+                        lock_simple_pipeline_voice(
+                            segments_data,
+                            pipeline_voice=voice,
+                            task_info=_vpin,
+                        )
+                        voice = str(_vpin.get("pipeline_voice") or voice)
+                        with STATE_LOCK:
+                            task["info"]["simple_voice_locked"] = True
+                            task["info"]["pipeline_voice"] = voice
+                            task["info"]["tts_voice"] = voice
+                            task["info"]["unique_voices_used"] = 1
+                except Exception as _vpin_exc:
+                    logger.debug("Simple voice re-pin skipped: %s", _vpin_exc)
+
                 work_items = []
                 from engines.pipeline_integrity.slot_budget import segment_tts_allowed
 
@@ -13305,12 +13433,24 @@ def _run_pipeline_inner(
                     indices = group["indices"]
                     text = resolve_tts_input_text(group)
                     try:
+                        from engines.text_slot_fit import strip_slot_pad_fillers
+
+                        text = strip_slot_pad_fillers(text)
+                    except Exception:
+                        pass
+                    try:
                         from engines.tts_text_authority import (
                             assert_tts_matches_final,
                             text_hash,
                         )
 
                         _exp_g = str(group.get("final_tts_text") or text)
+                        try:
+                            from engines.text_slot_fit import strip_slot_pad_fillers as _spf
+
+                            _exp_g = _spf(_exp_g)
+                        except Exception:
+                            pass
                         assert_tts_matches_final(
                             text, _exp_g, index=indices[0] if indices else -1, task_id=task_id
                         )
@@ -13318,11 +13458,40 @@ def _run_pipeline_inner(
                         group["spoken_text_source"] = "final_tts_text"
                     except Exception:
                         pass
-                    if text:
-                        head_idx = indices[0] if indices else 0
-                        if 0 <= head_idx < len(segments_data) and not segment_tts_allowed(
-                            segments_data[head_idx]
+                    if not text:
+                        head_idx = int(indices[0]) if indices else -1
+                        logger.warning(
+                            "Task %s: skip TTS group %s — empty text (idx=%s)",
+                            task_id,
+                            g_idx,
+                            head_idx,
+                        )
+                        if 0 <= head_idx < len(segments_data) and isinstance(
+                            segments_data[head_idx], dict
                         ):
+                            segments_data[head_idx]["skip_tts"] = True
+                            segments_data[head_idx]["tts_empty_skipped"] = True
+                            segments_data[head_idx]["status"] = "empty"
+                        with STATE_LOCK:
+                            info_e = task.setdefault("info", {})
+                            skips = list(info_e.get("tts_empty_skipped_indices") or [])
+                            if head_idx >= 0 and head_idx not in skips:
+                                skips.append(head_idx)
+                            info_e["tts_empty_skipped_indices"] = skips
+                        continue
+                    if text:
+                        head_idx = int(indices[0]) if indices else 0
+                        if not (0 <= head_idx < len(segments_data)):
+                            logger.warning(
+                                "Task %s: skip TTS group %s — head_idx=%s out of "
+                                "range (segments_data=%d)",
+                                task_id,
+                                g_idx,
+                                head_idx,
+                                len(segments_data),
+                            )
+                            continue
+                        if not segment_tts_allowed(segments_data[head_idx]):
                             logger.info(
                                 "Task %s: skip TTS group %s — SlotBudgetFirst blocked",
                                 task_id,
@@ -13333,9 +13502,16 @@ def _run_pipeline_inner(
                         expected_path = str(
                             _artifacts_dir(task.get("info")) / f"{base_id}_g{g_idx:04d}.mp3"
                         )
-                        group_voice = _segment_tts_voice(
-                            segments_data[head_idx] if head_idx < len(segments_data) else None,
-                            voice,
+                        with STATE_LOCK:
+                            _simple_v = bool(
+                                (task.get("info") or {}).get("simple_voice_locked")
+                                or (task.get("info") or {}).get("simple_pipeline")
+                                or (task.get("info") or {}).get("happy_path")
+                            )
+                        group_voice = (
+                            voice
+                            if _simple_v
+                            else _segment_tts_voice(segments_data[head_idx], voice)
                         )
                         work_items.append(
                             {
@@ -13600,10 +13776,38 @@ def _run_pipeline_inner(
 
                     indices = group["indices"]
                     text = resolve_tts_input_text(group)
-                    head_idx = indices[0]
-                    if 0 <= head_idx < len(segments_data) and not segment_tts_allowed(
-                        segments_data[head_idx]
-                    ):
+                    try:
+                        from engines.text_slot_fit import strip_slot_pad_fillers
+
+                        text = strip_slot_pad_fillers(text)
+                    except Exception:
+                        pass
+                    head_idx = int(indices[0]) if indices else 0
+                    if not text:
+                        logger.warning(
+                            "Task %s: skip TTS group %s — empty text (idx=%s)",
+                            task_id,
+                            g_idx,
+                            head_idx,
+                        )
+                        if 0 <= head_idx < len(segments_data) and isinstance(
+                            segments_data[head_idx], dict
+                        ):
+                            segments_data[head_idx]["skip_tts"] = True
+                            segments_data[head_idx]["tts_empty_skipped"] = True
+                            segments_data[head_idx]["status"] = "empty"
+                        continue
+                    if not (0 <= head_idx < len(segments_data)):
+                        logger.warning(
+                            "Task %s: skip TTS group %s — head_idx=%s out of "
+                            "range (segments_data=%d)",
+                            task_id,
+                            g_idx,
+                            head_idx,
+                            len(segments_data),
+                        )
+                        continue
+                    if not segment_tts_allowed(segments_data[head_idx]):
                         logger.info(
                             "Task %s: skip TTS group %s — SlotBudgetFirst blocked",
                             task_id,
@@ -13695,9 +13899,21 @@ def _run_pipeline_inner(
                         engine_id=tts_engine_id,
                     )
                     try:
-                        group_voice = _segment_tts_voice(
-                            segments_data[head_idx] if head_idx < len(segments_data) else None,
-                            voice,
+                        with STATE_LOCK:
+                            _simple_v2 = bool(
+                                (task.get("info") or {}).get("simple_voice_locked")
+                                or (task.get("info") or {}).get("simple_pipeline")
+                                or (task.get("info") or {}).get("happy_path")
+                            )
+                        group_voice = (
+                            voice
+                            if _simple_v2
+                            else _segment_tts_voice(
+                                segments_data[head_idx]
+                                if head_idx < len(segments_data)
+                                else None,
+                                voice,
+                            )
                         )
                         tts_ctx["voice"] = group_voice
 
@@ -15823,7 +16039,9 @@ def _run_pipeline_inner(
                 _crash_step = _crash_task.get("step") if _crash_task else None
             _fail(
                 task_id,
-                [f"Критическая ошибка пайплайна: {str(e)}"],
+                [
+                    f"Критическая ошибка пайплайна [{type(e).__name__}]: {str(e)}"
+                ],
                 stage=STEP_TO_STAGE.get(_crash_step or "", STAGE_AUDIO_EXTRACTION),
                 exc=e,
                 error_code="PIPELINE_CRITICAL",
