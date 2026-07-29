@@ -12994,6 +12994,7 @@ def _run_pipeline_inner(
 
                 with STATE_LOCK:
                     _vinfo = dict(task.get("info") or {})
+                    _vinfo.setdefault("target_lang", target_lang)
                 if should_lock_simple_voice(_vinfo):
                     voice = lock_simple_pipeline_voice(
                         segments_data,
@@ -13023,6 +13024,61 @@ def _run_pipeline_inner(
                         task_id,
                         voice,
                     )
+                    # Stage 12: reject non-uk TTS text; remt once or skip.
+                    try:
+                        from engines.tts_lang_lock import (
+                            assert_voice_matches_target,
+                            enforce_segments_lang_lock,
+                        )
+
+                        assert_voice_matches_target(voice, target_lang, raise_error=True)
+                        with STATE_LOCK:
+                            _src_l = str(
+                                task["info"].get("source_lang")
+                                or task["info"].get("detected_lang")
+                                or "en"
+                            )
+                        _lang_stats = enforce_segments_lang_lock(
+                            segments_data,
+                            target_lang=target_lang,
+                            source_lang=_src_l,
+                            app_dir=APP_DIR,
+                        )
+                        with STATE_LOCK:
+                            task["info"]["tts_lang_lock"] = dict(_lang_stats)
+                        # Sync tts_groups plain_text after remt/skip.
+                        for _g in tts_groups:
+                            _idxs = [int(x) for x in (_g.get("indices") or [])]
+                            if not _idxs:
+                                continue
+                            _head = _idxs[0]
+                            if 0 <= _head < len(segments_data) and isinstance(
+                                segments_data[_head], dict
+                            ):
+                                _nt = str(
+                                    segments_data[_head].get("final_tts_text")
+                                    or segments_data[_head].get("plain_text")
+                                    or ""
+                                ).strip()
+                                if segments_data[_head].get("skip_tts"):
+                                    _g["plain_text"] = ""
+                                    _g["text"] = ""
+                                    _g["skip_tts"] = True
+                                elif _nt:
+                                    _g["plain_text"] = _nt
+                        logger.info(
+                            "Task %s: TTS lang lock checked=%s remt_ok=%s skipped=%s",
+                            task_id,
+                            _lang_stats.get("checked"),
+                            _lang_stats.get("remt_ok"),
+                            _lang_stats.get("skipped"),
+                        )
+                    except RuntimeError:
+                        raise
+                    except Exception as _ll_exc:
+                        logger.warning(
+                            "Task %s: TTS lang lock soft-fail: %s", task_id, _ll_exc
+                        )
                 else:
                     voice = _apply_voice_platform_assignments(
                         task_id,
@@ -13031,6 +13087,8 @@ def _run_pipeline_inner(
                         target_lang=target_lang,
                         style_id=str(_style_id or "Movie"),
                     )
+            except RuntimeError:
+                raise
             except Exception as _vp_exc:
                 logger.warning(
                     "Task %s: voice platform assignment soft-fail: %s",
@@ -13045,6 +13103,7 @@ def _run_pipeline_inner(
 
                     with STATE_LOCK:
                         _vinfo2 = dict(task.get("info") or {})
+                        _vinfo2.setdefault("target_lang", target_lang)
                     if should_lock_simple_voice(_vinfo2):
                         lock_simple_pipeline_voice(
                             segments_data,
@@ -15660,6 +15719,52 @@ def _run_pipeline_inner(
         )
         with STATE_LOCK:
             task["info"]["dev_diagnostics"] = dev_diag.paths()
+
+        # Stage 12: TTS lang/voice integrity before mux (Simple).
+        try:
+            from engines.tts_lang_lock import (
+                assert_voice_matches_target,
+                pre_mux_tts_integrity,
+            )
+
+            with STATE_LOCK:
+                _mux_info = dict(task.get("info") or {})
+                _mux_sd = list(_mux_info.get("segments_data") or segments_data)
+                _mux_voice = str(
+                    _mux_info.get("pipeline_voice")
+                    or _mux_info.get("tts_voice")
+                    or voice
+                    or ""
+                )
+                _mux_tgt = str(_mux_info.get("target_lang") or target_lang or "uk")
+                _mux_timeline = float(
+                    _mux_info.get("target_duration_ms")
+                    or _mux_info.get("duration_ms")
+                    or 0
+                )
+            if _mux_info.get("simple_pipeline") or _mux_info.get("happy_path") or _mux_info.get(
+                "simple_voice_locked"
+            ):
+                assert_voice_matches_target(_mux_voice, _mux_tgt, raise_error=True)
+                if int(_mux_info.get("unique_voices_used") or 1) != 1:
+                    raise RuntimeError(
+                        f"PIPELINE_VOICE_LOCALE: unique_voices_used="
+                        f"{_mux_info.get('unique_voices_used')} (need 1)"
+                    )
+                _integ = pre_mux_tts_integrity(
+                    _mux_sd,
+                    target_lang=_mux_tgt,
+                    timeline_ms=_mux_timeline or None,
+                )
+                with STATE_LOCK:
+                    task["info"]["tts_pre_mux_integrity"] = {
+                        k: v for k, v in _integ.items() if k != "rows"
+                    }
+                    task["info"]["tts_pre_mux_rows"] = _integ.get("rows") or []
+        except RuntimeError:
+            raise
+        except Exception as _integ_exc:
+            logger.warning("Task %s: pre-mux TTS integrity soft-fail: %s", task_id, _integ_exc)
 
         # ══ ШАГ 6: Dub Engine ════════════════════════════════════════════
         if not _ensure_control(task_id, ui_lang):

@@ -110,6 +110,29 @@ async def _generate_single(
     if not text:
         return
 
+    # Stage 12: refuse non-target (uk) lang mix before Edge call.
+    try:
+        from engines.tts_lang_lock import (
+            assert_voice_matches_target,
+            is_uk_tts_text_ok,
+        )
+
+        _tgt = str(
+            (context or {}).get("target_lang")
+            or _detect_lang_from_voice(voice)
+            or ""
+        )
+        assert_voice_matches_target(voice, _tgt or "uk", raise_error=False)
+        if str(_tgt).split("-")[0].lower() == "uk" and not is_uk_tts_text_ok(text):
+            logger.warning(
+                "[TTS] reject_non_target lang_mix path=%s text=%.80s",
+                path,
+                text,
+            )
+            return
+    except Exception as _ll:
+        logger.debug("[TTS] lang lock skip: %s", _ll)
+
     text_for_cache = text
     # Add Unicode stress marks for natural intonation (UA/RU neural voices support U+0301)
     try:

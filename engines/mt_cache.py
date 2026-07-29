@@ -2,7 +2,7 @@
 """Disk cache for MT / translation text (Simple speedup).
 
 Key: hash(normalized_source + langs + engine + v3_glossary_split)
-Stage 11: stricter incomplete reject; VM_MT_NO_CACHE bypass.
+Stage 12: incomplete 0.55 + crash/ejected/survived/Star Wars entity keys.
 """
 
 from __future__ import annotations
@@ -18,13 +18,18 @@ from typing import Any
 logger = logging.getLogger("tubedub.mt_cache")
 
 _WS = re.compile(r"\s+")
-_SHORT_RATIO = 0.50
+_SHORT_RATIO = 0.55
 _CACHE_KEY_SUFFIX = "v3_glossary_split"
 
+# (src needle lowercase, tgt must match). Longer / phrase needles first.
 _CRITICAL_ENTITY_CHECKS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    ("race cars anymore", re.compile(r"гоночн|автомобіл|машин|race\s*cars?", re.I)),
     ("star wars", re.compile(r"зоряні|star\s*wars", re.I)),
     ("george lucas", re.compile(r"лукас|lucas", re.I)),
     ("acceptance", re.compile(r"прийнятт|лист|acceptance", re.I)),
+    ("survived", re.compile(r"вижив|вижила|вижило|survived", re.I)),
+    ("ejected", re.compile(r"викинул|викинуло|викинув|ejected", re.I)),
+    ("smash", re.compile(r"розбив|розбит|трощи|аварі|smash", re.I)),
 )
 
 
@@ -35,6 +40,12 @@ def mt_cache_disabled() -> bool:
         "yes",
         "on",
     )
+
+
+def skip_cache_for_long_segments() -> bool:
+    """Default ON — long/oversized segments always Marian+split (Simple Stage 12)."""
+    raw = (os.getenv("VM_MT_SKIP_CACHE_LONG") or "1").strip().lower()
+    return raw in ("1", "true", "yes", "on")
 
 
 def default_cache_dir() -> Path:
@@ -56,7 +67,6 @@ def mt_cache_key(
     *,
     engine: str = "auto",
 ) -> str:
-    # v3: invalidate v2 truncated / pre-glossary cache entries.
     payload = "|".join(
         [
             normalize_mt_cache_text(text),
@@ -102,15 +112,8 @@ def is_incomplete_mt_pair(
     if w_src <= 0:
         return False
 
-    long_src = w_src > 40
-    try:
-        from engines.mt.oversized_guard import is_oversized_mt_unit
-
-        long_src = long_src or is_oversized_mt_unit(src)
-    except Exception:
-        pass
-
-    if long_src and w_tgt < (_SHORT_RATIO * w_src):
+    # Stage 12: words_tgt < 0.55 * words_src AND words_src > 30
+    if w_src > 30 and w_tgt < (_SHORT_RATIO * w_src):
         return True
     if w_src > 80 and w_tgt < 60:
         return True
@@ -144,6 +147,7 @@ def lookup_mt_cache(
         if not out:
             logger.debug("mt_cache_miss empty key=%s", key[:12])
             return None
+        # Never finalize incomplete — unlink + miss first.
         if is_incomplete_mt_pair(text, out, source_lang, target_lang):
             logger.warning(
                 "mt_cache_reject_incomplete key=%s src_words=%d tgt_words=%d",
@@ -225,4 +229,5 @@ def empty_mt_stats() -> dict[str, Any]:
         "mt_guard_splits": 0,
         "mt_segment_engines": [],
         "mt_cache_bypassed": False,
+        "mt_long_cache_skips": 0,
     }

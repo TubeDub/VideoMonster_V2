@@ -116,12 +116,16 @@ def translate_segments_batch(
 ) -> tuple[list[str], dict[str, Any]]:
     """Translate segments 1:1 with disk cache + batch Marian / parallel fallback."""
     from engines.mt.glossary_en_uk import finalize_mt_text
-    from engines.mt.oversized_guard import guard_segments_before_mt
+    from engines.mt.oversized_guard import (
+        guard_segments_before_mt,
+        is_oversized_mt_unit,
+    )
     from engines.mt_cache import (
         default_cache_dir,
         empty_mt_stats,
         lookup_mt_cache,
         mt_cache_disabled,
+        skip_cache_for_long_segments,
         store_mt_cache,
     )
 
@@ -135,6 +139,7 @@ def translate_segments_batch(
     base = Path(app_dir) if app_dir is not None else Path(__file__).resolve().parent.parent
     engine_tag = str(engine_preference or "auto").strip() or "auto"
     stats["mt_cache_bypassed"] = bool(mt_cache_disabled())
+    skip_long = skip_cache_for_long_segments()
 
     n = len(segments or [])
     out: list[str] = [""] * n
@@ -155,10 +160,24 @@ def translate_segments_batch(
             seg_engines[i] = "none"
             stats["mt_cache_hits"] += 1
             continue
+        # P0-C: long/oversized → always Marian+split (default ON)
+        words_n = len(text.split())
+        if skip_long and (is_oversized_mt_unit(text) or words_n > 55):
+            miss_indices.append(i)
+            stats["mt_cache_misses"] += 1
+            stats["mt_long_cache_skips"] = int(stats.get("mt_long_cache_skips") or 0) + 1
+            logger.info(
+                "[MT] skip_cache_long seg#%d words=%d oversized=%s",
+                i + 1,
+                words_n,
+                is_oversized_mt_unit(text),
+            )
+            continue
         hit = lookup_mt_cache(
             text, src_l, tgt_l, engine=engine_tag, cache_dir=cdir
         )
         if hit is not None:
+            # Hit already passed incomplete check inside lookup — safe to finalize.
             finalized = finalize_mt_text(src_l, tgt_l, hit)
             out[i] = finalized
             if src_l.lower() == "en" and tgt_l.lower() == "uk":

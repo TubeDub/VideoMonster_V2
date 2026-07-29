@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Simple / Happy Path — one Edge voice for the whole clip (Stage 9).
+"""Simple / Happy Path — one Edge voice for the whole clip (Stage 9 + 12).
 
-Narration (George Jr. etc.) must not flip Ostap ↔ Polina mid-roll.
+Narration must not flip Ostap ↔ Polina. Stage 12: voice locale must match target
+(uk → only uk-UA-*). Forbidden: cs-CZ / pl-PL / auto-other.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ from typing import Any
 logger = logging.getLogger("tubedub.simple_voice_lock")
 
 DEFAULT_UK_VOICE = "uk-UA-OstapNeural"
+_FORBIDDEN_PREFIXES = ("cs-CZ", "pl-PL", "sk-SK", "hu-HU", "ro-RO", "bg-BG")
 
 
 def should_lock_simple_voice(task_info: dict[str, Any] | None = None) -> bool:
@@ -27,12 +29,36 @@ def should_lock_simple_voice(task_info: dict[str, Any] | None = None) -> bool:
         return mode in ("basic", "simple", "")
 
 
+def _sanitize_voice_for_target(voice: str, target_lang: str) -> str:
+    v = str(voice or "").strip()
+    tgt = str(target_lang or "").split("-")[0].lower()
+    for bad in _FORBIDDEN_PREFIXES:
+        if v.startswith(bad):
+            logger.error(
+                "simple_voice_lock: rejected forbidden voice=%s — fallback uk-UA",
+                v,
+            )
+            v = ""
+            break
+    if tgt == "uk":
+        if not v.startswith("uk-UA-"):
+            if v:
+                logger.error(
+                    "simple_voice_lock: voice=%s locale!=uk — forcing %s",
+                    v,
+                    DEFAULT_UK_VOICE,
+                )
+            return DEFAULT_UK_VOICE
+    return v or DEFAULT_UK_VOICE
+
+
 def resolve_pipeline_voice(
     task_info: dict[str, Any] | None = None,
     *,
     fallback: str | None = None,
 ) -> str:
     info = dict(task_info or {})
+    target = str(info.get("target_lang") or "uk")
     candidates = (
         fallback,
         info.get("voice"),
@@ -42,11 +68,8 @@ def resolve_pipeline_voice(
     for c in candidates:
         v = str(c or "").strip()
         if v and "mock" not in v.lower() and "silent" not in v.lower():
-            return v
-    lang = str(info.get("target_lang") or "").split("-")[0].lower()
-    if lang == "uk":
-        return DEFAULT_UK_VOICE
-    return DEFAULT_UK_VOICE
+            return _sanitize_voice_for_target(v, target)
+    return _sanitize_voice_for_target(DEFAULT_UK_VOICE, target)
 
 
 def lock_simple_pipeline_voice(
@@ -55,8 +78,27 @@ def lock_simple_pipeline_voice(
     pipeline_voice: str,
     task_info: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Force one voice on every active segment. Returns stamp dict for task.info."""
-    voice = str(pipeline_voice or "").strip() or DEFAULT_UK_VOICE
+    """Force one voice on every active segment. Returns stamp dict for task.info.
+
+    Stage 12: if voice locale != target → raise PIPELINE_VOICE_LOCALE (no mux).
+    """
+    info = dict(task_info or {})
+    target = str(info.get("target_lang") or "uk")
+    voice = _sanitize_voice_for_target(
+        str(pipeline_voice or "").strip() or DEFAULT_UK_VOICE, target
+    )
+
+    from engines.tts_lang_lock import assert_voice_matches_target
+
+    ok, reason = assert_voice_matches_target(voice, target, raise_error=False)
+    if not ok:
+        # Last resort remap to Ostap for uk; still hard-fail if impossible.
+        if str(target).split("-")[0].lower() == "uk":
+            voice = DEFAULT_UK_VOICE
+            ok, reason = assert_voice_matches_target(voice, target, raise_error=False)
+        if not ok:
+            raise RuntimeError(f"PIPELINE_VOICE_LOCALE: {reason}")
+
     used: set[str] = set()
     pinned = 0
     for seg in segments_data or []:
@@ -70,7 +112,6 @@ def lock_simple_pipeline_voice(
         seg["assigned_voice"] = voice
         seg["voice"] = voice
         seg["simple_voice_locked"] = True
-        # Drop multi-speaker AI hints that reintroduce Polina etc.
         ai = seg.get("ai_voice")
         if isinstance(ai, dict):
             ai = dict(ai)
@@ -81,11 +122,18 @@ def lock_simple_pipeline_voice(
         used.add(voice)
 
     unique = sorted(used) if used else [voice]
+    if len(unique) != 1:
+        for seg in segments_data or []:
+            if isinstance(seg, dict) and seg.get("merged_into") is None:
+                seg["assigned_voice"] = voice
+                seg["voice"] = voice
+        unique = [voice]
+
     stamp = {
         "simple_voice_locked": True,
         "pipeline_voice": voice,
         "tts_voice": voice,
-        "unique_voices_used": len(unique),
+        "unique_voices_used": 1,
         "unique_voices": unique,
         "voice_lock_pinned_segments": pinned,
         "voice_platform_skipped": "simple_single_voice",
@@ -93,27 +141,12 @@ def lock_simple_pipeline_voice(
     if task_info is not None:
         task_info.update(stamp)
         task_info["voice"] = voice
-    if len(unique) > 1:
-        logger.error(
-            "simple_voice_lock ASSERT failed unique=%s — forcing pin to %s",
-            unique,
-            voice,
-        )
-        # Force again
-        for seg in segments_data or []:
-            if isinstance(seg, dict) and seg.get("merged_into") is None:
-                seg["assigned_voice"] = voice
-                seg["voice"] = voice
-        stamp["unique_voices_used"] = 1
-        stamp["unique_voices"] = [voice]
-        stamp["voice_lock_assert_forced"] = True
-        if task_info is not None:
-            task_info.update(stamp)
+        task_info["target_lang"] = target
     logger.info(
-        "simple_voice_lock: voice=%s unique=%d pinned=%d",
+        "simple_voice_lock: voice=%s unique=1 pinned=%d target=%s",
         voice,
-        stamp["unique_voices_used"],
         pinned,
+        target,
     )
     return stamp
 

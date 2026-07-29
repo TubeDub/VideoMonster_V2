@@ -1,0 +1,26 @@
+{
+  "task_id": "ee86e27b96e748f6b683cbe2b21bf347",
+  "updated_at": "2026-07-29T07:50:19.355233+00:00",
+  "total_sec": 217.415,
+  "stages": {
+    "extract": 1.236,
+    "whisper": 138.407,
+    "translation": 0.0,
+    "natural": 0.0,
+    "validation": 0.0,
+    "translation_post": 0.0,
+    "tts": 7.903,
+    "slot_fit": 7.057,
+    "timing": 0.0,
+    "mux": 0.0,
+    "export": 0.0
+  },
+  "meta": {
+    "stt_wall_sec": 138.407,
+    "stt_model": "small",
+    "stt_device": "cpu",
+    "stt_compute_type": "int8",
+    "stt_beam_size": 1,
+    "stt_cache_hit": false
+  }
+}

@@ -33,12 +33,12 @@ def test_cache_key_contains_v3():
 
 
 def test_incomplete_ratio_half():
-    # 50 words EN, 24 UK words → 0.48 < 0.50 → incomplete
+    # Stage 12: 0.55 threshold; 50 words EN, 27 UK → 0.54 < 0.55 → incomplete
     src = " ".join([f"word{i}" for i in range(50)])
-    short = " ".join(["слово"] * 24)
+    short = " ".join(["слово"] * 27)
     assert is_incomplete_mt_pair(src, short, "en", "uk")
-    # 26/50 = 0.52 → ok for ratio (unless other rules)
-    ok = " ".join(["слово"] * 26)
+    # 28/50 = 0.56 → ok for ratio
+    ok = " ".join(["слово"] * 28)
     assert not is_incomplete_mt_pair(src, ok, "en", "uk")
 
 

@@ -55,7 +55,7 @@ def test_glossary_fiat_to_fiat_uk():
 
 
 def test_short_cache_rejected_words_gt_55(tmp_path: Path):
-    # 56+ English words, short UK → incomplete even without sentence oversized.
+    # 56+ English words, short UK → incomplete (0.55 rule, words_src>30)
     src = " ".join([f"word{i}" for i in range(60)])
     short = "короткий текст"
     assert len(src.split()) > 55
