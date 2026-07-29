@@ -1,0 +1,567 @@
+{
+  "engine": "closed_loop_timing",
+  "segment_count": 9,
+  "avg_timing_score": 65.5,
+  "segments_score_ge_95": 0,
+  "kpi_target_score": 95,
+  "overflow_threshold_ms": 100,
+  "underflow_threshold_ms": 450,
+  "max_rewrite_iterations": 5,
+  "closed_loop": {
+    "engine": "closed_loop_timing",
+    "checked": 9,
+    "ok": 0,
+    "rewritten": 0,
+    "pause_only": 0,
+    "failed": 9,
+    "retries": 0,
+    "deviations": 9,
+    "fixed": 0,
+    "adaptation_executed": false,
+    "resegmented": 0,
+    "issues": [
+      {
+        "idx": 0,
+        "code": "underflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 12788,
+        "slot_ms": 17783,
+        "overflow_ms": 0,
+        "underflow_ms": 4995,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 1,
+        "code": "underflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 11332,
+        "slot_ms": 14716,
+        "overflow_ms": 0,
+        "underflow_ms": 3384,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 2,
+        "code": "underflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 4215,
+        "slot_ms": 7246,
+        "overflow_ms": 0,
+        "underflow_ms": 3031,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 3,
+        "code": "overflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 14377,
+        "slot_ms": 13861,
+        "overflow_ms": 516,
+        "underflow_ms": 0,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 4,
+        "code": "underflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 7617,
+        "slot_ms": 19815,
+        "overflow_ms": 0,
+        "underflow_ms": 12198,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 5,
+        "code": "underflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 9313,
+        "slot_ms": 21075,
+        "overflow_ms": 0,
+        "underflow_ms": 11762,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 6,
+        "code": "underflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 4667,
+        "slot_ms": 6875,
+        "overflow_ms": 0,
+        "underflow_ms": 2208,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 7,
+        "code": "overflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 9872,
+        "slot_ms": 8941,
+        "overflow_ms": 931,
+        "underflow_ms": 0,
+        "rewrite_reason": "pause_only_after_resegment"
+      },
+      {
+        "idx": 8,
+        "code": "underflow",
+        "final_status": "deferred_after_resegment",
+        "tts_ms": 35185,
+        "slot_ms": 55626,
+        "overflow_ms": 0,
+        "underflow_ms": 20441,
+        "rewrite_reason": "pause_only_after_resegment"
+      }
+    ],
+    "avg_timing_score": 65.3,
+    "segments_score_ge_95": 0,
+    "budgets": [
+      {
+        "index": 0,
+        "slot_start": 0,
+        "slot_end": 17783,
+        "slot_duration": 17783,
+        "tts_duration": 12788,
+        "measured_duration": 12788,
+        "delta": -4995,
+        "overflow": 0,
+        "underflow": 4995,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1804,
+        "pause_stages": [
+          "lead_trim:242",
+          "tail_trim:1147",
+          "pause_compress:413"
+        ],
+        "timing_score": 68.3,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 14592,
+        "provider_fatal": false
+      },
+      {
+        "index": 1,
+        "slot_start": 17883,
+        "slot_end": 32599,
+        "slot_duration": 14716,
+        "tts_duration": 11332,
+        "measured_duration": 11332,
+        "delta": -3384,
+        "overflow": 0,
+        "underflow": 3384,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1628,
+        "pause_stages": [
+          "lead_trim:214",
+          "tail_trim:985",
+          "pause_compress:428"
+        ],
+        "timing_score": 74.9,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 12960,
+        "provider_fatal": false
+      },
+      {
+        "index": 2,
+        "slot_start": 32699,
+        "slot_end": 39945,
+        "slot_duration": 7246,
+        "tts_duration": 4215,
+        "measured_duration": 4215,
+        "delta": -3031,
+        "overflow": 0,
+        "underflow": 3031,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1377,
+        "pause_stages": [
+          "lead_trim:228",
+          "tail_trim:1065",
+          "pause_compress:84"
+        ],
+        "timing_score": 54.8,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 5592,
+        "provider_fatal": false
+      },
+      {
+        "index": 3,
+        "slot_start": 40239,
+        "slot_end": 54100,
+        "slot_duration": 13861,
+        "tts_duration": 14377,
+        "measured_duration": 14377,
+        "delta": 516,
+        "overflow": 516,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1679,
+        "pause_stages": [
+          "lead_trim:201",
+          "tail_trim:944",
+          "pause_compress:532"
+        ],
+        "timing_score": 91.5,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 16056,
+        "provider_fatal": false
+      },
+      {
+        "index": 4,
+        "slot_start": 54200,
+        "slot_end": 74015,
+        "slot_duration": 19815,
+        "tts_duration": 7617,
+        "measured_duration": 7617,
+        "delta": -12198,
+        "overflow": 0,
+        "underflow": 12198,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1455,
+        "pause_stages": [
+          "lead_trim:258",
+          "tail_trim:1197"
+        ],
+        "timing_score": 50.0,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 9072,
+        "provider_fatal": false
+      },
+      {
+        "index": 5,
+        "slot_start": 74115,
+        "slot_end": 95190,
+        "slot_duration": 21075,
+        "tts_duration": 9313,
+        "measured_duration": 9313,
+        "delta": -11762,
+        "overflow": 0,
+        "underflow": 11762,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1631,
+        "pause_stages": [
+          "lead_trim:247",
+          "tail_trim:1229",
+          "pause_compress:154"
+        ],
+        "timing_score": 50.0,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 10944,
+        "provider_fatal": false
+      },
+      {
+        "index": 6,
+        "slot_start": 95290,
+        "slot_end": 102165,
+        "slot_duration": 6875,
+        "tts_duration": 4667,
+        "measured_duration": 4667,
+        "delta": -2208,
+        "overflow": 0,
+        "underflow": 2208,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1165,
+        "pause_stages": [
+          "lead_trim:203",
+          "tail_trim:962"
+        ],
+        "timing_score": 66.7,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 5832,
+        "provider_fatal": false
+      },
+      {
+        "index": 7,
+        "slot_start": 102702,
+        "slot_end": 111643,
+        "slot_duration": 8941,
+        "tts_duration": 9872,
+        "measured_duration": 9872,
+        "delta": 931,
+        "overflow": 931,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1336,
+        "pause_stages": [
+          "lead_trim:190",
+          "tail_trim:987",
+          "pause_compress:158"
+        ],
+        "timing_score": 74.8,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 11208,
+        "provider_fatal": false
+      },
+      {
+        "index": 8,
+        "slot_start": 111743,
+        "slot_end": 167369,
+        "slot_duration": 55626,
+        "tts_duration": 35185,
+        "measured_duration": 35185,
+        "delta": -20441,
+        "overflow": 0,
+        "underflow": 20441,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 3959,
+        "pause_stages": [
+          "lead_trim:230",
+          "tail_trim:1218",
+          "pause_compress:2506"
+        ],
+        "timing_score": 56.6,
+        "rewrite_reason": "pause_only_after_resegment",
+        "final_status": "deferred_after_resegment",
+        "original_duration": 39144,
+        "provider_fatal": false
+      }
+    ],
+    "requires_llm_adaptation": {
+      "count": 9,
+      "segment_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "reason": "closed_loop_unresolved"
+    }
+  },
+  "timeline_validation": {
+    "ok": false,
+    "segment_overlap": [],
+    "speech_overlap": [
+      {
+        "index": 3,
+        "code": "speech_overlap",
+        "overlap_ms": 341,
+        "speech_end_ms": 54541,
+        "next_start_ms": 54200
+      },
+      {
+        "index": 7,
+        "code": "speech_overlap",
+        "overlap_ms": 806,
+        "speech_end_ms": 112549,
+        "next_start_ms": 111743
+      }
+    ],
+    "gap_analysis": [],
+    "problem_indices": [
+      3,
+      7
+    ]
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original_duration": 14592,
+      "tts_duration": 12788,
+      "slot_duration": 17783,
+      "slot_start": 0,
+      "slot_end": 17783,
+      "delta": -4995,
+      "overflow": 0,
+      "underflow": 4995,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1804,
+      "pause_stages": [
+        "lead_trim:242",
+        "tail_trim:1147",
+        "pause_compress:413"
+      ],
+      "timing_score": 68.3,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "underflow"
+    },
+    {
+      "index": 1,
+      "original_duration": 12960,
+      "tts_duration": 11332,
+      "slot_duration": 14716,
+      "slot_start": 17883,
+      "slot_end": 32599,
+      "delta": -3384,
+      "overflow": 0,
+      "underflow": 3384,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1628,
+      "pause_stages": [
+        "lead_trim:214",
+        "tail_trim:985",
+        "pause_compress:428"
+      ],
+      "timing_score": 74.9,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "underflow"
+    },
+    {
+      "index": 2,
+      "original_duration": 5592,
+      "tts_duration": 4215,
+      "slot_duration": 7246,
+      "slot_start": 32699,
+      "slot_end": 39945,
+      "delta": -3031,
+      "overflow": 0,
+      "underflow": 3031,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1377,
+      "pause_stages": [
+        "lead_trim:228",
+        "tail_trim:1065",
+        "pause_compress:84"
+      ],
+      "timing_score": 54.8,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "underflow"
+    },
+    {
+      "index": 3,
+      "original_duration": 16056,
+      "tts_duration": 14302,
+      "slot_duration": 13861,
+      "slot_start": 40239,
+      "slot_end": 54100,
+      "delta": 441,
+      "overflow": 441,
+      "underflow": 0,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 75,
+      "pause_stages": [
+        "pause_compress:73"
+      ],
+      "timing_score": 92.9,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "overflow"
+    },
+    {
+      "index": 4,
+      "original_duration": 9072,
+      "tts_duration": 7617,
+      "slot_duration": 19815,
+      "slot_start": 54200,
+      "slot_end": 74015,
+      "delta": -12198,
+      "overflow": 0,
+      "underflow": 12198,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1455,
+      "pause_stages": [
+        "lead_trim:258",
+        "tail_trim:1197"
+      ],
+      "timing_score": 50.0,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "underflow"
+    },
+    {
+      "index": 5,
+      "original_duration": 10944,
+      "tts_duration": 9313,
+      "slot_duration": 21075,
+      "slot_start": 74115,
+      "slot_end": 95190,
+      "delta": -11762,
+      "overflow": 0,
+      "underflow": 11762,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1631,
+      "pause_stages": [
+        "lead_trim:247",
+        "tail_trim:1229",
+        "pause_compress:154"
+      ],
+      "timing_score": 50.0,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "underflow"
+    },
+    {
+      "index": 6,
+      "original_duration": 5832,
+      "tts_duration": 4667,
+      "slot_duration": 6875,
+      "slot_start": 95290,
+      "slot_end": 102165,
+      "delta": -2208,
+      "overflow": 0,
+      "underflow": 2208,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1165,
+      "pause_stages": [
+        "lead_trim:203",
+        "tail_trim:962"
+      ],
+      "timing_score": 66.7,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "underflow"
+    },
+    {
+      "index": 7,
+      "original_duration": 11208,
+      "tts_duration": 9847,
+      "slot_duration": 8941,
+      "slot_start": 102702,
+      "slot_end": 111643,
+      "delta": 906,
+      "overflow": 906,
+      "underflow": 0,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 25,
+      "pause_stages": [
+        "pause_compress:24"
+      ],
+      "timing_score": 75.5,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "overflow"
+    },
+    {
+      "index": 8,
+      "original_duration": 39144,
+      "tts_duration": 35185,
+      "slot_duration": 55626,
+      "slot_start": 111743,
+      "slot_end": 167369,
+      "delta": -20441,
+      "overflow": 0,
+      "underflow": 20441,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 3959,
+      "pause_stages": [
+        "lead_trim:230",
+        "tail_trim:1218",
+        "pause_compress:2506"
+      ],
+      "timing_score": 56.6,
+      "final_status": "deferred_after_resegment",
+      "rewrite_reason": "pause_only_after_resegment",
+      "status": "underflow"
+    }
+  ]
+}

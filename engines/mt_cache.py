@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Disk cache for MT / translation text (Simple speedup).
 
-Key: hash(normalized_source + source_lang + target_lang + engine)
+Key: hash(normalized_source + source_lang + target_lang + engine + v2_osplit)
+Stage 10: reject incomplete (truncated) translations for oversized EN→UK sources.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from typing import Any
 logger = logging.getLogger("tubedub.mt_cache")
 
 _WS = re.compile(r"\s+")
+_SHORT_RATIO = 0.35
 
 
 def default_cache_dir() -> Path:
@@ -56,6 +58,37 @@ def cache_path_for_key(cache_dir: Path, key: str) -> Path:
     return Path(cache_dir) / shard / f"{key}.json"
 
 
+def is_incomplete_mt_pair(
+    source: str,
+    translated: str,
+    source_lang: str,
+    target_lang: str,
+) -> bool:
+    """True when oversized EN→UK source got a truncated target (do not cache).
+
+    Heuristic: words_tgt < 0.35 * words_src when source is oversized.
+    """
+    src = normalize_mt_cache_text(source)
+    dst = str(translated or "").strip()
+    if not src or not dst:
+        return True
+    src_l = str(source_lang or "").strip().lower()
+    tgt_l = str(target_lang or "").strip().lower()
+    if src_l != "en" or tgt_l != "uk":
+        return False
+    try:
+        from engines.mt.oversized_guard import is_oversized_mt_unit
+    except Exception:
+        return False
+    if not is_oversized_mt_unit(src):
+        return False
+    w_src = len(src.split())
+    w_tgt = len(dst.split())
+    if w_src <= 0:
+        return False
+    return w_tgt < (_SHORT_RATIO * w_src)
+
+
 def lookup_mt_cache(
     text: str,
     source_lang: str,
@@ -78,6 +111,18 @@ def lookup_mt_cache(
         if not out:
             logger.debug("mt_cache_miss empty key=%s", key[:12])
             return None
+        if is_incomplete_mt_pair(text, out, source_lang, target_lang):
+            logger.warning(
+                "mt_cache_reject_short key=%s src_words=%d tgt_words=%d",
+                key[:12],
+                len(normalize_mt_cache_text(text).split()),
+                len(out.split()),
+            )
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                pass
+            return None
         logger.info("mt_cache_hit key=%s", key[:12])
         return out
     except Exception as exc:
@@ -97,6 +142,13 @@ def store_mt_cache(
     src = normalize_mt_cache_text(text)
     dst = str(translated or "").strip()
     if not src or not dst:
+        return None
+    if is_incomplete_mt_pair(src, dst, source_lang, target_lang):
+        logger.warning(
+            "mt_cache_skip_incomplete src_words=%d tgt_words=%d (oversized short MT)",
+            len(src.split()),
+            len(dst.split()),
+        )
         return None
     cdir = Path(cache_dir) if cache_dir is not None else default_cache_dir()
     key = mt_cache_key(src, source_lang, target_lang, engine=engine)
@@ -134,4 +186,5 @@ def empty_mt_stats() -> dict[str, Any]:
         "mt_concurrency_used": 1,
         "mt_retries": 0,
         "mt_path": "",
+        "mt_guard_splits": 0,
     }

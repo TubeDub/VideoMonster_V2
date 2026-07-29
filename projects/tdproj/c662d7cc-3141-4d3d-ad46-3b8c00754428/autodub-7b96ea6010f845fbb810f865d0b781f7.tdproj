@@ -1,0 +1,19 @@
+{
+  "format": "tubedub-project",
+  "version": 1,
+  "project_id": "c662d7cc-3141-4d3d-ad46-3b8c00754428",
+  "title": "autodub-7b96ea6010f845fbb810f865d0b781f7",
+  "created_ms": 1785299917688,
+  "updated_ms": 1785299917688,
+  "src_lang": "en",
+  "tgt_lang": "uk",
+  "modules": {},
+  "pipeline": {
+    "trace_id": "",
+    "last_run_ms": 0,
+    "stages": [],
+    "segments": []
+  },
+  "assets": [],
+  "meta": {}
+}

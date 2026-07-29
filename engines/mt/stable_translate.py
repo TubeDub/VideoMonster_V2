@@ -3,6 +3,8 @@ Stable MT path — direct Marian in the main thread.
 
 No Router, no pivot, no cascade, no ThreadPoolExecutor, no from_pretrained during dub.
 Models must be preloaded during «Подготовка компонентов».
+
+Stage 10: oversized split before truncate, beams=2 (Simple), glossary protect.
 """
 
 from __future__ import annotations
@@ -19,6 +21,9 @@ from engines.mt.lang_codes import normalize_lang
 logger = logging.getLogger("tubedub.engines.mt.stable")
 
 _MARIAN_INFER_LOCK = threading.Lock()
+_DEFAULT_SIMPLE_BEAMS = 2
+_TOKEN_MAX = 512
+_GEN_MAX = 512
 
 
 def use_stable_mt() -> bool:
@@ -39,6 +44,16 @@ def use_stable_mt() -> bool:
     return True
 
 
+def resolve_marian_beams(*, simple: bool = True) -> int:
+    """Simple default beams=2 (quality/speed); env MT_NUM_BEAMS overrides (1–4)."""
+    raw = (os.getenv("MT_NUM_BEAMS") or os.getenv("VM_MT_NUM_BEAMS") or "").strip()
+    if raw.isdigit():
+        return max(1, min(4, int(raw)))
+    if simple or use_stable_mt():
+        return _DEFAULT_SIMPLE_BEAMS
+    return 4
+
+
 def ensure_marian_ready(app_dir: Path, src_lang: str, tgt_lang: str) -> None:
     """Load Marian weights on the main thread before segment loop."""
     from engines.model_manager.downloader import is_mt_engine_ready, load_marian
@@ -55,6 +70,18 @@ def ensure_marian_ready(app_dir: Path, src_lang: str, tgt_lang: str) -> None:
     load_marian(app_dir, src, tgt)
     ms = (time.perf_counter() - t0) * 1000.0
     logger.info("[StableMT] Marian ready %s→%s preload_ms=%.0f", src, tgt, ms)
+
+
+def _postprocess_mt(src_lang: str, tgt_lang: str, text: str) -> str:
+    src, tgt = normalize_lang(src_lang), normalize_lang(tgt_lang)
+    if src == "en" and tgt == "uk":
+        try:
+            from engines.mt.glossary_en_uk import apply_glossary_en_uk
+
+            return apply_glossary_en_uk(text)
+        except Exception:
+            return text
+    return text
 
 
 def translate_direct_marian(
@@ -113,7 +140,21 @@ def translate_direct_marian(
 
     tok, model, name = loaded
     t0 = time.perf_counter()
-    num_beams = 1 if use_stable_mt() else 4
+    num_beams = resolve_marian_beams(simple=True)
+    meta["num_beams"] = num_beams
+
+    # Glossary protect (EN→UK) so Marian cannot mangle Fiat / USC / names.
+    forms: list[str] = []
+    work = clean
+    if src == "en" and tgt == "uk":
+        try:
+            from engines.mt.glossary_en_uk import protect_glossary, restore_glossary
+
+            work, forms = protect_glossary(clean)
+            if forms:
+                meta["glossary_protected"] = len(forms)
+        except Exception:
+            forms = []
 
     def _infer_one(piece: str) -> str:
         with _MARIAN_INFER_LOCK:
@@ -122,30 +163,51 @@ def translate_direct_marian(
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
-                max_length=512,
+                max_length=_TOKEN_MAX,
             )
             with torch.no_grad():
-                out_ids = model.generate(**batch, max_length=512, num_beams=num_beams)
+                out_ids = model.generate(
+                    **batch, max_length=_GEN_MAX, num_beams=num_beams
+                )
             return tok.decode(out_ids[0], skip_special_tokens=True).strip()
 
     try:
         from engines.mt.oversized_guard import (
             is_oversized_mt_unit,
+            split_oversized_unit,
             translate_oversized_safely,
         )
 
-        if is_oversized_mt_unit(clean):
-            result = translate_oversized_safely(clean, _infer_one)
+        if is_oversized_mt_unit(work):
+            parts = split_oversized_unit(work)
+            logger.warning(
+                "[MT Guard] oversized seg#%s → %d parts",
+                segment_index if segment_index >= 0 else "?",
+                len(parts),
+            )
+            result = translate_oversized_safely(work, _infer_one)
             meta["oversized_split"] = True
+            meta["oversized_parts"] = len(parts)
         else:
-            result = _infer_one(clean)
+            result = _infer_one(work)
     except Exception as exc:
         ms = (time.perf_counter() - t0) * 1000.0
-        logger.error("[StableMT] infer failed seg=%s %s→%s: %s", segment_index, src, tgt, exc)
+        logger.error(
+            "[StableMT] infer failed seg=%s %s→%s: %s", segment_index, src, tgt, exc
+        )
         meta["engine"] = "failed"
         meta["error"] = str(exc)
         meta["elapsed_ms"] = round(ms, 1)
         return "", meta
+
+    if forms:
+        try:
+            from engines.mt.glossary_en_uk import restore_glossary
+
+            result = restore_glossary(result, forms)
+        except Exception:
+            pass
+    result = _postprocess_mt(src, tgt, result)
 
     ms = (time.perf_counter() - t0) * 1000.0
     meta["engine_version"] = name
@@ -170,11 +232,15 @@ def translate_batch_marian(
     *,
     app_dir: Path,
 ) -> list[tuple[str, dict[str, Any]]]:
-    """Batch Marian inference — one ``generate()`` for multiple segments (TZ §2)."""
+    """Batch Marian — split oversized units first, then tokenize (truncate safe)."""
     import torch
 
     from engines.model_manager.downloader import load_marian
     from engines.model_manager.runtime import OfflineOnlyError
+    from engines.mt.oversized_guard import (
+        guard_segments_before_mt,
+        is_oversized_mt_unit,
+    )
     from engines.translation_quality_score import compute_quality_score
 
     src, tgt = normalize_lang(src_lang), normalize_lang(tgt_lang)
@@ -198,75 +264,87 @@ def translate_batch_marian(
         return [("", {"engine": "failed", "error": "no_model"}) for _ in cleaned]
 
     tok, model, name = loaded
-    num_beams = 1 if use_stable_mt() else 4
+    num_beams = resolve_marian_beams(simple=True)
     t0 = time.perf_counter()
 
-    non_empty_idx = [i for i, t in enumerate(cleaned) if t]
-    if not non_empty_idx:
-        return [("", {"engine": "none"}) for _ in cleaned]
+    # Protect glossary per original segment, then expand oversized → units.
+    protected: list[str] = []
+    gloss_forms: list[list[str]] = []
+    for t in cleaned:
+        if not t:
+            protected.append("")
+            gloss_forms.append([])
+            continue
+        forms: list[str] = []
+        work = t
+        if src == "en" and tgt == "uk":
+            try:
+                from engines.mt.glossary_en_uk import protect_glossary
 
-    batch_texts = [cleaned[i] for i in non_empty_idx]
+                work, forms = protect_glossary(t)
+            except Exception:
+                forms = []
+        protected.append(work)
+        gloss_forms.append(forms)
+
+    guard = guard_segments_before_mt(protected, log=True)
+    unit_texts = guard.texts
+    parents = guard.parent_indices
+
+    decoded_units: list[str] = [""] * len(unit_texts)
+    non_empty = [(i, t) for i, t in enumerate(unit_texts) if t]
     try:
-        from engines.mt.oversized_guard import (
-            is_oversized_mt_unit,
-            translate_oversized_safely,
-        )
-
-        # If any unit is oversized, translate those via split; batch the rest.
-        decoded_map: dict[int, str] = {}
-        oversized_idx: set[int] = set()
-        batch_idx: list[int] = []
-        batch_payload: list[str] = []
-        for i, src_text in zip(non_empty_idx, batch_texts):
-            if is_oversized_mt_unit(src_text):
-                oversized_idx.add(i)
-
-                def _infer_piece(piece: str, _tok=tok, _model=model, _beams=num_beams) -> str:
-                    with _MARIAN_INFER_LOCK:
-                        b = _tok(
-                            [piece],
-                            return_tensors="pt",
-                            padding=True,
-                            truncation=True,
-                            max_length=512,
+        if non_empty:
+            idxs = [i for i, _ in non_empty]
+            payload = [t for _, t in non_empty]
+            # Sub-batch to keep GPU/CPU memory sane
+            chunk = 12
+            for off in range(0, len(payload), chunk):
+                sl_idx = idxs[off : off + chunk]
+                sl_txt = payload[off : off + chunk]
+                with _MARIAN_INFER_LOCK:
+                    batch = tok(
+                        sl_txt,
+                        return_tensors="pt",
+                        padding=True,
+                        truncation=True,
+                        max_length=_TOKEN_MAX,
+                    )
+                    with torch.no_grad():
+                        generated = model.generate(
+                            **batch, max_length=_GEN_MAX, num_beams=num_beams
                         )
-                        with torch.no_grad():
-                            gen = _model.generate(**b, max_length=512, num_beams=_beams)
-                        return _tok.decode(gen[0], skip_special_tokens=True).strip()
-
-                decoded_map[i] = translate_oversized_safely(src_text, _infer_piece)
-            else:
-                batch_idx.append(i)
-                batch_payload.append(src_text)
-
-        if batch_payload:
-            with _MARIAN_INFER_LOCK:
-                batch = tok(
-                    batch_payload,
-                    return_tensors="pt",
-                    padding=True,
-                    truncation=True,
-                    max_length=512,
-                )
-                with torch.no_grad():
-                    generated = model.generate(**batch, max_length=512, num_beams=num_beams)
-                decoded = [
-                    tok.decode(row, skip_special_tokens=True).strip()
-                    for row in generated
-                ]
-            for i, tr in zip(batch_idx, decoded):
-                decoded_map[i] = tr
+                    decoded = [
+                        tok.decode(row, skip_special_tokens=True).strip()
+                        for row in generated
+                    ]
+                for ui, tr in zip(sl_idx, decoded):
+                    decoded_units[ui] = tr
     except Exception as exc:
         logger.error("[StableMT] batch infer failed: %s", exc)
         return [("", {"engine": "failed", "error": str(exc)}) for _ in cleaned]
 
+    # Rejoin units → parent segments
+    joined: list[list[str]] = [[] for _ in cleaned]
+    for ui, parent in enumerate(parents):
+        if 0 <= parent < len(joined) and decoded_units[ui]:
+            joined[parent].append(decoded_units[ui])
+
     ms = (time.perf_counter() - t0) * 1000.0
-    per_ms = ms / max(len(non_empty_idx), 1)
+    per_ms = ms / max(len([t for t in cleaned if t]), 1)
     for i, src_text in enumerate(cleaned):
         if not src_text:
             out.append(("", {"engine": "none", "batch": True}))
             continue
-        result = decoded_map.get(i, "")
+        result = " ".join(joined[i]).strip()
+        if gloss_forms[i]:
+            try:
+                from engines.mt.glossary_en_uk import restore_glossary
+
+                result = restore_glossary(result, gloss_forms[i])
+            except Exception:
+                pass
+        result = _postprocess_mt(src, tgt, result)
         meta: dict[str, Any] = {
             "engine": "marian",
             "route": "direct",
@@ -275,10 +353,14 @@ def translate_batch_marian(
             "batch": True,
             "elapsed_ms": round(per_ms, 1),
             "engine_version": name,
-            "oversized_split": i in oversized_idx,
+            "num_beams": num_beams,
+            "oversized_split": bool(src_text and is_oversized_mt_unit(protected[i])),
+            "glossary_protected": len(gloss_forms[i]),
         }
         if result:
-            score, qd = compute_quality_score(src_text, result, src_lang=src, tgt_lang=tgt)
+            score, qd = compute_quality_score(
+                src_text, result, src_lang=src, tgt_lang=tgt
+            )
             meta["quality_score"] = score
             meta["quality_details"] = qd
         out.append((result, meta))
