@@ -83,6 +83,22 @@ def _rejoin_by_parent(
     return [" ".join(parts).strip() for parts in buckets]
 
 
+def _skip_cache_long(text: str) -> bool:
+    """Stage 12b: long/oversized segments always Marian+split (default ON)."""
+    if (os.getenv("VM_MT_SKIP_CACHE_LONG", "1").strip().lower()
+            in ("0", "false", "no", "off")):
+        return False
+    w = len(str(text or "").split())
+    if w > 55:
+        return True
+    try:
+        from engines.mt.oversized_guard import is_oversized_mt_unit
+
+        return is_oversized_mt_unit(text)
+    except Exception:
+        return w > 55
+
+
 def _translate_one_traced(
     text: str,
     source_lang: str,
@@ -116,16 +132,12 @@ def translate_segments_batch(
 ) -> tuple[list[str], dict[str, Any]]:
     """Translate segments 1:1 with disk cache + batch Marian / parallel fallback."""
     from engines.mt.glossary_en_uk import finalize_mt_text
-    from engines.mt.oversized_guard import (
-        guard_segments_before_mt,
-        is_oversized_mt_unit,
-    )
+    from engines.mt.oversized_guard import guard_segments_before_mt
     from engines.mt_cache import (
         default_cache_dir,
         empty_mt_stats,
         lookup_mt_cache,
         mt_cache_disabled,
-        skip_cache_for_long_segments,
         store_mt_cache,
     )
 
@@ -139,7 +151,6 @@ def translate_segments_batch(
     base = Path(app_dir) if app_dir is not None else Path(__file__).resolve().parent.parent
     engine_tag = str(engine_preference or "auto").strip() or "auto"
     stats["mt_cache_bypassed"] = bool(mt_cache_disabled())
-    skip_long = skip_cache_for_long_segments()
 
     n = len(segments or [])
     out: list[str] = [""] * n
@@ -160,17 +171,15 @@ def translate_segments_batch(
             seg_engines[i] = "none"
             stats["mt_cache_hits"] += 1
             continue
-        # P0-C: long/oversized → always Marian+split (default ON)
-        words_n = len(text.split())
-        if skip_long and (is_oversized_mt_unit(text) or words_n > 55):
+        # Stage 12b: long/oversized → skip cache → Marian+split
+        if _skip_cache_long(text):
             miss_indices.append(i)
             stats["mt_cache_misses"] += 1
             stats["mt_long_cache_skips"] = int(stats.get("mt_long_cache_skips") or 0) + 1
             logger.info(
-                "[MT] skip_cache_long seg#%d words=%d oversized=%s",
+                "[MT] skip_cache_long seg#%d words=%d",
                 i + 1,
-                words_n,
-                is_oversized_mt_unit(text),
+                len(text.split()),
             )
             continue
         hit = lookup_mt_cache(

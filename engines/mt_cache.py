@@ -2,7 +2,7 @@
 """Disk cache for MT / translation text (Simple speedup).
 
 Key: hash(normalized_source + langs + engine + v3_glossary_split)
-Stage 12: incomplete 0.55 + crash/ejected/survived/Star Wars entity keys.
+Stage 12b: incomplete 0.55 + long_src (words>30 OR oversized) + entity keys.
 """
 
 from __future__ import annotations
@@ -21,15 +21,14 @@ _WS = re.compile(r"\s+")
 _SHORT_RATIO = 0.55
 _CACHE_KEY_SUFFIX = "v3_glossary_split"
 
-# (src needle lowercase, tgt must match). Longer / phrase needles first.
+# src needle → tgt must match (Stage 12b keys).
 _CRITICAL_ENTITY_CHECKS: tuple[tuple[str, re.Pattern[str]], ...] = (
-    ("race cars anymore", re.compile(r"гоночн|автомобіл|машин|race\s*cars?", re.I)),
+    ("race cars", re.compile(r"гонок|гоночн|автомобіл|машин|race\s*cars?", re.I)),
     ("star wars", re.compile(r"зоряні|star\s*wars", re.I)),
     ("george lucas", re.compile(r"лукас|lucas", re.I)),
-    ("acceptance", re.compile(r"прийнятт|лист|acceptance", re.I)),
-    ("survived", re.compile(r"вижив|вижила|вижило|survived", re.I)),
-    ("ejected", re.compile(r"викинул|викинуло|викинув|ejected", re.I)),
-    ("smash", re.compile(r"розбив|розбит|трощи|аварі|smash", re.I)),
+    ("survived", re.compile(r"вижив|survived", re.I)),
+    ("ejected", re.compile(r"викину|ejected", re.I)),
+    ("smash", re.compile(r"розбив|аварі|smash", re.I)),
 )
 
 
@@ -43,9 +42,11 @@ def mt_cache_disabled() -> bool:
 
 
 def skip_cache_for_long_segments() -> bool:
-    """Default ON — long/oversized segments always Marian+split (Simple Stage 12)."""
+    """Default ON. Opt-out: VM_MT_SKIP_CACHE_LONG=0/false/no/off."""
     raw = (os.getenv("VM_MT_SKIP_CACHE_LONG") or "1").strip().lower()
-    return raw in ("1", "true", "yes", "on")
+    if raw in ("0", "false", "no", "off"):
+        return False
+    return True
 
 
 def default_cache_dir() -> Path:
@@ -98,7 +99,15 @@ def is_incomplete_mt_pair(
     source_lang: str,
     target_lang: str,
 ) -> bool:
-    """True when EN→UK translation is truncated / missing critical entities."""
+    """True when EN→UK translation is truncated / missing critical entities.
+
+    Stage 12b:
+      long_src = words_src > 30 OR is_oversized_mt_unit(src)
+      incomplete if:
+        a) long_src and words_tgt < 0.55 * words_src
+        b) words_src > 55 and words_tgt < 40
+        c) entity missing (smash/ejected/survived/race cars/Star Wars/George Lucas)
+    """
     src = normalize_mt_cache_text(source)
     dst = str(translated or "").strip()
     if not src or not dst:
@@ -112,11 +121,21 @@ def is_incomplete_mt_pair(
     if w_src <= 0:
         return False
 
-    # Stage 12: words_tgt < 0.55 * words_src AND words_src > 30
-    if w_src > 30 and w_tgt < (_SHORT_RATIO * w_src):
+    long_src = w_src > 30
+    try:
+        from engines.mt.oversized_guard import is_oversized_mt_unit
+
+        long_src = long_src or is_oversized_mt_unit(src)
+    except Exception:
+        pass
+
+    # a) ratio on long/oversized
+    if long_src and w_tgt < (_SHORT_RATIO * w_src):
         return True
-    if w_src > 80 and w_tgt < 60:
+    # b) hard floor for long segments
+    if w_src > 55 and w_tgt < 40:
         return True
+    # c) critical entities
     if _missing_critical_entities(src, dst):
         return True
     return False
