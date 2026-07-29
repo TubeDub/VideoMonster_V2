@@ -64,9 +64,10 @@ def is_incomplete_mt_pair(
     source_lang: str,
     target_lang: str,
 ) -> bool:
-    """True when oversized EN→UK source got a truncated target (do not cache).
+    """True when long/oversized EN→UK source got a truncated target (do not cache).
 
-    Heuristic: words_tgt < 0.35 * words_src when source is oversized.
+    Trigger when src is oversized OR words_src > 55, and
+    words_tgt < 0.35 * words_src.
     """
     src = normalize_mt_cache_text(source)
     dst = str(translated or "").strip()
@@ -76,15 +77,18 @@ def is_incomplete_mt_pair(
     tgt_l = str(target_lang or "").strip().lower()
     if src_l != "en" or tgt_l != "uk":
         return False
-    try:
-        from engines.mt.oversized_guard import is_oversized_mt_unit
-    except Exception:
-        return False
-    if not is_oversized_mt_unit(src):
-        return False
     w_src = len(src.split())
     w_tgt = len(dst.split())
     if w_src <= 0:
+        return False
+    long_src = w_src > 55
+    try:
+        from engines.mt.oversized_guard import is_oversized_mt_unit
+
+        long_src = long_src or is_oversized_mt_unit(src)
+    except Exception:
+        pass
+    if not long_src:
         return False
     return w_tgt < (_SHORT_RATIO * w_src)
 

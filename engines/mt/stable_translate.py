@@ -72,15 +72,29 @@ def ensure_marian_ready(app_dir: Path, src_lang: str, tgt_lang: str) -> None:
     logger.info("[StableMT] Marian ready %s→%s preload_ms=%.0f", src, tgt, ms)
 
 
+def _finish_en_uk_glossary(text: str, forms: list[str] | None = None) -> str:
+    """restore → apply_post_mt_glossary_fixes (+ leftover EN term replace)."""
+    out = str(text or "")
+    try:
+        from engines.mt.glossary_en_uk import (
+            apply_glossary_en_uk,
+            apply_post_mt_glossary_fixes,
+            restore_glossary,
+        )
+
+        if forms:
+            out = restore_glossary(out, forms)
+        out = apply_post_mt_glossary_fixes(out)
+        out = apply_glossary_en_uk(out)
+    except Exception:
+        pass
+    return out
+
+
 def _postprocess_mt(src_lang: str, tgt_lang: str, text: str) -> str:
     src, tgt = normalize_lang(src_lang), normalize_lang(tgt_lang)
     if src == "en" and tgt == "uk":
-        try:
-            from engines.mt.glossary_en_uk import apply_glossary_en_uk
-
-            return apply_glossary_en_uk(text)
-        except Exception:
-            return text
+        return _finish_en_uk_glossary(text, None)
     return text
 
 
@@ -200,14 +214,11 @@ def translate_direct_marian(
         meta["elapsed_ms"] = round(ms, 1)
         return "", meta
 
-    if forms:
-        try:
-            from engines.mt.glossary_en_uk import restore_glossary
-
-            result = restore_glossary(result, forms)
-        except Exception:
-            pass
-    result = _postprocess_mt(src, tgt, result)
+    # Glossary: protect → infer (incl. oversized parts) → restore → post-fixes
+    if src == "en" and tgt == "uk":
+        result = _finish_en_uk_glossary(result, forms)
+    else:
+        result = _postprocess_mt(src, tgt, result)
 
     ms = (time.perf_counter() - t0) * 1000.0
     meta["engine_version"] = name
@@ -337,14 +348,11 @@ def translate_batch_marian(
             out.append(("", {"engine": "none", "batch": True}))
             continue
         result = " ".join(joined[i]).strip()
-        if gloss_forms[i]:
-            try:
-                from engines.mt.glossary_en_uk import restore_glossary
-
-                result = restore_glossary(result, gloss_forms[i])
-            except Exception:
-                pass
-        result = _postprocess_mt(src, tgt, result)
+        # Glossary: protect → infer units → restore → post-fixes
+        if src == "en" and tgt == "uk":
+            result = _finish_en_uk_glossary(result, gloss_forms[i])
+        else:
+            result = _postprocess_mt(src, tgt, result)
         meta: dict[str, Any] = {
             "engine": "marian",
             "route": "direct",
