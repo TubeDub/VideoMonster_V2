@@ -112,9 +112,9 @@ def test_mt_batch_guard_then_marian_rejoin(tmp_path: Path, monkeypatch):
     """Miss path: guard expand → fake Marian on units → rejoin 1:1."""
 
     def fake_marian(texts, src, tgt, *, app_dir):
-        # Return long-enough UK so cache short-reject does not fire on rejoined mega.
+        # Return long-enough UK so cache short-reject (0.50 ratio) does not fire.
         return [
-            (" ".join(["слово"] * max(8, len(t.split()) // 2)), {"engine": "marian"})
+            (" ".join(["слово"] * max(12, len(t.split()))), {"engine": "marian"})
             for t in texts
         ]
 

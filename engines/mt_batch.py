@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 """Batch MT for Simple — cache + Marian batch / parallel fallback, 1:1 parity.
 
-Stage 10: oversized guard before Marian (split → batch units → rejoin 1:1).
-
-API:
-  translate_segments_batch(segments, source_lang, target_lang, batch_size=10, ...)
-  → (translated_same_length, stats)
+Stage 11: glossary on cache hit; per-segment engine labels (cache / cache+glossary / marian*).
 """
 
 from __future__ import annotations
@@ -119,11 +115,13 @@ def translate_segments_batch(
     on_progress: Callable[[int, int], None] | None = None,
 ) -> tuple[list[str], dict[str, Any]]:
     """Translate segments 1:1 with disk cache + batch Marian / parallel fallback."""
+    from engines.mt.glossary_en_uk import finalize_mt_text
     from engines.mt.oversized_guard import guard_segments_before_mt
     from engines.mt_cache import (
         default_cache_dir,
         empty_mt_stats,
         lookup_mt_cache,
+        mt_cache_disabled,
         store_mt_cache,
     )
 
@@ -136,9 +134,11 @@ def translate_segments_batch(
     cdir.mkdir(parents=True, exist_ok=True)
     base = Path(app_dir) if app_dir is not None else Path(__file__).resolve().parent.parent
     engine_tag = str(engine_preference or "auto").strip() or "auto"
+    stats["mt_cache_bypassed"] = bool(mt_cache_disabled())
 
     n = len(segments or [])
     out: list[str] = [""] * n
+    seg_engines: list[str] = [""] * n
     stats["mt_segments"] = n
     stats["mt_batch_size"] = bsize
     stats["mt_path"] = "stage7_batch_cache"
@@ -148,16 +148,23 @@ def translate_segments_batch(
         text = str(raw or "").strip()
         if not text:
             out[i] = ""
+            seg_engines[i] = "none"
             continue
         if src_l.lower() == tgt_l.lower():
             out[i] = text
+            seg_engines[i] = "none"
             stats["mt_cache_hits"] += 1
             continue
         hit = lookup_mt_cache(
             text, src_l, tgt_l, engine=engine_tag, cache_dir=cdir
         )
         if hit is not None:
-            out[i] = hit
+            finalized = finalize_mt_text(src_l, tgt_l, hit)
+            out[i] = finalized
+            if src_l.lower() == "en" and tgt_l.lower() == "uk":
+                seg_engines[i] = "cache+glossary"
+            else:
+                seg_engines[i] = "cache"
             stats["mt_cache_hits"] += 1
         else:
             miss_indices.append(i)
@@ -176,7 +183,6 @@ def translate_segments_batch(
     if miss_indices and prefer_marian:
         for group in _chunks(list(miss_indices), bsize):
             texts = [str(segments[i] or "").strip() for i in group]
-            # A2: split oversized miss-segments → units, batch, rejoin 1:1
             guard = guard_segments_before_mt(texts, log=True)
             stats["mt_guard_splits"] = int(stats.get("mt_guard_splits") or 0) + int(
                 guard.split_count or 0
@@ -187,7 +193,6 @@ def translate_segments_batch(
             if batch is None or len(batch) != len(unit_texts):
                 continue
             unit_trs = [str((batch[j][0] or "")).strip() for j in range(len(unit_texts))]
-            # Fail group if a non-empty unit produced empty MT
             group_ok = True
             for ui, ut in enumerate(unit_texts):
                 if ut and not unit_trs[ui]:
@@ -202,8 +207,9 @@ def translate_segments_batch(
             used_marian_batch = True
             stats["mt_calls"] += 1
             for j, idx in enumerate(group):
-                tr = rejoined[j]
+                tr = finalize_mt_text(src_l, tgt_l, rejoined[j])
                 out[idx] = tr
+                seg_engines[idx] = "marian_batch"
                 filled_by_marian.add(idx)
                 if tr:
                     store_mt_cache(
@@ -220,7 +226,6 @@ def translate_segments_batch(
                 except Exception:
                     pass
 
-    # Remaining misses: per-segment (parallel for online engines).
     still_miss = [
         i
         for i in miss_indices
@@ -228,7 +233,7 @@ def translate_segments_batch(
         and not out[i]
         and str(segments[i] or "").strip()
     ]
-    online = bool(still_miss)  # traced fallback may use deep-translator
+    online = bool(still_miss)
     workers = resolve_mt_concurrency(online=online, requested=concurrency)
     stats["mt_concurrency_used"] = workers if still_miss else 1
 
@@ -254,9 +259,13 @@ def translate_segments_batch(
                 i2, tr, meta, retries = _one(idx)
                 stats["mt_calls"] += 1
                 stats["mt_retries"] += retries
-                eng = str(meta.get("engine") or meta.get("route_label") or "traced")
+                eng = str(meta.get("engine") or meta.get("route_label") or "marian")
+                if "marian" in eng.lower():
+                    eng = "marian"
                 engines_used.add(eng)
+                tr = finalize_mt_text(src_l, tgt_l, tr)
                 out[i2] = tr
+                seg_engines[i2] = eng if eng else "marian"
                 if tr:
                     store_mt_cache(
                         str(segments[i2] or ""),
@@ -278,9 +287,13 @@ def translate_segments_batch(
                     i2, tr, meta, retries = fut.result()
                     stats["mt_calls"] += 1
                     stats["mt_retries"] += retries
-                    eng = str(meta.get("engine") or meta.get("route_label") or "traced")
+                    eng = str(meta.get("engine") or meta.get("route_label") or "marian")
+                    if "marian" in eng.lower():
+                        eng = "marian"
                     engines_used.add(eng)
+                    tr = finalize_mt_text(src_l, tgt_l, tr)
                     out[i2] = tr
+                    seg_engines[i2] = eng if eng else "marian"
                     if tr:
                         store_mt_cache(
                             str(segments[i2] or ""),
@@ -299,20 +312,26 @@ def translate_segments_batch(
                         except Exception:
                             pass
 
-    # Strict 1:1 length
     if len(out) != n:
         raise RuntimeError(f"mt_batch parity broken: in={n} out={len(out)}")
 
-    if used_marian_batch and not still_miss:
+    stats["mt_segment_engines"] = list(seg_engines)
+    if used_marian_batch and not still_miss and stats["mt_cache_hits"] == 0:
         stats["mt_engine"] = "marian_batch"
+    elif used_marian_batch and stats["mt_cache_hits"] > 0:
+        stats["mt_engine"] = "marian_batch+cache"
     elif engines_used:
         stats["mt_engine"] = "+".join(sorted(engines_used))
     else:
-        stats["mt_engine"] = "cache" if stats["mt_cache_hits"] else "none"
+        # Pure cache path — prefer cache+glossary if any segment used it
+        if any(e == "cache+glossary" for e in seg_engines):
+            stats["mt_engine"] = "cache+glossary"
+        else:
+            stats["mt_engine"] = "cache" if stats["mt_cache_hits"] else "none"
 
     stats["mt_wall_sec"] = round(time.perf_counter() - t0, 3)
     logger.info(
-        "mt_batch: segs=%d wall=%.2fs calls=%d hits=%d misses=%d engine=%s conc=%s splits=%s",
+        "mt_batch: segs=%d wall=%.2fs calls=%d hits=%d misses=%d engine=%s conc=%s splits=%s bypass=%s",
         n,
         stats["mt_wall_sec"],
         stats["mt_calls"],
@@ -321,5 +340,6 @@ def translate_segments_batch(
         stats["mt_engine"],
         stats["mt_concurrency_used"],
         stats.get("mt_guard_splits", 0),
+        stats.get("mt_cache_bypassed"),
     )
     return out, stats

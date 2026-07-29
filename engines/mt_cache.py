@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Disk cache for MT / translation text (Simple speedup).
 
-Key: hash(normalized_source + source_lang + target_lang + engine + v2_osplit)
-Stage 10: reject incomplete (truncated) translations for oversized EN→UK sources.
+Key: hash(normalized_source + langs + engine + v3_glossary_split)
+Stage 11: stricter incomplete reject; VM_MT_NO_CACHE bypass.
 """
 
 from __future__ import annotations
@@ -18,7 +18,23 @@ from typing import Any
 logger = logging.getLogger("tubedub.mt_cache")
 
 _WS = re.compile(r"\s+")
-_SHORT_RATIO = 0.35
+_SHORT_RATIO = 0.50
+_CACHE_KEY_SUFFIX = "v3_glossary_split"
+
+_CRITICAL_ENTITY_CHECKS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    ("star wars", re.compile(r"зоряні|star\s*wars", re.I)),
+    ("george lucas", re.compile(r"лукас|lucas", re.I)),
+    ("acceptance", re.compile(r"прийнятт|лист|acceptance", re.I)),
+)
+
+
+def mt_cache_disabled() -> bool:
+    return (os.getenv("VM_MT_NO_CACHE") or "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
 
 
 def default_cache_dir() -> Path:
@@ -40,14 +56,14 @@ def mt_cache_key(
     *,
     engine: str = "auto",
 ) -> str:
-    # v2: Marian oversized split — invalidate truncated v1 cache entries.
+    # v3: invalidate v2 truncated / pre-glossary cache entries.
     payload = "|".join(
         [
             normalize_mt_cache_text(text),
             str(source_lang or "").strip().lower(),
             str(target_lang or "").strip().lower(),
             str(engine or "auto").strip().lower(),
-            "v2_osplit",
+            _CACHE_KEY_SUFFIX,
         ]
     )
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()
@@ -58,17 +74,21 @@ def cache_path_for_key(cache_dir: Path, key: str) -> Path:
     return Path(cache_dir) / shard / f"{key}.json"
 
 
+def _missing_critical_entities(src: str, tgt: str) -> bool:
+    src_l = src.lower()
+    for needle, tgt_pat in _CRITICAL_ENTITY_CHECKS:
+        if needle in src_l and not tgt_pat.search(tgt):
+            return True
+    return False
+
+
 def is_incomplete_mt_pair(
     source: str,
     translated: str,
     source_lang: str,
     target_lang: str,
 ) -> bool:
-    """True when long/oversized EN→UK source got a truncated target (do not cache).
-
-    Trigger when src is oversized OR words_src > 55, and
-    words_tgt < 0.35 * words_src.
-    """
+    """True when EN→UK translation is truncated / missing critical entities."""
     src = normalize_mt_cache_text(source)
     dst = str(translated or "").strip()
     if not src or not dst:
@@ -81,16 +101,22 @@ def is_incomplete_mt_pair(
     w_tgt = len(dst.split())
     if w_src <= 0:
         return False
-    long_src = w_src > 55
+
+    long_src = w_src > 40
     try:
         from engines.mt.oversized_guard import is_oversized_mt_unit
 
         long_src = long_src or is_oversized_mt_unit(src)
     except Exception:
         pass
-    if not long_src:
-        return False
-    return w_tgt < (_SHORT_RATIO * w_src)
+
+    if long_src and w_tgt < (_SHORT_RATIO * w_src):
+        return True
+    if w_src > 80 and w_tgt < 60:
+        return True
+    if _missing_critical_entities(src, dst):
+        return True
+    return False
 
 
 def lookup_mt_cache(
@@ -101,6 +127,9 @@ def lookup_mt_cache(
     engine: str = "auto",
     cache_dir: Path | None = None,
 ) -> str | None:
+    if mt_cache_disabled():
+        logger.info("mt_cache_bypass VM_MT_NO_CACHE=1")
+        return None
     if not normalize_mt_cache_text(text):
         return ""
     cdir = Path(cache_dir) if cache_dir is not None else default_cache_dir()
@@ -117,7 +146,7 @@ def lookup_mt_cache(
             return None
         if is_incomplete_mt_pair(text, out, source_lang, target_lang):
             logger.warning(
-                "mt_cache_reject_short key=%s src_words=%d tgt_words=%d",
+                "mt_cache_reject_incomplete key=%s src_words=%d tgt_words=%d",
                 key[:12],
                 len(normalize_mt_cache_text(text).split()),
                 len(out.split()),
@@ -143,13 +172,15 @@ def store_mt_cache(
     engine: str = "auto",
     cache_dir: Path | None = None,
 ) -> Path | None:
+    if mt_cache_disabled():
+        return None
     src = normalize_mt_cache_text(text)
     dst = str(translated or "").strip()
     if not src or not dst:
         return None
     if is_incomplete_mt_pair(src, dst, source_lang, target_lang):
         logger.warning(
-            "mt_cache_skip_incomplete src_words=%d tgt_words=%d (oversized short MT)",
+            "mt_cache_skip_incomplete src_words=%d tgt_words=%d",
             len(src.split()),
             len(dst.split()),
         )
@@ -167,6 +198,7 @@ def store_mt_cache(
                     "source_lang": source_lang,
                     "target_lang": target_lang,
                     "engine": engine,
+                    "key_suffix": _CACHE_KEY_SUFFIX,
                 },
                 ensure_ascii=False,
             ),
@@ -191,4 +223,6 @@ def empty_mt_stats() -> dict[str, Any]:
         "mt_retries": 0,
         "mt_path": "",
         "mt_guard_splits": 0,
+        "mt_segment_engines": [],
+        "mt_cache_bypassed": False,
     }

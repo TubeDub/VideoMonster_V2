@@ -130,8 +130,12 @@ def synthesize_audits_from_segments(
     tgt_lang: str,
     *,
     engine: str = "cache",
+    engines: list[str] | None = None,
 ) -> list[SegmentTranslationAudit]:
-    """Build review audits when translate cache returns final text only."""
+    """Build review audits when translate cache returns final text only.
+
+    ``engines`` — optional per-segment engine labels (cache / cache+glossary / marian*).
+    """
     from engines.translation_quality import run_quality_validation
 
     n = max(len(source_segments), len(translated_segments))
@@ -139,6 +143,13 @@ def synthesize_audits_from_segments(
         str(translated_segments[i] if i < len(translated_segments) else "").strip()
         for i in range(n)
     ]
+    # Stage 11: glossary finalize on Review populate (cache / any path).
+    try:
+        from engines.mt.glossary_en_uk import finalize_mt_text
+
+        texts = [finalize_mt_text(src_lang, tgt_lang, t) for t in texts]
+    except Exception:
+        pass
     _, validation_warnings = run_quality_validation(
         source_segments,
         texts,
@@ -151,6 +162,9 @@ def synthesize_audits_from_segments(
         src = str(source_segments[i] if i < len(source_segments) else "")
         tr = texts[i]
         seg_warnings = validation_warnings[i] if i < len(validation_warnings) else []
+        eng = str(engine or "cache")
+        if engines is not None and i < len(engines) and str(engines[i] or "").strip():
+            eng = str(engines[i]).strip()
         audits.append(
             SegmentTranslationAudit(
                 index=i,
@@ -164,7 +178,7 @@ def synthesize_audits_from_segments(
                 quality_pass_before=tr,
                 quality_pass_after=tr,
                 semantic_text=tr,
-                engine=engine,
+                engine=eng,
                 route="direct",
                 validation_warnings=seg_warnings,
                 whisper_len=len(src),

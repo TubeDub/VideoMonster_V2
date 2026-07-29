@@ -9788,7 +9788,22 @@ def _run_pipeline_inner(
             )
             if cached_tr and len(cached_tr) == len(source_segments_snapshot):
                 segments = cached_tr
-                translate_method = "cache"
+                try:
+                    from engines.mt.glossary_en_uk import finalize_mt_text
+
+                    segments = [
+                        finalize_mt_text(translation_source_lang, target_lang, s)
+                        for s in segments
+                    ]
+                except Exception:
+                    pass
+                _job_eng = (
+                    "cache+glossary"
+                    if str(translation_source_lang or "").lower() == "en"
+                    and str(target_lang or "").lower() == "uk"
+                    else "cache"
+                )
+                translate_method = _job_eng
                 profiler.set_meta(translate_cache="hit")
                 from engines.translation_quality_log import synthesize_audits_from_segments
 
@@ -9797,7 +9812,7 @@ def _run_pipeline_inner(
                     segments,
                     translation_source_lang,
                     target_lang,
-                    engine="cache",
+                    engine=_job_eng,
                 )
                 with STATE_LOCK:
                     task["info"]["translation_audits"] = [
@@ -10006,6 +10021,7 @@ def _run_pipeline_inner(
                             translation_source_lang,
                             target_lang,
                             engine=str(_mt_stats.get("mt_engine") or "marian_batch"),
+                            engines=list(_mt_stats.get("mt_segment_engines") or []),
                         )
                         with STATE_LOCK:
                             info_s7 = task.setdefault("info", {})

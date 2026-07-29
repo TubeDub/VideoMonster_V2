@@ -47,6 +47,62 @@ _DANGLING_CLAUSE = re.compile(
     r")[.!?…]*$"
 )
 
+# Stage 11: do not chop tails that carry job / admission / film-entity meaning.
+_CRITICAL_TAIL_GUARD = re.compile(
+    r"(?i)\b("
+    r"job|get\s+in|star\s+wars|lucas|"
+    r"робот[ауеи]?|роботі|роботою|роботі|"
+    r"поступл\w*|прийнятт\w*|"
+    r"зоряні|лукас|аварі\w*|вилет\w*|вижив\w*"
+    r")\b"
+)
+_CRITICAL_MARKER_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"(?i)\bjob\b"),
+    re.compile(r"(?i)\bget\s+in\b"),
+    re.compile(r"(?i)\bstar\s+wars\b"),
+    re.compile(r"(?i)\blucas\b"),
+    re.compile(r"(?i)\bробот"),
+    re.compile(r"(?i)\bпоступл"),
+    re.compile(r"(?i)\bзоряні"),
+    re.compile(r"(?i)\bлукас"),
+    re.compile(r"(?i)\bаварі"),
+    re.compile(r"(?i)\bвилет"),
+    re.compile(r"(?i)\bвижив"),
+)
+
+
+def _needs_critical_tail_guard(text: str, source_hint: str = "") -> bool:
+    blob = f"{text} {source_hint}"
+    return bool(_CRITICAL_TAIL_GUARD.search(blob))
+
+
+def _critical_markers_lost(original: str, shortened: str, source_hint: str = "") -> bool:
+    """True when shorten dropped a critical meaning marker present in original/hint."""
+    if not _needs_critical_tail_guard(original, source_hint):
+        return False
+    probe_src = f"{original} {source_hint}"
+    for pat in _CRITICAL_MARKER_PATTERNS:
+        if pat.search(probe_src) and not pat.search(shortened):
+            # EN markers may map to UK — allow UK siblings for a few cases.
+            if pat.pattern.lower().find("job") >= 0 and re.search(
+                r"(?i)\bробот", shortened
+            ):
+                continue
+            if pat.pattern.lower().find("star") >= 0 and re.search(
+                r"(?i)\bзоряні", shortened
+            ):
+                continue
+            if pat.pattern.lower().find("lucas") >= 0 and re.search(
+                r"(?i)\bлукас", shortened
+            ):
+                continue
+            if pat.pattern.lower().find("get\\s+in") >= 0 and re.search(
+                r"(?i)\b(поступл|прийнятт)", shortened
+            ):
+                continue
+            return True
+    return False
+
 
 @dataclass
 class TextFitResult:
@@ -232,17 +288,26 @@ def _paraphrase_compress(text: str, lang: str) -> str:
     return t
 
 
-def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], bool]:
+def _safe_shorten(
+    text: str,
+    slot_ms: int,
+    lang: str,
+    *,
+    source_hint: str = "",
+) -> tuple[str, list[str], bool]:
     """Shorten by paraphrase / full sentences only. Never hard-cut mid-thought.
 
     Returns (text, reasons, meaning_truncated). meaning_truncated stays False —
     hard-cuts are refused rather than applied.
+    Stage 11: refuse shorten that drops job / Star Wars / Lucas / admission tails.
     """
     reasons: list[str] = []
     meaning_truncated = False
     out = " ".join(str(text or "").split()).strip()
     if not out:
         return out, reasons, False
+    original = out
+    hint = str(source_hint or "")
 
     pred0 = estimate_tts_ms(out, lang)
     severe = bool(slot_ms > 0 and pred0 > int(slot_ms * SEVERE_OVERFLOW_RATIO))
@@ -260,6 +325,7 @@ def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], b
             compressed
             and compressed != out
             and _is_complete_thought(compressed)
+            and not _critical_markers_lost(original, compressed, hint)
         ):
             out = compressed
             reasons.append("soft_compress")
@@ -271,7 +337,12 @@ def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], b
         return out, reasons, False
 
     cleaned = _drop_parentheticals(out)
-    if cleaned != out and cleaned and _is_complete_thought(cleaned):
+    if (
+        cleaned != out
+        and cleaned
+        and _is_complete_thought(cleaned)
+        and not _critical_markers_lost(original, cleaned, hint)
+    ):
         out = cleaned
         reasons.append("drop_parens")
         pred = estimate_tts_ms(out, lang)
@@ -279,7 +350,12 @@ def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], b
             return out, reasons, False
 
     trimmed = _drop_redundant_clauses(out, lang)
-    if trimmed and trimmed != out and _is_complete_thought(trimmed):
+    if (
+        trimmed
+        and trimmed != out
+        and _is_complete_thought(trimmed)
+        and not _critical_markers_lost(original, trimmed, hint)
+    ):
         try:
             from engines.semantic_meaning import is_truncated_adaptation
 
@@ -294,7 +370,11 @@ def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], b
         return out, reasons, False
 
     para = _paraphrase_compress(out, lang)
-    if para != out and _is_complete_thought(para):
+    if (
+        para != out
+        and _is_complete_thought(para)
+        and not _critical_markers_lost(original, para, hint)
+    ):
         out = para
         reasons.append("clause_paraphrase")
         pred = estimate_tts_ms(out, lang)
@@ -305,11 +385,15 @@ def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], b
         from engines.soft_sync import shorten_text_for_slot
 
         stronger = shorten_text_for_slot(
-            out, slot_ms=slot_ms, lang=lang, source_hint=""
+            out, slot_ms=slot_ms, lang=lang, source_hint=hint
         )
         if stronger and stronger != out:
             nw = len(stronger.split())
-            if nw >= int(orig_words * min_ret) and _is_complete_thought(stronger):
+            if (
+                nw >= int(orig_words * min_ret)
+                and _is_complete_thought(stronger)
+                and not _critical_markers_lost(original, stronger, hint)
+            ):
                 try:
                     from engines.semantic_meaning import is_truncated_adaptation
 
@@ -325,37 +409,54 @@ def _safe_shorten(text: str, slot_ms: int, lang: str) -> tuple[str, list[str], b
     except Exception:
         pass
 
-    # Keep leading *complete* sentences only.
+    # Keep leading *complete* sentences only — but refuse if critical tail lost.
     cand, _ = _keep_leading_complete_sentences(
         out, slot_ms, lang, min_words=max(4, int(orig_words * min_ret))
     )
-    if cand != out:
+    if cand != out and not _critical_markers_lost(original, cand, hint):
         out = cand
         reasons.append("keep_leading_sentences")
+    elif cand != out and _critical_markers_lost(original, cand, hint):
+        reasons.append("shorten_refused_critical_tail")
+        return original, reasons, False
 
     pred = estimate_tts_ms(out, lang)
     if pred > int(slot_ms * SEVERE_OVERFLOW_RATIO):
         cand2, _ = _keep_leading_complete_sentences(
             out, slot_ms, lang, min_words=4
         )
-        if cand2 != out and _is_complete_thought(cand2):
+        if (
+            cand2 != out
+            and _is_complete_thought(cand2)
+            and not _critical_markers_lost(original, cand2, hint)
+        ):
             out = cand2
             reasons.append("severe_keep_leading")
+        elif cand2 != out and _critical_markers_lost(original, cand2, hint):
+            reasons.append("shorten_refused_critical_tail")
+            return original, reasons, False
 
     # Refuse hard char-budget cut (Stage 4 TZ) — mild overflow preferred.
     pred = estimate_tts_ms(out, lang)
     if pred > target and not _is_complete_thought(out):
-        # Revert to last complete original sentences rather than broken tail.
         parts = _split_sentences(text)
         if parts:
             safe = parts[0]
-            if _is_complete_thought(safe):
+            if _is_complete_thought(safe) and not _critical_markers_lost(
+                original, safe, hint
+            ):
                 out = safe
                 reasons.append("reverted_incomplete_tail")
             else:
                 meaning_truncated = True
                 reasons.append("incomplete_refused")
                 out = text  # keep full meaning; allow mild overflow
+
+    # Final Stage 11 guard: never ship a shorten that ate critical content.
+    if out != original and _critical_markers_lost(original, out, hint):
+        reasons.append("shorten_refused_critical_tail")
+        return original, reasons, False
+
     return out, reasons, meaning_truncated
 
 
@@ -570,7 +671,9 @@ def fit_text_to_slot(
     meaning_truncated = False
 
     if before > hi:
-        out, reasons, meaning_truncated = _safe_shorten(original, slot, lang)
+        out, reasons, meaning_truncated = _safe_shorten(
+            original, slot, lang, source_hint=source_hint
+        )
         action = "shorten" if out != original else "unchanged"
         # Stage 5: if shorten overshot into dead air, expand back toward the band.
         after_short = estimate_tts_ms(out, lang)

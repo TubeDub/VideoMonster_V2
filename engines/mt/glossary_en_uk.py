@@ -114,3 +114,15 @@ def translate_with_glossary_protect(text: str, translate_fn) -> str:
     raw = str(translate_fn(protected) or "").strip()
     restored = restore_glossary(raw, forms)
     return apply_glossary_en_uk(restored)
+
+
+def finalize_mt_text(src_lang: str, tgt_lang: str, text: str) -> str:
+    """Post-process MT / cache-hit text (EN→UK glossary fixes). Safe no-op otherwise."""
+    src = str(src_lang or "").strip().lower()
+    tgt = str(tgt_lang or "").strip().lower()
+    out = str(text or "")
+    if src != "en" or tgt != "uk" or not out.strip():
+        return out
+    out = apply_post_mt_glossary_fixes(out)
+    out = apply_glossary_en_uk(out)
+    return out
