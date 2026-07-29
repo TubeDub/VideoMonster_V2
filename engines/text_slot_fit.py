@@ -494,11 +494,11 @@ def expand_text_to_slot(
             and estimate_tts_ms(llm_out, lang) > pred
             and estimate_tts_ms(llm_out, lang) <= int(slot * OVERFLOW_FIT_RATIO * 1.05)
         ):
-            out = llm_out
+            out = strip_slot_pad_fillers(llm_out)
             pred = estimate_tts_ms(out, lang)
             reasons.append("llm_expand")
             if pred >= floor:
-                return out, reasons
+                return strip_slot_pad_fillers(out), reasons
     except Exception:
         pass
 
@@ -511,6 +511,7 @@ def expand_text_to_slot(
             break
         if not (_is_complete_thought(nxt) or _COMPLETE_END.search(nxt)):
             break
+        nxt = strip_slot_pad_fillers(nxt)
         nxt_pred = estimate_tts_ms(nxt, lang)
         if nxt_pred <= pred:
             break
