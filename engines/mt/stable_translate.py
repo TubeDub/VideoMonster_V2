@@ -4,7 +4,7 @@ Stable MT path — direct Marian in the main thread.
 No Router, no pivot, no cascade, no ThreadPoolExecutor, no from_pretrained during dub.
 Models must be preloaded during «Подготовка компонентов».
 
-Stage 10: oversized split before truncate, beams=2 (Simple), glossary protect.
+Stage 10c: beams via resolve_marian_beams (default 2); EN→UK glossary protect/restore.
 """
 
 from __future__ import annotations
@@ -21,7 +21,6 @@ from engines.mt.lang_codes import normalize_lang
 logger = logging.getLogger("tubedub.engines.mt.stable")
 
 _MARIAN_INFER_LOCK = threading.Lock()
-_DEFAULT_SIMPLE_BEAMS = 2
 _TOKEN_MAX = 512
 _GEN_MAX = 512
 
@@ -44,14 +43,11 @@ def use_stable_mt() -> bool:
     return True
 
 
-def resolve_marian_beams(*, simple: bool = True) -> int:
-    """Simple default beams=2 (quality/speed); env MT_NUM_BEAMS overrides (1–4)."""
+def resolve_marian_beams(simple: bool = True) -> int:
     raw = (os.getenv("MT_NUM_BEAMS") or os.getenv("VM_MT_NUM_BEAMS") or "").strip()
     if raw.isdigit():
         return max(1, min(4, int(raw)))
-    if simple or use_stable_mt():
-        return _DEFAULT_SIMPLE_BEAMS
-    return 4
+    return 2 if simple else 4
 
 
 def ensure_marian_ready(app_dir: Path, src_lang: str, tgt_lang: str) -> None:
@@ -72,32 +68,6 @@ def ensure_marian_ready(app_dir: Path, src_lang: str, tgt_lang: str) -> None:
     logger.info("[StableMT] Marian ready %s→%s preload_ms=%.0f", src, tgt, ms)
 
 
-def _finish_en_uk_glossary(text: str, forms: list[str] | None = None) -> str:
-    """restore → apply_post_mt_glossary_fixes (+ leftover EN term replace)."""
-    out = str(text or "")
-    try:
-        from engines.mt.glossary_en_uk import (
-            apply_glossary_en_uk,
-            apply_post_mt_glossary_fixes,
-            restore_glossary,
-        )
-
-        if forms:
-            out = restore_glossary(out, forms)
-        out = apply_post_mt_glossary_fixes(out)
-        out = apply_glossary_en_uk(out)
-    except Exception:
-        pass
-    return out
-
-
-def _postprocess_mt(src_lang: str, tgt_lang: str, text: str) -> str:
-    src, tgt = normalize_lang(src_lang), normalize_lang(tgt_lang)
-    if src == "en" and tgt == "uk":
-        return _finish_en_uk_glossary(text, None)
-    return text
-
-
 def translate_direct_marian(
     text: str,
     src_lang: str,
@@ -111,6 +81,12 @@ def translate_direct_marian(
 
     from engines.model_manager.downloader import load_marian
     from engines.model_manager.runtime import OfflineOnlyError
+    from engines.mt.glossary_en_uk import (
+        apply_glossary_en_uk,
+        apply_post_mt_glossary_fixes,
+        protect_glossary,
+        restore_glossary,
+    )
 
     src, tgt = normalize_lang(src_lang), normalize_lang(tgt_lang)
     meta: dict[str, Any] = {
@@ -157,18 +133,13 @@ def translate_direct_marian(
     num_beams = resolve_marian_beams(simple=True)
     meta["num_beams"] = num_beams
 
-    # Glossary protect (EN→UK) so Marian cannot mangle Fiat / USC / names.
+    # Glossary protect on full text before infer (incl. oversized split parts).
     forms: list[str] = []
     work = clean
     if src == "en" and tgt == "uk":
-        try:
-            from engines.mt.glossary_en_uk import protect_glossary, restore_glossary
-
-            work, forms = protect_glossary(clean)
-            if forms:
-                meta["glossary_protected"] = len(forms)
-        except Exception:
-            forms = []
+        work, forms = protect_glossary(clean)
+        if forms:
+            meta["glossary_protected"] = len(forms)
 
     def _infer_one(piece: str) -> str:
         with _MARIAN_INFER_LOCK:
@@ -214,11 +185,10 @@ def translate_direct_marian(
         meta["elapsed_ms"] = round(ms, 1)
         return "", meta
 
-    # Glossary: protect → infer (incl. oversized parts) → restore → post-fixes
     if src == "en" and tgt == "uk":
-        result = _finish_en_uk_glossary(result, forms)
-    else:
-        result = _postprocess_mt(src, tgt, result)
+        result = restore_glossary(result, forms)
+        result = apply_post_mt_glossary_fixes(result)
+        result = apply_glossary_en_uk(result)
 
     ms = (time.perf_counter() - t0) * 1000.0
     meta["engine_version"] = name
@@ -248,6 +218,12 @@ def translate_batch_marian(
 
     from engines.model_manager.downloader import load_marian
     from engines.model_manager.runtime import OfflineOnlyError
+    from engines.mt.glossary_en_uk import (
+        apply_glossary_en_uk,
+        apply_post_mt_glossary_fixes,
+        protect_glossary,
+        restore_glossary,
+    )
     from engines.mt.oversized_guard import (
         guard_segments_before_mt,
         is_oversized_mt_unit,
@@ -278,7 +254,7 @@ def translate_batch_marian(
     num_beams = resolve_marian_beams(simple=True)
     t0 = time.perf_counter()
 
-    # Protect glossary per original segment, then expand oversized → units.
+    # Protect glossary on full segment text, then expand oversized → units.
     protected: list[str] = []
     gloss_forms: list[list[str]] = []
     for t in cleaned:
@@ -289,12 +265,7 @@ def translate_batch_marian(
         forms: list[str] = []
         work = t
         if src == "en" and tgt == "uk":
-            try:
-                from engines.mt.glossary_en_uk import protect_glossary
-
-                work, forms = protect_glossary(t)
-            except Exception:
-                forms = []
+            work, forms = protect_glossary(t)
         protected.append(work)
         gloss_forms.append(forms)
 
@@ -308,7 +279,6 @@ def translate_batch_marian(
         if non_empty:
             idxs = [i for i, _ in non_empty]
             payload = [t for _, t in non_empty]
-            # Sub-batch to keep GPU/CPU memory sane
             chunk = 12
             for off in range(0, len(payload), chunk):
                 sl_idx = idxs[off : off + chunk]
@@ -335,7 +305,6 @@ def translate_batch_marian(
         logger.error("[StableMT] batch infer failed: %s", exc)
         return [("", {"engine": "failed", "error": str(exc)}) for _ in cleaned]
 
-    # Rejoin units → parent segments
     joined: list[list[str]] = [[] for _ in cleaned]
     for ui, parent in enumerate(parents):
         if 0 <= parent < len(joined) and decoded_units[ui]:
@@ -348,11 +317,10 @@ def translate_batch_marian(
             out.append(("", {"engine": "none", "batch": True}))
             continue
         result = " ".join(joined[i]).strip()
-        # Glossary: protect → infer units → restore → post-fixes
         if src == "en" and tgt == "uk":
-            result = _finish_en_uk_glossary(result, gloss_forms[i])
-        else:
-            result = _postprocess_mt(src, tgt, result)
+            result = restore_glossary(result, gloss_forms[i])
+            result = apply_post_mt_glossary_fixes(result)
+            result = apply_glossary_en_uk(result)
         meta: dict[str, Any] = {
             "engine": "marian",
             "route": "direct",
