@@ -138,6 +138,21 @@ def is_incomplete_mt_pair(
     # c) critical entities
     if _missing_critical_entities(src, dst):
         return True
+    # d) leftover protect tokens / near-empty after strip on long src
+    try:
+        from engines.mt.glossary_en_uk import (
+            contains_glossary_garbage,
+            strip_glossary_placeholders,
+        )
+
+        if contains_glossary_garbage(dst):
+            return True
+        cleaned = strip_glossary_placeholders(dst)
+        if long_src and len(cleaned.split()) < max(3, int(0.15 * w_src)):
+            return True
+    except Exception:
+        if re.search(r"__?GLOS_", dst, re.I):
+            return True
     return False
 
 
@@ -208,6 +223,15 @@ def store_mt_cache(
             len(dst.split()),
         )
         return None
+    try:
+        from engines.mt.glossary_en_uk import contains_glossary_garbage
+
+        if contains_glossary_garbage(dst):
+            logger.warning("mt_cache_skip_glossary_garbage src_words=%d", len(src.split()))
+            return None
+    except Exception:
+        if re.search(r"__?GLOS_", dst, re.I):
+            return None
     cdir = Path(cache_dir) if cache_dir is not None else default_cache_dir()
     key = mt_cache_key(src, source_lang, target_lang, engine=engine)
     path = cache_path_for_key(cdir, key)

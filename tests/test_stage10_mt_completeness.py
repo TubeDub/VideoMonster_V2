@@ -8,7 +8,6 @@ from pathlib import Path
 from engines.mt.glossary_en_uk import (
     apply_glossary_en_uk,
     protect_glossary,
-    restore_glossary,
 )
 from engines.mt.oversized_guard import (
     guard_segments_before_mt,
@@ -91,15 +90,17 @@ def test_cache_accepts_full_joined_translation(tmp_path: Path):
 
 
 def test_glossary_protect_restore_fiat():
+    """Stage 14b: protect is no-op; Fiat fixed post-MT."""
     src = "his father bought him a Fiat."
     protected, forms = protect_glossary(src)
-    assert "Fiat" not in protected
-    assert "\u27e6G" in protected  # ⟦G…
-    restored = restore_glossary(protected, forms)
-    assert "Фіат" in restored
-    fixed = apply_glossary_en_uk("купив Файта.")
+    assert protected == src
+    assert forms == []
+    fixed = apply_glossary_en_uk(src)
     assert "Фіат" in fixed
-    assert "Файта" not in fixed
+    assert "Fiat" not in fixed
+    fixed2 = apply_glossary_en_uk("купив Файта.")
+    assert "Фіат" in fixed2
+    assert "Файта" not in fixed2
 
 
 def test_glossary_star_wars_usc():

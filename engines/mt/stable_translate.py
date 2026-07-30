@@ -4,7 +4,7 @@ Stable MT path — direct Marian in the main thread.
 No Router, no pivot, no cascade, no ThreadPoolExecutor, no from_pretrained during dub.
 Models must be preloaded during «Подготовка компонентов».
 
-Stage 10c: beams via resolve_marian_beams (default 2); EN→UK glossary protect/restore.
+Stage 14b: beams via resolve_marian_beams (default 2); EN→UK post-MT glossary only (no protect).
 """
 
 from __future__ import annotations
@@ -81,12 +81,7 @@ def translate_direct_marian(
 
     from engines.model_manager.downloader import load_marian
     from engines.model_manager.runtime import OfflineOnlyError
-    from engines.mt.glossary_en_uk import (
-        apply_glossary_en_uk,
-        apply_post_mt_glossary_fixes,
-        protect_glossary,
-        restore_glossary,
-    )
+    from engines.mt.glossary_en_uk import finalize_mt_text
 
     src, tgt = normalize_lang(src_lang), normalize_lang(tgt_lang)
     meta: dict[str, Any] = {
@@ -133,13 +128,9 @@ def translate_direct_marian(
     num_beams = resolve_marian_beams(simple=True)
     meta["num_beams"] = num_beams
 
-    # Glossary protect on full text before infer (incl. oversized split parts).
-    forms: list[str] = []
+    # Stage 14b: translate RAW source — post-MT glossary only (no protect tokens).
     work = clean
-    if src == "en" and tgt == "uk":
-        work, forms = protect_glossary(clean)
-        if forms:
-            meta["glossary_protected"] = len(forms)
+    meta["glossary_protected"] = 0
 
     def _infer_one(piece: str) -> str:
         with _MARIAN_INFER_LOCK:
@@ -185,10 +176,7 @@ def translate_direct_marian(
         meta["elapsed_ms"] = round(ms, 1)
         return "", meta
 
-    if src == "en" and tgt == "uk":
-        result = restore_glossary(result, forms)
-        result = apply_post_mt_glossary_fixes(result)
-        result = apply_glossary_en_uk(result)
+    result = finalize_mt_text(src, tgt, result)
 
     ms = (time.perf_counter() - t0) * 1000.0
     meta["engine_version"] = name
@@ -218,12 +206,7 @@ def translate_batch_marian(
 
     from engines.model_manager.downloader import load_marian
     from engines.model_manager.runtime import OfflineOnlyError
-    from engines.mt.glossary_en_uk import (
-        apply_glossary_en_uk,
-        apply_post_mt_glossary_fixes,
-        protect_glossary,
-        restore_glossary,
-    )
+    from engines.mt.glossary_en_uk import finalize_mt_text
     from engines.mt.oversized_guard import (
         guard_segments_before_mt,
         is_oversized_mt_unit,
@@ -254,22 +237,8 @@ def translate_batch_marian(
     num_beams = resolve_marian_beams(simple=True)
     t0 = time.perf_counter()
 
-    # Protect glossary on full segment text, then expand oversized → units.
-    protected: list[str] = []
-    gloss_forms: list[list[str]] = []
-    for t in cleaned:
-        if not t:
-            protected.append("")
-            gloss_forms.append([])
-            continue
-        forms: list[str] = []
-        work = t
-        if src == "en" and tgt == "uk":
-            work, forms = protect_glossary(t)
-        protected.append(work)
-        gloss_forms.append(forms)
-
-    guard = guard_segments_before_mt(protected, log=True)
+    # Stage 14b: RAW source → oversized expand → Marian (no glossary protect).
+    guard = guard_segments_before_mt(cleaned, log=True)
     unit_texts = guard.texts
     parents = guard.parent_indices
 
@@ -316,11 +285,7 @@ def translate_batch_marian(
         if not src_text:
             out.append(("", {"engine": "none", "batch": True}))
             continue
-        result = " ".join(joined[i]).strip()
-        if src == "en" and tgt == "uk":
-            result = restore_glossary(result, gloss_forms[i])
-            result = apply_post_mt_glossary_fixes(result)
-            result = apply_glossary_en_uk(result)
+        result = finalize_mt_text(src, tgt, " ".join(joined[i]).strip())
         meta: dict[str, Any] = {
             "engine": "marian",
             "route": "direct",
@@ -330,8 +295,8 @@ def translate_batch_marian(
             "elapsed_ms": round(per_ms, 1),
             "engine_version": name,
             "num_beams": num_beams,
-            "oversized_split": bool(src_text and is_oversized_mt_unit(protected[i])),
-            "glossary_protected": len(gloss_forms[i]),
+            "oversized_split": bool(src_text and is_oversized_mt_unit(src_text)),
+            "glossary_protected": 0,
         }
         if result:
             score, qd = compute_quality_score(

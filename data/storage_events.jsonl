@@ -1221,3 +1221,15 @@
 {"event": "PROJECT_MIGRATED", "ts": 1785353405.9843814, "payload": {"project_id": "d669f464-a3f1-5156-a64d-a6eb02e96add", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785353406.0278835, "payload": {"project_id": "4b832fb0-7bf5-5ced-9b47-5b300b2958f1", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785353406.0703325, "payload": {"project_id": "5cd2c979-3d70-5e9f-9093-499e3d031afb", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785420499.3717244, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785420499.6087537, "payload": {"project_id": "78f39033-a7cb-553f-95bb-59d35781b65a", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785420499.8285396, "payload": {"project_id": "f86785f2-ce99-515a-a98f-e548bf0a42ff", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785420499.8489602, "payload": {"project_id": "448af09e-1962-5dce-87bd-799d63634c6b", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785420499.8739216, "payload": {"project_id": "173f4f76-abb7-56a1-a8f9-836b98bd699e", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785420499.8986495, "payload": {"project_id": "8ed32dd9-9964-5358-a830-9d3cf4958f60", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785425125.5831108, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785425125.7332625, "payload": {"project_id": "76a0af42-56b8-53bd-ba2f-f544a43057f6", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785425125.94105, "payload": {"project_id": "6cc03b19-ac54-503c-98dd-4f68cde0276b", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785425125.9630132, "payload": {"project_id": "e43fa541-9099-5bf2-9af7-cf75849c3407", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785425125.9836614, "payload": {"project_id": "e129afbf-b40d-5549-bbd2-263a51569e4e", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785425126.0028653, "payload": {"project_id": "a67e71c0-de0f-58cd-bd9f-54d4b6fb0ee5", "source": "tdproj"}}

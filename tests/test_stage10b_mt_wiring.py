@@ -9,7 +9,6 @@ from pathlib import Path
 from engines.mt.glossary_en_uk import (
     apply_post_mt_glossary_fixes,
     protect_glossary,
-    restore_glossary,
 )
 from engines.mt.stable_translate import resolve_marian_beams
 from engines.mt_cache import (
@@ -45,11 +44,12 @@ def test_beams_default_two_and_env(monkeypatch):
 
 
 def test_glossary_fiat_to_fiat_uk():
+    """Stage 14b: protect no-op; Fiat via post-MT."""
     src = "his father bought him a small Italian car called the Fiat."
     protected, forms = protect_glossary(src)
-    assert "Fiat" not in protected
-    restored = restore_glossary(protected, forms)
-    assert "Фіат" in restored
+    assert protected == src
+    assert forms == []
+    assert "Фіат" in apply_post_mt_glossary_fixes(src)
     assert "Фіат" in apply_post_mt_glossary_fixes("купив Файта.")
     assert "Файта" not in apply_post_mt_glossary_fixes("купив Файта.")
 
@@ -90,7 +90,7 @@ def test_short_cache_rejected_words_gt_55(tmp_path: Path):
 
 def test_stable_has_glossary_protect_restore():
     src = STABLE.read_text(encoding="utf-8")
-    assert "protect_glossary" in src
-    assert "restore_glossary" in src or "_finish_en_uk_glossary" in src
-    assert "apply_post_mt_glossary_fixes" in src
+    # Stage 14b: post-MT finalize only — no protect before Marian.
+    assert "protect_glossary" not in src
+    assert "finalize_mt_text" in src
     assert "resolve_marian_beams" in src

@@ -1,40 +1,63 @@
 # -*- coding: utf-8 -*-
-"""EN→UK glossary for Simple MT (George Jr. / Lucas demo + common proper nouns).
+"""EN→UK glossary for Simple MT — Stage 14b: POST-MT only (no protect before Marian).
 
-Protects names before Marian and repairs known bad transliterations after.
-Prefer project glossary (`data/glossaries/default_en_uk.json`) when available.
+Protect/restore are no-ops. Marian sees raw English; names are fixed after MT.
 """
 
 from __future__ import annotations
 
+import logging
 import re
 from typing import Iterable
 
-# Fallback if project glossary is unavailable. Longer phrases first.
+logger = logging.getLogger("tubedub.mt.glossary")
+
+# Fallback pairs (longest first). Used by post-MT apply.
 GLOSSARY_EN_UK: tuple[tuple[str, str], ...] = (
-    ("University of Southern California", "USC"),
-    ("George Junior", "Джордж-молодший"),
-    ("George Jr.", "Джордж-молодший"),
+    ("University of Southern California", "Університет Південної Каліфорнії"),
+    ("George Junior", "Джордж Молодший"),
+    ("George Jr.", "Джордж Молодший"),
+    ("George Jr", "Джордж Молодший"),
     ("George Lucas", "Джордж Лукас"),
     ("Haskell Wexler", "Хаскелл Векслер"),
     ("Star Wars", "Зоряні війни"),
     ("Hollywood", "Голлівуд"),
+    ("Wexler", "Векслер"),
     ("Fiat", "Фіат"),
     ("USC", "USC"),
+    ("George", "Джордж"),
 )
 
-# Post-MT repairs when Marian mangles protected or unprotected names.
-_POST_FIXES: tuple[tuple[str, str], ...] = (
+# Marian mangling repairs (UK side).
+_POST_UK_FIXES: tuple[tuple[str, str], ...] = (
     (r"\bФайта\b", "Фіат"),
     (r"\bФайту\b", "Фіат"),
     (r"\bФайтом\b", "Фіатом"),
-    (r"\bХаскелом Уекслером\b", "Хаскеллом Векслером"),
-    (r"\bХаскел Уекслер\b", "Хаскелл Векслер"),
+    (r"\bХаскелом\s+Уекслером\b", "Хаскеллом Векслером"),
+    (r"\bХаскел\s+Уекслер\b", "Хаскелл Векслер"),
     (r"\bУекслер(?:ом|а|у)?\b", "Векслер"),
     (r"\bДжоржавськ\w*\b", "Джордж Лукас"),
     (r"\bлюдей\s+в\s+США\b", "людей в USC"),
     (r"\bподав(?:ся)?\s+до\s+США\b", "подався до USC"),
 )
+
+# Leftover protect-token garbage (Marian-mangled + legacy).
+_GARBAGE_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"__GLOS[_A-Z0-9_*\s]*", re.I),
+    re.compile(r"_GLOS[_A-Z0-9_*\s]*", re.I),
+    re.compile(r"__GLOSS_\d+__", re.I),
+    re.compile(r"\bGLOSS_?\d+\b", re.I),
+    re.compile(r"\}[A-Za-zА-Яа-яЁёІіЇїЄєҐґ0-9_-]+"),
+    re.compile(r"\{\s*[A-Za-zА-Яа-яЁёІіЇїЄєҐґ0-9_-]+"),
+    re.compile(r"\bG\d{2,}\b"),
+    re.compile(r"\bГГ?\d+\b", re.I),
+    re.compile(r"ведьг\d*\]?", re.I),
+    re.compile(r"⟦\s*G?\d*\s*⟧", re.I),
+    re.compile(r"\[\s*G\d+\s*\]", re.I),
+    re.compile(r"\(\s*G\d+\s*\)", re.I),
+)
+
+_PLACEHOLDER_RE = re.compile(r"__?GLOS_|\}[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]", re.I)
 
 
 def glossary_pairs() -> tuple[tuple[str, str], ...]:
@@ -61,68 +84,116 @@ def glossary_pairs() -> tuple[tuple[str, str], ...]:
     return GLOSSARY_EN_UK
 
 
-def _token(i: int) -> str:
-    return f"⟦G{i}⟧"
-
-
 def protect_glossary(
     text: str, *, pairs: Iterable[tuple[str, str]] | None = None
-) -> tuple[str, list[str]]:
-    """Replace EN glossary sources with placeholders; return (text, uk_forms)."""
-    pairs = tuple(pairs or glossary_pairs())
-    out = str(text or "")
-    forms: list[str] = []
-    for en, uk in pairs:
-        if not en or en not in out:
-            continue
-        idx = len(forms)
-        forms.append(uk)
-        out = out.replace(en, _token(idx))
-    return out, forms
+) -> tuple[str, list[tuple[str, str]]]:
+    """Stage 14b: Simple no-op — Marian gets RAW source (no placeholders)."""
+    _ = pairs
+    return str(text or ""), []
 
 
-def restore_glossary(text: str, forms: list[str]) -> str:
+def restore_glossary(
+    text: str,
+    forms: list[str] | list[tuple[str, str]],
+) -> str:
+    """Stage 14b: no-op when map empty (protect disabled)."""
+    if not forms:
+        return str(text or "")
+    # Legacy path only — strip leftovers if somehow called with a map.
+    return strip_glossary_placeholders(str(text or ""))
+
+
+def strip_glossary_placeholders(text: str) -> str:
+    """Remove leftover / Marian-mangled glossary placeholders."""
     out = str(text or "")
-    for i, uk in enumerate(forms):
-        out = out.replace(_token(i), uk)
-        # Marian sometimes strips brackets / adds spaces around placeholder
-        out = out.replace(f"[G{i}]", uk)
-        out = out.replace(f"(G{i})", uk)
-        out = re.sub(rf"\bG{i}\b", uk, out)
-    return out
+    for pat in _GARBAGE_PATTERNS:
+        out = pat.sub(" ", out)
+    out = re.sub(r"\}\s*", " ", out)
+    out = re.sub(r"\{\s*", " ", out)
+    out = re.sub(r"\s{2,}", " ", out)
+    out = re.sub(r"\s+([,.;:!?])", r"\1", out)
+    return out.strip(" ,;:")
+
+
+# Alias used by older call sites / Stage 14.
+strip_glossary_artifacts = strip_glossary_placeholders
+
+
+def contains_glossary_garbage(text: str) -> bool:
+    t = str(text or "")
+    if not t:
+        return False
+    if _PLACEHOLDER_RE.search(t):
+        return True
+    for pat in _GARBAGE_PATTERNS:
+        if pat.search(t):
+            return True
+    if re.search(r"ведьг", t, re.I):
+        return True
+    return False
+
+
+def _replace_en_phrase(text: str, en: str, uk: str) -> str:
+    """Case-insensitive, word-boundary-ish EN→UK replace."""
+    if not en or not uk:
+        return text
+    # Flexible whitespace inside multi-word phrases.
+    body = re.escape(en)
+    body = body.replace(r"\ ", r"\s+")
+    # Allow optional trailing period already in en (Jr.) — escaped.
+    pat = re.compile(rf"(?<![A-Za-z0-9_]){body}(?![A-Za-z0-9_])", re.IGNORECASE)
+    return pat.sub(uk, text)
 
 
 def apply_post_mt_glossary_fixes(text: str) -> str:
+    """EN→UK glossary + Marian UK mangling repairs (longest EN first)."""
     out = str(text or "")
-    for pat, repl in _POST_FIXES:
+    # Prefer built-in order for Jr/Lucas/George precedence, then project pairs.
+    seen_lower: set[str] = set()
+    ordered: list[tuple[str, str]] = []
+    for en, uk in GLOSSARY_EN_UK:
+        key = en.lower()
+        if key in seen_lower:
+            continue
+        seen_lower.add(key)
+        ordered.append((en, uk))
+    for en, uk in glossary_pairs():
+        key = en.lower()
+        if key in seen_lower:
+            continue
+        seen_lower.add(key)
+        ordered.append((en, uk))
+    ordered.sort(key=lambda x: -len(x[0]))
+    for en, uk in ordered:
+        out = _replace_en_phrase(out, en, uk)
+    for pat, repl in _POST_UK_FIXES:
         out = re.sub(pat, repl, out, flags=re.IGNORECASE)
     return out
 
 
 def apply_glossary_en_uk(text: str) -> str:
     """Best-effort post-MT glossary apply (no placeholders)."""
-    out = apply_post_mt_glossary_fixes(text)
-    for en, uk in glossary_pairs():
-        if en in out:
-            out = out.replace(en, uk)
-    return out
+    return apply_post_mt_glossary_fixes(text)
 
 
 def translate_with_glossary_protect(text: str, translate_fn) -> str:
-    """Protect glossary → translate → restore → post-fixes."""
-    protected, forms = protect_glossary(text)
-    raw = str(translate_fn(protected) or "").strip()
-    restored = restore_glossary(raw, forms)
-    return apply_glossary_en_uk(restored)
+    """Stage 14b: raw translate → finalize (protect is no-op)."""
+    raw = str(translate_fn(str(text or "")) or "").strip()
+    return finalize_mt_text("en", "uk", raw)
 
 
 def finalize_mt_text(src_lang: str, tgt_lang: str, text: str) -> str:
-    """Post-process MT / cache-hit text (EN→UK glossary fixes). Safe no-op otherwise."""
+    """Post-process MT / cache-hit text. Strip placeholders → glossary → strip."""
     src = str(src_lang or "").strip().lower()
     tgt = str(tgt_lang or "").strip().lower()
     out = str(text or "")
-    if src != "en" or tgt != "uk" or not out.strip():
+    if not out.strip():
         return out
-    out = apply_post_mt_glossary_fixes(out)
-    out = apply_glossary_en_uk(out)
+    out = strip_glossary_placeholders(out)
+    if src == "en" and tgt == "uk":
+        out = apply_post_mt_glossary_fixes(out)
+    out = strip_glossary_placeholders(out)
+    if contains_glossary_garbage(out):
+        logger.error("[glossary] placeholders remain after finalize: %r", out[:120])
+        out = strip_glossary_placeholders(out)
     return out

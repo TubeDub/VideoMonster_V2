@@ -1,0 +1,201 @@
+{
+  "task_id": "10bb76f328754925a5b015440da59f31",
+  "index": 5,
+  "original": "Two years later George Jr., who by this point was fully recovered from his injuries, stood at the finish line at a racetrack and raised his camera. So since his near-death experience George Jr. had realized that really his dad had been kind of right, that in some ways he was wasting his potential. So George Jr. had decided that he really didn't want to race cars anymore.",
+  "translation": "Через два роки __GLOS_XY, який, до цього моменту, повністю одужав від травм, стояв на фінішній лінії на __GLOS_000000Y і підняв свою камеру. Отже, __GLOS_000 * дійсно вирішив, що він не хоче більше ганятися в автомобілях.",
+  "reason": "FastQAReviewer: garbage_or_ssml; FastQAReviewer/garbage_or_ssml: (.)\\1{5,}; EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:George; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; EntityReviewer/preserved_token: George",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "REJECT",
+      "metrics": {
+        "error_count": 1
+      },
+      "errors": [
+        {
+          "code": "garbage_or_ssml",
+          "detail": "(.)\\1{5,}",
+          "severity": "critical"
+        }
+      ],
+      "explanation": "garbage_or_ssml",
+      "retry_strategy": "Completion Strategy",
+      "metadata": {
+        "index": 5
+      },
+      "review_time_ms": 0.69,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.88
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 0.2,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.88
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "entity_missing",
+          "token": "{'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}",
+          "severity": "critical"
+        },
+        {
+          "code": "preserved_token",
+          "token": "George",
+          "severity": "major"
+        }
+      ],
+      "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'named_entity', 'value': 'George', 'severity': 'error', 'reason': 'not_found_after_normalization', 'match_method': 'transliteration_and_alias'}; preserved_token:George",
+      "retry_strategy": "Entity Correction Strategy",
+      "metadata": {
+        "index": 5
+      },
+      "review_time_ms": 7.11,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.9
+      ],
+      "confidence": {
+        "entity_preservation": 0.5,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.9
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 5
+      },
+      "review_time_ms": 0.43,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 5
+      },
+      "review_time_ms": 0.2,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "timing_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 5,
+        "slot_ms": 18310
+      },
+      "review_time_ms": 0.05,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 5
+      },
+      "review_time_ms": 0.06,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.9633,
+  "retry_history": [
+    {
+      "ok": false,
+      "reason": "cannot import name 'chat_completion' from 'engines.llm_adaptation_mode' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\llm_adaptation_mode.py)"
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Completion Strategy",
+  "ts": 1785425344263
+}

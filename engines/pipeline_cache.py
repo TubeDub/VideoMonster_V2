@@ -6,6 +6,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -119,6 +120,14 @@ def translate_job_cache_acceptable(
             return False, f"incomplete_seg#{i + 1}"
         if s and not t:
             return False, f"empty_tgt#{i + 1}"
+        try:
+            from engines.mt.glossary_en_uk import contains_glossary_garbage
+
+            if contains_glossary_garbage(t):
+                return False, f"glossary_garbage_seg#{i + 1}"
+        except Exception:
+            if re.search(r"__?GLOS_", t, re.I):
+                return False, f"glossary_garbage_seg#{i + 1}"
     return True, "ok"
 
 

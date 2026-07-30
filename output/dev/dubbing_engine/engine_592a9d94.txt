@@ -1,0 +1,62 @@
+=== DUBBING ENGINE REPORT task=63dd55af90834e9b9e9b6d36d9554a68 run=592a9d94 ===
+lang=uk  segments=9  elapsed=1.10s
+adapted=5  skipped=0  strategies={'direct': 4, 'adapted': 0, 'video_adapt': 0, 'merge_next': 5, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=16533ms slot=17783ms
+       IN : 18-ти річний хлопчик на ім'я ведьг0] проходить через свою "рідне місто" дорогу д
+       OUT: 18-ти річний хлопчик на ім'я ведьг0] проходить че́рез свою "рідне місто" дорогу 
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; missing_entity:So George Jr
+  [✓] seg#01 strategy=merge_next pred=15640ms slot=11714ms
+       IN : І в цей момент його батько купив йому маленьку італійську машину, яка називаєтьс
+       OUT: І в цей момент його́ батько купив йому маленьку італійську машину, яка називаєть
+       [stress] ok
+       [timing] strategy=merge_next pred=15640ms slot=11714ms prev_end=17783ms overflow=33.5% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:Fiat; missing_entity:Italian; severe_overflow: predicted=15640ms slot=11714ms ratio=1.34; voice_quality_r
+  [✓] seg#02 strategy=merge_next pred=7810ms slot=5033ms
+       [timing] strategy=merge_next pred=7810ms slot=5033ms prev_end=32599ms overflow=55.2% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied; severe_overflow: predicted=7810ms slot=5033ms ratio=1.55; voice_quality_risk: projected_atempo=1.55 
+  [✓] seg#03 strategy=direct pred=12018ms slot=13861ms
+       IN : Отже тоді тоді тоді, Джордж прийшов на цей перетин, де він справді був прямо біл
+       OUT: Отже тоді́ тоді́ тоді́, Джордж прийшов на цей перетин, де ві́н справді був прямо
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#04 strategy=direct pred=14758ms slot=17479ms
+       IN : Отже, два тижні раніше, коли Джордж робив такий поворот, а потім сталося щось, щ
+       OUT: Отже, два тижні раніше, коли́ Джордж робив такий поворот, а по́тім сталося щось,
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr
+  [✓] seg#05 strategy=direct pred=15860ms slot=18310ms
+       IN : Два роки потому }Джордж-молодший, який, до цього моменту, був повністю відплив в
+       OUT: Два роки потому́ }Джордж-молодший, яки́й, до цього моменту, був повністю відплив
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:George Jr; missing_entity:So George Jr
+  [✓] seg#06 strategy=merge_next pred=5785ms slot=4709ms
+       IN : Замість цього він взяв свою камеру і повернувся в своє старе хобі фотографії.
+       OUT: Замість цього ві́н взяв свою камеру і повернувся в своє старе хобі фотографії.
+       [stress] ok
+       [timing] strategy=merge_next pred=5785ms slot=4709ms prev_end=95190ms overflow=22.8% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: voice_quality_risk: projected_atempo=1.23 (max=1.2) — recommend text adaptation
+  [✓] seg#07 strategy=merge_next pred=11393ms slot=8941ms
+       IN : Фактично, він застосував до престижної кінематографії під час "Угоді," але після
+       OUT: Фактично, ві́н застосував до престижної кінематографії під час "Угоді," але́ пі́
+       [stress] ok
+       [timing] strategy=merge_next pred=11393ms slot=8941ms prev_end=102165ms overflow=27.4% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:University of Southern California; missing_entity:California; missing_entity:George Jr; missing_entity:So
+  [✓] seg#08 strategy=merge_next pred=74843ms slot=54767ms
+       IN : Тепер }1 * іде над підтей, щоб зробити кілька фотографій виграшного водія, але к
+       OUT: Тепер }1 * іде над підтей, щоб зробити кілька фотографій виграшного водія, але́ 
+       [punct] added_terminal_period
+       [stress] ok
+       [phonetics] fixed: USC→Ю Ес Сі
+       [timing] strategy=merge_next pred=74843ms slot=54767ms prev_end=111643ms overflow=36.7% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:USC; missing_entity:Now George Jr; missing_entity:George Jr; missing_entity:Haskell Wexler; missing_entit

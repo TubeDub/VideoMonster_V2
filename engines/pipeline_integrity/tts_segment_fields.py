@@ -97,6 +97,21 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
         text = restore_terminal_close(text, original=original)
     except Exception:
         pass
+    # Stage 14b: never send glossary placeholder garbage to TTS.
+    try:
+        from engines.mt.glossary_en_uk import (
+            contains_glossary_garbage,
+            finalize_mt_text,
+            strip_glossary_placeholders,
+        )
+
+        text = finalize_mt_text("en", "uk", text)
+        if contains_glossary_garbage(text):
+            logger = __import__("logging").getLogger("tubedub.tts_fields")
+            logger.error("[glossary] TTS text still dirty after finalize: %r", text[:120])
+            text = strip_glossary_placeholders(text)
+    except Exception:
+        pass
     return text
 
 
