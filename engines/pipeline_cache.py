@@ -5,12 +5,15 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 CACHE_VERSION = 2
+# Stage 12b/13: bump so truncated job-cache blobs miss (fingerprint change).
+TRANSLATE_COMPLETENESS_VERSION = 3
 
 try:
     from engines.mt.registry import MT_ROUTER_VERSION as ROUTER_VERSION
@@ -31,6 +34,7 @@ def cache_versions() -> dict[str, int | str]:
         "router_v": ROUTER_VERSION,
         "naturalizer_v": NATURALIZER_VERSION,
         "tps_v": TPS_PIPELINE_VERSION,
+        "tc_v": TRANSLATE_COMPLETENESS_VERSION,
     }
 
 
@@ -72,6 +76,52 @@ def segments_fingerprint(
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:32]
 
 
+def _skip_cache_long_source(text: str) -> bool:
+    """Mirror mt_batch._skip_cache_long — long sources must not come from job cache."""
+    if (os.getenv("VM_MT_SKIP_CACHE_LONG", "1").strip().lower()
+            in ("0", "false", "no", "off")):
+        return False
+    w = len(str(text or "").split())
+    if w > 55:
+        return True
+    try:
+        from engines.mt.oversized_guard import is_oversized_mt_unit
+
+        return is_oversized_mt_unit(text)
+    except Exception:
+        return w > 55
+
+
+def translate_job_cache_acceptable(
+    sources: list[str],
+    translated: list[str],
+    src_lang: str,
+    tgt_lang: str,
+) -> tuple[bool, str]:
+    """Reject truncated / long-source job-cache blobs (Stage 12b gate)."""
+    if len(sources) != len(translated):
+        return False, "length_mismatch"
+    try:
+        from engines.mt_cache import is_incomplete_mt_pair
+    except Exception:
+        is_incomplete_mt_pair = None  # type: ignore
+
+    for i, (src, tr) in enumerate(zip(sources, translated)):
+        s = str(src or "").strip()
+        t = str(tr or "").strip()
+        if not s:
+            continue
+        if _skip_cache_long_source(s):
+            return False, f"long_seg#{i + 1}"
+        if is_incomplete_mt_pair is not None and is_incomplete_mt_pair(
+            s, t, src_lang, tgt_lang
+        ):
+            return False, f"incomplete_seg#{i + 1}"
+        if s and not t:
+            return False, f"empty_tgt#{i + 1}"
+    return True, "ok"
+
+
 def _read_json(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
         return None
@@ -85,6 +135,8 @@ def _read_json(path: Path) -> dict[str, Any] | None:
             return None
         if int(data.get("tps_v", 0)) != int(TPS_PIPELINE_VERSION):
             return None
+        # Older translate blobs without tc_v are still readable; completeness
+        # gate in load_translate_cache rejects truncated content.
         return data
     except Exception as e:
         logger.debug("cache read failed %s: %s", path, e)
@@ -204,12 +256,64 @@ def load_translate_cache(
     key = segments_fingerprint(segments, src_lang, tgt_lang)
     path = _cache_root(app_dir) / "translate" / f"{key}.json"
     hit = _read_json(path)
-    if hit and isinstance(hit.get("segments"), list):
-        logger.info(
-            "[Cache] Translation HIT key=%s route=%s",
+    if not hit or not isinstance(hit.get("segments"), list):
+        # Also try legacy keys without tc_v (pre-Stage12b) and reject if incomplete.
+        legacy = _load_legacy_translate_without_tc(app_dir, segments, src_lang, tgt_lang)
+        if legacy is None:
+            return None
+        translated = legacy
+    else:
+        translated = [str(s) for s in hit["segments"]]
+
+    ok, reason = translate_job_cache_acceptable(
+        list(segments or []), translated, src_lang, tgt_lang
+    )
+    if not ok:
+        logger.warning(
+            "[Cache] Translation REJECT key=%s reason=%s — force Marian",
             key,
-            hit.get("route_label", "?"),
+            reason,
         )
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return None
+    logger.info(
+        "[Cache] Translation HIT key=%s route=%s",
+        key,
+        (hit or {}).get("route_label", "?") if hit else "legacy",
+    )
+    return translated
+
+
+def _load_legacy_translate_without_tc(
+    app_dir: Path,
+    segments: list[str],
+    src_lang: str,
+    tgt_lang: str,
+) -> list[str] | None:
+    """Scan translate dir for same segments/src/tgt ignoring tc_v (one-shot migration)."""
+    root = _cache_root(app_dir) / "translate"
+    if not root.is_dir():
+        return None
+    # Fast path: compute old fingerprint without tc_v
+    payload = {
+        "v": CACHE_VERSION,
+        "router_v": ROUTER_VERSION,
+        "naturalizer_v": NATURALIZER_VERSION,
+        "tps_v": TPS_PIPELINE_VERSION,
+        "s": segments,
+        "src": src_lang,
+        "tgt": tgt_lang,
+        "route": "",
+        "engine": "",
+    }
+    raw = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    old_key = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:32]
+    path = root / f"{old_key}.json"
+    hit = _read_json(path)
+    if hit and isinstance(hit.get("segments"), list):
         return [str(s) for s in hit["segments"]]
     return None
 
@@ -226,6 +330,15 @@ def save_translate_cache(
     quality_score: float = 0.0,
 ) -> None:
     # Key must match load_translate_cache (src+tgt+segments only) or warm hits never fire.
+    ok, reason = translate_job_cache_acceptable(
+        list(segments or []), list(translated or []), src_lang, tgt_lang
+    )
+    if not ok:
+        logger.warning(
+            "[Cache] Translation SKIP save reason=%s — incomplete/long",
+            reason,
+        )
+        return
     key = segments_fingerprint(segments, src_lang, tgt_lang)
     path = _cache_root(app_dir) / "translate" / f"{key}.json"
     _write_json(
