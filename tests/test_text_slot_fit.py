@@ -33,10 +33,17 @@ def test_fit_shortens_long_text():
     before = estimate_tts_ms(long_uk, "uk")
     assert before > slot * 1.15
     fit = fit_text_to_slot(long_uk, slot, "uk")
-    assert fit.predicted_ms_after <= before
-    assert fit.action in ("shorten", "unchanged")
-    # Meaning retained: still mentions George
+    assert fit.predicted_ms_after <= before or fit.action == "atempo_prefer"
+    assert fit.action in ("shorten", "unchanged", "atempo_prefer")
+    # Meaning retained: still mentions George; Stage 15 may keep full text.
     assert "Джордж" in fit.text or "джордж" in fit.text.lower()
+    assert word_retention_ok(long_uk, fit.text)
+
+
+def word_retention_ok(original: str, candidate: str) -> bool:
+    from engines.text_slot_fit import word_retention_ratio
+
+    return word_retention_ratio(original, candidate) >= 0.85 - 1e-9
 
 
 def test_fit_leaves_ok_text():
@@ -48,17 +55,17 @@ def test_fit_leaves_ok_text():
     assert fit.text == text or len(fit.text) >= len(text) * 0.8
 
 
-def test_happy_path_atempo_cap_1_08():
+def test_happy_path_atempo_cap_1_15():
     from engines.happy_path import HAPPY_PATH_MAX_ATEMPO, HAPPY_PATH_MIN_ATEMPO
     from engines.timing_fit import _atempo_hard_cap, _gentle_atempo_factor
 
     assert HAPPY_PATH_MIN_ATEMPO == 0.95
-    assert HAPPY_PATH_MAX_ATEMPO == 1.08
+    assert HAPPY_PATH_MAX_ATEMPO == 1.15
     assert _atempo_hard_cap(1.50) <= 1.20  # absolute still 1.20 for advanced
-    assert _gentle_atempo_factor(1.5, max_atempo=1.08) <= 1.08 + 1e-6
+    assert _gentle_atempo_factor(1.5, max_atempo=1.15) <= 1.15 + 1e-6
 
 
-def test_no_speech_trim_with_1_08_cap():
+def test_no_speech_trim_with_1_15_cap():
     from pydub import AudioSegment
 
     from engines.timing_fit import fit_segment_audio
@@ -75,10 +82,10 @@ def test_no_speech_trim_with_1_08_cap():
         work_dir=work,
         allow_atempo=True,
         no_speech_trim=True,
-        max_atempo=1.08,
+        max_atempo=1.15,
     )
     assert Path(out).is_file()
-    assert float(meta.get("atempo") or 1.0) <= 1.08 + 1e-6
+    assert float(meta.get("atempo") or 1.0) <= 1.15 + 1e-6
     assert meta.get("speech_trimmed") is False
     assert "trim_overlap" not in str(meta.get("strategy") or "")
 

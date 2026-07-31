@@ -118,7 +118,7 @@ def test_timing_happy_path_caps():
     from engines.happy_path import HAPPY_PATH_MAX_ATEMPO, HAPPY_PATH_NO_SPEECH_TRIM
     from engines.timing_fit import HAPPY_PATH_MAX_ATEMPO as TF_HP, _ATEMPO_ABSOLUTE_MAX
 
-    assert HAPPY_PATH_MAX_ATEMPO <= 1.08
-    assert TF_HP <= 1.08
+    assert HAPPY_PATH_MAX_ATEMPO <= 1.15
+    assert TF_HP <= 1.15
     assert HAPPY_PATH_NO_SPEECH_TRIM is True
     assert _ATEMPO_ABSOLUTE_MAX <= 1.20

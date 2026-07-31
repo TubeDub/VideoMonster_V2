@@ -19,16 +19,17 @@ logger = logging.getLogger("tubedub.mt_cache")
 
 _WS = re.compile(r"\s+")
 _SHORT_RATIO = 0.55
-_CACHE_KEY_SUFFIX = "v3_glossary_split"
+_CACHE_KEY_SUFFIX = "v4_uk_quality_repairs"
 
 # src needle → tgt must match (Stage 12b keys).
 _CRITICAL_ENTITY_CHECKS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("race cars", re.compile(r"гонок|гоночн|автомобіл|машин|race\s*cars?", re.I)),
     ("star wars", re.compile(r"зоряні|star\s*wars", re.I)),
     ("george lucas", re.compile(r"лукас|lucas", re.I)),
-    ("survived", re.compile(r"вижив|survived", re.I)),
-    ("ejected", re.compile(r"викину|ejected", re.I)),
-    ("smash", re.compile(r"розбив|аварі|smash", re.I)),
+    ("survived", re.compile(r"вижив\w*|survived", re.I)),
+    ("ejected", re.compile(r"викину\w*|ejected", re.I)),
+    # розбила / розбив / розбитий — not bare «розбив» only
+    ("smash", re.compile(r"розби\w*|аварі\w*|smash(?:ed|ing)?", re.I)),
 )
 
 
@@ -273,4 +274,5 @@ def empty_mt_stats() -> dict[str, Any]:
         "mt_segment_engines": [],
         "mt_cache_bypassed": False,
         "mt_long_cache_skips": 0,
+        "mt_incomplete_remts": 0,
     }

@@ -10604,6 +10604,47 @@ def _run_pipeline_inner(
                     lang=str(target_lang or "uk"),
                     source_hints=_src_fit,
                 )
+                # Stage 15: never lock Final shorter than Raw MT by >15% words.
+                try:
+                    from engines.text_slot_fit import prefer_full_meaning_text
+
+                    _aud_raw = list(
+                        (task.get("info") or {}).get("translation_audits") or []
+                    )
+                    _sd_raw = list(
+                        (task.get("info") or {}).get("segments_data") or []
+                    )
+                    for _i_ret, _txt_ret in enumerate(list(segments)):
+                        _raw_ret = ""
+                        if _i_ret < len(_sd_raw) and isinstance(_sd_raw[_i_ret], dict):
+                            _raw_ret = str(
+                                _sd_raw[_i_ret].get("raw_translation") or ""
+                            )
+                        if not _raw_ret and _i_ret < len(_aud_raw):
+                            _ar = _aud_raw[_i_ret]
+                            if isinstance(_ar, dict):
+                                _raw_ret = str(_ar.get("raw_translation") or "")
+                        _restored, _did = prefer_full_meaning_text(
+                            str(_txt_ret or ""), _raw_ret
+                        )
+                        if _did and _restored:
+                            segments[_i_ret] = _restored
+                            if _i_ret < len(_fit_audits) and isinstance(
+                                _fit_audits[_i_ret], dict
+                            ):
+                                _fit_audits[_i_ret]["action"] = "atempo_prefer"
+                                _fit_audits[_i_ret]["meaning_preserved"] = True
+                                _fit_audits[_i_ret]["changed"] = False
+                                _fit_audits[_i_ret]["text"] = _restored
+                                _rs = list(_fit_audits[_i_ret].get("reasons") or [])
+                                _rs.append("restore_raw_mt_retention")
+                                _fit_audits[_i_ret]["reasons"] = _rs
+                except Exception as _ret_exc:
+                    logger.debug(
+                        "Task %s: raw retention restore skipped: %s",
+                        task_id,
+                        _ret_exc,
+                    )
                 _fit_changed = sum(1 for a in _fit_audits if a.get("changed"))
                 with STATE_LOCK:
                     task["info"]["text_slot_fit"] = {
@@ -10682,7 +10723,7 @@ def _run_pipeline_inner(
                         )
                     task["info"]["segments_data"] = _sd_fit
                 logger.info(
-                    "Task %s: text_slot_fit changed=%d/%d (atempo cap 1.08)",
+                    "Task %s: text_slot_fit changed=%d/%d (atempo cap 1.15)",
                     task_id,
                     _fit_changed,
                     len(_fit_audits),

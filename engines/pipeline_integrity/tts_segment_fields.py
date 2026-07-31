@@ -20,6 +20,33 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
 )
 
 
+def _stage15_restore_full_meaning(seg: dict[str, Any], text: str) -> str:
+    """If text lost >15% words vs Raw MT — restore full meaning (Final=TTS)."""
+    try:
+        from engines.text_slot_fit import prefer_full_meaning_text
+
+        raw_mt = str(
+            seg.get("raw_translation")
+            or seg.get("raw_mt")
+            or ""
+        )
+        text2, restored = prefer_full_meaning_text(text, raw_mt)
+        if restored and text2:
+            for key in (
+                "final_tts_text",
+                "final_text",
+                "plain_text",
+                "tts_text",
+                "text",
+            ):
+                if key in seg or key == "final_tts_text":
+                    seg[key] = text2
+            return text2
+    except Exception:
+        pass
+    return text
+
+
 def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
     """Priority: locked final_tts_text, then authoritative final, then legacy."""
     if seg.get("tts_blocked") or seg.get("skip_tts"):
@@ -30,7 +57,8 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
         return ""
     locked = str(seg.get("final_tts_text") or "").strip()
     if locked:
-        return locked
+        # Stage 15: locked Final may still be over-short vs Raw — restore.
+        return _stage15_restore_full_meaning(seg, locked)
     from engines.translation_validation import (
         is_shared_mt_blob_reclaim,
         resolve_post_quality_text,
@@ -112,7 +140,7 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
             text = strip_glossary_placeholders(text)
     except Exception:
         pass
-    return text
+    return _stage15_restore_full_meaning(seg, text)
 
 
 def resolve_tts_input_text(group: dict[str, Any]) -> str:

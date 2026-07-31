@@ -1233,3 +1233,20 @@
 {"event": "PROJECT_MIGRATED", "ts": 1785425125.9630132, "payload": {"project_id": "e43fa541-9099-5bf2-9af7-cf75849c3407", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785425125.9836614, "payload": {"project_id": "e129afbf-b40d-5549-bbd2-263a51569e4e", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785425126.0028653, "payload": {"project_id": "a67e71c0-de0f-58cd-bd9f-54d4b6fb0ee5", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785439679.9419057, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785439680.1003847, "payload": {"project_id": "bc588b81-2dc9-599e-ae52-09c58110e4ca", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785439680.3437953, "payload": {"project_id": "237fed4f-4431-57ff-acaf-6a57d1096bc0", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785439680.3643095, "payload": {"project_id": "6c6cf54d-318f-51df-9abd-14f291958a3c", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785439680.3853028, "payload": {"project_id": "5af6819e-dbce-5fb2-9c62-c8e6f6137860", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785442086.5833385, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785442086.7466908, "payload": {"project_id": "df4cb89b-dd3e-50d5-8ade-198209c29cc5", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785442086.9378314, "payload": {"project_id": "e84fe25c-e29d-5f8f-bbd1-96972643a284", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785442086.9680264, "payload": {"project_id": "0eac5b79-5dd0-52c7-aedd-91b1982f37ca", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785442086.9908597, "payload": {"project_id": "ee00835e-6883-569e-b4ae-04e1d3b1a96c", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785442087.022465, "payload": {"project_id": "9c88e627-99a0-58e2-9102-865a0025483a", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785465926.2016683, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785465926.3871372, "payload": {"project_id": "e6964af4-d3a5-5611-b3cf-620c3359eece", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785465926.5693789, "payload": {"project_id": "57688181-9369-5478-becd-2f24b7404794", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785465926.5916667, "payload": {"project_id": "672e80ec-0612-5f2c-bab6-2b5c7d37f3d2", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785465926.612434, "payload": {"project_id": "2f0ff66f-2174-57e9-94bb-3525fb98c4f9", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785465926.632717, "payload": {"project_id": "3540fd54-50fd-568b-b5dd-461320319b00", "source": "tdproj"}}

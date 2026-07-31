@@ -1,0 +1,60 @@
+=== DUBBING ENGINE REPORT task=04032f2196724ad39b789152265ef993 run=9d06ceea ===
+lang=uk  segments=9  elapsed=0.48s
+adapted=4  skipped=0  strategies={'direct': 5, 'adapted': 0, 'video_adapt': 0, 'merge_next': 4, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=9070ms slot=17783ms
+       IN : Вісімнадцятирічний Джордж молодший поїхав по дорозі додому на вечерю, але коли ї
+       OUT: Вісімнадцятирічний Джордж молодший поїхав по дорозі додому на вечерю, але́ коли́
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr
+  [✓] seg#01 strategy=direct pred=11681ms slot=11714ms
+       IN : Це за винятком машин. але його батько, незважаючи на те, що він був тим, хто бук
+       OUT: Це за винятком машин. але́ його́ батько, незважаючи на те, що ві́н був тим, хто 
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:Fiat; missing_entity:Italian
+  [✓] seg#02 strategy=merge_next pred=7810ms slot=5033ms
+       [timing] strategy=merge_next pred=7810ms slot=5033ms prev_end=32599ms overflow=55.2% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied; severe_overflow: predicted=7810ms slot=5033ms ratio=1.55; voice_quality_risk: projected_atempo=1.55 
+  [✓] seg#03 strategy=direct pred=12018ms slot=13861ms
+       IN : Отже тоді тоді тоді, Джордж прийшов на цей перетин, де він справді був прямо біл
+       OUT: Отже тоді́ тоді́ тоді́, Джордж прийшов на цей перетин, де ві́н справді був прямо
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#04 strategy=direct pred=7035ms slot=17479ms
+       IN : Через два тижні Джордж молодший лежав у лікарняному ліжку у реанімації місцевої 
+       OUT: Че́рез два тижні Джордж молодший лежав у лікарняному ліжку у реанімації місцевої
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#05 strategy=direct pred=14726ms slot=18310ms
+       IN : Через два роки Джордж молодший, який повністю одужав від травм, стояв на фінішні
+       OUT: Че́рез два роки Джордж молодший, яки́й повністю одужав від травм, стояв на фініш
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:So George Jr
+  [✓] seg#06 strategy=merge_next pred=5785ms slot=4709ms
+       IN : Замість цього він взяв свою камеру і повернувся в своє старе хобі фотографії.
+       OUT: Замість цього ві́н взяв свою камеру і повернувся в своє старе хобі фотографії.
+       [stress] ok
+       [timing] strategy=merge_next pred=5785ms slot=4709ms prev_end=95190ms overflow=22.8% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: voice_quality_risk: projected_atempo=1.23 (max=1.2) — recommend text adaptation
+  [✓] seg#07 strategy=merge_next pred=13605ms slot=8941ms
+       IN : Насправді Джордж молодший звернувся до престижної кінематографії в університеті 
+       OUT: Насправді Джордж молодший звернувся до престижної кінематографії в університеті 
+       [stress] ok
+       [timing] strategy=merge_next pred=13605ms slot=8941ms prev_end=102165ms overflow=52.2% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:University of Southern California; missing_entity:California; missing_entity:Southern California; severe_
+  [✓] seg#08 strategy=merge_next pred=83698ms slot=54767ms
+       IN : Тепер Джордж молодший підійшов до подіуму, щоб сфотографувати переможця водія, а
+       OUT: Тепер Джордж молодший підійшов до подіуму, щоб сфотографувати переможця водія, а
+       [punct] added_terminal_period
+       [stress] ok
+       [phonetics] fixed: USC→Ю Ес Сі
+       [timing] strategy=merge_next pred=83698ms slot=54767ms prev_end=111643ms overflow=52.8% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: missing_entity:USC; missing_entity:Now George Jr; missing_entity:Haskell Wexler; missing_entity:George Lucas; missing_en

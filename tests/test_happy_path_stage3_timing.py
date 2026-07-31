@@ -20,12 +20,12 @@ def test_happy_path_constants():
         _ATEMPO_EMERGENCY_MAX,
     )
 
-    assert HAPPY_PATH_MAX_ATEMPO == 1.08
+    assert HAPPY_PATH_MAX_ATEMPO == 1.15
     assert HAPPY_PATH_NO_SPEECH_TRIM is True
-    assert TF_HP == 1.08
+    assert TF_HP == 1.15
     assert _ATEMPO_ABSOLUTE_MAX == 1.20
     assert _ATEMPO_EMERGENCY_MAX == 1.20
-    assert DUB_MAX_ATEMPO <= 1.08
+    assert DUB_MAX_ATEMPO <= 1.15
 
 
 def test_no_speech_trim_keeps_overflow_no_hard_cut():

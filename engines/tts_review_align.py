@@ -162,8 +162,8 @@ def sync_segments_from_audits(
         )
         if not final:
             continue
-        # Hard-trim honesty: do not overwrite a shorter spoken prefix with a
-        # longer Final (that recreates Review≠audio after trim_overlap).
+        # Stage 15: Text for TTS = Final (1:1). Do NOT shrink Final to a
+        # truncated spoken prefix — meaning > timing; atempo handles overflow.
         spoken = _norm_space(
             seg.get("spoken_fit_text")
             or (seg.get("timing_meta") or {}).get("spoken_fit_text")
@@ -178,7 +178,25 @@ def sync_segments_from_audits(
             or (seg.get("timing_meta") or {}).get("speech_trimmed")
         )
         if voice_cut and spoken and len(spoken) + 8 < len(final):
-            final = spoken
+            logger = __import__("logging").getLogger("tubedub.tts_review_align")
+            logger.warning(
+                "voice_cut ignored for meaning retention idx=%s spoken_len=%d final_len=%d",
+                i,
+                len(spoken),
+                len(final),
+            )
+        # Prefer full Raw MT if Final was over-shortened vs Raw.
+        try:
+            from engines.text_slot_fit import prefer_full_meaning_text
+
+            raw_mt = _norm_space(
+                row.get("raw_translation")
+                or seg.get("raw_translation")
+                or ""
+            )
+            final, _ = prefer_full_meaning_text(final, raw_mt)
+        except Exception:
+            pass
         final = _restore_terminal(
             final,
             original=original,

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Happy Path text↔slot fit — paraphrase length, keep natural speech speed.
 
-Priority (TZ Stage 4): natural rate > meaning > timing.
-atempo is a last resort (0.95–1.08); never chop words or mid-thought tails.
+Stage 15 priority (Simple): meaning completeness > timing fit > atempo.
+atempo ≤ 1.15 preferred over chopping sentences from Raw MT.
 """
 
 from __future__ import annotations
@@ -22,8 +22,9 @@ OVERFLOW_FIT_RATIO = 1.08
 UNDERFILL_EXPAND_RATIO = 0.80
 # Soft expand aim — leave a little natural room under the slot.
 EXPAND_AIM_RATIO = 0.92
-MIN_WORD_RETENTION = 0.55
-MIN_WORD_RETENTION_SEVERE = 0.35
+# Stage 15: refuse shorten that drops >15% of words (severe floor 30%).
+MIN_WORD_RETENTION = 0.85
+MIN_WORD_RETENTION_SEVERE = 0.70
 SEVERE_OVERFLOW_RATIO = 1.50
 
 # Incomplete thought endings that must NEVER be voiced as a final cut.
@@ -32,6 +33,7 @@ _BAD_TAIL = re.compile(
     r"\bнезважаючи\s+на\s+те|\bнесмотря\s+на\s+(?:это|то)|"
     r"\bdespite\s+(?:that|this)|\bin\s+spite\s+of\s+that|"
     r"\bвирішив|\bрешил|\bdecided|\bbegan|\bstarted|"
+    r"\bне\s+міг\s+не\s+відчуват\w*\s*$|"
     r"\bщоб\s*$|\bале\s*$|\bі\s*$|\bта\s*$|\bщо\s*$|\bякий\s*$|\bяка\s*$|"
     r"\bякі\s*$|\bколи\s*$|\bтому\s*$|\bдля\s*$|\bпро\s*$|"
     r"\band\s*$|\bbut\s*$|\bto\s*$|\bthe\s*$|\ba\s*$)$"
@@ -47,13 +49,15 @@ _DANGLING_CLAUSE = re.compile(
     r")[.!?…]*$"
 )
 
-# Stage 11: do not chop tails that carry job / admission / film-entity meaning.
+# Stage 11/15: do not chop tails that carry job / crash / film-entity meaning.
 _CRITICAL_TAIL_GUARD = re.compile(
     r"(?i)\b("
-    r"job|get\s+in|star\s+wars|lucas|"
-    r"робот[ауеи]?|роботі|роботою|роботі|"
+    r"job|get\s+in|star\s+wars|lucas|wexler|"
+    r"робот[ауеи]?|роботі|роботою|"
     r"поступл\w*|прийнятт\w*|"
-    r"зоряні|лукас|аварі\w*|вилет\w*|вижив\w*"
+    r"зоряні|лукас|векслер|"
+    r"аварі\w*|вилет\w*|вижив\w*|викину\w*|розби\w*|"
+    r"потенціал\w*|гоночн\w*|фотоапарат\w*"
     r")\b"
 )
 _CRITICAL_MARKER_PATTERNS: tuple[re.Pattern[str], ...] = (
@@ -61,14 +65,63 @@ _CRITICAL_MARKER_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"(?i)\bget\s+in\b"),
     re.compile(r"(?i)\bstar\s+wars\b"),
     re.compile(r"(?i)\blucas\b"),
+    re.compile(r"(?i)\bwexler\b"),
     re.compile(r"(?i)\bробот"),
+    re.compile(r"(?i)\bроботі"),
     re.compile(r"(?i)\bпоступл"),
     re.compile(r"(?i)\bзоряні"),
     re.compile(r"(?i)\bлукас"),
+    re.compile(r"(?i)\bвекслер"),
     re.compile(r"(?i)\bаварі"),
     re.compile(r"(?i)\bвилет"),
     re.compile(r"(?i)\bвижив"),
+    re.compile(r"(?i)\bвикину"),
+    re.compile(r"(?i)\bрозби"),
+    re.compile(r"(?i)\bпотенціал"),
+    re.compile(r"(?i)\bгоночн"),
+    re.compile(r"(?i)\bфотоапарат"),
 )
+
+
+def word_retention_ratio(original: str, candidate: str) -> float:
+    ow = len(str(original or "").split())
+    if ow <= 0:
+        return 1.0
+    return len(str(candidate or "").split()) / float(ow)
+
+
+def prefer_full_meaning_text(
+    candidate: str,
+    raw_mt: str,
+    *,
+    min_retention: float = MIN_WORD_RETENTION,
+    src_lang: str = "en",
+    tgt_lang: str = "uk",
+) -> tuple[str, bool]:
+    """If candidate lost >15% words vs Raw MT — restore Raw (post-finalize)."""
+    cand = " ".join(str(candidate or "").split()).strip()
+    raw = " ".join(str(raw_mt or "").split()).strip()
+    if not raw:
+        return cand, False
+    try:
+        from engines.mt.glossary_en_uk import finalize_mt_text
+
+        raw = finalize_mt_text(src_lang, tgt_lang, raw)
+    except Exception:
+        pass
+    if not raw:
+        return cand, False
+    if not cand:
+        return raw, True
+    if word_retention_ratio(raw, cand) < float(min_retention):
+        logger.info(
+            "prefer_full_meaning: restore raw words %d→%d (ret=%.2f)",
+            len(cand.split()),
+            len(raw.split()),
+            word_retention_ratio(raw, cand),
+        )
+        return raw, True
+    return cand, False
 
 
 def _needs_critical_tail_guard(text: str, source_hint: str = "") -> bool:
@@ -96,6 +149,10 @@ def _critical_markers_lost(original: str, shortened: str, source_hint: str = "")
                 r"(?i)\bлукас", shortened
             ):
                 continue
+            if pat.pattern.lower().find("wexler") >= 0 and re.search(
+                r"(?i)\bвекслер", shortened
+            ):
+                continue
             if pat.pattern.lower().find("get\\s+in") >= 0 and re.search(
                 r"(?i)\b(поступл|прийнятт)", shortened
             ):
@@ -110,10 +167,11 @@ class TextFitResult:
     slot_ms: int
     predicted_ms_before: int
     predicted_ms_after: int
-    action: str = "none"  # none | shorten | expand | unchanged
+    action: str = "none"  # none | shorten | expand | unchanged | atempo_prefer
     changed: bool = False
     reasons: list[str] = field(default_factory=list)
     meaning_truncated: bool = False
+    meaning_preserved: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -244,6 +302,12 @@ def _keep_leading_complete_sentences(
     while kept and not _is_complete_thought(" ".join(kept).strip()):
         kept.pop()
         cand = " ".join(kept).strip()
+    # Stage 15: never ship a shorten that drops below retention or bad-tails.
+    if cand and cand != text:
+        if word_retention_ratio(text, cand) < MIN_WORD_RETENTION:
+            return text, False
+        if _BAD_TAIL.search(cand) or not _is_complete_thought(cand):
+            return text, False
     # If still underfilled and original fits the overflow cap, keep original.
     if cand and estimate_tts_ms(cand, lang) < target_lo:
         orig_pred = estimate_tts_ms(text, lang)
@@ -254,6 +318,7 @@ def _keep_leading_complete_sentences(
         and cand != text
         and len(cand.split()) >= min_words
         and _is_complete_thought(cand)
+        and word_retention_ratio(text, cand) >= MIN_WORD_RETENTION
     ):
         return cand, False
     return text, False
@@ -452,9 +517,23 @@ def _safe_shorten(
                 reasons.append("incomplete_refused")
                 out = text  # keep full meaning; allow mild overflow
 
-    # Final Stage 11 guard: never ship a shorten that ate critical content.
+    # Final Stage 11/15 guards: critical markers, retention, complete thought.
     if out != original and _critical_markers_lost(original, out, hint):
         reasons.append("shorten_refused_critical_tail")
+        return original, reasons, False
+    if out != original and word_retention_ratio(original, out) < MIN_WORD_RETENTION:
+        reasons.append("shorten_refused_retention")
+        logger.info(
+            "meaning_preserved=True refuse shorten ret=%.2f words %d→%d",
+            word_retention_ratio(original, out),
+            len(original.split()),
+            len(out.split()),
+        )
+        return original, reasons, False
+    if out != original and (
+        _BAD_TAIL.search(out) or not _is_complete_thought(out)
+    ):
+        reasons.append("shorten_refused_incomplete")
         return original, reasons, False
 
     return out, reasons, meaning_truncated
@@ -669,16 +748,64 @@ def fit_text_to_slot(
     out = original
     action = "unchanged"
     meaning_truncated = False
+    meaning_preserved = True
 
     if before > hi:
-        out, reasons, meaning_truncated = _safe_shorten(
-            original, slot, lang, source_hint=source_hint
-        )
-        action = "shorten" if out != original else "unchanged"
+        # Soft compress first; if still overflow and shorten would drop meaning → atempo.
+        try:
+            from engines.mt.tts_slot_compress import soft_compress_for_slot
+
+            soft = soft_compress_for_slot(
+                original, slot_ms=slot, target_lang=lang
+            )
+            soft = " ".join(str(soft or "").split()).strip()
+            if (
+                soft
+                and soft != original
+                and _is_complete_thought(soft)
+                and word_retention_ratio(original, soft) >= MIN_WORD_RETENTION
+                and not _critical_markers_lost(original, soft, source_hint)
+            ):
+                out = soft
+                reasons.append("soft_compress")
+        except Exception:
+            pass
+        after_soft = estimate_tts_ms(out, lang)
+        if after_soft > hi:
+            shortened, sh_reasons, meaning_truncated = _safe_shorten(
+                out, slot, lang, source_hint=source_hint
+            )
+            reasons = list(reasons) + list(sh_reasons)
+            ret = word_retention_ratio(original, shortened)
+            if (
+                shortened != original
+                and ret >= MIN_WORD_RETENTION
+                and _is_complete_thought(shortened)
+                and not _BAD_TAIL.search(shortened)
+            ):
+                out = shortened
+                action = "shorten"
+            else:
+                # Stage 15: prefer mild atempo over chopping sentences.
+                out = original
+                action = "atempo_prefer"
+                meaning_preserved = True
+                meaning_truncated = False
+                reasons.append("atempo_prefer_retention")
+                logger.info(
+                    "fit_text_to_slot: meaning_preserved=True action=atempo_prefer "
+                    "slot=%d pred=%d retention_would=%.2f",
+                    slot,
+                    before,
+                    ret if shortened != original else 1.0,
+                )
+        else:
+            action = "shorten" if out != original else "unchanged"
         # Stage 5: if shorten overshot into dead air, expand back toward the band.
         after_short = estimate_tts_ms(out, lang)
         if (
             allow_expand
+            and action == "shorten"
             and after_short < lo
             and out.strip()
             and not meaning_truncated
@@ -705,19 +832,30 @@ def fit_text_to_slot(
         action = "unchanged"
         reasons = ["reverted_empty"]
         meaning_truncated = False
+        meaning_preserved = True
     elif action == "shorten" and after > before and after > hi:
         out = original
         after = before
-        action = "unchanged"
-        reasons = ["reverted_worse"]
+        action = "atempo_prefer"
+        reasons = list(reasons) + ["reverted_worse"]
         meaning_truncated = False
-    elif out != original and not _is_complete_thought(out):
-        # Never ship a mid-thought fragment to TTS / Review.
+        meaning_preserved = True
+    elif out != original and (
+        not _is_complete_thought(out)
+        or _BAD_TAIL.search(out)
+        or word_retention_ratio(original, out) < MIN_WORD_RETENTION
+    ):
+        # Never ship a mid-thought / truncated fragment to TTS / Review.
         out = original
         after = before
-        action = "unchanged"
-        reasons = list(reasons) + ["reverted_incomplete"]
+        action = "atempo_prefer"
+        reasons = list(reasons) + ["reverted_incomplete_or_retention"]
         meaning_truncated = False
+        meaning_preserved = True
+        logger.info(
+            "fit_text_to_slot: meaning_preserved=True refuse shorten slot=%d",
+            slot,
+        )
 
     result = TextFitResult(
         text=out,
@@ -728,15 +866,18 @@ def fit_text_to_slot(
         changed=out != original,
         reasons=reasons,
         meaning_truncated=bool(meaning_truncated),
+        meaning_preserved=bool(meaning_preserved),
     )
-    if result.changed or result.meaning_truncated:
+    if result.changed or result.meaning_truncated or action == "atempo_prefer":
         logger.info(
-            "fit_text_to_slot: action=%s slot=%d pred %d→%d truncated=%s reasons=%s",
+            "fit_text_to_slot: action=%s slot=%d pred %d→%d truncated=%s "
+            "preserved=%s reasons=%s",
             action,
             slot,
             before,
             after,
             result.meaning_truncated,
+            result.meaning_preserved,
             reasons,
         )
     return result

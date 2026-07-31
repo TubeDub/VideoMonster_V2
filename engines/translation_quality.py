@@ -930,6 +930,10 @@ def keep_if_not_worse(
     if is_nonsense_text(a) and not is_nonsense_text(b):
         return b
     if naturalizer_mode:
+        # Stage 15: never accept naturalizer cuts that drop >15% words (Simple meaning).
+        bw, aw = len(b.split()), len(a.split())
+        if bw >= 8 and aw < int(bw * 0.85):
+            return b
         if len(b) > 24 and len(a) < len(b) * 0.30:
             return b
         return a

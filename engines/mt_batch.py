@@ -99,6 +99,102 @@ def _skip_cache_long(text: str) -> bool:
         return w > 55
 
 
+def _prefer_complete_mt(
+    source: str,
+    a: str,
+    b: str,
+    source_lang: str,
+    target_lang: str,
+) -> str:
+    """Prefer a non-incomplete candidate; else the longer one."""
+    from engines.mt_cache import is_incomplete_mt_pair
+
+    a = str(a or "").strip()
+    b = str(b or "").strip()
+    a_ok = bool(a) and not is_incomplete_mt_pair(source, a, source_lang, target_lang)
+    b_ok = bool(b) and not is_incomplete_mt_pair(source, b, source_lang, target_lang)
+    if b_ok and not a_ok:
+        return b
+    if a_ok and not b_ok:
+        return a
+    if a_ok and b_ok:
+        return b if len(b.split()) >= len(a.split()) else a
+    if len(b.split()) > len(a.split()):
+        return b
+    return a
+
+
+def _remt_incomplete_raw(
+    text: str,
+    source_lang: str,
+    target_lang: str,
+    *,
+    app_dir: Path,
+) -> str:
+    """Sentence/word-level Marian remt (RAW, no glossary protect)."""
+    from engines.mt.glossary_en_uk import finalize_mt_text
+    from engines.mt.sentence_split import split_mt_sentences
+
+    clean = " ".join(str(text or "").split()).strip()
+    if not clean:
+        return ""
+    units = split_mt_sentences(clean)
+    if len(units) <= 1:
+        words = clean.split()
+        # Smaller windows than default 55 — avoid Marian mid-unit collapse.
+        win = 28
+        units = [
+            " ".join(words[i : i + win]).strip()
+            for i in range(0, len(words), win)
+            if words[i : i + win]
+        ]
+    batch = _try_marian_batch(units, source_lang, target_lang, app_dir=app_dir)
+    if batch is None or len(batch) != len(units):
+        return ""
+    parts = [
+        finalize_mt_text(
+            source_lang, target_lang, str((batch[i][0] or "")).strip()
+        )
+        for i in range(len(units))
+    ]
+    return " ".join(p for p in parts if p).strip()
+
+
+def _ensure_complete_mt(
+    source: str,
+    translated: str,
+    source_lang: str,
+    target_lang: str,
+    *,
+    app_dir: Path,
+    stats: dict[str, Any] | None = None,
+    seg_index: int = -1,
+) -> tuple[str, bool]:
+    """If truncated / missing critical entities — remt RAW sentence-level."""
+    from engines.mt.glossary_en_uk import finalize_mt_text
+    from engines.mt_cache import is_incomplete_mt_pair
+
+    src = " ".join(str(source or "").split()).strip()
+    tr = finalize_mt_text(source_lang, target_lang, translated)
+    if not src or not tr:
+        return tr, False
+    if not is_incomplete_mt_pair(src, tr, source_lang, target_lang):
+        return tr, False
+    logger.warning(
+        "[MT] incomplete remt seg#%s src_words=%d tgt_words=%d",
+        seg_index + 1 if seg_index >= 0 else "?",
+        len(src.split()),
+        len(tr.split()),
+    )
+    remt = _remt_incomplete_raw(src, source_lang, target_lang, app_dir=app_dir)
+    remt = finalize_mt_text(source_lang, target_lang, remt)
+    best = _prefer_complete_mt(src, tr, remt, source_lang, target_lang)
+    if stats is not None:
+        stats["mt_incomplete_remts"] = int(stats.get("mt_incomplete_remts") or 0) + 1
+        stats["mt_calls"] = int(stats.get("mt_calls") or 0) + 1
+    return best, True
+
+
 def _translate_one_traced(
     text: str,
     source_lang: str,
@@ -136,6 +232,7 @@ def translate_segments_batch(
     from engines.mt_cache import (
         default_cache_dir,
         empty_mt_stats,
+        is_incomplete_mt_pair,
         lookup_mt_cache,
         mt_cache_disabled,
         store_mt_cache,
@@ -236,10 +333,23 @@ def translate_segments_batch(
             stats["mt_calls"] += 1
             for j, idx in enumerate(group):
                 tr = finalize_mt_text(src_l, tgt_l, rejoined[j])
+                eng_label = "marian_batch"
+                if tr and is_incomplete_mt_pair(texts[j], tr, src_l, tgt_l):
+                    tr, did_remt = _ensure_complete_mt(
+                        texts[j],
+                        tr,
+                        src_l,
+                        tgt_l,
+                        app_dir=base,
+                        stats=stats,
+                        seg_index=idx,
+                    )
+                    if did_remt:
+                        eng_label = "marian_batch+remt"
                 out[idx] = tr
-                seg_engines[idx] = "marian_batch"
+                seg_engines[idx] = eng_label
                 filled_by_marian.add(idx)
-                if tr:
+                if tr and not is_incomplete_mt_pair(texts[j], tr, src_l, tgt_l):
                     store_mt_cache(
                         texts[j],
                         tr,
@@ -254,13 +364,25 @@ def translate_segments_batch(
                 except Exception:
                     pass
 
-    still_miss = [
-        i
-        for i in miss_indices
-        if i not in filled_by_marian
-        and not out[i]
-        and str(segments[i] or "").strip()
-    ]
+    # Empty misses + still-incomplete after batch/remt (second chance via _one).
+    still_miss = []
+    for i in miss_indices:
+        src_i = str(segments[i] or "").strip()
+        if not src_i:
+            continue
+        if i not in filled_by_marian and not out[i]:
+            still_miss.append(i)
+            continue
+        if out[i] and is_incomplete_mt_pair(src_i, out[i], src_l, tgt_l):
+            # Already remted in batch path — only retry if empty/worse.
+            if seg_engines[i].endswith("+remt") and len(out[i].split()) >= 8:
+                logger.warning(
+                    "[MT] incomplete after remt seg#%d words=%d — keeping best",
+                    i + 1,
+                    len(out[i].split()),
+                )
+                continue
+            still_miss.append(i)
     online = bool(still_miss)
     workers = resolve_mt_concurrency(online=online, requested=concurrency)
     stats["mt_concurrency_used"] = workers if still_miss else 1
@@ -272,8 +394,30 @@ def translate_segments_batch(
         for attempt in range(3):
             try:
                 tr, meta = _translate_one_traced(text, src_l, tgt_l, app_dir=base)
-                if tr:
+                tr = finalize_mt_text(src_l, tgt_l, tr)
+                if tr and not is_incomplete_mt_pair(text, tr, src_l, tgt_l):
                     return idx, tr, meta, retries
+                if tr and is_incomplete_mt_pair(text, tr, src_l, tgt_l):
+                    remt, _ = _ensure_complete_mt(
+                        text,
+                        tr,
+                        src_l,
+                        tgt_l,
+                        app_dir=base,
+                        seg_index=idx,
+                    )
+                    if remt and not is_incomplete_mt_pair(text, remt, src_l, tgt_l):
+                        meta = dict(meta or {})
+                        meta["engine"] = "marian+remt"
+                        meta["incomplete_remt"] = True
+                        return idx, remt, meta, retries + 1
+                    if remt and len(remt.split()) > len(tr.split()):
+                        meta = dict(meta or {})
+                        meta["engine"] = "marian+remt"
+                        return idx, remt, meta, retries + 1
+                    last_err = "incomplete"
+                    retries += 1
+                    continue
                 last_err = "empty"
             except Exception as exc:
                 last_err = str(exc)
@@ -281,28 +425,34 @@ def translate_segments_batch(
                 time.sleep(0.4 * (attempt + 1))
         return idx, "", {"engine": "error", "error": last_err}, retries
 
+    def _apply_one_result(i2: int, tr: str, meta: dict[str, Any], retries: int) -> None:
+        stats["mt_calls"] += 1
+        stats["mt_retries"] += retries
+        if meta.get("incomplete_remt"):
+            stats["mt_incomplete_remts"] = int(stats.get("mt_incomplete_remts") or 0) + 1
+        eng = str(meta.get("engine") or meta.get("route_label") or "marian")
+        if "marian" in eng.lower() and "remt" not in eng.lower():
+            eng = "marian"
+        engines_used.add(eng)
+        tr = finalize_mt_text(src_l, tgt_l, tr)
+        src_text = str(segments[i2] or "")
+        out[i2] = tr
+        seg_engines[i2] = eng if eng else "marian"
+        if tr and not is_incomplete_mt_pair(src_text, tr, src_l, tgt_l):
+            store_mt_cache(
+                src_text,
+                tr,
+                src_l,
+                tgt_l,
+                engine=engine_tag,
+                cache_dir=cdir,
+            )
+
     if still_miss:
         if workers <= 1 or len(still_miss) == 1:
             for idx in still_miss:
                 i2, tr, meta, retries = _one(idx)
-                stats["mt_calls"] += 1
-                stats["mt_retries"] += retries
-                eng = str(meta.get("engine") or meta.get("route_label") or "marian")
-                if "marian" in eng.lower():
-                    eng = "marian"
-                engines_used.add(eng)
-                tr = finalize_mt_text(src_l, tgt_l, tr)
-                out[i2] = tr
-                seg_engines[i2] = eng if eng else "marian"
-                if tr:
-                    store_mt_cache(
-                        str(segments[i2] or ""),
-                        tr,
-                        src_l,
-                        tgt_l,
-                        engine=engine_tag,
-                        cache_dir=cdir,
-                    )
+                _apply_one_result(i2, tr, meta, retries)
                 if on_progress:
                     try:
                         on_progress(n - sum(1 for k in still_miss if not out[k]), n)
@@ -313,24 +463,7 @@ def translate_segments_batch(
                 futs = {pool.submit(_one, idx): idx for idx in still_miss}
                 for fut in as_completed(futs):
                     i2, tr, meta, retries = fut.result()
-                    stats["mt_calls"] += 1
-                    stats["mt_retries"] += retries
-                    eng = str(meta.get("engine") or meta.get("route_label") or "marian")
-                    if "marian" in eng.lower():
-                        eng = "marian"
-                    engines_used.add(eng)
-                    tr = finalize_mt_text(src_l, tgt_l, tr)
-                    out[i2] = tr
-                    seg_engines[i2] = eng if eng else "marian"
-                    if tr:
-                        store_mt_cache(
-                            str(segments[i2] or ""),
-                            tr,
-                            src_l,
-                            tgt_l,
-                            engine=engine_tag,
-                            cache_dir=cdir,
-                        )
+                    _apply_one_result(i2, tr, meta, retries)
                     if on_progress:
                         try:
                             on_progress(
@@ -339,7 +472,6 @@ def translate_segments_batch(
                             )
                         except Exception:
                             pass
-
     if len(out) != n:
         raise RuntimeError(f"mt_batch parity broken: in={n} out={len(out)}")
 

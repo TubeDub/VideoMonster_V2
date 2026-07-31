@@ -15,14 +15,13 @@ from pydub.silence import detect_nonsilent
 
 logger = logging.getLogger(__name__)
 
-# ─── Quality-first constants (TZ text-fit) ────────────────────────────────────
-# atempo is the LAST RESORT — listener must not hear unnatural speed.
-# Advanced ceiling 1.20; Happy Path uses ≤1.08 (see engines.happy_path).
+# ─── Quality-first constants (TZ text-fit / Stage 15) ─────────────────────────
+# meaning completeness > timing fit > atempo (Happy Path ≤1.15).
 _ATEMPO_MIN = 0.95
 _ATEMPO_ABSOLUTE_MAX = 1.20      # hard ceiling (advanced / legacy)
 _ATEMPO_EMERGENCY_MAX = 1.20
-DUB_MAX_ATEMPO = 1.08            # preferred per-segment cap
-HAPPY_PATH_MAX_ATEMPO = 1.08
+DUB_MAX_ATEMPO = 1.15            # preferred per-segment cap (Simple)
+HAPPY_PATH_MAX_ATEMPO = 1.15
 DUB_SLOT_TOLERANCE_MS = 75
 
 # Video-adaptation window: if overflow ≤ this %, prefer gap-borrow / video

@@ -1635,6 +1635,13 @@ def naturalize_uk(text: str, prev_context: str | None = None) -> str:
     if not text:
         return text
 
+    # Stage 16: Marian quality repairs (also in finalize_mt_text) — Simple always.
+    try:
+        from engines.mt.glossary_en_uk import apply_uk_marian_repairs
+
+        text = apply_uk_marian_repairs(text)
+    except Exception:
+        pass
     try:
         from engines.mt.cross_script_guard import deflate_phrase_loop, has_phrase_loop
 

@@ -61,8 +61,25 @@ def is_oversized_mt_unit(text: str) -> bool:
     )
 
 
+def _chunk_by_words(text: str, max_w: int) -> list[str]:
+    words = str(text or "").split()
+    if not words:
+        return []
+    if len(words) <= max_w:
+        return [" ".join(words)]
+    return [
+        " ".join(words[i : i + max_w]).strip()
+        for i in range(0, len(words), max_w)
+        if words[i : i + max_w]
+    ]
+
+
 def split_oversized_unit(text: str) -> list[str]:
-    """Split one MT unit on sentence boundaries; further chunk if still huge."""
+    """Split one MT unit on sentence boundaries; further chunk if still huge.
+
+    Always respect max_words — packing by sentences alone can leave a 65-word
+    2-sentence unit that Marian truncates (George Jr. #5 crash).
+    """
     clean = " ".join(str(text or "").split())
     if not clean:
         return []
@@ -70,39 +87,51 @@ def split_oversized_unit(text: str) -> list[str]:
         return [clean]
 
     parts = split_mt_sentences(clean)
+    max_w = _max_words()
     if len(parts) <= 1:
-        # Soft word-window split as last resort
-        words = clean.split()
-        max_w = _max_words()
-        chunks: list[str] = []
-        for i in range(0, len(words), max_w):
-            chunk = " ".join(words[i : i + max_w]).strip()
-            if chunk:
-                chunks.append(chunk)
-        return chunks or [clean]
+        return _chunk_by_words(clean, max_w) or [clean]
 
-    # Pack sentences into units respecting max_sentences / max_chars
+    # Pack sentences into units respecting max_sentences / max_chars / max_words
     max_s = _max_sentences()
     max_c = _max_chars()
     packed: list[str] = []
     buf: list[str] = []
     buf_len = 0
+    buf_words = 0
     for sent in parts:
         s = sent.strip()
         if not s:
             continue
+        s_words = len(s.split())
         next_len = buf_len + len(s) + (1 if buf else 0)
-        if buf and (len(buf) >= max_s or next_len > max_c):
+        next_words = buf_words + s_words
+        if buf and (
+            len(buf) >= max_s or next_len > max_c or next_words > max_w
+        ):
             packed.append(" ".join(buf))
             buf = [s]
             buf_len = len(s)
+            buf_words = s_words
         else:
             buf.append(s)
             buf_len = next_len
+            buf_words = next_words
     if buf:
         packed.append(" ".join(buf))
-    return packed or [clean]
 
+    # Safety: any pack still over max_words → sentence/word chunks
+    final: list[str] = []
+    for pack in packed:
+        if len(pack.split()) <= max_w:
+            final.append(pack)
+            continue
+        sents = split_mt_sentences(pack)
+        if len(sents) > 1:
+            for s in sents:
+                final.extend(_chunk_by_words(s, max_w) or [s])
+        else:
+            final.extend(_chunk_by_words(pack, max_w) or [pack])
+    return final or [clean]
 
 def guard_segments_before_mt(
     segments: list[str],

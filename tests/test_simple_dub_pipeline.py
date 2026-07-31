@@ -27,7 +27,7 @@ def test_apply_simple_policy_locks_gates():
     assert info["post_tts_resegment_allowed"] is False
     assert info["blind_timing_align_allowed"] is False
     assert info["text_fit_required"] is True
-    assert float(info["max_atempo"]) <= 1.08
+    assert float(info["max_atempo"]) <= 1.15
     assert float(info["min_atempo"]) >= 0.95
     assert info["simple_auto_mix"] is True
     assert should_auto_mix_mp4(info) is True
