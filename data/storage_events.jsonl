@@ -1250,3 +1250,14 @@
 {"event": "PROJECT_MIGRATED", "ts": 1785465926.5916667, "payload": {"project_id": "672e80ec-0612-5f2c-bab6-2b5c7d37f3d2", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785465926.612434, "payload": {"project_id": "2f0ff66f-2174-57e9-94bb-3525fb98c4f9", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785465926.632717, "payload": {"project_id": "3540fd54-50fd-568b-b5dd-461320319b00", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785506637.1776805, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785506637.4453459, "payload": {"project_id": "9306f71a-fb15-5d7a-8b3a-b0b34c779104", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785506637.663302, "payload": {"project_id": "031ec40e-0c60-582f-b29b-8f6fbf5f75d7", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785506637.6860306, "payload": {"project_id": "ba2d9126-6f06-5843-b457-8bfd120988e0", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785506637.7087119, "payload": {"project_id": "b0ea2d3a-5f2e-55a5-9a4c-e304a3ae5d96", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785506637.7292914, "payload": {"project_id": "ce862c02-9ebb-5831-b929-9e287a58768e", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785514020.7624516, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785514020.915649, "payload": {"project_id": "fe570768-6d73-5050-8b46-11cde021355e", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785514021.139328, "payload": {"project_id": "6147326c-1d45-5bd0-b16e-00e8868fd363", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785514021.1608946, "payload": {"project_id": "2338fee2-7435-5ffc-8f7a-177c75cdd7f4", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785514021.1801248, "payload": {"project_id": "a60722f4-5ea8-5939-9249-a49e516e4d62", "source": "tdproj"}}
