@@ -53,3 +53,28 @@ _build_timed_dub_track → export timed mp3
 ```bash
 pytest tests/test_stage17_dead_air.py tests/test_stage18_hard_fail.py tests/test_stage15_meaning_retention.py -q
 ```
+
+---
+
+## Stage 18b — Добить hard-fail (`dead_air.py` + no skip)
+
+### Problem
+Partial Stage 18 on some trees: API/tests imported `DeadAirError` / `enforce_dead_air_or_fail` while `dead_air.py` was still Stage-17-only → ImportError / soft-fail → quiet success with holes. `tts_lang_lock` could still `skip_tts=True`.
+
+### Added / fixed
+**`engines/dead_air.py`**
+- `PIPELINE_DEAD_AIR` constant
+- `class DeadAirError(RuntimeError)` — `error_code`, `regions`; accepts `DeadAirError(msg, regions=…)` or `DeadAirError(regions_list)`
+- `enforce_dead_air_or_fail(regions, simple_mode=True)` — raise on Simple; `VM_ALLOW_DEAD_AIR=1` → warning only
+- Kept Stage 17: `find_dead_air_regions`, `audit_dead_air_post_mux`, `stamp_segment_dead_air_fields`, `append_dead_air_to_trace(phase=…)`
+
+**`engines/tts_lang_lock.py`**
+- `fail_loud` / `simple_mode`: remt once → else `PIPELINE_LANG_MIX` raise
+- **No** `skip_tts` / empty text path on Simple uk
+- Stale `skip_tts` cleared under fail_loud before re-check
+
+### pytest
+```bash
+pytest tests/test_stage18_hard_fail.py tests/test_stage17_dead_air.py tests/test_stage15_meaning_retention.py -q
+```
+All green (Stage 18b).

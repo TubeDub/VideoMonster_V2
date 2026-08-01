@@ -204,41 +204,59 @@ def append_dead_air_to_trace(
 
 
 class DeadAirError(RuntimeError):
-    """Raised when post-mux dead air on EN speech must fail the job."""
+    """Raised when EN-speech zones still have silence > threshold after mux."""
 
-    def __init__(self, regions: list[dict[str, Any]], message: str | None = None):
+    def __init__(
+        self,
+        message: str | list | None = None,
+        *,
+        regions: list | None = None,
+    ):
+        # Compat: DeadAirError(regions_list) or DeadAirError(msg, regions=...)
+        if isinstance(message, list):
+            regions = message
+            message = None
         self.regions = list(regions or [])
         self.error_code = PIPELINE_DEAD_AIR
-        msg = message or (
-            f"{PIPELINE_DEAD_AIR}: {len(self.regions)} silence region(s) >{MAX_DEAD_AIR_MS}ms "
-            f"on EN-speech zones — refuse success output"
+        msg = str(message) if message else (
+            f"{PIPELINE_DEAD_AIR}: {len(self.regions)} silence region(s) "
+            f">{MAX_DEAD_AIR_MS}ms on EN-speech zones"
         )
         super().__init__(msg)
 
 
 def enforce_dead_air_or_fail(
-    regions: list[dict[str, Any]] | None,
+    regions: list[dict] | None,
     *,
     simple_mode: bool = True,
     allow_override: bool | None = None,
-) -> list[dict[str, Any]]:
-    """Stage 18: non-empty EN-speech dead_air → raise DeadAirError (unless override).
+) -> list:
+    """Simple/Happy Path: non-empty dead_air on EN-speech → raise DeadAirError.
 
-    Returns regions (possibly empty). Never marks job success when raising.
+    Override: VM_ALLOW_DEAD_AIR=1 → log warning, return regions (no raise).
+    Non-simple: never raise (return regions).
     """
-    regs = [r for r in (regions or []) if r.get("en_speech")]
-    if not regs:
+    regs = list(regions or [])
+    # Prefer EN-speech-flagged rows; plain dicts from tests also count.
+    en_regs = [r for r in regs if isinstance(r, dict) and r.get("en_speech")]
+    if en_regs:
+        regs = en_regs
+    if not simple_mode or not regs:
         return list(regions or [])
-    override = allow_dead_air_override() if allow_override is None else bool(allow_override)
-    if override or not simple_mode:
+    override = (
+        allow_dead_air_override() if allow_override is None else bool(allow_override)
+    )
+    if override:
         logger.warning(
-            "dead_air: %d region(s) allowed (override=%s simple=%s)",
+            "dead_air: VM_ALLOW_DEAD_AIR=1 — warning only, count=%d",
             len(regs),
-            override,
-            simple_mode,
         )
         return regs
-    raise DeadAirError(regs)
+    raise DeadAirError(
+        f"PIPELINE_DEAD_AIR: {len(regs)} silence region(s) "
+        f">{MAX_DEAD_AIR_MS}ms on EN-speech zones",
+        regions=regs,
+    )
 
 
 def audit_dead_air_post_mux(

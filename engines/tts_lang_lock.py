@@ -228,7 +228,8 @@ def enforce_segments_lang_lock(
     Stage 18 Simple: fail_loud — never skip_tts / empty text (raise instead).
     """
     tgt = str(target_lang or "").split("-")[0].lower()
-    loud = bool(simple_mode) if fail_loud is None else bool(fail_loud)
+    # Stage 18b: simple_mode OR fail_loud → never skip→silence.
+    loud = bool(simple_mode) or bool(fail_loud)
     stats: dict[str, Any] = {
         "checked": 0,
         "rejected_non_target": 0,
@@ -246,12 +247,12 @@ def enforce_segments_lang_lock(
             continue
         if seg.get("merged_into") is not None or seg.get("archived"):
             continue
-        # Stage 18: on Simple, clear prior skip flags — remt or fail, no silence.
+        # Stage 18b: Simple/fail_loud — never skip→silence; clear stale skip flags.
         if loud and (seg.get("tts_blocked") or seg.get("skip_tts")):
-            if str(seg.get("tts_skip_reason") or "") == "reject_non_target_lang_mix":
-                seg.pop("skip_tts", None)
-                seg.pop("tts_blocked", None)
-        if seg.get("tts_blocked") or seg.get("skip_tts"):
+            seg.pop("skip_tts", None)
+            seg.pop("tts_blocked", None)
+            seg.pop("tts_skip_reason", None)
+        elif seg.get("tts_blocked") or seg.get("skip_tts"):
             continue
         text = str(
             seg.get("final_tts_text")
@@ -289,6 +290,11 @@ def enforce_segments_lang_lock(
         seg["tts_lang_hint"] = "uk" if meta.get("tts_lang_ok") else "reject"
         seg["tts_cyrillic_ratio"] = meta.get("cyrillic_ratio")
         if meta.get("skipped"):
+            # Legacy non-loud path only — fail_loud guard never returns skipped.
+            if loud:
+                raise RuntimeError(
+                    f"PIPELINE_LANG_MIX: seg#{i} rejected_non_target — refuse skip→silence"
+                )
             stats["skipped"] += 1
             stats["rejected_non_target"] += 1
             seg["skip_tts"] = True
