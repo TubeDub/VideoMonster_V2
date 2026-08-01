@@ -18,10 +18,12 @@ logger = logging.getLogger("tubedub.text_slot_fit")
 FIT_TOLERANCE = 0.15
 # Stage 4/5: shorten when predicted > slot * 1.08
 OVERFLOW_FIT_RATIO = 1.08
-# Stage 5: expand (or avoid overshoot) when predicted < slot * 0.80 — dead air.
-UNDERFILL_EXPAND_RATIO = 0.80
+# Stage 17: expand / atempo-slow when predicted < slot * 0.90 — kill dead air.
+UNDERFILL_EXPAND_RATIO = 0.90
 # Soft expand aim — leave a little natural room under the slot.
-EXPAND_AIM_RATIO = 0.92
+EXPAND_AIM_RATIO = 0.95
+# After fit, still under this → mark atempo_slow (audio path must stretch).
+UNDERFILL_ATEMPO_SLOW_RATIO = 0.88
 # Stage 15: refuse shorten that drops >15% of words (severe floor 30%).
 MIN_WORD_RETENTION = 0.85
 MIN_WORD_RETENTION_SEVERE = 0.70
@@ -167,11 +169,12 @@ class TextFitResult:
     slot_ms: int
     predicted_ms_before: int
     predicted_ms_after: int
-    action: str = "none"  # none | shorten | expand | unchanged | atempo_prefer
+    action: str = "none"  # none|shorten|expand|unchanged|atempo_prefer|atempo_slow
     changed: bool = False
     reasons: list[str] = field(default_factory=list)
     meaning_truncated: bool = False
     meaning_preserved: bool = True
+    dead_air_risk_ms: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -857,6 +860,14 @@ def fit_text_to_slot(
             slot,
         )
 
+    # Stage 17: if still underfilled after expand — mark atempo_slow (audio stretch).
+    slow_floor = int(slot * UNDERFILL_ATEMPO_SLOW_RATIO)
+    if after < slow_floor and action not in ("atempo_prefer",):
+        if action == "unchanged" or after < lo:
+            action = "atempo_slow"
+            reasons = list(reasons) + ["atempo_slow_underfill"]
+    dead_air_risk_ms = max(0, slot - after)
+
     result = TextFitResult(
         text=out,
         slot_ms=slot,
@@ -867,17 +878,33 @@ def fit_text_to_slot(
         reasons=reasons,
         meaning_truncated=bool(meaning_truncated),
         meaning_preserved=bool(meaning_preserved),
+        dead_air_risk_ms=int(dead_air_risk_ms),
     )
-    if result.changed or result.meaning_truncated or action == "atempo_prefer":
+    # Soft assert: underfill must be handled by expand / atempo_slow / prefer.
+    if after < slow_floor and action not in (
+        "expand",
+        "atempo_slow",
+        "atempo_prefer",
+    ):
+        result.action = "atempo_slow"
+        result.reasons = list(result.reasons) + ["assert_atempo_slow"]
+        action = "atempo_slow"
+    if (
+        result.changed
+        or result.meaning_truncated
+        or action in ("atempo_prefer", "atempo_slow", "expand")
+        or dead_air_risk_ms > 350
+    ):
         logger.info(
             "fit_text_to_slot: action=%s slot=%d pred %d→%d truncated=%s "
-            "preserved=%s reasons=%s",
+            "preserved=%s dead_air_risk_ms=%d reasons=%s",
             action,
             slot,
             before,
             after,
             result.meaning_truncated,
             result.meaning_preserved,
+            dead_air_risk_ms,
             reasons,
         )
     return result

@@ -729,6 +729,18 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
                 "overflow_ms": diagnostics.get("overflow_ms", 0)
                 or int(seg.get("predicted_overflow_ms") or 0),
                 "tts_ms": diagnostics.get("tts_ms", int(playback_ms_val)),
+                # Stage 17 Review/trace: slot / tts / dead air / voice.
+                "dead_air_ms": int(
+                    seg.get("dead_air_ms")
+                    or (diagnostics or {}).get("dead_air_ms")
+                    or 0
+                ),
+                "voice_id": str(
+                    seg.get("voice_id")
+                    or seg.get("assigned_voice")
+                    or seg.get("voice")
+                    or ""
+                ),
                 "slot_budget_ms": int(
                     (seg.get("slot_budget") or {}).get("slot_ms")
                     or slot_ms_val
@@ -939,6 +951,10 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
         "trace_log": task_info.get("translation_trace_log"),
         "final_dub_qa": task_info.get("final_dub_qa"),
         "post_tts_qa": task_info.get("post_tts_qa"),
+        # Stage 17: post-mux silence vs EN speech mask.
+        "dead_air_regions": list(task_info.get("dead_air_regions") or []),
+        "dead_air_audit": task_info.get("dead_air_audit"),
+        "dead_air_warning": str(task_info.get("dead_air_warning") or ""),
         "needs_studio": bool(task_info.get("needs_studio")),
         "translation_lock_deferred": bool(task_info.get("translation_lock_deferred")),
         "tps": bool(task_info.get("tps")),

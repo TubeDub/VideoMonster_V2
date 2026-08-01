@@ -1,0 +1,196 @@
+{
+  "task_id": "1a93fcd8d7cf4ecb9dbe22897b19b7f8",
+  "index": 0,
+  "original": "An 18-year-old boy named George Jr. drove through his hometown on his way home for dinner. But as he was driving, George Jr. could not help but feel like he was really dreading actually getting there. So George Jr. was a very smart kid, but he also got distracted really easily, and because of that he really had not pursued anything all that seriously.",
+  "translation": "Вісімнадцятирічний Джордж молодший поїхав по дорозі додому на вечерю, але коли їхав, Джордж молодший відчував, що він справді боїться потрапити туди. Джордж молодший був розумною дитиною, але він також легко відволікся, і тому він не займався чимось настільки серйозним.",
+  "reason": "EntityReviewer: entity_missing:{'code': 'entity_missing', 'category': 'number', 'value': '18', 'severity': 'error', 'reason': 'number_not_preserved'}; EntityReviewer/entity_missing: {'code': 'entity_missing', 'category': 'number', 'value': '18', 'severity': 'error', 'reason': 'number_not_preserved'}",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "WARN",
+      "metrics": {
+        "error_count": 1
+      },
+      "errors": [
+        {
+          "code": "number_missing",
+          "token": "18",
+          "severity": "major"
+        }
+      ],
+      "explanation": "number_missing",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 0
+      },
+      "review_time_ms": 101.62,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.955
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 0.7,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.955
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "REJECT",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "entity_missing",
+          "token": "{'code': 'entity_missing', 'category': 'number', 'value': '18', 'severity': 'error', 'reason': 'number_not_preserved'}",
+          "severity": "critical"
+        }
+      ],
+      "explanation": "entity_missing:{'code': 'entity_missing', 'category': 'number', 'value': '18', 'severity': 'error', 'reason': 'number_not_preserved'}",
+      "retry_strategy": "Entity Correction Strategy",
+      "metadata": {
+        "index": 0
+      },
+      "review_time_ms": 7.41,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.95
+      ],
+      "confidence": {
+        "entity_preservation": 0.75,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.95
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "meaning_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 0
+      },
+      "review_time_ms": 1.17,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 0
+      },
+      "review_time_ms": 0.83,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "timing_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 0,
+        "slot_ms": 17783
+      },
+      "review_time_ms": 0.03,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 0
+      },
+      "review_time_ms": 0.03,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.9842,
+  "retry_history": [
+    {
+      "ok": false,
+      "reason": "cannot import name 'chat_completion' from 'engines.llm_adaptation_mode' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\llm_adaptation_mode.py)"
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Entity Correction Strategy",
+  "ts": 1785522124874
+}

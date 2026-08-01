@@ -2785,7 +2785,7 @@ def _publish_studio_session_keep_running(task_id: str, step: str) -> str | None:
 
 
 _DUB_SLOT_TOLERANCE_MS = 75
-_DUB_MAX_ATEMPO = 1.08          # natural rate; Happy Path hard-cap 1.08
+_DUB_MAX_ATEMPO = 1.15          # Stage 15/17 Happy Path ceiling (overflow); slow ≥0.95
 _VIDEO_ADAPT_MAX_PCT = 15.0     # overlap ≤ 15% → prefer gap-borrow / video slowdown
 
 # ── Block merge constants ──────────────────────────────────────────────────────
@@ -3862,7 +3862,8 @@ def _build_gap_adjusted_track_no_double_soft_sync(
     Slot-fit may still leave overflow_ms>0; skipping trim_overlap overlays full WAV
     into the next segment. Only video_adapt / gap_absorb may keep no_speech_trim.
 
-    Happy Path (TZ text-fit): never chop speech — no_speech_trim=True, atempo≤1.08.
+    Happy Path (TZ text-fit / Stage 17): never chop speech — no_speech_trim=True,
+    atempo up ≤1.15, atempo down ≥0.95 to kill dead air.
     """
     import engines.timing_fit as timing_fit_mod
 
@@ -3871,13 +3872,14 @@ def _build_gap_adjusted_track_no_double_soft_sync(
     try:
         from engines.happy_path import HAPPY_PATH_MAX_ATEMPO as _HP_ATEMPO
     except Exception:
-        _HP_ATEMPO = 1.08
+        _HP_ATEMPO = 1.15
     fit_max = float(max_atempo if max_atempo is not None else (
         _HP_ATEMPO if happy_path else _DUB_MAX_ATEMPO
     ))
-    # Happy Path: hard 1.08; advanced may go to 1.20 absolute ceiling.
-    _ceil = 1.08 if happy_path else 1.20
-    fit_max = min(_ceil, max(1.0, fit_max))
+    # Happy Path: hard 1.15; advanced may go to 1.20 absolute ceiling.
+    # Do NOT clamp with max(1.0, …) — underfill uses atempo < 1.0.
+    _ceil = 1.15 if happy_path else 1.20
+    fit_max = min(_ceil, max(0.01, fit_max))
 
     def _fit_with_skip(tts_path, slot_start, slot_end, next_start=None, work_dir=None, **fit_kw):
         pos = call_idx["i"]
@@ -3891,14 +3893,15 @@ def _build_gap_adjusted_track_no_double_soft_sync(
         # Happy Path: never hard-trim speech. Advanced: trim unless absorb mode.
         if happy_path:
             fit_kw["no_speech_trim"] = True
-            fit_kw.setdefault("allow_atempo", True)
+            # Force True (caller may pass allow_atempo=False via flags).
+            fit_kw["allow_atempo"] = True
         else:
             fit_kw.setdefault("no_speech_trim", allow_overflow)
         # Always enforce ceiling (setdefault loses when build_gap_adjusted_track
         # already passes absolute default 1.20).
         fit_kw["max_atempo"] = fit_max
         if pre_fitted:
-            # Skip re-atempo / soft-sync; Happy Path still forbids speech trim.
+            # Skip soft_sync re-pass; Stage 17 still allows underfill atempo_slow.
             fit_kw["_skip_soft_sync"] = True
         # Natural pause hint — avoids padding the full slot with silence
         if text_hints and pos < len(text_hints):
@@ -4165,7 +4168,7 @@ def _build_timed_dub_track(
         lead_in_ms_list=lead_ins,
         text_hints=text_hints,
         max_atempo=float(
-            1.08
+            1.15
             if _happy_path_timing
             else (style_params.get("max_atempo") or _DUB_MAX_ATEMPO)
         ),
@@ -4205,11 +4208,18 @@ def _build_timed_dub_track(
                     "underfill_resolved_by_shrink": place.get(
                         "underfill_resolved_by_shrink"
                     ),
+                    "dead_air_ms": place.get("dead_air_ms"),
+                    "gap_close_ms": place.get("gap_close_ms"),
                 }
             )
         # Stage 4: attach final_tts_text + text-fit preds for lip/scene diagnostics.
         if task_info is not None and timing_rows:
             _sd_log = list(task_info.get("segments_data") or [])
+            _voice_log = str(
+                task_info.get("pipeline_voice")
+                or task_info.get("tts_voice")
+                or ""
+            )
             for _row in timing_rows:
                 _i = int(_row.get("idx") if _row.get("idx") is not None else -1)
                 if 0 <= _i < len(_sd_log) and isinstance(_sd_log[_i], dict):
@@ -4220,16 +4230,52 @@ def _build_timed_dub_track(
                         or _seg.get("text")
                         or ""
                     )[:300]
-                    _row["tts_text_hash"] = _seg.get("tts_text_hash")
                     _row["spoken_text_source"] = _seg.get("spoken_text_source") or (
                         "final_tts_text" if _seg.get("final_tts_text") else ""
                     )
+                    _row["voice_id"] = str(
+                        _seg.get("voice_id")
+                        or _seg.get("assigned_voice")
+                        or _seg.get("voice")
+                        or _voice_log
+                        or ""
+                    )
+                    # Stage 17: tts_text_hash must match Final hash.
+                    try:
+                        from engines.tts_text_authority import text_hash as _th
+
+                        _final_for_hash = str(
+                            _seg.get("final_tts_text")
+                            or _seg.get("tts_text")
+                            or _seg.get("final_text")
+                            or ""
+                        )
+                        _row["tts_text_hash"] = str(
+                            _seg.get("tts_text_hash") or _th(_final_for_hash) or ""
+                        )
+                        if _final_for_hash and not _seg.get("tts_text_hash"):
+                            _seg["tts_text_hash"] = _row["tts_text_hash"]
+                    except Exception:
+                        _row["tts_text_hash"] = str(_seg.get("tts_text_hash") or "")
                     _tf = _seg.get("text_slot_fit") or {}
                     if isinstance(_tf, dict):
                         _row["predicted_ms_before"] = _tf.get("predicted_ms_before")
                         _row["predicted_ms_after"] = _tf.get("predicted_ms_after")
                         _row["text_fit_applied"] = _tf.get("text_fit_applied")
                         _row["meaning_truncated"] = _tf.get("meaning_truncated")
+                        if _row.get("dead_air_ms") is None and _tf.get(
+                            "dead_air_risk_ms"
+                        ) is not None:
+                            _row["dead_air_ms"] = int(_tf.get("dead_air_risk_ms") or 0)
+                    # Stage 17 Review/trace stamps.
+                    if _row.get("slot_ms") is not None:
+                        _seg["slot_ms"] = int(_row["slot_ms"])
+                    if _row.get("tts_ms") is not None:
+                        _seg["tts_ms"] = int(_row["tts_ms"])
+                    if _row.get("dead_air_ms") is not None:
+                        _seg["dead_air_ms"] = int(_row["dead_air_ms"])
+                    if _row.get("voice_id"):
+                        _seg["voice_id"] = str(_row["voice_id"])
                 # Ensure fill metrics even if placement omitted them.
                 if _row.get("fill_ratio") is None:
                     try:
@@ -4243,9 +4289,9 @@ def _build_timed_dub_track(
                     except Exception:
                         pass
             atempos = [float(r.get("atempo") or 1.0) for r in timing_rows]
-            if atempos and (max(atempos) > 1.0801 or min(atempos) < 0.949):
+            if atempos and (max(atempos) > 1.1501 or min(atempos) < 0.949):
                 logger.warning(
-                    "Task %s: atempo outside Simple band 0.95–1.08 (min=%.3f max=%.3f)",
+                    "Task %s: atempo outside Simple band 0.95–1.15 (min=%.3f max=%.3f)",
                     task_id,
                     min(atempos),
                     max(atempos),
@@ -15629,6 +15675,82 @@ def _run_pipeline_inner(
 
                     with STATE_LOCK:
                         task["info"]["timed_audio"] = timed_audio_path
+                    # Stage 17: silence detector vs EN speech mask → dead_air_regions[].
+                    try:
+                        from engines.dead_air import audit_dead_air_post_mux
+
+                        with STATE_LOCK:
+                            _da_info = task.get("info") or {}
+                            _da_voice = str(
+                                _da_info.get("pipeline_voice")
+                                or _da_info.get("tts_voice")
+                                or voice
+                                or ""
+                            )
+                            _da_sd = list(
+                                _da_info.get("segments_data")
+                                or current_segments_snapshot
+                                or []
+                            )
+                        _da_report = audit_dead_air_post_mux(
+                            timed_audio_path,
+                            current_timing_map_snapshot,
+                            segments_data=_da_sd,
+                            fitted_placements=list(
+                                (overlap_report or {}).get("fitted_placements") or []
+                            ),
+                            voice_id=_da_voice,
+                            task_info=None,
+                        )
+                        _da_regions = list(_da_report.get("dead_air_regions") or [])
+                        with STATE_LOCK:
+                            task["info"]["dead_air_regions"] = _da_regions
+                            task["info"]["dead_air_audit"] = {
+                                "count": int(_da_report.get("dead_air_count") or 0),
+                                "max_allowed_ms": int(
+                                    _da_report.get("max_allowed_ms") or 350
+                                ),
+                                "en_speech_intervals": int(
+                                    _da_report.get("en_speech_intervals") or 0
+                                ),
+                            }
+                            if _da_regions:
+                                task["info"]["dead_air_warning"] = (
+                                    f"Stage17: {len(_da_regions)} silence region(s) "
+                                    f">350ms on EN-speech zones — check mux fill"
+                                )
+                            else:
+                                task["info"].pop("dead_air_warning", None)
+                            if _da_sd:
+                                task["info"]["segments_data"] = _da_sd
+                            _da_timing = list(
+                                task["info"].get("timing_fit_segments") or []
+                            )
+                        try:
+                            from engines.dead_air import append_dead_air_to_trace
+
+                            append_dead_air_to_trace(
+                                Path(__file__).resolve().parents[1],
+                                task_id=task_id,
+                                regions=_da_regions,
+                                timing_rows=_da_timing,
+                                voice_id=_da_voice,
+                            )
+                        except Exception as _tr_exc:
+                            logger.debug(
+                                "Task %s: dead_air trace append soft-fail: %s",
+                                task_id,
+                                _tr_exc,
+                            )
+                        logger.info(
+                            "Task %s: dead_air_regions=%d",
+                            task_id,
+                            int(_da_report.get("dead_air_count") or 0),
+                        )
+                    except Exception as _da_exc:
+                        logger.warning(
+                            "Task %s: dead_air audit soft-fail: %s", task_id, _da_exc
+                        )
                 else:
                     # Never ship a silent 1s stub as a "successful" dub track.
                     return _fail(

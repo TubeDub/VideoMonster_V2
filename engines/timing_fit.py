@@ -15,14 +15,18 @@ from pydub.silence import detect_nonsilent
 
 logger = logging.getLogger(__name__)
 
-# ─── Quality-first constants (TZ text-fit / Stage 15) ─────────────────────────
-# meaning completeness > timing fit > atempo (Happy Path ≤1.15).
+# ─── Quality-first constants (TZ text-fit / Stage 15–17) ──────────────────────
+# meaning completeness > timing fit > atempo (Happy Path ≤1.15, ≥0.95 slow).
 _ATEMPO_MIN = 0.95
 _ATEMPO_ABSOLUTE_MAX = 1.20      # hard ceiling (advanced / legacy)
 _ATEMPO_EMERGENCY_MAX = 1.20
 DUB_MAX_ATEMPO = 1.15            # preferred per-segment cap (Simple)
 HAPPY_PATH_MAX_ATEMPO = 1.15
 DUB_SLOT_TOLERANCE_MS = 75
+# Stage 17: max silence between consecutive speech placements.
+MAX_INTER_SEG_DEAD_AIR_MS = 350
+MAX_MICRO_PAUSE_MS = 150
+UNDERFILL_STRETCH_RATIO = 0.90
 
 # Video-adaptation window: if overflow ≤ this %, prefer gap-borrow / video
 # slowdown instead of touching speech at all.
@@ -470,7 +474,7 @@ def _atempo_hard_cap(max_atempo: float) -> float:
 def _gentle_atempo_factor(need: float, *, max_atempo: float = _ATEMPO_ABSOLUTE_MAX) -> float:
     """
     Minimal speech speed-up — LAST RESORT.
-    Soft steps toward need, hard-capped at max_atempo (Happy Path ≤1.08).
+    Soft steps toward need, hard-capped at max_atempo (Happy Path ≤1.15).
     """
     cap = _atempo_hard_cap(max_atempo)
     if need <= 1.0:
@@ -484,9 +488,31 @@ def _gentle_atempo_factor(need: float, *, max_atempo: float = _ATEMPO_ABSOLUTE_M
     return min(need, cap)
 
 
-def _atempo(in_path: Path, tempo: float, out_path: Path, *, max_atempo: float = _ATEMPO_ABSOLUTE_MAX) -> None:
-    cap = max(_ATEMPO_MIN, _atempo_hard_cap(max_atempo))
-    tempo = max(_ATEMPO_MIN, min(cap, tempo))
+def _gentle_atempo_slow_factor(
+    fill_need: float,
+    *,
+    min_atempo: float = _ATEMPO_MIN,
+) -> float:
+    """Slow speech to fill dead air. fill_need = target_ms / speech_ms (≥1)."""
+    if fill_need <= 1.001:
+        return 1.0
+    # atempo < 1 lengthens audio: tempo = speech/target = 1/fill_need
+    tempo = 1.0 / float(fill_need)
+    floor = max(0.85, float(min_atempo))
+    return max(floor, min(1.0, tempo))
+
+
+def _atempo(
+    in_path: Path,
+    tempo: float,
+    out_path: Path,
+    *,
+    max_atempo: float = _ATEMPO_ABSOLUTE_MAX,
+    min_atempo: float = _ATEMPO_MIN,
+) -> None:
+    hi = _atempo_hard_cap(max_atempo)
+    lo = max(0.85, float(min_atempo))
+    tempo = max(lo, min(hi, float(tempo)))
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
         raise RuntimeError("ffmpeg not found")
@@ -701,15 +727,51 @@ def fit_segment_audio(
     speech_ms = int(fitted_ms)
     speech_trimmed = "trim_overlap" in str(strategy or "")
 
+    # Stage 17: underfill → atempo-slow to fill slot (prefer stretch over dead air).
+    if (
+        fitted_ms > 0
+        and effective_slot > 0
+        and fitted_ms < int(effective_slot * UNDERFILL_STRETCH_RATIO)
+        and allow_atempo
+    ):
+        fill_need = float(effective_slot) / float(max(fitted_ms, 1))
+        slow = _gentle_atempo_slow_factor(fill_need, min_atempo=_ATEMPO_MIN)
+        if slow < 0.999:
+            tmp_slow = work / f"{src.stem}_slow.wav"
+            try:
+                _atempo(
+                    cur,
+                    slow,
+                    tmp_slow,
+                    max_atempo=max(1.0, float(max_atempo)),
+                    min_atempo=_ATEMPO_MIN,
+                )
+                cur = tmp_slow
+                audio = AudioSegment.from_file(str(tmp_slow))
+                fitted_ms = len(audio)
+                speech_ms = int(fitted_ms)
+                atempo = float(slow)
+                tag = "atempo_slow"
+                strategy = tag if strategy == "none" else strategy + f"+{tag}"
+                logger.info(
+                    "timing_fit: atempo_slow=%.3f slot=%dms tts→%dms (kill dead air)",
+                    slow,
+                    effective_slot,
+                    fitted_ms,
+                )
+            except Exception as exc:
+                logger.debug("timing_fit: atempo_slow failed: %s", exc)
+
     if fitted_ms < effective_slot:
-        # Natural post-sentence pause only (80–200 ms). Never pad the rest of
-        # the old slot with silence — that is dead air (Stage 5).
+        # Micro pause only (≤150 ms). Residual underfill → gap closer / slow.
         natural_pause = natural_sentence_pause_ms(text_hint)
         remaining = effective_slot - fitted_ms
-        # Cap pause tightly; residual underfill is handled by slot shrink.
-        pause_added_ms = min(natural_pause, remaining, _SLOT_SHRINK_PAD_MAX_MS)
+        pause_added_ms = min(
+            natural_pause, remaining, MAX_MICRO_PAUSE_MS, _SLOT_SHRINK_PAD_MAX_MS
+        )
         if pause_added_ms > 0:
             audio = audio + AudioSegment.silent(duration=pause_added_ms)
+            fitted_ms = len(audio)
     elif fitted_ms > effective_slot:
         strategy = strategy + "+overflow" if strategy != "none" else "overflow"
         logger.debug(
@@ -720,19 +782,40 @@ def fit_segment_audio(
         )
 
     overflow_ms = max(0, fitted_ms - effective_slot)
-    # Never slow voice below Happy Path floor (dead-air must not use atempo<0.95).
+    # Clamp atempo into Happy Path band (0.95–1.15).
     if atempo < _ATEMPO_MIN:
         atempo = _ATEMPO_MIN
+    if atempo > float(max_atempo):
+        atempo = float(max_atempo)
 
     speech_for_fill = int(speech_ms)
     fill_orig = underfill_metrics(speech_for_fill, slot_end - slot_start)
-    shrunk_end, shrink_meta = shrink_underfilled_slot_end(
-        slot_start,
-        slot_end,
-        speech_for_fill,
-        next_start=next_start,
-        text_hint=text_hint,
+    # Stage 17: prefer keeping full slot (stretch already applied). Shrink only
+    # when stretch could not fill AND gap to next would stay ≤350ms anyway.
+    gap_to_next = (
+        max(0, int(next_start) - int(slot_end)) if next_start is not None else 10**9
     )
+    allow_shrink = (
+        fill_orig.get("underfill_significant")
+        and "atempo_slow" not in str(strategy)
+        and gap_to_next <= MAX_INTER_SEG_DEAD_AIR_MS
+    )
+    if allow_shrink:
+        shrunk_end, shrink_meta = shrink_underfilled_slot_end(
+            slot_start,
+            slot_end,
+            speech_for_fill,
+            next_start=next_start,
+            text_hint=text_hint,
+        )
+    else:
+        shrunk_end, shrink_meta = slot_end, {
+            "slot_shrunk": False,
+            "slot_end_before": slot_end,
+            "slot_end_after": slot_end,
+            "slot_ms_before": slot_end - slot_start,
+            "slot_ms_after": slot_end - slot_start,
+        }
     if shrink_meta.get("slot_shrunk"):
         tag = "slot_shrink"
         strategy = tag if strategy == "none" else strategy + f"+{tag}"
@@ -807,6 +890,189 @@ def _segment_start_delays(
         spread = (i * 37 + 13) % (2 * jitter_ms + 1)
         out.append(max(0, base_ms + spread - jitter_ms))
     return out
+
+
+def en_speech_likely_in_interval(
+    gap_start_ms: int,
+    gap_end_ms: int,
+    *,
+    slot_start: int,
+    slot_end: int,
+    next_start: int | None,
+    en_speech_intervals: list[tuple[int, int]] | None = None,
+) -> bool:
+    """True when the gap sits where EN had continuous speech (not a natural pause)."""
+    a = int(gap_start_ms)
+    b = int(gap_end_ms)
+    if b <= a:
+        return False
+    # Underfill inside own slot → EN speech zone by definition.
+    if a < int(slot_end) - 20:
+        return True
+    # Contiguous / short EN inter-seg pause (≤350 ms in timing map).
+    if next_start is not None and int(next_start) - int(slot_end) <= MAX_INTER_SEG_DEAD_AIR_MS:
+        return True
+    if en_speech_intervals:
+        for s, e in en_speech_intervals:
+            if int(s) < b and int(e) > a:
+                return True
+    return False
+
+
+def close_inter_segment_dead_air(
+    fitted_for_mix: list[tuple[str, int, int]],
+    fitted_placements: list[dict],
+    work_dir: Path,
+    *,
+    en_speech_intervals: list[tuple[int, int]] | None = None,
+    max_gap_ms: int = MAX_INTER_SEG_DEAD_AIR_MS,
+    min_atempo: float = _ATEMPO_MIN,
+) -> list[dict]:
+    """Before mux: stretch seg i when placement gap >350ms on EN-speech zones.
+
+    Never invents TTS text — only atempo-slow / micro-pause pad (≤150ms).
+    Mutates fitted_for_mix and fitted_placements in place. Returns audit rows.
+    """
+    audits: list[dict] = []
+    n = len(fitted_for_mix)
+    if n < 2:
+        return audits
+
+    for i in range(n - 1):
+        path_i, place_i, fitted_i = fitted_for_mix[i]
+        place_next = int(fitted_for_mix[i + 1][1])
+        audio_end = int(place_i) + int(fitted_i)
+        gap = place_next - audio_end
+        if gap <= int(max_gap_ms):
+            continue
+
+        row = fitted_placements[i] if i < len(fitted_placements) else {}
+        slot_start = int(row.get("original_start_ms") or place_i)
+        slot_end = int(row.get("slot_end_ms") or (slot_start + int(row.get("slot_ms") or 0)))
+        next_start = int(
+            (fitted_placements[i + 1].get("original_start_ms") if i + 1 < len(fitted_placements) else place_next)
+            or place_next
+        )
+        if not en_speech_likely_in_interval(
+            audio_end,
+            place_next,
+            slot_start=slot_start,
+            slot_end=slot_end,
+            next_start=next_start,
+            en_speech_intervals=en_speech_intervals,
+        ):
+            audits.append(
+                {
+                    "idx": i,
+                    "gap_ms": gap,
+                    "action": "skip_en_pause",
+                    "reason": "en_natural_pause",
+                }
+            )
+            continue
+
+        # Aim for ≤150ms micro-pause (or ≤350ms hard cap if stretch floor hits).
+        target_end = place_next - MAX_MICRO_PAUSE_MS
+        target_fitted = max(int(fitted_i), target_end - int(place_i))
+        if target_fitted <= int(fitted_i):
+            continue
+
+        fill_need = float(target_fitted) / float(max(int(fitted_i), 1))
+        slow = _gentle_atempo_slow_factor(fill_need, min_atempo=min_atempo)
+        action = "none"
+        new_path = path_i
+        new_ms = int(fitted_i)
+        new_next_place = int(place_next)
+        if slow < 0.999 and Path(path_i).is_file():
+            try:
+                out = Path(work_dir) / f"gap_close_{i}_slow.wav"
+                _atempo(
+                    Path(path_i),
+                    slow,
+                    out,
+                    max_atempo=1.0,
+                    min_atempo=min_atempo,
+                )
+                new_path = str(out)
+                new_ms = len(AudioSegment.from_file(new_path))
+                action = "atempo_slow_gap"
+            except Exception as exc:
+                logger.debug("timing_fit: gap atempo_slow idx=%d: %s", i, exc)
+        # Residual gap after stretch: micro-pad ≤150ms only.
+        still_gap = new_next_place - (int(place_i) + new_ms)
+        if still_gap > int(max_gap_ms) and new_ms > 0:
+            pad = min(MAX_MICRO_PAUSE_MS, still_gap - int(max_gap_ms))
+            if pad > 0:
+                try:
+                    audio = AudioSegment.from_file(new_path)
+                    audio = audio + AudioSegment.silent(duration=pad)
+                    out_pad = Path(work_dir) / f"gap_close_{i}_pad.wav"
+                    audio.export(out_pad, format="wav")
+                    new_path = str(out_pad)
+                    new_ms = len(audio)
+                    action = (
+                        "atempo_slow_gap+micro_pad"
+                        if action.startswith("atempo")
+                        else "micro_pad"
+                    )
+                except Exception as exc:
+                    logger.debug("timing_fit: gap micro_pad idx=%d: %s", i, exc)
+        # Still >350ms → shift next boundary earlier (no invented speech).
+        still_gap = new_next_place - (int(place_i) + new_ms)
+        if still_gap > int(max_gap_ms):
+            shifted = int(place_i) + new_ms + MAX_MICRO_PAUSE_MS
+            if shifted < new_next_place:
+                new_next_place = shifted
+                path_n, _, ms_n = fitted_for_mix[i + 1]
+                fitted_for_mix[i + 1] = (path_n, new_next_place, ms_n)
+                if i + 1 < len(fitted_placements):
+                    fitted_placements[i + 1]["place_start"] = new_next_place
+                    prev_n = str(
+                        fitted_placements[i + 1].get("strategy") or "none"
+                    )
+                    tag_n = "boundary_shift"
+                    fitted_placements[i + 1]["strategy"] = (
+                        tag_n if prev_n == "none" else prev_n + f"+{tag_n}"
+                    )
+                action = (
+                    f"{action}+boundary_shift"
+                    if action != "none"
+                    else "boundary_shift"
+                )
+
+        fitted_for_mix[i] = (new_path, int(place_i), new_ms)
+        new_gap = new_next_place - (int(place_i) + new_ms)
+        if i < len(fitted_placements):
+            fitted_placements[i]["fitted_ms"] = new_ms
+            fitted_placements[i]["gap_close_ms"] = max(0, gap - new_gap)
+            fitted_placements[i]["dead_air_ms"] = max(0, new_gap)
+            prev_st = str(fitted_placements[i].get("strategy") or "none")
+            tag = "gap_close"
+            fitted_placements[i]["strategy"] = (
+                tag if prev_st == "none" else prev_st + f"+{tag}"
+            )
+            if "atempo" in action:
+                fitted_placements[i]["atempo"] = round(float(slow), 4)
+        audits.append(
+            {
+                "idx": i,
+                "gap_ms_before": gap,
+                "gap_ms_after": new_gap,
+                "action": action,
+                "atempo": round(float(slow), 4) if "atempo" in action else 1.0,
+                "fitted_ms_before": int(fitted_i),
+                "fitted_ms_after": new_ms,
+                "next_place_after": new_next_place,
+            }
+        )
+        logger.info(
+            "timing_fit: gap_close idx=%d gap %dms→%dms action=%s",
+            i,
+            gap,
+            new_gap,
+            action,
+        )
+    return audits
 
 
 def _mix_fitted_segments_ffmpeg(
@@ -971,6 +1237,22 @@ def build_gap_adjusted_track(
                     on_segment_progress(i + 1, n)
                 except Exception:
                     pass
+            # Per-seg dead-air estimate before gap-close (slot underfill tail).
+            _dead = max(
+                0,
+                int(meta.get("slot_ms") or 0) - int(meta.get("speech_ms") or fitted_ms),
+            )
+            fitted_placements[-1]["dead_air_ms"] = _dead
+            fitted_placements[-1]["dead_air_risk_ms"] = _dead
+
+        # Stage 17: close inter-segment holes >350ms where EN had speech.
+        en_intervals = [(int(s), int(e)) for s, e in parsed]
+        gap_audits = close_inter_segment_dead_air(
+            fitted_for_mix,
+            fitted_placements,
+            work_dir,
+            en_speech_intervals=en_intervals,
+        )
 
         max_end = master_ms
         for _, place_start, fitted_ms in fitted_for_mix:
@@ -989,6 +1271,7 @@ def build_gap_adjusted_track(
             "conflict_resolver": resolver_result.intervention_map,
             "conflict_resolver_profile": resolver_result.profile,
             "conflict_strategy_counts": resolver_result.strategy_counts,
+            "gap_close_audits": gap_audits,
         }
 
         ffmpeg_out = _mix_fitted_segments_ffmpeg(fitted_for_mix, master_ms, work_dir)

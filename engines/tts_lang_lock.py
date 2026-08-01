@@ -33,7 +33,13 @@ def cyrillic_letter_ratio(text: str) -> float:
     return cyr / len(letters)
 
 
-def is_uk_tts_text_ok(text: str, *, min_ratio: float = 0.6) -> bool:
+# Stage 17: en→uk Edge TTS requires ≥55% cyrillic letters.
+DEFAULT_UK_CYRILLIC_MIN = 0.55
+
+
+def is_uk_tts_text_ok(
+    text: str, *, min_ratio: float = DEFAULT_UK_CYRILLIC_MIN
+) -> bool:
     clean = " ".join(str(text or "").split()).strip()
     if not clean:
         return False
@@ -110,7 +116,7 @@ def guard_uk_tts_text(
 ) -> tuple[str, dict[str, Any]]:
     """Ensure TTS text is Ukrainian. Returns (text_or_empty, meta).
 
-    If cyrillic ratio < 0.6 → log reject → optional one Marian remt → else skip ("").
+    If cyrillic ratio < 0.55 → log reject → optional one Marian remt → else skip ("").
     """
     meta: dict[str, Any] = {
         "tts_lang_ok": True,
@@ -127,7 +133,7 @@ def guard_uk_tts_text(
 
     ratio = cyrillic_letter_ratio(clean)
     meta["cyrillic_ratio"] = round(ratio, 3)
-    if is_uk_tts_text_ok(clean):
+    if is_uk_tts_text_ok(clean, min_ratio=DEFAULT_UK_CYRILLIC_MIN):
         return clean, meta
 
     logger.warning(
@@ -150,7 +156,7 @@ def guard_uk_tts_text(
             )
             remt_ratio = cyrillic_letter_ratio(remt)
             meta["remt_cyrillic_ratio"] = round(remt_ratio, 3)
-            if is_uk_tts_text_ok(remt):
+            if is_uk_tts_text_ok(remt, min_ratio=DEFAULT_UK_CYRILLIC_MIN):
                 logger.info(
                     "[TTS] remt_ok seg#%s ratio=%.2f",
                     segment_index if segment_index >= 0 else "?",
@@ -313,7 +319,12 @@ def pre_mux_tts_integrity(
         row = {
             "index": i,
             "voice_id": voice,
-            "tts_lang_hint": hint or ("uk" if cyrillic_letter_ratio(text) >= 0.6 else "?"),
+            "tts_lang_hint": hint
+            or (
+                "uk"
+                if cyrillic_letter_ratio(text) >= DEFAULT_UK_CYRILLIC_MIN
+                else "?"
+            ),
             "text": text[:80],
             "duration_s": round(dur, 3),
         }
