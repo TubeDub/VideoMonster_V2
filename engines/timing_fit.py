@@ -15,15 +15,15 @@ from pydub.silence import detect_nonsilent
 
 logger = logging.getLogger(__name__)
 
-# ─── Quality-first constants (TZ text-fit / Stage 15–17) ──────────────────────
-# meaning completeness > timing fit > atempo (Happy Path ≤1.15, ≥0.95 slow).
-_ATEMPO_MIN = 0.95
+# ─── Quality-first constants (TZ text-fit / Stage 15–19) ──────────────────────
+# meaning completeness > timing fit > atempo (Happy Path ≤1.15, ≥0.85 slow).
+_ATEMPO_MIN = 0.85               # Stage 19 MAX_ATEMPO_SLOW
 _ATEMPO_ABSOLUTE_MAX = 1.20      # hard ceiling (advanced / legacy)
 _ATEMPO_EMERGENCY_MAX = 1.20
 DUB_MAX_ATEMPO = 1.15            # preferred per-segment cap (Simple)
 HAPPY_PATH_MAX_ATEMPO = 1.15
 DUB_SLOT_TOLERANCE_MS = 75
-# Stage 17: max silence between consecutive speech placements.
+# Stage 17/19: max silence between consecutive speech placements.
 MAX_INTER_SEG_DEAD_AIR_MS = 350
 MAX_MICRO_PAUSE_MS = 150
 UNDERFILL_STRETCH_RATIO = 0.90

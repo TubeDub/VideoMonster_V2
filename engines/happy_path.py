@@ -21,8 +21,8 @@ logger = logging.getLogger("tubedub.happy_path")
 # Default OFF — Simple mode is always Happy Path; Pro/dev may opt in via env.
 USE_ADVANCED_ADAPTATION = False
 
-# Happy Path timing (Stage 15): meaning > fit > atempo (cap 1.15).
-HAPPY_PATH_MIN_ATEMPO = 0.95
+# Happy Path timing (Stage 15/19): meaning > fit > atempo (0.85–1.15).
+HAPPY_PATH_MIN_ATEMPO = 0.85
 HAPPY_PATH_MAX_ATEMPO = 1.15
 HAPPY_PATH_NO_SPEECH_TRIM = True
 

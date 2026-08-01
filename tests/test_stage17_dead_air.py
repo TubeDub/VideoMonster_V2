@@ -34,13 +34,20 @@ def test_underfill_triggers_expand_or_atempo_slow():
         source_hint="So he kept walking down that long road for a while then.",
     )
     assert fit.dead_air_risk_ms == max(0, slot - fit.predicted_ms_after)
-    assert fit.action in ("expand", "atempo_slow", "atempo_prefer")
+    assert fit.action in (
+        "expand",
+        "atempo_slow",
+        "expand_then_slow",
+        "atempo_prefer",
+        "dead_air_risk",
+    )
     if fit.action == "expand":
         assert fit.predicted_ms_after > pred
     # Soft assert: after fit handled or marked for audio stretch.
     assert (
         fit.predicted_ms_after >= int(slot * UNDERFILL_ATEMPO_SLOW_RATIO)
-        or fit.action in ("expand", "atempo_slow", "atempo_prefer")
+        or fit.action
+        in ("expand", "atempo_slow", "expand_then_slow", "atempo_prefer", "dead_air_risk")
     )
 
 

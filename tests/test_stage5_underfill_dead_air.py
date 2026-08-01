@@ -40,12 +40,18 @@ def test_fit_expands_underfill_not_noop():
     fit = fit_text_to_slot(text, slot, "uk", source_hint="So he kept walking for a long time then.")
     assert fit.predicted_ms_after >= fit.predicted_ms_before
     if estimate_tts_ms(text, "uk") < slot * 0.80:
-        # Stage 17: residual underfill after expand → atempo_slow (audio stretch).
-        assert fit.action in ("expand", "unchanged", "atempo_slow")
+        # Stage 17/19: residual underfill after expand → atempo_slow / expand_then_slow.
+        assert fit.action in (
+            "expand",
+            "unchanged",
+            "atempo_slow",
+            "expand_then_slow",
+            "dead_air_risk",
+        )
         if fit.action == "expand":
             assert fit.changed
             assert fit.predicted_ms_after > fit.predicted_ms_before
-        if fit.action == "atempo_slow":
+        if fit.action in ("atempo_slow", "expand_then_slow"):
             assert fit.dead_air_risk_ms > 0
 
 

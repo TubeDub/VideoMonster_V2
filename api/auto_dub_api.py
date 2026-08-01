@@ -10725,9 +10725,15 @@ def _run_pipeline_inner(
                                 _sd_fit[_i_f]["final_text"] = segments[_i_f]
                             _sd_fit[_i_f]["text_slot_fit"] = {
                                 "action": _a.get("action"),
+                                "strategy": _a.get("strategy") or _a.get("action") or "ok",
                                 "predicted_ms_before": _a.get("predicted_ms_before"),
                                 "predicted_ms_after": _a.get("predicted_ms_after"),
+                                "predicted_tts_ms": _a.get("predicted_tts_ms")
+                                or _a.get("predicted_ms_after"),
                                 "slot_ms": _a.get("slot_ms"),
+                                "fill_ratio": _a.get("fill_ratio"),
+                                "atempo": _a.get("atempo"),
+                                "dead_air_risk_ms": _a.get("dead_air_risk_ms"),
                                 "text_fit_applied": bool(_a.get("changed")),
                                 "meaning_truncated": bool(_a.get("meaning_truncated")),
                                 "translation_bleed": bool(
@@ -10738,6 +10744,18 @@ def _run_pipeline_inner(
                                 ),
                                 "fitted_len": len(str(segments[_i_f] or "")),
                             }
+                            # Stage 19 Review fields on the segment itself.
+                            _sd_fit[_i_f]["slot_ms"] = int(_a.get("slot_ms") or 0)
+                            _sd_fit[_i_f]["predicted_tts_ms"] = int(
+                                _a.get("predicted_tts_ms")
+                                or _a.get("predicted_ms_after")
+                                or 0
+                            )
+                            _sd_fit[_i_f]["fill_ratio"] = _a.get("fill_ratio")
+                            _sd_fit[_i_f]["atempo"] = _a.get("atempo")
+                            _sd_fit[_i_f]["slot_strategy"] = (
+                                _a.get("strategy") or _a.get("action") or "ok"
+                            )
                             if _a.get("changed"):
                                 logger.info(
                                     "text_fit seg#%d slot=%s pred %s→%s truncated=%s",
@@ -15677,15 +15695,15 @@ def _run_pipeline_inner(
 
                     with STATE_LOCK:
                         task["info"]["timed_audio"] = timed_audio_path
-                    # Stage 17/18: silence vs EN speech → dead_air_regions[]; Simple hard-fail.
-                    try:
-                        from engines.dead_air import (
-                            DeadAirError,
-                            append_dead_air_to_trace,
-                            audit_dead_air_post_mux,
-                            enforce_dead_air_or_fail,
-                        )
+                    # Stage 17–19: silence vs EN speech → hard-fail on Simple (never soft-swallow).
+                    from engines.dead_air import (
+                        DeadAirError,
+                        append_dead_air_to_trace,
+                        audit_dead_air_post_mux,
+                        enforce_dead_air_or_fail,
+                    )
 
+                    try:
                         with STATE_LOCK:
                             _da_info = task.get("info") or {}
                             _da_voice = str(
@@ -15743,31 +15761,31 @@ def _run_pipeline_inner(
                                 task["info"].get("timing_fit_segments") or []
                             )
                         _da_phase = "dead_air"
-                        try:
-                            if _da_simple:
+                        if _da_simple:
+                            try:
                                 enforce_dead_air_or_fail(
                                     _da_regions, simple_mode=True
                                 )
-                        except DeadAirError as _dae:
-                            _da_phase = "dead_air_fail"
-                            try:
-                                append_dead_air_to_trace(
-                                    Path(__file__).resolve().parents[1],
-                                    task_id=task_id,
-                                    regions=_da_regions,
-                                    timing_rows=_da_timing,
-                                    voice_id=_da_voice,
-                                    phase=_da_phase,
+                            except DeadAirError as _dae:
+                                _da_phase = "dead_air_fail"
+                                try:
+                                    append_dead_air_to_trace(
+                                        Path(__file__).resolve().parents[1],
+                                        task_id=task_id,
+                                        regions=_da_regions,
+                                        timing_rows=_da_timing,
+                                        voice_id=_da_voice,
+                                        phase=_da_phase,
+                                    )
+                                except Exception:
+                                    pass
+                                return _fail(
+                                    task_id,
+                                    [str(_dae)],
+                                    stage=STAGE_TIMING,
+                                    error_code="PIPELINE_DEAD_AIR",
+                                    exc=_dae,
                                 )
-                            except Exception:
-                                pass
-                            return _fail(
-                                task_id,
-                                [str(_dae)],
-                                stage=STAGE_TIMING,
-                                error_code="PIPELINE_DEAD_AIR",
-                                exc=_dae,
-                            )
                         try:
                             append_dead_air_to_trace(
                                 Path(__file__).resolve().parents[1],
@@ -15788,20 +15806,24 @@ def _run_pipeline_inner(
                             task_id,
                             int(_da_report.get("dead_air_count") or 0),
                         )
+                    except DeadAirError as _dae:
+                        return _fail(
+                            task_id,
+                            [str(_dae)],
+                            stage=STAGE_TIMING,
+                            error_code="PIPELINE_DEAD_AIR",
+                            exc=_dae,
+                        )
                     except Exception as _da_exc:
-                        try:
-                            from engines.dead_air import DeadAirError as _DAE
-
-                            if isinstance(_da_exc, _DAE):
-                                return _fail(
-                                    task_id,
-                                    [str(_da_exc)],
-                                    stage=STAGE_TIMING,
-                                    error_code="PIPELINE_DEAD_AIR",
-                                    exc=_da_exc,
-                                )
-                        except Exception:
-                            pass
+                        # Stage 19: never soft-swallow PIPELINE_DEAD_AIR strings.
+                        if "PIPELINE_DEAD_AIR" in str(_da_exc):
+                            return _fail(
+                                task_id,
+                                [str(_da_exc)],
+                                stage=STAGE_TIMING,
+                                error_code="PIPELINE_DEAD_AIR",
+                                exc=_da_exc,
+                            )
                         logger.warning(
                             "Task %s: dead_air audit soft-fail: %s", task_id, _da_exc
                         )

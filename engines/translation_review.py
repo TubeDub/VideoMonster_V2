@@ -741,6 +741,29 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
                     or seg.get("voice")
                     or ""
                 ),
+                # Stage 19: slot-fill strategy visible in Review.
+                "fill_ratio": float(
+                    seg.get("fill_ratio")
+                    or (seg.get("text_slot_fit") or {}).get("fill_ratio")
+                    or 0
+                ),
+                "atempo": float(
+                    seg.get("atempo")
+                    or (seg.get("text_slot_fit") or {}).get("atempo")
+                    or 1.0
+                ),
+                "strategy": str(
+                    seg.get("slot_strategy")
+                    or (seg.get("text_slot_fit") or {}).get("strategy")
+                    or (seg.get("text_slot_fit") or {}).get("action")
+                    or ""
+                ),
+                "tts_text_hash": str(seg.get("tts_text_hash") or ""),
+                "predicted_tts_ms": int(
+                    seg.get("predicted_tts_ms")
+                    or (seg.get("text_slot_fit") or {}).get("predicted_tts_ms")
+                    or 0
+                ),
                 "slot_budget_ms": int(
                     (seg.get("slot_budget") or {}).get("slot_ms")
                     or slot_ms_val

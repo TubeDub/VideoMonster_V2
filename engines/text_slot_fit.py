@@ -18,12 +18,17 @@ logger = logging.getLogger("tubedub.text_slot_fit")
 FIT_TOLERANCE = 0.15
 # Stage 4/5: shorten when predicted > slot * 1.08
 OVERFLOW_FIT_RATIO = 1.08
-# Stage 17: expand / atempo-slow when predicted < slot * 0.90 — kill dead air.
+# Stage 17/19: expand / atempo-slow when predicted < slot * 0.90 — kill dead air.
 UNDERFILL_EXPAND_RATIO = 0.90
 # Soft expand aim — leave a little natural room under the slot.
 EXPAND_AIM_RATIO = 0.95
 # After fit, still under this → mark atempo_slow (audio path must stretch).
 UNDERFILL_ATEMPO_SLOW_RATIO = 0.88
+# Stage 19: atempo band — expand text first; never "fast then gap".
+MAX_ATEMPO_SLOW = 0.85
+MAX_ATEMPO_FAST = 1.15
+FORBIDDEN_FAST_THEN_GAP = True
+FAST_GAP_ATEMPO_THRESHOLD = 1.05
 # Stage 15: refuse shorten that drops >15% of words (severe floor 30%).
 MIN_WORD_RETENTION = 0.85
 MIN_WORD_RETENTION_SEVERE = 0.70
@@ -178,15 +183,42 @@ class TextFitResult:
     slot_ms: int
     predicted_ms_before: int
     predicted_ms_after: int
-    action: str = "none"  # none|shorten|expand|unchanged|atempo_prefer|atempo_slow
+    action: str = "none"  # ok|shorten|expand|unchanged|atempo_prefer|atempo_slow|expand_then_slow|dead_air_risk
     changed: bool = False
     reasons: list[str] = field(default_factory=list)
     meaning_truncated: bool = False
     meaning_preserved: bool = True
     dead_air_risk_ms: int = 0
+    fill_ratio: float = 0.0
+    atempo: float = 1.0
+    strategy: str = "ok"
+    predicted_tts_ms: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+def suggested_atempo_for_fill(predicted_ms: int, slot_ms: int) -> float:
+    """Map fill need to atempo in [MAX_ATEMPO_SLOW, MAX_ATEMPO_FAST]."""
+    slot = max(1, int(slot_ms or 0))
+    pred = max(1, int(predicted_ms or 0))
+    fill = pred / float(slot)
+    if fill >= UNDERFILL_EXPAND_RATIO:
+        # Mild speed-up only when overfilling toward OVERFLOW band.
+        if pred > int(slot * OVERFLOW_FIT_RATIO):
+            need = pred / float(slot)
+            return min(MAX_ATEMPO_FAST, max(1.0, need))
+        return 1.0
+    # Underfill → slow down (lengthen audio): atempo = pred/slot.
+    tempo = pred / float(slot)
+    return max(MAX_ATEMPO_SLOW, min(1.0, tempo))
+
+
+def forbid_fast_then_gap(atempo: float, fill_ratio: float) -> bool:
+    """True when strategy would compress speech and leave a dead-air tail."""
+    if not FORBIDDEN_FAST_THEN_GAP:
+        return False
+    return float(atempo) > FAST_GAP_ATEMPO_THRESHOLD and float(fill_ratio) < UNDERFILL_EXPAND_RATIO
 
 
 def estimate_tts_ms(text: str, lang: str = "uk") -> int:
@@ -562,20 +594,45 @@ def _rule_expand_once(text: str, lang: str, source_hint: str = "") -> str:
     cand = re.sub(r"\s*—\s*", ", ", cand)
     cand = " ".join(cand.split()).strip()
 
-    # Light pacing inserts that do not add claims.
+    # Light pacing / full-form inserts that do not invent facts (Stage 19).
     if lang0 == "uk":
+        # Negative lookahead — never stack the same soft insert (Тож тоді тоді…).
         inserts = (
-            (r"\bТож\b", "Тож тоді"),
-            (r"\bОтже\b", "Отже тоді"),
-            (r"\bАле\b", "Але при цьому"),
-            (r"\bІ\b", "І також"),
+            (r"\bТож\b(?!\s+тоді)", "Тож тоді"),
+            (r"\bОтже\b(?!\s+тоді)", "Отже тоді"),
+            (r"\bАле\b(?!\s+при\s+цьому)", "Але при цьому"),
+            (r"\bІ\b(?!\s+також)", "І також"),
+            (r"\bПотім\b(?!\s+згодом)", "Потім згодом"),
+            (r"(?<!Саме\s)\bТому\b", "Саме тому"),
+            (r"(?<!Саме\s)\bКоли\b", "Саме коли"),
         )
         restoratives = (
             (" був ", " справді був "),
             (" була ", " справді була "),
+            (" були ", " справді були "),
+            (" став ", " тоді став "),
+            (" стала ", " тоді стала "),
             (" стали ", " тоді стали "),
             (" вирішив", " зрештою вирішив"),
+            (" вирішила", " зрештою вирішила"),
             (" подав ", " тоді подав "),
+            (" пішов ", " далі пішов "),
+            (" пішла ", " далі пішла "),
+            (" зробив ", " тоді зробив "),
+            (" зробила ", " тоді зробила "),
+            (" сказав ", " тоді сказав "),
+            (" сказала ", " тоді сказала "),
+            (" купив ", " тоді купив "),
+            (" вижив ", " усе ж вижив "),
+            (" працював ", " тоді працював "),
+        )
+        # Safe synonym expansions (no new claims).
+        synonyms = (
+            (" авто ", " автомобіль "),
+            (" машину ", " автомобіль "),
+            (" машини ", " автомобіля "),
+            (" фото ", " фотоапарат "),
+            (" кіно ", " кінематограф "),
         )
     elif lang0 == "ru":
         inserts = (
@@ -588,6 +645,7 @@ def _rule_expand_once(text: str, lang: str, source_hint: str = "") -> str:
             (" была ", " действительно была "),
             (" решил", " в итоге решил"),
         )
+        synonyms = ()
     else:
         inserts = (
             (r"\bSo\b", "So then"),
@@ -598,9 +656,16 @@ def _rule_expand_once(text: str, lang: str, source_hint: str = "") -> str:
             (" was ", " really was "),
             (" decided", " eventually decided"),
         )
+        synonyms = ()
 
     # Prefer one restorative substitution first (fact-neutral intensifier).
     for a, b in restoratives:
+        if a in cand and b not in cand:
+            trial = cand.replace(a, b, 1)
+            if _is_complete_thought(trial) or _COMPLETE_END.search(trial):
+                return trial
+
+    for a, b in synonyms:
         if a in cand and b not in cand:
             trial = cand.replace(a, b, 1)
             if _is_complete_thought(trial) or _COMPLETE_END.search(trial):
@@ -613,7 +678,6 @@ def _rule_expand_once(text: str, lang: str, source_hint: str = "") -> str:
 
     # Do NOT invent pacing filler ("ось як це було тоді" / "Саме так: …").
     # Those poisoned Review Final and looped under repeated expand (George Jr. RCA).
-    # Underfill is resolved by mild intensifiers above and/or slot shrink in timing_fit.
     return cand
 
 
@@ -648,12 +712,30 @@ def strip_slot_pad_fillers(text: str) -> str:
     return " ".join(t.split()).strip()
 
 
+def _expand_keeps_entities(original: str, expanded: str, source_hint: str = "") -> bool:
+    """Refuse expand that drops critical entities (Star Wars, Wexler, Fiat, …)."""
+    return not _critical_markers_lost(original, expanded, source_hint)
+
+
+def _expand_lang_ok(text: str, lang: str) -> bool:
+    lang0 = str(lang or "uk").split("-")[0].lower()
+    if lang0 != "uk":
+        return True
+    try:
+        from engines.tts_lang_lock import is_uk_tts_text_ok
+
+        return is_uk_tts_text_ok(text)
+    except Exception:
+        return True
+
+
 def expand_text_to_slot(
     text: str,
     slot_ms: int,
     lang: str = "uk",
     *,
     source_hint: str = "",
+    raw_mt: str = "",
 ) -> tuple[str, list[str]]:
     """Grow underfilled speech toward the slot without inventing facts.
 
@@ -671,6 +753,10 @@ def expand_text_to_slot(
     if pred >= floor:
         return out, reasons
 
+    original = out
+    # Retention vs UK Final/Raw — never use EN source_hint as word-count denominator.
+    meaning_anchor = " ".join(str(raw_mt or original).split()).strip() or original
+
     # Optional LLM expand (same gate as soft_sync) — still meaning-safe.
     try:
         from engines.soft_sync import expand_text_for_slot
@@ -683,6 +769,9 @@ def expand_text_to_slot(
             llm_out
             and llm_out != out
             and _is_complete_thought(llm_out)
+            and _expand_lang_ok(llm_out, lang)
+            and _expand_keeps_entities(original, llm_out, source_hint)
+            and word_retention_ratio(meaning_anchor, llm_out) >= MIN_WORD_RETENTION
             and estimate_tts_ms(llm_out, lang) > pred
             and estimate_tts_ms(llm_out, lang) <= int(slot * OVERFLOW_FIT_RATIO * 1.05)
         ):
@@ -694,8 +783,8 @@ def expand_text_to_slot(
     except Exception:
         pass
 
-    # Rule-based passes until near aim or no progress.
-    for _ in range(4):
+    # Rule-based passes until near aim or no progress (Stage 19: up to 6).
+    for _ in range(6):
         if estimate_tts_ms(out, lang) >= aim:
             break
         nxt = _rule_expand_once(out, lang, source_hint=source_hint)
@@ -704,6 +793,15 @@ def expand_text_to_slot(
         if not (_is_complete_thought(nxt) or _COMPLETE_END.search(nxt)):
             break
         nxt = strip_slot_pad_fillers(nxt)
+        if not _expand_lang_ok(nxt, lang):
+            break
+        if not _expand_keeps_entities(original, nxt, source_hint):
+            break
+        # Retention vs meaning anchor: expand may add words, never drop core.
+        if word_retention_ratio(meaning_anchor, nxt) < MIN_WORD_RETENTION:
+            # Allow longer-than-anchor expands (retention > 1.0 is fine).
+            if len(nxt.split()) < int(len(meaning_anchor.split()) * MIN_WORD_RETENTION):
+                break
         nxt_pred = estimate_tts_ms(nxt, lang)
         if nxt_pred <= pred:
             break
@@ -719,6 +817,25 @@ def expand_text_to_slot(
         reasons.append("strip_pad_fillers")
         out = cleaned
     return out, reasons
+
+
+def expand_to_fill(
+    final_text: str,
+    *,
+    target_ms: int,
+    lang: str = "uk",
+    source_hint: str = "",
+    raw_mt: str = "",
+) -> tuple[str, list[str]]:
+    """Stage 19: paraphrase/lengthen Final toward target_ms (≈ EXPAND_AIM * slot)."""
+    slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
+    return expand_text_to_slot(
+        final_text,
+        slot_equiv,
+        lang,
+        source_hint=source_hint,
+        raw_mt=raw_mt,
+    )
 
 
 def _light_expand(
@@ -739,8 +856,9 @@ def fit_text_to_slot(
     *,
     source_hint: str = "",
     allow_expand: bool = True,
+    raw_mt: str = "",
 ) -> TextFitResult:
-    """One Happy Path step: paraphrase length toward slot without chopping speech."""
+    """Stage 19: paraphrase length toward slot — expand first, then mild atempo."""
     original = strip_slot_pad_fillers(" ".join(str(text or "").split()).strip())
     slot = max(0, int(slot_ms or 0))
     before = estimate_tts_ms(original, lang)
@@ -752,6 +870,10 @@ def fit_text_to_slot(
             predicted_ms_after=before,
             action="none",
             changed=False,
+            fill_ratio=0.0,
+            atempo=1.0,
+            strategy="ok",
+            predicted_tts_ms=before,
         )
 
     hi = int(slot * OVERFLOW_FIT_RATIO)
@@ -761,6 +883,7 @@ def fit_text_to_slot(
     action = "unchanged"
     meaning_truncated = False
     meaning_preserved = True
+    did_expand = False
 
     if before > hi:
         # Soft compress first; if still overflow and shorten would drop meaning → atempo.
@@ -813,7 +936,7 @@ def fit_text_to_slot(
                 )
         else:
             action = "shorten" if out != original else "unchanged"
-        # Stage 5: if shorten overshot into dead air, expand back toward the band.
+        # Stage 5/19: if shorten overshot into dead air, expand back toward the band.
         after_short = estimate_tts_ms(out, lang)
         if (
             allow_expand
@@ -822,18 +945,33 @@ def fit_text_to_slot(
             and out.strip()
             and not meaning_truncated
         ):
-            expanded, er = expand_text_to_slot(
-                out, slot, lang, source_hint=source_hint
+            expanded, er = expand_to_fill(
+                out,
+                target_ms=int(slot * EXPAND_AIM_RATIO),
+                lang=lang,
+                source_hint=source_hint,
+                raw_mt=raw_mt or original,
             )
             if expanded and expanded != out:
                 out = expanded
+                did_expand = True
                 reasons = list(reasons) + er + ["expand_after_shorten"]
                 action = "expand" if estimate_tts_ms(out, lang) >= lo else "shorten"
     elif allow_expand and before < lo:
-        out, reasons = expand_text_to_slot(
-            original, slot, lang, source_hint=source_hint
+        # Stage 19 priority: expand text first (not atempo).
+        out, reasons = expand_to_fill(
+            original,
+            target_ms=int(slot * EXPAND_AIM_RATIO),
+            lang=lang,
+            source_hint=source_hint,
+            raw_mt=raw_mt or original,
         )
-        action = "expand" if out != original else "unchanged"
+        if out != original:
+            did_expand = True
+            action = "expand"
+        else:
+            action = "unchanged"
+            reasons = list(reasons) + ["expand_noop"]
     else:
         action = "unchanged"
 
@@ -845,6 +983,7 @@ def fit_text_to_slot(
         reasons = ["reverted_empty"]
         meaning_truncated = False
         meaning_preserved = True
+        did_expand = False
     elif action == "shorten" and after > before and after > hi:
         out = original
         after = before
@@ -853,29 +992,76 @@ def fit_text_to_slot(
         meaning_truncated = False
         meaning_preserved = True
     elif out != original and (
-        not _is_complete_thought(out)
-        or _BAD_TAIL.search(out)
-        or word_retention_ratio(original, out) < MIN_WORD_RETENTION
+        not _is_complete_thought(out) or _BAD_TAIL.search(out)
     ):
         # Never ship a mid-thought / truncated fragment to TTS / Review.
         out = original
         after = before
         action = "atempo_prefer"
-        reasons = list(reasons) + ["reverted_incomplete_or_retention"]
+        reasons = list(reasons) + ["reverted_incomplete"]
         meaning_truncated = False
         meaning_preserved = True
+        did_expand = False
+    elif (
+        out != original
+        and len(out.split()) < len(original.split())
+        and word_retention_ratio(original, out) < MIN_WORD_RETENTION
+    ):
+        # Shorten lost meaning — expand is allowed to grow past original.
+        out = original
+        after = before
+        action = "atempo_prefer"
+        reasons = list(reasons) + ["reverted_retention"]
+        meaning_truncated = False
+        meaning_preserved = True
+        did_expand = False
         logger.info(
             "fit_text_to_slot: meaning_preserved=True refuse shorten slot=%d",
             slot,
         )
 
-    # Stage 17: if still underfilled after expand — mark atempo_slow (audio stretch).
+    # Stage 17/19: still underfilled after expand → atempo_slow (not fast+gap).
     slow_floor = int(slot * UNDERFILL_ATEMPO_SLOW_RATIO)
     if after < slow_floor and action not in ("atempo_prefer",):
-        if action == "unchanged" or after < lo:
+        if did_expand:
+            action = "expand_then_slow"
+            reasons = list(reasons) + ["atempo_slow_after_expand"]
+        elif action == "unchanged" or after < lo:
             action = "atempo_slow"
             reasons = list(reasons) + ["atempo_slow_underfill"]
+
+    fill_ratio = float(after) / float(max(slot, 1))
+    atempo = suggested_atempo_for_fill(after, slot)
+
+    # Stage 19-C: forbid atempo>1.05 with fill<0.90 — roll back to slow/expand.
+    if forbid_fast_then_gap(atempo, fill_ratio):
+        reasons = list(reasons) + ["expand_or_slow_not_fast_gap"]
+        atempo = suggested_atempo_for_fill(after, slot)
+        if atempo > FAST_GAP_ATEMPO_THRESHOLD:
+            atempo = 1.0
+        if fill_ratio < UNDERFILL_EXPAND_RATIO:
+            atempo = max(MAX_ATEMPO_SLOW, min(1.0, fill_ratio))
+            if did_expand:
+                action = "expand_then_slow"
+            else:
+                action = "atempo_slow"
+        logger.info(
+            "fit_text_to_slot: forbid fast+gap → atempo=%.3f fill=%.2f action=%s",
+            atempo,
+            fill_ratio,
+            action,
+        )
+
+    # Clamp atempo into Stage 19 band.
+    atempo = max(MAX_ATEMPO_SLOW, min(MAX_ATEMPO_FAST, float(atempo)))
     dead_air_risk_ms = max(0, slot - after)
+    strategy = action if action not in ("none", "unchanged") else "ok"
+    if after < lo and action in ("unchanged", "none"):
+        strategy = "dead_air_risk"
+        action = "dead_air_risk"
+        reasons = list(reasons) + ["dead_air_risk_underfill"]
+    if dead_air_risk_ms > 350 and strategy == "ok":
+        strategy = "dead_air_risk"
 
     result = TextFitResult(
         text=out,
@@ -888,33 +1074,44 @@ def fit_text_to_slot(
         meaning_truncated=bool(meaning_truncated),
         meaning_preserved=bool(meaning_preserved),
         dead_air_risk_ms=int(dead_air_risk_ms),
+        fill_ratio=round(fill_ratio, 4),
+        atempo=round(atempo, 4),
+        strategy=strategy,
+        predicted_tts_ms=int(after),
     )
     # Soft assert: underfill must be handled by expand / atempo_slow / prefer.
-    if after < slow_floor and action not in (
+    if after < slow_floor and result.action not in (
         "expand",
         "atempo_slow",
+        "expand_then_slow",
         "atempo_prefer",
+        "dead_air_risk",
     ):
         result.action = "atempo_slow"
+        result.strategy = "atempo_slow"
         result.reasons = list(result.reasons) + ["assert_atempo_slow"]
-        action = "atempo_slow"
+        result.atempo = round(
+            max(MAX_ATEMPO_SLOW, min(1.0, result.fill_ratio)), 4
+        )
     if (
         result.changed
         or result.meaning_truncated
-        or action in ("atempo_prefer", "atempo_slow", "expand")
+        or result.action
+        in ("atempo_prefer", "atempo_slow", "expand", "expand_then_slow", "dead_air_risk")
         or dead_air_risk_ms > 350
     ):
         logger.info(
-            "fit_text_to_slot: action=%s slot=%d pred %d→%d truncated=%s "
-            "preserved=%s dead_air_risk_ms=%d reasons=%s",
-            action,
+            "fit_text_to_slot: action=%s strategy=%s slot=%d pred %d→%d "
+            "fill=%.2f atempo=%.3f dead_air_risk_ms=%d reasons=%s",
+            result.action,
+            result.strategy,
             slot,
             before,
             after,
-            result.meaning_truncated,
-            result.meaning_preserved,
+            result.fill_ratio,
+            result.atempo,
             dead_air_risk_ms,
-            reasons,
+            result.reasons,
         )
     return result
 
