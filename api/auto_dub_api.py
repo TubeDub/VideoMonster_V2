@@ -13130,6 +13130,8 @@ def _run_pipeline_inner(
                             target_lang=target_lang,
                             source_lang=_src_l,
                             app_dir=APP_DIR,
+                            simple_mode=True,
+                            fail_loud=True,
                         )
                         with STATE_LOCK:
                             task["info"]["tts_lang_lock"] = dict(_lang_stats)
@@ -15675,9 +15677,14 @@ def _run_pipeline_inner(
 
                     with STATE_LOCK:
                         task["info"]["timed_audio"] = timed_audio_path
-                    # Stage 17: silence detector vs EN speech mask → dead_air_regions[].
+                    # Stage 17/18: silence vs EN speech → dead_air_regions[]; Simple hard-fail.
                     try:
-                        from engines.dead_air import audit_dead_air_post_mux
+                        from engines.dead_air import (
+                            DeadAirError,
+                            append_dead_air_to_trace,
+                            audit_dead_air_post_mux,
+                            enforce_dead_air_or_fail,
+                        )
 
                         with STATE_LOCK:
                             _da_info = task.get("info") or {}
@@ -15692,6 +15699,10 @@ def _run_pipeline_inner(
                                 or current_segments_snapshot
                                 or []
                             )
+                            _da_simple = bool(
+                                _da_info.get("simple_pipeline")
+                                or _da_info.get("happy_path")
+                            )
                         _da_report = audit_dead_air_post_mux(
                             timed_audio_path,
                             current_timing_map_snapshot,
@@ -15701,6 +15712,8 @@ def _run_pipeline_inner(
                             ),
                             voice_id=_da_voice,
                             task_info=None,
+                            simple_mode=_da_simple,
+                            hard_fail=False,
                         )
                         _da_regions = list(_da_report.get("dead_air_regions") or [])
                         with STATE_LOCK:
@@ -15713,11 +15726,14 @@ def _run_pipeline_inner(
                                 "en_speech_intervals": int(
                                     _da_report.get("en_speech_intervals") or 0
                                 ),
+                                "unresolved_segs": list(
+                                    _da_report.get("dead_air_unresolved_segs") or []
+                                ),
                             }
                             if _da_regions:
                                 task["info"]["dead_air_warning"] = (
-                                    f"Stage17: {len(_da_regions)} silence region(s) "
-                                    f">350ms on EN-speech zones — check mux fill"
+                                    f"PIPELINE_DEAD_AIR: {len(_da_regions)} silence "
+                                    f"region(s) >350ms on EN-speech zones"
                                 )
                             else:
                                 task["info"].pop("dead_air_warning", None)
@@ -15726,15 +15742,40 @@ def _run_pipeline_inner(
                             _da_timing = list(
                                 task["info"].get("timing_fit_segments") or []
                             )
+                        _da_phase = "dead_air"
                         try:
-                            from engines.dead_air import append_dead_air_to_trace
-
+                            if _da_simple:
+                                enforce_dead_air_or_fail(
+                                    _da_regions, simple_mode=True
+                                )
+                        except DeadAirError as _dae:
+                            _da_phase = "dead_air_fail"
+                            try:
+                                append_dead_air_to_trace(
+                                    Path(__file__).resolve().parents[1],
+                                    task_id=task_id,
+                                    regions=_da_regions,
+                                    timing_rows=_da_timing,
+                                    voice_id=_da_voice,
+                                    phase=_da_phase,
+                                )
+                            except Exception:
+                                pass
+                            return _fail(
+                                task_id,
+                                [str(_dae)],
+                                stage=STAGE_TIMING,
+                                error_code="PIPELINE_DEAD_AIR",
+                                exc=_dae,
+                            )
+                        try:
                             append_dead_air_to_trace(
                                 Path(__file__).resolve().parents[1],
                                 task_id=task_id,
                                 regions=_da_regions,
                                 timing_rows=_da_timing,
                                 voice_id=_da_voice,
+                                phase=_da_phase,
                             )
                         except Exception as _tr_exc:
                             logger.debug(
@@ -15748,6 +15789,19 @@ def _run_pipeline_inner(
                             int(_da_report.get("dead_air_count") or 0),
                         )
                     except Exception as _da_exc:
+                        try:
+                            from engines.dead_air import DeadAirError as _DAE
+
+                            if isinstance(_da_exc, _DAE):
+                                return _fail(
+                                    task_id,
+                                    [str(_da_exc)],
+                                    stage=STAGE_TIMING,
+                                    error_code="PIPELINE_DEAD_AIR",
+                                    exc=_da_exc,
+                                )
+                        except Exception:
+                            pass
                         logger.warning(
                             "Task %s: dead_air audit soft-fail: %s", task_id, _da_exc
                         )
@@ -15918,6 +15972,7 @@ def _run_pipeline_inner(
                     _mux_sd,
                     target_lang=_mux_tgt,
                     timeline_ms=_mux_timeline or None,
+                    simple_mode=True,
                 )
                 with STATE_LOCK:
                     task["info"]["tts_pre_mux_integrity"] = {

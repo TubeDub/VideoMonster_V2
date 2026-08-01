@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Stage 17 — post-mux dead-air audit vs EN speech mask."""
+"""Stage 17/18 — post-mux dead-air audit vs EN speech mask + hard-fail."""
 
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,18 @@ MAX_DEAD_AIR_MS = 350
 # pydub silence: chunks quieter than this (dBFS) count as silence.
 _SILENCE_THRESH_DBFS = -40
 _MIN_SILENCE_LEN_MS = 350
+
+PIPELINE_DEAD_AIR = "PIPELINE_DEAD_AIR"
+
+
+def allow_dead_air_override() -> bool:
+    """VM_ALLOW_DEAD_AIR=1 → warning only (debug). Default off on Simple."""
+    return str(os.getenv("VM_ALLOW_DEAD_AIR") or "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
 
 
 def intervals_overlap(a0: int, a1: int, b0: int, b1: int) -> bool:
@@ -137,6 +150,8 @@ def stamp_segment_dead_air_fields(
                 speech = int(place.get("speech_ms") or place.get("fitted_ms") or 0)
                 dead = max(0, slot - speech)
             seg["dead_air_ms"] = int(dead)
+            if place.get("dead_air_unresolved") or int(dead) > MAX_DEAD_AIR_MS:
+                seg["dead_air_unresolved"] = True
         if voice_id:
             seg["voice_id"] = str(voice_id)
         elif seg.get("assigned_voice") or seg.get("voice"):
@@ -150,8 +165,9 @@ def append_dead_air_to_trace(
     regions: list[dict[str, Any]] | None = None,
     timing_rows: list[dict[str, Any]] | None = None,
     voice_id: str = "",
+    phase: str = "dead_air",
 ) -> str:
-    """Append Stage 17 dead-air block to output/dev/translation_trace.log."""
+    """Append Stage 17/18 dead-air block to output/dev/translation_trace.log."""
     from datetime import datetime, timezone
 
     log_dir = Path(app_dir) / "output" / "dev"
@@ -159,7 +175,7 @@ def append_dead_air_to_trace(
     log_path = log_dir / "translation_trace.log"
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     lines = [
-        f"=== task={task_id} phase=dead_air ts={ts} ===",
+        f"=== task={task_id} phase={phase} ts={ts} ===",
         f"voice_id={voice_id or '-'}",
         f"dead_air_count={len(regions or [])}",
     ]
@@ -178,12 +194,51 @@ def append_dead_air_to_trace(
             f"tts_ms={row.get('tts_ms')}\tdead_air_ms={row.get('dead_air_ms')}\t"
             f"voice_id={row.get('voice_id') or voice_id or '-'}\t"
             f"tts_text_hash={row.get('tts_text_hash') or '-'}\t"
-            f"strategy={row.get('strategy') or '-'}"
+            f"strategy={row.get('strategy') or '-'}\t"
+            f"dead_air_unresolved={bool(row.get('dead_air_unresolved'))}"
         )
     with log_path.open("a", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n\n")
-    logger.info("dead_air: wrote %d region(s) to %s", len(regions or []), log_path)
+    logger.info("dead_air: wrote %d region(s) to %s phase=%s", len(regions or []), log_path, phase)
     return str(log_path)
+
+
+class DeadAirError(RuntimeError):
+    """Raised when post-mux dead air on EN speech must fail the job."""
+
+    def __init__(self, regions: list[dict[str, Any]], message: str | None = None):
+        self.regions = list(regions or [])
+        self.error_code = PIPELINE_DEAD_AIR
+        msg = message or (
+            f"{PIPELINE_DEAD_AIR}: {len(self.regions)} silence region(s) >{MAX_DEAD_AIR_MS}ms "
+            f"on EN-speech zones — refuse success output"
+        )
+        super().__init__(msg)
+
+
+def enforce_dead_air_or_fail(
+    regions: list[dict[str, Any]] | None,
+    *,
+    simple_mode: bool = True,
+    allow_override: bool | None = None,
+) -> list[dict[str, Any]]:
+    """Stage 18: non-empty EN-speech dead_air → raise DeadAirError (unless override).
+
+    Returns regions (possibly empty). Never marks job success when raising.
+    """
+    regs = [r for r in (regions or []) if r.get("en_speech")]
+    if not regs:
+        return list(regions or [])
+    override = allow_dead_air_override() if allow_override is None else bool(allow_override)
+    if override or not simple_mode:
+        logger.warning(
+            "dead_air: %d region(s) allowed (override=%s simple=%s)",
+            len(regs),
+            override,
+            simple_mode,
+        )
+        return regs
+    raise DeadAirError(regs)
 
 
 def audit_dead_air_post_mux(
@@ -194,19 +249,28 @@ def audit_dead_air_post_mux(
     fitted_placements: list[dict] | None = None,
     voice_id: str = "",
     task_info: dict | None = None,
+    simple_mode: bool = False,
+    hard_fail: bool = False,
 ) -> dict[str, Any]:
-    """Full Stage 17 post-mux audit; optionally stamps task_info + segments."""
+    """Full post-mux audit; optionally stamps task_info + hard-fails (Stage 18)."""
     en_mask = en_speech_mask_from_timing(timing_map)
     regions = find_dead_air_regions(dub_audio_path, en_mask)
     if segments_data is not None and fitted_placements is not None:
         stamp_segment_dead_air_fields(
             segments_data, fitted_placements, voice_id=voice_id
         )
+    # Per-seg unresolved underfill also counts toward fail signal in logs.
+    unresolved = []
+    if segments_data:
+        for i, seg in enumerate(segments_data):
+            if isinstance(seg, dict) and seg.get("dead_air_unresolved"):
+                unresolved.append(i)
     report = {
         "dead_air_regions": regions,
         "dead_air_count": len(regions),
         "en_speech_intervals": len(en_mask),
         "max_allowed_ms": MAX_DEAD_AIR_MS,
+        "dead_air_unresolved_segs": unresolved,
     }
     if task_info is not None:
         task_info["dead_air_regions"] = regions
@@ -214,5 +278,8 @@ def audit_dead_air_post_mux(
             "count": len(regions),
             "max_allowed_ms": MAX_DEAD_AIR_MS,
             "en_speech_intervals": len(en_mask),
+            "unresolved_segs": unresolved,
         }
+    if hard_fail:
+        enforce_dead_air_or_fail(regions, simple_mode=bool(simple_mode) or True)
     return report

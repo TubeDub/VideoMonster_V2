@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Disk cache for Edge-TTS audio (Simple speedup).
 
-Key: hash(normalized_text + voice_id + rate + pitch)
+Key: hash(normalized_text + voice_id + lang + rate + pitch) — Stage 18.
+Env VM_TTS_NO_CACHE=1 → never read cache (Simple cold regen).
 """
 
 from __future__ import annotations
@@ -27,8 +28,29 @@ def default_cache_dir() -> Path:
     return root / "cache" / "tts"
 
 
+def tts_cache_disabled() -> bool:
+    """VM_TTS_NO_CACHE=1 — skip TTS audio cache reads (and prefer miss)."""
+    return str(os.getenv("VM_TTS_NO_CACHE") or "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+
+
 def normalize_tts_cache_text(text: str) -> str:
     return _WS.sub(" ", str(text or "").strip())
+
+
+def _voice_lang(voice: str, lang: str = "") -> str:
+    lang0 = str(lang or "").strip().lower().split("-")[0]
+    if lang0:
+        return lang0
+    v = str(voice or "").strip()
+    parts = v.split("-")
+    if len(parts) >= 1 and parts[0]:
+        return parts[0].lower()
+    return ""
 
 
 def tts_cache_key(
@@ -38,15 +60,19 @@ def tts_cache_key(
     rate: str = "",
     pitch: str = "",
     engine_id: str = "edge-offline",
+    lang: str = "",
 ) -> str:
+    """Cache key includes voice_id + text + lang (old keys without lang → miss)."""
     rate_n = str(rate or "").strip() or "-5%"
     pitch_n = str(pitch or "").strip()
     if pitch_n in ("+0Hz", "0Hz", "+0hz", "0hz"):
         pitch_n = ""
     payload = "|".join(
         [
+            "v2",
             normalize_tts_cache_text(text),
             str(voice or "").strip(),
+            _voice_lang(voice, lang),
             rate_n,
             pitch_n,
             str(engine_id or "edge-offline").strip(),
@@ -81,10 +107,16 @@ def lookup_tts_cache(
     engine_id: str = "edge-offline",
     cache_dir: Path | None = None,
     ext: str = ".mp3",
+    lang: str = "",
 ) -> Path | None:
     """Return cached audio path if present and valid."""
+    if tts_cache_disabled():
+        logger.info("tts_cache_disabled VM_TTS_NO_CACHE=1 — miss")
+        return None
     cdir = Path(cache_dir) if cache_dir is not None else default_cache_dir()
-    key = tts_cache_key(text, voice, rate=rate, pitch=pitch, engine_id=engine_id)
+    key = tts_cache_key(
+        text, voice, rate=rate, pitch=pitch, engine_id=engine_id, lang=lang
+    )
     path = cache_path_for_key(cdir, key, ext=ext)
     if is_valid_tts_file(path):
         logger.info("tts_cache_hit key=%s path=%s", key[:12], path)
@@ -102,12 +134,17 @@ def store_tts_cache(
     pitch: str = "",
     engine_id: str = "edge-offline",
     cache_dir: Path | None = None,
+    lang: str = "",
 ) -> Path | None:
     """Copy successful synth into cache. Returns cache path or None."""
     if not is_valid_tts_file(src):
         return None
+    if tts_cache_disabled():
+        return None
     cdir = Path(cache_dir) if cache_dir is not None else default_cache_dir()
-    key = tts_cache_key(text, voice, rate=rate, pitch=pitch, engine_id=engine_id)
+    key = tts_cache_key(
+        text, voice, rate=rate, pitch=pitch, engine_id=engine_id, lang=lang
+    )
     ext = Path(src).suffix or ".mp3"
     dest = cache_path_for_key(cdir, key, ext=ext)
     try:

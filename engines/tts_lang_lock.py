@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Stage 12 — TTS language lock for Simple (target=uk → only Ukrainian text/voice)."""
+"""Stage 12/18 — TTS language lock for Simple (target=uk → only Ukrainian text/voice)."""
 
 from __future__ import annotations
 
@@ -14,15 +14,25 @@ logger = logging.getLogger("tubedub.tts_lang_lock")
 _CYR = re.compile(r"[\u0400-\u04FF]")
 _LAT = re.compile(r"[A-Za-z]")
 
-# Czech / Polish Edge voices must never be used for uk target.
-_FORBIDDEN_VOICE_PREFIXES = (
+# Always-banned cross-locale voices when targeting uk (Stage 18: +ru-RU).
+_FORBIDDEN_VOICE_PREFIXES_FOR_UK = (
     "cs-CZ",
     "pl-PL",
     "sk-SK",
     "hu-HU",
     "ro-RO",
     "bg-BG",
+    "ru-RU",
+    "en-US",
+    "en-GB",
+    "de-DE",
+    "fr-FR",
 )
+# Legacy alias used by older imports/tests.
+_FORBIDDEN_VOICE_PREFIXES = _FORBIDDEN_VOICE_PREFIXES_FOR_UK
+
+# Stage 17/18: en→uk Edge TTS requires ≥55% cyrillic letters.
+DEFAULT_UK_CYRILLIC_MIN = 0.55
 
 
 def cyrillic_letter_ratio(text: str) -> float:
@@ -31,10 +41,6 @@ def cyrillic_letter_ratio(text: str) -> float:
         return 0.0
     cyr = sum(1 for c in letters if _CYR.match(c))
     return cyr / len(letters)
-
-
-# Stage 17: en→uk Edge TTS requires ≥55% cyrillic letters.
-DEFAULT_UK_CYRILLIC_MIN = 0.55
 
 
 def is_uk_tts_text_ok(
@@ -68,13 +74,13 @@ def assert_voice_matches_target(
         if raise_error:
             raise RuntimeError(f"PIPELINE_VOICE_LOCALE: {msg}")
         return False, msg
-    for bad in _FORBIDDEN_VOICE_PREFIXES:
-        if v.startswith(bad):
-            msg = f"forbidden_voice={v} for target={tgt}"
-            if raise_error:
-                raise RuntimeError(f"PIPELINE_VOICE_LOCALE: {msg}")
-            return False, msg
     if tgt == "uk":
+        for bad in _FORBIDDEN_VOICE_PREFIXES_FOR_UK:
+            if v.startswith(bad):
+                msg = f"forbidden_voice={v} for target={tgt}"
+                if raise_error:
+                    raise RuntimeError(f"PIPELINE_VOICE_LOCALE: {msg}")
+                return False, msg
         if not v.startswith("uk-UA-"):
             msg = f"voice={v} locale!={tgt} (need uk-UA-*)"
             if raise_error:
@@ -113,10 +119,13 @@ def guard_uk_tts_text(
     app_dir: Path | None = None,
     segment_index: int = -1,
     allow_remt: bool = True,
+    fail_loud: bool = False,
 ) -> tuple[str, dict[str, Any]]:
-    """Ensure TTS text is Ukrainian. Returns (text_or_empty, meta).
+    """Ensure TTS text is Ukrainian. Returns (text, meta).
 
-    If cyrillic ratio < 0.55 → log reject → optional one Marian remt → else skip ("").
+    If cyrillic ratio < 0.55 → remt once.
+    Stage 18 Simple/Happy Path (fail_loud): remt fail → raise PIPELINE_LANG_MIX
+    (never skip→empty silence). Legacy: skip with text="".
     """
     meta: dict[str, Any] = {
         "tts_lang_ok": True,
@@ -124,12 +133,23 @@ def guard_uk_tts_text(
         "rejected_non_target": False,
         "remt_attempted": False,
         "skipped": False,
+        "fail_loud": bool(fail_loud),
     }
     tgt = str(tgt_lang or "").split("-")[0].lower()
     clean = " ".join(str(text or "").split()).strip()
     if tgt != "uk":
         meta["tts_lang_ok"] = True
         return clean, meta
+
+    if not clean:
+        meta["tts_lang_ok"] = False
+        meta["rejected_non_target"] = True
+        if fail_loud:
+            raise RuntimeError(
+                f"PIPELINE_LANG_MIX: empty TTS text seg#{segment_index if segment_index >= 0 else '?'}"
+            )
+        meta["skipped"] = True
+        return "", meta
 
     ratio = cyrillic_letter_ratio(clean)
     meta["cyrillic_ratio"] = round(ratio, 3)
@@ -164,16 +184,30 @@ def guard_uk_tts_text(
                 )
                 meta["tts_lang_ok"] = True
                 meta["rejected_non_target"] = False
+                meta["remt_ok"] = True
                 meta["engine"] = "marian_remt"
                 return remt, meta
+            meta["remt_ok"] = False
+            meta["fail_reason"] = f"remt_still_bad ratio={remt_ratio:.2f}"
             logger.warning(
-                "[TTS] remt_still_bad seg#%s ratio=%.2f — skip segment",
+                "[TTS] remt_still_bad seg#%s ratio=%.2f",
                 segment_index if segment_index >= 0 else "?",
                 remt_ratio,
             )
         except Exception as exc:
             logger.warning("[TTS] remt_failed seg#%s: %s", segment_index, exc)
             meta["remt_error"] = str(exc)
+            meta["remt_ok"] = False
+            meta["fail_reason"] = f"remt_failed:{exc}"
+    else:
+        meta["fail_reason"] = "no_remt_or_empty_source"
+
+    if fail_loud:
+        reason = meta.get("fail_reason") or "cyrillic_ratio_low"
+        raise RuntimeError(
+            f"PIPELINE_LANG_MIX: seg#{segment_index if segment_index >= 0 else '?'} "
+            f"{reason} ratio={meta.get('cyrillic_ratio')} — refuse skip→silence"
+        )
 
     meta["skipped"] = True
     return "", meta
@@ -186,15 +220,22 @@ def enforce_segments_lang_lock(
     source_lang: str = "en",
     app_dir: Path | None = None,
     fail_if_reject_ratio: float = 0.20,
+    simple_mode: bool = False,
+    fail_loud: bool | None = None,
 ) -> dict[str, Any]:
-    """In-place guard on segments_data TTS texts. Returns stats; may raise."""
+    """In-place guard on segments_data TTS texts. Returns stats; may raise.
+
+    Stage 18 Simple: fail_loud — never skip_tts / empty text (raise instead).
+    """
     tgt = str(target_lang or "").split("-")[0].lower()
+    loud = bool(simple_mode) if fail_loud is None else bool(fail_loud)
     stats: dict[str, Any] = {
         "checked": 0,
         "rejected_non_target": 0,
         "remt_ok": 0,
         "skipped": 0,
         "ok": 0,
+        "fail_loud": loud,
     }
     if tgt != "uk":
         return stats
@@ -205,6 +246,11 @@ def enforce_segments_lang_lock(
             continue
         if seg.get("merged_into") is not None or seg.get("archived"):
             continue
+        # Stage 18: on Simple, clear prior skip flags — remt or fail, no silence.
+        if loud and (seg.get("tts_blocked") or seg.get("skip_tts")):
+            if str(seg.get("tts_skip_reason") or "") == "reject_non_target_lang_mix":
+                seg.pop("skip_tts", None)
+                seg.pop("tts_blocked", None)
         if seg.get("tts_blocked") or seg.get("skip_tts"):
             continue
         text = str(
@@ -216,6 +262,10 @@ def enforce_segments_lang_lock(
             or ""
         ).strip()
         if not text:
+            if loud:
+                raise RuntimeError(
+                    f"PIPELINE_LANG_MIX: empty TTS text seg#{i} — refuse skip→silence"
+                )
             continue
         active += 1
         stats["checked"] += 1
@@ -234,6 +284,7 @@ def enforce_segments_lang_lock(
             app_dir=app_dir,
             segment_index=i,
             allow_remt=True,
+            fail_loud=loud,
         )
         seg["tts_lang_hint"] = "uk" if meta.get("tts_lang_ok") else "reject"
         seg["tts_cyrillic_ratio"] = meta.get("cyrillic_ratio")
@@ -264,7 +315,7 @@ def enforce_segments_lang_lock(
             ):
                 if k in seg or k in ("final_tts_text", "tts_text", "plain_text"):
                     seg[k] = new_text
-            if meta.get("rejected_non_target") is False and meta.get("engine"):
+            if meta.get("engine"):
                 seg["mt_engine"] = meta["engine"]
             stats["ok"] += 1
             continue
@@ -273,7 +324,7 @@ def enforce_segments_lang_lock(
         else:
             stats["ok"] += 1
 
-    if active > 0 and stats["rejected_non_target"] / active > fail_if_reject_ratio:
+    if not loud and active > 0 and stats["rejected_non_target"] / active > fail_if_reject_ratio:
         raise RuntimeError(
             f"PIPELINE_LANG_MIX: {stats['rejected_non_target']}/{active} segments "
             f"rejected_non_target (>{fail_if_reject_ratio:.0%}) — abort before mux"
@@ -286,6 +337,7 @@ def pre_mux_tts_integrity(
     *,
     target_lang: str,
     timeline_ms: float | None = None,
+    simple_mode: bool = False,
 ) -> dict[str, Any]:
     """Log per-segment voice/text; check duration sum vs timeline loosely."""
     rows: list[dict[str, Any]] = []
@@ -301,10 +353,21 @@ def pre_mux_tts_integrity(
             or seg.get("plain_text")
             or ""
         ).strip()
-        voice = str(seg.get("assigned_voice") or seg.get("voice") or "")
+        voice = str(
+            seg.get("voice_id")
+            or seg.get("assigned_voice")
+            or seg.get("voice")
+            or ""
+        )
         hint = str(seg.get("tts_lang_hint") or "")
         if seg.get("skip_tts") or seg.get("tts_blocked"):
             rejected += 1
+            if simple_mode and str(target_lang or "").split("-")[0].lower() == "uk":
+                raise RuntimeError(
+                    f"PIPELINE_LANG_MIX: seg#{i} skip_tts on Simple uk — refuse mux silence"
+                )
+        if voice and str(target_lang or "").split("-")[0].lower() == "uk":
+            assert_voice_matches_target(voice, target_lang, raise_error=True)
         dur = float(seg.get("playback_duration") or seg.get("tts_duration") or 0)
         if dur <= 0:
             try:
@@ -326,14 +389,16 @@ def pre_mux_tts_integrity(
                 else "?"
             ),
             "text": text[:80],
+            "tts_text_hash": str(seg.get("tts_text_hash") or ""),
             "duration_s": round(dur, 3),
         }
         rows.append(row)
         logger.info(
-            "[TTS integrity] seg#%d voice=%s lang=%s dur=%.2f text=%.80s",
+            "[TTS integrity] seg#%d voice=%s lang=%s hash=%s dur=%.2f text=%.80s",
             i + 1,
             voice,
             row["tts_lang_hint"],
+            row["tts_text_hash"] or "-",
             dur,
             text,
         )

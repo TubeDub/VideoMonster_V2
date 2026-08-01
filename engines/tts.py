@@ -110,51 +110,39 @@ async def _generate_single(
     if not text:
         return
 
-    # Stage 12: refuse non-target (uk) lang mix before Edge call.
+    # Stage 12/18: refuse non-target (uk) lang mix / wrong voice before Edge.
+    _tgt = str(
+        (context or {}).get("target_lang")
+        or _detect_lang_from_voice(voice)
+        or ""
+    )
+    _tgt_n = str(_tgt or "").split("-")[0].lower()
+    _ctx = context or {}
+    _simple = bool(
+        _ctx.get("simple_pipeline")
+        or _ctx.get("happy_path")
+        or _ctx.get("fail_loud_lang_lock")
+    )
     try:
         from engines.tts_lang_lock import (
             assert_voice_matches_target,
             is_uk_tts_text_ok,
         )
 
-        _tgt = str(
-            (context or {}).get("target_lang")
-            or _detect_lang_from_voice(voice)
-            or ""
+        # Stage 18: raise — no silent cs/sk/pl fallback for uk.
+        assert_voice_matches_target(
+            voice, _tgt or _detect_lang_from_voice(voice) or "uk", raise_error=True
         )
-        _tgt_n = str(_tgt or "uk").split("-")[0].lower()
-        _ctx = context or {}
-        _simple = bool(
-            _ctx.get("simple_pipeline")
-            or _ctx.get("happy_path")
-            or _ctx.get("fail_loud_lang_lock")
-        )
-        ok_v, v_reason = assert_voice_matches_target(
-            voice, _tgt or "uk", raise_error=False
-        )
-        if not ok_v:
-            logger.error(
-                "[TTS] reject_non_uk_voice path=%s voice=%s reason=%s",
-                path,
-                voice,
-                v_reason,
-            )
-            # Stage 17: never silent-fallback to cs/sk/pl for uk target.
-            if _simple or _tgt_n == "uk":
-                raise RuntimeError(f"PIPELINE_VOICE_LOCALE: {v_reason}")
-            return
         if _tgt_n == "uk" and not is_uk_tts_text_ok(text):
             logger.warning(
                 "[TTS] reject_non_target lang_mix path=%s text=%.80s",
                 path,
                 text,
             )
-            if _simple:
-                raise RuntimeError(
-                    "PIPELINE_LANG_MIX: cyrillic_ratio < 0.55 before Edge-TTS "
-                    f"path={path} text={text[:80]!r}"
-                )
-            return
+            raise RuntimeError(
+                "PIPELINE_LANG_MIX: cyrillic_ratio < 0.55 before Edge-TTS "
+                f"path={path} text={text[:80]!r}"
+            )
     except RuntimeError:
         raise
     except Exception as _ll:
@@ -205,6 +193,7 @@ async def _generate_single(
                 engine_id=eid,
                 cache_dir=default_cache_dir(),
                 ext=Path(path).suffix or ".mp3",
+                lang=_tgt_n,
             )
             if cached is not None and materialize_cached(cached, path):
                 logger.info(
@@ -237,6 +226,7 @@ async def _generate_single(
                         pitch=str(effective_pitch or ""),
                         engine_id=eid,
                         cache_dir=default_cache_dir(),
+                        lang=_tgt_n,
                     )
                 except Exception:
                     pass

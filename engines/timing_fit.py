@@ -1244,6 +1244,8 @@ def build_gap_adjusted_track(
             )
             fitted_placements[-1]["dead_air_ms"] = _dead
             fitted_placements[-1]["dead_air_risk_ms"] = _dead
+            if _dead > MAX_INTER_SEG_DEAD_AIR_MS:
+                fitted_placements[-1]["dead_air_unresolved"] = True
 
         # Stage 17: close inter-segment holes >350ms where EN had speech.
         en_intervals = [(int(s), int(e)) for s, e in parsed]
@@ -1253,6 +1255,22 @@ def build_gap_adjusted_track(
             work_dir,
             en_speech_intervals=en_intervals,
         )
+        # Recompute dead_air after gap-close; mark unresolved if still >350.
+        for place in fitted_placements:
+            if not isinstance(place, dict):
+                continue
+            idx = int(place.get("idx") or 0)
+            if idx + 1 >= len(fitted_for_mix):
+                dead = int(place.get("dead_air_ms") or 0)
+            else:
+                p0, s0, m0 = fitted_for_mix[idx]
+                p1 = int(fitted_for_mix[idx + 1][1])
+                dead = max(0, p1 - (int(s0) + int(m0)))
+                place["dead_air_ms"] = dead
+            if dead > MAX_INTER_SEG_DEAD_AIR_MS:
+                place["dead_air_unresolved"] = True
+            else:
+                place.pop("dead_air_unresolved", None)
 
         max_end = master_ms
         for _, place_start, fitted_ms in fitted_for_mix:

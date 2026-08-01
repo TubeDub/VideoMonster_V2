@@ -48,17 +48,35 @@ def _stage15_restore_full_meaning(seg: dict[str, Any], text: str) -> str:
 
 
 def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
-    """Priority: locked final_tts_text, then authoritative final, then legacy."""
+    """Stage 18: voice only Final (after Stage 15 restore / Stage 16 repairs).
+
+    Never prefer Raw MT / Naturalized / grammar buffers when Final exists.
+    """
     if seg.get("tts_blocked") or seg.get("skip_tts"):
         return ""
     if "FAIL" in str(seg.get("tqe_status") or "").upper() and not str(
         seg.get("approved_text") or ""
     ).strip():
         return ""
-    locked = str(seg.get("final_tts_text") or "").strip()
-    if locked:
-        # Stage 15: locked Final may still be over-short vs Raw — restore.
-        return _stage15_restore_full_meaning(seg, locked)
+    # Final-only when any Final field is present.
+    final_only = str(
+        seg.get("final_tts_text")
+        or seg.get("approved_text")
+        or seg.get("final_text")
+        or ""
+    ).strip()
+    if final_only:
+        restored = _stage15_restore_full_meaning(seg, final_only)
+        # Stage 18: never replace good uk Final with latin/raw garbage.
+        try:
+            from engines.tts_lang_lock import is_uk_tts_text_ok
+
+            if is_uk_tts_text_ok(final_only) and not is_uk_tts_text_ok(restored):
+                return final_only
+        except Exception:
+            pass
+        return restored
+
     from engines.translation_validation import (
         is_shared_mt_blob_reclaim,
         resolve_post_quality_text,
@@ -66,20 +84,14 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
 
     owned = resolve_post_quality_text(seg)
     text = owned or str(
-        seg.get("grammar_text")
-        or seg.get("timing_text")
-        or seg.get("semantic_text")
+        seg.get("plain_text")
         or seg.get("translated_text")
         or seg.get("text")
         or ""
     ).strip()
-    # Last ownership belt: prefer segment Final/translated over multi-segment blob.
-    final_owned = str(
-        seg.get("approved_text")
-        or seg.get("final_text")
-        or seg.get("translated_text")
-        or ""
-    ).strip()
+    # Do not fall back to raw_translation / naturalized_text when absent Final —
+    # those are MT buffers, not spoken Final.
+    final_owned = str(seg.get("translated_text") or "").strip()
     if final_owned and text and is_shared_mt_blob_reclaim(
         final_owned,
         text,
@@ -104,8 +116,6 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
         if source and source_script_leak(source, text):
             return ""
         if source and meaning_collapse(source, text, target_lang=tgt or None):
-            # Keep segment-owned Final/translated even when the slot is a short
-            # split fragment (collapse vs long EN source is expected).
             if not (
                 final_owned and texts_equivalent_for_ownership(text, final_owned)
             ):

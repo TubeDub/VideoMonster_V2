@@ -116,6 +116,15 @@ def prefer_full_meaning_text(
     if not cand:
         return raw, True
     if word_retention_ratio(raw, cand) < float(min_retention):
+        # Stage 18: never restore latin/raw garbage over already-good uk Final.
+        try:
+            from engines.tts_lang_lock import is_uk_tts_text_ok
+
+            if str(tgt_lang or "").split("-")[0].lower() == "uk":
+                if is_uk_tts_text_ok(cand) and not is_uk_tts_text_ok(raw):
+                    return cand, False
+        except Exception:
+            pass
         logger.info(
             "prefer_full_meaning: restore raw words %d→%d (ret=%.2f)",
             len(cand.split()),

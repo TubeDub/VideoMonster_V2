@@ -100,11 +100,21 @@ def _synthesize_one_edge(
         text0 = _re.sub(r"<[^>]+>", " ", text0)
         text0 = _re.sub(r"[ \t]+", " ", text0).strip()
     if not text0:
-        raise RuntimeError("empty TTS text after sanitize")
+        raise RuntimeError("PIPELINE_LANG_MIX: empty TTS text after sanitize")
+
+    # Stage 18: same voice lock as serial Edge path (no bypass).
+    from engines.tts import _detect_lang_from_voice
+    from engines.tts_lang_lock import assert_voice_matches_target, is_uk_tts_text_ok
+
+    _lang = _detect_lang_from_voice(voice) or "uk"
+    assert_voice_matches_target(voice, _lang, raise_error=True)
+    if str(_lang).split("-")[0].lower() == "uk" and not is_uk_tts_text_ok(text0):
+        raise RuntimeError(
+            f"PIPELINE_LANG_MIX: cyrillic_ratio < 0.55 parallel TTS text={text0[:80]!r}"
+        )
 
     try:
         from engines.stress_marks import add_stress_marks
-        from engines.tts import _detect_lang_from_voice
 
         text0 = add_stress_marks(text0, lang=_detect_lang_from_voice(voice))
     except Exception:
@@ -171,9 +181,22 @@ def synthesize_one_with_cache(
         "error": None,
         "retries": 0,
     }
+    from engines.tts import _detect_lang_from_voice
+    from engines.tts_cache import tts_cache_disabled
+    from engines.tts_lang_lock import assert_voice_matches_target
+
+    _tgt_lang = _detect_lang_from_voice(voice0) or "uk"
     if not text0:
         result["error"] = "empty_text"
+        # Stage 18: empty text must not silently become silence on uk.
+        if str(_tgt_lang).split("-")[0].lower() == "uk":
+            raise RuntimeError(
+                f"PIPELINE_LANG_MIX: empty TTS text idx={index} — refuse skip→silence"
+            )
         return result
+
+    # Stage 18 voice lock before cache / Edge (same as serial path).
+    assert_voice_matches_target(voice0, _tgt_lang, raise_error=True)
 
     if skip_existing and is_valid_tts_file(dest):
         result["skipped_existing"] = True
@@ -181,7 +204,9 @@ def synthesize_one_with_cache(
         logger.info("tts_skip_existing idx=%s path=%s", index, dest.name)
         return result
 
-    if use_cache:
+    _use_cache = bool(use_cache) and not tts_cache_disabled()
+    _lang = str(_tgt_lang).split("-")[0].lower()
+    if _use_cache:
         cached = lookup_tts_cache(
             text0,
             voice0,
@@ -190,6 +215,7 @@ def synthesize_one_with_cache(
             engine_id=engine_id,
             cache_dir=cache_dir,
             ext=dest.suffix or ".mp3",
+            lang=_lang,
         )
         if cached is not None and materialize_cached(cached, dest):
             result["cache_hit"] = True
@@ -209,7 +235,7 @@ def synthesize_one_with_cache(
                 pitch=pitch,
                 engine_id=engine_id,
             )
-            if use_cache:
+            if _use_cache:
                 store_tts_cache(
                     dest,
                     text0,
@@ -217,6 +243,7 @@ def synthesize_one_with_cache(
                     rate=rate,
                     pitch=pitch,
                     engine_id=engine_id,
+                    lang=_lang,
                     cache_dir=cache_dir,
                 )
             result["retries"] = attempt
