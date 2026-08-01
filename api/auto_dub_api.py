@@ -1689,7 +1689,9 @@ def _strict_llm_adaptation_enabled() -> bool:
 def _post_tts_max_retries(task_info: dict | None = None) -> int:
     """Fewer post-TTS LLM loops in fast mode (CPU dub runs).
 
-    Happy Path: 0 → closed-loop pause-only (no text rewrite shorteners).
+    Happy Path: 0 → no LLM rewrite loops. Stage 19b rule expand/shorten
+    (`fit_text_to_slot` / `expand_to_fill`) still runs in closed-loop when
+    |TTS−slot| > 350 ms — LLM is optional, not a blocker.
     """
     try:
         from engines.happy_path import advanced_adaptation_enabled

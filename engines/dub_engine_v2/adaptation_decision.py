@@ -29,8 +29,8 @@ SKIP_MERGED_SEGMENT = "MergedSegment"
 SKIP_EMPTY_TEXT = "EmptyText"
 SKIP_UNKNOWN = "UnknownSkip"
 
-# Temporary hard gate (user TZ): force need_adaptation when |orig−tts| > this.
-DURATION_DELTA_FORCE_ADAPT_MS = 500
+# Stage 19b: force need_adaptation when |orig−tts| > 350 ms (text fit, not FitsNoChange).
+DURATION_DELTA_FORCE_ADAPT_MS = 350
 
 KNOWN_SKIP_REASONS = frozenset(
     {

@@ -21,7 +21,9 @@ logger = logging.getLogger("tubedub.closed_loop_timing")
 
 MAX_REWRITE_ITERATIONS = 5
 OVERFLOW_THRESHOLD_MS = 100
-UNDERFLOW_THRESHOLD_MS = 450
+# Stage 19b: text-first when |TTS−slot| > 350 ms (was 450; pause-only Happy Path skipped fit).
+UNDERFLOW_THRESHOLD_MS = 350
+TEXT_FIT_DELTA_MS = 350
 OVERLAP_TOLERANCE_MS = 40
 TIMING_SCORE_GOAL = 95
 
@@ -316,6 +318,424 @@ def _needs_rewrite(budget: TimingBudget) -> tuple[bool, str]:
     return False, ""
 
 
+def _slot_delta_ms(budget: TimingBudget) -> int:
+    """tts_ms - slot_ms: >0 overflow, <0 underflow."""
+    return int(budget.measured_duration or 0) - int(budget.slot_duration or 0)
+
+
+def _needs_stage19b_text_fit(budget: TimingBudget) -> bool:
+    return abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS
+
+
+def _stage19b_algorithm_reason(fit: Any, *, text_changed: bool) -> str:
+    action = str(getattr(fit, "action", "") or "")
+    strategy = str(getattr(fit, "strategy", "") or "")
+    if action in ("expand",) or strategy == "expand":
+        return "TextSlotFitExpand"
+    if action == "shorten" or strategy == "shorten":
+        return "TextSlotFitShorten"
+    if action in ("expand_then_slow", "atempo_slow", "atempo_prefer") or strategy in (
+        "expand_then_slow",
+        "atempo_slow",
+        "shorten_then_fast",
+    ):
+        return "TextThenAtemo" if text_changed else "TextThenAtemo"
+    if text_changed:
+        return "TextSlotFitExpand" if "expand" in (action + strategy) else "TextSlotFitShorten"
+    return "TextThenAtemo"
+
+
+def _stamp_stage19b_meta(
+    seg: dict,
+    *,
+    fit: Any,
+    expand_required: bool,
+    expand_executed: bool,
+    algorithm_reason: str,
+    text_changed: bool,
+) -> None:
+    fill = float(getattr(fit, "fill_ratio", 0.0) or 0.0)
+    atempo = float(getattr(fit, "atempo", 1.0) or 1.0)
+    strategy = str(getattr(fit, "strategy", "") or "ok")
+    action = str(getattr(fit, "action", "") or "")
+    expansion_strategy = "none"
+    if expand_executed:
+        reasons = [str(r) for r in (getattr(fit, "reasons", None) or [])]
+        if "rule_expand" in reasons or "expand_to_fill" in " ".join(reasons):
+            expansion_strategy = "rule_expand"
+        else:
+            expansion_strategy = "expand_to_fill"
+    seg["expand_required"] = bool(expand_required)
+    seg["expand_executed"] = bool(expand_executed)
+    seg["expansion_strategy"] = expansion_strategy
+    seg["fill_ratio"] = round(fill, 4)
+    seg["atempo"] = round(atempo, 4)
+    seg["strategy"] = strategy
+    seg["rule_rewrite_used"] = bool(text_changed)
+    seg["algorithm_reason"] = algorithm_reason
+    seg["text_adaptation_reason"] = algorithm_reason
+    if text_changed or expand_executed:
+        from engines.dub_engine_v2.adaptation_decision import mark_adaptation_executed
+
+        stage = f"text_slot_fit:{action or strategy or 'fit'}"
+        mark_adaptation_executed(seg, decision=algorithm_reason, stages=[stage])
+        trace = seg.setdefault("text_adaptation_trace", {})
+        trace["executed"] = True
+        reasons = list(trace.get("reasons") or [])
+        if algorithm_reason not in reasons:
+            reasons.append(algorithm_reason)
+        trace["reasons"] = reasons
+        prev = list(trace.get("stages") or [])
+        if stage not in prev:
+            prev.append(stage)
+        trace["stages"] = prev
+    seg["stage19b"] = {
+        "expand_required": bool(expand_required),
+        "expand_executed": bool(expand_executed),
+        "expansion_strategy": expansion_strategy,
+        "algorithm_reason": algorithm_reason,
+        "fill_ratio": round(fill, 4),
+        "atempo": round(atempo, 4),
+        "strategy": strategy,
+        "rule_rewrite_used": bool(text_changed),
+        "action": action,
+        "reasons": list(getattr(fit, "reasons", None) or []),
+    }
+
+
+def _apply_light_atempo_after_fit(
+    seg: dict,
+    *,
+    budget: TimingBudget,
+    work_dir: Path,
+    resolve_path: Callable[[str], str] | None,
+    fit: Any,
+) -> TimingBudget:
+    """Stage 19b step 3: mild atempo only after text fit attempt."""
+    from engines.text_slot_fit import (
+        MAX_ATEMPO_FAST,
+        MAX_ATEMPO_SLOW,
+        UNDERFILL_EXPAND_RATIO,
+        forbid_fast_then_gap,
+        suggested_atempo_for_fill,
+    )
+
+    slot = int(budget.slot_duration or 0)
+    tts = int(budget.measured_duration or 0)
+    if slot <= 0 or tts <= 0:
+        return budget
+    fill = tts / float(slot)
+    tempo = float(getattr(fit, "atempo", 0) or 0) or suggested_atempo_for_fill(tts, slot)
+    tempo = max(MAX_ATEMPO_SLOW, min(MAX_ATEMPO_FAST, tempo))
+    if forbid_fast_then_gap(tempo, fill):
+        tempo = max(MAX_ATEMPO_SLOW, min(1.0, fill))
+    # Skip near-noop tempos.
+    if abs(tempo - 1.0) < 0.02:
+        return budget
+    # Still outside band → apply.
+    if fill >= UNDERFILL_EXPAND_RATIO and fill <= 1.08 and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS:
+        return budget
+
+    src = str(seg.get("file") or seg.get("tts_file_path") or "").strip()
+    if resolve_path and src:
+        try:
+            src = resolve_path(src) or src
+        except Exception:
+            pass
+    if not src or not Path(src).is_file():
+        return budget
+    try:
+        from engines.timing_fit import fit_segment_audio
+
+        fitted, meta = fit_segment_audio(
+            src,
+            0,
+            slot,
+            work_dir=work_dir / "stage19b_atempo",
+            allow_atempo=True,
+            max_atempo=MAX_ATEMPO_FAST,
+            text_hint=_segment_text(seg),
+        )
+        if fitted and Path(fitted).is_file():
+            seg["file"] = fitted
+            seg["tts_file_path"] = fitted
+            fitted_ms = int((meta or {}).get("fitted_ms") or (meta or {}).get("tts_ms") or 0)
+            if fitted_ms <= 0:
+                fitted_ms = measure_actual_ms(seg, resolve_path=resolve_path)
+            if fitted_ms > 0:
+                seg["playback_duration"] = fitted_ms
+                seg["tts_ms"] = fitted_ms
+                seg["actual_duration_ms"] = fitted_ms
+            applied = float((meta or {}).get("atempo") or tempo)
+            seg["atempo"] = round(applied, 4)
+            if fill < UNDERFILL_EXPAND_RATIO:
+                seg["strategy"] = (
+                    "expand_then_slow"
+                    if seg.get("expand_executed")
+                    else "atempo_slow"
+                )
+            else:
+                seg["strategy"] = (
+                    "shorten_then_fast" if seg.get("rule_rewrite_used") else "ok"
+                )
+            stages = list(seg.get("adaptation_stages") or [])
+            tag = f"stage19b_atempo:{applied:.3f}"
+            if tag not in stages:
+                stages.append(tag)
+            seg["adaptation_stages"] = stages
+            if not seg.get("adaptation_executed"):
+                from engines.dub_engine_v2.adaptation_decision import (
+                    mark_adaptation_executed,
+                )
+
+                mark_adaptation_executed(
+                    seg,
+                    decision="TextThenAtemo",
+                    stages=[tag],
+                )
+            if not str(seg.get("algorithm_reason") or "").startswith("TextSlotFit"):
+                seg["algorithm_reason"] = "TextThenAtemo"
+                seg["text_adaptation_reason"] = "TextThenAtemo"
+    except Exception as exc:
+        logger.debug("stage19b light atempo skipped: %s", exc)
+    return budget
+
+
+def apply_stage19b_rule_text_fit(
+    seg: dict,
+    idx: int,
+    timing_map: list,
+    budget: TimingBudget,
+    *,
+    source_hint: str,
+    target_lang: str,
+    voice: str,
+    work_dir: Path,
+    regen_fn: Callable[..., Any] | None,
+    commit_fn: Callable[..., Any] | None = None,
+    audit: dict | None = None,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    task_id: str | None = None,
+    resolve_path: Callable[[str], str] | None = None,
+) -> tuple[TimingBudget, bool]:
+    """Stage 19b: expand/shorten text before tempo. Works without LLM.
+
+    Returns (budget, did_attempt). did_attempt True when |delta|>350 and fit ran.
+    """
+    if not _needs_stage19b_text_fit(budget):
+        return budget, False
+
+    from engines.text_slot_fit import fit_text_to_slot
+
+    delta = _slot_delta_ms(budget)
+    expand_required = delta < -TEXT_FIT_DELTA_MS
+    original = _segment_text(seg)
+    if not original:
+        return budget, False
+
+    raw_mt = str(
+        seg.get("raw_mt")
+        or seg.get("raw_translation")
+        or seg.get("mt_text")
+        or original
+    ).strip()
+    fit = fit_text_to_slot(
+        original,
+        int(budget.slot_duration or 0),
+        str(target_lang or "uk"),
+        source_hint=str(source_hint or ""),
+        allow_expand=True,
+        raw_mt=raw_mt,
+    )
+    new_text = " ".join(str(fit.text or "").split()).strip()
+    text_changed = bool(fit.changed and new_text and new_text != original)
+    expand_executed = bool(
+        expand_required
+        and text_changed
+        and (
+            fit.action in ("expand", "expand_then_slow")
+            or "expand" in " ".join(str(r) for r in (fit.reasons or []))
+            or len(new_text.split()) > len(original.split())
+        )
+    )
+    algorithm_reason = _stage19b_algorithm_reason(fit, text_changed=text_changed)
+
+    if text_changed:
+        if regen_fn is None:
+            seg["expand_required"] = expand_required
+            _stamp_stage19b_meta(
+                seg,
+                fit=fit,
+                expand_required=expand_required,
+                expand_executed=False,
+                algorithm_reason=algorithm_reason,
+                text_changed=False,
+            )
+            budget.rewrite_reason = f"stage19b:no_regen:{algorithm_reason}"
+            return budget, True
+
+        regen_result = regen_fn(
+            new_text,
+            voice=voice,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            task_id=task_id,
+            segment_index=idx,
+            segment_id=str(seg.get("segment_id") or ""),
+        )
+        if isinstance(regen_result, tuple):
+            new_file, new_ms = regen_result[0], int(regen_result[1] or 0)
+        else:
+            new_file, new_ms = regen_result, 0
+        if not new_file:
+            budget.final_status = "failed_tts_regen"
+            budget.rewrite_reason = f"stage19b:tts_fail:{algorithm_reason}"
+            seg["expand_required"] = expand_required
+            _stamp_stage19b_meta(
+                seg,
+                fit=fit,
+                expand_required=expand_required,
+                expand_executed=False,
+                algorithm_reason=algorithm_reason,
+                text_changed=False,
+            )
+            return budget, True
+
+        seg["text"] = new_text
+        seg["plain_text"] = new_text
+        seg["translation_text"] = new_text
+        seg["final_text"] = new_text
+        seg["file"] = new_file
+        seg["tts_file_path"] = new_file
+        if new_ms <= 0:
+            new_ms = measure_actual_ms(seg, resolve_path=resolve_path)
+        else:
+            seg["playback_duration"] = new_ms
+            seg["tts_ms"] = new_ms
+            seg["actual_duration_ms"] = new_ms
+
+        pause_meta = apply_dynamic_pause_engine(
+            seg,
+            slot_ms=budget.slot_duration,
+            work_dir=work_dir / "pause",
+            resolve_path=resolve_path,
+        )
+        if pause_meta.get("applied"):
+            budget.pause_adjustments_ms += int(pause_meta.get("pause_adjustments_ms") or 0)
+            budget.pause_stages.extend(list(pause_meta.get("stages") or []))
+
+        if audit is not None:
+            audit["tts_text"] = new_text
+            audit["final_text"] = new_text
+            qd = audit.setdefault("quality_details", {})
+            qd["stage19b"] = {
+                "reason": algorithm_reason,
+                "text_before": original[:500],
+                "text_after": new_text[:500],
+                "expand_required": expand_required,
+                "expand_executed": expand_executed,
+                "fill_ratio": fit.fill_ratio,
+                "atempo": fit.atempo,
+                "strategy": fit.strategy,
+            }
+
+        if commit_fn:
+            try:
+                commit_fn(
+                    None,
+                    [idx],
+                    tts_text=new_text,
+                    audio_filename=str(seg.get("file") or new_file),
+                )
+            except Exception as exc:
+                logger.debug("stage19b commit skipped: %s", exc)
+
+        budget.rewrite_iterations = max(1, int(budget.rewrite_iterations or 0) + 1)
+        budget.rewrite_reason = f"stage19b:{algorithm_reason}"
+        saved_pause = budget.pause_adjustments_ms
+        saved_stages = list(budget.pause_stages or [])
+        orig = budget.original_duration
+        iters = budget.rewrite_iterations
+        reason = budget.rewrite_reason
+        budget = build_timing_budget(seg, idx, timing_map)
+        budget.rewrite_iterations = iters
+        budget.rewrite_reason = reason
+        budget.pause_adjustments_ms = saved_pause
+        budget.pause_stages = saved_stages
+        budget.original_duration = orig or int(
+            seg.get("first_tts_duration_ms") or budget.measured_duration
+        )
+    else:
+        # No text change — still mark expand_required + suggested strategy/atempo.
+        if expand_required:
+            seg["expand_required"] = True
+
+    _stamp_stage19b_meta(
+        seg,
+        fit=fit,
+        expand_required=expand_required,
+        expand_executed=expand_executed,
+        algorithm_reason=algorithm_reason,
+        text_changed=text_changed,
+    )
+
+    # Light atempo after text attempt when still outside band.
+    if _needs_stage19b_text_fit(budget) or float(seg.get("fill_ratio") or 0) < 0.90:
+        budget = _apply_light_atempo_after_fit(
+            seg,
+            budget=budget,
+            work_dir=work_dir,
+            resolve_path=resolve_path,
+            fit=fit,
+        )
+        saved_pause = budget.pause_adjustments_ms
+        saved_stages = list(budget.pause_stages or [])
+        orig = budget.original_duration
+        iters = budget.rewrite_iterations
+        reason = budget.rewrite_reason
+        budget = build_timing_budget(seg, idx, timing_map)
+        budget.rewrite_iterations = iters
+        budget.rewrite_reason = reason or f"stage19b:{algorithm_reason}"
+        budget.pause_adjustments_ms = saved_pause
+        budget.pause_stages = saved_stages
+        budget.original_duration = orig or int(
+            seg.get("first_tts_duration_ms") or budget.measured_duration
+        )
+        # Refresh fill from measured audio.
+        slot = max(1, int(budget.slot_duration or 1))
+        seg["fill_ratio"] = round(int(budget.measured_duration or 0) / float(slot), 4)
+        if text_changed and abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS:
+            seg["algorithm_reason"] = "TextThenAtemo"
+            seg["text_adaptation_reason"] = "TextThenAtemo"
+
+    needs, _ = _needs_rewrite(budget)
+    if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS:
+        budget.final_status = "ok"
+    elif budget.final_status in ("", "pending"):
+        fill = float(seg.get("fill_ratio") or 0)
+        if fill < 0.90 and int(budget.underflow or 0) > TEXT_FIT_DELTA_MS:
+            budget.final_status = "dead_air_risk"
+            seg["strategy"] = "dead_air_risk"
+        else:
+            budget.final_status = "ok" if not needs else "stage19b_partial"
+
+    logger.info(
+        "[Stage19b] task=%s seg=%d delta=%dms expand_req=%s expand_exec=%s "
+        "reason=%s fill=%.2f atempo=%.3f iters=%d",
+        task_id,
+        idx,
+        delta,
+        expand_required,
+        expand_executed,
+        algorithm_reason,
+        float(seg.get("fill_ratio") or 0),
+        float(seg.get("atempo") or 1),
+        int(budget.rewrite_iterations or 0),
+    )
+    return budget, True
+
+
 def run_closed_loop_segment(
     seg: dict,
     idx: int,
@@ -374,6 +794,15 @@ def run_closed_loop_segment(
         )
 
     needs, reason = _needs_rewrite(budget)
+    # Stage 19b: |delta|>350 always needs text fit — never FitsNoChange / audio-only.
+    if not needs and _needs_stage19b_text_fit(budget):
+        needs = True
+        reason = (
+            "duration_overflow"
+            if _slot_delta_ms(budget) > 0
+            else "duration_underflow"
+        )
+
     if not needs:
         budget.final_status = "ok"
         budget.rewrite_reason = "fits_after_pause" if pause_meta.get("applied") else "fits_no_change"
@@ -388,32 +817,114 @@ def run_closed_loop_segment(
                 resolve_need_adaptation,
             )
 
-            # Do not hard-force False — duration delta >500ms must keep need=True
             _need = resolve_need_adaptation(
                 seg,
                 need_adaptation=False,
                 overflow_ms=int(budget.overflow or 0),
                 underflow_ms=int(budget.underflow or 0),
             )
+            # FitsNoChange only when truly in band (|delta|≤350). Never with need=True.
+            if _need or _needs_stage19b_text_fit(budget):
+                budget, _ = apply_stage19b_rule_text_fit(
+                    seg,
+                    idx,
+                    timing_map,
+                    budget,
+                    source_hint=source_hint,
+                    target_lang=target_lang,
+                    voice=voice,
+                    work_dir=work_dir,
+                    regen_fn=regen_fn,
+                    commit_fn=commit_fn,
+                    audit=audit,
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                    task_id=task_id,
+                    resolve_path=resolve_path,
+                )
+                seg["timing_budget"] = budget.to_dict()
+                seg["timing_score"] = budget.timing_score
+                return budget
             mark_adaptation_skipped(
                 seg,
                 skip_reason=SKIP_FITS_NO_CHANGE,
                 index=idx,
                 overflow_ms=int(budget.overflow or 0),
                 underflow_ms=int(budget.underflow or 0),
-                need_adaptation=_need,
-                decision="fits_no_change" if not _need else "duration_delta_needs_adapt",
+                need_adaptation=False,
+                decision="fits_no_change",
             )
         seg["timing_budget"] = budget.to_dict()
         seg["timing_score"] = budget.timing_score
         return budget
 
-    # max_iterations<=0 → pause-only (used after Adaptive Seg resegment, TZ §11)
-    if int(max_iterations or 0) <= 0:
-        budget.final_status = "ok" if not needs else "deferred_after_resegment"
-        budget.rewrite_reason = "pause_only_after_resegment"
+    # Stage 19b: rule expand/shorten BEFORE LLM / before pause-only short-circuit.
+    # Happy Path (max_iterations=0) and llm_available=false must still run text fit.
+    budget, stage19b_ran = apply_stage19b_rule_text_fit(
+        seg,
+        idx,
+        timing_map,
+        budget,
+        source_hint=source_hint,
+        target_lang=target_lang,
+        voice=voice,
+        work_dir=work_dir,
+        regen_fn=regen_fn,
+        commit_fn=commit_fn,
+        audit=audit,
+        tts_rate=tts_rate,
+        tts_pitch=tts_pitch,
+        task_id=task_id,
+        resolve_path=resolve_path,
+    )
+    needs, reason = _needs_rewrite(budget)
+    if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS:
+        budget.final_status = "ok"
+        if not budget.rewrite_reason:
+            budget.rewrite_reason = (
+                "stage19b_fit" if stage19b_ran else "fits_after_pause"
+            )
         seg["timing_budget"] = budget.to_dict()
         seg["timing_score"] = budget.timing_score
+        return budget
+
+    # max_iterations<=0 → no LLM loops (TZ §11 / Happy Path), but Stage 19b already ran.
+    if int(max_iterations or 0) <= 0:
+        if stage19b_ran and int(budget.rewrite_iterations or 0) > 0:
+            budget.final_status = (
+                "ok"
+                if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS
+                else (budget.final_status or "stage19b_partial")
+            )
+            if not budget.rewrite_reason:
+                budget.rewrite_reason = "stage19b_rule_fit"
+        else:
+            budget.final_status = "ok" if not needs else (
+                budget.final_status or "deferred_after_resegment"
+            )
+            if not budget.rewrite_reason:
+                budget.rewrite_reason = (
+                    "stage19b_atempo_or_pause"
+                    if stage19b_ran
+                    else "pause_only_after_resegment"
+                )
+        seg["timing_budget"] = budget.to_dict()
+        seg["timing_score"] = budget.timing_score
+        seg["closed_loop"] = {
+            "iterations": budget.rewrite_iterations,
+            "final_status": budget.final_status,
+            "rewrite_reason": budget.rewrite_reason,
+            "pause_adjustments_ms": budget.pause_adjustments_ms,
+            "timing_score": budget.timing_score,
+            "actual_duration_ms": budget.measured_duration,
+            "slot_duration": budget.slot_duration,
+            "delta": budget.delta,
+            "underflow_ms": max(0, int(budget.underflow or 0)),
+            "expand_required": bool(seg.get("expand_required")),
+            "expand_executed": bool(seg.get("expand_executed")),
+            "adaptation_skip_reason": seg.get("adaptation_skip_reason") or "",
+            "adaptation_decision": seg.get("adaptation_decision") or {},
+        }
         return budget
 
     if regen_fn is None:
@@ -830,6 +1341,13 @@ def run_closed_loop_segment(
         "delta": budget.delta,
         "underflow_ms": underflow_ms,
         "expand_required": bool(seg.get("expand_required")),
+        "expand_executed": bool(seg.get("expand_executed")),
+        "expansion_strategy": seg.get("expansion_strategy") or "none",
+        "algorithm_reason": seg.get("algorithm_reason") or "",
+        "fill_ratio": seg.get("fill_ratio"),
+        "atempo": seg.get("atempo"),
+        "strategy": seg.get("strategy") or "",
+        "rule_rewrite_used": bool(seg.get("rule_rewrite_used")),
         "adaptation_skip_reason": seg.get("adaptation_skip_reason") or "",
         "adaptation_decision": seg.get("adaptation_decision") or {},
     }

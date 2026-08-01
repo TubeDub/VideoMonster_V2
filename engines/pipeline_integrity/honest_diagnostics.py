@@ -159,6 +159,19 @@ def _decision_trace_has_audio_only(seg: dict[str, Any]) -> bool:
 
 
 def _text_adaptation_really_executed(seg: dict[str, Any]) -> bool:
+    if seg.get("rule_rewrite_used") or seg.get("expand_executed"):
+        return True
+    algo = str(seg.get("algorithm_reason") or seg.get("text_adaptation_reason") or "")
+    if any(
+        tok in algo
+        for tok in (
+            "TextSlotFitExpand",
+            "TextSlotFitShorten",
+            "TextThenAtemo",
+            "text_slot_fit",
+        )
+    ):
+        return True
     trace = seg.get("text_adaptation_trace")
     if isinstance(trace, dict) and trace.get("executed"):
         # Only true text rewrite — not a false stamp over audio-only
@@ -168,7 +181,21 @@ def _text_adaptation_really_executed(seg: dict[str, Any]) -> bool:
             return False
         return True
     stages = " ".join(str(x) for x in (seg.get("adaptation_stages") or []))
-    if any(tok in stages.lower() for tok in ("semantic", "llm_adapt", "meaning_fit", "naturalizer", "retranslate")):
+    if any(
+        tok in stages.lower()
+        for tok in (
+            "semantic",
+            "llm_adapt",
+            "meaning_fit",
+            "naturalizer",
+            "retranslate",
+            "text_slot_fit",
+            "textslotfit",
+            "rule_expand",
+            "expand_to_fill",
+            "stage19b",
+        )
+    ):
         if "audiostrategynotextrewrite" in _norm(stages):
             return False
         return True
@@ -281,19 +308,28 @@ def apply_honest_reasons(
         seg["text_adaptation_reason"] = ""
 
     legacy = str(seg.get("algorithm_reason") or "")
-    honest_algo = sanitize_algorithm_reason(
-        legacy
-        or (
-            "post_tts_text_adaptation: semantic shorten + TTS regen until slot fit"
-            if text_r == "semantic_shortening"
-            else ""
+    # Stage 19b: keep TextSlotFit* / TextThenAtemo as the honest algorithm_reason.
+    if any(
+        tok in legacy
+        for tok in ("TextSlotFitExpand", "TextSlotFitShorten", "TextThenAtemo")
+    ):
+        text_r = text_r or legacy
+        seg["text_adaptation_reason"] = text_r
+        honest_algo = legacy
+    else:
+        honest_algo = sanitize_algorithm_reason(
+            legacy
+            or (
+                "post_tts_text_adaptation: semantic shorten + TTS regen until slot fit"
+                if text_r == "semantic_shortening"
+                else ""
+            )
+            or audio_r
+            or text_r,
+            seg=seg,
+            text_adaptation_reason=text_r,
+            audio_strategy_reason=audio_r,
         )
-        or audio_r
-        or text_r,
-        seg=seg,
-        text_adaptation_reason=text_r,
-        audio_strategy_reason=audio_r,
-    )
     seg["algorithm_reason"] = honest_algo
 
     return collect_honest_summary(seg)
