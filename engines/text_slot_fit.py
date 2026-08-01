@@ -757,6 +757,25 @@ def expand_text_to_slot(
     # Retention vs UK Final/Raw — never use EN source_hint as word-count denominator.
     meaning_anchor = " ".join(str(raw_mt or original).split()).strip() or original
 
+    # Stage 19c: if Raw MT is longer and still meaning-safe, prefer it over short Final.
+    raw_full = " ".join(str(raw_mt or "").split()).strip()
+    if (
+        raw_full
+        and raw_full != out
+        and len(raw_full.split()) > len(out.split())
+        and word_retention_ratio(out, raw_full) >= MIN_WORD_RETENTION
+        and _is_complete_thought(raw_full)
+        and _expand_lang_ok(raw_full, lang)
+        and _expand_keeps_entities(original, raw_full, source_hint)
+    ):
+        raw_pred = estimate_tts_ms(raw_full, lang)
+        if pred < floor and raw_pred <= int(slot * OVERFLOW_FIT_RATIO * 1.05):
+            out = strip_slot_pad_fillers(raw_full)
+            pred = estimate_tts_ms(out, lang)
+            reasons.append("raw_mt_restore")
+            if pred >= floor:
+                return out, reasons
+
     # Optional LLM expand (same gate as soft_sync) — still meaning-safe.
     try:
         from engines.soft_sync import expand_text_for_slot
@@ -783,8 +802,8 @@ def expand_text_to_slot(
     except Exception:
         pass
 
-    # Rule-based passes until near aim or no progress (Stage 19: up to 6).
-    for _ in range(6):
+    # Rule-based passes until near aim or no progress (Stage 19c: up to 8).
+    for _ in range(8):
         if estimate_tts_ms(out, lang) >= aim:
             break
         nxt = _rule_expand_once(out, lang, source_hint=source_hint)

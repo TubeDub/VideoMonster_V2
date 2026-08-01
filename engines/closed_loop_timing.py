@@ -21,11 +21,29 @@ logger = logging.getLogger("tubedub.closed_loop_timing")
 
 MAX_REWRITE_ITERATIONS = 5
 OVERFLOW_THRESHOLD_MS = 100
-# Stage 19b: text-first when |TTS−slot| > 350 ms (was 450; pause-only Happy Path skipped fit).
+# Stage 19b/19c: text-first when |TTS−slot| > 350 ms (was 450; pause-only Happy Path skipped fit).
 UNDERFLOW_THRESHOLD_MS = 350
 TEXT_FIT_DELTA_MS = 350
+# Stage 19c: large overflow → sentence split (production).
+OVERFLOW_SPLIT_ABS_MS = 3000
+OVERFLOW_SPLIT_RATIO = 0.25
+MIN_SPLIT_CHILD_MS = 800
 OVERLAP_TOLERANCE_MS = 40
 TIMING_SCORE_GOAL = 95
+
+# Honest algorithm reasons that must not be overwritten by AudioOnly.
+_TEXT_FIT_REASON_PREFIXES = (
+    "TextSlotFitExpand",
+    "TextSlotFitShorten",
+    "TextThenAtemo",
+    "TextSlotSplit",
+)
+
+
+class TextFitNoRegenError(RuntimeError):
+    """text_changed but regen_fn is None — fail loud (Stage 19c §B)."""
+
+    error_code = "PIPELINE_TEXT_FIT_NO_REGEN"
 
 
 def _env_int(key: str, default: int) -> int:
@@ -327,6 +345,293 @@ def _needs_stage19b_text_fit(budget: TimingBudget) -> bool:
     return abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS
 
 
+def large_overflow_needs_split(*, overflow_ms: int, slot_ms: int) -> bool:
+    """Stage 19c §C: overflow > max(3000, 0.25×slot) → split by sentences."""
+    slot = max(0, int(slot_ms or 0))
+    ov = max(0, int(overflow_ms or 0))
+    if ov <= TEXT_FIT_DELTA_MS:
+        return False
+    return ov > max(OVERFLOW_SPLIT_ABS_MS, int(slot * OVERFLOW_SPLIT_RATIO))
+
+
+def lock_text_fit_algorithm_reason(seg: dict, reason: str) -> None:
+    """Stamp TextSlotFit* and prevent AudioStrategyNoTextRewrite overwrite."""
+    r = str(reason or "").strip()
+    if not r:
+        return
+    seg["algorithm_reason"] = r
+    seg["text_adaptation_reason"] = r
+    seg["algorithm_reason_locked"] = True
+    seg["_algorithm_reason_locked"] = True
+
+
+def _merge_short_chunk_spans(
+    allocated: list[tuple[str, int, int]],
+    *,
+    min_ms: int = MIN_SPLIT_CHILD_MS,
+) -> list[tuple[str, int, int]]:
+    """Merge children shorter than min_ms back into neighbors."""
+    if not allocated:
+        return allocated
+    out: list[tuple[str, int, int]] = []
+    for text, start, end in allocated:
+        dur = max(0, end - start)
+        if out and dur < min_ms:
+            prev_t, prev_s, _prev_e = out[-1]
+            out[-1] = (f"{prev_t} {text}".strip(), prev_s, end)
+        elif dur < min_ms and not out:
+            out.append((text, start, end))
+        else:
+            out.append((text, start, end))
+    # If first was short and we have 2+, merge forward.
+    if len(out) >= 2 and (out[0][2] - out[0][1]) < min_ms:
+        t0, s0, _e0 = out[0]
+        t1, _s1, e1 = out[1]
+        out = [(f"{t0} {t1}".strip(), s0, e1)] + out[2:]
+    return out
+
+
+def try_stage19c_overflow_split(
+    *,
+    segments_data: list[dict],
+    source_segments: list[str],
+    timing_map: list,
+    audits: list[dict] | None,
+    idx: int,
+    overflow_ms: int | None = None,
+) -> bool:
+    """Split one large-overflow segment into 2+ sentence children (Stage 19c §C).
+
+    Works on Happy Path (no advanced_adaptation gate). Mutates lists in place.
+    """
+    import copy
+
+    if idx < 0 or idx >= len(segments_data):
+        return False
+    seg = segments_data[idx]
+    if seg.get("stage19c_split_done") or seg.get("adaptive_resegment_done"):
+        return False
+
+    if idx < len(timing_map):
+        item = timing_map[idx]
+        if isinstance(item, dict):
+            start_ms = int(item.get("start") or item.get("start_ms") or 0)
+            end_ms = int(item.get("end") or item.get("end_ms") or 0)
+        elif isinstance(item, (list, tuple)) and len(item) >= 2:
+            start_ms, end_ms = int(item[0]), int(item[1])
+        else:
+            start_ms = int(seg.get("start_ms") or 0)
+            end_ms = start_ms + int(seg.get("slot_ms") or 0)
+    else:
+        start_ms = int(seg.get("start_ms") or 0)
+        end_ms = start_ms + int(seg.get("slot_ms") or 0)
+    slot_ms = max(0, end_ms - start_ms)
+    tts_ms = int(
+        seg.get("playback_duration")
+        or seg.get("tts_ms")
+        or seg.get("actual_duration_ms")
+        or 0
+    )
+    ov = max(0, int(overflow_ms if overflow_ms is not None else (tts_ms - slot_ms)))
+    if not large_overflow_needs_split(overflow_ms=ov, slot_ms=slot_ms):
+        return False
+
+    src = ""
+    if idx < len(source_segments):
+        src = str(source_segments[idx] or "").strip()
+    tgt = _segment_text(seg)
+    if not tgt and not src:
+        return False
+
+    try:
+        from engines.adaptive_segmentation.core import (
+            _allocate_times,
+            _safe_split_chunks,
+        )
+    except Exception as exc:
+        logger.debug("stage19c split imports failed: %s", exc)
+        return False
+
+    # Prefer EN sentence cuts; fall back to Final.
+    base = src if len(_safe_split_chunks(src)) >= 2 else tgt
+    chunks = _safe_split_chunks(base)
+    if len(chunks) < 2:
+        chunks = _safe_split_chunks(tgt)
+    if len(chunks) < 2:
+        return False
+
+    # Allocate by char weight, then merge children shorter than MIN_SPLIT_CHILD_MS.
+    allocated = _allocate_times(chunks, start_ms, end_ms)
+    allocated = _merge_short_chunk_spans(allocated, min_ms=MIN_SPLIT_CHILD_MS)
+    if len(allocated) < 2:
+        return False
+
+    # Parallel source / target chunk lists of same arity.
+    src_chunks = _safe_split_chunks(src) if src else []
+    tgt_chunks = _safe_split_chunks(tgt) if tgt else list(chunks)
+    n = len(allocated)
+    if len(src_chunks) != n:
+        # Proportional word split of source to n parts.
+        if src:
+            words = src.split()
+            if len(words) >= n:
+                src_chunks = []
+                step = max(1, len(words) // n)
+                for i in range(n):
+                    a = i * step
+                    b = len(words) if i == n - 1 else (i + 1) * step
+                    src_chunks.append(" ".join(words[a:b]).strip())
+            else:
+                src_chunks = [src] + [""] * (n - 1)
+        else:
+            src_chunks = [c[0] for c in allocated]
+    if len(tgt_chunks) != n:
+        # Use allocated texts as Final when tgt didn't sentence-split evenly.
+        tgt_chunks = [c[0] for c in allocated]
+        if tgt and n == 2:
+            try:
+                from engines.translation_segment_parity import (
+                    split_translation_by_sources,
+                )
+
+                tl, tr = split_translation_by_sources(
+                    tgt, [src_chunks[0], src_chunks[1]]
+                )
+                if tl and tr:
+                    tgt_chunks = [tl, tr]
+            except Exception:
+                pass
+
+    # Build child segment dicts.
+    children: list[dict] = []
+    for i, ((text, st, en), src_t, tgt_t) in enumerate(
+        zip(allocated, src_chunks, tgt_chunks)
+    ):
+        child = copy.deepcopy(seg) if i > 0 else seg
+        if i > 0:
+            for key in (
+                "file",
+                "tts_file_path",
+                "tts_ms",
+                "playback_duration",
+                "actual_duration_ms",
+                "tts_timing",
+                "post_tts_retry",
+                "text_adaptation_trace",
+                "fitted_file",
+                "first_tts_duration_ms",
+            ):
+                child.pop(key, None)
+            try:
+                from engines.pipeline_integrity.segment import new_segment_id
+
+                parent_sid = str(seg.get("segment_id") or "").strip()
+                new_sid = new_segment_id()
+                child["segment_id"] = new_sid
+                child["segment_uuid"] = new_sid
+                if parent_sid:
+                    child["reissued_from"] = [parent_sid]
+                    child["split_from_segment_id"] = parent_sid
+            except Exception:
+                pass
+        else:
+            for key in (
+                "file",
+                "tts_file_path",
+                "tts_ms",
+                "playback_duration",
+                "actual_duration_ms",
+                "tts_timing",
+                "first_tts_duration_ms",
+            ):
+                child.pop(key, None)
+
+        final_txt = (tgt_t or text or "").strip()
+        child["plain_text"] = final_txt
+        child["text"] = final_txt
+        child["final_text"] = final_txt
+        child["translation_text"] = final_txt
+        child["start_ms"] = int(st)
+        child["end_ms"] = int(en)
+        child["slot_ms"] = max(1, int(en) - int(st))
+        child["stage19c_split_done"] = True
+        child["adaptive_resegment_done"] = True
+        child["strategy"] = "split"
+        lock_text_fit_algorithm_reason(child, "TextSlotSplit")
+        child["expansion_strategy"] = "split"
+        child["rule_rewrite_used"] = True
+        child["adaptation_stages"] = list(child.get("adaptation_stages") or []) + [
+            "stage19c_overflow_split"
+        ]
+        child["stage19c"] = {
+            "split_parent_idx": idx,
+            "split_child": i,
+            "split_children": n,
+            "delta_before": ov,
+            "overflow_ms_before": ov,
+        }
+        children.append(child)
+        if i == 0:
+            # first child is in-place seg
+            pass
+
+    # Insert siblings after idx
+    for i, child in enumerate(children):
+        if i == 0:
+            segments_data[idx] = child
+            continue
+        segments_data.insert(idx + i, child)
+
+    # Source + timing
+    for i, (_text, st, en) in enumerate(allocated):
+        src_t = src_chunks[i] if i < len(src_chunks) else ""
+        timing_entry = {"start": int(st), "end": int(en)}
+        if i == 0:
+            if idx < len(source_segments):
+                source_segments[idx] = src_t
+            else:
+                source_segments.append(src_t)
+            if idx < len(timing_map):
+                timing_map[idx] = timing_entry
+            else:
+                timing_map.append(timing_entry)
+        else:
+            source_segments.insert(idx + i, src_t)
+            timing_map.insert(idx + i, timing_entry)
+
+    if audits is not None:
+        audit_by = {int(a.get("index", -1)): a for a in audits}
+        parent_audit = dict(audit_by.get(idx) or {"index": idx})
+        rebuilt: list[dict[str, Any]] = []
+        for a in audits:
+            ai = int(a.get("index", -1))
+            if ai == idx:
+                continue
+            if ai > idx:
+                a = dict(a)
+                a["index"] = ai + (n - 1)
+            rebuilt.append(a)
+        for i in range(n):
+            aa = dict(parent_audit)
+            aa["index"] = idx + i
+            aa["whisper_text"] = src_chunks[i] if i < len(src_chunks) else ""
+            aa["final_text"] = tgt_chunks[i] if i < len(tgt_chunks) else ""
+            aa["stage19c_split"] = True
+            rebuilt.append(aa)
+        rebuilt.sort(key=lambda x: int(x.get("index", 0)))
+        audits.clear()
+        audits.extend(rebuilt)
+
+    logger.info(
+        "[Stage19c] overflow split seg#%d ov=%dms slot=%dms → %d children",
+        idx,
+        ov,
+        slot_ms,
+        n,
+    )
+    return True
+
+
 def _stage19b_algorithm_reason(fit: Any, *, text_changed: bool) -> str:
     action = str(getattr(fit, "action", "") or "")
     strategy = str(getattr(fit, "strategy", "") or "")
@@ -372,8 +677,7 @@ def _stamp_stage19b_meta(
     seg["atempo"] = round(atempo, 4)
     seg["strategy"] = strategy
     seg["rule_rewrite_used"] = bool(text_changed)
-    seg["algorithm_reason"] = algorithm_reason
-    seg["text_adaptation_reason"] = algorithm_reason
+    lock_text_fit_algorithm_reason(seg, algorithm_reason)
     if text_changed or expand_executed:
         from engines.dub_engine_v2.adaptation_decision import mark_adaptation_executed
 
@@ -519,8 +823,9 @@ def apply_stage19b_rule_text_fit(
     task_id: str | None = None,
     resolve_path: Callable[[str], str] | None = None,
 ) -> tuple[TimingBudget, bool]:
-    """Stage 19b: expand/shorten text before tempo. Works without LLM.
+    """Stage 19b/19c: expand/shorten text before tempo. Works without LLM.
 
+    Stage 19c: text_changed ⇒ mandatory re-TTS (regen_fn required — fail loud).
     Returns (budget, did_attempt). did_attempt True when |delta|>350 and fit ran.
     """
     if not _needs_stage19b_text_fit(budget):
@@ -528,8 +833,8 @@ def apply_stage19b_rule_text_fit(
 
     from engines.text_slot_fit import fit_text_to_slot
 
-    delta = _slot_delta_ms(budget)
-    expand_required = delta < -TEXT_FIT_DELTA_MS
+    delta_before = _slot_delta_ms(budget)
+    expand_required = delta_before < -TEXT_FIT_DELTA_MS
     original = _segment_text(seg)
     if not original:
         return budget, False
@@ -540,6 +845,9 @@ def apply_stage19b_rule_text_fit(
         or seg.get("mt_text")
         or original
     ).strip()
+    expansion_strategy = "none"
+    llm_used = False
+
     fit = fit_text_to_slot(
         original,
         int(budget.slot_duration or 0),
@@ -550,6 +858,67 @@ def apply_stage19b_rule_text_fit(
     )
     new_text = " ".join(str(fit.text or "").split()).strip()
     text_changed = bool(fit.changed and new_text and new_text != original)
+
+    # Stage 19c §D: no rule progress on underfill → strong expand / optional LLM.
+    if expand_required and not text_changed:
+        seg["requires_strong_expand"] = True
+        try:
+            from engines.translation_adapt import llm_rephrase_available
+            from engines.semantic_optimizer import optimize_expand_for_slot
+
+            if llm_rephrase_available():
+                opt = optimize_expand_for_slot(
+                    original,
+                    source_hint=source_hint,
+                    slot_ms=budget.slot_duration,
+                    tgt_lang=target_lang,
+                    max_rounds=1,
+                    current_ms=int(budget.measured_duration or 0),
+                )
+                if opt.changed and str(opt.text or "").strip() != original:
+                    new_text = " ".join(str(opt.text).split()).strip()
+                    text_changed = True
+                    llm_used = True
+                    expansion_strategy = "llm_expand"
+                    fit.changed = True
+                    fit.text = new_text
+                    fit.action = "expand"
+                    fit.strategy = "expand"
+        except Exception as exc:
+            logger.debug("stage19c strong LLM expand skipped: %s", exc)
+
+    # Overflow after rule: optional one-shot LLM paraphrase when still over.
+    if (
+        not text_changed
+        and delta_before > TEXT_FIT_DELTA_MS
+        and not large_overflow_needs_split(
+            overflow_ms=max(0, delta_before), slot_ms=int(budget.slot_duration or 0)
+        )
+    ):
+        try:
+            from engines.translation_adapt import llm_rephrase_available
+            from engines.semantic_optimizer import optimize_llm_rephrase_for_slot
+
+            if llm_rephrase_available():
+                opt = optimize_llm_rephrase_for_slot(
+                    original,
+                    source_hint=source_hint,
+                    slot_ms=budget.slot_duration,
+                    tgt_lang=target_lang,
+                    max_rounds=1,
+                    current_ms=int(budget.measured_duration or 0),
+                )
+                if opt.changed and str(opt.text or "").strip() != original:
+                    new_text = " ".join(str(opt.text).split()).strip()
+                    text_changed = True
+                    llm_used = True
+                    fit.changed = True
+                    fit.text = new_text
+                    fit.action = "shorten"
+                    fit.strategy = "shorten"
+        except Exception as exc:
+            logger.debug("stage19c LLM shorten skipped: %s", exc)
+
     expand_executed = bool(
         expand_required
         and text_changed
@@ -557,23 +926,39 @@ def apply_stage19b_rule_text_fit(
             fit.action in ("expand", "expand_then_slow")
             or "expand" in " ".join(str(r) for r in (fit.reasons or []))
             or len(new_text.split()) > len(original.split())
+            or expansion_strategy == "llm_expand"
         )
     )
+    if text_changed and expansion_strategy == "none":
+        if expand_executed:
+            reasons = [str(r) for r in (fit.reasons or [])]
+            expansion_strategy = (
+                "llm_expand"
+                if llm_used or "llm_expand" in reasons
+                else ("rule_expand" if "rule_expand" in reasons else "expand_to_fill")
+            )
+        elif fit.action == "shorten":
+            expansion_strategy = "none"
+
     algorithm_reason = _stage19b_algorithm_reason(fit, text_changed=text_changed)
+    regen_ok = False
 
     if text_changed:
         if regen_fn is None:
             seg["expand_required"] = expand_required
-            _stamp_stage19b_meta(
-                seg,
-                fit=fit,
-                expand_required=expand_required,
-                expand_executed=False,
-                algorithm_reason=algorithm_reason,
-                text_changed=False,
+            lock_text_fit_algorithm_reason(seg, algorithm_reason)
+            budget.final_status = "failed_no_regen"
+            budget.rewrite_reason = f"stage19c:PIPELINE_TEXT_FIT_NO_REGEN"
+            seg["stage19c"] = {
+                "delta_before": delta_before,
+                "delta_after": delta_before,
+                "split_children": 0,
+                "regen_ok": False,
+                "error": "PIPELINE_TEXT_FIT_NO_REGEN",
+            }
+            raise TextFitNoRegenError(
+                "PIPELINE_TEXT_FIT_NO_REGEN: text changed but regen_fn is None"
             )
-            budget.rewrite_reason = f"stage19b:no_regen:{algorithm_reason}"
-            return budget, True
 
         regen_result = regen_fn(
             new_text,
@@ -590,22 +975,25 @@ def apply_stage19b_rule_text_fit(
             new_file, new_ms = regen_result, 0
         if not new_file:
             budget.final_status = "failed_tts_regen"
-            budget.rewrite_reason = f"stage19b:tts_fail:{algorithm_reason}"
+            budget.rewrite_reason = f"stage19c:tts_fail:{algorithm_reason}"
             seg["expand_required"] = expand_required
-            _stamp_stage19b_meta(
-                seg,
-                fit=fit,
-                expand_required=expand_required,
-                expand_executed=False,
-                algorithm_reason=algorithm_reason,
-                text_changed=False,
-            )
+            lock_text_fit_algorithm_reason(seg, algorithm_reason)
+            seg["stage19c"] = {
+                "delta_before": delta_before,
+                "delta_after": delta_before,
+                "split_children": 0,
+                "regen_ok": False,
+                "error": "failed_tts_regen",
+            }
+            # Do not continue as success with the old wav.
             return budget, True
 
+        regen_ok = True
         seg["text"] = new_text
         seg["plain_text"] = new_text
         seg["translation_text"] = new_text
         seg["final_text"] = new_text
+        seg["final_tts_text"] = new_text
         seg["file"] = new_file
         seg["tts_file_path"] = new_file
         if new_ms <= 0:
@@ -614,6 +1002,7 @@ def apply_stage19b_rule_text_fit(
             seg["playback_duration"] = new_ms
             seg["tts_ms"] = new_ms
             seg["actual_duration_ms"] = new_ms
+            seg["final_tts_duration_ms"] = new_ms
 
         pause_meta = apply_dynamic_pause_engine(
             seg,
@@ -629,7 +1018,7 @@ def apply_stage19b_rule_text_fit(
             audit["tts_text"] = new_text
             audit["final_text"] = new_text
             qd = audit.setdefault("quality_details", {})
-            qd["stage19b"] = {
+            qd["stage19c"] = {
                 "reason": algorithm_reason,
                 "text_before": original[:500],
                 "text_after": new_text[:500],
@@ -638,6 +1027,7 @@ def apply_stage19b_rule_text_fit(
                 "fill_ratio": fit.fill_ratio,
                 "atempo": fit.atempo,
                 "strategy": fit.strategy,
+                "regen_ok": True,
             }
 
         if commit_fn:
@@ -649,10 +1039,10 @@ def apply_stage19b_rule_text_fit(
                     audio_filename=str(seg.get("file") or new_file),
                 )
             except Exception as exc:
-                logger.debug("stage19b commit skipped: %s", exc)
+                logger.debug("stage19c commit skipped: %s", exc)
 
         budget.rewrite_iterations = max(1, int(budget.rewrite_iterations or 0) + 1)
-        budget.rewrite_reason = f"stage19b:{algorithm_reason}"
+        budget.rewrite_reason = f"stage19c:{algorithm_reason}"
         saved_pause = budget.pause_adjustments_ms
         saved_stages = list(budget.pause_stages or [])
         orig = budget.original_duration
@@ -667,9 +1057,9 @@ def apply_stage19b_rule_text_fit(
             seg.get("first_tts_duration_ms") or budget.measured_duration
         )
     else:
-        # No text change — still mark expand_required + suggested strategy/atempo.
         if expand_required:
             seg["expand_required"] = True
+            seg["requires_strong_expand"] = True
 
     _stamp_stage19b_meta(
         seg,
@@ -679,9 +1069,14 @@ def apply_stage19b_rule_text_fit(
         algorithm_reason=algorithm_reason,
         text_changed=text_changed,
     )
+    if expansion_strategy != "none":
+        seg["expansion_strategy"] = expansion_strategy
+    lock_text_fit_algorithm_reason(seg, algorithm_reason)
 
-    # Light atempo after text attempt when still outside band.
-    if _needs_stage19b_text_fit(budget) or float(seg.get("fill_ratio") or 0) < 0.90:
+    # Light atempo after text attempt when still outside band (never alone as sole strategy).
+    if budget.final_status != "failed_tts_regen" and (
+        _needs_stage19b_text_fit(budget) or float(seg.get("fill_ratio") or 0) < 0.90
+    ):
         budget = _apply_light_atempo_after_fit(
             seg,
             budget=budget,
@@ -696,42 +1091,56 @@ def apply_stage19b_rule_text_fit(
         reason = budget.rewrite_reason
         budget = build_timing_budget(seg, idx, timing_map)
         budget.rewrite_iterations = iters
-        budget.rewrite_reason = reason or f"stage19b:{algorithm_reason}"
+        budget.rewrite_reason = reason or f"stage19c:{algorithm_reason}"
         budget.pause_adjustments_ms = saved_pause
         budget.pause_stages = saved_stages
         budget.original_duration = orig or int(
             seg.get("first_tts_duration_ms") or budget.measured_duration
         )
-        # Refresh fill from measured audio.
         slot = max(1, int(budget.slot_duration or 1))
         seg["fill_ratio"] = round(int(budget.measured_duration or 0) / float(slot), 4)
         if text_changed and abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS:
-            seg["algorithm_reason"] = "TextThenAtemo"
-            seg["text_adaptation_reason"] = "TextThenAtemo"
+            algorithm_reason = "TextThenAtemo"
+            lock_text_fit_algorithm_reason(seg, algorithm_reason)
+
+    delta_after = _slot_delta_ms(budget)
+    seg["stage19c"] = {
+        "delta_before": int(delta_before),
+        "delta_after": int(delta_after),
+        "split_children": int((seg.get("stage19c") or {}).get("split_children") or 0),
+        "regen_ok": bool(regen_ok) if text_changed else None,
+        "expansion_strategy": seg.get("expansion_strategy") or expansion_strategy,
+        "algorithm_reason": str(seg.get("algorithm_reason") or algorithm_reason),
+        "fill_ratio": seg.get("fill_ratio"),
+        "atempo": seg.get("atempo"),
+        "requires_strong_expand": bool(seg.get("requires_strong_expand")),
+    }
 
     needs, _ = _needs_rewrite(budget)
-    if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS:
+    if not needs and abs(delta_after) <= TEXT_FIT_DELTA_MS:
         budget.final_status = "ok"
-    elif budget.final_status in ("", "pending"):
+    elif budget.final_status in ("", "pending", "underflow", "overflow", "ok"):
         fill = float(seg.get("fill_ratio") or 0)
         if fill < 0.90 and int(budget.underflow or 0) > TEXT_FIT_DELTA_MS:
             budget.final_status = "dead_air_risk"
             seg["strategy"] = "dead_air_risk"
-        else:
-            budget.final_status = "ok" if not needs else "stage19b_partial"
+        elif budget.final_status not in ("failed_tts_regen", "failed_no_regen"):
+            budget.final_status = "ok" if not needs else "stage19c_partial"
 
     logger.info(
-        "[Stage19b] task=%s seg=%d delta=%dms expand_req=%s expand_exec=%s "
-        "reason=%s fill=%.2f atempo=%.3f iters=%d",
+        "[Stage19c] task=%s seg=%d δ %d→%d expand_req=%s expand_exec=%s "
+        "reason=%s fill=%.2f atempo=%.3f iters=%d regen_ok=%s",
         task_id,
         idx,
-        delta,
+        delta_before,
+        delta_after,
         expand_required,
         expand_executed,
-        algorithm_reason,
+        seg.get("algorithm_reason") or algorithm_reason,
         float(seg.get("fill_ratio") or 0),
         float(seg.get("atempo") or 1),
         int(budget.rewrite_iterations or 0),
+        regen_ok,
     )
     return budget, True
 
@@ -825,23 +1234,28 @@ def run_closed_loop_segment(
             )
             # FitsNoChange only when truly in band (|delta|≤350). Never with need=True.
             if _need or _needs_stage19b_text_fit(budget):
-                budget, _ = apply_stage19b_rule_text_fit(
-                    seg,
-                    idx,
-                    timing_map,
-                    budget,
-                    source_hint=source_hint,
-                    target_lang=target_lang,
-                    voice=voice,
-                    work_dir=work_dir,
-                    regen_fn=regen_fn,
-                    commit_fn=commit_fn,
-                    audit=audit,
-                    tts_rate=tts_rate,
-                    tts_pitch=tts_pitch,
-                    task_id=task_id,
-                    resolve_path=resolve_path,
-                )
+                try:
+                    budget, _ = apply_stage19b_rule_text_fit(
+                        seg,
+                        idx,
+                        timing_map,
+                        budget,
+                        source_hint=source_hint,
+                        target_lang=target_lang,
+                        voice=voice,
+                        work_dir=work_dir,
+                        regen_fn=regen_fn,
+                        commit_fn=commit_fn,
+                        audit=audit,
+                        tts_rate=tts_rate,
+                        tts_pitch=tts_pitch,
+                        task_id=task_id,
+                        resolve_path=resolve_path,
+                    )
+                except TextFitNoRegenError as exc:
+                    budget.final_status = "failed_no_regen"
+                    budget.rewrite_reason = str(exc.error_code)
+                    logger.error("closed_loop seg=%s: %s", idx, exc)
                 seg["timing_budget"] = budget.to_dict()
                 seg["timing_score"] = budget.timing_score
                 return budget
@@ -858,25 +1272,35 @@ def run_closed_loop_segment(
         seg["timing_score"] = budget.timing_score
         return budget
 
-    # Stage 19b: rule expand/shorten BEFORE LLM / before pause-only short-circuit.
+    # Stage 19b/19c: rule expand/shorten BEFORE LLM / before pause-only short-circuit.
     # Happy Path (max_iterations=0) and llm_available=false must still run text fit.
-    budget, stage19b_ran = apply_stage19b_rule_text_fit(
-        seg,
-        idx,
-        timing_map,
-        budget,
-        source_hint=source_hint,
-        target_lang=target_lang,
-        voice=voice,
-        work_dir=work_dir,
-        regen_fn=regen_fn,
-        commit_fn=commit_fn,
-        audit=audit,
-        tts_rate=tts_rate,
-        tts_pitch=tts_pitch,
-        task_id=task_id,
-        resolve_path=resolve_path,
-    )
+    stage19b_ran = False
+    try:
+        budget, stage19b_ran = apply_stage19b_rule_text_fit(
+            seg,
+            idx,
+            timing_map,
+            budget,
+            source_hint=source_hint,
+            target_lang=target_lang,
+            voice=voice,
+            work_dir=work_dir,
+            regen_fn=regen_fn,
+            commit_fn=commit_fn,
+            audit=audit,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            task_id=task_id,
+            resolve_path=resolve_path,
+        )
+    except TextFitNoRegenError as exc:
+        budget.final_status = "failed_no_regen"
+        budget.rewrite_reason = str(exc.error_code)
+        stage19b_ran = True
+        logger.error("closed_loop seg=%s: %s", idx, exc)
+        seg["timing_budget"] = budget.to_dict()
+        seg["timing_score"] = budget.timing_score
+        return budget
     needs, reason = _needs_rewrite(budget)
     if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS:
         budget.final_status = "ok"
@@ -1427,8 +1851,138 @@ def run_closed_loop_timing(
         if before.status in ("overflow", "underflow"):
             stats["deviations"] += 1
 
-        # TZ §11: resegment oversized overflow before any text shorten
-        # Happy Path: skip — resegment causes translation bleed (Stage 3).
+        # Stage 19c §C: large overflow split (Happy Path included — not LLM-gated).
+        if (
+            before.status == "overflow"
+            and large_overflow_needs_split(
+                overflow_ms=int(before.overflow or 0),
+                slot_ms=int(before.slot_duration or 0),
+            )
+            and not seg.get("stage19c_split_done")
+            and not seg.get("adaptive_resegment_done")
+        ):
+            try:
+                _src_list = (
+                    source_segments
+                    if isinstance(source_segments, list)
+                    else list(source_segments or [])
+                )
+                _audits_mut = list(audits) if audits is not None else None
+                if try_stage19c_overflow_split(
+                    segments_data=segments_data,
+                    source_segments=_src_list,
+                    timing_map=timing_map,
+                    audits=_audits_mut,
+                    idx=idx,
+                    overflow_ms=int(before.overflow or 0),
+                ):
+                    if isinstance(source_segments, list) and source_segments is not _src_list:
+                        source_segments[:] = _src_list
+                    if audits is not None and _audits_mut is not None:
+                        audits.clear()
+                        audits.extend(_audits_mut)
+                    audit_by_idx = {
+                        int(a.get("index", -1)): a for a in (audits or [])
+                    }
+                    n_children = int(
+                        (segments_data[idx].get("stage19c") or {}).get(
+                            "split_children"
+                        )
+                        or 0
+                    )
+                    if n_children < 2:
+                        # Fallback: count consecutive children sharing parent idx.
+                        n_children = 1
+                        while idx + n_children < len(segments_data):
+                            meta = segments_data[idx + n_children].get("stage19c") or {}
+                            if int(meta.get("split_parent_idx", -1)) != idx:
+                                break
+                            n_children += 1
+                    stats["resegmented"] += 1
+                    stats["adaptation_executed"] = True
+                    stats.setdefault("stage19c_splits", 0)
+                    stats["stage19c_splits"] = int(stats["stage19c_splits"]) + 1
+                    logger.info(
+                        "closed_loop: stage19c overflow split idx=%s children=%s",
+                        idx,
+                        n_children,
+                    )
+                    for _ri in range(idx, idx + n_children):
+                        if _ri >= len(segments_data):
+                            break
+                        _s = segments_data[_ri]
+                        _src = (
+                            source_segments[_ri]
+                            if _ri < len(source_segments)
+                            else ""
+                        )
+                        _txt = str(
+                            _s.get("plain_text") or _s.get("text") or ""
+                        ).strip()
+                        if _txt and callable(regen_fn):
+                            try:
+                                _rr = regen_fn(
+                                    _txt,
+                                    voice=voice,
+                                    tts_rate=tts_rate,
+                                    tts_pitch=tts_pitch,
+                                    task_id=task_id,
+                                    segment_index=_ri,
+                                    segment_id=str(_s.get("segment_id") or ""),
+                                )
+                                if isinstance(_rr, tuple):
+                                    _nf, _nms = _rr[0], int(_rr[1] or 0)
+                                else:
+                                    _nf, _nms = _rr, 0
+                                if _nf:
+                                    _s["file"] = _nf
+                                    _s["tts_file_path"] = _nf
+                                    _s["final_tts_text"] = _txt
+                                    if _nms > 0:
+                                        _s["playback_duration"] = _nms
+                                        _s["tts_ms"] = _nms
+                                        _s["actual_duration_ms"] = _nms
+                            except Exception as _rg_exc:
+                                logger.debug(
+                                    "closed_loop stage19c split regen failed: %s",
+                                    _rg_exc,
+                                )
+                        # Full §A text-fit on each child (max_iters=0 ⇒ no LLM, rule fit yes).
+                        _budget = run_closed_loop_segment(
+                            _s,
+                            _ri,
+                            timing_map,
+                            source_hint=str(_src or ""),
+                            target_lang=target_lang,
+                            src_lang=src_lang,
+                            voice=voice,
+                            work_dir=work_dir,
+                            regen_fn=regen_fn,
+                            commit_fn=commit_fn,
+                            audit=audit_by_idx.get(_ri),
+                            max_iterations=0,  # no LLM; Stage 19c rule text-fit still runs
+                            tts_rate=tts_rate,
+                            tts_pitch=tts_pitch,
+                            task_id=task_id,
+                            resolve_path=resolve_path,
+                        )
+                        budgets.append(_budget)
+                        if _budget.final_status == "ok":
+                            stats["ok"] += 1
+                        elif int(_budget.rewrite_iterations or 0) > 0:
+                            stats["rewritten"] += 1
+                            stats["fixed"] += 1
+                        elif _budget.pause_adjustments_ms > 0:
+                            stats["pause_only"] += 1
+                        else:
+                            stats["failed"] += 1
+                    idx += n_children
+                    continue
+            except Exception as _s19c_exc:
+                logger.debug("closed_loop stage19c split skipped: %s", _s19c_exc)
+
+        # TZ §11: adaptive resegment (advanced path) before aggressive shorten.
+        # Happy Path: skip — Stage 19c split above covers large overflow.
         _allow_resegment = True
         try:
             from engines.happy_path import (
@@ -1549,7 +2103,8 @@ def run_closed_loop_timing(
                                 regen_fn=regen_fn,
                                 commit_fn=commit_fn,
                                 audit=audit_by_idx.get(_ri),
-                                max_iterations=0,  # pause only — no text shorten
+                                # No LLM loops; Stage 19b/19c rule text-fit still runs (§G).
+                                max_iterations=0,
                                 tts_rate=tts_rate,
                                 tts_pitch=tts_pitch,
                                 task_id=task_id,
@@ -1558,6 +2113,9 @@ def run_closed_loop_timing(
                             budgets.append(_budget)
                             if _budget.final_status == "ok":
                                 stats["ok"] += 1
+                            elif int(_budget.rewrite_iterations or 0) > 0:
+                                stats["rewritten"] += 1
+                                stats["fixed"] += 1
                             elif _budget.pause_adjustments_ms > 0:
                                 stats["pause_only"] += 1
                             else:

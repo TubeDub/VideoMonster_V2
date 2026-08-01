@@ -53,6 +53,21 @@ _TEXT_ADAPT_TOKENS = (
 )
 
 
+def _text_fit_reason_locked(seg: dict[str, Any]) -> bool:
+    if seg.get("algorithm_reason_locked") or seg.get("_algorithm_reason_locked"):
+        return True
+    algo = str(seg.get("algorithm_reason") or "")
+    return any(
+        tok in algo
+        for tok in (
+            "TextSlotFitExpand",
+            "TextSlotFitShorten",
+            "TextThenAtemo",
+            "TextSlotSplit",
+        )
+    )
+
+
 def set_reason(
     seg: dict[str, Any],
     field: str,
@@ -65,6 +80,15 @@ def set_reason(
     reason = str(reason or "").strip()
     if not reason:
         return
+    # Stage 19c: never overwrite locked TextSlotFit* with AudioOnly labels.
+    if field in ("text_adaptation_reason",) and _text_fit_reason_locked(seg):
+        if _is_audio_only_label(reason):
+            return
+    if field == "audio_strategy_reason" and _text_fit_reason_locked(seg):
+        # Keep audio field for diagnostics but do not let it clobber text-fit story.
+        if _is_audio_only_label(reason) or reason == "AudioStrategyNoTextRewrite":
+            seg["audio_strategy_reason"] = reason
+            return
     # PSA7: refuse to stamp semantic-shorten into audio_strategy_reason
     if field == "audio_strategy_reason" and _SEMANTIC_SHORTEN_RE.search(reason):
         reason = "AudioStrategyNoTextRewrite"
@@ -308,14 +332,23 @@ def apply_honest_reasons(
         seg["text_adaptation_reason"] = ""
 
     legacy = str(seg.get("algorithm_reason") or "")
-    # Stage 19b: keep TextSlotFit* / TextThenAtemo as the honest algorithm_reason.
-    if any(
+    # Stage 19b/19c: keep TextSlotFit* / TextThenAtemo / TextSlotSplit locked.
+    if _text_fit_reason_locked(seg) or any(
         tok in legacy
-        for tok in ("TextSlotFitExpand", "TextSlotFitShorten", "TextThenAtemo")
+        for tok in (
+            "TextSlotFitExpand",
+            "TextSlotFitShorten",
+            "TextThenAtemo",
+            "TextSlotSplit",
+        )
     ):
         text_r = text_r or legacy
         seg["text_adaptation_reason"] = text_r
-        honest_algo = legacy
+        honest_algo = legacy or text_r
+        # Refuse AudioOnly overwrite after successful text-fit.
+        if audio_r and _is_audio_only_label(audio_r):
+            seg["audio_strategy_reason"] = audio_r  # keep split field
+            # algorithm_reason stays TextSlotFit*
     else:
         honest_algo = sanitize_algorithm_reason(
             legacy
