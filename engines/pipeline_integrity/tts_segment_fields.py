@@ -16,6 +16,11 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
         "tts_cache_hit",
         "tts_synth_rate",
         "tts_synth_pitch",
+        # Stage 20 — backend / voice metadata
+        "tts_backend",
+        "tts_engine",
+        "tts_voice",
+        "tts_sample_rate",
     }
 )
 

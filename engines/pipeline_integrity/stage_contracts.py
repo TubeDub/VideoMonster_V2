@@ -175,6 +175,11 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             "tts_cache_hit",
             "tts_synth_rate",
             "tts_synth_pitch",
+            # Stage 20 — Ukrainian TTS backend metadata
+            "tts_backend",
+            "tts_engine",
+            "tts_voice",
+            "tts_sample_rate",
         }
     ),
     "slot_fit": frozenset(
