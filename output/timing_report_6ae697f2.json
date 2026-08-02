@@ -1,0 +1,653 @@
+{
+  "engine": "closed_loop_timing",
+  "segment_count": 11,
+  "avg_timing_score": 76.8,
+  "segments_score_ge_95": 4,
+  "kpi_target_score": 95,
+  "overflow_threshold_ms": 100,
+  "underflow_threshold_ms": 350,
+  "max_rewrite_iterations": 5,
+  "closed_loop": {
+    "engine": "closed_loop_timing",
+    "checked": 9,
+    "ok": 0,
+    "rewritten": 3,
+    "pause_only": 1,
+    "failed": 7,
+    "retries": 0,
+    "deviations": 9,
+    "fixed": 3,
+    "adaptation_executed": true,
+    "resegmented": 2,
+    "issues": [
+      {
+        "idx": 0,
+        "code": "underflow",
+        "final_status": "stage19d_partial",
+        "tts_ms": 17196,
+        "slot_ms": 17783,
+        "overflow_ms": 0,
+        "underflow_ms": 587,
+        "rewrite_reason": "stage19d:TextSlotFitExpand"
+      },
+      {
+        "idx": 1,
+        "code": "underflow",
+        "final_status": "dead_air_risk",
+        "tts_ms": 11901,
+        "slot_ms": 14716,
+        "overflow_ms": 0,
+        "underflow_ms": 2815,
+        "rewrite_reason": "stage19d:TextSlotFitExpand"
+      },
+      {
+        "idx": 2,
+        "code": "underflow",
+        "final_status": "dead_air_risk",
+        "tts_ms": 6062,
+        "slot_ms": 7246,
+        "overflow_ms": 0,
+        "underflow_ms": 1184,
+        "rewrite_reason": "stage19d:TextSlotFitExpand"
+      },
+      {
+        "idx": 3,
+        "code": "overflow",
+        "final_status": "overflow",
+        "tts_ms": 14117,
+        "slot_ms": 13861,
+        "overflow_ms": 256,
+        "underflow_ms": 0,
+        "rewrite_reason": "stage19d_unresolved"
+      },
+      {
+        "idx": 4,
+        "code": "overflow",
+        "final_status": "overflow",
+        "tts_ms": 20017,
+        "slot_ms": 19815,
+        "overflow_ms": 202,
+        "underflow_ms": 0,
+        "rewrite_reason": "stage19d_unresolved"
+      },
+      {
+        "idx": 5,
+        "code": "underflow",
+        "final_status": "dead_air_risk",
+        "tts_ms": 19756,
+        "slot_ms": 21075,
+        "overflow_ms": 0,
+        "underflow_ms": 1319,
+        "rewrite_reason": "stage19d:TextSlotFitExpand"
+      },
+      {
+        "idx": 6,
+        "code": "underflow",
+        "final_status": "dead_air_risk",
+        "tts_ms": 5626,
+        "slot_ms": 6875,
+        "overflow_ms": 0,
+        "underflow_ms": 1249,
+        "rewrite_reason": "stage19d:TextSlotFitExpand"
+      }
+    ],
+    "avg_timing_score": 67.5,
+    "segments_score_ge_95": 3,
+    "stage19e_splits": 2,
+    "budgets": [
+      {
+        "index": 0,
+        "slot_start": 0,
+        "slot_end": 17783,
+        "slot_duration": 17783,
+        "tts_duration": 17196,
+        "measured_duration": 17196,
+        "delta": -587,
+        "overflow": 0,
+        "underflow": 587,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 2490,
+        "pause_stages": [
+          "lead_trim:212",
+          "tail_trim:1003",
+          "pause_compress:1273"
+        ],
+        "timing_score": 97.6,
+        "rewrite_reason": "stage19d:TextSlotFitExpand",
+        "final_status": "stage19d_partial",
+        "original_duration": 19536,
+        "provider_fatal": false
+      },
+      {
+        "index": 1,
+        "slot_start": 17883,
+        "slot_end": 32599,
+        "slot_duration": 14716,
+        "tts_duration": 11901,
+        "measured_duration": 11901,
+        "delta": -2815,
+        "overflow": 0,
+        "underflow": 2815,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 2355,
+        "pause_stages": [
+          "lead_trim:214",
+          "tail_trim:978",
+          "pause_compress:1162"
+        ],
+        "timing_score": 78.9,
+        "rewrite_reason": "stage19d:TextSlotFitExpand",
+        "final_status": "dead_air_risk",
+        "original_duration": 14256,
+        "provider_fatal": false
+      },
+      {
+        "index": 2,
+        "slot_start": 32699,
+        "slot_end": 39945,
+        "slot_duration": 7246,
+        "tts_duration": 6062,
+        "measured_duration": 6062,
+        "delta": -1184,
+        "overflow": 0,
+        "underflow": 1184,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1306,
+        "pause_stages": [
+          "lead_trim:204",
+          "tail_trim:939",
+          "pause_compress:162"
+        ],
+        "timing_score": 84.3,
+        "rewrite_reason": "stage19d:TextSlotFitExpand",
+        "final_status": "dead_air_risk",
+        "original_duration": 7368,
+        "provider_fatal": false
+      },
+      {
+        "index": 3,
+        "slot_start": 40239,
+        "slot_end": 54100,
+        "slot_duration": 13861,
+        "tts_duration": 14117,
+        "measured_duration": 14117,
+        "delta": 256,
+        "overflow": 256,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 2323,
+        "pause_stages": [
+          "lead_trim:210",
+          "tail_trim:978",
+          "pause_compress:1133"
+        ],
+        "timing_score": 96.4,
+        "rewrite_reason": "stage19d_unresolved",
+        "final_status": "overflow",
+        "original_duration": 16440,
+        "provider_fatal": false
+      },
+      {
+        "index": 4,
+        "slot_start": 54200,
+        "slot_end": 74015,
+        "slot_duration": 19815,
+        "tts_duration": 20017,
+        "measured_duration": 20017,
+        "delta": 202,
+        "overflow": 202,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 2495,
+        "pause_stages": [
+          "lead_trim:215",
+          "tail_trim:993",
+          "pause_compress:1285"
+        ],
+        "timing_score": 98.2,
+        "rewrite_reason": "stage19d_unresolved",
+        "final_status": "overflow",
+        "original_duration": 22512,
+        "provider_fatal": false
+      },
+      {
+        "index": 5,
+        "slot_start": 74115,
+        "slot_end": 95190,
+        "slot_duration": 21075,
+        "tts_duration": 19756,
+        "measured_duration": 19756,
+        "delta": -1319,
+        "overflow": 0,
+        "underflow": 1319,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 3050,
+        "pause_stages": [
+          "lead_trim:207",
+          "tail_trim:980",
+          "pause_compress:1861"
+        ],
+        "timing_score": 93.8,
+        "rewrite_reason": "stage19d:TextSlotFitExpand",
+        "final_status": "dead_air_risk",
+        "original_duration": 22656,
+        "provider_fatal": false
+      },
+      {
+        "index": 6,
+        "slot_start": 95290,
+        "slot_end": 102165,
+        "slot_duration": 6875,
+        "tts_duration": 5626,
+        "measured_duration": 5626,
+        "delta": -1249,
+        "overflow": 0,
+        "underflow": 1249,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 1164,
+        "pause_stages": [
+          "lead_trim:203",
+          "tail_trim:961"
+        ],
+        "timing_score": 82.3,
+        "rewrite_reason": "stage19d:TextSlotFitExpand",
+        "final_status": "dead_air_risk",
+        "original_duration": 5832,
+        "provider_fatal": false
+      },
+      {
+        "index": 7,
+        "slot_start": 102702,
+        "slot_end": 111590,
+        "slot_duration": 8888,
+        "tts_duration": 13584,
+        "measured_duration": 13584,
+        "delta": 4696,
+        "overflow": 4696,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 2,
+        "pause_adjustments_ms": 2397,
+        "pause_stages": [
+          "lead_trim:215",
+          "tail_trim:981",
+          "lead_trim:213",
+          "tail_trim:988"
+        ],
+        "timing_score": 0.0,
+        "rewrite_reason": "stage19d:anti_truncate_restored",
+        "final_status": "stage19d_partial",
+        "original_duration": 8184,
+        "provider_fatal": false
+      },
+      {
+        "index": 8,
+        "slot_start": 111590,
+        "slot_end": 117359,
+        "slot_duration": 5769,
+        "tts_duration": 13584,
+        "measured_duration": 13584,
+        "delta": 7815,
+        "overflow": 7815,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 1,
+        "pause_adjustments_ms": 1349,
+        "pause_stages": [
+          "lead_trim:217",
+          "tail_trim:1044",
+          "pause_compress:87"
+        ],
+        "timing_score": 0.0,
+        "rewrite_reason": "stage19d:anti_truncate_restored",
+        "final_status": "stage19d_partial",
+        "original_duration": 6384,
+        "provider_fatal": false
+      },
+      {
+        "index": 9,
+        "slot_start": 117459,
+        "slot_end": 188881,
+        "slot_duration": 71422,
+        "tts_duration": 59814,
+        "measured_duration": 59814,
+        "delta": -11608,
+        "overflow": 0,
+        "underflow": 11608,
+        "status": "underflow",
+        "rewrite_iterations": 0,
+        "pause_adjustments_ms": 4290,
+        "pause_stages": [
+          "lead_trim:223",
+          "tail_trim:1032",
+          "pause_compress:3028"
+        ],
+        "timing_score": 80.9,
+        "rewrite_reason": "stage19d:TextSlotFitSplit",
+        "final_status": "dead_air_risk",
+        "original_duration": 64104,
+        "provider_fatal": false
+      },
+      {
+        "index": 10,
+        "slot_start": 188881,
+        "slot_end": 209231,
+        "slot_duration": 20350,
+        "tts_duration": 83712,
+        "measured_duration": 83712,
+        "delta": 63362,
+        "overflow": 63362,
+        "underflow": 0,
+        "status": "overflow",
+        "rewrite_iterations": 1,
+        "pause_adjustments_ms": 2531,
+        "pause_stages": [
+          "lead_trim:211",
+          "tail_trim:1000",
+          "pause_compress:1319"
+        ],
+        "timing_score": 30.0,
+        "rewrite_reason": "stage19d:anti_truncate_restored",
+        "final_status": "stage19d_partial",
+        "original_duration": 19728,
+        "provider_fatal": false
+      }
+    ],
+    "requires_llm_adaptation": {
+      "count": 11,
+      "segment_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reason": "closed_loop_unresolved"
+    }
+  },
+  "timeline_validation": {
+    "ok": false,
+    "segment_overlap": [],
+    "speech_overlap": [
+      {
+        "index": 3,
+        "code": "speech_overlap",
+        "overlap_ms": 57,
+        "speech_end_ms": 54257,
+        "next_start_ms": 54200
+      },
+      {
+        "index": 4,
+        "code": "speech_overlap",
+        "overlap_ms": 50,
+        "speech_end_ms": 74165,
+        "next_start_ms": 74115
+      },
+      {
+        "index": 8,
+        "code": "speech_overlap",
+        "overlap_ms": 4227,
+        "speech_end_ms": 121686,
+        "next_start_ms": 117459
+      }
+    ],
+    "gap_analysis": [],
+    "problem_indices": [
+      3,
+      4,
+      8
+    ]
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original_duration": 19536,
+      "tts_duration": 17196,
+      "slot_duration": 17783,
+      "slot_start": 0,
+      "slot_end": 17783,
+      "delta": -587,
+      "overflow": 0,
+      "underflow": 587,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 2490,
+      "pause_stages": [
+        "lead_trim:212",
+        "tail_trim:1003",
+        "pause_compress:1273"
+      ],
+      "timing_score": 97.6,
+      "final_status": "stage19d_partial",
+      "rewrite_reason": "stage19d:TextSlotFitExpand",
+      "status": "underflow"
+    },
+    {
+      "index": 1,
+      "original_duration": 14256,
+      "tts_duration": 11901,
+      "slot_duration": 14716,
+      "slot_start": 17883,
+      "slot_end": 32599,
+      "delta": -2815,
+      "overflow": 0,
+      "underflow": 2815,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 2355,
+      "pause_stages": [
+        "lead_trim:214",
+        "tail_trim:978",
+        "pause_compress:1162"
+      ],
+      "timing_score": 78.9,
+      "final_status": "dead_air_risk",
+      "rewrite_reason": "stage19d:TextSlotFitExpand",
+      "status": "underflow"
+    },
+    {
+      "index": 2,
+      "original_duration": 7368,
+      "tts_duration": 6062,
+      "slot_duration": 7246,
+      "slot_start": 32699,
+      "slot_end": 39945,
+      "delta": -1184,
+      "overflow": 0,
+      "underflow": 1184,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1306,
+      "pause_stages": [
+        "lead_trim:204",
+        "tail_trim:939",
+        "pause_compress:162"
+      ],
+      "timing_score": 84.3,
+      "final_status": "dead_air_risk",
+      "rewrite_reason": "stage19d:TextSlotFitExpand",
+      "status": "underflow"
+    },
+    {
+      "index": 3,
+      "original_duration": 16440,
+      "tts_duration": 14018,
+      "slot_duration": 13861,
+      "slot_start": 40239,
+      "slot_end": 54100,
+      "delta": 157,
+      "overflow": 157,
+      "underflow": 0,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 99,
+      "pause_stages": [
+        "pause_compress:97"
+      ],
+      "timing_score": 98.3,
+      "final_status": "overflow",
+      "rewrite_reason": "stage19d_unresolved",
+      "status": "overflow"
+    },
+    {
+      "index": 4,
+      "original_duration": 22512,
+      "tts_duration": 19965,
+      "slot_duration": 19815,
+      "slot_start": 54200,
+      "slot_end": 74015,
+      "delta": 150,
+      "overflow": 150,
+      "underflow": 0,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 52,
+      "pause_stages": [
+        "pause_compress:50"
+      ],
+      "timing_score": 98.9,
+      "final_status": "overflow",
+      "rewrite_reason": "stage19d_unresolved",
+      "status": "overflow"
+    },
+    {
+      "index": 5,
+      "original_duration": 22656,
+      "tts_duration": 19756,
+      "slot_duration": 21075,
+      "slot_start": 74115,
+      "slot_end": 95190,
+      "delta": -1319,
+      "overflow": 0,
+      "underflow": 1319,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 3050,
+      "pause_stages": [
+        "lead_trim:207",
+        "tail_trim:980",
+        "pause_compress:1861"
+      ],
+      "timing_score": 93.8,
+      "final_status": "dead_air_risk",
+      "rewrite_reason": "stage19d:TextSlotFitExpand",
+      "status": "underflow"
+    },
+    {
+      "index": 6,
+      "original_duration": 5832,
+      "tts_duration": 5626,
+      "slot_duration": 6875,
+      "slot_start": 95290,
+      "slot_end": 102165,
+      "delta": -1249,
+      "overflow": 0,
+      "underflow": 1249,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1164,
+      "pause_stages": [
+        "lead_trim:203",
+        "tail_trim:961"
+      ],
+      "timing_score": 82.3,
+      "final_status": "dead_air_risk",
+      "rewrite_reason": "stage19d:TextSlotFitExpand",
+      "status": "underflow"
+    },
+    {
+      "index": 7,
+      "original_duration": 8184,
+      "tts_duration": 8888,
+      "slot_duration": 8888,
+      "slot_start": 102702,
+      "slot_end": 111590,
+      "delta": 0,
+      "overflow": 0,
+      "underflow": 0,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1416,
+      "pause_stages": [
+        "lead_trim:217",
+        "tail_trim:942",
+        "pause_compress:255"
+      ],
+      "timing_score": 100.0,
+      "final_status": "ok",
+      "rewrite_reason": "stage19d:TextSlotFitSplit",
+      "status": "ok"
+    },
+    {
+      "index": 8,
+      "original_duration": 6384,
+      "tts_duration": 10096,
+      "slot_duration": 5769,
+      "slot_start": 111590,
+      "slot_end": 117359,
+      "delta": 4327,
+      "overflow": 4327,
+      "underflow": 0,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 1416,
+      "pause_stages": [
+        "lead_trim:217",
+        "tail_trim:942",
+        "pause_compress:255"
+      ],
+      "timing_score": 0,
+      "final_status": "overflow_unresolved",
+      "rewrite_reason": "stage19d:TextSlotFitSplit",
+      "status": "overflow"
+    },
+    {
+      "index": 9,
+      "original_duration": 64104,
+      "tts_duration": 59814,
+      "slot_duration": 71422,
+      "slot_start": 117459,
+      "slot_end": 188881,
+      "delta": -11608,
+      "overflow": 0,
+      "underflow": 11608,
+      "rewrite_iterations": 0,
+      "pause_adjustments": 4290,
+      "pause_stages": [
+        "lead_trim:223",
+        "tail_trim:1032",
+        "pause_compress:3028"
+      ],
+      "timing_score": 80.9,
+      "final_status": "dead_air_risk",
+      "rewrite_reason": "stage19d:TextSlotFitSplit",
+      "status": "underflow"
+    },
+    {
+      "index": 10,
+      "original_duration": 19728,
+      "tts_duration": 83712,
+      "slot_duration": 20350,
+      "slot_start": 188881,
+      "slot_end": 209231,
+      "delta": 63362,
+      "overflow": 63362,
+      "underflow": 0,
+      "rewrite_iterations": 1,
+      "pause_adjustments": 2531,
+      "pause_stages": [
+        "lead_trim:211",
+        "tail_trim:1000",
+        "pause_compress:1319"
+      ],
+      "timing_score": 30.0,
+      "final_status": "stage19d_partial",
+      "rewrite_reason": "stage19d:anti_truncate_restored",
+      "status": "overflow"
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "task_id": "c18913c0b1c64253a3122e87e2afaf64",
+  "index": 8,
+  "original": "Now George Jr. walked over to the podium to take some photos of the winning driver but as he walked over there this middle-aged man came up beside him and just asked George Jr. about his photography and then at some point the man actually formally introduced himself as Haskell Wexler and he said that he was actually a cinematographer in Hollywood and George Jr. told Haskell about how he had recently applied to USC to try to get into their cinematography program and when Haskell heard this he said George I know people at USC let me make some calls and sure enough not long after this fateful meeting George Jr. would receive an acceptance letter from USC's film school but this moment in George Jr.'s life did not just alter George's life forever it also would go on to completely alter cinema in general forever because about 13 years later George Jr. would go on to create one of the most groundbreaking films in history his movie would go on to become part of the most successful movie franchise of all time George Jr. is better known today as George Lucas and his film franchise was Star Wars George Jr. is better known today as George Lucas and his film franchise was Star Wars",
+  "translation": "Тепер Джордж молодший підійшов до подіуму, щоб сфотографувати переможного гонщика, але коли він проходив туди, цей чоловік середнього віку підійшов до нього і запитав Джорджа Молодшого про його фотографію, а потім, в якийсь момент, чоловік офіційно представився як Хаскелл Векслер і він сказав, що він був кінооператором у Голлівуді і Джордж молодший розповів Хаскеллу про те, як він нещодавно подав заявку до USC, щоб спробувати потрапити до їхньої програми з кінематографії і коли Хаскелл почув це він сказав, що «Джордж, я знаю людей в USC, дозвольте мені зробити деякі дзвінки і, звичайно, досить швидко після цієї вирішальної зустрічі Джордж Молодший отримав би листа про зарахування від кіношколи USC». Але цей момент у житті Джорджа Молодшого не тільки змінив життя Джорджа назавжди, він також би змінив кіно назавжди, тому що приблизно 13 років пізніше Джордж Молодший створив один з найзахопливіших фільмів. В історії його фільм мав стати частиною найуспішнішої кінофраншизи всіх часів, Джордж Молодший, краще відомий сьогодні як Джордж Лукас, а його кінофраншиза, це «Зоряні війни». Сьогодні його краще знають як Джорджа Лукаса, а його кінофраншиза, це «Зоряні війни».",
+  "reason": "FastQAReviewer: word_loop; FastQAReviewer/word_loop: джордж",
+  "reviewers": [
+    {
+      "reviewer_name": "FastQAReviewer",
+      "status": "REJECT",
+      "metrics": {
+        "error_count": 1
+      },
+      "errors": [
+        {
+          "code": "word_loop",
+          "token": "джордж",
+          "severity": "critical"
+        }
+      ],
+      "explanation": "word_loop",
+      "retry_strategy": "Completion Strategy",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.7,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.88
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 0.2,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.88
+      }
+    },
+    {
+      "reviewer_name": "EntityReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "entities_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 8.98,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "MeaningReviewer",
+      "status": "WARN",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "event_missing",
+          "detail": "\\bstar wars\\b",
+          "severity": "major"
+        }
+      ],
+      "explanation": "event_missing",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.35,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.95
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 0.8,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 0.95
+      }
+    },
+    {
+      "reviewer_name": "GrammarReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "grammar_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.21,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    },
+    {
+      "reviewer_name": "TimingReviewer",
+      "status": "WARN",
+      "metrics": {},
+      "errors": [
+        {
+          "code": "too_long_for_slot",
+          "severity": "major",
+          "detail": "est_ms=98166 slot_ms=54767 ratio=1.79"
+        }
+      ],
+      "explanation": "too_long_for_slot",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8,
+        "slot_ms": 54767
+      },
+      "review_time_ms": 0.03,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        0.97
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 0.7,
+        "overall_confidence": 0.97
+      }
+    },
+    {
+      "reviewer_name": "NarrativeReviewer",
+      "status": "PASS",
+      "metrics": {},
+      "errors": [],
+      "explanation": "narrative_ok",
+      "retry_strategy": "none",
+      "metadata": {
+        "index": 8
+      },
+      "review_time_ms": 0.05,
+      "retry_count": 0,
+      "llm_used": false,
+      "fallback_used": false,
+      "confidence_history": [
+        1.0
+      ],
+      "confidence": {
+        "entity_preservation": 1.0,
+        "meaning_coverage": 1.0,
+        "grammar_integrity": 1.0,
+        "sentence_completeness": 1.0,
+        "narrative_integrity": 1.0,
+        "timing_fitness": 1.0,
+        "overall_confidence": 1.0
+      }
+    }
+  ],
+  "confidence": 0.9667,
+  "retry_history": [
+    {
+      "ok": false,
+      "reason": "cannot import name 'chat_completion' from 'engines.llm_adaptation_mode' (C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\engines\\llm_adaptation_mode.py)"
+    }
+  ],
+  "final_status": "REJECT",
+  "retry_strategy": "Completion Strategy",
+  "ts": 1785655836561
+}
