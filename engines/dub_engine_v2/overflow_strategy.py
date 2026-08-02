@@ -480,17 +480,15 @@ def stamp_decision_on_segment(seg: dict[str, Any], decision: OverflowDecision) -
             stage=STAGE_TTS,
             status="SKIPPED",
             reason=_skip_reason,
-            detail={"requires_re_tts": False, "text_fit_locked": _locked},
+            detail={
+                "requires_re_tts": False,
+                "text_fit_locked": _locked,
+                # Do NOT mutate seg["audio_strategy_reason"] here:
+                # OpenDDF forbids that field at stage slot_fit (STAGE_SNAPSHOT_INTEGRITY).
+                "audio_only": (not _locked),
+            },
             index=decision.index,
         )
-        if not _locked:
-            # Only stamp AudioOnly when no prior text-fit reason exists.
-            try:
-                from engines.pipeline_integrity.honest_diagnostics import set_reason
-
-                set_reason(seg, "audio_strategy_reason", "AudioStrategyNoTextRewrite")
-            except Exception:
-                seg["audio_strategy_reason"] = "AudioStrategyNoTextRewrite"
     record_stage(
         seg,
         stage=STAGE_SCHEDULER,
