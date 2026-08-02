@@ -28,6 +28,8 @@ TEXT_FIT_DELTA_MS = 350
 OVERFLOW_SPLIT_ABS_MS = 3000
 OVERFLOW_SPLIT_RATIO = 0.25
 MIN_SPLIT_CHILD_MS = 800
+# Cap children — conj-splitting EN into 12 orphans caused RUNTIME_INTEGRITY (task dce9b27b).
+MAX_STAGE19C_SPLIT_CHILDREN = 4
 OVERLAP_TOLERANCE_MS = 40
 TIMING_SCORE_GOAL = 95
 
@@ -391,6 +393,135 @@ def _merge_short_chunk_spans(
     return out
 
 
+def _pack_text_chunks(chunks: list[str], max_n: int) -> list[str]:
+    """Pack many sentence chunks into at most max_n groups (by char weight)."""
+    parts = [c.strip() for c in chunks if str(c or "").strip()]
+    if len(parts) <= max_n:
+        return parts
+    weights = [max(1, len(c)) for c in parts]
+    total = sum(weights) or 1
+    target = total / float(max_n)
+    packed: list[str] = []
+    buf: list[str] = []
+    wbuf = 0
+    for c, w in zip(parts, weights):
+        if buf and (wbuf + w) > target and len(packed) < max_n - 1:
+            packed.append(" ".join(buf).strip())
+            buf, wbuf = [c], w
+        else:
+            buf.append(c)
+            wbuf += w
+    if buf:
+        packed.append(" ".join(buf).strip())
+    return [p for p in packed if p]
+
+
+def _text_looks_english(text: str) -> bool:
+    """True when text is predominantly Latin (unsafe as UK Final/TTS)."""
+    t = str(text or "").strip()
+    if not t:
+        return False
+    letters = [ch for ch in t if ch.isalpha()]
+    if not letters:
+        return False
+    latin = sum(1 for ch in letters if ("a" <= ch.lower() <= "z"))
+    cyr = sum(1 for ch in letters if "\u0400" <= ch <= "\u04FF")
+    if cyr >= max(3, int(len(letters) * 0.25)):
+        return False
+    return latin >= int(len(letters) * 0.70)
+
+
+def _split_tgt_by_sources(tgt: str, src_parts: list[str]) -> list[str] | None:
+    """Align Final UA to N source parts — never return EN source as Final."""
+    parts = [p.strip() for p in src_parts if str(p or "").strip()]
+    tgt = " ".join(str(tgt or "").split()).strip()
+    if not tgt or len(parts) < 2:
+        return None
+    if len(parts) == 2:
+        try:
+            from engines.translation_segment_parity import split_translation_by_sources
+
+            left, right = split_translation_by_sources(tgt, parts)
+            if left and right and not _text_looks_english(left + " " + right):
+                return [left.strip(), right.strip()]
+        except Exception:
+            pass
+    # Proportional word split of Final (UA) — last resort, still not EN.
+    words = tgt.split()
+    if len(words) < len(parts):
+        return None
+    weights = [max(1, len(p.split())) for p in parts]
+    total_w = sum(weights) or 1
+    out: list[str] = []
+    cursor = 0
+    for i, w in enumerate(weights):
+        if i == len(weights) - 1:
+            piece = words[cursor:]
+        else:
+            n_take = max(1, int(round(len(words) * (w / total_w))))
+            n_take = min(n_take, len(words) - cursor - (len(weights) - i - 1))
+            piece = words[cursor : cursor + n_take]
+            cursor += n_take
+        chunk = " ".join(piece).strip()
+        if not chunk or _text_looks_english(chunk):
+            return None
+        out.append(chunk)
+    return out if len(out) == len(parts) else None
+
+
+def rollback_stage19c_split(
+    *,
+    segments_data: list[dict],
+    source_segments: list[str],
+    timing_map: list,
+    audits: list[dict] | None,
+    idx: int,
+    n_children: int,
+    parent_backup: dict,
+    parent_src: str,
+    parent_timing: Any,
+) -> None:
+    """Undo a failed Stage 19c split that left children without TTS."""
+    import copy
+
+    n = max(1, int(n_children or 1))
+    # Remove siblings idx+1 .. idx+n-1
+    for _ in range(n - 1):
+        if idx + 1 < len(segments_data):
+            segments_data.pop(idx + 1)
+        if idx + 1 < len(source_segments):
+            source_segments.pop(idx + 1)
+        if idx + 1 < len(timing_map):
+            timing_map.pop(idx + 1)
+    restored = copy.deepcopy(parent_backup)
+    segments_data[idx] = restored
+    if idx < len(source_segments):
+        source_segments[idx] = parent_src
+    else:
+        source_segments.append(parent_src)
+    if idx < len(timing_map):
+        timing_map[idx] = parent_timing
+    else:
+        timing_map.append(parent_timing)
+    if audits is not None:
+        # Drop split audits in the child range; keep best-effort parent index.
+        kept = [
+            a
+            for a in audits
+            if not (
+                idx < int(a.get("index", -1)) < idx + n
+                and a.get("stage19c_split")
+            )
+        ]
+        audits.clear()
+        audits.extend(kept)
+    logger.warning(
+        "[Stage19c] rolled back overflow split at idx=%s (n_children=%s) — regen incomplete",
+        idx,
+        n,
+    )
+
+
 def try_stage19c_overflow_split(
     *,
     segments_data: list[dict],
@@ -400,9 +531,10 @@ def try_stage19c_overflow_split(
     idx: int,
     overflow_ms: int | None = None,
 ) -> bool:
-    """Split one large-overflow segment into 2+ sentence children (Stage 19c §C).
+    """Split one large-overflow segment into 2..4 sentence children (Stage 19c §C).
 
-    Works on Happy Path (no advanced_adaptation gate). Mutates lists in place.
+    Final/TTS text is always target-language (UA) — never EN source chunks.
+    Works on Happy Path. Mutates lists in place.
     """
     import copy
 
@@ -440,7 +572,13 @@ def try_stage19c_overflow_split(
     if idx < len(source_segments):
         src = str(source_segments[idx] or "").strip()
     tgt = _segment_text(seg)
-    if not tgt and not src:
+    if not tgt:
+        return False
+    # Refuse to split when Final is already EN (would create EN TTS orphans).
+    if _text_looks_english(tgt):
+        logger.warning(
+            "[Stage19c] refuse split seg#%d — Final looks English", idx
+        )
         return False
 
     try:
@@ -452,55 +590,62 @@ def try_stage19c_overflow_split(
         logger.debug("stage19c split imports failed: %s", exc)
         return False
 
-    # Prefer EN sentence cuts; fall back to Final.
-    base = src if len(_safe_split_chunks(src)) >= 2 else tgt
-    chunks = _safe_split_chunks(base)
-    if len(chunks) < 2:
-        chunks = _safe_split_chunks(tgt)
-    if len(chunks) < 2:
+    # Prefer Final (UA) sentence cuts — production order.
+    tgt_parts = _safe_split_chunks(tgt)
+    src_parts = _safe_split_chunks(src) if src else []
+    if len(tgt_parts) >= 2:
+        tgt_chunks = _pack_text_chunks(tgt_parts, MAX_STAGE19C_SPLIT_CHILDREN)
+        # Align source to same arity.
+        if len(src_parts) >= 2:
+            src_chunks = _pack_text_chunks(src_parts, len(tgt_chunks))
+            if len(src_chunks) != len(tgt_chunks):
+                src_chunks = _pack_text_chunks(
+                    src_parts if src_parts else [src or ""], len(tgt_chunks)
+                )
+        else:
+            src_chunks = _pack_text_chunks([src] if src else tgt_chunks, len(tgt_chunks))
+    elif len(src_parts) >= 2:
+        # Source has sentences; Final does not — 2-way max via parity split.
+        src_chunks = _pack_text_chunks(
+            [src_parts[0], " ".join(src_parts[1:]).strip()], 2
+        )
+        aligned = _split_tgt_by_sources(tgt, src_chunks)
+        if not aligned:
+            return False
+        tgt_chunks = aligned
+    else:
         return False
 
-    # Allocate by char weight, then merge children shorter than MIN_SPLIT_CHILD_MS.
-    allocated = _allocate_times(chunks, start_ms, end_ms)
+    if len(tgt_chunks) < 2:
+        return False
+    if any(_text_looks_english(t) for t in tgt_chunks):
+        logger.warning(
+            "[Stage19c] refuse split seg#%d — child Final looks English", idx
+        )
+        return False
+    if len(src_chunks) != len(tgt_chunks):
+        src_chunks = _pack_text_chunks(
+            src_parts if len(src_parts) >= 2 else ([src] if src else tgt_chunks),
+            len(tgt_chunks),
+        )
+        if len(src_chunks) != len(tgt_chunks):
+            src_chunks = list(tgt_chunks)  # timing-only; source hint degraded
+
+    # Allocate times from UA chunk lengths (speech estimate proxy).
+    allocated = _allocate_times(tgt_chunks, start_ms, end_ms)
     allocated = _merge_short_chunk_spans(allocated, min_ms=MIN_SPLIT_CHILD_MS)
     if len(allocated) < 2:
         return False
-
-    # Parallel source / target chunk lists of same arity.
-    src_chunks = _safe_split_chunks(src) if src else []
-    tgt_chunks = _safe_split_chunks(tgt) if tgt else list(chunks)
+    # Re-sync texts after merge.
     n = len(allocated)
-    if len(src_chunks) != n:
-        # Proportional word split of source to n parts.
-        if src:
-            words = src.split()
-            if len(words) >= n:
-                src_chunks = []
-                step = max(1, len(words) // n)
-                for i in range(n):
-                    a = i * step
-                    b = len(words) if i == n - 1 else (i + 1) * step
-                    src_chunks.append(" ".join(words[a:b]).strip())
-            else:
-                src_chunks = [src] + [""] * (n - 1)
-        else:
-            src_chunks = [c[0] for c in allocated]
-    if len(tgt_chunks) != n:
-        # Use allocated texts as Final when tgt didn't sentence-split evenly.
+    if n != len(tgt_chunks):
         tgt_chunks = [c[0] for c in allocated]
-        if tgt and n == 2:
-            try:
-                from engines.translation_segment_parity import (
-                    split_translation_by_sources,
-                )
-
-                tl, tr = split_translation_by_sources(
-                    tgt, [src_chunks[0], src_chunks[1]]
-                )
-                if tl and tr:
-                    tgt_chunks = [tl, tr]
-            except Exception:
-                pass
+        src_chunks = _pack_text_chunks(
+            src_parts if len(src_parts) >= 2 else ([src] if src else tgt_chunks),
+            n,
+        )
+        if len(src_chunks) != n:
+            src_chunks = list(tgt_chunks)
 
     # Build child segment dicts.
     children: list[dict] = []
@@ -508,20 +653,22 @@ def try_stage19c_overflow_split(
         zip(allocated, src_chunks, tgt_chunks)
     ):
         child = copy.deepcopy(seg) if i > 0 else seg
+        clear_keys = (
+            "file",
+            "tts_file_path",
+            "tts_ms",
+            "playback_duration",
+            "actual_duration_ms",
+            "tts_timing",
+            "post_tts_retry",
+            "text_adaptation_trace",
+            "fitted_file",
+            "first_tts_duration_ms",
+            "final_tts_duration_ms",
+        )
+        for key in clear_keys:
+            child.pop(key, None)
         if i > 0:
-            for key in (
-                "file",
-                "tts_file_path",
-                "tts_ms",
-                "playback_duration",
-                "actual_duration_ms",
-                "tts_timing",
-                "post_tts_retry",
-                "text_adaptation_trace",
-                "fitted_file",
-                "first_tts_duration_ms",
-            ):
-                child.pop(key, None)
             try:
                 from engines.pipeline_integrity.segment import new_segment_id
 
@@ -534,23 +681,18 @@ def try_stage19c_overflow_split(
                     child["split_from_segment_id"] = parent_sid
             except Exception:
                 pass
-        else:
-            for key in (
-                "file",
-                "tts_file_path",
-                "tts_ms",
-                "playback_duration",
-                "actual_duration_ms",
-                "tts_timing",
-                "first_tts_duration_ms",
-            ):
-                child.pop(key, None)
 
-        final_txt = (tgt_t or text or "").strip()
+        final_txt = str(tgt_t or text or "").strip()
+        if not final_txt or _text_looks_english(final_txt):
+            logger.warning(
+                "[Stage19c] abort split seg#%d — empty/EN child Final", idx
+            )
+            return False
         child["plain_text"] = final_txt
         child["text"] = final_txt
         child["final_text"] = final_txt
         child["translation_text"] = final_txt
+        child["final_tts_text"] = final_txt
         child["start_ms"] = int(st)
         child["end_ms"] = int(en)
         child["slot_ms"] = max(1, int(en) - int(st))
@@ -571,9 +713,6 @@ def try_stage19c_overflow_split(
             "overflow_ms_before": ov,
         }
         children.append(child)
-        if i == 0:
-            # first child is in-place seg
-            pass
 
     # Insert siblings after idx
     for i, child in enumerate(children):
@@ -623,7 +762,7 @@ def try_stage19c_overflow_split(
         audits.extend(rebuilt)
 
     logger.info(
-        "[Stage19c] overflow split seg#%d ov=%dms slot=%dms → %d children",
+        "[Stage19c] overflow split seg#%d ov=%dms slot=%dms → %d children (UA Final)",
         idx,
         ov,
         slot_ms,
@@ -1104,11 +1243,13 @@ def apply_stage19b_rule_text_fit(
             lock_text_fit_algorithm_reason(seg, algorithm_reason)
 
     delta_after = _slot_delta_ms(budget)
+    prev19c = dict(seg.get("stage19c") or {})
     seg["stage19c"] = {
+        **prev19c,
         "delta_before": int(delta_before),
         "delta_after": int(delta_after),
-        "split_children": int((seg.get("stage19c") or {}).get("split_children") or 0),
-        "regen_ok": bool(regen_ok) if text_changed else None,
+        "split_children": int(prev19c.get("split_children") or 0),
+        "regen_ok": bool(regen_ok) if text_changed else prev19c.get("regen_ok"),
         "expansion_strategy": seg.get("expansion_strategy") or expansion_strategy,
         "algorithm_reason": str(seg.get("algorithm_reason") or algorithm_reason),
         "fill_ratio": seg.get("fill_ratio"),
@@ -1868,6 +2009,15 @@ def run_closed_loop_timing(
                     else list(source_segments or [])
                 )
                 _audits_mut = list(audits) if audits is not None else None
+                import copy as _copy_s19c
+
+                _parent_backup = _copy_s19c.deepcopy(seg)
+                _parent_src = str(src_hint or "")
+                _parent_timing = (
+                    timing_map[idx]
+                    if idx < len(timing_map)
+                    else {"start": 0, "end": int(before.slot_duration or 0)}
+                )
                 if try_stage19c_overflow_split(
                     segments_data=segments_data,
                     source_segments=_src_list,
@@ -1891,35 +2041,33 @@ def run_closed_loop_timing(
                         or 0
                     )
                     if n_children < 2:
-                        # Fallback: count consecutive children sharing parent idx.
                         n_children = 1
                         while idx + n_children < len(segments_data):
                             meta = segments_data[idx + n_children].get("stage19c") or {}
                             if int(meta.get("split_parent_idx", -1)) != idx:
                                 break
                             n_children += 1
-                    stats["resegmented"] += 1
-                    stats["adaptation_executed"] = True
-                    stats.setdefault("stage19c_splits", 0)
-                    stats["stage19c_splits"] = int(stats["stage19c_splits"]) + 1
                     logger.info(
                         "closed_loop: stage19c overflow split idx=%s children=%s",
                         idx,
                         n_children,
                     )
-                    for _ri in range(idx, idx + n_children):
-                        if _ri >= len(segments_data):
-                            break
-                        _s = segments_data[_ri]
-                        _src = (
-                            source_segments[_ri]
-                            if _ri < len(source_segments)
-                            else ""
-                        )
-                        _txt = str(
-                            _s.get("plain_text") or _s.get("text") or ""
-                        ).strip()
-                        if _txt and callable(regen_fn):
+                    # Mandatory re-TTS for EVERY child — never leave active orphans.
+                    regen_ok_all = True
+                    if not callable(regen_fn):
+                        regen_ok_all = False
+                    else:
+                        for _ri in range(idx, idx + n_children):
+                            if _ri >= len(segments_data):
+                                regen_ok_all = False
+                                break
+                            _s = segments_data[_ri]
+                            _txt = str(
+                                _s.get("plain_text") or _s.get("text") or ""
+                            ).strip()
+                            if not _txt or _text_looks_english(_txt):
+                                regen_ok_all = False
+                                break
                             try:
                                 _rr = regen_fn(
                                     _txt,
@@ -1934,50 +2082,91 @@ def run_closed_loop_timing(
                                     _nf, _nms = _rr[0], int(_rr[1] or 0)
                                 else:
                                     _nf, _nms = _rr, 0
-                                if _nf:
-                                    _s["file"] = _nf
-                                    _s["tts_file_path"] = _nf
-                                    _s["final_tts_text"] = _txt
-                                    if _nms > 0:
-                                        _s["playback_duration"] = _nms
-                                        _s["tts_ms"] = _nms
-                                        _s["actual_duration_ms"] = _nms
+                                if not _nf:
+                                    regen_ok_all = False
+                                    break
+                                _s["file"] = _nf
+                                _s["tts_file_path"] = _nf
+                                _s["final_tts_text"] = _txt
+                                if _nms > 0:
+                                    _s["playback_duration"] = _nms
+                                    _s["tts_ms"] = _nms
+                                    _s["actual_duration_ms"] = _nms
                             except Exception as _rg_exc:
-                                logger.debug(
-                                    "closed_loop stage19c split regen failed: %s",
+                                logger.warning(
+                                    "closed_loop stage19c split regen failed idx=%s: %s",
+                                    _ri,
                                     _rg_exc,
                                 )
-                        # Full §A text-fit on each child (max_iters=0 ⇒ no LLM, rule fit yes).
-                        _budget = run_closed_loop_segment(
-                            _s,
-                            _ri,
-                            timing_map,
-                            source_hint=str(_src or ""),
-                            target_lang=target_lang,
-                            src_lang=src_lang,
-                            voice=voice,
-                            work_dir=work_dir,
-                            regen_fn=regen_fn,
-                            commit_fn=commit_fn,
-                            audit=audit_by_idx.get(_ri),
-                            max_iterations=0,  # no LLM; Stage 19c rule text-fit still runs
-                            tts_rate=tts_rate,
-                            tts_pitch=tts_pitch,
-                            task_id=task_id,
-                            resolve_path=resolve_path,
+                                regen_ok_all = False
+                                break
+
+                    if not regen_ok_all:
+                        rollback_stage19c_split(
+                            segments_data=segments_data,
+                            source_segments=_src_list
+                            if isinstance(_src_list, list)
+                            else source_segments,
+                            timing_map=timing_map,
+                            audits=_audits_mut if audits is not None else None,
+                            idx=idx,
+                            n_children=n_children,
+                            parent_backup=_parent_backup,
+                            parent_src=_parent_src,
+                            parent_timing=_parent_timing,
                         )
-                        budgets.append(_budget)
-                        if _budget.final_status == "ok":
-                            stats["ok"] += 1
-                        elif int(_budget.rewrite_iterations or 0) > 0:
-                            stats["rewritten"] += 1
-                            stats["fixed"] += 1
-                        elif _budget.pause_adjustments_ms > 0:
-                            stats["pause_only"] += 1
-                        else:
-                            stats["failed"] += 1
-                    idx += n_children
-                    continue
+                        if isinstance(source_segments, list) and source_segments is not _src_list:
+                            source_segments[:] = _src_list
+                        if audits is not None and _audits_mut is not None:
+                            audits.clear()
+                            audits.extend(_audits_mut)
+                        # Fall through to normal closed-loop on restored parent.
+                    else:
+                        stats["resegmented"] += 1
+                        stats["adaptation_executed"] = True
+                        stats.setdefault("stage19c_splits", 0)
+                        stats["stage19c_splits"] = int(stats["stage19c_splits"]) + 1
+                        for _ri in range(idx, idx + n_children):
+                            if _ri >= len(segments_data):
+                                break
+                            _s = segments_data[_ri]
+                            if not (_s.get("file") or _s.get("tts_file_path")):
+                                continue
+                            _src = (
+                                source_segments[_ri]
+                                if _ri < len(source_segments)
+                                else ""
+                            )
+                            _budget = run_closed_loop_segment(
+                                _s,
+                                _ri,
+                                timing_map,
+                                source_hint=str(_src or ""),
+                                target_lang=target_lang,
+                                src_lang=src_lang,
+                                voice=voice,
+                                work_dir=work_dir,
+                                regen_fn=regen_fn,
+                                commit_fn=commit_fn,
+                                audit=audit_by_idx.get(_ri),
+                                max_iterations=0,  # no LLM; Stage 19c rule text-fit still runs
+                                tts_rate=tts_rate,
+                                tts_pitch=tts_pitch,
+                                task_id=task_id,
+                                resolve_path=resolve_path,
+                            )
+                            budgets.append(_budget)
+                            if _budget.final_status == "ok":
+                                stats["ok"] += 1
+                            elif int(_budget.rewrite_iterations or 0) > 0:
+                                stats["rewritten"] += 1
+                                stats["fixed"] += 1
+                            elif _budget.pause_adjustments_ms > 0:
+                                stats["pause_only"] += 1
+                            else:
+                                stats["failed"] += 1
+                        idx += n_children
+                        continue
             except Exception as _s19c_exc:
                 logger.debug("closed_loop stage19c split skipped: %s", _s19c_exc)
 

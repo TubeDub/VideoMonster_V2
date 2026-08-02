@@ -233,13 +233,113 @@ def test_large_overflow_split_18s():
         overflow_ms=overflow_ms,
     )
     assert ok is True
-    assert len(segments) >= 2
+    assert 2 <= len(segments) <= 4
     for s in segments:
         assert s.get("algorithm_reason") == "TextSlotSplit"
         assert s.get("strategy") == "split"
         assert int(s.get("slot_ms") or 0) >= 800 or len(segments) == 2
-    # Parent overflow distributed — no single child keeps full 18s delta as sole plan.
+        # Never ship EN source as Final/TTS text.
+        text = str(s.get("plain_text") or "")
+        assert any("\u0400" <= ch <= "\u04FF" for ch in text)
     assert all(s.get("stage19c_split_done") for s in segments)
+
+
+def test_refuse_split_when_final_is_english():
+    from engines.closed_loop_timing import try_stage19c_overflow_split
+
+    en = (
+        "Now George Jr. walked over to the podium. "
+        "But as he walked this man asked about his camera. "
+        "And then the man formally introduced himself."
+    )
+    seg = {
+        "plain_text": en,
+        "text": en,
+        "final_text": en,
+        "tts_ms": 26000,
+        "playback_duration": 26000,
+        "slot_ms": 8000,
+        "start_ms": 0,
+        "end_ms": 8000,
+        "segment_id": "en-parent",
+    }
+    segments = [seg]
+    ok = try_stage19c_overflow_split(
+        segments_data=segments,
+        source_segments=[en],
+        timing_map=[{"start": 0, "end": 8000}],
+        audits=None,
+        idx=0,
+        overflow_ms=18000,
+    )
+    assert ok is False
+    assert len(segments) == 1
+
+
+def test_split_regen_failure_rolls_back(tmp_path: Path):
+    """Failed child regen must not leave active orphans without TTS files."""
+    from engines.closed_loop_timing import run_closed_loop_timing
+
+    slot_ms = 8000
+    uk = (
+        "Він довго йшов. Потім він зупинився біля річки. "
+        "Зрештою він вирішив піти додому до темряви."
+    )
+    en = (
+        "He walked for a long time. Then he stopped near the river. "
+        "Finally he decided to go home before dark."
+    )
+    parent_wav = tmp_path / "parent.wav"
+    parent_wav.write_bytes(b"RIFF")
+    seg = {
+        "plain_text": uk,
+        "text": uk,
+        "final_text": uk,
+        "file": str(parent_wav),
+        "tts_file_path": str(parent_wav),
+        "tts_ms": slot_ms + 18000,
+        "playback_duration": slot_ms + 18000,
+        "actual_duration_ms": slot_ms + 18000,
+        "slot_ms": slot_ms,
+        "start_ms": 0,
+        "end_ms": slot_ms,
+        "segment_id": "parent-rb",
+        "first_tts_duration_ms": slot_ms + 18000,
+    }
+    segments = [seg]
+    sources = [en]
+    timing = [{"start": 0, "end": slot_ms}]
+
+    def regen_fail(text, **kwargs):
+        return None, 0
+
+    with patch(
+        "engines.closed_loop_timing.measure_actual_ms",
+        side_effect=lambda s, **k: int(
+            s.get("playback_duration") or s.get("tts_ms") or 0
+        ),
+    ), patch(
+        "engines.closed_loop_timing.apply_dynamic_pause_engine",
+        return_value={"applied": False},
+    ):
+        run_closed_loop_timing(
+            segments,
+            timing,
+            source_segments=sources,
+            voice="uk-UA-OstapNeural",
+            target_lang="uk",
+            src_lang="en",
+            work_dir=tmp_path,
+            regen_fn=regen_fail,
+            max_iterations=0,
+        )
+
+    # Rollback → single parent with original file still present (or no orphans).
+    assert len(segments) == 1
+    assert segments[0].get("file") or segments[0].get("tts_file_path")
+    assert not any(
+        (not (s.get("file") or s.get("tts_file_path"))) for s in segments
+    )
 
 
 def test_text_changed_regen_none_fail_loud(tmp_path: Path):
