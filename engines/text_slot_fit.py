@@ -56,10 +56,12 @@ STAGE19H_OK_FILL_LO = 0.85
 STAGE19H_OK_FILL_HI = 1.15
 STAGE19I_OK_FILL_LO = 0.85
 STAGE19I_OK_FILL_HI = 1.15
+STAGE19J_OK_FILL_LO = 0.85
+STAGE19J_OK_FILL_HI = 1.15
 UNDERFLOW_TRIGGER_MS = 350
 OVERFLOW_TRIGGER_MS = 350
 MAX_SOFT_PADS_PER_SEG = 1
-# Stage 19i: soft expand pads (strict whitelist — never "ось як це було тоді").
+# Stage 19i/19j: soft expand pads (strict whitelist — never "ось як це було тоді").
 SOFT_PAD_WHITELIST: tuple[str, ...] = (
     "саме тоді",
     "і саме в цей момент",
@@ -69,6 +71,19 @@ SOFT_PAD_WHITELIST: tuple[str, ...] = (
 _STAGE19G_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19H_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19I_SOFT_PADS = SOFT_PAD_WHITELIST
+_STAGE19J_SOFT_PADS = SOFT_PAD_WHITELIST
+# Stage 19j: garbage expand tails — ", Джордж." / ", Вісімнадцятирічний."
+FORBIDDEN_EXPAND_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r",\s*\S+\s*[.!?…]?\s*$"),
+    re.compile(r"(?i),\s*Вісімнадцятирічний\b"),
+    re.compile(r"(?i),\s*Джордж\s*[.!?…]?\s*$"),
+    re.compile(r"(?i),\s*займався\s*[.!?…]?\s*$"),
+    re.compile(r"(?i),\s*\w{3,}\s*[.!?…]\s*$"),
+)
+_CLAUSE_CONJ = (
+    "і", "та", "але", "а", "що", "коли", "тому", "тоді", "бо", "адже",
+    "якщо", "хоча", "який", "яка", "які", "де", "куди",
+)
 _STAGE19G_GLOSSARY_ANCHORS: tuple[tuple[str, str], ...] = (
     (r"(?i)\bgeorge\s+junior\b|\bgeorge\s+jr\.?\b", "Джордж молодший"),
     (r"(?i)\bfiat\b", "Фіат"),
@@ -267,30 +282,153 @@ def should_force_split(
     return slot < FORCE_SPLIT_ABS_MS and pred > FORCE_SPLIT_ABS_MS and pred > slot
 
 
-def _atomic_text_parts(text: str) -> list[str]:
-    """Sentence / adaptive / word crumbs for aggressive split."""
-    t = " ".join(str(text or "").split()).strip()
+def has_forbidden_expand_pattern(text: str) -> bool:
+    """Stage 19j: True when text has garbage append (e.g. ', Джордж.')."""
+    t = _normalize_chunk(text)
+    if not t:
+        return False
+    for pat in FORBIDDEN_EXPAND_PATTERNS:
+        if pat.search(t):
+            return True
+    return False
+
+
+def is_clean_utterance(text: str) -> bool:
+    """Stage 19j: finished sentence or clean clause — never a word crumb."""
+    t = _normalize_chunk(text)
+    if not t or len(t.split()) < 3:
+        return False
+    if t.endswith(",") or t.endswith(";") or t.endswith(":"):
+        return False
+    if has_forbidden_expand_pattern(t):
+        return False
+    # Reject lone "Word." / "Word," crumbs.
+    if re.fullmatch(r"\S+[.,!?;…]?", t):
+        return False
+    if not _is_complete_thought(t):
+        return False
+    if _COMPLETE_END.search(t):
+        return True
+    # Clean subordinate / clause without final punct (≥4 words, no dangling conj).
+    if len(t.split()) >= 4 and not _BAD_TAIL.search(t):
+        return True
+    return False
+
+
+def _split_strong_sentences(text: str) -> list[str]:
+    """Split ONLY on . ! ? … and strong semicolons."""
+    t = _normalize_chunk(text)
     if not t:
         return []
-    parts = _split_sentences(t)
-    if len(parts) < 2:
-        try:
-            from engines.adaptive_segmentation.core import _safe_split_chunks
+    parts = re.split(r"(?<=[.!?…;])\s+", t)
+    return [p.strip() for p in parts if p.strip()]
 
-            parts = _safe_split_chunks(t)
-        except Exception:
-            parts = [t]
+
+def _split_clauses(text: str) -> list[str]:
+    """Split a long sentence on commas before conjunctions (і, але, що…)."""
+    t = _normalize_chunk(text)
+    if not t:
+        return []
+    conj = "|".join(re.escape(c) for c in _CLAUSE_CONJ)
+    # ", і …" / ", але …" — keep conjunction with the right clause.
+    parts = re.split(rf"(?<=,)\s+(?=(?:{conj})\b)", t, flags=re.IGNORECASE)
+    cleaned = [_normalize_chunk(p) for p in parts if _normalize_chunk(p)]
+    if len(cleaned) < 2:
+        # Fallback: split on " і " / " але " mid-clause (no comma).
+        parts2 = re.split(
+            rf"\s+(?=\b(?:{'|'.join(re.escape(c) for c in ('і', 'та', 'але', 'а'))})\b)",
+            t,
+            flags=re.IGNORECASE,
+        )
+        cleaned = [_normalize_chunk(p) for p in parts2 if _normalize_chunk(p)]
+    return cleaned if len(cleaned) >= 2 else [t]
+
+
+def _ensure_chunk_terminal(text: str) -> str:
+    """Ensure a clean chunk ends with sentence punctuation when appropriate."""
+    t = _normalize_chunk(text)
+    if not t:
+        return t
+    # Never leave a dangling comma / colon tail from clause cuts.
+    t = t.rstrip(" \t,;:")
+    if not t:
+        return t
+    if _COMPLETE_END.search(t) or t.endswith((";", "…")):
+        return t
+    # Clause starting with conjunction — still prefer a terminal period.
+    first = t.split()[0].lower().strip("«\"'")
+    if first in _CLAUSE_CONJ and len(t.split()) >= 4:
+        return t + "."
+    if len(t.split()) >= 3:
+        return t + "."
+    return t
+
+
+def _atomic_text_parts(text: str) -> list[str]:
+    """Stage 19j: sentence units only — never word crumbs."""
+    t = _normalize_chunk(text)
+    if not t:
+        return []
+    parts = _split_strong_sentences(t)
     if len(parts) < 2:
-        words = t.split()
-        if len(words) >= 8:
-            # Soft packs of ~6–10 words so giant monologues still split.
-            step = max(4, min(10, max(4, len(words) // 4)))
-            parts = [
-                " ".join(words[i : i + step]).strip()
-                for i in range(0, len(words), step)
-                if " ".join(words[i : i + step]).strip()
-            ]
+        parts = _split_clauses(t)
     return [p for p in parts if p] or ([t] if t else [])
+
+
+def _filter_clean_unique_chunks(parent: str, chunks: list[str]) -> list[str]:
+    """Keep unique clean utterances; merge unclean crumbs into neighbors."""
+    parent_n = _normalize_chunk(parent)
+    raw = [_normalize_chunk(c) for c in chunks if _normalize_chunk(c)]
+    if not raw:
+        return []
+    # Merge unclean / tiny into previous (or next if first).
+    merged: list[str] = []
+    pending = ""
+    for c in raw:
+        piece = (pending + " " + c).strip() if pending else c
+        pending = ""
+        if is_clean_utterance(piece) or (
+            len(piece.split()) >= 4 and not has_forbidden_expand_pattern(piece)
+        ):
+            merged.append(_ensure_chunk_terminal(piece))
+        elif merged:
+            merged[-1] = _ensure_chunk_terminal((merged[-1] + " " + piece).strip())
+        else:
+            pending = piece
+    if pending:
+        if merged:
+            merged[-1] = _ensure_chunk_terminal((merged[-1] + " " + pending).strip())
+        else:
+            merged.append(_ensure_chunk_terminal(pending))
+
+    # Drop parent equals / dups / affix clones.
+    out: list[str] = []
+    for c in merged:
+        cn = _normalize_chunk(c)
+        if not cn or cn == parent_n:
+            continue
+        if any(cn == x for x in out):
+            continue
+        # Significant prefix/suffix of another chunk → skip the shorter clone.
+        skip = False
+        for x in list(out):
+            if cn == x:
+                skip = True
+                break
+            shorter, longer = (cn, x) if len(cn) <= len(x) else (x, cn)
+            if len(shorter) >= 24 and (
+                longer.startswith(shorter) or longer.endswith(shorter)
+            ):
+                if cn == shorter:
+                    skip = True
+                    break
+                out = [y for y in out if y != shorter]
+        if not skip:
+            out.append(cn)
+    # Final cleanliness gate.
+    return [c for c in out if is_clean_utterance(c) or (
+        len(c.split()) >= 4 and not has_forbidden_expand_pattern(c)
+    )]
 
 
 def split_into_slot_sized_chunks(
@@ -376,6 +514,14 @@ def assert_unique_split_chunks(
     return True
 
 
+def assert_clean_split_chunks(chunks: list[str]) -> bool:
+    """Stage 19j: every child is a clean utterance."""
+    cleaned = [_normalize_chunk(c) for c in chunks if _normalize_chunk(c)]
+    if len(cleaned) < 2:
+        return False
+    return all(is_clean_utterance(c) for c in cleaned)
+
+
 def force_split_until_fit(
     text: str,
     slot_ms: int,
@@ -384,324 +530,144 @@ def force_split_until_fit(
     max_children: int = MAX_SPLIT_CHILDREN,
     depth: int = 0,
 ) -> list[str]:
-    """Stage 19i: unique natural chunks aimed at 2.2–7.5s / CPS budget.
+    """Stage 19j: unique clean sentence/clause chunks (no word crumbs).
 
-    Guarantees: when ≥2 chunks returned, no chunk equals the full parent text.
-    Recurses while any child fill > 1.15 or chars > char_budget(child).
+    1) Split on . ! ? ;
+    2) Oversized sentence → clauses (comma + conjunctions)
+    3) Pack to ~2.2–7.5s; recurse while fill > 1.15
+    Never mid-word / mid-phrase garbage packs.
     """
     t = _normalize_chunk(text)
     if not t:
         return []
     parent_slot = max(1, int(slot_ms or 0) or MIN_CHILD_SLOT_MS)
     parent_pred = estimate_tts_ms(t, lang)
-    # Production aim: pack to natural 2.2–7.5s children, not the whole parent slot.
     slot = production_child_aim_ms(parent_slot, predicted_ms=parent_pred)
-    if int(depth or 0) >= MAX_SPLIT_DEPTH:
-        # At max depth still try a hard bipartition so we never return the
-        # full parent as a "successful" multi-child split.
-        parts = _atomic_text_parts(t)
-        if len(parts) >= 2:
-            mid = max(1, len(parts) // 2)
-            return [
-                _normalize_chunk(" ".join(parts[:mid])),
-                _normalize_chunk(" ".join(parts[mid:])),
-            ]
-        words = t.split()
-        if len(words) >= 6:
-            mid = len(words) // 2
-            return [
-                " ".join(words[:mid]).strip(),
-                " ".join(words[mid:]).strip(),
-            ]
-        return [t]
-
     hard = max(int(slot * MAX_CHILD_FILL), MIN_CHILD_SLOT_MS)
     budget_chars = int(char_budget(slot) * 1.15)
-    chunks = split_into_slot_sized_chunks(
-        t, slot, lang, max_children=max_children
-    )
-    if len(chunks) < 2:
-        parts = _atomic_text_parts(t)
-        if len(parts) >= 2:
-            mid = max(1, len(parts) // 2)
-            chunks = [
-                " ".join(parts[:mid]).strip(),
-                " ".join(parts[mid:]).strip(),
-            ]
+
+    def _sentence_units(src: str) -> list[str]:
+        units = _split_strong_sentences(src)
+        if len(units) < 2:
+            units = _split_clauses(src)
+        return [u for u in units if u] or ([src] if src else [])
+
+    def _pack_units(units: list[str]) -> list[str]:
+        if not units:
+            return []
+        if len(units) == 1:
+            return list(units)
+        packed: list[str] = []
+        buf: list[str] = []
+        for u in units:
+            trial = " ".join(buf + [u]).strip()
+            pred = estimate_tts_ms(trial, lang)
+            if buf and pred > hard and len(packed) < max_children - 1:
+                packed.append(" ".join(buf).strip())
+                buf = [u]
+            else:
+                buf.append(u)
+        if buf:
+            packed.append(" ".join(buf).strip())
+        return packed[: max(1, int(max_children))]
+
+    if int(depth or 0) >= MAX_SPLIT_DEPTH:
+        units = _sentence_units(t)
+        if len(units) >= 2:
+            mid = max(1, len(units) // 2)
+            left = _ensure_chunk_terminal(" ".join(units[:mid]))
+            right = _ensure_chunk_terminal(" ".join(units[mid:]))
+            out = _filter_clean_unique_chunks(t, [left, right])
+            return out if out else [t]
+        return [t]
+
+    units = _sentence_units(t)
+    # Oversized single sentence → clause split before packing.
+    expanded: list[str] = []
+    for u in units:
+        pred = estimate_tts_ms(u, lang)
+        if pred > hard or len(clean_text_chars(u)) > budget_chars:
+            clauses = _split_clauses(u)
+            if len(clauses) >= 2:
+                expanded.extend(clauses)
+            else:
+                expanded.append(u)
         else:
-            words = t.split()
-            if len(words) >= 6:
-                mid = len(words) // 2
-                chunks = [
-                    " ".join(words[:mid]).strip(),
-                    " ".join(words[mid:]).strip(),
-                ]
+            expanded.append(u)
+
+    chunks = _pack_units(expanded)
+    if len(chunks) < 2 and len(expanded) >= 2:
+        mid = max(1, len(expanded) // 2)
+        chunks = [
+            " ".join(expanded[:mid]).strip(),
+            " ".join(expanded[mid:]).strip(),
+        ]
 
     result: list[str] = []
     for c in chunks:
         c = _normalize_chunk(c)
         if not c or len(result) >= max_children:
             break
-        # Never keep a chunk that is the entire parent when we already have room.
         if c == t and max_children >= 2:
-            parts = _atomic_text_parts(c)
-            if len(parts) >= 2:
-                mid = max(1, len(parts) // 2)
-                left = _normalize_chunk(" ".join(parts[:mid]))
-                right = _normalize_chunk(" ".join(parts[mid:]))
-                if left and right and left != t and right != t:
+            sub_units = _sentence_units(c)
+            if len(sub_units) >= 2:
+                mid = max(1, len(sub_units) // 2)
+                left = _ensure_chunk_terminal(" ".join(sub_units[:mid]))
+                right = _ensure_chunk_terminal(" ".join(sub_units[mid:]))
+                if left != t:
                     result.append(left)
-                    if len(result) < max_children:
-                        result.append(right)
-                    continue
-            words = c.split()
-            if len(words) >= 6:
-                mid = len(words) // 2
-                left = " ".join(words[:mid]).strip()
-                right = " ".join(words[mid:]).strip()
-                if left and right:
-                    result.append(left)
-                    if len(result) < max_children:
-                        result.append(right)
-                    continue
+                if right != t and len(result) < max_children:
+                    result.append(right)
+                continue
         pred = estimate_tts_ms(c, lang)
         room = max_children - len(result)
-        over_fill = pred > hard
-        over_chars = len(clean_text_chars(c)) > budget_chars
-        if (
-            (over_fill or over_chars)
-            and room >= 2
-            and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH
-        ):
-            sub_slot = production_child_aim_ms(
-                max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
-                predicted_ms=pred,
-            )
+        over = pred > hard or len(clean_text_chars(c)) > budget_chars
+        if over and room >= 2 and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH:
             sub = force_split_until_fit(
                 c,
-                sub_slot,
+                production_child_aim_ms(
+                    max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
+                    predicted_ms=pred,
+                ),
                 lang,
                 max_children=min(max_children, room),
                 depth=int(depth or 0) + 1,
             )
-            # Accept recursive result only when it yields unique sub-chunks.
             if len(sub) >= 2 and assert_unique_split_chunks(c, sub):
                 for s in sub:
-                    if len(result) >= max_children:
-                        break
                     sn = _normalize_chunk(s)
-                    if sn and sn != t:
+                    if sn and sn != t and len(result) < max_children:
                         result.append(sn)
                 continue
-            words = c.split()
-            if len(words) >= 6:
-                mid = len(words) // 2
-                left = " ".join(words[:mid]).strip()
-                right = " ".join(words[mid:]).strip()
+            # Clause bipartition only — never word mid-split.
+            clauses = _split_clauses(c)
+            if len(clauses) >= 2:
+                mid = max(1, len(clauses) // 2)
+                left = _ensure_chunk_terminal(" ".join(clauses[:mid]))
+                right = _ensure_chunk_terminal(" ".join(clauses[mid:]))
                 if left and left != t:
                     result.append(left)
                 if right and right != t and len(result) < max_children:
                     result.append(right)
                 continue
         if c != t or not result:
-            result.append(c)
+            result.append(_ensure_chunk_terminal(c))
 
-    # Deduplicate while preserving order; drop any accidental parent equals.
-    seen: set[str] = set()
-    out: list[str] = []
-    for p in result:
-        pn = _normalize_chunk(p)
-        if not pn or pn == t or pn in seen:
-            continue
-        seen.add(pn)
-        out.append(pn)
-        if len(out) >= max_children:
-            break
-
-    expected_n = min(
-        max_children,
-        max(
-            2,
-            int(parent_pred / max(MAX_CHILD_SLOT_MS, hard, 1)) + 1,
-            int(len(clean_text_chars(t)) / max(char_budget(slot), 1)) + 1,
-        ),
-    )
-
-    def _uneven_atomic_packs(src: str, n: int) -> list[str]:
-        """Build n unique contiguous packs (uneven sizes defeat period-aligned dups)."""
-        parts = _atomic_text_parts(src)
-        if len(parts) < 2:
-            words = src.split()
-            if len(words) < 6:
-                return []
-            # Fall back to uneven word windows.
-            packs: list[str] = []
-            idx = 0
-            sizes = [3, 5, 4, 6, 3, 5, 4, 6, 5, 4, 3, 6]
-            for k in range(n):
-                if idx >= len(words):
-                    break
-                take = sizes[k % len(sizes)]
-                if k == n - 1:
-                    take = max(take, len(words) - idx)
-                packs.append(" ".join(words[idx : idx + take]).strip())
-                idx += take
-            return [p for p in packs if p and p != src]
-        packs = []
-        idx = 0
-        # Pattern of part counts — not divisible by common sentence-period (8).
-        sizes = [3, 5, 4, 6, 3, 5, 4, 6, 5, 4, 3, 6]
-        for k in range(n):
-            if idx >= len(parts):
-                break
-            take = sizes[k % len(sizes)]
-            if k == n - 1:
-                take = max(take, len(parts) - idx)
-            packs.append(" ".join(parts[idx : idx + take]).strip())
-            idx += take
-        if idx < len(parts) and packs:
-            packs[-1] = (packs[-1] + " " + " ".join(parts[idx:])).strip()
-        # Dedup while keeping order; drop parent equals.
-        seen_local: set[str] = set()
-        uniq: list[str] = []
-        for p in packs:
-            pn = _normalize_chunk(p)
-            if not pn or pn == src or pn in seen_local:
-                continue
-            seen_local.add(pn)
-            uniq.append(pn)
-        return uniq
-
+    out = _filter_clean_unique_chunks(t, result)[:max_children]
     if len(out) < 2 and should_force_split(t, slot, lang):
-        words = t.split()
-        if len(words) >= expected_n * 3:
-            step = max(3, len(words) // expected_n)
-            out = [
-                " ".join(words[i : i + step]).strip()
-                for i in range(0, len(words), step)
-                if " ".join(words[i : i + step]).strip()
-            ][:max_children]
-            out = [c for c in out if c and c != t]
+        units2 = _sentence_units(t)
+        if len(units2) >= 2:
+            # One sentence per child when possible (up to max_children).
+            packs = units2[:max_children]
+            if len(units2) > max_children:
+                packs = _pack_units(units2)
+            out = _filter_clean_unique_chunks(t, packs)[:max_children]
 
-    # Repeated source (e.g. synthetic ×N) collapses equal packs — rebuild unevenly.
-    if (
-        should_force_split(t, slot, lang)
-        and (len(out) < min(3, expected_n) or not assert_unique_split_chunks(t, out))
-    ):
-        rebuilt = _uneven_atomic_packs(t, max(expected_n, 3))
-        if len(rebuilt) > len(out) and assert_unique_split_chunks(t, rebuilt):
-            out = rebuilt[:max_children]
-        elif len(rebuilt) >= 2 and (
-            len(out) < 2 or not assert_unique_split_chunks(t, out)
-        ):
-            out = rebuilt[:max_children]
-
-    if len(out) >= 2 and not assert_unique_split_chunks(t, out):
-        # Last-resort proportional word packs — always unique vs parent.
-        words = t.split()
-        n = min(max_children, max(2, len(words) // 4))
-        if len(words) >= n * 2:
-            step = max(2, len(words) // n)
-            out = [
-                " ".join(words[i : i + step]).strip()
-                for i in range(0, len(words), step)
-                if " ".join(words[i : i + step]).strip()
-            ][:max_children]
-            out = [c for c in out if c and c != t]
-            # Still duplicated? uneven word windows.
-            if not assert_unique_split_chunks(t, out):
-                rebuilt = _uneven_atomic_packs(t, n)
-                if len(rebuilt) >= 2:
-                    out = rebuilt[:max_children]
-
-    # Merge tiny crumbs / Latin-only tokens (e.g. "USC.") into neighbors.
+    if len(out) >= 2 and assert_unique_split_chunks(t, out):
+        return out
     if len(out) >= 2:
-        merged_tiny: list[str] = []
-        for c in out:
-            c = _normalize_chunk(c)
-            if not c:
-                continue
-            words = c.split()
-            latin_only = bool(re.fullmatch(r"[A-Za-z0-9 .,'’\-]+", c))
-            tiny = len(words) <= 2 or len(clean_text_chars(c)) < 12
-            if merged_tiny and (tiny or latin_only):
-                merged_tiny[-1] = (merged_tiny[-1] + " " + c).strip()
-            elif latin_only and not merged_tiny:
-                # Defer — attach to next real chunk.
-                merged_tiny.append(c)
-            else:
-                if (
-                    merged_tiny
-                    and len(merged_tiny[-1].split()) <= 2
-                    and re.fullmatch(r"[A-Za-z0-9 .,'’\-]+", merged_tiny[-1] or "")
-                ):
-                    # Leading latin crumb waiting for a host.
-                    c = (merged_tiny.pop() + " " + c).strip()
-                    if merged_tiny:
-                        merged_tiny[-1] = (merged_tiny[-1] + " " + c).strip()
-                    else:
-                        merged_tiny.append(c)
-                else:
-                    merged_tiny.append(c)
-        if len(merged_tiny) >= 2 and assert_unique_split_chunks(t, merged_tiny):
-            out = merged_tiny[:max_children]
-        elif len(merged_tiny) >= 2:
-            out = merged_tiny[:max_children]
-
-    # Polish: recursively carve leftover oversize packs (fill > 1.15 or CPS).
-    if out and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH:
-        polished: list[str] = []
-        for c in out:
-            if len(polished) >= max_children:
-                break
-            c = _normalize_chunk(c)
-            if not c or c == t:
-                continue
-            pred = estimate_tts_ms(c, lang)
-            room = max_children - len(polished)
-            if (pred > hard or len(clean_text_chars(c)) > budget_chars) and room >= 2:
-                sub = force_split_until_fit(
-                    c,
-                    production_child_aim_ms(
-                        max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
-                        predicted_ms=pred,
-                    ),
-                    lang,
-                    max_children=room,
-                    depth=int(depth or 0) + 1,
-                )
-                if len(sub) >= 2 and assert_unique_split_chunks(c, sub):
-                    for s in sub:
-                        sn = _normalize_chunk(s)
-                        if (
-                            sn
-                            and sn != t
-                            and sn not in polished
-                            and len(polished) < max_children
-                        ):
-                            polished.append(sn)
-                    continue
-                words = c.split()
-                if len(words) >= 6 and room >= 2:
-                    mid = len(words) // 2
-                    left = " ".join(words[:mid]).strip()
-                    right = " ".join(words[mid:]).strip()
-                    if left and left != t and left not in polished:
-                        polished.append(left)
-                    if (
-                        right
-                        and right != t
-                        and right not in polished
-                        and len(polished) < max_children
-                    ):
-                        polished.append(right)
-                    continue
-            if c not in polished:
-                polished.append(c)
-        if len(polished) >= 2 and assert_unique_split_chunks(t, polished):
-            out = polished[:max_children]
-
-    return out if out else ([t] if t else [])
+        return out
+    return [t] if t else []
 
 
 def prefer_full_meaning_text(
@@ -1530,29 +1496,61 @@ def _stage19g_soft_pad_once(text: str, lang: str = "uk") -> tuple[str, bool]:
     return out, False
 
 
-def _stage19g_repeat_key_noun(text: str) -> tuple[str, bool]:
-    """Repeat one content noun once to grow underfilled speech (≤1 repeat)."""
-    out = " ".join(str(text or "").split()).strip()
-    words = out.split()
-    if len(words) < 3:
+def _stage19j_repeat_key_phrase(text: str) -> tuple[str, bool]:
+    """Repeat a multi-word key entity as a full clean sentence — never ', Word.'."""
+    out = _normalize_chunk(text)
+    if not out or len(out.split()) < 3:
         return out, False
-    stop = {
-        "і", "та", "а", "але", "що", "як", "в", "у", "на", "з", "із", "до", "від",
-        "про", "для", "це", "той", "та", "він", "вона", "вони", "був", "була",
-        "були", "є", "не", "тоді", "потім", "саме",
-    }
-    for w in words:
-        stem = re.sub(r"[^\w\u0400-\u04FF]+", "", w, flags=re.UNICODE)
-        if len(stem) < 5 or stem.lower() in stop:
-            continue
-        # Already repeated nearby — skip.
-        if out.lower().count(stem.lower()) >= 2:
-            continue
-        trial = f"{out.rstrip('.!?…')}, {stem}."
-        trial = strip_slot_pad_fillers(" ".join(trial.split()).strip())
-        if trial != out and len(trial.split()) > len(words):
-            return trial, True
+    # Prefer known multi-word glossary forms already present / injectible.
+    phrases = (
+        "Джордж молодший",
+        "Хаскелл Векслер",
+        "Зоряні війни",
+        "старий Фіат",
+    )
+    entity = ""
+    low = out.lower()
+    for ph in phrases:
+        if ph.lower() in low:
+            entity = ph
+            break
+    if not entity:
+        # Bigram of capitalized / long content words (never a single stem dump).
+        words = out.split()
+        stop = {
+            "і", "та", "а", "але", "що", "як", "в", "у", "на", "з", "із", "до",
+            "від", "про", "для", "це", "той", "він", "вона", "вони", "був", "була",
+            "були", "є", "не", "тоді", "потім", "саме", "отже", "тому",
+        }
+        for i in range(len(words) - 1):
+            a = re.sub(r"[^\w\u0400-\u04FF]+", "", words[i], flags=re.UNICODE)
+            b = re.sub(r"[^\w\u0400-\u04FF]+", "", words[i + 1], flags=re.UNICODE)
+            if (
+                len(a) >= 4
+                and len(b) >= 4
+                and a.lower() not in stop
+                and b.lower() not in stop
+            ):
+                entity = f"{a} {b}"
+                break
+    if not entity:
+        return out, False
+    base = out if _COMPLETE_END.search(out) else out.rstrip(",;:") + "."
+    trial = f"{base} Саме про {entity} тут ідеться."
+    trial = strip_slot_pad_fillers(_normalize_chunk(trial))
+    if (
+        trial != out
+        and len(clean_text_chars(trial)) > len(clean_text_chars(out))
+        and is_clean_utterance(trial)
+        and not has_forbidden_expand_pattern(trial)
+    ):
+        return trial, True
     return out, False
+
+
+def _stage19g_repeat_key_noun(text: str) -> tuple[str, bool]:
+    """Deprecated Stage 19g path — routed to clean phrase repeat (19j)."""
+    return _stage19j_repeat_key_phrase(text)
 
 
 def expand_to_fill(
@@ -1566,86 +1564,125 @@ def expand_to_fill(
     target_chars: int | None = None,
     strategy_order: list[str] | tuple[str, ...] | None = None,
 ) -> tuple[str, list[str]]:
-    """Stage 19i: lengthen Final toward CPS/char budget — must grow clean chars.
+    """Stage 19j: lengthen only with clean utterances — never garbage appends.
 
-    Default strategy order (after rule expand + optional longer semantic):
-      semantic_repeat_key → glossary_expand → soft_pad_once (≤1)
+    Order: semantic_repeat_key_phrase → glossary_expand → soft_pad_once (≤1).
+    If no clean growth possible → return original (caller marks dead_air_risk).
     """
-    before = " ".join(str(final_text or "").split()).strip()
+    before = _normalize_chunk(final_text)
     before_chars = len(clean_text_chars(before))
     slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
     aim_chars = int(target_chars) if target_chars is not None else char_budget(slot_equiv)
-    anchor = " ".join(str(prefer_raw or raw_mt or "").split()).strip()
-    out, reasons = expand_text_to_slot(
-        before,
-        slot_equiv,
-        lang,
-        source_hint=source_hint,
-        raw_mt=anchor or raw_mt,
-    )
-    out = " ".join(str(out or "").split()).strip() or before
-    reasons = list(reasons or [])
+    anchor = _normalize_chunk(prefer_raw or raw_mt)
+    reasons: list[str] = []
+    blocked = 0
     aim = max(200, int(target_ms or 0))
     order = list(
         strategy_order
         or ("semantic_repeat_key", "glossary_expand", "soft_pad_once")
     )
 
-    def _grew(candidate: str) -> bool:
-        c = " ".join(str(candidate or "").split()).strip()
-        return bool(c) and len(clean_text_chars(c)) > before_chars
+    def _accept(candidate: str) -> bool:
+        c = _normalize_chunk(candidate)
+        if not c or c == before:
+            return False
+        if len(clean_text_chars(c)) <= before_chars:
+            return False
+        if has_forbidden_expand_pattern(c):
+            return False
+        if not is_clean_utterance(c) and not (
+            _is_complete_thought(c) and not has_forbidden_expand_pattern(c)
+        ):
+            return False
+        if not _expand_lang_ok(c, lang):
+            return False
+        return True
 
     def _still_short(candidate: str) -> bool:
-        c = " ".join(str(candidate or "").split()).strip()
+        c = _normalize_chunk(candidate)
         return (
             len(clean_text_chars(c)) < int(aim_chars * 0.85)
             or estimate_tts_ms(c, lang) < aim
         )
 
-    # Prefer longer raw/semantic when it truly grows clean length.
+    out = before
+    # Rule expand first — accept only if clean.
+    try:
+        ruled, rule_reasons = expand_text_to_slot(
+            before,
+            slot_equiv,
+            lang,
+            source_hint=source_hint,
+            raw_mt=anchor or raw_mt,
+        )
+        ruled = _normalize_chunk(ruled) or before
+        if _accept(ruled):
+            out = ruled
+            reasons.extend(list(rule_reasons or []))
+        elif ruled != before:
+            blocked += 1
+            reasons.append("stage19j:garbage_expand_blocked")
+    except Exception:
+        pass
+
+    # Longer clean semantic/raw replacement (whole text, not a crumb append).
     if (
-        (not _grew(out) or _still_short(out))
+        (_still_short(out) or out == before)
         and anchor
         and anchor != out
-        and len(clean_text_chars(anchor)) > len(clean_text_chars(out))
-        and _expand_lang_ok(anchor, lang)
-        and _is_complete_thought(anchor)
+        and _accept(anchor)
     ):
         out = strip_slot_pad_fillers(anchor)
-        reasons.append("stage19i:force_raw_prefer")
+        reasons.append("stage19j:force_raw_prefer")
         if "raw_prefer" not in reasons:
             reasons.append("raw_prefer")
 
     for step in order:
-        if _grew(out) and not _still_short(out):
+        if _accept(out) and not _still_short(out) and out != before:
             break
-        if step == "semantic_repeat_key":
-            rep, ok = _stage19g_repeat_key_noun(out)
-            if ok and _grew(rep):
+        if step in ("semantic_repeat_key", "semantic_repeat_key_phrase"):
+            rep, ok = _stage19j_repeat_key_phrase(out)
+            if ok and _accept(rep):
                 out = rep
-                reasons.append("stage19i:semantic_repeat_key")
+                reasons.append("stage19j:semantic_repeat_key")
+            elif ok:
+                blocked += 1
+                reasons.append("stage19j:garbage_expand_blocked")
         elif step == "glossary_expand":
             inj, ok = _stage19g_inject_glossary_anchors(
                 out, source_hint=source_hint, raw_mt=anchor or raw_mt
             )
-            if ok and _grew(inj):
-                out = inj
-                reasons.append("stage19i:glossary_expand")
+            if ok and _accept(inj):
+                out = _normalize_chunk(inj)
+                reasons.append("stage19j:glossary_expand")
+            elif ok:
+                blocked += 1
+                reasons.append("stage19j:garbage_expand_blocked")
         elif step == "soft_pad_once":
             if soft_pad_count(out) >= MAX_SOFT_PADS_PER_SEG:
                 continue
             padded, ok = _stage19g_soft_pad_once(out, lang)
-            if ok and _grew(padded) and soft_pad_count(padded) <= MAX_SOFT_PADS_PER_SEG:
+            if ok and _accept(padded) and soft_pad_count(padded) <= MAX_SOFT_PADS_PER_SEG:
                 out = padded
-                reasons.append("stage19i:soft_pad")
+                reasons.append("stage19j:soft_pad")
+            elif ok:
+                blocked += 1
+                reasons.append("stage19j:garbage_expand_blocked")
 
-    out = strip_slot_pad_fillers(out)
-    # Forbidden: expand that does not increase clean length.
-    if not _grew(out):
+    out = strip_slot_pad_fillers(_normalize_chunk(out))
+    # Hard refuse: any forbidden pattern or no real clean growth.
+    if has_forbidden_expand_pattern(out) or not _accept(out):
+        if out != before:
+            blocked += 1
+            reasons.append("stage19j:garbage_expand_blocked")
         out = before
-        reasons = [r for r in reasons if "grown" not in str(r) and "soft_pad" not in str(r)]
-    elif "stage19i:text_grown" not in reasons:
-        reasons.append("stage19i:text_grown")
+        reasons = [r for r in reasons if "grown" not in str(r)]
+        if blocked:
+            reasons.append(f"stage19j:blocked_count:{blocked}")
+        return out, reasons
+    reasons.append("stage19j:text_grown")
+    if blocked:
+        reasons.append(f"stage19j:blocked_count:{blocked}")
     return out, reasons
 
 

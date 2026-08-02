@@ -2271,8 +2271,10 @@ def build_openddf_segment_diagnostics(
                 "stage19g": seg.get("stage19g") or {},
                 "stage19h": seg.get("stage19h") or {},
                 "stage19i": seg.get("stage19i") or {},
+                "stage19j": seg.get("stage19j") or {},
                 "text_changed": bool(
                     seg.get("text_changed")
+                    or (seg.get("stage19j") or {}).get("text_changed")
                     or (seg.get("stage19i") or {}).get("text_changed")
                     or (seg.get("stage19h") or {}).get("text_changed")
                     or (seg.get("stage19g") or {}).get("text_changed")
@@ -2280,22 +2282,41 @@ def build_openddf_segment_diagnostics(
                 "unique_text_ok": bool(
                     seg.get("unique_text_ok")
                     if seg.get("unique_text_ok") is not None
-                    else (seg.get("stage19i") or seg.get("stage19h") or {}).get(
-                        "unique_text_ok", True
-                    )
+                    else (
+                        seg.get("stage19j")
+                        or seg.get("stage19i")
+                        or seg.get("stage19h")
+                        or {}
+                    ).get("unique_text_ok", True)
+                ),
+                "clean_split_ok": bool(
+                    seg.get("clean_split_ok")
+                    if seg.get("clean_split_ok") is not None
+                    else (seg.get("stage19j") or {}).get("clean_split_ok", True)
+                ),
+                "garbage_expand_blocked": int(
+                    seg.get("garbage_expand_blocked")
+                    or (seg.get("stage19j") or {}).get("garbage_expand_blocked")
+                    or 0
                 ),
                 "char_budget": int(
-                    (seg.get("stage19i") or {}).get("char_budget")
+                    (seg.get("stage19j") or seg.get("stage19i") or {}).get(
+                        "char_budget"
+                    )
                     or seg.get("char_budget")
                     or 0
                 ),
                 "estimated_cps": float(
-                    (seg.get("stage19i") or {}).get("estimated_cps")
+                    (seg.get("stage19j") or seg.get("stage19i") or {}).get(
+                        "estimated_cps"
+                    )
                     or seg.get("estimated_cps")
                     or 0
                 ),
                 "soft_pad_count": int(
-                    (seg.get("stage19i") or {}).get("soft_pad_count")
+                    (seg.get("stage19j") or seg.get("stage19i") or {}).get(
+                        "soft_pad_count"
+                    )
                     or seg.get("soft_pad_count")
                     or 0
                 ),
@@ -2314,6 +2335,12 @@ def build_openddf_segment_diagnostics(
                     seg.get("stage19i_split_depth")
                     or (seg.get("stage19i") or {}).get("stage19i_split_depth")
                     or seg.get("stage19h_split_depth")
+                    or 0
+                ),
+                "stage19j_split_depth": int(
+                    seg.get("stage19j_split_depth")
+                    or (seg.get("stage19j") or {}).get("stage19j_split_depth")
+                    or seg.get("stage19i_split_depth")
                     or 0
                 ),
                 "duration_match_score": int(
