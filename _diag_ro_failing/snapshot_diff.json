@@ -1,6 +1,0 @@
-{
-  "stage": "STT",
-  "task_id": "ed4098575cc3483686757de5a2a60106",
-  "error_type": "UnboundLocalError",
-  "message": "cannot access local variable 'persist_to_task_info' where it is not associated with a value"
-}

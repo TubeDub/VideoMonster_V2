@@ -1,8 +1,0 @@
-[2026-07-11T21:27:46.797580+00:00] stage_snapshot_check -> Status: OK | Meta: {'stage': 'tts'}
-[2026-07-11T21:28:39.839260+00:00] stage_snapshot_check -> Status: OK | Meta: {'stage': 'slot_fit'}
-[2026-07-11T21:28:40.084237+00:00] unhandled_exception -> Status: FAILED | Meta: {'stage': 'studio_handoff', 'error_type': 'RuntimeIntegrityError'}
-[2026-07-11T21:28:40.084572+00:00] pipeline_crash -> Status: FAILED | Meta: {'stage': 'studio_handoff', 'error_type': 'RuntimeIntegrityError', 'message': 'TTS file not found for segment b59625b1aecb4f40b2801b755e60ba75: pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav'}
-2026-07-12 00:27:46 [INFO] tubedub.tts_handoff: [TTS] task=79e4407c2afb45ae80da9e92adf00829
-2026-07-12 00:28:39 [INFO] tubedub.tts_lifecycle: [TTS-LC] task=79e4407c2afb45ae80da9e92adf00829 event=integrity_check stage=studio_handoff segment_id=b59625b1aecb4f40b2801b755e60ba75 idx=0 file=pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav path=output\pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav success=False exists=False detail=tts_file_path=pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav file=pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav
-2026-07-12 00:28:39 [ERROR] api.auto_dub_api: Pipeline failed task=79e4407c2afb45ae80da9e92adf00829
-2026-07-12 00:28:40 [ERROR] tubedub.pipeline_failure: [P16-ERR] run=79e4407c2afb45ae80da9e92adf00829 seg= stage=studio_handoff class=RuntimeIntegrityError recovery=abort_pipeline zip=- msg=TTS file not found for segment b59625b1aecb4f40b2801b755e60ba75: pause_run_b59625b1aecb_20260712_002748_fbde60cb.wav

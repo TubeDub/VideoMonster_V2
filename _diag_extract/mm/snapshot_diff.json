@@ -1,6 +1,0 @@
-{
-  "stage": "AI Adaptation Gate",
-  "task_id": "622868c73552419c9587697a6119e354",
-  "error_type": "RuntimeError",
-  "message": "AI Adaptation Engine: 11 сегмент(ов) требуют интеллектуальной адаптации, но LLM не была вызвана (#9:budget_exhausted; #10:budget_exhausted; #11:budget_exhausted; #12:budget_exhausted; #13:budget_exhausted; #14:budget_exhausted; #16:budget_exhausted; #17:budget_exhausted; #18:budget_exhausted; #19:budget_exhausted)"
-}
