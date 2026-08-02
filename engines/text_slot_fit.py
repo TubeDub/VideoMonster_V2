@@ -24,9 +24,11 @@ UNDERFILL_EXPAND_RATIO = 0.90
 EXPAND_AIM_RATIO = 0.95
 # After fit, still under this → mark atempo_slow (audio path must stretch).
 UNDERFILL_ATEMPO_SLOW_RATIO = 0.88
-# Stage 19: atempo band — expand text first; never "fast then gap".
-MAX_ATEMPO_SLOW = 0.85
-MAX_ATEMPO_FAST = 1.15
+# Stage 19i: production atempo band — expand/split first; never "fast then gap".
+ATEMPO_MIN = 0.90
+ATEMPO_MAX = 1.20
+MAX_ATEMPO_SLOW = ATEMPO_MIN
+MAX_ATEMPO_FAST = ATEMPO_MAX
 FORBIDDEN_FAST_THEN_GAP = True
 FAST_GAP_ATEMPO_THRESHOLD = 1.05
 # Stage 15: refuse shorten that drops >15% of words (severe floor 30%).
@@ -36,27 +38,37 @@ SEVERE_OVERFLOW_RATIO = 1.50
 # Stage 19d: final shorter than raw/semantic by >25% without shorten_executed = silent truncate.
 MAX_SILENT_TRUNCATE_RATIO = 0.75
 MIN_RAW_WORDS_FOR_TRUNCATE_GUARD = 12
-# Stage 19e/19f/19g/19h: after restore, force split when predicted speech exceeds slot.
+# Stage 19i: Ukrainian CPS budget (production typical).
+TARGET_CPS_UK = 14.0
+MIN_CPS_UK = 11.5
+MAX_CPS_UK = 17.0
+# Stage 19e–19i: after restore, force split when predicted speech exceeds slot.
 FORCE_SPLIT_RATIO = 1.15
 FORCE_SPLIT_ABS_MS = 3000
-MAX_POST_RESTORE_SPLIT_CHILDREN = 12
+MAX_POST_RESTORE_SPLIT_CHILDREN = 10
 MAX_CHILD_FILL = 1.15
 MAX_FILL_RATIO_AFTER_RESTORE = 1.15
-MAX_SPLIT_CHILDREN = 12
-MAX_SPLIT_DEPTH = 4
-MIN_CHILD_SLOT_MS = 1800
+MAX_SPLIT_CHILDREN = 10
+MAX_SPLIT_DEPTH = 3
+MIN_CHILD_SLOT_MS = 2200
+MAX_CHILD_SLOT_MS = 7500
 STAGE19H_OK_FILL_LO = 0.85
 STAGE19H_OK_FILL_HI = 1.15
+STAGE19I_OK_FILL_LO = 0.85
+STAGE19I_OK_FILL_HI = 1.15
 UNDERFLOW_TRIGGER_MS = 350
 OVERFLOW_TRIGGER_MS = 350
-# Stage 19h: soft expand pads (strict whitelist — never "ось як це було тоді").
-_STAGE19G_SOFT_PADS: tuple[str, ...] = (
+MAX_SOFT_PADS_PER_SEG = 1
+# Stage 19i: soft expand pads (strict whitelist — never "ось як це було тоді").
+SOFT_PAD_WHITELIST: tuple[str, ...] = (
     "саме тоді",
     "і саме в цей момент",
-    "тоді",
     "отже",
+    "тому",
 )
-_STAGE19H_SOFT_PADS = _STAGE19G_SOFT_PADS
+_STAGE19G_SOFT_PADS = SOFT_PAD_WHITELIST
+_STAGE19H_SOFT_PADS = SOFT_PAD_WHITELIST
+_STAGE19I_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19G_GLOSSARY_ANCHORS: tuple[tuple[str, str], ...] = (
     (r"(?i)\bgeorge\s+junior\b|\bgeorge\s+jr\.?\b", "Джордж молодший"),
     (r"(?i)\bfiat\b", "Фіат"),
@@ -179,6 +191,60 @@ def safe_shorten(
     return _safe_shorten(text, slot_ms, lang, source_hint=source_hint)
 
 
+def clean_text_chars(text: str) -> str:
+    """Non-space characters used for CPS / char-budget checks."""
+    return str(text or "").replace(" ", "")
+
+
+def char_budget(slot_ms: int, cps: float = TARGET_CPS_UK) -> int:
+    """Stage 19i: max comfortable characters for a slot at target CPS."""
+    return max(20, int((max(0, int(slot_ms or 0)) / 1000.0) * float(cps or TARGET_CPS_UK)))
+
+
+def estimated_cps(text: str, measured_ms: int) -> float:
+    """Stage 19i: characters/sec from clean text and measured audio."""
+    ms = int(measured_ms or 0)
+    if ms <= 0:
+        return 0.0
+    return len(clean_text_chars(text)) / (ms / 1000.0)
+
+
+def soft_pad_count(text: str) -> int:
+    """Count whitelist soft pads present in text (Stage 19i ≤1)."""
+    low = str(text or "").lower()
+    n = 0
+    for pad in SOFT_PAD_WHITELIST:
+        if pad.lower() in low:
+            n += 1
+    return n
+
+
+def cps_over_budget(text: str, slot_ms: int, *, ratio: float = 1.15) -> bool:
+    """True when clean text exceeds char_budget × ratio → shorten/split first."""
+    budget = char_budget(slot_ms)
+    return len(clean_text_chars(text)) > int(budget * float(ratio))
+
+
+def cps_under_budget(text: str, slot_ms: int, *, ratio: float = 0.85) -> bool:
+    """True when clean text is below char_budget × ratio → expand."""
+    budget = char_budget(slot_ms)
+    return len(clean_text_chars(text)) < int(budget * float(ratio))
+
+
+def production_child_aim_ms(slot_ms: int = 0, *, predicted_ms: int = 0) -> int:
+    """Target pack aim in [MIN_CHILD_SLOT_MS, MAX_CHILD_SLOT_MS].
+
+    Honors the caller's pack slot when inside the band; caps large parent
+    windows to MAX_CHILD_SLOT_MS so monologues become 3–7.5s chunks.
+    ``predicted_ms`` is reserved for callers that pre-size aim.
+    """
+    del predicted_ms  # API compatibility — aim follows slot, not raw pred.
+    slot = max(0, int(slot_ms or 0))
+    if slot <= 0:
+        return MAX_CHILD_SLOT_MS
+    return max(MIN_CHILD_SLOT_MS, min(MAX_CHILD_SLOT_MS, slot))
+
+
 def should_force_split(
     text: str,
     slot_ms: int,
@@ -186,11 +252,13 @@ def should_force_split(
     *,
     predicted_ms: int | None = None,
 ) -> bool:
-    """Stage 19g: predicted fill_ratio > 1.15 (or absolute giant into tiny/empty slot)."""
+    """Stage 19i: predicted fill > 1.15 or CPS over char_budget."""
     slot = max(0, int(slot_ms or 0))
     pred = int(predicted_ms) if predicted_ms is not None else estimate_tts_ms(text, lang)
     if pred <= 0:
         return False
+    if slot > 0 and cps_over_budget(text, slot):
+        return True
     if slot <= 0:
         return pred > FORCE_SPLIT_ABS_MS
     if pred > int(slot * FORCE_SPLIT_RATIO):
@@ -316,14 +384,18 @@ def force_split_until_fit(
     max_children: int = MAX_SPLIT_CHILDREN,
     depth: int = 0,
 ) -> list[str]:
-    """Stage 19h: recursive unique-chunk split until each fill ≤ 1.15.
+    """Stage 19i: unique natural chunks aimed at 2.2–7.5s / CPS budget.
 
     Guarantees: when ≥2 chunks returned, no chunk equals the full parent text.
+    Recurses while any child fill > 1.15 or chars > char_budget(child).
     """
     t = _normalize_chunk(text)
     if not t:
         return []
-    slot = max(1, int(slot_ms or 0) or 2000)
+    parent_slot = max(1, int(slot_ms or 0) or MIN_CHILD_SLOT_MS)
+    parent_pred = estimate_tts_ms(t, lang)
+    # Production aim: pack to natural 2.2–7.5s children, not the whole parent slot.
+    slot = production_child_aim_ms(parent_slot, predicted_ms=parent_pred)
     if int(depth or 0) >= MAX_SPLIT_DEPTH:
         # At max depth still try a hard bipartition so we never return the
         # full parent as a "successful" multi-child split.
@@ -344,6 +416,7 @@ def force_split_until_fit(
         return [t]
 
     hard = max(int(slot * MAX_CHILD_FILL), MIN_CHILD_SLOT_MS)
+    budget_chars = int(char_budget(slot) * 1.15)
     chunks = split_into_slot_sized_chunks(
         t, slot, lang, max_children=max_children
     )
@@ -393,8 +466,17 @@ def force_split_until_fit(
                     continue
         pred = estimate_tts_ms(c, lang)
         room = max_children - len(result)
-        if pred > hard and room >= 2 and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH:
-            sub_slot = max(MIN_CHILD_SLOT_MS, int(slot * 0.85))
+        over_fill = pred > hard
+        over_chars = len(clean_text_chars(c)) > budget_chars
+        if (
+            (over_fill or over_chars)
+            and room >= 2
+            and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH
+        ):
+            sub_slot = production_child_aim_ms(
+                max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
+                predicted_ms=pred,
+            )
             sub = force_split_until_fit(
                 c,
                 sub_slot,
@@ -438,7 +520,11 @@ def force_split_until_fit(
 
     expected_n = min(
         max_children,
-        max(2, int(estimate_tts_ms(t, lang) / max(hard, 1)) + 1),
+        max(
+            2,
+            int(parent_pred / max(MAX_CHILD_SLOT_MS, hard, 1)) + 1,
+            int(len(clean_text_chars(t)) / max(char_budget(slot), 1)) + 1,
+        ),
     )
 
     def _uneven_atomic_packs(src: str, n: int) -> list[str]:
@@ -528,7 +614,41 @@ def force_split_until_fit(
                 if len(rebuilt) >= 2:
                     out = rebuilt[:max_children]
 
-    # Polish: recursively carve any leftover oversize unique pack (fill > 1.15).
+    # Merge tiny crumbs / Latin-only tokens (e.g. "USC.") into neighbors.
+    if len(out) >= 2:
+        merged_tiny: list[str] = []
+        for c in out:
+            c = _normalize_chunk(c)
+            if not c:
+                continue
+            words = c.split()
+            latin_only = bool(re.fullmatch(r"[A-Za-z0-9 .,'’\-]+", c))
+            tiny = len(words) <= 2 or len(clean_text_chars(c)) < 12
+            if merged_tiny and (tiny or latin_only):
+                merged_tiny[-1] = (merged_tiny[-1] + " " + c).strip()
+            elif latin_only and not merged_tiny:
+                # Defer — attach to next real chunk.
+                merged_tiny.append(c)
+            else:
+                if (
+                    merged_tiny
+                    and len(merged_tiny[-1].split()) <= 2
+                    and re.fullmatch(r"[A-Za-z0-9 .,'’\-]+", merged_tiny[-1] or "")
+                ):
+                    # Leading latin crumb waiting for a host.
+                    c = (merged_tiny.pop() + " " + c).strip()
+                    if merged_tiny:
+                        merged_tiny[-1] = (merged_tiny[-1] + " " + c).strip()
+                    else:
+                        merged_tiny.append(c)
+                else:
+                    merged_tiny.append(c)
+        if len(merged_tiny) >= 2 and assert_unique_split_chunks(t, merged_tiny):
+            out = merged_tiny[:max_children]
+        elif len(merged_tiny) >= 2:
+            out = merged_tiny[:max_children]
+
+    # Polish: recursively carve leftover oversize packs (fill > 1.15 or CPS).
     if out and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH:
         polished: list[str] = []
         for c in out:
@@ -539,10 +659,13 @@ def force_split_until_fit(
                 continue
             pred = estimate_tts_ms(c, lang)
             room = max_children - len(polished)
-            if pred > hard and room >= 2:
+            if (pred > hard or len(clean_text_chars(c)) > budget_chars) and room >= 2:
                 sub = force_split_until_fit(
                     c,
-                    max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
+                    production_child_aim_ms(
+                        max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
+                        predicted_ms=pred,
+                    ),
                     lang,
                     max_children=room,
                     depth=int(depth or 0) + 1,
@@ -1376,14 +1499,16 @@ def _stage19g_inject_glossary_anchors(
 
 
 def _stage19g_soft_pad_once(text: str, lang: str = "uk") -> tuple[str, bool]:
-    """Insert one whitelist soft pad (never banned 'ось як це було тоді')."""
+    """Insert at most one whitelist soft pad (Stage 19i ≤ MAX_SOFT_PADS_PER_SEG)."""
     out = " ".join(str(text or "").split()).strip()
     if not out:
         return out, False
     lang0 = str(lang or "uk").split("-")[0].lower()
     if lang0 != "uk":
         return out, False
-    for pad in _STAGE19G_SOFT_PADS:
+    if soft_pad_count(out) >= MAX_SOFT_PADS_PER_SEG:
+        return out, False
+    for pad in SOFT_PAD_WHITELIST:
         if pad.lower() in out.lower():
             continue
         # Prefer mid-clause insert after first comma / first clause.
@@ -1396,7 +1521,8 @@ def _stage19g_soft_pad_once(text: str, lang: str = "uk") -> tuple[str, bool]:
         if (
             trial
             and trial != out
-            and len(trial) > len(out)
+            and len(clean_text_chars(trial)) > len(clean_text_chars(out))
+            and soft_pad_count(trial) <= MAX_SOFT_PADS_PER_SEG
             and _is_complete_thought(trial)
             and _expand_lang_ok(trial, lang)
         ):
@@ -1437,17 +1563,18 @@ def expand_to_fill(
     source_hint: str = "",
     raw_mt: str = "",
     prefer_raw: str = "",
+    target_chars: int | None = None,
+    strategy_order: list[str] | tuple[str, ...] | None = None,
 ) -> tuple[str, list[str]]:
-    """Stage 19g: lengthen Final toward target_ms — must grow when underfilled.
+    """Stage 19i: lengthen Final toward CPS/char budget — must grow clean chars.
 
-    Fallback chain when rule-expand is a no-op:
-      a) prefer longer raw/semantic
-      b) glossary anchors (George Jr., Fiat, USC, Wexler, Star Wars)
-      c) whitelist soft pads
-      d) repeat one key noun once
+    Default strategy order (after rule expand + optional longer semantic):
+      semantic_repeat_key → glossary_expand → soft_pad_once (≤1)
     """
     before = " ".join(str(final_text or "").split()).strip()
+    before_chars = len(clean_text_chars(before))
     slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
+    aim_chars = int(target_chars) if target_chars is not None else char_budget(slot_equiv)
     anchor = " ".join(str(prefer_raw or raw_mt or "").split()).strip()
     out, reasons = expand_text_to_slot(
         before,
@@ -1459,54 +1586,66 @@ def expand_to_fill(
     out = " ".join(str(out or "").split()).strip() or before
     reasons = list(reasons or [])
     aim = max(200, int(target_ms or 0))
+    order = list(
+        strategy_order
+        or ("semantic_repeat_key", "glossary_expand", "soft_pad_once")
+    )
 
     def _grew(candidate: str) -> bool:
         c = " ".join(str(candidate or "").split()).strip()
-        return bool(c) and (
-            len(c) > len(before)
-            or len(c.split()) > len(before.split())
+        return bool(c) and len(clean_text_chars(c)) > before_chars
+
+    def _still_short(candidate: str) -> bool:
+        c = " ".join(str(candidate or "").split()).strip()
+        return (
+            len(clean_text_chars(c)) < int(aim_chars * 0.85)
+            or estimate_tts_ms(c, lang) < aim
         )
 
-    # a) prefer longer raw/semantic (Stage 19f/19g).
+    # Prefer longer raw/semantic when it truly grows clean length.
     if (
-        (not _grew(out) or estimate_tts_ms(out, lang) < aim)
+        (not _grew(out) or _still_short(out))
         and anchor
         and anchor != out
-        and len(anchor.split()) > len(out.split())
+        and len(clean_text_chars(anchor)) > len(clean_text_chars(out))
         and _expand_lang_ok(anchor, lang)
         and _is_complete_thought(anchor)
     ):
         out = strip_slot_pad_fillers(anchor)
-        reasons.append("stage19g:force_raw_prefer")
+        reasons.append("stage19i:force_raw_prefer")
         if "raw_prefer" not in reasons:
             reasons.append("raw_prefer")
 
-    # b) glossary anchors from hint / raw.
-    if not _grew(out) or estimate_tts_ms(out, lang) < aim:
-        inj, ok = _stage19g_inject_glossary_anchors(
-            out, source_hint=source_hint, raw_mt=anchor or raw_mt
-        )
-        if ok and _grew(inj):
-            out = inj
-            reasons.append("stage19g:glossary_anchor")
-
-    # c) whitelist soft pads.
-    if not _grew(out) or estimate_tts_ms(out, lang) < aim:
-        padded, ok = _stage19g_soft_pad_once(out, lang)
-        if ok and _grew(padded):
-            out = padded
-            reasons.append("stage19g:soft_pad")
-
-    # d) repeat key noun once.
-    if not _grew(out) or estimate_tts_ms(out, lang) < aim:
-        rep, ok = _stage19g_repeat_key_noun(out)
-        if ok and _grew(rep):
-            out = rep
-            reasons.append("stage19g:repeat_noun")
+    for step in order:
+        if _grew(out) and not _still_short(out):
+            break
+        if step == "semantic_repeat_key":
+            rep, ok = _stage19g_repeat_key_noun(out)
+            if ok and _grew(rep):
+                out = rep
+                reasons.append("stage19i:semantic_repeat_key")
+        elif step == "glossary_expand":
+            inj, ok = _stage19g_inject_glossary_anchors(
+                out, source_hint=source_hint, raw_mt=anchor or raw_mt
+            )
+            if ok and _grew(inj):
+                out = inj
+                reasons.append("stage19i:glossary_expand")
+        elif step == "soft_pad_once":
+            if soft_pad_count(out) >= MAX_SOFT_PADS_PER_SEG:
+                continue
+            padded, ok = _stage19g_soft_pad_once(out, lang)
+            if ok and _grew(padded) and soft_pad_count(padded) <= MAX_SOFT_PADS_PER_SEG:
+                out = padded
+                reasons.append("stage19i:soft_pad")
 
     out = strip_slot_pad_fillers(out)
-    if _grew(out) and "stage19g:text_grown" not in reasons:
-        reasons.append("stage19g:text_grown")
+    # Forbidden: expand that does not increase clean length.
+    if not _grew(out):
+        out = before
+        reasons = [r for r in reasons if "grown" not in str(r) and "soft_pad" not in str(r)]
+    elif "stage19i:text_grown" not in reasons:
+        reasons.append("stage19i:text_grown")
     return out, reasons
 
 
