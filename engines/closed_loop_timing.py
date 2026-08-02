@@ -40,21 +40,26 @@ MAX_STAGE19H_SPLIT_CHILDREN = 12
 MAX_STAGE19H_SPLIT_DEPTH = 4
 MAX_STAGE19I_SPLIT_CHILDREN = 10
 MAX_STAGE19I_SPLIT_DEPTH = 3
-MAX_STAGE19J_SPLIT_CHILDREN = 10
-MAX_STAGE19J_SPLIT_DEPTH = 3
+MAX_STAGE19J_SPLIT_CHILDREN = 14
+MAX_STAGE19J_SPLIT_DEPTH = 5
+MAX_STAGE21_SPLIT_CHILDREN = 14
+MAX_STAGE21_SPLIT_DEPTH = 5
 OVERLAP_TOLERANCE_MS = 40
 TIMING_SCORE_GOAL = 95
 STAGE19G_UNDERFILL_FILL_RATIO = 0.92
 STAGE19G_OK_FILL_LO = 0.85
-STAGE19G_OK_FILL_HI = 1.15
+STAGE19G_OK_FILL_HI = 1.12
 STAGE19H_OK_FILL_LO = 0.85
-STAGE19H_OK_FILL_HI = 1.15
+STAGE19H_OK_FILL_HI = 1.12
 STAGE19I_OK_FILL_LO = 0.85
-STAGE19I_OK_FILL_HI = 1.15
+STAGE19I_OK_FILL_HI = 1.12
 STAGE19J_OK_FILL_LO = 0.85
-STAGE19J_OK_FILL_HI = 1.15
+STAGE19J_OK_FILL_HI = 1.12
+STAGE21_OK_FILL_LO = 0.85
+STAGE21_OK_FILL_HI = 1.12
 UNDERFLOW_TRIGGER_MS = 350
 OVERFLOW_TRIGGER_MS = 350
+OVERFLOW_FORCE_SPLIT_MS = 350
 ATEMPO_MIN = 0.90
 ATEMPO_MAX = 1.20
 
@@ -935,41 +940,44 @@ def try_stage19e_post_restore_split(
     idx: int,
     lang: str = "uk",
 ) -> bool:
-    """Stage 19i: CPS-aware unique natural split + independent re-TTS.
+    """Stage 21: overflow>350ms → aggressive clean split + independent re-TTS.
 
-    Uses force_split_until_fit so each child predicted fill ≤ 1.15
+    Uses force_split_until_fit so each child predicted fill ≤ 1.12
     and lands near production 2.2–7.5s chunks. Children never inherit
-    parent text/duration; each needs its own TTS.
+    parent text/duration; each needs its own TTS. Garbage expand forbidden.
     """
     import copy
 
     from engines.text_slot_fit import (
         MAX_CHILD_FILL,
         MAX_SPLIT_CHILDREN,
+        OVERFLOW_FORCE_SPLIT_MS,
         assert_clean_split_chunks,
         assert_unique_split_chunks,
         char_budget,
         cps_over_budget,
         estimate_tts_ms,
         force_split_until_fit,
-        has_forbidden_expand_pattern,
         is_clean_utterance,
+        is_garbage_expand,
         should_force_split,
         soft_pad_count,
+        strip_garbage_expand_phrases,
     )
 
     if idx < 0 or idx >= len(segments_data):
         return False
     seg = segments_data[idx]
     depth = int(
-        seg.get("stage19j_split_depth")
+        seg.get("stage21_split_depth")
+        or seg.get("stage19j_split_depth")
         or seg.get("stage19i_split_depth")
         or seg.get("stage19h_split_depth")
         or seg.get("stage19g_split_depth")
         or seg.get("stage19f_split_depth")
         or 0
     )
-    if depth >= MAX_STAGE19J_SPLIT_DEPTH:
+    if depth >= MAX_STAGE21_SPLIT_DEPTH:
         return False
 
     if idx < len(timing_map):
@@ -999,10 +1007,17 @@ def try_stage19e_post_restore_split(
     fill_ratio_now = (
         (measured_ms / float(slot_ms)) if slot_ms > 0 and measured_ms > 0 else 0.0
     )
+    overflow_ms_now = (
+        int(measured_ms - slot_ms) if slot_ms > 0 and measured_ms > 0 else 0
+    )
+    parent_text = strip_garbage_expand_phrases(parent_text)
     if not (
         seg.get("needs_post_restore_split")
-        or should_force_split(parent_text, slot_ms, lang)
+        or should_force_split(
+            parent_text, slot_ms, lang, measured_ms=measured_ms or None
+        )
         or fill_ratio_now > MAX_CHILD_FILL
+        or overflow_ms_now > OVERFLOW_FORCE_SPLIT_MS
         or (slot_ms > 0 and cps_over_budget(parent_text, slot_ms))
         or segment_needs_stage19e_split(
             seg,
@@ -1019,24 +1034,28 @@ def try_stage19e_post_restore_split(
 
     # Aim packs at production child size (2.2–7.5s), not the whole parent window.
     pack_slot = slot_ms if slot_ms > 0 else 4000
-    if measured_ms > pack_slot * MAX_CHILD_FILL or cps_over_budget(parent_text, pack_slot):
-        pack_slot = max(2200, min(7500, int(pack_slot * 0.9) if pack_slot else 4000))
+    if (
+        measured_ms > pack_slot * MAX_CHILD_FILL
+        or overflow_ms_now > OVERFLOW_FORCE_SPLIT_MS
+        or cps_over_budget(parent_text, pack_slot)
+    ):
+        pack_slot = max(2200, min(7500, int(pack_slot * 0.92) if pack_slot else 4000))
     tgt_chunks = force_split_until_fit(
         parent_text,
         pack_slot,
         lang,
-        max_children=min(MAX_SPLIT_CHILDREN, MAX_STAGE19J_SPLIT_CHILDREN),
+        max_children=min(MAX_SPLIT_CHILDREN, MAX_STAGE21_SPLIT_CHILDREN),
         depth=0,
     )
     if len(tgt_chunks) < 2:
         return False
     unique_text_ok = assert_unique_split_chunks(parent_text, tgt_chunks)
     clean_split_ok = assert_clean_split_chunks(tgt_chunks) and all(
-        not has_forbidden_expand_pattern(c) for c in tgt_chunks
+        not is_garbage_expand(c) for c in tgt_chunks
     )
     if not unique_text_ok or not clean_split_ok:
         logger.warning(
-            "[Stage19j] refuse split seg#%d — unique_ok=%s clean_ok=%s",
+            "[Stage21] refuse split seg#%d — unique_ok=%s clean_ok=%s",
             idx,
             unique_text_ok,
             clean_split_ok,
@@ -1046,13 +1065,16 @@ def try_stage19e_post_restore_split(
             "split_children": len(tgt_chunks),
             "unique_text_ok": bool(unique_text_ok),
             "clean_split_ok": bool(clean_split_ok),
+            "force_split_executed": False,
+            "stage21_split_depth": depth,
             "stage19j_split_depth": depth,
             "stage19i_split_depth": depth,
             "stage19h_split_depth": depth,
             "char_budget": char_budget(slot_ms) if slot_ms else 0,
             "final_status": "overflow_unresolved",
             "fill_ratio": round(fill_ratio_now, 4),
-            "delta": int(measured_ms - slot_ms) if slot_ms else 0,
+            "overflow_ms": overflow_ms_now,
+            "delta": overflow_ms_now,
             "expand_executed": False,
             "text_changed": False,
             "soft_pad_count": soft_pad_count(parent_text),
@@ -1061,19 +1083,23 @@ def try_stage19e_post_restore_split(
         seg["stage19h"] = {**(seg.get("stage19h") or {}), **bad}
         seg["stage19i"] = {**(seg.get("stage19i") or {}), **bad}
         seg["stage19j"] = {**(seg.get("stage19j") or {}), **bad}
+        seg["stage21"] = {**(seg.get("stage21") or {}), **bad}
         seg["unique_text_ok"] = bool(unique_text_ok)
         seg["clean_split_ok"] = bool(clean_split_ok)
         return False
     if any(_text_looks_english(t) for t in tgt_chunks):
         logger.warning(
-            "[Stage19j] refuse split seg#%d — child Final looks English", idx
+            "[Stage21] refuse split seg#%d — child Final looks English", idx
         )
         return False
     assert all(
         " ".join(str(c).split()).strip() != parent_text for c in tgt_chunks
-    ), "Stage19j: child must not equal parent text"
+    ), "Stage21: child must not equal parent text"
     assert all(is_clean_utterance(c) for c in tgt_chunks), (
-        "Stage19j: child must be a clean utterance"
+        "Stage21: child must be a clean utterance"
+    )
+    assert all(not is_garbage_expand(c) for c in tgt_chunks), (
+        "Stage21: child must not contain garbage expand"
     )
 
     src_parts: list[str] = []
@@ -1201,8 +1227,9 @@ def try_stage19e_post_restore_split(
         child["stage19h_split_depth"] = child_depth
         child["stage19i_split_depth"] = child_depth
         child["stage19j_split_depth"] = child_depth
+        child["stage21_split_depth"] = child_depth
         child["needs_post_restore_split"] = bool(
-            still_over and child_depth < MAX_STAGE19J_SPLIT_DEPTH
+            still_over and child_depth < MAX_STAGE21_SPLIT_DEPTH
         )
         child["adaptive_resegment_done"] = True
         child["strategy"] = "split"
@@ -1210,18 +1237,18 @@ def try_stage19e_post_restore_split(
         child["unique_text_ok"] = True
         child["clean_split_ok"] = True
         child["needs_re_tts"] = True  # independent child TTS — never inherit parent
-        if still_over and child_depth >= MAX_STAGE19J_SPLIT_DEPTH:
+        if still_over and child_depth >= MAX_STAGE21_SPLIT_DEPTH:
             child["final_status"] = "overflow_unresolved"
         lock_text_fit_algorithm_reason(child, "TextSlotFitSplit")
         child["expansion_strategy"] = "split"
         child["rule_rewrite_used"] = True
         child["adaptation_stages"] = list(child.get("adaptation_stages") or []) + [
-            "stage19j_post_restore_split"
+            "stage21_force_split"
         ]
         final_status = (
             "overflow_unresolved"
-            if still_over and child_depth >= MAX_STAGE19J_SPLIT_DEPTH
-            else "stage19j_partial"
+            if still_over and child_depth >= MAX_STAGE21_SPLIT_DEPTH
+            else "stage21_partial"
         )
         child_budget = char_budget(child_slot)
         meta = {
@@ -1230,16 +1257,19 @@ def try_stage19e_post_restore_split(
             "split_children": n,
             "post_restore_split": True,
             "split_executed": True,
+            "force_split_executed": True,
             "expand_executed": False,
             "text_changed": True,
             "shorten_executed": False,
             "algorithm_reason": "TextSlotFitSplit",
             "fill_ratio": round(child_fill, 4),
+            "overflow_ms": 0,
             "stage19f_split_depth": child_depth,
             "stage19g_split_depth": child_depth,
             "stage19h_split_depth": child_depth,
             "stage19i_split_depth": child_depth,
             "stage19j_split_depth": child_depth,
+            "stage21_split_depth": child_depth,
             "unique_text_ok": True,
             "clean_split_ok": True,
             "garbage_expand_blocked": 0,
@@ -1256,6 +1286,7 @@ def try_stage19e_post_restore_split(
         child["stage19h"] = dict(meta)
         child["stage19i"] = dict(meta)
         child["stage19j"] = dict(meta)
+        child["stage21"] = dict(meta)
         children.append(child)
 
     for i, child in enumerate(children):
@@ -1602,44 +1633,71 @@ def _stamp_stage19e_fields(
         or seg.get("rule_rewrite_used")
         or seg.get("text_changed")
     )
-    # Stage 19j: ok only inside fill/CPS/pad/unique/clean bounds.
+    # Stage 21: ok only inside fill/CPS/pad/unique/clean bounds — never mask overflow.
     from engines.text_slot_fit import (
         MAX_CPS_UK,
         MIN_CPS_UK,
         char_budget,
         estimated_cps,
-        has_forbidden_expand_pattern,
         is_clean_utterance,
+        is_garbage_expand,
         soft_pad_count,
+        strip_garbage_expand_phrases,
     )
 
-    seg_text = _segment_text(seg)
+    seg_text = strip_garbage_expand_phrases(_segment_text(seg))
+    # Persist scrubbed text so garbage never survives into final_tts_text.
+    if seg_text and seg_text != _segment_text(seg):
+        for _k in (
+            "plain_text",
+            "text",
+            "final_text",
+            "final_tts_text",
+            "tts_text",
+            "translation_text",
+        ):
+            if _k in seg:
+                seg[_k] = seg_text
     unique_text_ok = seg.get("unique_text_ok")
     if unique_text_ok is None:
         unique_text_ok = (
-            seg.get("stage19j") or seg.get("stage19i") or seg.get("stage19h") or {}
+            seg.get("stage21")
+            or seg.get("stage19j")
+            or seg.get("stage19i")
+            or seg.get("stage19h")
+            or {}
         ).get("unique_text_ok")
     if unique_text_ok is None:
         unique_text_ok = True
     unique_text_ok = bool(unique_text_ok)
     clean_split_ok = seg.get("clean_split_ok")
     if clean_split_ok is None:
-        clean_split_ok = (seg.get("stage19j") or {}).get("clean_split_ok")
+        clean_split_ok = (seg.get("stage21") or seg.get("stage19j") or {}).get(
+            "clean_split_ok"
+        )
     if clean_split_ok is None:
         # Unsplit segments: clean if utterance itself is clean / no garbage.
         clean_split_ok = (
-            (not has_forbidden_expand_pattern(seg_text))
+            (not is_garbage_expand(seg_text))
             and (is_clean_utterance(seg_text) or len(seg_text.split()) >= 3)
         )
-    clean_split_ok = bool(clean_split_ok) and not has_forbidden_expand_pattern(seg_text)
+    clean_split_ok = bool(clean_split_ok) and not is_garbage_expand(seg_text)
     garbage_blocked = int(
         seg.get("garbage_expand_blocked")
+        or (seg.get("stage21") or {}).get("garbage_expand_blocked")
         or (seg.get("stage19j") or {}).get("garbage_expand_blocked")
         or 0
     )
     pad_n = soft_pad_count(seg_text)
     cps_now = estimated_cps(seg_text, tts) if tts > 0 else 0.0
     budget_chars = char_budget(slot)
+    overflow_ms = int(budget.overflow or max(0, delta))
+    force_split_executed = bool(
+        split_executed
+        or seg.get("split_executed")
+        or (seg.get("stage21") or {}).get("force_split_executed")
+        or (seg.get("stage19j") or {}).get("force_split_executed")
+    )
     atempo_ratio = seg.get("atempo")
     try:
         atempo_f = float(atempo_ratio) if atempo_ratio is not None else None
@@ -1651,13 +1709,16 @@ def _stamp_stage19e_fields(
         and abs(delta) <= TEXT_FIT_DELTA_MS
     )
     cps_ok = (cps_now <= 0.0) or (MIN_CPS_UK <= cps_now <= MAX_CPS_UK)
-    if not unique_text_ok or not clean_split_ok:
-        final_status = "overflow_unresolved" if not unique_text_ok else "stage19j_partial"
+    if is_garbage_expand(seg_text):
+        final_status = "stage21_partial"
+        garbage_blocked = max(garbage_blocked, 1)
+    elif not unique_text_ok or not clean_split_ok:
+        final_status = "overflow_unresolved" if not unique_text_ok else "stage21_partial"
     elif pad_n > 1:
-        final_status = "stage19j_partial"
+        final_status = "stage21_partial"
     elif (
         abs(delta) <= TEXT_FIT_DELTA_MS
-        and STAGE19J_OK_FILL_LO <= fill <= STAGE19J_OK_FILL_HI
+        and STAGE21_OK_FILL_LO <= fill <= STAGE21_OK_FILL_HI
         and cps_ok
         and final_status not in ("failed_tts_regen", "failed_no_regen", "dead_air_risk")
     ):
@@ -1665,32 +1726,35 @@ def _stamp_stage19e_fields(
     elif final_status == "ok":
         if int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS and not expand_executed:
             final_status = "dead_air_risk"
-        elif fill > STAGE19J_OK_FILL_HI:
+        elif fill > STAGE21_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
             final_status = "overflow_unresolved"
         else:
-            final_status = "stage19j_partial"
-    # Forbidden: never stamp ok with garbage text, fill>1.15, or unresolved dead air.
+            final_status = "stage21_partial"
+    # Forbidden: never stamp ok with garbage text, fill>1.12, or unresolved dead air.
     if final_status == "ok" and (
-        fill > STAGE19J_OK_FILL_HI
+        fill > STAGE21_OK_FILL_HI
+        or overflow_ms > OVERFLOW_FORCE_SPLIT_MS
         or (abs(delta) > TEXT_FIT_DELTA_MS and not atempo_ok)
         or not cps_ok
         or pad_n > 1
         or not unique_text_ok
         or not clean_split_ok
-        or has_forbidden_expand_pattern(seg_text)
+        or is_garbage_expand(seg_text)
     ):
-        if fill > STAGE19J_OK_FILL_HI or not unique_text_ok:
+        if fill > STAGE21_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
             final_status = "overflow_unresolved"
         elif int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS and not expand_executed:
             final_status = "dead_air_risk"
         else:
-            final_status = "stage19j_partial"
+            final_status = "stage21_partial"
     split_depth = int(
-        seg.get("stage19j_split_depth")
+        seg.get("stage21_split_depth")
+        or seg.get("stage19j_split_depth")
         or seg.get("stage19i_split_depth")
         or seg.get("stage19h_split_depth")
         or seg.get("stage19g_split_depth")
         or seg.get("stage19f_split_depth")
+        or prev.get("stage21_split_depth")
         or prev.get("stage19j_split_depth")
         or prev.get("stage19i_split_depth")
         or prev.get("stage19h_split_depth")
@@ -1703,11 +1767,13 @@ def _stamp_stage19e_fields(
         "text_changed": bool(text_changed),
         "shorten_executed": bool(shorten_executed or seg.get("shorten_executed")),
         "split_executed": bool(split_executed or seg.get("split_executed")),
+        "force_split_executed": bool(force_split_executed),
         "post_restore_split": bool(
             seg.get("post_restore_split") or prev.get("post_restore_split")
         ),
         "truncation_blocked": bool(seg.get("truncation_blocked")),
         "fill_ratio": fill,
+        "overflow_ms": overflow_ms,
         "retention_score": float(seg.get("retention_score") or 0),
         "delta": delta,
         "final_status": final_status,
@@ -1717,6 +1783,7 @@ def _stamp_stage19e_fields(
         "stage19h_split_depth": split_depth,
         "stage19i_split_depth": split_depth,
         "stage19j_split_depth": split_depth,
+        "stage21_split_depth": split_depth,
         "unique_text_ok": unique_text_ok,
         "clean_split_ok": clean_split_ok,
         "garbage_expand_blocked": garbage_blocked,
@@ -1727,7 +1794,7 @@ def _stamp_stage19e_fields(
         "split_parent_idx": prev.get("split_parent_idx", seg.get("split_parent_idx")),
         "split_child": prev.get("split_child", seg.get("split_child")),
     }
-    # Stage 19j status names preferred when unresolved after fit.
+    # Stage 21 status names preferred when unresolved after fit.
     if final_status in (
         "stage19d_partial",
         "stage19f_partial",
@@ -1735,10 +1802,12 @@ def _stamp_stage19e_fields(
         "stage19g_partial",
         "stage19h_partial",
         "stage19i_partial",
+        "stage19j_partial",
     ) and (
         abs(delta) > TEXT_FIT_DELTA_MS or seg.get("needs_post_restore_split")
     ):
-        meta19["final_status"] = "stage19j_partial"
+        meta19["final_status"] = "stage21_partial"
+        final_status = "stage21_partial"
         if budget.final_status in (
             "stage19d_partial",
             "stage19f_partial",
@@ -1746,8 +1815,9 @@ def _stamp_stage19e_fields(
             "stage19g_partial",
             "stage19h_partial",
             "stage19i_partial",
+            "stage19j_partial",
         ):
-            budget.final_status = "stage19j_partial"
+            budget.final_status = "stage21_partial"
     if budget.final_status == "ok" and meta19["final_status"] != "ok":
         budget.final_status = meta19["final_status"]
     seg["stage19e"] = dict(meta19)
@@ -1761,10 +1831,13 @@ def _stamp_stage19e_fields(
     seg["stage19i"] = {**prev_i, **meta19}
     prev_j = dict(seg.get("stage19j") or {})
     seg["stage19j"] = {**prev_j, **meta19}
+    prev_21 = dict(seg.get("stage21") or {})
+    seg["stage21"] = {**prev_21, **meta19}
     seg["unique_text_ok"] = unique_text_ok
     seg["clean_split_ok"] = clean_split_ok
     seg["fill_ratio"] = fill
     seg["text_changed"] = bool(text_changed)
+    seg["garbage_expand_blocked"] = garbage_blocked
 
 
 def _stamp_stage19b_meta(
@@ -1975,11 +2048,12 @@ def apply_stage19b_rule_text_fit(
         estimated_cps,
         expand_to_fill,
         fit_text_to_slot,
-        has_forbidden_expand_pattern,
         is_clean_utterance,
+        is_garbage_expand,
         safe_shorten,
         semantic_anchor_text,
         should_force_split,
+        strip_garbage_expand_phrases,
         word_retention_ratio,
         MIN_WORD_RETENTION,
     )
@@ -2068,14 +2142,19 @@ def apply_stage19b_rule_text_fit(
                         "soft_pad_once",
                     ),
                 )
-                exp_text = " ".join(str(exp_text or "").split()).strip()
-                blocked_n = sum(
-                    1
-                    for r in (exp_reasons or [])
-                    if "garbage_expand_blocked" in str(r) or str(r).startswith(
-                        "stage19j:blocked_count"
-                    )
+                exp_text = strip_garbage_expand_phrases(
+                    " ".join(str(exp_text or "").split()).strip()
                 )
+                blocked_n = 0
+                for r in exp_reasons or []:
+                    rs = str(r)
+                    if "garbage_expand_blocked" in rs or "expand_refused" in rs:
+                        blocked_n += 1
+                    elif "blocked_count:" in rs:
+                        try:
+                            blocked_n += int(rs.rsplit(":", 1)[-1])
+                        except ValueError:
+                            blocked_n += 1
                 if blocked_n:
                     seg["garbage_expand_blocked"] = int(
                         seg.get("garbage_expand_blocked") or 0
@@ -2085,7 +2164,7 @@ def apply_stage19b_rule_text_fit(
                     and len(clean_text_chars(exp_text))
                     > len(clean_text_chars(original))
                     and exp_text != original
-                    and not has_forbidden_expand_pattern(exp_text)
+                    and not is_garbage_expand(exp_text)
                     and (
                         is_clean_utterance(exp_text)
                         or len(exp_text.split()) >= len(original.split())

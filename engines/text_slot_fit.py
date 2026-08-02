@@ -42,26 +42,29 @@ MIN_RAW_WORDS_FOR_TRUNCATE_GUARD = 12
 TARGET_CPS_UK = 14.0
 MIN_CPS_UK = 11.5
 MAX_CPS_UK = 17.0
-# Stage 19e–19i: after restore, force split when predicted speech exceeds slot.
-FORCE_SPLIT_RATIO = 1.15
+# Stage 21: after restore, force split when predicted/measured overflow exceeds band.
+FORCE_SPLIT_RATIO = 1.12
 FORCE_SPLIT_ABS_MS = 3000
-MAX_POST_RESTORE_SPLIT_CHILDREN = 10
-MAX_CHILD_FILL = 1.15
-MAX_FILL_RATIO_AFTER_RESTORE = 1.15
-MAX_SPLIT_CHILDREN = 10
-MAX_SPLIT_DEPTH = 3
+MAX_POST_RESTORE_SPLIT_CHILDREN = 14
+MAX_CHILD_FILL = 1.12
+MAX_FILL_RATIO_AFTER_RESTORE = 1.12
+MAX_SPLIT_CHILDREN = 14
+MAX_SPLIT_DEPTH = 5
+OVERFLOW_FORCE_SPLIT_MS = 350
 MIN_CHILD_SLOT_MS = 2200
 MAX_CHILD_SLOT_MS = 7500
 STAGE19H_OK_FILL_LO = 0.85
-STAGE19H_OK_FILL_HI = 1.15
+STAGE19H_OK_FILL_HI = 1.12
 STAGE19I_OK_FILL_LO = 0.85
-STAGE19I_OK_FILL_HI = 1.15
+STAGE19I_OK_FILL_HI = 1.12
 STAGE19J_OK_FILL_LO = 0.85
-STAGE19J_OK_FILL_HI = 1.15
+STAGE19J_OK_FILL_HI = 1.12
+STAGE21_OK_FILL_LO = 0.85
+STAGE21_OK_FILL_HI = 1.12
 UNDERFLOW_TRIGGER_MS = 350
 OVERFLOW_TRIGGER_MS = 350
 MAX_SOFT_PADS_PER_SEG = 1
-# Stage 19i/19j: soft expand pads (strict whitelist — never "ось як це було тоді").
+# Soft expand pads (strict whitelist — never "Саме про … тут ідеться").
 SOFT_PAD_WHITELIST: tuple[str, ...] = (
     "саме тоді",
     "і саме в цей момент",
@@ -72,14 +75,24 @@ _STAGE19G_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19H_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19I_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19J_SOFT_PADS = SOFT_PAD_WHITELIST
-# Stage 19j: garbage expand tails — ", Джордж." / ", Вісімнадцятирічний."
-FORBIDDEN_EXPAND_PATTERNS: tuple[re.Pattern[str], ...] = (
+_STAGE21_SOFT_PADS = SOFT_PAD_WHITELIST
+# Stage 21: kill garbage expand — "Саме про …", ", Джордж.", crumbs.
+GARBAGE_EXPAND_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"(?i)Саме про .+ тут ідеться\.?"),
+    re.compile(r"(?i)Саме про .+ ідеться\.?"),
+    re.compile(r"(?i),?\s*Саме про\b"),
+    re.compile(r"(?i)тут ідеться\.?\s*$"),
+    # Broader "про … тут" only when tied to the garbage filler idiom.
+    re.compile(r"(?i)\bпро\s+\S.{0,60}?\s+тут\s+ідеться"),
+    re.compile(r",\s*\w+\.$"),
+    re.compile(r"(?i),\s*Вісімнадцятирічний"),
+    re.compile(r"(?i),\s*займався\.?"),
+    re.compile(r"(?i)про винятком"),
     re.compile(r",\s*\S+\s*[.!?…]?\s*$"),
-    re.compile(r"(?i),\s*Вісімнадцятирічний\b"),
     re.compile(r"(?i),\s*Джордж\s*[.!?…]?\s*$"),
-    re.compile(r"(?i),\s*займався\s*[.!?…]?\s*$"),
     re.compile(r"(?i),\s*\w{3,}\s*[.!?…]\s*$"),
 )
+FORBIDDEN_EXPAND_PATTERNS = GARBAGE_EXPAND_PATTERNS
 _CLAUSE_CONJ = (
     "і", "та", "але", "а", "що", "коли", "тому", "тоді", "бо", "адже",
     "якщо", "хоча", "який", "яка", "які", "де", "куди",
@@ -266,41 +279,65 @@ def should_force_split(
     lang: str = "uk",
     *,
     predicted_ms: int | None = None,
+    measured_ms: int | None = None,
 ) -> bool:
-    """Stage 19i: predicted fill > 1.15 or CPS over char_budget."""
+    """Stage 21: predicted/measured fill > 1.12, overflow > 350 ms, or CPS over."""
     slot = max(0, int(slot_ms or 0))
     pred = int(predicted_ms) if predicted_ms is not None else estimate_tts_ms(text, lang)
-    if pred <= 0:
+    measured = int(measured_ms) if measured_ms is not None else 0
+    speech = max(pred, measured)
+    if speech <= 0:
         return False
+    if slot > 0 and measured > 0 and (measured - slot) > OVERFLOW_FORCE_SPLIT_MS:
+        return True
     if slot > 0 and cps_over_budget(text, slot):
         return True
     if slot <= 0:
-        return pred > FORCE_SPLIT_ABS_MS
-    if pred > int(slot * FORCE_SPLIT_RATIO):
+        return speech > FORCE_SPLIT_ABS_MS
+    if speech > int(slot * FORCE_SPLIT_RATIO):
         return True
     # Tiny slots: absolute 3s+ speech that still overshoots the slot hard.
-    return slot < FORCE_SPLIT_ABS_MS and pred > FORCE_SPLIT_ABS_MS and pred > slot
+    return slot < FORCE_SPLIT_ABS_MS and speech > FORCE_SPLIT_ABS_MS and speech > slot
 
 
-def has_forbidden_expand_pattern(text: str) -> bool:
-    """Stage 19j: True when text has garbage append (e.g. ', Джордж.')."""
+def is_garbage_expand(text: str) -> bool:
+    """Stage 21: True for forbidden soft-pad/expand garbage constructions."""
     t = _normalize_chunk(text)
     if not t:
         return False
-    for pat in FORBIDDEN_EXPAND_PATTERNS:
-        if pat.search(t):
-            return True
-    return False
+    return any(pat.search(t) for pat in GARBAGE_EXPAND_PATTERNS)
+
+
+def has_forbidden_expand_pattern(text: str) -> bool:
+    """Alias — Stage 19j/21 garbage expand detector."""
+    return is_garbage_expand(text)
+
+
+def strip_garbage_expand_phrases(text: str) -> str:
+    """Remove known garbage expand suffixes (Саме про … тут ідеться)."""
+    t = _normalize_chunk(text)
+    if not t:
+        return t
+    # Drop whole "Саме про … ідеться" clauses.
+    t = re.sub(
+        r"(?i)[.!?…]?\s*Саме про .+?(?:тут )?ідеться\.?",
+        ".",
+        t,
+    )
+    t = re.sub(r"(?i)\s*про винятком\b", " ", t)
+    t = re.sub(r"\s+\.", ".", t)
+    t = re.sub(r"\.{2,}", ".", t)
+    return _normalize_chunk(t)
 
 
 def is_clean_utterance(text: str) -> bool:
-    """Stage 19j: finished sentence or clean clause — never a word crumb."""
+    """Stage 21: finished sentence or clean clause — never garbage / crumbs."""
     t = _normalize_chunk(text)
     if not t or len(t.split()) < 3:
         return False
     if t.endswith(",") or t.endswith(";") or t.endswith(":"):
         return False
-    if has_forbidden_expand_pattern(t):
+    if is_garbage_expand(t):
         return False
     # Reject lone "Word." / "Word," crumbs.
     if re.fullmatch(r"\S+[.,!?;…]?", t):
@@ -530,21 +567,24 @@ def force_split_until_fit(
     max_children: int = MAX_SPLIT_CHILDREN,
     depth: int = 0,
 ) -> list[str]:
-    """Stage 19j: unique clean sentence/clause chunks (no word crumbs).
+    """Stage 21: unique clean sentence/clause chunks until fill ≤ 1.12.
 
     1) Split on . ! ? ;
     2) Oversized sentence → clauses (comma + conjunctions)
-    3) Pack to ~2.2–7.5s; recurse while fill > 1.15
+    3) Pack to ~2.2–7.5s; recurse (depth≤5) while fill > 1.12
     Never mid-word / mid-phrase garbage packs.
     """
-    t = _normalize_chunk(text)
+    t = strip_garbage_expand_phrases(_normalize_chunk(text))
     if not t:
         return []
     parent_slot = max(1, int(slot_ms or 0) or MIN_CHILD_SLOT_MS)
     parent_pred = estimate_tts_ms(t, lang)
+    # Spec: stop when estimate ≤ slot * MAX_CHILD_FILL (or depth exhausted).
+    if parent_pred <= int(parent_slot * MAX_CHILD_FILL) and int(depth or 0) > 0:
+        return [t] if is_clean_utterance(t) or len(t.split()) >= 3 else []
     slot = production_child_aim_ms(parent_slot, predicted_ms=parent_pred)
     hard = max(int(slot * MAX_CHILD_FILL), MIN_CHILD_SLOT_MS)
-    budget_chars = int(char_budget(slot) * 1.15)
+    budget_chars = int(char_budget(slot) * MAX_CHILD_FILL)
 
     def _sentence_units(src: str) -> list[str]:
         units = _split_strong_sentences(src)
@@ -626,7 +666,7 @@ def force_split_until_fit(
             sub = force_split_until_fit(
                 c,
                 production_child_aim_ms(
-                    max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
+                    max(MIN_CHILD_SLOT_MS, int(parent_slot * 0.92)),
                     predicted_ms=pred,
                 ),
                 lang,
@@ -1505,11 +1545,11 @@ def _stage19g_soft_pad_once(text: str, lang: str = "uk") -> tuple[str, bool]:
 
 
 def _stage19j_repeat_key_phrase(text: str) -> tuple[str, bool]:
-    """Repeat a multi-word key entity as a full clean sentence — never ', Word.'."""
-    out = _normalize_chunk(text)
+    """Stage 21: full multi-word entity repeat — NEVER «Саме про … тут ідеться»."""
+    out = strip_garbage_expand_phrases(_normalize_chunk(text))
     if not out or len(out.split()) < 3:
         return out, False
-    # Prefer known multi-word glossary forms already present / injectible.
+    # Prefer known multi-word glossary forms already present.
     phrases = (
         "Джордж молодший",
         "Хаскелл Векслер",
@@ -1523,7 +1563,7 @@ def _stage19j_repeat_key_phrase(text: str) -> tuple[str, bool]:
             entity = ph
             break
     if not entity:
-        # Bigram of capitalized / long content words (never a single stem dump).
+        # Bigram of content words (never a single stem dump / ", Word.").
         words = out.split()
         stop = {
             "і", "та", "а", "але", "що", "як", "в", "у", "на", "з", "із", "до",
@@ -1541,16 +1581,21 @@ def _stage19j_repeat_key_phrase(text: str) -> tuple[str, bool]:
             ):
                 entity = f"{a} {b}"
                 break
-    if not entity:
+    if not entity or len(entity.split()) < 2:
+        return out, False
+    # Already ends with the entity as its own sentence — nothing to add.
+    if re.search(rf"(?i)[.!?…]\s*{re.escape(entity)}\s*[.!?…]?\s*$", out):
         return out, False
     base = out if _COMPLETE_END.search(out) else out.rstrip(",;:") + "."
-    trial = f"{base} Саме про {entity} тут ідеться."
+    # Full clean sentence repeat of the entity (glossary-style), not soft garbage.
+    trial = f"{base} {entity}."
     trial = strip_slot_pad_fillers(_normalize_chunk(trial))
     if (
         trial != out
         and len(clean_text_chars(trial)) > len(clean_text_chars(out))
         and is_clean_utterance(trial)
-        and not has_forbidden_expand_pattern(trial)
+        and not is_garbage_expand(trial)
+        and soft_pad_count(trial) <= MAX_SOFT_PADS_PER_SEG
     ):
         return trial, True
     return out, False
@@ -1572,16 +1617,16 @@ def expand_to_fill(
     target_chars: int | None = None,
     strategy_order: list[str] | tuple[str, ...] | None = None,
 ) -> tuple[str, list[str]]:
-    """Stage 19j: lengthen only with clean utterances — never garbage appends.
+    """Stage 21: lengthen only with clean utterances — hard-refuse garbage.
 
-    Order: semantic_repeat_key_phrase → glossary_expand → soft_pad_once (≤1).
-    If no clean growth possible → return original (caller marks dead_air_risk).
+    Order: semantic_repeat_key_entity → glossary_full_term → soft_pad_whitelist_once (≤1).
+    If no clean growth possible → return original (expand_executed = False).
     """
-    before = _normalize_chunk(final_text)
+    before = strip_garbage_expand_phrases(_normalize_chunk(final_text))
     before_chars = len(clean_text_chars(before))
     slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
     aim_chars = int(target_chars) if target_chars is not None else char_budget(slot_equiv)
-    anchor = _normalize_chunk(prefer_raw or raw_mt)
+    anchor = strip_garbage_expand_phrases(_normalize_chunk(prefer_raw or raw_mt))
     reasons: list[str] = []
     blocked = 0
     aim = max(200, int(target_ms or 0))
@@ -1591,15 +1636,17 @@ def expand_to_fill(
     )
 
     def _accept(candidate: str) -> bool:
-        c = _normalize_chunk(candidate)
+        c = strip_garbage_expand_phrases(_normalize_chunk(candidate))
         if not c or c == before:
             return False
         if len(clean_text_chars(c)) <= before_chars:
             return False
-        if has_forbidden_expand_pattern(c):
+        if is_garbage_expand(c):
+            return False
+        if soft_pad_count(c) > MAX_SOFT_PADS_PER_SEG:
             return False
         if not is_clean_utterance(c) and not (
-            _is_complete_thought(c) and not has_forbidden_expand_pattern(c)
+            _is_complete_thought(c) and not is_garbage_expand(c)
         ):
             return False
         if not _expand_lang_ok(c, lang):
@@ -1623,13 +1670,13 @@ def expand_to_fill(
             source_hint=source_hint,
             raw_mt=anchor or raw_mt,
         )
-        ruled = _normalize_chunk(ruled) or before
+        ruled = strip_garbage_expand_phrases(_normalize_chunk(ruled) or before)
         if _accept(ruled):
             out = ruled
             reasons.extend(list(rule_reasons or []))
         elif ruled != before:
             blocked += 1
-            reasons.append("stage19j:garbage_expand_blocked")
+            reasons.append("stage21:garbage_expand_blocked")
     except Exception:
         pass
 
@@ -1641,56 +1688,75 @@ def expand_to_fill(
         and _accept(anchor)
     ):
         out = strip_slot_pad_fillers(anchor)
-        reasons.append("stage19j:force_raw_prefer")
+        reasons.append("stage21:force_raw_prefer")
         if "raw_prefer" not in reasons:
             reasons.append("raw_prefer")
 
     for step in order:
         if _accept(out) and not _still_short(out) and out != before:
             break
-        if step in ("semantic_repeat_key", "semantic_repeat_key_phrase"):
+        if step in (
+            "semantic_repeat_key",
+            "semantic_repeat_key_phrase",
+            "semantic_repeat_key_entity",
+        ):
             rep, ok = _stage19j_repeat_key_phrase(out)
             if ok and _accept(rep):
                 out = rep
-                reasons.append("stage19j:semantic_repeat_key")
-            elif ok:
+                reasons.append("stage21:semantic_repeat_key")
+            elif ok or (rep != out and is_garbage_expand(rep)):
                 blocked += 1
-                reasons.append("stage19j:garbage_expand_blocked")
-        elif step == "glossary_expand":
+                reasons.append("stage21:garbage_expand_blocked")
+        elif step in ("glossary_expand", "glossary_full_term"):
             inj, ok = _stage19g_inject_glossary_anchors(
                 out, source_hint=source_hint, raw_mt=anchor or raw_mt
             )
+            inj = strip_garbage_expand_phrases(_normalize_chunk(inj))
             if ok and _accept(inj):
-                out = _normalize_chunk(inj)
-                reasons.append("stage19j:glossary_expand")
+                out = inj
+                reasons.append("stage21:glossary_expand")
             elif ok:
                 blocked += 1
-                reasons.append("stage19j:garbage_expand_blocked")
-        elif step == "soft_pad_once":
+                reasons.append("stage21:garbage_expand_blocked")
+        elif step in ("soft_pad_once", "soft_pad_whitelist_once"):
             if soft_pad_count(out) >= MAX_SOFT_PADS_PER_SEG:
                 continue
             padded, ok = _stage19g_soft_pad_once(out, lang)
-            if ok and _accept(padded) and soft_pad_count(padded) <= MAX_SOFT_PADS_PER_SEG:
+            padded = strip_garbage_expand_phrases(_normalize_chunk(padded))
+            if (
+                ok
+                and _accept(padded)
+                and soft_pad_count(padded) <= MAX_SOFT_PADS_PER_SEG
+            ):
                 out = padded
-                reasons.append("stage19j:soft_pad")
+                reasons.append("stage21:soft_pad")
             elif ok:
                 blocked += 1
-                reasons.append("stage19j:garbage_expand_blocked")
+                reasons.append("stage21:garbage_expand_blocked")
 
-    out = strip_slot_pad_fillers(_normalize_chunk(out))
-    # Hard refuse: any forbidden pattern or no real clean growth.
-    if has_forbidden_expand_pattern(out) or not _accept(out):
+    out = strip_garbage_expand_phrases(
+        strip_slot_pad_fillers(_normalize_chunk(out))
+    )
+    # Hard refuse: any garbage pattern, soft_pad>1, or no real clean growth.
+    if (
+        is_garbage_expand(out)
+        or soft_pad_count(out) > MAX_SOFT_PADS_PER_SEG
+        or not _accept(out)
+    ):
         if out != before:
             blocked += 1
-            reasons.append("stage19j:garbage_expand_blocked")
+            reasons.append("stage21:garbage_expand_blocked")
         out = before
         reasons = [r for r in reasons if "grown" not in str(r)]
         if blocked:
-            reasons.append(f"stage19j:blocked_count:{blocked}")
+            reasons.append(f"stage21:blocked_count:{blocked}")
+        # expand_executed = False signal for callers
+        reasons.append("stage21:expand_refused")
         return out, reasons
-    reasons.append("stage19j:text_grown")
+    reasons.append("stage21:text_grown")
+    reasons.append("stage19j:text_grown")  # backward-compatible reason tag
     if blocked:
-        reasons.append(f"stage19j:blocked_count:{blocked}")
+        reasons.append(f"stage21:blocked_count:{blocked}")
     return out, reasons
 
 
