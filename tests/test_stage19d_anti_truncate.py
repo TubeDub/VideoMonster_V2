@@ -188,4 +188,6 @@ def test_bare_text_then_atemo_forbidden_on_large_underflow():
         overflow_ms=0,
     )
     assert r != "TextThenAtemo"
-    assert r == "TextSlotFitExpand"
+    # Stage 19f: do not claim TextSlotFitExpand when expand did not run.
+    assert r != "TextSlotFitExpand"
+    assert r == "dead_air_risk"

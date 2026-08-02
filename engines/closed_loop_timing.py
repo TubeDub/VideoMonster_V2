@@ -30,8 +30,10 @@ OVERFLOW_SPLIT_RATIO = 0.25
 MIN_SPLIT_CHILD_MS = 800
 # Cap children — conj-splitting EN into 12 orphans caused RUNTIME_INTEGRITY (task dce9b27b).
 MAX_STAGE19C_SPLIT_CHILDREN = 4
-# Stage 19e: post-restore / giant predicted text may split into more children.
-MAX_STAGE19E_SPLIT_CHILDREN = 6
+# Stage 19e/19f: post-restore / giant predicted text may split into more children.
+MAX_STAGE19E_SPLIT_CHILDREN = 8
+MAX_STAGE19F_SPLIT_CHILDREN = 8
+MAX_STAGE19F_SPLIT_DEPTH = 3
 OVERLAP_TOLERANCE_MS = 40
 TIMING_SCORE_GOAL = 95
 
@@ -397,30 +399,37 @@ def segment_needs_stage19e_split(
 ) -> bool:
     """True when restored/giant text must be split before keeping one slot."""
     from engines.text_slot_fit import (
+        MAX_CHILD_FILL,
         MAX_FILL_RATIO_AFTER_RESTORE,
         estimate_tts_ms,
         should_force_split,
     )
 
-    if seg.get("stage19e_split_done") or seg.get("stage19c_split_done"):
-        return False
-    if seg.get("needs_post_restore_split") or seg.get("post_restore_split"):
-        return True
     text = _segment_text(seg)
     if not text or _text_looks_english(text):
         return False
     slot = max(0, int(slot_ms or seg.get("slot_ms") or 0))
-    if should_force_split(text, slot, lang):
-        return True
     measured = max(0, int(measured_ms or 0))
-    if slot > 0 and measured > 0:
-        if measured / float(slot) > float(MAX_FILL_RATIO_AFTER_RESTORE):
-            return True
-    # Predicted fill also gates post-restore mush.
     pred = int(estimate_tts_ms(text, lang) or 0)
-    if slot > 0 and pred > 0 and pred / float(slot) > float(MAX_FILL_RATIO_AFTER_RESTORE):
+    fill_pred = (pred / float(slot)) if slot > 0 and pred > 0 else 0.0
+    fill_meas = (measured / float(slot)) if slot > 0 and measured > 0 else 0.0
+    overfilled = (
+        fill_pred > float(MAX_CHILD_FILL)
+        or fill_meas > float(MAX_CHILD_FILL)
+        or fill_pred > float(MAX_FILL_RATIO_AFTER_RESTORE)
+        or fill_meas > float(MAX_FILL_RATIO_AFTER_RESTORE)
+    )
+    depth = int(seg.get("stage19f_split_depth") or 0)
+    # Stage 19f: allow re-split of already-split children that are still overfilled.
+    if seg.get("stage19e_split_done") or seg.get("stage19c_split_done"):
+        if overfilled and depth < MAX_STAGE19F_SPLIT_DEPTH:
+            return True
+        return False
+    if seg.get("needs_post_restore_split"):
         return True
-    return False
+    if should_force_split(text, slot, lang, predicted_ms=pred):
+        return True
+    return bool(overfilled)
 
 
 def lock_text_fit_algorithm_reason(seg: dict, reason: str) -> None:
@@ -848,23 +857,27 @@ def try_stage19e_post_restore_split(
     idx: int,
     lang: str = "uk",
 ) -> bool:
-    """Stage 19e: after restore / giant predicted TTS — split into 2..6 speech-sized children.
+    """Stage 19e/19f: split giant Final into 2..8 speech-sized children.
 
-    Children receive expanded timing (not squeezed into the original short slot).
+    Uses force_split_until_fit so each child predicted fill ≤ 1.25.
+    Children get expanded timing. Oversized children may re-split (depth-limited).
     Mutates lists in place. Caller must re-TTS every child.
     """
     import copy
 
     from engines.text_slot_fit import (
-        MAX_POST_RESTORE_SPLIT_CHILDREN,
-        split_into_slot_sized_chunks,
+        MAX_CHILD_FILL,
+        MAX_SPLIT_CHILDREN,
+        estimate_tts_ms,
+        force_split_until_fit,
         should_force_split,
     )
 
     if idx < 0 or idx >= len(segments_data):
         return False
     seg = segments_data[idx]
-    if seg.get("stage19e_split_done") or seg.get("stage19c_split_done"):
+    depth = int(seg.get("stage19f_split_depth") or 0)
+    if depth >= MAX_STAGE19F_SPLIT_DEPTH:
         return False
 
     if idx < len(timing_map):
@@ -884,18 +897,19 @@ def try_stage19e_post_restore_split(
     tgt = _segment_text(seg)
     if not tgt or _text_looks_english(tgt):
         return False
+    measured_ms = int(
+        seg.get("playback_duration")
+        or seg.get("tts_ms")
+        or seg.get("actual_duration_ms")
+        or 0
+    )
     if not (
         seg.get("needs_post_restore_split")
         or should_force_split(tgt, slot_ms, lang)
         or segment_needs_stage19e_split(
             seg,
             slot_ms=slot_ms,
-            measured_ms=int(
-                seg.get("playback_duration")
-                or seg.get("tts_ms")
-                or seg.get("actual_duration_ms")
-                or 0
-            ),
+            measured_ms=measured_ms,
             lang=lang,
         )
     ):
@@ -905,17 +919,23 @@ def try_stage19e_post_restore_split(
     if idx < len(source_segments):
         src = str(source_segments[idx] or "").strip()
 
-    tgt_chunks = split_into_slot_sized_chunks(
+    # Aim packs at the original parent slot (or a reasonable default), not the
+    # already-expanded child slot — keeps aggressive multi-child splits.
+    pack_slot = slot_ms if slot_ms > 0 else 2000
+    if measured_ms > pack_slot * MAX_CHILD_FILL:
+        # Re-split measured-oversize child using a tighter aim toward 0.95 band.
+        pack_slot = max(800, int(pack_slot * 0.9))
+    tgt_chunks = force_split_until_fit(
         tgt,
-        slot_ms if slot_ms > 0 else 2000,
+        pack_slot,
         lang,
-        max_children=MAX_POST_RESTORE_SPLIT_CHILDREN,
+        max_children=MAX_SPLIT_CHILDREN,
     )
     if len(tgt_chunks) < 2:
         return False
     if any(_text_looks_english(t) for t in tgt_chunks):
         logger.warning(
-            "[Stage19e] refuse split seg#%d — child Final looks English", idx
+            "[Stage19f] refuse split seg#%d — child Final looks English", idx
         )
         return False
 
@@ -953,6 +973,7 @@ def try_stage19e_post_restore_split(
     parent_end = end_ms
     new_end = int(allocated[-1][2])
     shift_ms = max(0, new_end - parent_end)
+    child_depth = depth + 1
 
     children: list[dict] = []
     for i, ((text, st, en), src_t, tgt_t) in enumerate(
@@ -992,9 +1013,13 @@ def try_stage19e_post_restore_split(
         final_txt = str(tgt_t or text or "").strip()
         if not final_txt or _text_looks_english(final_txt):
             logger.warning(
-                "[Stage19e] abort split seg#%d — empty/EN child Final", idx
+                "[Stage19f] abort split seg#%d — empty/EN child Final", idx
             )
             return False
+        child_slot = max(1, int(en) - int(st))
+        child_pred = int(estimate_tts_ms(final_txt, lang) or 0)
+        child_fill = child_pred / float(child_slot) if child_slot else 0.0
+        still_over = child_fill > float(MAX_CHILD_FILL)
         child["plain_text"] = final_txt
         child["text"] = final_txt
         child["final_text"] = final_txt
@@ -1002,27 +1027,37 @@ def try_stage19e_post_restore_split(
         child["final_tts_text"] = final_txt
         child["start_ms"] = int(st)
         child["end_ms"] = int(en)
-        child["slot_ms"] = max(1, int(en) - int(st))
+        child["slot_ms"] = child_slot
         child["stage19e_split_done"] = True
-        child["stage19c_split_done"] = True  # prevent double-split
+        # Allow Stage 19f re-split when this child is still overfilled.
+        child["stage19c_split_done"] = not still_over
         child["split_executed"] = True
         child["post_restore_split"] = True
+        child["stage19f_split_depth"] = child_depth
+        child["needs_post_restore_split"] = bool(
+            still_over and child_depth < MAX_STAGE19F_SPLIT_DEPTH
+        )
         child["adaptive_resegment_done"] = True
         child["strategy"] = "split"
+        child["fill_ratio"] = round(child_fill, 4)
         lock_text_fit_algorithm_reason(child, "TextSlotFitSplit")
         child["expansion_strategy"] = "split"
         child["rule_rewrite_used"] = True
         child["adaptation_stages"] = list(child.get("adaptation_stages") or []) + [
-            "stage19e_post_restore_split"
+            "stage19f_post_restore_split"
         ]
-        child["stage19e"] = {
+        meta = {
             "split_parent_idx": idx,
             "split_child": i,
             "split_children": n,
             "post_restore_split": True,
             "split_executed": True,
             "algorithm_reason": "TextSlotFitSplit",
+            "fill_ratio": round(child_fill, 4),
+            "stage19f_split_depth": child_depth,
         }
+        child["stage19e"] = dict(meta)
+        child["stage19f"] = dict(meta)
         children.append(child)
 
     for i, child in enumerate(children):
@@ -1083,6 +1118,7 @@ def try_stage19e_post_restore_split(
             aa["whisper_text"] = src_chunks[i] if i < len(src_chunks) else ""
             aa["final_text"] = tgt_chunks[i] if i < len(tgt_chunks) else ""
             aa["stage19e_split"] = True
+            aa["stage19f_split"] = True
             aa["post_restore_split"] = True
             rebuilt.append(aa)
         rebuilt.sort(key=lambda x: int(x.get("index", 0)))
@@ -1090,11 +1126,12 @@ def try_stage19e_post_restore_split(
         audits.extend(rebuilt)
 
     logger.info(
-        "[Stage19e] post-restore split seg#%d slot=%dms → %d children (expanded end=%dms)",
+        "[Stage19f] post-restore split seg#%d slot=%dms → %d children (expanded end=%dms depth=%d)",
         idx,
         slot_ms,
         n,
         new_end,
+        child_depth,
     )
     return True
 
@@ -1127,7 +1164,7 @@ def _stage19d_sanitize_algorithm_reason(
     underflow_ms: int,
     overflow_ms: int,
 ) -> str:
-    """Stage 19d: forbid bare TextThenAtemo when |Δ|>350 without text change."""
+    """Stage 19d/19f: forbid bare TextThenAtemo / false TextSlotFitExpand."""
     r = str(reason or "").strip() or "TextThenAtemo"
     abs_d = abs(int(delta_ms or 0))
     if split_executed:
@@ -1136,12 +1173,17 @@ def _stage19d_sanitize_algorithm_reason(
         return "TextSlotFitExpand" if "Atemo" not in r else "TextThenAtemo"
     if shorten_executed:
         return "TextSlotFitShorten" if "Atemo" not in r else "TextThenAtemo"
+    # Stage 19f: NEVER claim TextSlotFitExpand when expand did not change text.
+    if r in ("TextSlotFitExpand",) or r.endswith("TextSlotFitExpand"):
+        if int(underflow_ms or 0) > TEXT_FIT_DELTA_MS:
+            return "dead_air_risk"
+        r = "TextThenAtemo"
     if abs_d <= TEXT_FIT_DELTA_MS:
         return r if r.startswith("Text") else "TextThenAtemo"
-    # Large Δ without text rewrite — do not claim TextThenAtemo as sole strategy.
+    # Large Δ without text rewrite — do not claim TextThenAtemo as success.
     if r in ("TextThenAtemo",) or r.endswith("TextThenAtemo"):
         if int(underflow_ms or 0) > TEXT_FIT_DELTA_MS:
-            return "TextSlotFitExpand"
+            return "dead_air_risk"
         if int(overflow_ms or 0) > TEXT_FIT_DELTA_MS:
             return "TextSlotFitShorten"
     return r
@@ -1344,7 +1386,7 @@ def _stamp_stage19e_fields(
         or (seg.get("stage19c") or {}).get("split_children")
         or 0
     )
-    seg["stage19e"] = {
+    meta19 = {
         **prev,
         "expand_executed": bool(expand_executed or seg.get("expand_executed")),
         "shorten_executed": bool(shorten_executed or seg.get("shorten_executed")),
@@ -1360,6 +1402,16 @@ def _stamp_stage19e_fields(
         "algorithm_reason": reason,
         "split_children": split_children,
     }
+    # Stage 19f status names preferred when unresolved after fit.
+    if final_status == "stage19d_partial" and (
+        abs(delta) > TEXT_FIT_DELTA_MS or seg.get("needs_post_restore_split")
+    ):
+        meta19["final_status"] = "stage19f_partial"
+        if budget.final_status == "stage19d_partial":
+            budget.final_status = "stage19f_partial"
+    seg["stage19e"] = dict(meta19)
+    prev_f = dict(seg.get("stage19f") or {})
+    seg["stage19f"] = {**prev_f, **meta19}
     seg["fill_ratio"] = fill
 
 
@@ -1606,11 +1658,14 @@ def apply_stage19b_rule_text_fit(
     new_text = " ".join(str(fit.text or "").split()).strip()
     text_changed = bool(fit.changed and new_text and new_text != original)
 
-    # Stage 19d §B: forced expand — prefer raw/semantic when underfill.
+    # Stage 19f §B: forced expand — prefer raw/semantic when underfill.
     if expand_required and not text_changed:
         seg["requires_strong_expand"] = True
         slot = int(budget.slot_duration or 0)
         preferred = raw_mt if len(raw_mt.split()) > len(original.split()) else original
+        prefer_anchor = semantic_anchor_text(seg, fallback=preferred)
+        if len(prefer_anchor.split()) < len(preferred.split()):
+            prefer_anchor = preferred
         try:
             exp_text, exp_reasons = expand_to_fill(
                 original,
@@ -1618,7 +1673,7 @@ def apply_stage19b_rule_text_fit(
                 lang=str(target_lang or "uk"),
                 source_hint=str(source_hint or ""),
                 raw_mt=preferred,
-                prefer_raw=semantic_anchor_text(seg, fallback=preferred),
+                prefer_raw=prefer_anchor,
             )
             exp_text = " ".join(str(exp_text or "").split()).strip()
             if exp_text and exp_text != original:
@@ -1630,15 +1685,36 @@ def apply_stage19b_rule_text_fit(
                 fit.strategy = "expand"
                 fit.reasons = list(getattr(fit, "reasons", None) or []) + list(
                     exp_reasons or []
-                ) + ["stage19e:forced_expand"]
-                if "raw_prefer" in (exp_reasons or []):
+                ) + ["stage19f:forced_expand"]
+                if "raw_prefer" in (exp_reasons or []) or "stage19f:force_raw_prefer" in (
+                    exp_reasons or []
+                ):
                     expansion_strategy = "raw_prefer"
                 elif "rule_expand" in (exp_reasons or []):
-                    expansion_strategy = "rule_expand_from_raw" if preferred != original else "rule_expand"
+                    expansion_strategy = (
+                        "rule_expand_from_raw" if preferred != original else "rule_expand"
+                    )
                 else:
                     expansion_strategy = "expand_to_fill"
         except Exception as exc:
-            logger.debug("stage19e forced expand_to_fill skipped: %s", exc)
+            logger.debug("stage19f forced expand_to_fill skipped: %s", exc)
+        # Nuclear: longer semantic/raw must lengthen underfilled Final.
+        if (
+            not text_changed
+            and prefer_anchor
+            and prefer_anchor != original
+            and len(prefer_anchor.split()) > len(original.split())
+        ):
+            new_text = prefer_anchor
+            text_changed = True
+            expansion_strategy = "raw_prefer"
+            fit.changed = True
+            fit.text = new_text
+            fit.action = "expand"
+            fit.strategy = "expand"
+            fit.reasons = list(getattr(fit, "reasons", None) or []) + [
+                "stage19f:force_raw_prefer"
+            ]
         if not text_changed:
             try:
                 from engines.translation_adapt import llm_rephrase_available
@@ -1663,7 +1739,7 @@ def apply_stage19b_rule_text_fit(
                         fit.action = "expand"
                         fit.strategy = "expand"
             except Exception as exc:
-                logger.debug("stage19d strong LLM expand skipped: %s", exc)
+                logger.debug("stage19f strong LLM expand skipped: %s", exc)
 
     # Stage 19d §C: forced shorten when overflow (split handled upstream for large ov).
     if (
@@ -1750,6 +1826,9 @@ def apply_stage19b_rule_text_fit(
             )
 
     algorithm_reason = _stage19b_algorithm_reason(fit, text_changed=text_changed)
+    # Stage 19f: never advertise TextSlotFitExpand before expand actually ran.
+    if expand_required and not expand_executed:
+        algorithm_reason = "dead_air_risk"
     algorithm_reason = _stage19d_sanitize_algorithm_reason(
         algorithm_reason,
         expand_executed=expand_executed,
@@ -1853,7 +1932,15 @@ def apply_stage19b_rule_text_fit(
                 logger.debug("stage19c commit skipped: %s", exc)
 
         budget.rewrite_iterations = max(1, int(budget.rewrite_iterations or 0) + 1)
-        budget.rewrite_reason = f"stage19d:{algorithm_reason}"
+        seg["rewrite_iterations"] = int(budget.rewrite_iterations)
+        budget.rewrite_reason = (
+            f"stage19f:{algorithm_reason}" if expand_executed else f"stage19d:{algorithm_reason}"
+        )
+        # Expanded text may now require post-restore split (raw >> slot).
+        if expand_executed and should_force_split(
+            new_text, int(budget.slot_duration or 0), str(target_lang or "uk")
+        ):
+            seg["needs_post_restore_split"] = True
         saved_pause = budget.pause_adjustments_ms
         saved_stages = list(budget.pause_stages or [])
         orig = budget.original_duration
@@ -1871,14 +1958,19 @@ def apply_stage19b_rule_text_fit(
         if expand_required:
             seg["expand_required"] = True
             seg["requires_strong_expand"] = True
-            # Stage 19e §C: expand must lengthen; otherwise honest dead_air_risk.
+            seg["expand_executed"] = False
+            # Stage 19f §C: expand must lengthen; otherwise honest dead_air_risk.
             budget.final_status = "dead_air_risk"
             seg["strategy"] = "dead_air_risk"
-            budget.rewrite_reason = "stage19e:expand_no_change"
+            budget.rewrite_reason = "stage19f:expand_no_change"
+            algorithm_reason = "dead_air_risk"
+            lock_text_fit_algorithm_reason(seg, "dead_air_risk")
 
     seg["shorten_executed"] = bool(shorten_executed)
     if expand_executed:
         seg["expand_executed"] = True
+    elif expand_required and not text_changed:
+        seg["expand_executed"] = False
     _stamp_stage19b_meta(
         seg,
         fit=fit,

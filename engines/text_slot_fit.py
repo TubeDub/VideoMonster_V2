@@ -36,11 +36,13 @@ SEVERE_OVERFLOW_RATIO = 1.50
 # Stage 19d: final shorter than raw/semantic by >25% without shorten_executed = silent truncate.
 MAX_SILENT_TRUNCATE_RATIO = 0.75
 MIN_RAW_WORDS_FOR_TRUNCATE_GUARD = 12
-# Stage 19e: after restore, force split when predicted speech vastly exceeds slot.
+# Stage 19e/19f: after restore, force split when predicted speech exceeds slot.
 FORCE_SPLIT_RATIO = 1.25
 FORCE_SPLIT_ABS_MS = 3000
-MAX_POST_RESTORE_SPLIT_CHILDREN = 6
-MAX_FILL_RATIO_AFTER_RESTORE = 1.5
+MAX_POST_RESTORE_SPLIT_CHILDREN = 8
+MAX_CHILD_FILL = 1.25
+MAX_FILL_RATIO_AFTER_RESTORE = 1.25
+MAX_SPLIT_CHILDREN = 8
 
 # Incomplete thought endings that must NEVER be voiced as a final cut.
 _BAD_TAIL = re.compile(
@@ -162,19 +164,43 @@ def should_force_split(
     *,
     predicted_ms: int | None = None,
 ) -> bool:
-    """Stage 19e: predicted TTS clearly exceeds the slot (restore/overflow gate).
-
-    Triggers when pred > max(slot×1.25, 3000ms) and pred > slot — so a mild
-    9s/8s miss shortens, while ~80s into ~4s (or any giant overfill) splits.
-    """
+    """Stage 19f: predicted fill_ratio > 1.25 (or absolute giant into tiny/empty slot)."""
     slot = max(0, int(slot_ms or 0))
     pred = int(predicted_ms) if predicted_ms is not None else estimate_tts_ms(text, lang)
     if pred <= 0:
         return False
     if slot <= 0:
         return pred > FORCE_SPLIT_ABS_MS
-    threshold = max(int(slot * FORCE_SPLIT_RATIO), FORCE_SPLIT_ABS_MS)
-    return pred > threshold and pred > slot
+    if pred > int(slot * FORCE_SPLIT_RATIO):
+        return True
+    # Tiny slots: absolute 3s+ speech that still overshoots the slot hard.
+    return slot < FORCE_SPLIT_ABS_MS and pred > FORCE_SPLIT_ABS_MS and pred > slot
+
+
+def _atomic_text_parts(text: str) -> list[str]:
+    """Sentence / adaptive / word crumbs for aggressive split."""
+    t = " ".join(str(text or "").split()).strip()
+    if not t:
+        return []
+    parts = _split_sentences(t)
+    if len(parts) < 2:
+        try:
+            from engines.adaptive_segmentation.core import _safe_split_chunks
+
+            parts = _safe_split_chunks(t)
+        except Exception:
+            parts = [t]
+    if len(parts) < 2:
+        words = t.split()
+        if len(words) >= 8:
+            # Soft packs of ~6–10 words so giant monologues still split.
+            step = max(4, min(10, max(4, len(words) // 4)))
+            parts = [
+                " ".join(words[i : i + step]).strip()
+                for i in range(0, len(words), step)
+                if " ".join(words[i : i + step]).strip()
+            ]
+    return [p for p in parts if p] or ([t] if t else [])
 
 
 def split_into_slot_sized_chunks(
@@ -184,24 +210,17 @@ def split_into_slot_sized_chunks(
     *,
     max_children: int = MAX_POST_RESTORE_SPLIT_CHILDREN,
 ) -> list[str]:
-    """Split long Final into ≤max_children sentence packs sized toward the slot."""
+    """Split long Final into ≤max_children packs aimed at ≈slot×0.95."""
     t = " ".join(str(text or "").split()).strip()
     if not t:
         return []
-    parts = _split_sentences(t)
-    if len(parts) < 2:
-        # Light fallback: split on ; / conjunctions via adaptive-style chunks.
-        try:
-            from engines.adaptive_segmentation.core import _safe_split_chunks
-
-            parts = _safe_split_chunks(t)
-        except Exception:
-            parts = [t]
+    parts = _atomic_text_parts(t)
     if len(parts) < 2:
         return [t]
 
+    # Aim near EXPAND_AIM; hard-cap at fill 1.25 so children stay in band.
     aim = max(400, int(max(1, slot_ms) * EXPAND_AIM_RATIO))
-    hard = max(aim, int(max(1, slot_ms) * FORCE_SPLIT_RATIO))
+    hard = max(aim, int(max(1, slot_ms) * MAX_CHILD_FILL))
     packed: list[str] = []
     buf: list[str] = []
     for p in parts:
@@ -242,6 +261,82 @@ def split_into_slot_sized_chunks(
             " ".join(parts[mid:]).strip(),
         ]
     return [p for p in packed if p][: max(1, int(max_children))]
+
+
+def force_split_until_fit(
+    text: str,
+    slot_ms: int,
+    lang: str = "uk",
+    *,
+    max_children: int = MAX_SPLIT_CHILDREN,
+) -> list[str]:
+    """Stage 19f: split until each chunk predicted fill ≤ 1.25 (max children)."""
+    slot = max(1, int(slot_ms or 0) or 2000)
+    hard = max(int(slot * MAX_CHILD_FILL), FORCE_SPLIT_ABS_MS)
+    chunks = split_into_slot_sized_chunks(
+        text, slot, lang, max_children=max_children
+    )
+    if len(chunks) < 2 and should_force_split(text, slot, lang):
+        parts = _atomic_text_parts(text)
+        if len(parts) >= 2:
+            mid = max(1, len(parts) // 2)
+            chunks = [
+                " ".join(parts[:mid]).strip(),
+                " ".join(parts[mid:]).strip(),
+            ]
+
+    result: list[str] = []
+    for c in chunks:
+        if len(result) >= max_children:
+            break
+        pred = estimate_tts_ms(c, lang)
+        room = max_children - len(result)
+        if pred > hard and room >= 2:
+            sub_slot = max(800, int(slot * 0.9))
+            sub = split_into_slot_sized_chunks(
+                c, sub_slot, lang, max_children=min(4, room)
+            )
+            if len(sub) < 2:
+                # Word-mid split last resort.
+                words = c.split()
+                if len(words) >= 8:
+                    mid = len(words) // 2
+                    sub = [
+                        " ".join(words[:mid]).strip(),
+                        " ".join(words[mid:]).strip(),
+                    ]
+            if len(sub) >= 2:
+                # Recurse once more on still-oversized heads.
+                for s in sub:
+                    if len(result) >= max_children:
+                        break
+                    sp = estimate_tts_ms(s, lang)
+                    if sp > hard and (max_children - len(result)) >= 2:
+                        deeper = split_into_slot_sized_chunks(
+                            s,
+                            max(800, int(slot * 0.85)),
+                            lang,
+                            max_children=min(3, max_children - len(result)),
+                        )
+                        if len(deeper) >= 2:
+                            result.extend(deeper)
+                            continue
+                    result.append(s)
+                continue
+        result.append(c)
+    out = [p for p in result if p][: max(1, int(max_children))]
+    # If still one giant, force word halves up to max_children.
+    if len(out) == 1 and should_force_split(out[0], slot, lang):
+        words = out[0].split()
+        n = min(max_children, max(2, int(estimate_tts_ms(out[0], lang) / max(hard, 1)) + 1))
+        if len(words) >= n * 3:
+            step = max(3, len(words) // n)
+            out = [
+                " ".join(words[i : i + step]).strip()
+                for i in range(0, len(words), step)
+                if " ".join(words[i : i + step]).strip()
+            ][:max_children]
+    return out
 
 
 def prefer_full_meaning_text(
@@ -1015,19 +1110,40 @@ def expand_to_fill(
     raw_mt: str = "",
     prefer_raw: str = "",
 ) -> tuple[str, list[str]]:
-    """Stage 19/19e: paraphrase/lengthen Final toward target_ms (≈ EXPAND_AIM * slot).
+    """Stage 19/19f: paraphrase/lengthen Final toward target_ms (≈ EXPAND_AIM * slot).
 
-    prefer_raw — optional longer semantic/raw anchor (Stage 19e forced expand).
+    prefer_raw — longer semantic/raw anchor. Stage 19f: if still underfilled after
+    rule expand, force-adopt a longer anchor even when it mildly overflows the slot
+    (caller may then force-split).
     """
+    before = " ".join(str(final_text or "").split()).strip()
     slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
     anchor = " ".join(str(prefer_raw or raw_mt or "").split()).strip()
-    return expand_text_to_slot(
-        final_text,
+    out, reasons = expand_text_to_slot(
+        before,
         slot_equiv,
         lang,
         source_hint=source_hint,
         raw_mt=anchor or raw_mt,
     )
+    out = " ".join(str(out or "").split()).strip() or before
+    reasons = list(reasons or [])
+    # Still under aim after expand → force longer semantic/raw anchor (19f).
+    aim = max(200, int(target_ms or 0))
+    if (
+        anchor
+        and anchor != out
+        and len(anchor.split()) > len(out.split())
+        and estimate_tts_ms(out, lang) < aim
+        and _expand_lang_ok(anchor, lang)
+        and _is_complete_thought(anchor)
+    ):
+        out = strip_slot_pad_fillers(anchor)
+        if "stage19f:force_raw_prefer" not in reasons:
+            reasons.append("stage19f:force_raw_prefer")
+        if "raw_prefer" not in reasons:
+            reasons.append("raw_prefer")
+    return out, reasons
 
 
 def _light_expand(

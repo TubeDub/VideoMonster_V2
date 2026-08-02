@@ -2267,6 +2267,7 @@ def build_openddf_segment_diagnostics(
                 ),
                 "stage19d": seg.get("stage19d") or {},
                 "stage19e": seg.get("stage19e") or {},
+                "stage19f": seg.get("stage19f") or {},
                 "duration_match_score": int(
                     adapt_trace.get("duration_match_score")
                     or speech_duration_match_score(actual_ms, slot_ms)

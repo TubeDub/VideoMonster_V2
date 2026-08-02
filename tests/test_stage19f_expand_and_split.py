@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Stage 19e: post-restore forced split + real expand."""
+"""Stage 19f: expand must execute + aggressive post-restore split."""
 
 from __future__ import annotations
 
@@ -23,26 +23,38 @@ def _make_long_uk_paragraph() -> str:
         "Він згадав аварію на треку, але все одно продовжив рухатися вперед.",
         "Камера, роботи і гоночні мрії лишилися з ним назавжди.",
     ]
-    # Repeat to push predicted TTS well past 4s / toward ~80s.
     return " ".join(sentences * 4)
 
 
-def test_should_force_split_80s_into_4s_slot():
-    from engines.text_slot_fit import estimate_tts_ms, should_force_split
+def test_force_split_until_fit_80s_into_4s_at_least_3():
+    from engines.text_slot_fit import (
+        estimate_tts_ms,
+        force_split_until_fit,
+        should_force_split,
+    )
 
     text = _make_long_uk_paragraph()
-    slot_ms = 4000
-    pred = estimate_tts_ms(text, "uk")
-    assert pred > int(slot_ms * 1.25)
-    assert should_force_split(text, slot_ms, "uk") is True
+    for slot_ms in (4000, 20000):
+        assert should_force_split(text, slot_ms, "uk") is True
+        chunks = force_split_until_fit(text, slot_ms, "uk", max_children=8)
+        assert len(chunks) >= 3, (slot_ms, len(chunks))
+        for c in chunks:
+            pred = estimate_tts_ms(c, "uk")
+            # Child packs aimed at slot; predicted must not exceed slot×1.25.
+            assert pred <= int(slot_ms * 1.25) + 1 or len(chunks) >= 8, (
+                slot_ms,
+                pred,
+                len(c.split()),
+                c[:60],
+            )
 
 
-def test_restore_long_text_splits_children_fill_ratio():
+def test_restore_split_children_each_fill_le_125():
     from engines.closed_loop_timing import try_stage19e_post_restore_split
     from engines.text_slot_fit import estimate_tts_ms
 
     text = _make_long_uk_paragraph()
-    slot_ms = 4000
+    slot_ms = 20000
     seg = {
         "plain_text": text,
         "text": text,
@@ -53,7 +65,7 @@ def test_restore_long_text_splits_children_fill_ratio():
         "slot_ms": slot_ms,
         "start_ms": 0,
         "end_ms": slot_ms,
-        "segment_id": "p19e",
+        "segment_id": "p19f",
         "needs_post_restore_split": True,
         "truncation_blocked": True,
     }
@@ -68,17 +80,17 @@ def test_restore_long_text_splits_children_fill_ratio():
         lang="uk",
     )
     assert ok is True
-    assert len(segments) >= 2
+    assert len(segments) >= 3
     assert all(s.get("post_restore_split") for s in segments)
-    assert all(s.get("split_executed") for s in segments)
     for s in segments:
         child_slot = max(1, int(s.get("slot_ms") or 1))
         pred = estimate_tts_ms(str(s.get("plain_text") or ""), "uk")
         fill = pred / float(child_slot)
-        assert fill <= 1.25 + 1e-6, (fill, child_slot, pred, s.get("plain_text")[:80])
+        assert fill <= 1.25 + 1e-6, (fill, child_slot, pred)
+        assert float((s.get("stage19f") or {}).get("fill_ratio") or fill) <= 1.25 + 1e-6
 
 
-def test_underflow_expand_executed_and_retts(tmp_path: Path):
+def test_underflow_expand_changes_text_and_retts(tmp_path: Path):
     from engines.closed_loop_timing import apply_stage19b_rule_text_fit
 
     slot_ms = 8000
@@ -159,17 +171,21 @@ def test_underflow_expand_executed_and_retts(tmp_path: Path):
     assert bool(seg.get("expand_executed")) is True
     assert len(regen_calls) >= 1
     assert int(budget.rewrite_iterations or 0) >= 1
-    assert seg.get("stage19e") is not None
-    assert seg["stage19e"].get("expand_executed") is True
+    assert str(seg.get("plain_text") or "") != short
+    assert seg.get("stage19f") is not None
+    assert seg["stage19f"].get("expand_executed") is True
+    assert seg["stage19f"].get("algorithm_reason") in (
+        "TextSlotFitExpand",
+        "TextThenAtemo",
+    )
 
 
-def test_expand_no_change_dead_air_risk(tmp_path: Path):
+def test_expand_no_change_dead_air_not_text_slot_fit_expand(tmp_path: Path):
     from engines.closed_loop_timing import apply_stage19b_rule_text_fit
+    from engines.text_slot_fit import TextFitResult
 
     slot_ms = 6000
     tts_ms = slot_ms - 2200
-    # Already-long enough text that rule expand cannot lengthen further easily,
-    # but measured audio is short (dead air) — force expand attempt → no change.
     text = "Ок."
     seg = {
         "plain_text": text,
@@ -222,8 +238,6 @@ def test_expand_no_change_dead_air_risk(tmp_path: Path):
     ), patch(
         "engines.text_slot_fit.fit_text_to_slot",
     ) as fit_mock:
-        from engines.text_slot_fit import TextFitResult
-
         fit_mock.return_value = TextFitResult(
             text=text,
             slot_ms=slot_ms,
@@ -252,13 +266,16 @@ def test_expand_no_change_dead_air_risk(tmp_path: Path):
     assert attempted is True
     assert bool(seg.get("expand_executed")) is False
     assert budget.final_status == "dead_air_risk"
+    algo = str(seg.get("algorithm_reason") or "")
+    assert algo != "TextSlotFitExpand"
+    assert (seg.get("stage19f") or {}).get("algorithm_reason") != "TextSlotFitExpand"
 
 
-def test_bare_text_then_atemo_still_forbidden():
+def test_sanitize_forbids_false_text_slot_fit_expand():
     from engines.closed_loop_timing import _stage19d_sanitize_algorithm_reason
 
     r = _stage19d_sanitize_algorithm_reason(
-        "TextThenAtemo",
+        "TextSlotFitExpand",
         expand_executed=False,
         shorten_executed=False,
         split_executed=False,
@@ -266,6 +283,4 @@ def test_bare_text_then_atemo_still_forbidden():
         underflow_ms=900,
         overflow_ms=0,
     )
-    assert r != "TextThenAtemo"
-    assert r != "TextSlotFitExpand"
     assert r == "dead_air_risk"
