@@ -36,7 +36,7 @@ SEVERE_OVERFLOW_RATIO = 1.50
 # Stage 19d: final shorter than raw/semantic by >25% without shorten_executed = silent truncate.
 MAX_SILENT_TRUNCATE_RATIO = 0.75
 MIN_RAW_WORDS_FOR_TRUNCATE_GUARD = 12
-# Stage 19e/19f/19g: after restore, force split when predicted speech exceeds slot.
+# Stage 19e/19f/19g/19h: after restore, force split when predicted speech exceeds slot.
 FORCE_SPLIT_RATIO = 1.15
 FORCE_SPLIT_ABS_MS = 3000
 MAX_POST_RESTORE_SPLIT_CHILDREN = 12
@@ -45,14 +45,18 @@ MAX_FILL_RATIO_AFTER_RESTORE = 1.15
 MAX_SPLIT_CHILDREN = 12
 MAX_SPLIT_DEPTH = 4
 MIN_CHILD_SLOT_MS = 1800
-# Stage 19g: soft expand pads (whitelist only — never "ось як це було тоді").
+STAGE19H_OK_FILL_LO = 0.85
+STAGE19H_OK_FILL_HI = 1.15
+UNDERFLOW_TRIGGER_MS = 350
+OVERFLOW_TRIGGER_MS = 350
+# Stage 19h: soft expand pads (strict whitelist — never "ось як це було тоді").
 _STAGE19G_SOFT_PADS: tuple[str, ...] = (
     "саме тоді",
-    "як виявилося",
     "і саме в цей момент",
-    "згодом",
-    "після цього",
+    "тоді",
+    "отже",
 )
+_STAGE19H_SOFT_PADS = _STAGE19G_SOFT_PADS
 _STAGE19G_GLOSSARY_ANCHORS: tuple[tuple[str, str], ...] = (
     (r"(?i)\bgeorge\s+junior\b|\bgeorge\s+jr\.?\b", "Джордж молодший"),
     (r"(?i)\bfiat\b", "Фіат"),
@@ -281,6 +285,29 @@ def split_into_slot_sized_chunks(
     return [p for p in packed if p][: max(1, int(max_children))]
 
 
+def _normalize_chunk(text: str) -> str:
+    return " ".join(str(text or "").split()).strip()
+
+
+def assert_unique_split_chunks(
+    parent_text: str,
+    chunks: list[str],
+) -> bool:
+    """Stage 19h: True when every child chunk is a unique proper substring ≠ parent."""
+    parent = _normalize_chunk(parent_text)
+    cleaned = [_normalize_chunk(c) for c in chunks if _normalize_chunk(c)]
+    if len(cleaned) < 2:
+        return False
+    seen: set[str] = set()
+    for c in cleaned:
+        if c == parent:
+            return False
+        if c in seen:
+            return False
+        seen.add(c)
+    return True
+
+
 def force_split_until_fit(
     text: str,
     slot_ms: int,
@@ -289,19 +316,38 @@ def force_split_until_fit(
     max_children: int = MAX_SPLIT_CHILDREN,
     depth: int = 0,
 ) -> list[str]:
-    """Stage 19g: recursive split until each chunk predicted fill ≤ 1.15."""
-    t = " ".join(str(text or "").split()).strip()
+    """Stage 19h: recursive unique-chunk split until each fill ≤ 1.15.
+
+    Guarantees: when ≥2 chunks returned, no chunk equals the full parent text.
+    """
+    t = _normalize_chunk(text)
     if not t:
         return []
     slot = max(1, int(slot_ms or 0) or 2000)
     if int(depth or 0) >= MAX_SPLIT_DEPTH:
+        # At max depth still try a hard bipartition so we never return the
+        # full parent as a "successful" multi-child split.
+        parts = _atomic_text_parts(t)
+        if len(parts) >= 2:
+            mid = max(1, len(parts) // 2)
+            return [
+                _normalize_chunk(" ".join(parts[:mid])),
+                _normalize_chunk(" ".join(parts[mid:])),
+            ]
+        words = t.split()
+        if len(words) >= 6:
+            mid = len(words) // 2
+            return [
+                " ".join(words[:mid]).strip(),
+                " ".join(words[mid:]).strip(),
+            ]
         return [t]
 
     hard = max(int(slot * MAX_CHILD_FILL), MIN_CHILD_SLOT_MS)
     chunks = split_into_slot_sized_chunks(
         t, slot, lang, max_children=max_children
     )
-    if len(chunks) < 2 and should_force_split(t, slot, lang):
+    if len(chunks) < 2:
         parts = _atomic_text_parts(t)
         if len(parts) >= 2:
             mid = max(1, len(parts) // 2)
@@ -311,7 +357,7 @@ def force_split_until_fit(
             ]
         else:
             words = t.split()
-            if len(words) >= 8:
+            if len(words) >= 6:
                 mid = len(words) // 2
                 chunks = [
                     " ".join(words[:mid]).strip(),
@@ -320,11 +366,34 @@ def force_split_until_fit(
 
     result: list[str] = []
     for c in chunks:
-        if len(result) >= max_children:
+        c = _normalize_chunk(c)
+        if not c or len(result) >= max_children:
             break
+        # Never keep a chunk that is the entire parent when we already have room.
+        if c == t and max_children >= 2:
+            parts = _atomic_text_parts(c)
+            if len(parts) >= 2:
+                mid = max(1, len(parts) // 2)
+                left = _normalize_chunk(" ".join(parts[:mid]))
+                right = _normalize_chunk(" ".join(parts[mid:]))
+                if left and right and left != t and right != t:
+                    result.append(left)
+                    if len(result) < max_children:
+                        result.append(right)
+                    continue
+            words = c.split()
+            if len(words) >= 6:
+                mid = len(words) // 2
+                left = " ".join(words[:mid]).strip()
+                right = " ".join(words[mid:]).strip()
+                if left and right:
+                    result.append(left)
+                    if len(result) < max_children:
+                        result.append(right)
+                    continue
         pred = estimate_tts_ms(c, lang)
         room = max_children - len(result)
-        if pred > hard and room >= 2 and int(depth or 0) + 1 < MAX_SPLIT_DEPTH:
+        if pred > hard and room >= 2 and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH:
             sub_slot = max(MIN_CHILD_SLOT_MS, int(slot * 0.85))
             sub = force_split_until_fit(
                 c,
@@ -333,37 +402,183 @@ def force_split_until_fit(
                 max_children=min(max_children, room),
                 depth=int(depth or 0) + 1,
             )
-            if len(sub) >= 2:
+            # Accept recursive result only when it yields unique sub-chunks.
+            if len(sub) >= 2 and assert_unique_split_chunks(c, sub):
                 for s in sub:
                     if len(result) >= max_children:
                         break
-                    result.append(s)
+                    sn = _normalize_chunk(s)
+                    if sn and sn != t:
+                        result.append(sn)
                 continue
-            # Word-mid last resort when recursion returned a singleton.
             words = c.split()
-            if len(words) >= 8:
+            if len(words) >= 6:
                 mid = len(words) // 2
-                result.append(" ".join(words[:mid]).strip())
-                if len(result) < max_children:
-                    result.append(" ".join(words[mid:]).strip())
+                left = " ".join(words[:mid]).strip()
+                right = " ".join(words[mid:]).strip()
+                if left and left != t:
+                    result.append(left)
+                if right and right != t and len(result) < max_children:
+                    result.append(right)
                 continue
-        result.append(c)
+        if c != t or not result:
+            result.append(c)
 
-    out = [p for p in result if p][: max(1, int(max_children))]
-    if len(out) == 1 and should_force_split(out[0], slot, lang):
-        words = out[0].split()
-        n = min(
-            max_children,
-            max(2, int(estimate_tts_ms(out[0], lang) / max(hard, 1)) + 1),
-        )
-        if len(words) >= n * 3:
-            step = max(3, len(words) // n)
+    # Deduplicate while preserving order; drop any accidental parent equals.
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in result:
+        pn = _normalize_chunk(p)
+        if not pn or pn == t or pn in seen:
+            continue
+        seen.add(pn)
+        out.append(pn)
+        if len(out) >= max_children:
+            break
+
+    expected_n = min(
+        max_children,
+        max(2, int(estimate_tts_ms(t, lang) / max(hard, 1)) + 1),
+    )
+
+    def _uneven_atomic_packs(src: str, n: int) -> list[str]:
+        """Build n unique contiguous packs (uneven sizes defeat period-aligned dups)."""
+        parts = _atomic_text_parts(src)
+        if len(parts) < 2:
+            words = src.split()
+            if len(words) < 6:
+                return []
+            # Fall back to uneven word windows.
+            packs: list[str] = []
+            idx = 0
+            sizes = [3, 5, 4, 6, 3, 5, 4, 6, 5, 4, 3, 6]
+            for k in range(n):
+                if idx >= len(words):
+                    break
+                take = sizes[k % len(sizes)]
+                if k == n - 1:
+                    take = max(take, len(words) - idx)
+                packs.append(" ".join(words[idx : idx + take]).strip())
+                idx += take
+            return [p for p in packs if p and p != src]
+        packs = []
+        idx = 0
+        # Pattern of part counts — not divisible by common sentence-period (8).
+        sizes = [3, 5, 4, 6, 3, 5, 4, 6, 5, 4, 3, 6]
+        for k in range(n):
+            if idx >= len(parts):
+                break
+            take = sizes[k % len(sizes)]
+            if k == n - 1:
+                take = max(take, len(parts) - idx)
+            packs.append(" ".join(parts[idx : idx + take]).strip())
+            idx += take
+        if idx < len(parts) and packs:
+            packs[-1] = (packs[-1] + " " + " ".join(parts[idx:])).strip()
+        # Dedup while keeping order; drop parent equals.
+        seen_local: set[str] = set()
+        uniq: list[str] = []
+        for p in packs:
+            pn = _normalize_chunk(p)
+            if not pn or pn == src or pn in seen_local:
+                continue
+            seen_local.add(pn)
+            uniq.append(pn)
+        return uniq
+
+    if len(out) < 2 and should_force_split(t, slot, lang):
+        words = t.split()
+        if len(words) >= expected_n * 3:
+            step = max(3, len(words) // expected_n)
             out = [
                 " ".join(words[i : i + step]).strip()
                 for i in range(0, len(words), step)
                 if " ".join(words[i : i + step]).strip()
             ][:max_children]
-    return out
+            out = [c for c in out if c and c != t]
+
+    # Repeated source (e.g. synthetic ×N) collapses equal packs — rebuild unevenly.
+    if (
+        should_force_split(t, slot, lang)
+        and (len(out) < min(3, expected_n) or not assert_unique_split_chunks(t, out))
+    ):
+        rebuilt = _uneven_atomic_packs(t, max(expected_n, 3))
+        if len(rebuilt) > len(out) and assert_unique_split_chunks(t, rebuilt):
+            out = rebuilt[:max_children]
+        elif len(rebuilt) >= 2 and (
+            len(out) < 2 or not assert_unique_split_chunks(t, out)
+        ):
+            out = rebuilt[:max_children]
+
+    if len(out) >= 2 and not assert_unique_split_chunks(t, out):
+        # Last-resort proportional word packs — always unique vs parent.
+        words = t.split()
+        n = min(max_children, max(2, len(words) // 4))
+        if len(words) >= n * 2:
+            step = max(2, len(words) // n)
+            out = [
+                " ".join(words[i : i + step]).strip()
+                for i in range(0, len(words), step)
+                if " ".join(words[i : i + step]).strip()
+            ][:max_children]
+            out = [c for c in out if c and c != t]
+            # Still duplicated? uneven word windows.
+            if not assert_unique_split_chunks(t, out):
+                rebuilt = _uneven_atomic_packs(t, n)
+                if len(rebuilt) >= 2:
+                    out = rebuilt[:max_children]
+
+    # Polish: recursively carve any leftover oversize unique pack (fill > 1.15).
+    if out and int(depth or 0) + 1 <= MAX_SPLIT_DEPTH:
+        polished: list[str] = []
+        for c in out:
+            if len(polished) >= max_children:
+                break
+            c = _normalize_chunk(c)
+            if not c or c == t:
+                continue
+            pred = estimate_tts_ms(c, lang)
+            room = max_children - len(polished)
+            if pred > hard and room >= 2:
+                sub = force_split_until_fit(
+                    c,
+                    max(MIN_CHILD_SLOT_MS, int(slot * 0.85)),
+                    lang,
+                    max_children=room,
+                    depth=int(depth or 0) + 1,
+                )
+                if len(sub) >= 2 and assert_unique_split_chunks(c, sub):
+                    for s in sub:
+                        sn = _normalize_chunk(s)
+                        if (
+                            sn
+                            and sn != t
+                            and sn not in polished
+                            and len(polished) < max_children
+                        ):
+                            polished.append(sn)
+                    continue
+                words = c.split()
+                if len(words) >= 6 and room >= 2:
+                    mid = len(words) // 2
+                    left = " ".join(words[:mid]).strip()
+                    right = " ".join(words[mid:]).strip()
+                    if left and left != t and left not in polished:
+                        polished.append(left)
+                    if (
+                        right
+                        and right != t
+                        and right not in polished
+                        and len(polished) < max_children
+                    ):
+                        polished.append(right)
+                    continue
+            if c not in polished:
+                polished.append(c)
+        if len(polished) >= 2 and assert_unique_split_chunks(t, polished):
+            out = polished[:max_children]
+
+    return out if out else ([t] if t else [])
 
 
 def prefer_full_meaning_text(

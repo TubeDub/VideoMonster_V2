@@ -36,11 +36,17 @@ MAX_STAGE19F_SPLIT_CHILDREN = 12
 MAX_STAGE19F_SPLIT_DEPTH = 4
 MAX_STAGE19G_SPLIT_CHILDREN = 12
 MAX_STAGE19G_SPLIT_DEPTH = 4
+MAX_STAGE19H_SPLIT_CHILDREN = 12
+MAX_STAGE19H_SPLIT_DEPTH = 4
 OVERLAP_TOLERANCE_MS = 40
 TIMING_SCORE_GOAL = 95
 STAGE19G_UNDERFILL_FILL_RATIO = 0.92
 STAGE19G_OK_FILL_LO = 0.85
 STAGE19G_OK_FILL_HI = 1.15
+STAGE19H_OK_FILL_LO = 0.85
+STAGE19H_OK_FILL_HI = 1.15
+UNDERFLOW_TRIGGER_MS = 350
+OVERFLOW_TRIGGER_MS = 350
 
 # Honest algorithm reasons that must not be overwritten by AudioOnly.
 _TEXT_FIT_REASON_PREFIXES = (
@@ -857,6 +863,35 @@ def try_stage19c_overflow_split(
     return True
 
 
+def _scope_child_text_anchors(child: dict, unique_chunk: str) -> None:
+    """Stage 19h: bind all text/raw anchors to the unique child chunk.
+
+    Deepcopy from parent otherwise leaves full parent raw_translation, and
+    expand/anti-truncate restores that full text onto every child.
+    """
+    chunk = " ".join(str(unique_chunk or "").split()).strip()
+    if not chunk:
+        return
+    for key in (
+        "plain_text",
+        "text",
+        "final_text",
+        "translation_text",
+        "translated_text",
+        "final_tts_text",
+        "tts_text",
+        "naturalized_text",
+        "raw_translation",
+        "raw_mt",
+        "semantic_engine_text",
+        "semantic_text",
+        "mt_text",
+    ):
+        child[key] = chunk
+    child["expand_executed"] = False
+    child["text_changed"] = True
+
+
 def try_stage19e_post_restore_split(
     *,
     segments_data: list[dict],
@@ -866,10 +901,10 @@ def try_stage19e_post_restore_split(
     idx: int,
     lang: str = "uk",
 ) -> bool:
-    """Stage 19g: split giant Final into 2..12 speech-sized children.
+    """Stage 19h: split into unique speech-sized children + independent re-TTS.
 
     Uses force_split_until_fit so each child predicted fill ≤ 1.15.
-    Children get expanded timing + independent re-TTS (no parent duration copy).
+    Children never inherit parent text/duration; each needs its own TTS.
     Oversized children may re-split (depth-limited).
     """
     import copy
@@ -877,6 +912,7 @@ def try_stage19e_post_restore_split(
     from engines.text_slot_fit import (
         MAX_CHILD_FILL,
         MAX_SPLIT_CHILDREN,
+        assert_unique_split_chunks,
         estimate_tts_ms,
         force_split_until_fit,
         should_force_split,
@@ -886,11 +922,12 @@ def try_stage19e_post_restore_split(
         return False
     seg = segments_data[idx]
     depth = int(
-        seg.get("stage19g_split_depth")
+        seg.get("stage19h_split_depth")
+        or seg.get("stage19g_split_depth")
         or seg.get("stage19f_split_depth")
         or 0
     )
-    if depth >= MAX_STAGE19G_SPLIT_DEPTH:
+    if depth >= MAX_STAGE19H_SPLIT_DEPTH:
         return False
 
     if idx < len(timing_map):
@@ -908,7 +945,8 @@ def try_stage19e_post_restore_split(
         end_ms = start_ms + int(seg.get("slot_ms") or 0)
     slot_ms = max(0, end_ms - start_ms)
     tgt = _segment_text(seg)
-    if not tgt or _text_looks_english(tgt):
+    parent_text = " ".join(str(tgt or "").split()).strip()
+    if not parent_text or _text_looks_english(parent_text):
         return False
     measured_ms = int(
         seg.get("playback_duration")
@@ -916,9 +954,13 @@ def try_stage19e_post_restore_split(
         or seg.get("actual_duration_ms")
         or 0
     )
+    fill_ratio_now = (
+        (measured_ms / float(slot_ms)) if slot_ms > 0 and measured_ms > 0 else 0.0
+    )
     if not (
         seg.get("needs_post_restore_split")
-        or should_force_split(tgt, slot_ms, lang)
+        or should_force_split(parent_text, slot_ms, lang)
+        or fill_ratio_now > MAX_CHILD_FILL
         or segment_needs_stage19e_split(
             seg,
             slot_ms=slot_ms,
@@ -939,19 +981,44 @@ def try_stage19e_post_restore_split(
         # Re-split measured-oversize child using a tighter aim toward 0.95 band.
         pack_slot = max(800, int(pack_slot * 0.9))
     tgt_chunks = force_split_until_fit(
-        tgt,
+        parent_text,
         pack_slot,
         lang,
-        max_children=min(MAX_SPLIT_CHILDREN, MAX_STAGE19G_SPLIT_CHILDREN),
+        max_children=min(MAX_SPLIT_CHILDREN, MAX_STAGE19H_SPLIT_CHILDREN),
         depth=0,
     )
     if len(tgt_chunks) < 2:
         return False
+    unique_text_ok = assert_unique_split_chunks(parent_text, tgt_chunks)
+    if not unique_text_ok:
+        logger.warning(
+            "[Stage19h] refuse split seg#%d — child text equals parent (unique_text_ok=False)",
+            idx,
+        )
+        # Mark parent so QA surfaces the failure honestly.
+        bad = {
+            "split_parent_idx": idx,
+            "split_children": len(tgt_chunks),
+            "unique_text_ok": False,
+            "stage19h_split_depth": depth,
+            "final_status": "overflow_unresolved",
+            "fill_ratio": round(fill_ratio_now, 4),
+            "delta": int(measured_ms - slot_ms) if slot_ms else 0,
+            "expand_executed": False,
+            "text_changed": False,
+        }
+        seg["stage19h"] = {**(seg.get("stage19h") or {}), **bad}
+        seg["unique_text_ok"] = False
+        return False
     if any(_text_looks_english(t) for t in tgt_chunks):
         logger.warning(
-            "[Stage19g] refuse split seg#%d — child Final looks English", idx
+            "[Stage19h] refuse split seg#%d — child Final looks English", idx
         )
         return False
+    # Hard invariant from Stage 19h acceptance.
+    assert all(
+        " ".join(str(c).split()).strip() != parent_text for c in tgt_chunks
+    ), "Stage19h: child must not equal parent text"
 
     src_parts: list[str] = []
     try:
@@ -977,6 +1044,12 @@ def try_stage19e_post_restore_split(
     n = len(allocated)
     if n != len(tgt_chunks):
         tgt_chunks = [c[0] for c in allocated]
+        if not assert_unique_split_chunks(parent_text, tgt_chunks):
+            logger.warning(
+                "[Stage19h] refuse split seg#%d — allocated chunks not unique vs parent",
+                idx,
+            )
+            return False
         src_chunks = _pack_text_chunks(
             src_parts if len(src_parts) >= 2 else ([src] if src else tgt_chunks),
             n,
@@ -1014,6 +1087,18 @@ def try_stage19e_post_restore_split(
         )
         for key in clear_keys:
             child.pop(key, None)
+        # Forbidden: never copy parent duration onto children.
+        for forbidden in (
+            "tts_ms",
+            "playback_duration",
+            "actual_duration_ms",
+            "measured_duration",
+            "tts_duration",
+            "first_tts_duration_ms",
+            "final_tts_duration_ms",
+        ):
+            if forbidden in child:
+                child.pop(forbidden, None)
         if i > 0:
             try:
                 from engines.pipeline_integrity.segment import new_segment_id
@@ -1028,45 +1113,55 @@ def try_stage19e_post_restore_split(
             except Exception:
                 pass
 
-        final_txt = str(tgt_t or text or "").strip()
-        if not final_txt or _text_looks_english(final_txt):
+        final_txt = " ".join(str(tgt_t or text or "").split()).strip()
+        if (
+            not final_txt
+            or _text_looks_english(final_txt)
+            or final_txt == parent_text
+        ):
             logger.warning(
-                "[Stage19g] abort split seg#%d — empty/EN child Final", idx
+                "[Stage19h] abort split seg#%d — empty/EN/parent-equal child Final",
+                idx,
             )
             return False
         child_slot = max(1, int(en) - int(st))
         child_pred = int(estimate_tts_ms(final_txt, lang) or 0)
         child_fill = child_pred / float(child_slot) if child_slot else 0.0
         still_over = child_fill > float(MAX_CHILD_FILL)
-        child["plain_text"] = final_txt
-        child["text"] = final_txt
-        child["final_text"] = final_txt
-        child["translation_text"] = final_txt
-        child["final_tts_text"] = final_txt
+        # Bind ALL text/raw anchors to unique chunk (Stage 19h root-cause fix).
+        _scope_child_text_anchors(child, final_txt)
         child["start_ms"] = int(st)
         child["end_ms"] = int(en)
         child["slot_ms"] = child_slot
         child["stage19e_split_done"] = True
-        # Allow Stage 19g re-split when this child is still overfilled.
+        # Allow Stage 19h re-split when this child is still overfilled.
         child["stage19c_split_done"] = not still_over
         child["split_executed"] = True
         child["post_restore_split"] = True
         child["stage19f_split_depth"] = child_depth
         child["stage19g_split_depth"] = child_depth
+        child["stage19h_split_depth"] = child_depth
         child["needs_post_restore_split"] = bool(
-            still_over and child_depth < MAX_STAGE19G_SPLIT_DEPTH
+            still_over and child_depth < MAX_STAGE19H_SPLIT_DEPTH
         )
         child["adaptive_resegment_done"] = True
         child["strategy"] = "split"
         child["fill_ratio"] = round(child_fill, 4)
-        if still_over and child_depth >= MAX_STAGE19G_SPLIT_DEPTH:
+        child["unique_text_ok"] = True
+        child["needs_re_tts"] = True  # independent child TTS — never inherit parent
+        if still_over and child_depth >= MAX_STAGE19H_SPLIT_DEPTH:
             child["final_status"] = "overflow_unresolved"
         lock_text_fit_algorithm_reason(child, "TextSlotFitSplit")
         child["expansion_strategy"] = "split"
         child["rule_rewrite_used"] = True
         child["adaptation_stages"] = list(child.get("adaptation_stages") or []) + [
-            "stage19g_post_restore_split"
+            "stage19h_post_restore_split"
         ]
+        final_status = (
+            "overflow_unresolved"
+            if still_over and child_depth >= MAX_STAGE19H_SPLIT_DEPTH
+            else "stage19h_partial"
+        )
         meta = {
             "split_parent_idx": idx,
             "split_child": i,
@@ -1080,15 +1175,15 @@ def try_stage19e_post_restore_split(
             "fill_ratio": round(child_fill, 4),
             "stage19f_split_depth": child_depth,
             "stage19g_split_depth": child_depth,
-            "final_status": (
-                "overflow_unresolved"
-                if still_over and child_depth >= MAX_STAGE19G_SPLIT_DEPTH
-                else "stage19g_partial"
-            ),
+            "stage19h_split_depth": child_depth,
+            "unique_text_ok": True,
+            "delta": 0,  # unknown until independent measure
+            "final_status": final_status,
         }
         child["stage19e"] = dict(meta)
         child["stage19f"] = dict(meta)
         child["stage19g"] = dict(meta)
+        child["stage19h"] = dict(meta)
         children.append(child)
 
     for i, child in enumerate(children):
@@ -1147,18 +1242,25 @@ def try_stage19e_post_restore_split(
             aa = dict(parent_audit)
             aa["index"] = idx + i
             aa["whisper_text"] = src_chunks[i] if i < len(src_chunks) else ""
-            aa["final_text"] = tgt_chunks[i] if i < len(tgt_chunks) else ""
+            child_final = tgt_chunks[i] if i < len(tgt_chunks) else ""
+            aa["final_text"] = child_final
+            # Scope audit raw anchors to unique child text (not parent blob).
+            aa["raw_translation"] = child_final
+            aa["raw_mt"] = child_final
             aa["stage19e_split"] = True
             aa["stage19f_split"] = True
             aa["stage19g_split"] = True
+            aa["stage19h_split"] = True
             aa["post_restore_split"] = True
+            aa["unique_text_ok"] = True
             rebuilt.append(aa)
         rebuilt.sort(key=lambda x: int(x.get("index", 0)))
         audits.clear()
         audits.extend(rebuilt)
 
     logger.info(
-        "[Stage19g] post-restore split seg#%d slot=%dms → %d children (expanded end=%dms depth=%d)",
+        "[Stage19h] post-restore split seg#%d slot=%dms → %d unique children "
+        "(expanded end=%dms depth=%d unique_text_ok=True)",
         idx,
         slot_ms,
         n,
@@ -1425,20 +1527,45 @@ def _stamp_stage19e_fields(
         or seg.get("rule_rewrite_used")
         or seg.get("text_changed")
     )
-    # Stage 19g: ok only inside |Δ|≤350 and fill band [0.85, 1.15].
-    if (
+    # Stage 19h: ok only inside |Δ|≤350 and fill band [0.85, 1.15].
+    unique_text_ok = seg.get("unique_text_ok")
+    if unique_text_ok is None:
+        unique_text_ok = (seg.get("stage19h") or {}).get("unique_text_ok")
+    if unique_text_ok is None:
+        unique_text_ok = True
+    unique_text_ok = bool(unique_text_ok)
+    if not unique_text_ok:
+        final_status = "overflow_unresolved"
+    elif (
         abs(delta) <= TEXT_FIT_DELTA_MS
-        and STAGE19G_OK_FILL_LO <= fill <= STAGE19G_OK_FILL_HI
+        and STAGE19H_OK_FILL_LO <= fill <= STAGE19H_OK_FILL_HI
         and final_status not in ("failed_tts_regen", "failed_no_regen", "dead_air_risk")
     ):
         final_status = "ok"
     elif final_status == "ok":
-        if int(budget.underflow or 0) > TEXT_FIT_DELTA_MS and not expand_executed:
+        if int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS and not expand_executed:
             final_status = "dead_air_risk"
-        elif fill > STAGE19G_OK_FILL_HI:
+        elif fill > STAGE19H_OK_FILL_HI:
             final_status = "overflow_unresolved"
         else:
-            final_status = "stage19g_partial"
+            final_status = "stage19h_partial"
+    # Forbidden: never stamp ok when fill > 1.15 or |delta| > 350.
+    if final_status == "ok" and (
+        fill > STAGE19H_OK_FILL_HI or abs(delta) > TEXT_FIT_DELTA_MS
+    ):
+        final_status = (
+            "overflow_unresolved"
+            if fill > STAGE19H_OK_FILL_HI
+            else "stage19h_partial"
+        )
+    split_depth = int(
+        seg.get("stage19h_split_depth")
+        or seg.get("stage19g_split_depth")
+        or seg.get("stage19f_split_depth")
+        or prev.get("stage19h_split_depth")
+        or prev.get("stage19g_split_depth")
+        or 0
+    )
     meta19 = {
         **prev,
         "expand_executed": bool(expand_executed and text_changed),
@@ -1455,20 +1582,29 @@ def _stamp_stage19e_fields(
         "final_status": final_status,
         "algorithm_reason": reason,
         "split_children": split_children,
-        "stage19g_split_depth": int(
-            seg.get("stage19g_split_depth")
-            or seg.get("stage19f_split_depth")
-            or prev.get("stage19g_split_depth")
-            or 0
-        ),
+        "stage19g_split_depth": split_depth,
+        "stage19h_split_depth": split_depth,
+        "unique_text_ok": unique_text_ok,
+        "split_parent_idx": prev.get("split_parent_idx", seg.get("split_parent_idx")),
+        "split_child": prev.get("split_child", seg.get("split_child")),
     }
-    # Stage 19g status names preferred when unresolved after fit.
-    if final_status in ("stage19d_partial", "stage19f_partial", "stage19e_partial") and (
+    # Stage 19h status names preferred when unresolved after fit.
+    if final_status in (
+        "stage19d_partial",
+        "stage19f_partial",
+        "stage19e_partial",
+        "stage19g_partial",
+    ) and (
         abs(delta) > TEXT_FIT_DELTA_MS or seg.get("needs_post_restore_split")
     ):
-        meta19["final_status"] = "stage19g_partial"
-        if budget.final_status in ("stage19d_partial", "stage19f_partial", "stage19e_partial"):
-            budget.final_status = "stage19g_partial"
+        meta19["final_status"] = "stage19h_partial"
+        if budget.final_status in (
+            "stage19d_partial",
+            "stage19f_partial",
+            "stage19e_partial",
+            "stage19g_partial",
+        ):
+            budget.final_status = "stage19h_partial"
     if budget.final_status == "ok" and meta19["final_status"] != "ok":
         budget.final_status = meta19["final_status"]
     seg["stage19e"] = dict(meta19)
@@ -1476,6 +1612,9 @@ def _stamp_stage19e_fields(
     seg["stage19f"] = {**prev_f, **meta19}
     prev_g = dict(seg.get("stage19g") or {})
     seg["stage19g"] = {**prev_g, **meta19}
+    prev_h = dict(seg.get("stage19h") or {})
+    seg["stage19h"] = {**prev_h, **meta19}
+    seg["unique_text_ok"] = unique_text_ok
     seg["fill_ratio"] = fill
     seg["text_changed"] = bool(text_changed)
 
@@ -1680,9 +1819,14 @@ def apply_stage19b_rule_text_fit(
     )
 
     delta_before = _slot_delta_ms(budget)
-    # Stage 19g: expand when underfill >350ms OR fill_ratio < 0.92.
-    expand_required = delta_before < -TEXT_FIT_DELTA_MS or (
-        0 < fill_now < STAGE19G_UNDERFILL_FILL_RATIO
+    # Stage 19h: expand only when underfill >350ms and fill below ok-lo (0.85).
+    # Keep 0.92 band as a secondary trigger for still-noticeable underfill.
+    expand_required = (
+        delta_before < -UNDERFLOW_TRIGGER_MS
+        and (
+            fill_now < STAGE19H_OK_FILL_LO
+            or 0 < fill_now < STAGE19G_UNDERFILL_FILL_RATIO
+        )
     )
     shorten_required = delta_before > TEXT_FIT_DELTA_MS
     original = _segment_text(seg)
