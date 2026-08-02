@@ -36,13 +36,31 @@ SEVERE_OVERFLOW_RATIO = 1.50
 # Stage 19d: final shorter than raw/semantic by >25% without shorten_executed = silent truncate.
 MAX_SILENT_TRUNCATE_RATIO = 0.75
 MIN_RAW_WORDS_FOR_TRUNCATE_GUARD = 12
-# Stage 19e/19f: after restore, force split when predicted speech exceeds slot.
-FORCE_SPLIT_RATIO = 1.25
+# Stage 19e/19f/19g: after restore, force split when predicted speech exceeds slot.
+FORCE_SPLIT_RATIO = 1.15
 FORCE_SPLIT_ABS_MS = 3000
-MAX_POST_RESTORE_SPLIT_CHILDREN = 8
-MAX_CHILD_FILL = 1.25
-MAX_FILL_RATIO_AFTER_RESTORE = 1.25
-MAX_SPLIT_CHILDREN = 8
+MAX_POST_RESTORE_SPLIT_CHILDREN = 12
+MAX_CHILD_FILL = 1.15
+MAX_FILL_RATIO_AFTER_RESTORE = 1.15
+MAX_SPLIT_CHILDREN = 12
+MAX_SPLIT_DEPTH = 4
+MIN_CHILD_SLOT_MS = 1800
+# Stage 19g: soft expand pads (whitelist only — never "ось як це було тоді").
+_STAGE19G_SOFT_PADS: tuple[str, ...] = (
+    "саме тоді",
+    "як виявилося",
+    "і саме в цей момент",
+    "згодом",
+    "після цього",
+)
+_STAGE19G_GLOSSARY_ANCHORS: tuple[tuple[str, str], ...] = (
+    (r"(?i)\bgeorge\s+junior\b|\bgeorge\s+jr\.?\b", "Джордж молодший"),
+    (r"(?i)\bfiat\b", "Фіат"),
+    (r"(?i)\busc\b", "USC"),
+    (r"(?i)\bhaskell\s+wexler\b", "Хаскелл Векслер"),
+    (r"(?i)\bwexler\b", "Векслер"),
+    (r"(?i)\bstar\s+wars\b", "Зоряні війни"),
+)
 
 # Incomplete thought endings that must NEVER be voiced as a final cut.
 _BAD_TAIL = re.compile(
@@ -164,7 +182,7 @@ def should_force_split(
     *,
     predicted_ms: int | None = None,
 ) -> bool:
-    """Stage 19f: predicted fill_ratio > 1.25 (or absolute giant into tiny/empty slot)."""
+    """Stage 19g: predicted fill_ratio > 1.15 (or absolute giant into tiny/empty slot)."""
     slot = max(0, int(slot_ms or 0))
     pred = int(predicted_ms) if predicted_ms is not None else estimate_tts_ms(text, lang)
     if pred <= 0:
@@ -269,21 +287,36 @@ def force_split_until_fit(
     lang: str = "uk",
     *,
     max_children: int = MAX_SPLIT_CHILDREN,
+    depth: int = 0,
 ) -> list[str]:
-    """Stage 19f: split until each chunk predicted fill ≤ 1.25 (max children)."""
+    """Stage 19g: recursive split until each chunk predicted fill ≤ 1.15."""
+    t = " ".join(str(text or "").split()).strip()
+    if not t:
+        return []
     slot = max(1, int(slot_ms or 0) or 2000)
-    hard = max(int(slot * MAX_CHILD_FILL), FORCE_SPLIT_ABS_MS)
+    if int(depth or 0) >= MAX_SPLIT_DEPTH:
+        return [t]
+
+    hard = max(int(slot * MAX_CHILD_FILL), MIN_CHILD_SLOT_MS)
     chunks = split_into_slot_sized_chunks(
-        text, slot, lang, max_children=max_children
+        t, slot, lang, max_children=max_children
     )
-    if len(chunks) < 2 and should_force_split(text, slot, lang):
-        parts = _atomic_text_parts(text)
+    if len(chunks) < 2 and should_force_split(t, slot, lang):
+        parts = _atomic_text_parts(t)
         if len(parts) >= 2:
             mid = max(1, len(parts) // 2)
             chunks = [
                 " ".join(parts[:mid]).strip(),
                 " ".join(parts[mid:]).strip(),
             ]
+        else:
+            words = t.split()
+            if len(words) >= 8:
+                mid = len(words) // 2
+                chunks = [
+                    " ".join(words[:mid]).strip(),
+                    " ".join(words[mid:]).strip(),
+                ]
 
     result: list[str] = []
     for c in chunks:
@@ -291,44 +324,38 @@ def force_split_until_fit(
             break
         pred = estimate_tts_ms(c, lang)
         room = max_children - len(result)
-        if pred > hard and room >= 2:
-            sub_slot = max(800, int(slot * 0.9))
-            sub = split_into_slot_sized_chunks(
-                c, sub_slot, lang, max_children=min(4, room)
+        if pred > hard and room >= 2 and int(depth or 0) + 1 < MAX_SPLIT_DEPTH:
+            sub_slot = max(MIN_CHILD_SLOT_MS, int(slot * 0.85))
+            sub = force_split_until_fit(
+                c,
+                sub_slot,
+                lang,
+                max_children=min(max_children, room),
+                depth=int(depth or 0) + 1,
             )
-            if len(sub) < 2:
-                # Word-mid split last resort.
-                words = c.split()
-                if len(words) >= 8:
-                    mid = len(words) // 2
-                    sub = [
-                        " ".join(words[:mid]).strip(),
-                        " ".join(words[mid:]).strip(),
-                    ]
             if len(sub) >= 2:
-                # Recurse once more on still-oversized heads.
                 for s in sub:
                     if len(result) >= max_children:
                         break
-                    sp = estimate_tts_ms(s, lang)
-                    if sp > hard and (max_children - len(result)) >= 2:
-                        deeper = split_into_slot_sized_chunks(
-                            s,
-                            max(800, int(slot * 0.85)),
-                            lang,
-                            max_children=min(3, max_children - len(result)),
-                        )
-                        if len(deeper) >= 2:
-                            result.extend(deeper)
-                            continue
                     result.append(s)
                 continue
+            # Word-mid last resort when recursion returned a singleton.
+            words = c.split()
+            if len(words) >= 8:
+                mid = len(words) // 2
+                result.append(" ".join(words[:mid]).strip())
+                if len(result) < max_children:
+                    result.append(" ".join(words[mid:]).strip())
+                continue
         result.append(c)
+
     out = [p for p in result if p][: max(1, int(max_children))]
-    # If still one giant, force word halves up to max_children.
     if len(out) == 1 and should_force_split(out[0], slot, lang):
         words = out[0].split()
-        n = min(max_children, max(2, int(estimate_tts_ms(out[0], lang) / max(hard, 1)) + 1))
+        n = min(
+            max_children,
+            max(2, int(estimate_tts_ms(out[0], lang) / max(hard, 1)) + 1),
+        )
         if len(words) >= n * 3:
             step = max(3, len(words) // n)
             out = [
@@ -1101,6 +1128,92 @@ def expand_text_to_slot(
     return out, reasons
 
 
+def _stage19g_inject_glossary_anchors(
+    text: str,
+    *,
+    source_hint: str = "",
+    raw_mt: str = "",
+) -> tuple[str, bool]:
+    """Insert missing glossary entities (George Jr., Fiat, USC, Wexler, Star Wars)."""
+    out = " ".join(str(text or "").split()).strip()
+    if not out:
+        return out, False
+    probe = f"{source_hint} {raw_mt} {out}"
+    changed = False
+    for pat, uk_form in _STAGE19G_GLOSSARY_ANCHORS:
+        if not re.search(pat, probe):
+            continue
+        if uk_form.lower() in out.lower():
+            continue
+        # Append once as a natural clause — meaning-bearing, not empty pad.
+        trial = f"{out.rstrip('.!?…')} — {uk_form}."
+        trial = strip_slot_pad_fillers(" ".join(trial.split()).strip())
+        if (
+            trial
+            and trial != out
+            and len(trial.split()) > len(out.split())
+            and _expand_lang_ok(trial, "uk")
+        ):
+            out = trial
+            changed = True
+            break
+    return out, changed
+
+
+def _stage19g_soft_pad_once(text: str, lang: str = "uk") -> tuple[str, bool]:
+    """Insert one whitelist soft pad (never banned 'ось як це було тоді')."""
+    out = " ".join(str(text or "").split()).strip()
+    if not out:
+        return out, False
+    lang0 = str(lang or "uk").split("-")[0].lower()
+    if lang0 != "uk":
+        return out, False
+    for pad in _STAGE19G_SOFT_PADS:
+        if pad.lower() in out.lower():
+            continue
+        # Prefer mid-clause insert after first comma / first clause.
+        if "," in out:
+            left, right = out.split(",", 1)
+            trial = f"{left.strip()}, {pad},{right}"
+        else:
+            trial = f"{pad.capitalize()}, {out[0].lower() + out[1:]}" if out[0].isupper() else f"{pad}, {out}"
+        trial = strip_slot_pad_fillers(" ".join(trial.split()).strip())
+        if (
+            trial
+            and trial != out
+            and len(trial) > len(out)
+            and _is_complete_thought(trial)
+            and _expand_lang_ok(trial, lang)
+        ):
+            return trial, True
+    return out, False
+
+
+def _stage19g_repeat_key_noun(text: str) -> tuple[str, bool]:
+    """Repeat one content noun once to grow underfilled speech (≤1 repeat)."""
+    out = " ".join(str(text or "").split()).strip()
+    words = out.split()
+    if len(words) < 3:
+        return out, False
+    stop = {
+        "і", "та", "а", "але", "що", "як", "в", "у", "на", "з", "із", "до", "від",
+        "про", "для", "це", "той", "та", "він", "вона", "вони", "був", "була",
+        "були", "є", "не", "тоді", "потім", "саме",
+    }
+    for w in words:
+        stem = re.sub(r"[^\w\u0400-\u04FF]+", "", w, flags=re.UNICODE)
+        if len(stem) < 5 or stem.lower() in stop:
+            continue
+        # Already repeated nearby — skip.
+        if out.lower().count(stem.lower()) >= 2:
+            continue
+        trial = f"{out.rstrip('.!?…')}, {stem}."
+        trial = strip_slot_pad_fillers(" ".join(trial.split()).strip())
+        if trial != out and len(trial.split()) > len(words):
+            return trial, True
+    return out, False
+
+
 def expand_to_fill(
     final_text: str,
     *,
@@ -1110,11 +1223,13 @@ def expand_to_fill(
     raw_mt: str = "",
     prefer_raw: str = "",
 ) -> tuple[str, list[str]]:
-    """Stage 19/19f: paraphrase/lengthen Final toward target_ms (≈ EXPAND_AIM * slot).
+    """Stage 19g: lengthen Final toward target_ms — must grow when underfilled.
 
-    prefer_raw — longer semantic/raw anchor. Stage 19f: if still underfilled after
-    rule expand, force-adopt a longer anchor even when it mildly overflows the slot
-    (caller may then force-split).
+    Fallback chain when rule-expand is a no-op:
+      a) prefer longer raw/semantic
+      b) glossary anchors (George Jr., Fiat, USC, Wexler, Star Wars)
+      c) whitelist soft pads
+      d) repeat one key noun once
     """
     before = " ".join(str(final_text or "").split()).strip()
     slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
@@ -1128,21 +1243,55 @@ def expand_to_fill(
     )
     out = " ".join(str(out or "").split()).strip() or before
     reasons = list(reasons or [])
-    # Still under aim after expand → force longer semantic/raw anchor (19f).
     aim = max(200, int(target_ms or 0))
+
+    def _grew(candidate: str) -> bool:
+        c = " ".join(str(candidate or "").split()).strip()
+        return bool(c) and (
+            len(c) > len(before)
+            or len(c.split()) > len(before.split())
+        )
+
+    # a) prefer longer raw/semantic (Stage 19f/19g).
     if (
-        anchor
+        (not _grew(out) or estimate_tts_ms(out, lang) < aim)
+        and anchor
         and anchor != out
         and len(anchor.split()) > len(out.split())
-        and estimate_tts_ms(out, lang) < aim
         and _expand_lang_ok(anchor, lang)
         and _is_complete_thought(anchor)
     ):
         out = strip_slot_pad_fillers(anchor)
-        if "stage19f:force_raw_prefer" not in reasons:
-            reasons.append("stage19f:force_raw_prefer")
+        reasons.append("stage19g:force_raw_prefer")
         if "raw_prefer" not in reasons:
             reasons.append("raw_prefer")
+
+    # b) glossary anchors from hint / raw.
+    if not _grew(out) or estimate_tts_ms(out, lang) < aim:
+        inj, ok = _stage19g_inject_glossary_anchors(
+            out, source_hint=source_hint, raw_mt=anchor or raw_mt
+        )
+        if ok and _grew(inj):
+            out = inj
+            reasons.append("stage19g:glossary_anchor")
+
+    # c) whitelist soft pads.
+    if not _grew(out) or estimate_tts_ms(out, lang) < aim:
+        padded, ok = _stage19g_soft_pad_once(out, lang)
+        if ok and _grew(padded):
+            out = padded
+            reasons.append("stage19g:soft_pad")
+
+    # d) repeat key noun once.
+    if not _grew(out) or estimate_tts_ms(out, lang) < aim:
+        rep, ok = _stage19g_repeat_key_noun(out)
+        if ok and _grew(rep):
+            out = rep
+            reasons.append("stage19g:repeat_noun")
+
+    out = strip_slot_pad_fillers(out)
+    if _grew(out) and "stage19g:text_grown" not in reasons:
+        reasons.append("stage19g:text_grown")
     return out, reasons
 
 

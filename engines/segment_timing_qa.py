@@ -2268,6 +2268,16 @@ def build_openddf_segment_diagnostics(
                 "stage19d": seg.get("stage19d") or {},
                 "stage19e": seg.get("stage19e") or {},
                 "stage19f": seg.get("stage19f") or {},
+                "stage19g": seg.get("stage19g") or {},
+                "text_changed": bool(
+                    seg.get("text_changed")
+                    or (seg.get("stage19g") or {}).get("text_changed")
+                ),
+                "stage19g_split_depth": int(
+                    seg.get("stage19g_split_depth")
+                    or (seg.get("stage19g") or {}).get("stage19g_split_depth")
+                    or 0
+                ),
                 "duration_match_score": int(
                     adapt_trace.get("duration_match_score")
                     or speech_duration_match_score(actual_ms, slot_ms)
