@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "dce9b27b8d504ee983d0864d3b6eedba",
+  "created_at": "2026-08-02T00:38:56.347541+00:00",
+  "task_id": "dce9b27b8d504ee983d0864d3b6eedba",
+  "stage": "studio_handoff",
+  "developer": {
+    "error_code": "RUNTIME_INTEGRITY",
+    "stage": "studio_handoff",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "studio_handoff",
+    "task_id": "dce9b27b8d504ee983d0864d3b6eedba",
+    "error_type": "RuntimeIntegrityError",
+    "message": "active segment e6af9583f9bb4a7eb1cdd4f1aa74f0bd missing TTS file"
+  },
+  "exception": {
+    "type": "RuntimeIntegrityError",
+    "message": "active segment e6af9583f9bb4a7eb1cdd4f1aa74f0bd missing TTS file"
+  },
+  "timeline_event_count": 44
+}

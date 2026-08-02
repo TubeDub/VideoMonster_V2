@@ -1,0 +1,14 @@
+{
+  "task_id": "dce9b27b8d504ee983d0864d3b6eedba",
+  "stt_wall_sec": 135.509,
+  "stt_model": "small",
+  "stt_device": "cpu",
+  "stt_compute_type": "int8",
+  "stt_beam_size": 1,
+  "stt_vad_filter": true,
+  "stt_engine": "faster-whisper",
+  "stt_segments_raw": 33,
+  "stt_cache_hit": false,
+  "stt_word_timestamps": false,
+  "stt_segments_after_glue": 17
+}

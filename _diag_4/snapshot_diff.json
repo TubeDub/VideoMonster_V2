@@ -1,0 +1,6 @@
+{
+  "stage": "studio_handoff",
+  "task_id": "dce9b27b8d504ee983d0864d3b6eedba",
+  "error_type": "RuntimeIntegrityError",
+  "message": "active segment e6af9583f9bb4a7eb1cdd4f1aa74f0bd missing TTS file"
+}
