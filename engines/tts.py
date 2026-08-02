@@ -156,7 +156,13 @@ async def _generate_single(
         text = add_stress_marks(text, lang=lang)
     except Exception:
         pass
-    eid = (engine_id or "edge-offline").strip() or "edge-offline"
+    try:
+        from engines.tts_backends import normalize_backend_name, resolve_voice_for_backend
+
+        eid = normalize_backend_name(engine_id or "edge-offline")
+        voice = resolve_voice_for_backend(voice, eid)
+    except Exception:
+        eid = (engine_id or "edge-offline").strip() or "edge-offline"
     if eid == "edge-offline":
         import edge_tts
 
@@ -292,13 +298,13 @@ async def _generate_single(
         log_tts_failure(report)
         raise VoiceGenerationError(str(last_err), report=report, cause=last_err) from last_err
 
-    from engines.tts_engines.registry import synthesize
+    from engines.tts_backends import synthesize_with_backend
 
     loop = asyncio.get_running_loop()
 
     def _sync() -> None:
         t_sync = time.perf_counter()
-        result = synthesize(
+        result = synthesize_with_backend(
             text, voice, path, engine_id=eid, rate=rate, pitch=pitch
         )
         if not result.ok:

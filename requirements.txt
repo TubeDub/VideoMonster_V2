@@ -1,5 +1,8 @@
 flask>=3.0.0
 edge-tts>=6.1.9
+# Optional Ukrainian TTS backends (Stage 20) — install when needed:
+#   pip install tts-uk
+#   pip install piper-tts   # or use piper CLI + PIPER_MODELS_DIR with uk_UA-*-high onnx
 deep-translator>=1.11.4
 langdetect>=1.0.9
 pydub>=0.25.1

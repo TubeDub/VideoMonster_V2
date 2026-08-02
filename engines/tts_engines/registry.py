@@ -85,18 +85,23 @@ def _all_engine_instances():
 
 
 def get_engine(engine_id: str | None = None):
+    from engines.tts_backends import normalize_backend_name
+
     requested = (engine_id or "").strip()
-    env_default = (os.getenv("VM_TTS_ENGINE") or "").strip()
-    eid = requested or env_default
+    env_default = (
+        os.getenv("TTS_BACKEND") or os.getenv("VM_TTS_ENGINE") or ""
+    ).strip()
+    eid = normalize_backend_name(requested or env_default) if (requested or env_default) else ""
     if not eid:
-        # Offline mode: prefer Piper when installed, else edge-offline
+        # Offline mode: prefer tts_uk → piper → edge
         if offline_tts_mode():
-            for candidate in ("piper", _DEFAULT_ENGINE):
+            for candidate in ("tts_uk", "piper", _DEFAULT_ENGINE):
                 for eng in _all_engine_instances():
                     if eng.id == candidate and eng.is_available():
                         _ENGINE_CACHE[candidate] = eng
                         return eng
         eid = _DEFAULT_ENGINE
+    eid = normalize_backend_name(eid)
     if eid in _ENGINE_CACHE:
         return _ENGINE_CACHE[eid]
     for eng in _all_engine_instances():
@@ -109,11 +114,17 @@ def get_engine(engine_id: str | None = None):
 
 
 def default_engine_id() -> str:
-    if offline_tts_mode() and not (os.getenv("VM_TTS_ENGINE") or "").strip():
+    from engines.tts_backends import normalize_backend_name
+
+    env = (os.getenv("TTS_BACKEND") or os.getenv("VM_TTS_ENGINE") or "").strip()
+    if offline_tts_mode() and not env:
+        for eng in _all_engine_instances():
+            if eng.id == "tts_uk" and eng.is_available():
+                return "tts_uk"
         for eng in _all_engine_instances():
             if eng.id == "piper" and eng.is_available():
                 return "piper"
-    return (os.getenv("VM_TTS_ENGINE") or _DEFAULT_ENGINE).strip() or _DEFAULT_ENGINE
+    return normalize_backend_name(env or _DEFAULT_ENGINE)
 
 
 def synthesize(
@@ -143,10 +154,12 @@ def synthesize(
 
     if not eng.is_available():
         # Explicit offline engine or offline mode: fail clearly, no silent online/edge swap
-        if offline or (requested and requested not in ("", _DEFAULT_ENGINE)):
+        if offline or (requested and requested not in ("", _DEFAULT_ENGINE, "edge")):
             hint = ""
             if eng.id == "piper":
                 hint = " Install piper CLI/package and set PIPER_MODEL / VM_PIPER_MODEL."
+            elif eng.id == "tts_uk":
+                hint = " Install with: pip install tts-uk"
             elif eng.id == "coqui":
                 hint = " Install Coqui TTS (pip install TTS) and configure VM_COQUI_MODEL."
             return TTSResult(
@@ -170,4 +183,7 @@ def synthesize(
                 )
         else:
             return TTSResult(ok=False, error="edge-tts not installed", engine_id=eng.id)
-    return eng.synthesize(text, voice, output_path, rate=rate, pitch=pitch)
+    from engines.tts_backends import resolve_voice_for_backend
+
+    resolved_voice = resolve_voice_for_backend(voice, eng.id)
+    return eng.synthesize(text, resolved_voice, output_path, rate=rate, pitch=pitch)

@@ -795,7 +795,15 @@ def forbid_fast_then_gap(atempo: float, fill_ratio: float) -> bool:
 
 
 def estimate_tts_ms(text: str, lang: str = "uk") -> int:
-    """Chars/syllables heuristic — no audio synthesis."""
+    """Chars/syllables heuristic — prefers backend estimate when available."""
+    try:
+        from engines.tts_backends import estimate_duration_ms as _backend_est
+
+        ms = _backend_est(text, engine_id=None)
+        if ms is not None and int(ms) > 0:
+            return int(ms)
+    except Exception:
+        pass
     try:
         from engines.semantic_adaptation import estimate_tts_duration_ms
 

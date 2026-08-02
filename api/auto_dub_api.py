@@ -654,9 +654,36 @@ def _model_display_name(model: str) -> str:
 
 @bp.get("/api/auto_dub/tts_engines")
 def api_tts_engines():
+    from engines.tts_backends import voices_for_backend
     from engines.tts_engines.registry import list_engine_infos
 
     infos = list_engine_infos(APP_DIR)
+    stage20 = [
+        {
+            "id": "edge",
+            "engine_id": "edge-offline",
+            "name": "Edge TTS",
+            "recommended": False,
+            "hint": "Стабільний fallback (Ostap / Polina)",
+            "voices": voices_for_backend("edge"),
+        },
+        {
+            "id": "tts_uk",
+            "engine_id": "tts_uk",
+            "name": "tts_uk (RAD-TTS++ / Vocos)",
+            "recommended": True,
+            "hint": "Найкраща природність українського голосу + контроль тривалості",
+            "voices": voices_for_backend("tts_uk"),
+        },
+        {
+            "id": "piper",
+            "engine_id": "piper",
+            "name": "Piper (uk_UA-*-high)",
+            "recommended": True,
+            "hint": "Швидкий локальний TTS, CPU-friendly",
+            "voices": voices_for_backend("piper"),
+        },
+    ]
     return jsonify(
         {
             "ok": True,
@@ -672,6 +699,8 @@ def api_tts_engines():
                 }
                 for i in infos
             ],
+            "uk_backends": stage20,
+            "hint": "tts_uk і Piper дають більш природний український голос",
         }
     )
 
@@ -1291,6 +1320,7 @@ def _regen_segment_tts_simple(
     *,
     segment_id: str | None = None,
     task_id: str | None = None,
+    engine_id: str | None = None,
 ) -> str | None:
     """Simple TTS regen returning a unique filename bound to segment_id."""
     from engines.pipeline_integrity.audio_identity import (
@@ -1298,11 +1328,13 @@ def _regen_segment_tts_simple(
         ensure_segment_uuid,
     )
     from engines.tts import generate_audio
+    from engines.tts_backends import normalize_backend_name
 
     if not text.strip():
         return None
     meta = {"segment_id": segment_id or ""}
     suid = ensure_segment_uuid(meta)
+    eid = normalize_backend_name(engine_id or "edge-offline")
     files = _normalize_tts_result(
         generate_audio(
             text=text,
@@ -1310,10 +1342,12 @@ def _regen_segment_tts_simple(
             segments=[text],
             rate=tts_rate,
             pitch=tts_pitch,
+            engine_id=eid,
             context={
                 "segment_id": suid,
                 "segment_uuid": suid,
                 "task_id": task_id or "",
+                "tts_backend": eid,
             },
         )
     )
@@ -1571,6 +1605,21 @@ def _commit_tts_group_result(
             playback_duration=duration or None,
             status="generated",
         )
+        try:
+            from engines.tts_backends import stamp_tts_backend_meta
+
+            stamp_tts_backend_meta(
+                segments_data[head_idx],
+                engine_id=(task_info or {}).get("tts_engine")
+                or (task_info or {}).get("tts_backend"),
+                voice=str(
+                    segments_data[head_idx].get("voice")
+                    or (task_info or {}).get("voice")
+                    or ""
+                ),
+            )
+        except Exception:
+            pass
         from engines.pipeline_integrity.tts_file_lifecycle import (
             log_tts_lifecycle,
             verify_tts_file_on_disk,
@@ -1761,6 +1810,10 @@ def _post_tts_timing_qa(
                 task_id=kwargs.get("task_id") or task_id,
                 segment_index=kwargs.get("segment_index"),
                 segment_id=kwargs.get("segment_id") or "",
+                engine_id=kwargs.get("engine_id")
+                or task_info.get("tts_engine")
+                or task_info.get("tts_engine_id")
+                or "edge-offline",
             )
 
         watch = run_segment_bounded(
@@ -3070,6 +3123,7 @@ def _regen_segment_tts(
     task_id: str | None = None,
     segment_index: int | None = None,
     segment_id: str | None = None,
+    engine_id: str | None = None,
 ) -> tuple[str | None, int]:
     from engines.pipeline_integrity.audio_identity import (
         allocate_tts_path,
@@ -3079,16 +3133,18 @@ def _regen_segment_tts(
     )
     from engines.pipeline_integrity.tts_file_lifecycle import log_tts_lifecycle
     from engines.tts import generate_audio
+    from engines.tts_backends import normalize_backend_name
 
     seg_meta = {"segment_id": segment_id or "", "index": segment_index or 0}
     suid = ensure_segment_uuid(seg_meta)
+    eid = normalize_backend_name(engine_id or "edge-offline")
     log_tts_lifecycle(
         task_id,
         event="gen_start",
         segment_id=suid,
         segment_index=segment_index,
         stage="slot_fit_regen",
-        detail=f"text_len={len(text)}",
+        detail=f"text_len={len(text)} engine={eid}",
     )
     gen_kwargs: dict = {
         "text": text,
@@ -3097,12 +3153,14 @@ def _regen_segment_tts(
         "rate": tts_rate,
         "pitch": tts_pitch,
         "emotion": emotion,
+        "engine_id": eid,
         "output_dir": _artifacts_dir(),
         "context": {
             "segment_id": suid,
             "segment_uuid": suid,
             "segment_index": segment_index,
             "task_id": task_id or "",
+            "tts_backend": eid,
         },
     }
     files = generate_audio(**gen_kwargs)
@@ -4910,7 +4968,9 @@ def api_auto_dub_start():
             "translation_review_before_tts": review_before_tts,
             "tts_rate": tts_rate,
             "tts_pitch": tts_pitch,
-            "tts_engine": (data.get("tts_engine") or "edge-offline").strip(),
+            "tts_engine": (
+                data.get("tts_engine") or data.get("tts_backend") or "edge-offline"
+            ),
             "content_mode": content_mode,
             "strict_llm_adaptation": strict_llm_adaptation,
             "adaptation_speed_mode": adaptation_speed_mode,
@@ -4941,6 +5001,26 @@ def api_auto_dub_start():
         task_payload["info"]["simple_pipeline"] = True
         task_payload["info"]["simple_auto_mix"] = True
     _store_style_profile(task_payload["info"], resolved_style)
+    try:
+        from engines.tts_backends import (
+            normalize_backend_name,
+            resolve_voice_for_backend,
+            set_pipeline_tts_backend,
+        )
+
+        _eid = normalize_backend_name(task_payload["info"].get("tts_engine"))
+        task_payload["info"]["tts_engine"] = _eid
+        task_payload["info"]["tts_backend"] = (
+            "tts_uk"
+            if _eid == "tts_uk"
+            else ("piper" if _eid == "piper" else "edge")
+        )
+        set_pipeline_tts_backend(_eid)
+        _voice0 = str(data.get("voice") or task_payload["info"].get("voice") or "")
+        if _voice0:
+            task_payload["info"]["voice"] = resolve_voice_for_backend(_voice0, _eid)
+    except Exception:
+        pass
     init_auto_task(task_id, task_payload)
     with STATE_LOCK:
         AUTO_TASK_CONTROLS[task_id] = {
@@ -5076,14 +5156,20 @@ def api_preview_style():
 
     try:
         from engines.tts import generate_audio
+        from engines.tts_backends import normalize_backend_name, resolve_voice_for_backend
         from engines.voice_style_fx import apply_voice_style_fx
 
+        eid = normalize_backend_name(
+            data.get("tts_engine") or data.get("engine_id") or "edge-offline"
+        )
+        voice = resolve_voice_for_backend(voice, eid)
         raw = generate_audio(
             text=phrase,
             voice=voice,
             segments=[phrase],
             rate=resolved.get("tts_rate"),
             pitch=resolved.get("tts_pitch"),
+            engine_id=eid,
         )
         files = _normalize_tts_result(raw)
         if not files:
@@ -11101,6 +11187,12 @@ def _run_pipeline_inner(
                     raw_mt_segments, current_timing_map_snapshot
                 )
             tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+            try:
+                from engines.tts_backends import set_pipeline_tts_backend
+
+                set_pipeline_tts_backend(tts_engine_id)
+            except Exception:
+                pass
             _skip_timing_adapt = bool(task["info"].get("translation_agent_path"))
             _skip_semantic_shorten = bool(task["info"].get("semantic_agent_path"))
             _skip_timing_shorten = bool(task["info"].get("timing_agent_path"))
@@ -13309,6 +13401,12 @@ def _run_pipeline_inner(
 
             with STATE_LOCK:
                 tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+            try:
+                from engines.tts_backends import set_pipeline_tts_backend
+
+                set_pipeline_tts_backend(tts_engine_id)
+            except Exception:
+                pass
 
             apply_tts_group_merge_links(segments_data, tts_groups)
             _log_tts_synthesis_requests(
@@ -13485,6 +13583,12 @@ def _run_pipeline_inner(
             with STATE_LOCK:
                 use_parallel_tts = not control.get("stop_after_segment")
                 tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+            try:
+                from engines.tts_backends import set_pipeline_tts_backend
+
+                set_pipeline_tts_backend(tts_engine_id)
+            except Exception:
+                pass
                 _pipeline_mode = str(task["info"].get("pipeline_mode") or "")
                 _streaming_voice_done = bool(task["info"].get("streaming_voice_done"))
                 _manifest_vp = str(task["info"].get("manifest_path") or "")

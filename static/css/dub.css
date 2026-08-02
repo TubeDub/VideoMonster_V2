@@ -1601,6 +1601,22 @@ body.dev-mode .tr-dev-only { display: block; }
   display: block;
 }
 
+.wizard-tts-backend {
+  margin: 0 0 1rem;
+  max-width: 28rem;
+}
+.wizard-tts-backend-label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  opacity: 0.85;
+}
+.wizard-tts-backend-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  line-height: 1.35;
+}
 .wizard-voice-tile {
   min-height: 84px;
   align-items: flex-start;

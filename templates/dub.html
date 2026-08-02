@@ -15,7 +15,11 @@
             <option value="{{ code }}" {% if code=='ru' %}selected{% endif %}>{{ name }}</option> {% endfor %}
         </select>
         <select id="voice-select"></select>
-        <input type="hidden" id="tts-engine" value="edge-offline" />
+        <select id="tts-engine" class="select-control">
+            <option value="edge-offline" selected>Edge TTS</option>
+            <option value="tts_uk">tts_uk (рекомендовано)</option>
+            <option value="piper">Piper (uk high)</option>
+        </select>
         <select id="model-size" class="select-control">
             <option value="tiny">tiny</option>
             <option value="base">base</option>
@@ -123,6 +127,17 @@
             <section class="wizard-step" id="wizard-step-voice" data-wizard-step="voice" hidden>
                 <h2 class="wizard-step-title" data-i18n="dub.wizard_voice_title">Голос</h2>
                 <p class="wizard-step-sub" data-i18n="dub.wizard_voice_sub">Прослушайте и выберите голос</p>
+                <div class="wizard-tts-backend" id="wizard-tts-backend-row">
+                    <label class="wizard-tts-backend-label" for="wizard-tts-backend">TTS Backend</label>
+                    <select id="wizard-tts-backend" class="select-control">
+                        <option value="edge-offline">Edge TTS (Ostap / Polina)</option>
+                        <option value="tts_uk">tts_uk — рекомендований</option>
+                        <option value="piper">Piper uk_UA-*-high</option>
+                    </select>
+                    <p class="wizard-tts-backend-hint" id="wizard-tts-backend-hint">
+                        tts_uk і Piper дають більш природний український голос
+                    </p>
+                </div>
                 <div id="wizard-voice-grid" class="wizard-tile-grid wizard-tile-grid--voice" role="listbox"></div>
             </section>
 

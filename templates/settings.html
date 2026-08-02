@@ -102,6 +102,18 @@
     <h2>Озвучка (TTS)</h2>
 
     <div class="field-group">
+      <label>TTS Backend</label>
+      <select id="s-tts-backend" class="select-control" onchange="onTtsBackendChange()">
+        <option value="edge-offline" selected>Edge TTS</option>
+        <option value="tts_uk">tts_uk (рекомендуется)</option>
+        <option value="piper">Piper (uk high)</option>
+      </select>
+      <p class="field-hint" style="margin-top:6px;opacity:.75;font-size:.9em">
+        tts_uk и Piper дают более естественный украинский голос. По умолчанию — Edge (Ostap).
+      </p>
+    </div>
+
+    <div class="field-group">
       <label>Язык голоса по умолчанию</label>
       <select id="s-lang" class="select-control" onchange="updateVoiceList()">
         {% for name, code in languages.items() %}
@@ -517,14 +529,46 @@
   }
 
   /* ── TTS ── */
+  const UK_BACKEND_VOICES = {
+    'edge-offline': [
+      { id: 'uk-UA-OstapNeural', name: 'Остап (Edge, чол.) — за замовчуванням' },
+      { id: 'uk-UA-PolinaNeural', name: 'Поліна (Edge, жін.)' },
+    ],
+    edge: [
+      { id: 'uk-UA-OstapNeural', name: 'Остап (Edge, чол.) — за замовчуванням' },
+      { id: 'uk-UA-PolinaNeural', name: 'Поліна (Edge, жін.)' },
+    ],
+    tts_uk: [
+      { id: 'mykyta', name: 'Микита (tts_uk, чол.) — рекомендований' },
+      { id: 'lada', name: 'Лада (tts_uk, жін.)' },
+      { id: 'tetiana', name: 'Тетяна (tts_uk, жін.)' },
+    ],
+    piper: [
+      { id: 'uk_UA-mykyta-high', name: 'Микита (Piper high, чол.)' },
+      { id: 'uk_UA-oleksa-high', name: 'Олекса (Piper high, чол.)' },
+      { id: 'uk_UA-lada-high', name: 'Лада (Piper high, жін.)' },
+      { id: 'uk_UA-tetiana-high', name: 'Тетяна (Piper high, жін.)' },
+    ],
+  };
+
+  function onTtsBackendChange() {
+    updateVoiceList();
+  }
+
   function updateVoiceList() {
     const lang = document.getElementById('s-lang').value;
+    const backend = (document.getElementById('s-tts-backend') || {}).value || 'edge-offline';
     const sel = document.getElementById('s-voice');
+    const prev = sel.value;
     sel.innerHTML = '';
-    const list = VOICES[lang] || VOICES['ru'];
+    let list = VOICES[lang] || VOICES['ru'];
+    if (lang === 'uk' && UK_BACKEND_VOICES[backend]) {
+      list = UK_BACKEND_VOICES[backend];
+    }
     list.forEach(v => {
       const opt = document.createElement('option');
       opt.value = v.id; opt.textContent = v.name;
+      if (v.id === prev) opt.selected = true;
       sel.appendChild(opt);
     });
   }
@@ -532,12 +576,13 @@
   function previewVoice() {
     const text = document.getElementById('s-preview-text').value.trim();
     const voice = document.getElementById('s-voice').value;
+    const engine_id = (document.getElementById('s-tts-backend') || {}).value || 'edge-offline';
     if (!text) return;
     setStatus('Генерация превью...');
     fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text.slice(0, 300), voice })
+      body: JSON.stringify({ text: text.slice(0, 300), voice, engine_id })
     }).then(r => r.json()).then(d => {
       if (d.error) { setStatus('Ошибка: ' + d.error); return; }
       const player = document.getElementById('preview-player');
@@ -566,9 +611,12 @@
     const prev = JSON.parse(localStorage.getItem('vm_settings') || '{}');
     const strictEl = document.getElementById('s-strict-llm-adaptation');
     const origVolEl = document.getElementById('s-original-volume');
+    const backendEl = document.getElementById('s-tts-backend');
     const settings = {
       ...prev,
       voice: document.getElementById('s-voice').value,
+      ttsEngine: backendEl ? backendEl.value : (prev.ttsEngine || 'edge-offline'),
+      tts_engine: backendEl ? backendEl.value : (prev.tts_engine || 'edge-offline'),
       targetLang: document.getElementById('s-target-lang').value,
       autoClean: document.getElementById('s-auto-clean').checked,
       translateMode: document.getElementById('s-translate-mode').value,
@@ -1462,6 +1510,17 @@
     if (saved.autoClean !== undefined) document.getElementById('s-auto-clean').checked = saved.autoClean;
     const strictEl = document.getElementById('s-strict-llm-adaptation');
     if (strictEl && saved.strictLlmAdaptation) strictEl.value = saved.strictLlmAdaptation;
+    const backendEl = document.getElementById('s-tts-backend');
+    const savedBackend = saved.ttsEngine || saved.tts_engine || 'edge-offline';
+    if (backendEl && savedBackend) backendEl.value = savedBackend;
+    if (saved.voice) {
+      /* voice applied after updateVoiceList */
+    }
+    updateVoiceList();
+    if (saved.voice) {
+      const vsel = document.getElementById('s-voice');
+      if (vsel) vsel.value = saved.voice;
+    }
     refreshLlmCapabilityLine();
     const uiSoundsEl = document.getElementById('s-ui-sounds');
     if (uiSoundsEl) uiSoundsEl.checked = saved.uiSounds !== false;

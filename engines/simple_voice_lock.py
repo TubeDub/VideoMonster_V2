@@ -41,6 +41,13 @@ def _sanitize_voice_for_target(voice: str, target_lang: str) -> str:
             v = ""
             break
     if tgt == "uk":
+        try:
+            from engines.tts_backends import is_uk_tts_voice
+
+            if is_uk_tts_voice(v):
+                return v
+        except Exception:
+            pass
         if not v.startswith("uk-UA-"):
             if v:
                 logger.error(

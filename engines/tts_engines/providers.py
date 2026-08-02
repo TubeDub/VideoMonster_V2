@@ -185,11 +185,62 @@ class PiperTTSEngine(_BaseAdapter):
 
         if super().is_available():
             return True
-        # CLI piper + model path (PIPER_MODEL / VM_PIPER_MODEL)
-        if not shutil.which("piper"):
-            return False
-        model = (os.getenv("PIPER_MODEL") or os.getenv("VM_PIPER_MODEL") or "").strip()
-        return bool(model and Path(model).is_file())
+        # CLI piper + model path (PIPER_MODEL / VM_PIPER_MODEL) or voice models dir
+        if shutil.which("piper"):
+            model = self._resolve_model_path(
+                os.getenv("PIPER_MODEL") or os.getenv("VM_PIPER_MODEL") or ""
+            )
+            if model:
+                return True
+            # Available if models dir exists (voice chosen at synth time)
+            models_dir = (
+                os.getenv("PIPER_MODELS_DIR") or os.getenv("VM_PIPER_MODELS_DIR") or ""
+            ).strip()
+            if models_dir and Path(models_dir).is_dir():
+                return True
+        return False
+
+    def estimate_duration_ms(self, text: str, voice: str = "") -> int | None:
+        t = " ".join(str(text or "").split()).strip()
+        if not t:
+            return 0
+        chars = len(t.replace(" ", ""))
+        return max(200, int((chars / 14.0) * 1000.0))
+
+    def _resolve_model_path(self, voice_or_path: str) -> str:
+        """Resolve onnx model from path, voice id, or PIPER_MODELS_DIR."""
+        import os
+
+        raw = str(voice_or_path or "").strip()
+        if raw and Path(raw).is_file():
+            return raw
+        env_model = (os.getenv("PIPER_MODEL") or os.getenv("VM_PIPER_MODEL") or "").strip()
+        if env_model and Path(env_model).is_file():
+            return env_model
+        models_dir = Path(
+            (
+                os.getenv("PIPER_MODELS_DIR")
+                or os.getenv("VM_PIPER_MODELS_DIR")
+                or ""
+            ).strip()
+            or (Path.home() / ".local" / "share" / "piper" / "voices")
+        )
+        # Voice ids: uk_UA-mykyta-high → look for *.onnx
+        candidates = []
+        if raw:
+            stem = raw.replace(":", "_")
+            candidates.extend(
+                [
+                    models_dir / f"{stem}.onnx",
+                    models_dir / "uk" / "uk_UA" / stem / f"{stem}.onnx",
+                    models_dir / stem / f"{stem}.onnx",
+                    Path(stem + ".onnx"),
+                ]
+            )
+        for c in candidates:
+            if c.is_file():
+                return str(c)
+        return ""
 
     def _synthesize_impl(
         self,
@@ -204,47 +255,124 @@ class PiperTTSEngine(_BaseAdapter):
         import shutil
         import subprocess
 
+        from engines.tts_backends import rate_to_length_scale, resolve_voice_for_backend
+
+        clean = " ".join(str(text or "").split()).strip()
+        if not clean:
+            return TTSResult(ok=False, engine_id=self.id, error="empty_text")
+        voice_id = resolve_voice_for_backend(voice, self.id)
+        model = self._resolve_model_path(voice_id) or self._resolve_model_path("")
+        length_scale = rate_to_length_scale(rate)
+        path = Path(output_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        wav_path = path.with_suffix(".wav")
+
         # Prefer Python piper package when present
         try:
             from piper import PiperVoice  # type: ignore
 
-            model = (os.getenv("PIPER_MODEL") or os.getenv("VM_PIPER_MODEL") or voice or "").strip()
             if not model or not Path(model).is_file():
-                return TTSResult(ok=False, engine_id=self.id, error="PIPER_MODEL not set")
+                return TTSResult(
+                    ok=False,
+                    engine_id=self.id,
+                    error="PIPER_MODEL / voice onnx not found",
+                )
             voice_obj = PiperVoice.load(model)
-            path = Path(output_path)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            with wave.open(str(path), "wb") as wf:
-                voice_obj.synthesize(text, wf)
-            return TTSResult(ok=True, output_path=str(path), engine_id=self.id)
+            with wave.open(str(wav_path), "wb") as wf:
+                # Newer piper supports length_scale / speaker_id kwargs
+                try:
+                    voice_obj.synthesize(
+                        clean, wf, length_scale=length_scale
+                    )
+                except TypeError:
+                    voice_obj.synthesize(clean, wf)
+            out_final = wav_path
+            if path.suffix.lower() == ".mp3":
+                try:
+                    from pydub import AudioSegment
+
+                    AudioSegment.from_wav(str(wav_path)).export(str(path), format="mp3")
+                    out_final = path
+                except Exception:
+                    out_final = wav_path
+            return TTSResult(
+                ok=True,
+                output_path=str(out_final),
+                engine_id=self.id,
+                meta={
+                    "voice": voice_id,
+                    "tts_backend": "piper",
+                    "length_scale": length_scale,
+                    "model": model,
+                },
+            )
         except ImportError:
             pass
         except Exception as exc:  # noqa: BLE001
             logger.warning("piper package synthesize failed: %s", exc)
 
         piper_bin = shutil.which("piper")
-        model = (os.getenv("PIPER_MODEL") or os.getenv("VM_PIPER_MODEL") or "").strip()
         if not piper_bin or not model:
             return TTSResult(
                 ok=False,
                 engine_id=self.id,
                 error="piper CLI or PIPER_MODEL missing",
             )
-        path = Path(output_path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        # piper writes wav to stdout or -f
         try:
+            cmd = [
+                piper_bin,
+                "--model",
+                model,
+                "--output_file",
+                str(wav_path),
+                "--length_scale",
+                f"{length_scale:.3f}",
+            ]
             proc = subprocess.run(
-                [piper_bin, "--model", model, "--output_file", str(path)],
-                input=text.encode("utf-8"),
+                cmd,
+                input=clean.encode("utf-8"),
                 capture_output=True,
                 timeout=120,
                 check=False,
             )
-            if proc.returncode != 0 or not path.is_file() or path.stat().st_size == 0:
+            if proc.returncode != 0 or not wav_path.is_file() or wav_path.stat().st_size == 0:
+                # Retry without length_scale for older CLI
+                proc = subprocess.run(
+                    [
+                        piper_bin,
+                        "--model",
+                        model,
+                        "--output_file",
+                        str(wav_path),
+                    ],
+                    input=clean.encode("utf-8"),
+                    capture_output=True,
+                    timeout=120,
+                    check=False,
+                )
+            if proc.returncode != 0 or not wav_path.is_file() or wav_path.stat().st_size == 0:
                 err = (proc.stderr or b"").decode("utf-8", errors="replace")[:300]
                 return TTSResult(ok=False, engine_id=self.id, error=err or "piper_failed")
-            return TTSResult(ok=True, output_path=str(path), engine_id=self.id)
+            out_final = wav_path
+            if path.suffix.lower() == ".mp3":
+                try:
+                    from pydub import AudioSegment
+
+                    AudioSegment.from_wav(str(wav_path)).export(str(path), format="mp3")
+                    out_final = path
+                except Exception:
+                    out_final = wav_path
+            return TTSResult(
+                ok=True,
+                output_path=str(out_final),
+                engine_id=self.id,
+                meta={
+                    "voice": voice_id,
+                    "tts_backend": "piper",
+                    "length_scale": length_scale,
+                    "model": model,
+                },
+            )
         except Exception as exc:  # noqa: BLE001
             return TTSResult(ok=False, engine_id=self.id, error=str(exc)[:300])
 
@@ -387,8 +515,11 @@ class EdgeTTSAdapter(_BaseAdapter):
 
 
 def provider_engines() -> list[Any]:
+    from engines.tts_engines.tts_uk_engine import TtsUkEngine
+
     return [
         MockTTSEngine(),
+        TtsUkEngine(),
         CoquiTTSEngine(),
         PiperTTSEngine(),
         XTTSEngine(),

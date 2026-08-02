@@ -1166,14 +1166,74 @@ function warnIfOutputFilename(name) {
   );
 }
 
+const UK_TTS_BACKEND_VOICES = {
+  'edge-offline': [
+    { id: 'uk-UA-OstapNeural', name: 'Остап (Edge, чол.)' },
+    { id: 'uk-UA-PolinaNeural', name: 'Поліна (Edge, жін.)' },
+  ],
+  edge: [
+    { id: 'uk-UA-OstapNeural', name: 'Остап (Edge, чол.)' },
+    { id: 'uk-UA-PolinaNeural', name: 'Поліна (Edge, жін.)' },
+  ],
+  tts_uk: [
+    { id: 'mykyta', name: 'Микита (tts_uk, чол.) — рекомендований' },
+    { id: 'lada', name: 'Лада (tts_uk, жін.)' },
+    { id: 'tetiana', name: 'Тетяна (tts_uk, жін.)' },
+  ],
+  piper: [
+    { id: 'uk_UA-mykyta-high', name: 'Микита (Piper high, чол.)' },
+    { id: 'uk_UA-oleksa-high', name: 'Олекса (Piper high, чол.)' },
+    { id: 'uk_UA-lada-high', name: 'Лада (Piper high, жін.)' },
+    { id: 'uk_UA-tetiana-high', name: 'Тетяна (Piper high, жін.)' },
+  ],
+};
+
+function syncTtsEngineControls(backendId) {
+  const id = backendId || 'edge-offline';
+  const hidden = document.getElementById('tts-engine');
+  const wiz = document.getElementById('wizard-tts-backend');
+  if (hidden) hidden.value = id;
+  if (wiz && wiz.value !== id) wiz.value = id;
+  try {
+    const s = typeof loadSettings === 'function' ? loadSettings() : {};
+    s.ttsEngine = id;
+    s.tts_engine = id;
+    localStorage.setItem('vm_settings', JSON.stringify(s));
+  } catch (_) {}
+}
+
+function currentTtsBackend() {
+  const wiz = document.getElementById('wizard-tts-backend');
+  const el = document.getElementById('tts-engine');
+  const settings = typeof loadSettings === 'function' ? loadSettings() : {};
+  return (wiz && wiz.value)
+    || (el && el.value)
+    || settings.ttsEngine
+    || settings.tts_engine
+    || 'edge-offline';
+}
+
 function updateVoiceList() {
   const targetLang = document.getElementById('target-lang').value;
   const voiceSel = document.getElementById('voice-select');
   const voiceList = document.getElementById('voice-list');
   const wizardGrid = document.getElementById('wizard-voice-grid');
-  const voices = (window.VM_VOICES && window.VM_VOICES[targetLang]) || [];
+  const backend = currentTtsBackend();
+  syncTtsEngineControls(backend);
+  const backendRow = document.getElementById('wizard-tts-backend-row');
+  if (backendRow) backendRow.hidden = targetLang !== 'uk';
+  let voices = (window.VM_VOICES && window.VM_VOICES[targetLang]) || [];
+  if (targetLang === 'uk' && UK_TTS_BACKEND_VOICES[backend]) {
+    voices = UK_TTS_BACKEND_VOICES[backend];
+  } else if (targetLang === 'uk') {
+    voices = UK_TTS_BACKEND_VOICES['edge-offline'];
+  }
   const settings = typeof loadSettings === 'function' ? loadSettings() : {};
-  const preferred = settings.voice || 'ru-RU-DmitryNeural';
+  const preferred = settings.voice
+    || (targetLang === 'uk' && backend === 'tts_uk' ? 'mykyta' : null)
+    || (targetLang === 'uk' && backend === 'piper' ? 'uk_UA-mykyta-high' : null)
+    || (targetLang === 'uk' ? 'uk-UA-OstapNeural' : null)
+    || 'ru-RU-DmitryNeural';
 
   voiceSel.innerHTML = '';
 
@@ -1293,7 +1353,13 @@ async function previewVoice(voiceId) {
     const r = await fetch('/api/auto_dub/preview_style', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ voice: voiceId, target_lang: targetLang, dub_style: styleId }),
+      body: JSON.stringify({
+        voice: voiceId,
+        target_lang: targetLang,
+        dub_style: styleId,
+        tts_engine: currentTtsBackend(),
+        engine_id: currentTtsBackend(),
+      }),
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'preview failed');
@@ -2153,7 +2219,8 @@ async function startDub() {
     target_lang: document.getElementById('target-lang').value,
     source_lang: sourceAuto ? null : document.getElementById('source-lang').value,
     voice: state.selectedVoice || document.getElementById('voice-select').value,
-    tts_engine: (document.getElementById('tts-engine') || {}).value || 'edge-offline',
+    tts_engine: currentTtsBackend(),
+    tts_backend: currentTtsBackend(),
     model_size: (function () {
       if (typeof syncWizardModelSize === 'function') syncWizardModelSize(true);
       return document.getElementById('model-size')?.value || 'small';
@@ -4325,6 +4392,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const defLang = typeof getDefaultTargetLang === 'function' ? getDefaultTargetLang() : 'ru';
   const tgt = document.getElementById('target-lang');
   if (tgt) tgt.value = defLang;
+
+  try {
+    const saved = typeof loadSettings === 'function' ? loadSettings() : {};
+    const be = saved.ttsEngine || saved.tts_engine || 'edge-offline';
+    syncTtsEngineControls(be);
+  } catch (_) {}
+  const wizBackend = document.getElementById('wizard-tts-backend');
+  if (wizBackend) {
+    wizBackend.addEventListener('change', () => {
+      syncTtsEngineControls(wizBackend.value);
+      state.selectedVoice = null;
+      updateVoiceList();
+    });
+  }
 
   updateVoiceList();
   renderWizardLangGrid();

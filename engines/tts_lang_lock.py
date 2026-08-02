@@ -66,7 +66,7 @@ def assert_voice_matches_target(
     *,
     raise_error: bool = True,
 ) -> tuple[bool, str]:
-    """Return (ok, reason). For uk target require uk-UA-* Edge neural voices."""
+    """Return (ok, reason). For uk: Edge uk-UA-*, tts_uk, or Piper uk_UA-*."""
     tgt = str(target_lang or "").split("-")[0].lower()
     v = str(voice or "").strip()
     if not v:
@@ -81,8 +81,15 @@ def assert_voice_matches_target(
                 if raise_error:
                     raise RuntimeError(f"PIPELINE_VOICE_LOCALE: {msg}")
                 return False, msg
+        try:
+            from engines.tts_backends import is_uk_tts_voice
+
+            if is_uk_tts_voice(v):
+                return True, "ok"
+        except Exception:
+            pass
         if not v.startswith("uk-UA-"):
-            msg = f"voice={v} locale!={tgt} (need uk-UA-*)"
+            msg = f"voice={v} locale!={tgt} (need uk-UA-* / tts_uk / piper uk_UA-*)"
             if raise_error:
                 raise RuntimeError(f"PIPELINE_VOICE_LOCALE: {msg}")
             return False, msg

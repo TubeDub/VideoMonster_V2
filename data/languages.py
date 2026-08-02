@@ -47,8 +47,15 @@ VOICES = {
         {"id": "es-ES-AlvaroNeural", "name": "Álvaro (муж.)"},
     ],
     "uk": [
-        {"id": "uk-UA-PolinaNeural", "name": "Поліна (жен.)"},
-        {"id": "uk-UA-OstapNeural", "name": "Остап (муж.)"},
+        {"id": "uk-UA-OstapNeural", "name": "Остап (Edge, муж.)"},
+        {"id": "uk-UA-PolinaNeural", "name": "Поліна (Edge, жен.)"},
+        {"id": "mykyta", "name": "Микита (tts_uk, муж.)"},
+        {"id": "lada", "name": "Лада (tts_uk, жен.)"},
+        {"id": "tetiana", "name": "Тетяна (tts_uk, жен.)"},
+        {"id": "uk_UA-mykyta-high", "name": "Микита (Piper high, муж.)"},
+        {"id": "uk_UA-oleksa-high", "name": "Олекса (Piper high, муж.)"},
+        {"id": "uk_UA-lada-high", "name": "Лада (Piper high, жен.)"},
+        {"id": "uk_UA-tetiana-high", "name": "Тетяна (Piper high, жен.)"},
     ],
     "zh-CN": [
         {"id": "zh-CN-XiaoxiaoNeural", "name": "晓晓 (жен.)"},

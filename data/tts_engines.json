@@ -5,16 +5,24 @@
       "id": "edge-offline",
       "name": "Edge Neural (локальный)",
       "provider": "Microsoft Edge TTS",
-      "description": "Бесплатный нейро-голос через edge-tts. Работает офлайн после установки пакета.",
+      "description": "Бесплатный нейро-голос через edge-tts. Работает офлайн после установки пакета. Default fallback (Ostap).",
       "mode": "offline"
     },
     {
-      "id": "piper",
-      "name": "Piper TTS",
-      "provider": "Piper",
-      "description": "Локальный офлайн TTS (CLI piper или pip-пакет). Нужен PIPER_MODEL / VM_PIPER_MODEL.",
+      "id": "tts_uk",
+      "name": "tts_uk (RAD-TTS++ / Vocos)",
+      "provider": "tts_uk",
+      "description": "Рекомендований український TTS: pip install tts-uk. Голоси lada / tetiana / mykyta. Контроль duration (token_dur_scaling).",
       "mode": "offline",
-      "config_keys": ["PIPER_MODEL", "VM_PIPER_MODEL"]
+      "config_keys": ["VM_TTS_UK_OUT_SR"]
+    },
+    {
+      "id": "piper",
+      "name": "Piper TTS (uk_UA-*-high)",
+      "provider": "Piper",
+      "description": "Швидкий локальний TTS. Моделі uk_UA-*-high; PIPER_MODEL / PIPER_MODELS_DIR. length_scale підтримується.",
+      "mode": "offline",
+      "config_keys": ["PIPER_MODEL", "VM_PIPER_MODEL", "PIPER_MODELS_DIR", "VM_PIPER_MODELS_DIR"]
     },
     {
       "id": "coqui",
