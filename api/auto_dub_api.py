@@ -13589,13 +13589,13 @@ def _run_pipeline_inner(
                 set_pipeline_tts_backend(tts_engine_id)
             except Exception:
                 pass
-                _pipeline_mode = str(task["info"].get("pipeline_mode") or "")
-                _streaming_voice_done = bool(task["info"].get("streaming_voice_done"))
-                _manifest_vp = str(task["info"].get("manifest_path") or "")
-                _simple_batch_tts = bool(
-                    task["info"].get("simple_pipeline")
-                    or task["info"].get("happy_path")
-                )
+            _pipeline_mode = str(task["info"].get("pipeline_mode") or "")
+            _streaming_voice_done = bool(task["info"].get("streaming_voice_done"))
+            _manifest_vp = str(task["info"].get("manifest_path") or "")
+            _simple_batch_tts = bool(
+                task["info"].get("simple_pipeline")
+                or task["info"].get("happy_path")
+            )
 
             # Stage 6: Simple/Happy Path always owns TTS via parallel+cache batch.
             # Conveyor/streaming may have run earlier — ignore their skip flags here.
