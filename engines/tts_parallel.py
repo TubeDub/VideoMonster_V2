@@ -127,12 +127,19 @@ def _synthesize_one_edge(
     if effective_pitch:
         kwargs["pitch"] = effective_pitch
 
-    # Non-edge engines fall back to registry (rare on Simple).
+    # Non-edge engines via Stage 20 factory (Edge fallback if tts_uk/piper missing).
     eid = (engine_id or "edge-offline").strip() or "edge-offline"
-    if eid != "edge-offline":
-        from engines.tts_engines.registry import synthesize
+    if eid not in ("edge-offline", "edge", "edge-tts", "edge_tts"):
+        from engines.tts_backends import synthesize_with_backend
 
-        result = synthesize(text0, voice, str(out_path), engine_id=eid, rate=effective_rate, pitch=effective_pitch)
+        result = synthesize_with_backend(
+            text0,
+            voice,
+            str(out_path),
+            engine_id=eid,
+            rate=effective_rate,
+            pitch=effective_pitch,
+        )
         if not result.ok:
             raise RuntimeError(result.error or "TTS failed")
         if not is_valid_tts_file(out_path):

@@ -153,14 +153,18 @@ def synthesize(
         )
 
     if not eng.is_available():
-        # Explicit offline engine or offline mode: fail clearly, no silent online/edge swap
-        if offline or (requested and requested not in ("", _DEFAULT_ENGINE, "edge")):
+        # Stage 20: optional UK backends always fall back to Edge (also offline).
+        optional_uk = eng.id in ("tts_uk", "piper")
+        # Strict offline: fail clearly for other engines — no silent online/edge swap
+        if (
+            not optional_uk
+            and (
+                offline
+                or (requested and requested not in ("", _DEFAULT_ENGINE, "edge"))
+            )
+        ):
             hint = ""
-            if eng.id == "piper":
-                hint = " Install piper CLI/package and set PIPER_MODEL / VM_PIPER_MODEL."
-            elif eng.id == "tts_uk":
-                hint = " Install with: pip install tts-uk"
-            elif eng.id == "coqui":
+            if eng.id == "coqui":
                 hint = " Install Coqui TTS (pip install TTS) and configure VM_COQUI_MODEL."
             return TTSResult(
                 ok=False,
@@ -173,7 +177,16 @@ def synthesize(
                 ),
             )
         if eng.id != EdgeTTSEngine.id:
-            logger.warning("[TTS] %s unavailable — fallback edge-offline", eng.id)
+            hint = ""
+            if eng.id == "piper":
+                hint = " Install piper CLI/package and set PIPER_MODEL / VM_PIPER_MODEL."
+            elif eng.id == "tts_uk":
+                hint = " Install with: pip install tts-uk"
+            logger.warning(
+                "[TTS] %s unavailable — fallback edge-offline.%s",
+                eng.id,
+                hint,
+            )
             eng = EdgeTTSEngine()
             if not eng.is_available():
                 return TTSResult(

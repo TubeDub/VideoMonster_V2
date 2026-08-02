@@ -2444,6 +2444,24 @@ def _mark_tts_segment_skipped(
         fields = {f: report.get(f) for f in TTSFailureReport.__dataclass_fields__}
         if not fields.get("reason") and report.get("error_message"):
             fields["reason"] = report.get("error_message")
+        if fields.get("duration_ms") is None:
+            fields["duration_ms"] = 0.0
+        for _req in (
+            "segment_id",
+            "segment_index",
+            "current",
+            "total",
+            "original_text",
+            "tts_text",
+            "voice",
+            "language",
+            "tts_file_path",
+            "error_code",
+            "error_message",
+            "traceback",
+        ):
+            if fields.get(_req) is None:
+                fields[_req] = 0 if _req in ("segment_index", "current", "total") else ""
         fields["pipeline_state"] = "PARTIAL"
         fields["stage"] = "TTS"
         report_obj = TTSFailureReport(**fields)

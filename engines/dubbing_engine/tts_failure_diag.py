@@ -86,7 +86,7 @@ class TTSFailureReport:
             "error_message": self.error_message,
             "reason": reason,
             "traceback": self.traceback,
-            "duration_ms": round(self.duration_ms, 2),
+            "duration_ms": round(float(self.duration_ms or 0), 2),
             "task_id": self.task_id,
             "timestamp_ms": self.timestamp_ms,
             "timestamp": self.timestamp_iso,

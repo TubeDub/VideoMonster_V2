@@ -157,6 +157,22 @@ def resolve_voice_for_backend(voice: str, backend: str | None) -> str:
         return DEFAULT_PIPER_VOICE
     if eid == ENGINE_TTS_UK:
         return v.lower() if v.lower() in TTS_UK_VOICES else v
+    # Edge: map tts_uk / piper ids → Neural voices
+    if eid == ENGINE_EDGE:
+        vl = v.lower()
+        if vl in TTS_UK_VOICES:
+            return (
+                DEFAULT_EDGE_VOICE
+                if TTS_UK_VOICES[vl] == "male"
+                else "uk-UA-PolinaNeural"
+            )
+        if v in PIPER_UK_VOICES or v.startswith("uk_UA-"):
+            gender = PIPER_UK_VOICES.get(v, "male")
+            return (
+                DEFAULT_EDGE_VOICE
+                if gender == "male"
+                else "uk-UA-PolinaNeural"
+            )
     return v
 
 

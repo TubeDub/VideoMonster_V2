@@ -32,7 +32,9 @@ def test_resolve_voice_for_backend_defaults_and_maps():
     assert resolve_voice_for_backend("", "edge") == "uk-UA-OstapNeural"
     assert resolve_voice_for_backend("uk-UA-OstapNeural", "tts_uk") == "mykyta"
     assert resolve_voice_for_backend("uk-UA-PolinaNeural", "piper") == "uk_UA-tetiana-high"
-    assert resolve_voice_for_backend("tts_uk:mykyta", "edge") == "mykyta"
+    assert resolve_voice_for_backend("tts_uk:mykyta", "edge") == "uk-UA-OstapNeural"
+    assert resolve_voice_for_backend("mykyta", "edge-offline") == "uk-UA-OstapNeural"
+    assert resolve_voice_for_backend("uk_UA-tetiana-high", "edge") == "uk-UA-PolinaNeural"
 
 
 def test_is_uk_tts_voice_accepts_all_backends():
