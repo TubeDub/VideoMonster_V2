@@ -2234,8 +2234,27 @@ def build_openddf_segment_diagnostics(
                     adapt_trace.get("speech_difference_ms") or (slot_ms - actual_ms)
                 ),
                 "expand_required": bool(adapt_trace.get("expand_required")),
-                "expand_executed": bool(adapt_trace.get("expand_executed")),
-                "expansion_strategy": adapt_trace.get("expansion_strategy") or "",
+                "expand_executed": bool(
+                    adapt_trace.get("expand_executed") or seg.get("expand_executed")
+                ),
+                "shorten_executed": bool(seg.get("shorten_executed")),
+                "split_executed": bool(
+                    seg.get("split_executed") or seg.get("stage19c_split_done")
+                ),
+                "truncation_blocked": bool(seg.get("truncation_blocked")),
+                "retention_score": seg.get("retention_score"),
+                "fill_ratio": seg.get("fill_ratio"),
+                "rewrite_iterations": int(
+                    (seg.get("closed_loop") or {}).get("iterations")
+                    or seg.get("rewrite_iterations")
+                    or 0
+                ),
+                "expansion_strategy": (
+                    adapt_trace.get("expansion_strategy")
+                    or seg.get("expansion_strategy")
+                    or ""
+                ),
+                "stage19d": seg.get("stage19d") or {},
                 "duration_match_score": int(
                     adapt_trace.get("duration_match_score")
                     or speech_duration_match_score(actual_ms, slot_ms)

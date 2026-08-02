@@ -48,6 +48,17 @@ class TextFitNoRegenError(RuntimeError):
     error_code = "PIPELINE_TEXT_FIT_NO_REGEN"
 
 
+class NeedReTTS(RuntimeError):
+    """Stage 19d: text restored/changed — caller must re-TTS before finalize."""
+
+    def __init__(self, reason: str = "need_re_tts"):
+        self.reason = str(reason or "need_re_tts")
+        super().__init__(self.reason)
+
+
+STAGE19D_HARD_DELTA_MS = 800
+
+
 def _env_int(key: str, default: int) -> int:
     try:
         return int(os.getenv(key, str(default)))
@@ -697,6 +708,7 @@ def try_stage19c_overflow_split(
         child["end_ms"] = int(en)
         child["slot_ms"] = max(1, int(en) - int(st))
         child["stage19c_split_done"] = True
+        child["split_executed"] = True
         child["adaptive_resegment_done"] = True
         child["strategy"] = "split"
         lock_text_fit_algorithm_reason(child, "TextSlotSplit")
@@ -783,10 +795,172 @@ def _stage19b_algorithm_reason(fit: Any, *, text_changed: bool) -> str:
         "atempo_slow",
         "shorten_then_fast",
     ):
-        return "TextThenAtemo" if text_changed else "TextThenAtemo"
+        return "TextThenAtemo"
     if text_changed:
         return "TextSlotFitExpand" if "expand" in (action + strategy) else "TextSlotFitShorten"
     return "TextThenAtemo"
+
+
+def _stage19d_sanitize_algorithm_reason(
+    reason: str,
+    *,
+    expand_executed: bool,
+    shorten_executed: bool,
+    split_executed: bool,
+    delta_ms: int,
+    underflow_ms: int,
+    overflow_ms: int,
+) -> str:
+    """Stage 19d: forbid bare TextThenAtemo when |Δ|>350 without text change."""
+    r = str(reason or "").strip() or "TextThenAtemo"
+    abs_d = abs(int(delta_ms or 0))
+    if split_executed:
+        return "TextSlotFitSplit"
+    if expand_executed:
+        return "TextSlotFitExpand" if "Atemo" not in r else "TextThenAtemo"
+    if shorten_executed:
+        return "TextSlotFitShorten" if "Atemo" not in r else "TextThenAtemo"
+    if abs_d <= TEXT_FIT_DELTA_MS:
+        return r if r.startswith("Text") else "TextThenAtemo"
+    # Large Δ without text rewrite — do not claim TextThenAtemo as sole strategy.
+    if r in ("TextThenAtemo",) or r.endswith("TextThenAtemo"):
+        if int(underflow_ms or 0) > TEXT_FIT_DELTA_MS:
+            return "TextSlotFitExpand"
+        if int(overflow_ms or 0) > TEXT_FIT_DELTA_MS:
+            return "TextSlotFitShorten"
+    return r
+
+
+def assert_no_silent_truncate(
+    seg: dict,
+    *,
+    slot_ms: int = 0,
+    lang: str = "uk",
+    source_hint: str = "",
+) -> None:
+    """Stage 19d §D: restore raw/semantic when Final silently lost >25% words.
+
+    Raises NeedReTTS after restoring text so caller performs mandatory re-TTS.
+    """
+    from engines.text_slot_fit import (
+        detect_silent_truncate,
+        safe_shorten,
+        semantic_anchor_text,
+        strip_slot_pad_fillers,
+        word_retention_ratio,
+        MIN_WORD_RETENTION,
+    )
+
+    raw = semantic_anchor_text(seg)
+    final = str(
+        seg.get("final_tts_text")
+        or seg.get("plain_text")
+        or seg.get("text")
+        or ""
+    ).strip()
+    if not detect_silent_truncate(
+        final,
+        raw,
+        shorten_executed=bool(seg.get("shorten_executed")),
+    ):
+        # Still stamp retention for diagnostics.
+        if raw and final:
+            seg["retention_score"] = round(word_retention_ratio(raw, final), 4)
+        return
+
+    slot = int(slot_ms or seg.get("slot_ms") or 0)
+    restored, reasons, _tr = safe_shorten(
+        raw, slot if slot > 0 else 200, lang, source_hint=source_hint
+    )
+    # If safe_shorten refused, keep full raw (meaning > timing).
+    if not restored or word_retention_ratio(raw, restored) < MIN_WORD_RETENTION:
+        restored = strip_slot_pad_fillers(raw)
+        reasons = list(reasons or []) + ["restore_full_raw"]
+    restored = strip_slot_pad_fillers(restored)
+    if not restored or restored == final:
+        seg["truncation_blocked"] = True
+        seg["retention_score"] = round(word_retention_ratio(raw, final), 4)
+        return
+
+    seg["final_tts_text"] = restored
+    seg["plain_text"] = restored
+    seg["text"] = restored
+    seg["translation_text"] = restored
+    seg["final_text"] = restored
+    seg["pre_tts_text"] = restored
+    seg["truncation_blocked"] = True
+    seg["shorten_executed"] = True
+    seg["rule_rewrite_used"] = True
+    seg["retention_score"] = round(word_retention_ratio(raw, restored), 4)
+    lock_text_fit_algorithm_reason(seg, "TextSlotFitShorten")
+    seg["rewrite_reason"] = "stage19d:anti_truncate_restored"
+    prev = dict(seg.get("stage19d") or {})
+    seg["stage19d"] = {
+        **prev,
+        "truncation_blocked": True,
+        "anti_truncate_reasons": list(reasons or []) + ["silent_truncate"],
+        "retention_score": seg["retention_score"],
+    }
+    raise NeedReTTS("anti_truncate_restored")
+
+
+def _stamp_stage19d_fields(
+    seg: dict,
+    *,
+    budget: TimingBudget,
+    algorithm_reason: str,
+    expand_executed: bool,
+    shorten_executed: bool,
+    split_executed: bool = False,
+) -> None:
+    from engines.text_slot_fit import semantic_anchor_text, word_retention_ratio
+
+    raw = semantic_anchor_text(seg)
+    final = str(
+        seg.get("final_tts_text")
+        or seg.get("plain_text")
+        or seg.get("text")
+        or ""
+    ).strip()
+    retention = word_retention_ratio(raw, final) if raw and final else 1.0
+    slot = max(1, int(budget.slot_duration or seg.get("slot_ms") or 1))
+    tts = int(budget.measured_duration or seg.get("tts_ms") or 0)
+    fill = round(tts / float(slot), 4) if tts > 0 else float(seg.get("fill_ratio") or 0)
+    delta = int(budget.delta if budget.delta is not None else (tts - slot))
+    reason = _stage19d_sanitize_algorithm_reason(
+        algorithm_reason,
+        expand_executed=expand_executed,
+        shorten_executed=shorten_executed,
+        split_executed=split_executed or bool(seg.get("split_executed")),
+        delta_ms=delta,
+        underflow_ms=int(budget.underflow or 0),
+        overflow_ms=int(budget.overflow or 0),
+    )
+    lock_text_fit_algorithm_reason(seg, reason)
+    seg["expand_executed"] = bool(expand_executed or seg.get("expand_executed"))
+    seg["shorten_executed"] = bool(shorten_executed or seg.get("shorten_executed"))
+    seg["split_executed"] = bool(split_executed or seg.get("split_executed") or seg.get("stage19c_split_done"))
+    seg["truncation_blocked"] = bool(seg.get("truncation_blocked"))
+    seg["retention_score"] = round(float(retention), 4)
+    seg["fill_ratio"] = fill
+    seg["rewrite_iterations"] = int(
+        budget.rewrite_iterations or seg.get("rewrite_iterations") or 0
+    )
+    prev = dict(seg.get("stage19d") or {})
+    seg["stage19d"] = {
+        **prev,
+        "algorithm_reason": reason,
+        "expand_executed": bool(seg["expand_executed"]),
+        "shorten_executed": bool(seg["shorten_executed"]),
+        "split_executed": bool(seg["split_executed"]),
+        "truncation_blocked": bool(seg["truncation_blocked"]),
+        "retention_score": seg["retention_score"],
+        "fill_ratio": fill,
+        "rewrite_iterations": seg["rewrite_iterations"],
+        "expansion_strategy": seg.get("expansion_strategy") or "none",
+        "delta": delta,
+        "final_status": budget.final_status,
+    }
 
 
 def _stamp_stage19b_meta(
@@ -970,22 +1144,33 @@ def apply_stage19b_rule_text_fit(
     if not _needs_stage19b_text_fit(budget):
         return budget, False
 
-    from engines.text_slot_fit import fit_text_to_slot
+    from engines.text_slot_fit import (
+        EXPAND_AIM_RATIO,
+        UNDERFILL_EXPAND_RATIO,
+        expand_to_fill,
+        fit_text_to_slot,
+        safe_shorten,
+        semantic_anchor_text,
+        word_retention_ratio,
+        MIN_WORD_RETENTION,
+    )
 
     delta_before = _slot_delta_ms(budget)
     expand_required = delta_before < -TEXT_FIT_DELTA_MS
+    shorten_required = delta_before > TEXT_FIT_DELTA_MS
     original = _segment_text(seg)
     if not original:
         return budget, False
 
-    raw_mt = str(
-        seg.get("raw_mt")
-        or seg.get("raw_translation")
-        or seg.get("mt_text")
-        or original
-    ).strip()
+    raw_mt = semantic_anchor_text(seg, fallback=original)
+    # Prefer longer semantic/raw as expand source (Stage 19d §B).
+    for key in ("semantic_engine_text", "raw_translation", "raw_mt"):
+        cand = " ".join(str(seg.get(key) or "").split()).strip()
+        if cand and len(cand.split()) > len(raw_mt.split()):
+            raw_mt = cand
     expansion_strategy = "none"
     llm_used = False
+    shorten_executed = bool(seg.get("shorten_executed"))
 
     fit = fit_text_to_slot(
         original,
@@ -998,65 +1183,122 @@ def apply_stage19b_rule_text_fit(
     new_text = " ".join(str(fit.text or "").split()).strip()
     text_changed = bool(fit.changed and new_text and new_text != original)
 
-    # Stage 19c §D: no rule progress on underfill → strong expand / optional LLM.
+    # Stage 19d §B: forced expand — prefer raw/semantic when underfill.
     if expand_required and not text_changed:
         seg["requires_strong_expand"] = True
+        slot = int(budget.slot_duration or 0)
+        preferred = raw_mt if len(raw_mt.split()) > len(original.split()) else original
         try:
-            from engines.translation_adapt import llm_rephrase_available
-            from engines.semantic_optimizer import optimize_expand_for_slot
-
-            if llm_rephrase_available():
-                opt = optimize_expand_for_slot(
-                    original,
-                    source_hint=source_hint,
-                    slot_ms=budget.slot_duration,
-                    tgt_lang=target_lang,
-                    max_rounds=1,
-                    current_ms=int(budget.measured_duration or 0),
+            exp_text, exp_reasons = expand_to_fill(
+                original,
+                target_ms=int(slot * EXPAND_AIM_RATIO),
+                lang=str(target_lang or "uk"),
+                source_hint=str(source_hint or ""),
+                raw_mt=preferred,
+            )
+            exp_text = " ".join(str(exp_text or "").split()).strip()
+            if exp_text and exp_text != original:
+                new_text = exp_text
+                text_changed = True
+                fit.changed = True
+                fit.text = new_text
+                fit.action = "expand"
+                fit.strategy = "expand"
+                fit.reasons = list(getattr(fit, "reasons", None) or []) + list(
+                    exp_reasons or []
                 )
-                if opt.changed and str(opt.text or "").strip() != original:
-                    new_text = " ".join(str(opt.text).split()).strip()
-                    text_changed = True
-                    llm_used = True
-                    expansion_strategy = "llm_expand"
-                    fit.changed = True
-                    fit.text = new_text
-                    fit.action = "expand"
-                    fit.strategy = "expand"
+                if "raw_prefer" in (exp_reasons or []):
+                    expansion_strategy = "raw_prefer"
+                elif "rule_expand" in (exp_reasons or []):
+                    expansion_strategy = "rule_expand_from_raw" if preferred != original else "rule_expand"
+                else:
+                    expansion_strategy = "expand_to_fill"
         except Exception as exc:
-            logger.debug("stage19c strong LLM expand skipped: %s", exc)
+            logger.debug("stage19d forced expand_to_fill skipped: %s", exc)
+        if not text_changed:
+            try:
+                from engines.translation_adapt import llm_rephrase_available
+                from engines.semantic_optimizer import optimize_expand_for_slot
 
-    # Overflow after rule: optional one-shot LLM paraphrase when still over.
+                if llm_rephrase_available():
+                    opt = optimize_expand_for_slot(
+                        original,
+                        source_hint=source_hint,
+                        slot_ms=budget.slot_duration,
+                        tgt_lang=target_lang,
+                        max_rounds=1,
+                        current_ms=int(budget.measured_duration or 0),
+                    )
+                    if opt.changed and str(opt.text or "").strip() != original:
+                        new_text = " ".join(str(opt.text).split()).strip()
+                        text_changed = True
+                        llm_used = True
+                        expansion_strategy = "llm_expand"
+                        fit.changed = True
+                        fit.text = new_text
+                        fit.action = "expand"
+                        fit.strategy = "expand"
+            except Exception as exc:
+                logger.debug("stage19d strong LLM expand skipped: %s", exc)
+
+    # Stage 19d §C: forced shorten when overflow (split handled upstream for large ov).
     if (
-        not text_changed
-        and delta_before > TEXT_FIT_DELTA_MS
+        shorten_required
+        and not text_changed
         and not large_overflow_needs_split(
             overflow_ms=max(0, delta_before), slot_ms=int(budget.slot_duration or 0)
         )
     ):
         try:
-            from engines.translation_adapt import llm_rephrase_available
-            from engines.semantic_optimizer import optimize_llm_rephrase_for_slot
-
-            if llm_rephrase_available():
-                opt = optimize_llm_rephrase_for_slot(
-                    original,
-                    source_hint=source_hint,
-                    slot_ms=budget.slot_duration,
-                    tgt_lang=target_lang,
-                    max_rounds=1,
-                    current_ms=int(budget.measured_duration or 0),
+            shortened, sh_reasons, _tr = safe_shorten(
+                original,
+                int(budget.slot_duration or 0),
+                str(target_lang or "uk"),
+                source_hint=str(source_hint or ""),
+            )
+            shortened = " ".join(str(shortened or "").split()).strip()
+            if (
+                shortened
+                and shortened != original
+                and word_retention_ratio(original, shortened) >= MIN_WORD_RETENTION
+            ):
+                new_text = shortened
+                text_changed = True
+                shorten_executed = True
+                fit.changed = True
+                fit.text = new_text
+                fit.action = "shorten"
+                fit.strategy = "shorten"
+                fit.reasons = list(getattr(fit, "reasons", None) or []) + list(
+                    sh_reasons or []
                 )
-                if opt.changed and str(opt.text or "").strip() != original:
-                    new_text = " ".join(str(opt.text).split()).strip()
-                    text_changed = True
-                    llm_used = True
-                    fit.changed = True
-                    fit.text = new_text
-                    fit.action = "shorten"
-                    fit.strategy = "shorten"
         except Exception as exc:
-            logger.debug("stage19c LLM shorten skipped: %s", exc)
+            logger.debug("stage19d forced safe_shorten skipped: %s", exc)
+        if not text_changed:
+            try:
+                from engines.translation_adapt import llm_rephrase_available
+                from engines.semantic_optimizer import optimize_llm_rephrase_for_slot
+
+                if llm_rephrase_available():
+                    opt = optimize_llm_rephrase_for_slot(
+                        original,
+                        source_hint=source_hint,
+                        slot_ms=budget.slot_duration,
+                        tgt_lang=target_lang,
+                        max_rounds=1,
+                        current_ms=int(budget.measured_duration or 0),
+                    )
+                    if opt.changed and str(opt.text or "").strip() != original:
+                        new_text = " ".join(str(opt.text).split()).strip()
+                        text_changed = True
+                        llm_used = True
+                        shorten_executed = True
+                        fit.changed = True
+                        fit.text = new_text
+                        fit.action = "shorten"
+                        fit.strategy = "shorten"
+            except Exception as exc:
+                logger.debug("stage19d LLM shorten skipped: %s", exc)
 
     expand_executed = bool(
         expand_required
@@ -1065,21 +1307,34 @@ def apply_stage19b_rule_text_fit(
             fit.action in ("expand", "expand_then_slow")
             or "expand" in " ".join(str(r) for r in (fit.reasons or []))
             or len(new_text.split()) > len(original.split())
-            or expansion_strategy == "llm_expand"
+            or expansion_strategy in ("llm_expand", "raw_prefer", "rule_expand", "rule_expand_from_raw", "expand_to_fill")
         )
     )
+    if text_changed and fit.action == "shorten":
+        shorten_executed = True
     if text_changed and expansion_strategy == "none":
         if expand_executed:
             reasons = [str(r) for r in (fit.reasons or [])]
             expansion_strategy = (
                 "llm_expand"
                 if llm_used or "llm_expand" in reasons
-                else ("rule_expand" if "rule_expand" in reasons else "expand_to_fill")
+                else (
+                    "raw_prefer"
+                    if "raw_prefer" in reasons
+                    else ("rule_expand" if "rule_expand" in reasons else "expand_to_fill")
+                )
             )
-        elif fit.action == "shorten":
-            expansion_strategy = "none"
 
     algorithm_reason = _stage19b_algorithm_reason(fit, text_changed=text_changed)
+    algorithm_reason = _stage19d_sanitize_algorithm_reason(
+        algorithm_reason,
+        expand_executed=expand_executed,
+        shorten_executed=shorten_executed,
+        split_executed=bool(seg.get("split_executed") or seg.get("stage19c_split_done")),
+        delta_ms=delta_before,
+        underflow_ms=int(budget.underflow or 0),
+        overflow_ms=int(budget.overflow or 0),
+    )
     regen_ok = False
 
     if text_changed:
@@ -1087,16 +1342,9 @@ def apply_stage19b_rule_text_fit(
             seg["expand_required"] = expand_required
             lock_text_fit_algorithm_reason(seg, algorithm_reason)
             budget.final_status = "failed_no_regen"
-            budget.rewrite_reason = f"stage19c:PIPELINE_TEXT_FIT_NO_REGEN"
-            seg["stage19c"] = {
-                "delta_before": delta_before,
-                "delta_after": delta_before,
-                "split_children": 0,
-                "regen_ok": False,
-                "error": "PIPELINE_TEXT_FIT_NO_REGEN",
-            }
+            budget.rewrite_reason = "stage19d:PIPELINE_TEXT_FIT_NO_REGEN"
             raise TextFitNoRegenError(
-                "PIPELINE_TEXT_FIT_NO_REGEN: text changed but regen_fn is None"
+                "Stage19d requires regen_fn (PIPELINE_TEXT_FIT_NO_REGEN)"
             )
 
         regen_result = regen_fn(
@@ -1181,7 +1429,7 @@ def apply_stage19b_rule_text_fit(
                 logger.debug("stage19c commit skipped: %s", exc)
 
         budget.rewrite_iterations = max(1, int(budget.rewrite_iterations or 0) + 1)
-        budget.rewrite_reason = f"stage19c:{algorithm_reason}"
+        budget.rewrite_reason = f"stage19d:{algorithm_reason}"
         saved_pause = budget.pause_adjustments_ms
         saved_stages = list(budget.pause_stages or [])
         orig = budget.original_duration
@@ -1200,6 +1448,9 @@ def apply_stage19b_rule_text_fit(
             seg["expand_required"] = True
             seg["requires_strong_expand"] = True
 
+    seg["shorten_executed"] = bool(shorten_executed)
+    if expand_executed:
+        seg["expand_executed"] = True
     _stamp_stage19b_meta(
         seg,
         fit=fit,
@@ -1212,7 +1463,7 @@ def apply_stage19b_rule_text_fit(
         seg["expansion_strategy"] = expansion_strategy
     lock_text_fit_algorithm_reason(seg, algorithm_reason)
 
-    # Light atempo after text attempt when still outside band (never alone as sole strategy).
+    # Light atempo AFTER text fit / re-TTS only (never sole strategy when |Δ|>350).
     if budget.final_status != "failed_tts_regen" and (
         _needs_stage19b_text_fit(budget) or float(seg.get("fill_ratio") or 0) < 0.90
     ):
@@ -1230,7 +1481,7 @@ def apply_stage19b_rule_text_fit(
         reason = budget.rewrite_reason
         budget = build_timing_budget(seg, idx, timing_map)
         budget.rewrite_iterations = iters
-        budget.rewrite_reason = reason or f"stage19c:{algorithm_reason}"
+        budget.rewrite_reason = reason or f"stage19d:{algorithm_reason}"
         budget.pause_adjustments_ms = saved_pause
         budget.pause_stages = saved_stages
         budget.original_duration = orig or int(
@@ -1239,7 +1490,18 @@ def apply_stage19b_rule_text_fit(
         slot = max(1, int(budget.slot_duration or 1))
         seg["fill_ratio"] = round(int(budget.measured_duration or 0) / float(slot), 4)
         if text_changed and abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS:
-            algorithm_reason = "TextThenAtemo"
+            # TextThenAtemo only when expand/shorten already ran.
+            if expand_executed or shorten_executed:
+                algorithm_reason = "TextThenAtemo"
+            algorithm_reason = _stage19d_sanitize_algorithm_reason(
+                algorithm_reason,
+                expand_executed=expand_executed,
+                shorten_executed=shorten_executed,
+                split_executed=bool(seg.get("split_executed")),
+                delta_ms=_slot_delta_ms(budget),
+                underflow_ms=int(budget.underflow or 0),
+                overflow_ms=int(budget.overflow or 0),
+            )
             lock_text_fit_algorithm_reason(seg, algorithm_reason)
 
     delta_after = _slot_delta_ms(budget)
@@ -1258,25 +1520,46 @@ def apply_stage19b_rule_text_fit(
     }
 
     needs, _ = _needs_rewrite(budget)
+    fill = float(seg.get("fill_ratio") or 0)
     if not needs and abs(delta_after) <= TEXT_FIT_DELTA_MS:
         budget.final_status = "ok"
-    elif budget.final_status in ("", "pending", "underflow", "overflow", "ok"):
-        fill = float(seg.get("fill_ratio") or 0)
-        if fill < 0.90 and int(budget.underflow or 0) > TEXT_FIT_DELTA_MS:
+    elif abs(delta_after) > STAGE19D_HARD_DELTA_MS:
+        if int(budget.underflow or 0) > STAGE19D_HARD_DELTA_MS:
             budget.final_status = "dead_air_risk"
             seg["strategy"] = "dead_air_risk"
-        elif budget.final_status not in ("failed_tts_regen", "failed_no_regen"):
-            budget.final_status = "ok" if not needs else "stage19c_partial"
+        elif int(budget.overflow or 0) > STAGE19D_HARD_DELTA_MS:
+            budget.final_status = "overflow_unresolved"
+        else:
+            budget.final_status = "stage19d_partial"
+    elif fill < UNDERFILL_EXPAND_RATIO and int(budget.underflow or 0) > TEXT_FIT_DELTA_MS:
+        budget.final_status = (
+            "stage19d_partial" if expand_executed else "dead_air_risk"
+        )
+        if budget.final_status == "dead_air_risk":
+            seg["strategy"] = "dead_air_risk"
+    elif budget.final_status not in ("failed_tts_regen", "failed_no_regen"):
+        budget.final_status = "ok" if not needs else "stage19d_partial"
+
+    _stamp_stage19d_fields(
+        seg,
+        budget=budget,
+        algorithm_reason=str(seg.get("algorithm_reason") or algorithm_reason),
+        expand_executed=expand_executed,
+        shorten_executed=shorten_executed,
+    )
+    if not str(budget.rewrite_reason or "").startswith("stage19d"):
+        budget.rewrite_reason = f"stage19d:{seg.get('algorithm_reason') or algorithm_reason}"
 
     logger.info(
-        "[Stage19c] task=%s seg=%d δ %d→%d expand_req=%s expand_exec=%s "
-        "reason=%s fill=%.2f atempo=%.3f iters=%d regen_ok=%s",
+        "[Stage19d] task=%s seg=%d δ %d→%d expand_req=%s expand_exec=%s "
+        "shorten_exec=%s reason=%s fill=%.2f atempo=%.3f iters=%d regen_ok=%s",
         task_id,
         idx,
         delta_before,
         delta_after,
         expand_required,
         expand_executed,
+        shorten_executed,
         seg.get("algorithm_reason") or algorithm_reason,
         float(seg.get("fill_ratio") or 0),
         float(seg.get("atempo") or 1),
@@ -1284,6 +1567,136 @@ def apply_stage19b_rule_text_fit(
         regen_ok,
     )
     return budget, True
+
+
+def _finalize_closed_loop_segment(
+    seg: dict,
+    idx: int,
+    timing_map: list,
+    budget: TimingBudget,
+    *,
+    source_hint: str,
+    target_lang: str,
+    voice: str,
+    regen_fn: Callable[..., Any] | None,
+    commit_fn: Callable[..., Any] | None = None,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+    task_id: str | None = None,
+    resolve_path: Callable[[str], str] | None = None,
+) -> TimingBudget:
+    """Stage 19d exit: anti-truncate guard + honest metadata before return."""
+    if seg.get("stage19c_split_done"):
+        seg["split_executed"] = True
+    try:
+        assert_no_silent_truncate(
+            seg,
+            slot_ms=int(budget.slot_duration or seg.get("slot_ms") or 0),
+            lang=str(target_lang or "uk"),
+            source_hint=str(source_hint or ""),
+        )
+    except NeedReTTS as need:
+        if regen_fn is None:
+            raise TextFitNoRegenError(
+                "Stage19d requires regen_fn (anti_truncate)"
+            ) from need
+        new_text = _segment_text(seg)
+        rr = regen_fn(
+            new_text,
+            voice=voice,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            task_id=task_id,
+            segment_index=idx,
+            segment_id=str(seg.get("segment_id") or ""),
+        )
+        if isinstance(rr, tuple):
+            new_file, new_ms = rr[0], int(rr[1] or 0)
+        else:
+            new_file, new_ms = rr, 0
+        if not new_file:
+            budget.final_status = "failed_tts_regen"
+            budget.rewrite_reason = "stage19d:anti_truncate_tts_fail"
+        else:
+            seg["file"] = new_file
+            seg["tts_file_path"] = new_file
+            seg["final_tts_text"] = new_text
+            if new_ms <= 0:
+                new_ms = measure_actual_ms(seg, resolve_path=resolve_path)
+            else:
+                seg["playback_duration"] = new_ms
+                seg["tts_ms"] = new_ms
+                seg["actual_duration_ms"] = new_ms
+            if commit_fn:
+                try:
+                    commit_fn(
+                        None,
+                        [idx],
+                        tts_text=new_text,
+                        audio_filename=str(new_file),
+                    )
+                except Exception:
+                    pass
+            iters = max(1, int(budget.rewrite_iterations or 0) + 1)
+            reason = "stage19d:anti_truncate_restored"
+            pause = budget.pause_adjustments_ms
+            stages = list(budget.pause_stages or [])
+            orig = budget.original_duration
+            budget = build_timing_budget(seg, idx, timing_map)
+            budget.rewrite_iterations = iters
+            budget.rewrite_reason = reason
+            budget.pause_adjustments_ms = pause
+            budget.pause_stages = stages
+            budget.original_duration = orig
+            budget.final_status = (
+                "ok"
+                if abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS
+                else "stage19d_partial"
+            )
+
+    _stamp_stage19d_fields(
+        seg,
+        budget=budget,
+        algorithm_reason=str(seg.get("algorithm_reason") or ""),
+        expand_executed=bool(seg.get("expand_executed")),
+        shorten_executed=bool(seg.get("shorten_executed")),
+        split_executed=bool(seg.get("split_executed")),
+    )
+    # Honest final_status: no silent TIMING OK with dead air / truncate flags.
+    if seg.get("truncation_blocked") and budget.final_status == "ok":
+        if abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS:
+            budget.final_status = "stage19d_partial"
+    if budget.final_status == "ok" and abs(_slot_delta_ms(budget)) > STAGE19D_HARD_DELTA_MS:
+        budget.final_status = (
+            "dead_air_risk"
+            if int(budget.underflow or 0) > STAGE19D_HARD_DELTA_MS
+            else "overflow_unresolved"
+        )
+
+    seg["timing_budget"] = budget.to_dict()
+    seg["timing_score"] = budget.timing_score
+    seg["closed_loop"] = {
+        "iterations": budget.rewrite_iterations,
+        "final_status": budget.final_status,
+        "rewrite_reason": budget.rewrite_reason,
+        "pause_adjustments_ms": budget.pause_adjustments_ms,
+        "timing_score": budget.timing_score,
+        "actual_duration_ms": budget.measured_duration,
+        "slot_duration": budget.slot_duration,
+        "delta": budget.delta,
+        "underflow_ms": max(0, int(budget.underflow or 0)),
+        "expand_required": bool(seg.get("expand_required")),
+        "expand_executed": bool(seg.get("expand_executed")),
+        "shorten_executed": bool(seg.get("shorten_executed")),
+        "split_executed": bool(seg.get("split_executed")),
+        "truncation_blocked": bool(seg.get("truncation_blocked")),
+        "retention_score": seg.get("retention_score"),
+        "fill_ratio": seg.get("fill_ratio"),
+        "algorithm_reason": seg.get("algorithm_reason") or "",
+        "adaptation_skip_reason": seg.get("adaptation_skip_reason") or "",
+        "adaptation_decision": seg.get("adaptation_decision") or {},
+    }
+    return budget
 
 
 def run_closed_loop_segment(
@@ -1310,6 +1723,23 @@ def run_closed_loop_segment(
         optimize_expand_for_slot,
         optimize_llm_rephrase_for_slot,
     )
+
+    def _done(b: TimingBudget) -> TimingBudget:
+        return _finalize_closed_loop_segment(
+            seg,
+            idx,
+            timing_map,
+            b,
+            source_hint=source_hint,
+            target_lang=target_lang,
+            voice=voice,
+            regen_fn=regen_fn,
+            commit_fn=commit_fn,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            task_id=task_id,
+            resolve_path=resolve_path,
+        )
 
     if not seg.get("first_tts_duration_ms"):
         first = measure_actual_ms(seg, resolve_path=resolve_path)
@@ -1397,9 +1827,7 @@ def run_closed_loop_segment(
                     budget.final_status = "failed_no_regen"
                     budget.rewrite_reason = str(exc.error_code)
                     logger.error("closed_loop seg=%s: %s", idx, exc)
-                seg["timing_budget"] = budget.to_dict()
-                seg["timing_score"] = budget.timing_score
-                return budget
+                return _done(budget)
             mark_adaptation_skipped(
                 seg,
                 skip_reason=SKIP_FITS_NO_CHANGE,
@@ -1409,11 +1837,9 @@ def run_closed_loop_segment(
                 need_adaptation=False,
                 decision="fits_no_change",
             )
-        seg["timing_budget"] = budget.to_dict()
-        seg["timing_score"] = budget.timing_score
-        return budget
+        return _done(budget)
 
-    # Stage 19b/19c: rule expand/shorten BEFORE LLM / before pause-only short-circuit.
+    # Stage 19b/19c/19d: rule expand/shorten BEFORE LLM / before pause-only short-circuit.
     # Happy Path (max_iterations=0) and llm_available=false must still run text fit.
     stage19b_ran = False
     try:
@@ -1439,63 +1865,41 @@ def run_closed_loop_segment(
         budget.rewrite_reason = str(exc.error_code)
         stage19b_ran = True
         logger.error("closed_loop seg=%s: %s", idx, exc)
-        seg["timing_budget"] = budget.to_dict()
-        seg["timing_score"] = budget.timing_score
-        return budget
+        return _done(budget)
     needs, reason = _needs_rewrite(budget)
     if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS:
         budget.final_status = "ok"
         if not budget.rewrite_reason:
             budget.rewrite_reason = (
-                "stage19b_fit" if stage19b_ran else "fits_after_pause"
+                "stage19d_fit" if stage19b_ran else "fits_after_pause"
             )
-        seg["timing_budget"] = budget.to_dict()
-        seg["timing_score"] = budget.timing_score
-        return budget
+        return _done(budget)
 
-    # max_iterations<=0 → no LLM loops (TZ §11 / Happy Path), but Stage 19b already ran.
+    # max_iterations<=0 → no LLM loops (TZ §11 / Happy Path), but Stage 19d text-fit already ran.
     if int(max_iterations or 0) <= 0:
         if stage19b_ran and int(budget.rewrite_iterations or 0) > 0:
             budget.final_status = (
                 "ok"
                 if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS
-                else (budget.final_status or "stage19b_partial")
+                else (budget.final_status or "stage19d_partial")
             )
             if not budget.rewrite_reason:
-                budget.rewrite_reason = "stage19b_rule_fit"
+                budget.rewrite_reason = "stage19d_rule_fit"
         else:
             budget.final_status = "ok" if not needs else (
-                budget.final_status or "deferred_after_resegment"
+                budget.final_status or "stage19d_partial"
             )
             if not budget.rewrite_reason:
                 budget.rewrite_reason = (
-                    "stage19b_atempo_or_pause"
+                    "stage19d_atempo_or_pause"
                     if stage19b_ran
-                    else "pause_only_after_resegment"
+                    else "stage19d_unresolved"
                 )
-        seg["timing_budget"] = budget.to_dict()
-        seg["timing_score"] = budget.timing_score
-        seg["closed_loop"] = {
-            "iterations": budget.rewrite_iterations,
-            "final_status": budget.final_status,
-            "rewrite_reason": budget.rewrite_reason,
-            "pause_adjustments_ms": budget.pause_adjustments_ms,
-            "timing_score": budget.timing_score,
-            "actual_duration_ms": budget.measured_duration,
-            "slot_duration": budget.slot_duration,
-            "delta": budget.delta,
-            "underflow_ms": max(0, int(budget.underflow or 0)),
-            "expand_required": bool(seg.get("expand_required")),
-            "expand_executed": bool(seg.get("expand_executed")),
-            "adaptation_skip_reason": seg.get("adaptation_skip_reason") or "",
-            "adaptation_decision": seg.get("adaptation_decision") or {},
-        }
-        return budget
+        return _done(budget)
 
     if regen_fn is None:
         budget.final_status = "failed_no_regen"
         budget.rewrite_reason = reason
-        seg["timing_budget"] = budget.to_dict()
         seg["requires_llm_adaptation"] = True
         if not seg.get("adaptation_executed"):
             from engines.dub_engine_v2.adaptation_decision import (
@@ -1512,7 +1916,7 @@ def run_closed_loop_segment(
                 need_adaptation=True,
                 decision="skip_no_regen",
             )
-        return budget
+        return _done(budget)
 
     # Freeze TZ P0: after TRANSLATION LOCK text rewrite is forbidden.
     # Overflow becomes a normal state for Studio (manual edit), not silent text fix.
@@ -1583,8 +1987,6 @@ def run_closed_loop_segment(
                     need_adaptation=True,
                     decision="skip_text_rewrite",
                 )
-        seg["timing_budget"] = budget.to_dict()
-        seg["timing_score"] = budget.timing_score
         logger.info(
             "closed_loop: TRANSLATION_LOCK blocks text rewrite idx=%s reason=%s "
             "skip_reason=%s adaptation_executed=%s "
@@ -1594,7 +1996,7 @@ def run_closed_loop_segment(
             seg.get("adaptation_skip_reason") or "",
             bool(seg.get("adaptation_executed")),
         )
-        return budget
+        return _done(budget)
 
     adapt_direction: str | None = None
     max_iters = max(1, min(int(max_iterations or MAX_REWRITE_ITERATIONS), 5))
@@ -1893,30 +2295,7 @@ def run_closed_loop_segment(
         seg["expand_required"] = True
         seg["requires_llm_adaptation"] = True
 
-    seg["timing_budget"] = budget.to_dict()
-    seg["timing_score"] = budget.timing_score
-    seg["closed_loop"] = {
-        "iterations": budget.rewrite_iterations,
-        "final_status": budget.final_status,
-        "rewrite_reason": budget.rewrite_reason,
-        "pause_adjustments_ms": budget.pause_adjustments_ms,
-        "timing_score": budget.timing_score,
-        "actual_duration_ms": budget.measured_duration,
-        "slot_duration": budget.slot_duration,
-        "delta": budget.delta,
-        "underflow_ms": underflow_ms,
-        "expand_required": bool(seg.get("expand_required")),
-        "expand_executed": bool(seg.get("expand_executed")),
-        "expansion_strategy": seg.get("expansion_strategy") or "none",
-        "algorithm_reason": seg.get("algorithm_reason") or "",
-        "fill_ratio": seg.get("fill_ratio"),
-        "atempo": seg.get("atempo"),
-        "strategy": seg.get("strategy") or "",
-        "rule_rewrite_used": bool(seg.get("rule_rewrite_used")),
-        "adaptation_skip_reason": seg.get("adaptation_skip_reason") or "",
-        "adaptation_decision": seg.get("adaptation_decision") or {},
-    }
-    return budget
+    return _done(budget)
 
 
 def run_closed_loop_timing(

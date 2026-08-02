@@ -33,6 +33,9 @@ FAST_GAP_ATEMPO_THRESHOLD = 1.05
 MIN_WORD_RETENTION = 0.85
 MIN_WORD_RETENTION_SEVERE = 0.70
 SEVERE_OVERFLOW_RATIO = 1.50
+# Stage 19d: final shorter than raw/semantic by >25% without shorten_executed = silent truncate.
+MAX_SILENT_TRUNCATE_RATIO = 0.75
+MIN_RAW_WORDS_FOR_TRUNCATE_GUARD = 12
 
 # Incomplete thought endings that must NEVER be voiced as a final cut.
 _BAD_TAIL = re.compile(
@@ -95,6 +98,56 @@ def word_retention_ratio(original: str, candidate: str) -> float:
     if ow <= 0:
         return 1.0
     return len(str(candidate or "").split()) / float(ow)
+
+
+def semantic_anchor_text(seg: dict[str, Any] | None = None, *, fallback: str = "") -> str:
+    """Best meaning-complete UA source for expand / anti-truncate (Stage 19d)."""
+    if not isinstance(seg, dict):
+        return " ".join(str(fallback or "").split()).strip()
+    for key in (
+        "raw_translation",
+        "raw_mt",
+        "semantic_engine_text",
+        "mt_text",
+        "approved_text",
+    ):
+        t = " ".join(str(seg.get(key) or "").split()).strip()
+        if t:
+            return t
+    return " ".join(str(fallback or "").split()).strip()
+
+
+def detect_silent_truncate(
+    final_text: str,
+    raw_or_semantic: str,
+    *,
+    shorten_executed: bool = False,
+    max_ratio: float = MAX_SILENT_TRUNCATE_RATIO,
+    min_raw_words: int = MIN_RAW_WORDS_FOR_TRUNCATE_GUARD,
+) -> bool:
+    """True when Final lost >25% words vs raw/semantic without an explicit shorten."""
+    if shorten_executed:
+        return False
+    raw = " ".join(str(raw_or_semantic or "").split()).strip()
+    final = " ".join(str(final_text or "").split()).strip()
+    if not raw or not final:
+        return False
+    rw = len(raw.split())
+    fw = len(final.split())
+    if rw < int(min_raw_words):
+        return False
+    return fw < rw * float(max_ratio)
+
+
+def safe_shorten(
+    text: str,
+    slot_ms: int,
+    lang: str = "uk",
+    *,
+    source_hint: str = "",
+) -> tuple[str, list[str], bool]:
+    """Public Stage 19d wrapper — whole-thought shorten, retention ≥ 0.85."""
+    return _safe_shorten(text, slot_ms, lang, source_hint=source_hint)
 
 
 def prefer_full_meaning_text(
@@ -757,24 +810,42 @@ def expand_text_to_slot(
     # Retention vs UK Final/Raw — never use EN source_hint as word-count denominator.
     meaning_anchor = " ".join(str(raw_mt or original).split()).strip() or original
 
-    # Stage 19c: if Raw MT is longer and still meaning-safe, prefer it over short Final.
+    # Stage 19c/19d: if Raw/semantic is longer and meaning-safe, prefer it over short Final.
     raw_full = " ".join(str(raw_mt or "").split()).strip()
     if (
         raw_full
         and raw_full != out
         and len(raw_full.split()) > len(out.split())
-        and word_retention_ratio(out, raw_full) >= MIN_WORD_RETENTION
         and _is_complete_thought(raw_full)
         and _expand_lang_ok(raw_full, lang)
         and _expand_keeps_entities(original, raw_full, source_hint)
+        and not _critical_markers_lost(raw_full, out, source_hint)
     ):
         raw_pred = estimate_tts_ms(raw_full, lang)
-        if pred < floor and raw_pred <= int(slot * OVERFLOW_FIT_RATIO * 1.05):
-            out = strip_slot_pad_fillers(raw_full)
-            pred = estimate_tts_ms(out, lang)
-            reasons.append("raw_mt_restore")
-            if pred >= floor:
-                return out, reasons
+        # Prefer raw when underfilled; if raw mildly overflows, safe_shorten toward aim.
+        if pred < floor:
+            if raw_pred <= int(slot * OVERFLOW_FIT_RATIO * 1.08):
+                out = strip_slot_pad_fillers(raw_full)
+                pred = estimate_tts_ms(out, lang)
+                reasons.append("raw_prefer")
+                if pred >= floor:
+                    return out, reasons
+            elif raw_pred > int(slot * OVERFLOW_FIT_RATIO):
+                shortened, sh_reasons, _tr = _safe_shorten(
+                    raw_full, slot, lang, source_hint=source_hint
+                )
+                if (
+                    shortened
+                    and shortened != out
+                    and word_retention_ratio(raw_full, shortened) >= MIN_WORD_RETENTION
+                    and estimate_tts_ms(shortened, lang) > pred
+                ):
+                    out = strip_slot_pad_fillers(shortened)
+                    pred = estimate_tts_ms(out, lang)
+                    reasons.append("raw_prefer")
+                    reasons.extend(list(sh_reasons or []) + ["safe_shorten_raw"])
+                    if pred >= floor:
+                        return out, reasons
 
     # Optional LLM expand (same gate as soft_sync) — still meaning-safe.
     try:
