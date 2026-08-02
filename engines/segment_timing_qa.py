@@ -2239,7 +2239,18 @@ def build_openddf_segment_diagnostics(
                 ),
                 "shorten_executed": bool(seg.get("shorten_executed")),
                 "split_executed": bool(
-                    seg.get("split_executed") or seg.get("stage19c_split_done")
+                    seg.get("split_executed")
+                    or seg.get("stage19c_split_done")
+                    or seg.get("stage19e_split_done")
+                ),
+                "post_restore_split": bool(
+                    seg.get("post_restore_split")
+                    or (seg.get("stage19e") or {}).get("post_restore_split")
+                ),
+                "split_children": int(
+                    (seg.get("stage19e") or {}).get("split_children")
+                    or (seg.get("stage19c") or {}).get("split_children")
+                    or 0
                 ),
                 "truncation_blocked": bool(seg.get("truncation_blocked")),
                 "retention_score": seg.get("retention_score"),
@@ -2255,6 +2266,7 @@ def build_openddf_segment_diagnostics(
                     or ""
                 ),
                 "stage19d": seg.get("stage19d") or {},
+                "stage19e": seg.get("stage19e") or {},
                 "duration_match_score": int(
                     adapt_trace.get("duration_match_score")
                     or speech_duration_match_score(actual_ms, slot_ms)

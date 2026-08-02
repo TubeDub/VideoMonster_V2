@@ -36,6 +36,11 @@ SEVERE_OVERFLOW_RATIO = 1.50
 # Stage 19d: final shorter than raw/semantic by >25% without shorten_executed = silent truncate.
 MAX_SILENT_TRUNCATE_RATIO = 0.75
 MIN_RAW_WORDS_FOR_TRUNCATE_GUARD = 12
+# Stage 19e: after restore, force split when predicted speech vastly exceeds slot.
+FORCE_SPLIT_RATIO = 1.25
+FORCE_SPLIT_ABS_MS = 3000
+MAX_POST_RESTORE_SPLIT_CHILDREN = 6
+MAX_FILL_RATIO_AFTER_RESTORE = 1.5
 
 # Incomplete thought endings that must NEVER be voiced as a final cut.
 _BAD_TAIL = re.compile(
@@ -148,6 +153,95 @@ def safe_shorten(
 ) -> tuple[str, list[str], bool]:
     """Public Stage 19d wrapper — whole-thought shorten, retention ≥ 0.85."""
     return _safe_shorten(text, slot_ms, lang, source_hint=source_hint)
+
+
+def should_force_split(
+    text: str,
+    slot_ms: int,
+    lang: str = "uk",
+    *,
+    predicted_ms: int | None = None,
+) -> bool:
+    """Stage 19e: predicted TTS clearly exceeds the slot (restore/overflow gate).
+
+    Triggers when pred > max(slot×1.25, 3000ms) and pred > slot — so a mild
+    9s/8s miss shortens, while ~80s into ~4s (or any giant overfill) splits.
+    """
+    slot = max(0, int(slot_ms or 0))
+    pred = int(predicted_ms) if predicted_ms is not None else estimate_tts_ms(text, lang)
+    if pred <= 0:
+        return False
+    if slot <= 0:
+        return pred > FORCE_SPLIT_ABS_MS
+    threshold = max(int(slot * FORCE_SPLIT_RATIO), FORCE_SPLIT_ABS_MS)
+    return pred > threshold and pred > slot
+
+
+def split_into_slot_sized_chunks(
+    text: str,
+    slot_ms: int,
+    lang: str = "uk",
+    *,
+    max_children: int = MAX_POST_RESTORE_SPLIT_CHILDREN,
+) -> list[str]:
+    """Split long Final into ≤max_children sentence packs sized toward the slot."""
+    t = " ".join(str(text or "").split()).strip()
+    if not t:
+        return []
+    parts = _split_sentences(t)
+    if len(parts) < 2:
+        # Light fallback: split on ; / conjunctions via adaptive-style chunks.
+        try:
+            from engines.adaptive_segmentation.core import _safe_split_chunks
+
+            parts = _safe_split_chunks(t)
+        except Exception:
+            parts = [t]
+    if len(parts) < 2:
+        return [t]
+
+    aim = max(400, int(max(1, slot_ms) * EXPAND_AIM_RATIO))
+    hard = max(aim, int(max(1, slot_ms) * FORCE_SPLIT_RATIO))
+    packed: list[str] = []
+    buf: list[str] = []
+    for p in parts:
+        trial = " ".join(buf + [p]).strip()
+        pred = estimate_tts_ms(trial, lang)
+        if buf and pred > hard and len(packed) < max_children - 1:
+            packed.append(" ".join(buf).strip())
+            buf = [p]
+        else:
+            buf.append(p)
+    if buf:
+        packed.append(" ".join(buf).strip())
+
+    # If still too many, merge into max_children by weight.
+    if len(packed) > max_children:
+        weights = [max(1, len(c)) for c in packed]
+        total = sum(weights) or 1
+        target = total / float(max_children)
+        merged: list[str] = []
+        cur: list[str] = []
+        wcur = 0
+        for c, w in zip(packed, weights):
+            if cur and (wcur + w) > target and len(merged) < max_children - 1:
+                merged.append(" ".join(cur).strip())
+                cur, wcur = [c], w
+            else:
+                cur.append(c)
+                wcur += w
+        if cur:
+            merged.append(" ".join(cur).strip())
+        packed = [x for x in merged if x]
+
+    # Ensure at least 2 when force-split was warranted.
+    if len(packed) == 1 and len(parts) >= 2:
+        mid = max(1, len(parts) // 2)
+        packed = [
+            " ".join(parts[:mid]).strip(),
+            " ".join(parts[mid:]).strip(),
+        ]
+    return [p for p in packed if p][: max(1, int(max_children))]
 
 
 def prefer_full_meaning_text(
@@ -819,7 +913,10 @@ def expand_text_to_slot(
         and _is_complete_thought(raw_full)
         and _expand_lang_ok(raw_full, lang)
         and _expand_keeps_entities(original, raw_full, source_hint)
-        and not _critical_markers_lost(raw_full, out, source_hint)
+        # Prefer raw when it restores markers present in source (out may be truncated).
+        and not _critical_markers_lost(
+            f"{original} {source_hint}".strip(), raw_full, source_hint
+        )
     ):
         raw_pred = estimate_tts_ms(raw_full, lang)
         # Prefer raw when underfilled; if raw mildly overflows, safe_shorten toward aim.
@@ -916,15 +1013,20 @@ def expand_to_fill(
     lang: str = "uk",
     source_hint: str = "",
     raw_mt: str = "",
+    prefer_raw: str = "",
 ) -> tuple[str, list[str]]:
-    """Stage 19: paraphrase/lengthen Final toward target_ms (≈ EXPAND_AIM * slot)."""
+    """Stage 19/19e: paraphrase/lengthen Final toward target_ms (≈ EXPAND_AIM * slot).
+
+    prefer_raw — optional longer semantic/raw anchor (Stage 19e forced expand).
+    """
     slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
+    anchor = " ".join(str(prefer_raw or raw_mt or "").split()).strip()
     return expand_text_to_slot(
         final_text,
         slot_equiv,
         lang,
         source_hint=source_hint,
-        raw_mt=raw_mt,
+        raw_mt=anchor or raw_mt,
     )
 
 

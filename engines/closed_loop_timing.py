@@ -30,6 +30,8 @@ OVERFLOW_SPLIT_RATIO = 0.25
 MIN_SPLIT_CHILD_MS = 800
 # Cap children — conj-splitting EN into 12 orphans caused RUNTIME_INTEGRITY (task dce9b27b).
 MAX_STAGE19C_SPLIT_CHILDREN = 4
+# Stage 19e: post-restore / giant predicted text may split into more children.
+MAX_STAGE19E_SPLIT_CHILDREN = 6
 OVERLAP_TOLERANCE_MS = 40
 TIMING_SCORE_GOAL = 95
 
@@ -37,6 +39,7 @@ TIMING_SCORE_GOAL = 95
 _TEXT_FIT_REASON_PREFIXES = (
     "TextSlotFitExpand",
     "TextSlotFitShorten",
+    "TextSlotFitSplit",
     "TextThenAtemo",
     "TextSlotSplit",
 )
@@ -365,6 +368,59 @@ def large_overflow_needs_split(*, overflow_ms: int, slot_ms: int) -> bool:
     if ov <= TEXT_FIT_DELTA_MS:
         return False
     return ov > max(OVERFLOW_SPLIT_ABS_MS, int(slot * OVERFLOW_SPLIT_RATIO))
+
+
+def _allocate_times_speech_expanded(
+    chunks: list[str],
+    start_ms: int,
+    lang: str = "uk",
+) -> list[tuple[str, int, int]]:
+    """Stage 19e: give each child a speech-sized slot (do not squeeze into parent)."""
+    from engines.text_slot_fit import EXPAND_AIM_RATIO, estimate_tts_ms
+
+    out: list[tuple[str, int, int]] = []
+    cursor = int(start_ms)
+    for chunk in chunks:
+        pred = max(MIN_SPLIT_CHILD_MS, int(estimate_tts_ms(chunk, lang) or 0))
+        dur = max(MIN_SPLIT_CHILD_MS, int(pred / max(float(EXPAND_AIM_RATIO), 0.5)))
+        out.append((str(chunk), cursor, cursor + dur))
+        cursor += dur
+    return out
+
+
+def segment_needs_stage19e_split(
+    seg: dict,
+    *,
+    slot_ms: int,
+    measured_ms: int = 0,
+    lang: str = "uk",
+) -> bool:
+    """True when restored/giant text must be split before keeping one slot."""
+    from engines.text_slot_fit import (
+        MAX_FILL_RATIO_AFTER_RESTORE,
+        estimate_tts_ms,
+        should_force_split,
+    )
+
+    if seg.get("stage19e_split_done") or seg.get("stage19c_split_done"):
+        return False
+    if seg.get("needs_post_restore_split") or seg.get("post_restore_split"):
+        return True
+    text = _segment_text(seg)
+    if not text or _text_looks_english(text):
+        return False
+    slot = max(0, int(slot_ms or seg.get("slot_ms") or 0))
+    if should_force_split(text, slot, lang):
+        return True
+    measured = max(0, int(measured_ms or 0))
+    if slot > 0 and measured > 0:
+        if measured / float(slot) > float(MAX_FILL_RATIO_AFTER_RESTORE):
+            return True
+    # Predicted fill also gates post-restore mush.
+    pred = int(estimate_tts_ms(text, lang) or 0)
+    if slot > 0 and pred > 0 and pred / float(slot) > float(MAX_FILL_RATIO_AFTER_RESTORE):
+        return True
+    return False
 
 
 def lock_text_fit_algorithm_reason(seg: dict, reason: str) -> None:
@@ -783,6 +839,266 @@ def try_stage19c_overflow_split(
     return True
 
 
+def try_stage19e_post_restore_split(
+    *,
+    segments_data: list[dict],
+    source_segments: list[str],
+    timing_map: list,
+    audits: list[dict] | None,
+    idx: int,
+    lang: str = "uk",
+) -> bool:
+    """Stage 19e: after restore / giant predicted TTS — split into 2..6 speech-sized children.
+
+    Children receive expanded timing (not squeezed into the original short slot).
+    Mutates lists in place. Caller must re-TTS every child.
+    """
+    import copy
+
+    from engines.text_slot_fit import (
+        MAX_POST_RESTORE_SPLIT_CHILDREN,
+        split_into_slot_sized_chunks,
+        should_force_split,
+    )
+
+    if idx < 0 or idx >= len(segments_data):
+        return False
+    seg = segments_data[idx]
+    if seg.get("stage19e_split_done") or seg.get("stage19c_split_done"):
+        return False
+
+    if idx < len(timing_map):
+        item = timing_map[idx]
+        if isinstance(item, dict):
+            start_ms = int(item.get("start") or item.get("start_ms") or 0)
+            end_ms = int(item.get("end") or item.get("end_ms") or 0)
+        elif isinstance(item, (list, tuple)) and len(item) >= 2:
+            start_ms, end_ms = int(item[0]), int(item[1])
+        else:
+            start_ms = int(seg.get("start_ms") or 0)
+            end_ms = start_ms + int(seg.get("slot_ms") or 0)
+    else:
+        start_ms = int(seg.get("start_ms") or 0)
+        end_ms = start_ms + int(seg.get("slot_ms") or 0)
+    slot_ms = max(0, end_ms - start_ms)
+    tgt = _segment_text(seg)
+    if not tgt or _text_looks_english(tgt):
+        return False
+    if not (
+        seg.get("needs_post_restore_split")
+        or should_force_split(tgt, slot_ms, lang)
+        or segment_needs_stage19e_split(
+            seg,
+            slot_ms=slot_ms,
+            measured_ms=int(
+                seg.get("playback_duration")
+                or seg.get("tts_ms")
+                or seg.get("actual_duration_ms")
+                or 0
+            ),
+            lang=lang,
+        )
+    ):
+        return False
+
+    src = ""
+    if idx < len(source_segments):
+        src = str(source_segments[idx] or "").strip()
+
+    tgt_chunks = split_into_slot_sized_chunks(
+        tgt,
+        slot_ms if slot_ms > 0 else 2000,
+        lang,
+        max_children=MAX_POST_RESTORE_SPLIT_CHILDREN,
+    )
+    if len(tgt_chunks) < 2:
+        return False
+    if any(_text_looks_english(t) for t in tgt_chunks):
+        logger.warning(
+            "[Stage19e] refuse split seg#%d — child Final looks English", idx
+        )
+        return False
+
+    src_parts: list[str] = []
+    try:
+        from engines.adaptive_segmentation.core import _safe_split_chunks
+
+        src_parts = _safe_split_chunks(src) if src else []
+    except Exception:
+        src_parts = []
+    if len(src_parts) >= 2:
+        src_chunks = _pack_text_chunks(src_parts, len(tgt_chunks))
+        if len(src_chunks) != len(tgt_chunks):
+            src_chunks = _pack_text_chunks(
+                src_parts if src_parts else [src or ""], len(tgt_chunks)
+            )
+    else:
+        src_chunks = _pack_text_chunks([src] if src else tgt_chunks, len(tgt_chunks))
+    if len(src_chunks) != len(tgt_chunks):
+        src_chunks = list(tgt_chunks)
+
+    allocated = _allocate_times_speech_expanded(tgt_chunks, start_ms, lang)
+    if len(allocated) < 2:
+        return False
+    n = len(allocated)
+    if n != len(tgt_chunks):
+        tgt_chunks = [c[0] for c in allocated]
+        src_chunks = _pack_text_chunks(
+            src_parts if len(src_parts) >= 2 else ([src] if src else tgt_chunks),
+            n,
+        )
+        if len(src_chunks) != n:
+            src_chunks = list(tgt_chunks)
+
+    parent_end = end_ms
+    new_end = int(allocated[-1][2])
+    shift_ms = max(0, new_end - parent_end)
+
+    children: list[dict] = []
+    for i, ((text, st, en), src_t, tgt_t) in enumerate(
+        zip(allocated, src_chunks, tgt_chunks)
+    ):
+        child = copy.deepcopy(seg) if i > 0 else seg
+        clear_keys = (
+            "file",
+            "tts_file_path",
+            "tts_ms",
+            "playback_duration",
+            "actual_duration_ms",
+            "tts_timing",
+            "post_tts_retry",
+            "text_adaptation_trace",
+            "fitted_file",
+            "first_tts_duration_ms",
+            "final_tts_duration_ms",
+            "needs_post_restore_split",
+        )
+        for key in clear_keys:
+            child.pop(key, None)
+        if i > 0:
+            try:
+                from engines.pipeline_integrity.segment import new_segment_id
+
+                parent_sid = str(seg.get("segment_id") or "").strip()
+                new_sid = new_segment_id()
+                child["segment_id"] = new_sid
+                child["segment_uuid"] = new_sid
+                if parent_sid:
+                    child["reissued_from"] = [parent_sid]
+                    child["split_from_segment_id"] = parent_sid
+            except Exception:
+                pass
+
+        final_txt = str(tgt_t or text or "").strip()
+        if not final_txt or _text_looks_english(final_txt):
+            logger.warning(
+                "[Stage19e] abort split seg#%d — empty/EN child Final", idx
+            )
+            return False
+        child["plain_text"] = final_txt
+        child["text"] = final_txt
+        child["final_text"] = final_txt
+        child["translation_text"] = final_txt
+        child["final_tts_text"] = final_txt
+        child["start_ms"] = int(st)
+        child["end_ms"] = int(en)
+        child["slot_ms"] = max(1, int(en) - int(st))
+        child["stage19e_split_done"] = True
+        child["stage19c_split_done"] = True  # prevent double-split
+        child["split_executed"] = True
+        child["post_restore_split"] = True
+        child["adaptive_resegment_done"] = True
+        child["strategy"] = "split"
+        lock_text_fit_algorithm_reason(child, "TextSlotFitSplit")
+        child["expansion_strategy"] = "split"
+        child["rule_rewrite_used"] = True
+        child["adaptation_stages"] = list(child.get("adaptation_stages") or []) + [
+            "stage19e_post_restore_split"
+        ]
+        child["stage19e"] = {
+            "split_parent_idx": idx,
+            "split_child": i,
+            "split_children": n,
+            "post_restore_split": True,
+            "split_executed": True,
+            "algorithm_reason": "TextSlotFitSplit",
+        }
+        children.append(child)
+
+    for i, child in enumerate(children):
+        if i == 0:
+            segments_data[idx] = child
+            continue
+        segments_data.insert(idx + i, child)
+
+    for i, (_text, st, en) in enumerate(allocated):
+        src_t = src_chunks[i] if i < len(src_chunks) else ""
+        timing_entry = {"start": int(st), "end": int(en)}
+        if i == 0:
+            if idx < len(source_segments):
+                source_segments[idx] = src_t
+            else:
+                source_segments.append(src_t)
+            if idx < len(timing_map):
+                timing_map[idx] = timing_entry
+            else:
+                timing_map.append(timing_entry)
+        else:
+            source_segments.insert(idx + i, src_t)
+            timing_map.insert(idx + i, timing_entry)
+
+    # Shift subsequent slots so expanded children do not pile into one tiny window.
+    if shift_ms > 0:
+        for j in range(idx + n, len(timing_map)):
+            item = timing_map[j]
+            if isinstance(item, dict):
+                timing_map[j] = {
+                    **item,
+                    "start": int(item.get("start") or item.get("start_ms") or 0)
+                    + shift_ms,
+                    "end": int(item.get("end") or item.get("end_ms") or 0) + shift_ms,
+                }
+            elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                timing_map[j] = [int(item[0]) + shift_ms, int(item[1]) + shift_ms]
+            if j < len(segments_data):
+                sj = segments_data[j]
+                sj["start_ms"] = int(sj.get("start_ms") or 0) + shift_ms
+                sj["end_ms"] = int(sj.get("end_ms") or 0) + shift_ms
+
+    if audits is not None:
+        audit_by = {int(a.get("index", -1)): a for a in audits}
+        parent_audit = dict(audit_by.get(idx) or {"index": idx})
+        rebuilt: list[dict[str, Any]] = []
+        for a in audits:
+            ai = int(a.get("index", -1))
+            if ai == idx:
+                continue
+            if ai > idx:
+                a = dict(a)
+                a["index"] = ai + (n - 1)
+            rebuilt.append(a)
+        for i in range(n):
+            aa = dict(parent_audit)
+            aa["index"] = idx + i
+            aa["whisper_text"] = src_chunks[i] if i < len(src_chunks) else ""
+            aa["final_text"] = tgt_chunks[i] if i < len(tgt_chunks) else ""
+            aa["stage19e_split"] = True
+            aa["post_restore_split"] = True
+            rebuilt.append(aa)
+        rebuilt.sort(key=lambda x: int(x.get("index", 0)))
+        audits.clear()
+        audits.extend(rebuilt)
+
+    logger.info(
+        "[Stage19e] post-restore split seg#%d slot=%dms → %d children (expanded end=%dms)",
+        idx,
+        slot_ms,
+        n,
+        new_end,
+    )
+    return True
+
+
 def _stage19b_algorithm_reason(fit: Any, *, text_changed: bool) -> str:
     action = str(getattr(fit, "action", "") or "")
     strategy = str(getattr(fit, "strategy", "") or "")
@@ -846,6 +1162,7 @@ def assert_no_silent_truncate(
         detect_silent_truncate,
         safe_shorten,
         semantic_anchor_text,
+        should_force_split,
         strip_slot_pad_fillers,
         word_retention_ratio,
         MIN_WORD_RETENTION,
@@ -889,19 +1206,32 @@ def assert_no_silent_truncate(
     seg["final_text"] = restored
     seg["pre_tts_text"] = restored
     seg["truncation_blocked"] = True
-    seg["shorten_executed"] = True
     seg["rule_rewrite_used"] = True
     seg["retention_score"] = round(word_retention_ratio(raw, restored), 4)
-    lock_text_fit_algorithm_reason(seg, "TextSlotFitShorten")
-    seg["rewrite_reason"] = "stage19d:anti_truncate_restored"
+    # Stage 19e: giant restore must force-split — do not claim shorten-only fit.
+    force_split = should_force_split(restored, slot if slot > 0 else 0, lang)
+    if force_split:
+        seg["needs_post_restore_split"] = True
+        seg["shorten_executed"] = bool(seg.get("shorten_executed"))
+        lock_text_fit_algorithm_reason(seg, "TextSlotFitSplit")
+        seg["rewrite_reason"] = "stage19e:anti_truncate_needs_split"
+    else:
+        seg["shorten_executed"] = True
+        lock_text_fit_algorithm_reason(seg, "TextSlotFitShorten")
+        seg["rewrite_reason"] = "stage19d:anti_truncate_restored"
     prev = dict(seg.get("stage19d") or {})
     seg["stage19d"] = {
         **prev,
         "truncation_blocked": True,
-        "anti_truncate_reasons": list(reasons or []) + ["silent_truncate"],
+        "anti_truncate_reasons": list(reasons or [])
+        + ["silent_truncate"]
+        + (["needs_post_restore_split"] if force_split else []),
         "retention_score": seg["retention_score"],
+        "needs_post_restore_split": bool(force_split),
     }
-    raise NeedReTTS("anti_truncate_restored")
+    raise NeedReTTS(
+        "stage19e:anti_truncate_needs_split" if force_split else "anti_truncate_restored"
+    )
 
 
 def _stamp_stage19d_fields(
@@ -961,6 +1291,76 @@ def _stamp_stage19d_fields(
         "delta": delta,
         "final_status": budget.final_status,
     }
+    _stamp_stage19e_fields(
+        seg,
+        budget=budget,
+        algorithm_reason=reason,
+        expand_executed=bool(seg["expand_executed"]),
+        shorten_executed=bool(seg["shorten_executed"]),
+        split_executed=bool(seg["split_executed"]),
+    )
+
+
+def _stamp_stage19e_fields(
+    seg: dict,
+    *,
+    budget: TimingBudget,
+    algorithm_reason: str,
+    expand_executed: bool,
+    shorten_executed: bool,
+    split_executed: bool = False,
+) -> None:
+    """Stage 19e metadata — honest expand/split/fill after restore."""
+    slot = max(1, int(budget.slot_duration or seg.get("slot_ms") or 1))
+    tts = int(budget.measured_duration or seg.get("tts_ms") or 0)
+    fill = round(tts / float(slot), 4) if tts > 0 else float(seg.get("fill_ratio") or 0)
+    delta = int(budget.delta if budget.delta is not None else (tts - slot))
+    reason = _stage19d_sanitize_algorithm_reason(
+        algorithm_reason,
+        expand_executed=expand_executed,
+        shorten_executed=shorten_executed,
+        split_executed=split_executed or bool(seg.get("split_executed")),
+        delta_ms=delta,
+        underflow_ms=int(budget.underflow or 0),
+        overflow_ms=int(budget.overflow or 0),
+    )
+    final_status = str(budget.final_status or "pending")
+    if abs(delta) > STAGE19D_HARD_DELTA_MS:
+        if int(budget.underflow or 0) > STAGE19D_HARD_DELTA_MS:
+            final_status = "dead_air_risk"
+        elif int(budget.overflow or 0) > STAGE19D_HARD_DELTA_MS:
+            final_status = "overflow_unresolved"
+        elif final_status in ("ok", "pending"):
+            final_status = "stage19e_partial"
+    elif (
+        int(budget.underflow or 0) > TEXT_FIT_DELTA_MS
+        and not expand_executed
+        and not split_executed
+    ):
+        final_status = "dead_air_risk"
+    prev = dict(seg.get("stage19e") or {})
+    split_children = int(
+        prev.get("split_children")
+        or (seg.get("stage19c") or {}).get("split_children")
+        or 0
+    )
+    seg["stage19e"] = {
+        **prev,
+        "expand_executed": bool(expand_executed or seg.get("expand_executed")),
+        "shorten_executed": bool(shorten_executed or seg.get("shorten_executed")),
+        "split_executed": bool(split_executed or seg.get("split_executed")),
+        "post_restore_split": bool(
+            seg.get("post_restore_split") or prev.get("post_restore_split")
+        ),
+        "truncation_blocked": bool(seg.get("truncation_blocked")),
+        "fill_ratio": fill,
+        "retention_score": float(seg.get("retention_score") or 0),
+        "delta": delta,
+        "final_status": final_status,
+        "algorithm_reason": reason,
+        "split_children": split_children,
+    }
+    seg["fill_ratio"] = fill
 
 
 def _stamp_stage19b_meta(
@@ -1151,6 +1551,7 @@ def apply_stage19b_rule_text_fit(
         fit_text_to_slot,
         safe_shorten,
         semantic_anchor_text,
+        should_force_split,
         word_retention_ratio,
         MIN_WORD_RETENTION,
     )
@@ -1171,6 +1572,28 @@ def apply_stage19b_rule_text_fit(
     expansion_strategy = "none"
     llm_used = False
     shorten_executed = bool(seg.get("shorten_executed"))
+
+    # Stage 19e §B: predicted >> slot → forced split (not safe_shorten into one slot).
+    slot_for_split = int(budget.slot_duration or 0)
+    if (
+        (shorten_required or seg.get("needs_post_restore_split") or seg.get("truncation_blocked"))
+        and should_force_split(original, slot_for_split, str(target_lang or "uk"))
+        and not seg.get("stage19e_split_done")
+        and not seg.get("stage19c_split_done")
+    ):
+        seg["needs_post_restore_split"] = True
+        lock_text_fit_algorithm_reason(seg, "TextSlotFitSplit")
+        budget.final_status = "stage19e_partial"
+        budget.rewrite_reason = "stage19e:force_split_pending"
+        _stamp_stage19e_fields(
+            seg,
+            budget=budget,
+            algorithm_reason="TextSlotFitSplit",
+            expand_executed=bool(seg.get("expand_executed")),
+            shorten_executed=shorten_executed,
+            split_executed=False,
+        )
+        return budget, True
 
     fit = fit_text_to_slot(
         original,
@@ -1195,6 +1618,7 @@ def apply_stage19b_rule_text_fit(
                 lang=str(target_lang or "uk"),
                 source_hint=str(source_hint or ""),
                 raw_mt=preferred,
+                prefer_raw=semantic_anchor_text(seg, fallback=preferred),
             )
             exp_text = " ".join(str(exp_text or "").split()).strip()
             if exp_text and exp_text != original:
@@ -1206,7 +1630,7 @@ def apply_stage19b_rule_text_fit(
                 fit.strategy = "expand"
                 fit.reasons = list(getattr(fit, "reasons", None) or []) + list(
                     exp_reasons or []
-                )
+                ) + ["stage19e:forced_expand"]
                 if "raw_prefer" in (exp_reasons or []):
                     expansion_strategy = "raw_prefer"
                 elif "rule_expand" in (exp_reasons or []):
@@ -1214,7 +1638,7 @@ def apply_stage19b_rule_text_fit(
                 else:
                     expansion_strategy = "expand_to_fill"
         except Exception as exc:
-            logger.debug("stage19d forced expand_to_fill skipped: %s", exc)
+            logger.debug("stage19e forced expand_to_fill skipped: %s", exc)
         if not text_changed:
             try:
                 from engines.translation_adapt import llm_rephrase_available
@@ -1447,6 +1871,10 @@ def apply_stage19b_rule_text_fit(
         if expand_required:
             seg["expand_required"] = True
             seg["requires_strong_expand"] = True
+            # Stage 19e §C: expand must lengthen; otherwise honest dead_air_risk.
+            budget.final_status = "dead_air_risk"
+            seg["strategy"] = "dead_air_risk"
+            budget.rewrite_reason = "stage19e:expand_no_change"
 
     seg["shorten_executed"] = bool(shorten_executed)
     if expand_executed:
@@ -1653,6 +2081,30 @@ def _finalize_closed_loop_segment(
                 if abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS
                 else "stage19d_partial"
             )
+            # Stage 19e: restored giant text into a tiny slot → force split upstream.
+            if segment_needs_stage19e_split(
+                seg,
+                slot_ms=int(budget.slot_duration or 0),
+                measured_ms=int(budget.measured_duration or 0),
+                lang=str(target_lang or "uk"),
+            ):
+                seg["needs_post_restore_split"] = True
+                budget.final_status = "stage19e_partial"
+                budget.rewrite_reason = "stage19e:needs_post_restore_split"
+                lock_text_fit_algorithm_reason(seg, "TextSlotFitSplit")
+
+    # Also gate when Final already predicts >> slot (even without anti-truncate).
+    if segment_needs_stage19e_split(
+        seg,
+        slot_ms=int(budget.slot_duration or seg.get("slot_ms") or 0),
+        measured_ms=int(budget.measured_duration or 0),
+        lang=str(target_lang or "uk"),
+    ):
+        seg["needs_post_restore_split"] = True
+        if budget.final_status in ("ok", "pending", "stage19d_partial"):
+            budget.final_status = "stage19e_partial"
+        if not str(budget.rewrite_reason or "").startswith("stage19e"):
+            budget.rewrite_reason = "stage19e:needs_post_restore_split"
 
     _stamp_stage19d_fields(
         seg,
@@ -1672,6 +2124,15 @@ def _finalize_closed_loop_segment(
             if int(budget.underflow or 0) > STAGE19D_HARD_DELTA_MS
             else "overflow_unresolved"
         )
+    # Stage 19e: underfill without real expand is never ok.
+    if (
+        int(budget.underflow or 0) > TEXT_FIT_DELTA_MS
+        and not seg.get("expand_executed")
+        and not seg.get("split_executed")
+        and not seg.get("needs_post_restore_split")
+        and budget.final_status == "ok"
+    ):
+        budget.final_status = "dead_air_risk"
 
     seg["timing_budget"] = budget.to_dict()
     seg["timing_score"] = budget.timing_score
@@ -1689,12 +2150,14 @@ def _finalize_closed_loop_segment(
         "expand_executed": bool(seg.get("expand_executed")),
         "shorten_executed": bool(seg.get("shorten_executed")),
         "split_executed": bool(seg.get("split_executed")),
+        "post_restore_split": bool(seg.get("post_restore_split")),
         "truncation_blocked": bool(seg.get("truncation_blocked")),
         "retention_score": seg.get("retention_score"),
         "fill_ratio": seg.get("fill_ratio"),
         "algorithm_reason": seg.get("algorithm_reason") or "",
         "adaptation_skip_reason": seg.get("adaptation_skip_reason") or "",
         "adaptation_decision": seg.get("adaptation_decision") or {},
+        "stage19e": seg.get("stage19e") or {},
     }
     return budget
 
@@ -2371,6 +2834,173 @@ def run_closed_loop_timing(
         if before.status in ("overflow", "underflow"):
             stats["deviations"] += 1
 
+        # Stage 19e: post-restore / predicted>>slot → forced split before mushy TTS fit.
+        if segment_needs_stage19e_split(
+            seg,
+            slot_ms=int(before.slot_duration or 0),
+            measured_ms=int(before.measured_duration or 0),
+            lang=str(target_lang or "uk"),
+        ):
+            try:
+                _src_list_e = (
+                    source_segments
+                    if isinstance(source_segments, list)
+                    else list(source_segments or [])
+                )
+                _audits_mut_e = list(audits) if audits is not None else None
+                import copy as _copy_s19e
+
+                _parent_backup_e = _copy_s19e.deepcopy(seg)
+                _parent_src_e = str(src_hint or "")
+                _parent_timing_e = (
+                    timing_map[idx]
+                    if idx < len(timing_map)
+                    else {"start": 0, "end": int(before.slot_duration or 0)}
+                )
+                if try_stage19e_post_restore_split(
+                    segments_data=segments_data,
+                    source_segments=_src_list_e,
+                    timing_map=timing_map,
+                    audits=_audits_mut_e,
+                    idx=idx,
+                    lang=str(target_lang or "uk"),
+                ):
+                    if isinstance(source_segments, list) and source_segments is not _src_list_e:
+                        source_segments[:] = _src_list_e
+                    if audits is not None and _audits_mut_e is not None:
+                        audits.clear()
+                        audits.extend(_audits_mut_e)
+                    audit_by_idx = {
+                        int(a.get("index", -1)): a for a in (audits or [])
+                    }
+                    n_children_e = int(
+                        (segments_data[idx].get("stage19e") or {}).get(
+                            "split_children"
+                        )
+                        or 0
+                    )
+                    if n_children_e < 2:
+                        n_children_e = 1
+                        while idx + n_children_e < len(segments_data):
+                            meta = segments_data[idx + n_children_e].get("stage19e") or {}
+                            if int(meta.get("split_parent_idx", -1)) != idx:
+                                break
+                            n_children_e += 1
+                    regen_ok_all_e = True
+                    if not callable(regen_fn):
+                        regen_ok_all_e = False
+                    else:
+                        for _ri in range(idx, idx + n_children_e):
+                            if _ri >= len(segments_data):
+                                regen_ok_all_e = False
+                                break
+                            _s = segments_data[_ri]
+                            _txt = str(
+                                _s.get("plain_text") or _s.get("text") or ""
+                            ).strip()
+                            if not _txt or _text_looks_english(_txt):
+                                regen_ok_all_e = False
+                                break
+                            try:
+                                _rr = regen_fn(
+                                    _txt,
+                                    voice=voice,
+                                    tts_rate=tts_rate,
+                                    tts_pitch=tts_pitch,
+                                    task_id=task_id,
+                                    segment_index=_ri,
+                                    segment_id=str(_s.get("segment_id") or ""),
+                                )
+                                if isinstance(_rr, tuple):
+                                    _nf, _nms = _rr[0], int(_rr[1] or 0)
+                                else:
+                                    _nf, _nms = _rr, 0
+                                if not _nf:
+                                    regen_ok_all_e = False
+                                    break
+                                _s["file"] = _nf
+                                _s["tts_file_path"] = _nf
+                                _s["final_tts_text"] = _txt
+                                if _nms > 0:
+                                    _s["playback_duration"] = _nms
+                                    _s["tts_ms"] = _nms
+                                    _s["actual_duration_ms"] = _nms
+                            except Exception as _rg_exc:
+                                logger.warning(
+                                    "closed_loop stage19e split regen failed idx=%s: %s",
+                                    _ri,
+                                    _rg_exc,
+                                )
+                                regen_ok_all_e = False
+                                break
+                    if not regen_ok_all_e:
+                        rollback_stage19c_split(
+                            segments_data=segments_data,
+                            source_segments=_src_list_e
+                            if isinstance(_src_list_e, list)
+                            else source_segments,
+                            timing_map=timing_map,
+                            audits=_audits_mut_e if audits is not None else None,
+                            idx=idx,
+                            n_children=n_children_e,
+                            parent_backup=_parent_backup_e,
+                            parent_src=_parent_src_e,
+                            parent_timing=_parent_timing_e,
+                        )
+                        if isinstance(source_segments, list) and source_segments is not _src_list_e:
+                            source_segments[:] = _src_list_e
+                        if audits is not None and _audits_mut_e is not None:
+                            audits.clear()
+                            audits.extend(_audits_mut_e)
+                    else:
+                        stats["resegmented"] += 1
+                        stats["adaptation_executed"] = True
+                        stats.setdefault("stage19e_splits", 0)
+                        stats["stage19e_splits"] = int(stats["stage19e_splits"]) + 1
+                        for _ri in range(idx, idx + n_children_e):
+                            if _ri >= len(segments_data):
+                                break
+                            _s = segments_data[_ri]
+                            if not (_s.get("file") or _s.get("tts_file_path")):
+                                continue
+                            _src = (
+                                source_segments[_ri]
+                                if _ri < len(source_segments)
+                                else ""
+                            )
+                            _budget = run_closed_loop_segment(
+                                _s,
+                                _ri,
+                                timing_map,
+                                source_hint=str(_src or ""),
+                                target_lang=target_lang,
+                                src_lang=src_lang,
+                                voice=voice,
+                                work_dir=work_dir,
+                                regen_fn=regen_fn,
+                                commit_fn=commit_fn,
+                                audit=audit_by_idx.get(_ri),
+                                max_iterations=0,
+                                tts_rate=tts_rate,
+                                tts_pitch=tts_pitch,
+                                task_id=task_id,
+                                resolve_path=resolve_path,
+                            )
+                            budgets.append(_budget)
+                            if _budget.final_status == "ok":
+                                stats["ok"] += 1
+                            elif int(_budget.rewrite_iterations or 0) > 0:
+                                stats["rewritten"] += 1
+                                stats["fixed"] += 1
+                            elif _budget.pause_adjustments_ms > 0:
+                                stats["pause_only"] += 1
+                            else:
+                                stats["failed"] += 1
+                        idx += n_children_e
+                        continue
+            except Exception as _s19e_exc:
+                logger.debug("closed_loop stage19e split skipped: %s", _s19e_exc)
+
         # Stage 19c §C: large overflow split (Happy Path included — not LLM-gated).
         if (
             before.status == "overflow"
@@ -2713,6 +3343,157 @@ def run_closed_loop_timing(
             task_id=task_id,
             resolve_path=resolve_path,
         )
+        # Stage 19e: anti-truncate may restore a giant Final mid-pass — split now.
+        if seg.get("needs_post_restore_split") and not seg.get("stage19e_split_done"):
+            try:
+                _src_list_e2 = (
+                    source_segments
+                    if isinstance(source_segments, list)
+                    else list(source_segments or [])
+                )
+                _audits_mut_e2 = list(audits) if audits is not None else None
+                import copy as _copy_s19e2
+
+                _parent_backup_e2 = _copy_s19e2.deepcopy(seg)
+                _parent_src_e2 = (
+                    source_segments[idx] if idx < len(source_segments) else src_hint
+                )
+                _parent_timing_e2 = (
+                    timing_map[idx]
+                    if idx < len(timing_map)
+                    else {"start": 0, "end": int(budget.slot_duration or 0)}
+                )
+                if try_stage19e_post_restore_split(
+                    segments_data=segments_data,
+                    source_segments=_src_list_e2,
+                    timing_map=timing_map,
+                    audits=_audits_mut_e2,
+                    idx=idx,
+                    lang=str(target_lang or "uk"),
+                ):
+                    if isinstance(source_segments, list) and source_segments is not _src_list_e2:
+                        source_segments[:] = _src_list_e2
+                    if audits is not None and _audits_mut_e2 is not None:
+                        audits.clear()
+                        audits.extend(_audits_mut_e2)
+                    audit_by_idx = {
+                        int(a.get("index", -1)): a for a in (audits or [])
+                    }
+                    n_e2 = int(
+                        (segments_data[idx].get("stage19e") or {}).get("split_children")
+                        or 0
+                    )
+                    if n_e2 < 2:
+                        n_e2 = 1
+                        while idx + n_e2 < len(segments_data):
+                            meta = segments_data[idx + n_e2].get("stage19e") or {}
+                            if int(meta.get("split_parent_idx", -1)) != idx:
+                                break
+                            n_e2 += 1
+                    regen_ok_e2 = bool(callable(regen_fn))
+                    if regen_ok_e2:
+                        for _ri in range(idx, idx + n_e2):
+                            if _ri >= len(segments_data):
+                                regen_ok_e2 = False
+                                break
+                            _s = segments_data[_ri]
+                            _txt = str(
+                                _s.get("plain_text") or _s.get("text") or ""
+                            ).strip()
+                            if not _txt or _text_looks_english(_txt):
+                                regen_ok_e2 = False
+                                break
+                            try:
+                                _rr = regen_fn(
+                                    _txt,
+                                    voice=voice,
+                                    tts_rate=tts_rate,
+                                    tts_pitch=tts_pitch,
+                                    task_id=task_id,
+                                    segment_index=_ri,
+                                    segment_id=str(_s.get("segment_id") or ""),
+                                )
+                                if isinstance(_rr, tuple):
+                                    _nf, _nms = _rr[0], int(_rr[1] or 0)
+                                else:
+                                    _nf, _nms = _rr, 0
+                                if not _nf:
+                                    regen_ok_e2 = False
+                                    break
+                                _s["file"] = _nf
+                                _s["tts_file_path"] = _nf
+                                _s["final_tts_text"] = _txt
+                                if _nms > 0:
+                                    _s["playback_duration"] = _nms
+                                    _s["tts_ms"] = _nms
+                                    _s["actual_duration_ms"] = _nms
+                            except Exception:
+                                regen_ok_e2 = False
+                                break
+                    if not regen_ok_e2:
+                        rollback_stage19c_split(
+                            segments_data=segments_data,
+                            source_segments=_src_list_e2
+                            if isinstance(_src_list_e2, list)
+                            else source_segments,
+                            timing_map=timing_map,
+                            audits=_audits_mut_e2 if audits is not None else None,
+                            idx=idx,
+                            n_children=n_e2,
+                            parent_backup=_parent_backup_e2,
+                            parent_src=str(_parent_src_e2 or ""),
+                            parent_timing=_parent_timing_e2,
+                        )
+                        budgets.append(budget)
+                    else:
+                        stats["resegmented"] += 1
+                        stats["adaptation_executed"] = True
+                        stats.setdefault("stage19e_splits", 0)
+                        stats["stage19e_splits"] = int(stats["stage19e_splits"]) + 1
+                        for _ri in range(idx, idx + n_e2):
+                            if _ri >= len(segments_data):
+                                break
+                            _s = segments_data[_ri]
+                            if not (_s.get("file") or _s.get("tts_file_path")):
+                                continue
+                            _src = (
+                                source_segments[_ri]
+                                if _ri < len(source_segments)
+                                else ""
+                            )
+                            _budget = run_closed_loop_segment(
+                                _s,
+                                _ri,
+                                timing_map,
+                                source_hint=str(_src or ""),
+                                target_lang=target_lang,
+                                src_lang=src_lang,
+                                voice=voice,
+                                work_dir=work_dir,
+                                regen_fn=regen_fn,
+                                commit_fn=commit_fn,
+                                audit=audit_by_idx.get(_ri),
+                                max_iterations=0,
+                                tts_rate=tts_rate,
+                                tts_pitch=tts_pitch,
+                                task_id=task_id,
+                                resolve_path=resolve_path,
+                            )
+                            budgets.append(_budget)
+                            if _budget.final_status == "ok":
+                                stats["ok"] += 1
+                            elif int(_budget.rewrite_iterations or 0) > 0:
+                                stats["rewritten"] += 1
+                                stats["fixed"] += 1
+                            else:
+                                stats["failed"] += 1
+                        idx += n_e2
+                        continue
+            except Exception as _s19e2_exc:
+                logger.debug(
+                    "closed_loop stage19e post-pass split skipped: %s", _s19e2_exc
+                )
+
         budgets.append(budget)
         stats["retries"] += int(budget.rewrite_iterations)
         if budget.rewrite_iterations > 0:
