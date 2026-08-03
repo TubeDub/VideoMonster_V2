@@ -23,8 +23,11 @@ STALL_IDLE_SEC: dict[str, float] = {
     "translation": 300.0,
     "ai_core": 300.0,
     # Long Edge/offline group can exceed 90s with no on_group_done (e0e03d).
-    "tts": 300.0,
-    "slot_fit": 180.0,
+    # Stage 20/21: tts_uk + closed_loop regen of split children can exceed 5 min.
+    "tts": 900.0,
+    "slot_fit": 600.0,
+    "closed_loop": 900.0,
+    "closed_loop_regen": 900.0,
     "voice_verification": 300.0,
     "adaptation": 300.0,
     "post_tts_qa": 240.0,

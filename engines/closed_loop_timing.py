@@ -931,6 +931,20 @@ def _scope_child_text_anchors(child: dict, unique_chunk: str) -> None:
     child["text_changed"] = True
 
 
+def _stage21_watchdog_heartbeat(task_id: str | None, **fields: Any) -> None:
+    """Keep PIPELINE_STALLED from firing during slow tts_uk / split regen."""
+    if not task_id:
+        return
+    try:
+        from engines.pipeline_watchdog import get_pipeline_watchdog
+
+        wd = get_pipeline_watchdog(str(task_id))
+        if wd is not None:
+            wd.heartbeat(**fields)
+    except Exception:
+        pass
+
+
 def try_stage19e_post_restore_split(
     *,
     segments_data: list[dict],
@@ -3510,6 +3524,9 @@ def run_closed_loop_timing(
                                 regen_ok_all_e = False
                                 break
                             try:
+                                _stage21_watchdog_heartbeat(
+                                    task_id, phase="stage21_split_regen", segment=_ri
+                                )
                                 _rr = regen_fn(
                                     _txt,
                                     voice=voice,
@@ -3533,6 +3550,9 @@ def run_closed_loop_timing(
                                     _s["playback_duration"] = _nms
                                     _s["tts_ms"] = _nms
                                     _s["actual_duration_ms"] = _nms
+                                _stage21_watchdog_heartbeat(
+                                    task_id, phase="stage21_split_regen_done", segment=_ri
+                                )
                             except Exception as _rg_exc:
                                 logger.warning(
                                     "closed_loop stage19e split regen failed idx=%s: %s",
@@ -3542,18 +3562,37 @@ def run_closed_loop_timing(
                                 regen_ok_all_e = False
                                 break
                     if not regen_ok_all_e:
-                        rollback_stage19c_split(
-                            segments_data=segments_data,
-                            source_segments=_src_list_e
-                            if isinstance(_src_list_e, list)
-                            else source_segments,
-                            timing_map=timing_map,
-                            audits=_audits_mut_e if audits is not None else None,
-                            idx=idx,
-                            n_children=n_children_e,
-                            parent_backup=_parent_backup_e,
-                            parent_src=_parent_src_e,
-                            parent_timing=_parent_timing_e,
+                        # Stage 21: never roll back a clean structural split just
+                        # because child TTS/network failed — keep children and
+                        # mark re-TTS; rolling back re-creates parent overflow.
+                        logger.warning(
+                            "[Stage21] keep force-split seg#%d children=%d "
+                            "despite regen failure (no rollback)",
+                            idx,
+                            n_children_e,
+                        )
+                        for _ri in range(idx, idx + n_children_e):
+                            if _ri >= len(segments_data):
+                                break
+                            _s = segments_data[_ri]
+                            _s["needs_re_tts"] = True
+                            _s["force_split_executed"] = True
+                            _s["split_executed"] = True
+                            meta21 = dict(_s.get("stage21") or {})
+                            meta21.update(
+                                {
+                                    "force_split_executed": True,
+                                    "split_executed": True,
+                                    "final_status": "stage21_partial",
+                                }
+                            )
+                            _s["stage21"] = meta21
+                            _s["stage19j"] = {**dict(_s.get("stage19j") or {}), **meta21}
+                        stats["resegmented"] += 1
+                        stats["adaptation_executed"] = True
+                        stats.setdefault("stage21_splits_kept_without_regen", 0)
+                        stats["stage21_splits_kept_without_regen"] = (
+                            int(stats["stage21_splits_kept_without_regen"]) + 1
                         )
                         if isinstance(source_segments, list) and source_segments is not _src_list_e:
                             source_segments[:] = _src_list_e
@@ -4039,18 +4078,35 @@ def run_closed_loop_timing(
                                 regen_ok_e2 = False
                                 break
                     if not regen_ok_e2:
-                        rollback_stage19c_split(
-                            segments_data=segments_data,
-                            source_segments=_src_list_e2
-                            if isinstance(_src_list_e2, list)
-                            else source_segments,
-                            timing_map=timing_map,
-                            audits=_audits_mut_e2 if audits is not None else None,
-                            idx=idx,
-                            n_children=n_e2,
-                            parent_backup=_parent_backup_e2,
-                            parent_src=str(_parent_src_e2 or ""),
-                            parent_timing=_parent_timing_e2,
+                        # Stage 21: keep structural split; do not restore overflow parent.
+                        logger.warning(
+                            "[Stage21] keep force-split (post-pass) seg#%d "
+                            "children=%d despite regen failure",
+                            idx,
+                            n_e2,
+                        )
+                        for _ri in range(idx, idx + n_e2):
+                            if _ri >= len(segments_data):
+                                break
+                            _s = segments_data[_ri]
+                            _s["needs_re_tts"] = True
+                            _s["force_split_executed"] = True
+                            _s["split_executed"] = True
+                            meta21 = dict(_s.get("stage21") or {})
+                            meta21.update(
+                                {
+                                    "force_split_executed": True,
+                                    "split_executed": True,
+                                    "final_status": "stage21_partial",
+                                }
+                            )
+                            _s["stage21"] = meta21
+                            _s["stage19j"] = {**dict(_s.get("stage19j") or {}), **meta21}
+                        stats["resegmented"] += 1
+                        stats["adaptation_executed"] = True
+                        stats.setdefault("stage21_splits_kept_without_regen", 0)
+                        stats["stage21_splits_kept_without_regen"] = (
+                            int(stats["stage21_splits_kept_without_regen"]) + 1
                         )
                         budgets.append(budget)
                     else:
