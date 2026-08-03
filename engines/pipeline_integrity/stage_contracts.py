@@ -180,6 +180,11 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             "tts_engine",
             "tts_voice",
             "tts_sample_rate",
+            # Stage 22 — Mykyta / tts_uk voice controls
+            "tts_rate",
+            "tts_pitch",
+            "tts_volume",
+            "tts_length_scale",
         }
     ),
     "slot_fit": frozenset(
