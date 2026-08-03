@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 13603, in _run_pipeline_inner
+    if not _simple_batch_tts:
+           ^^^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable '_simple_batch_tts' where it is not associated with a value

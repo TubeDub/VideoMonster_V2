@@ -1,0 +1,12 @@
+{
+  "task_id": "417bed69c82249d7a14e4b97e50f00a5",
+  "path": "stage6_parallel_cache",
+  "tts_cache_hits": 9,
+  "tts_cache_misses": 0,
+  "tts_skips_existing": 0,
+  "tts_retries": 0,
+  "tts_segments_total": 9,
+  "tts_concurrency_used": 6,
+  "tts_wall_sec": 0.038,
+  "tts_rate_limit_backs": 0
+}

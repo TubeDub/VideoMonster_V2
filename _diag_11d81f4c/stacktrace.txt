@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 14008, in _run_pipeline_inner
+    _mark_tts_segment_skipped(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        task_id,
+        ^^^^^^^^
+    ...<3 lines>...
+        reason="tts_failure",
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 2457, in _mark_tts_segment_skipped
+    mark_segment_tts_failed(segments_data[idx], report_obj)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\dubbing_engine\tts_failure_diag.py", line 284, in mark_segment_tts_failed
+    segment["tts_error"] = report.to_dict()
+                           ~~~~~~~~~~~~~~^^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\dubbing_engine\tts_failure_diag.py", line 89, in to_dict
+    "duration_ms": round(self.duration_ms, 2),
+                   ~~~~~^^^^^^^^^^^^^^^^^^^^^
+TypeError: type NoneType doesn't define __round__ method

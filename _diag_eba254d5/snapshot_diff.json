@@ -1,0 +1,6 @@
+{
+  "stage": "pipeline",
+  "task_id": "eba254d559374961b1cdd6af7784d854",
+  "error_type": "RuntimeError",
+  "message": "{'title': 'Обработка остановлена', 'reason': 'Этап завис: Озвучка (TTS). Сегмент 1. Нет активности 5 мин 0 с. Возможная причина: движок TTS завис или сеть недоступна.', 'reason_short': 'Этап завис: Озвучка (TTS). Сегмент 1. Нет активности 5 мин 0 с. Возможная причина: движок TTS завис или сеть недоступна.', 'error_code': 'PIPELINE_STALLED', 'stage': 'Озвучка (TTS)', 'segment': None, 'llm_diagnostics': {}}"
+}

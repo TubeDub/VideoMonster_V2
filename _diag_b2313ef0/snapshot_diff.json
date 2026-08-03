@@ -1,0 +1,6 @@
+{
+  "stage": "TTS",
+  "task_id": "b2313ef00f8c4b0582352f9cba415f07",
+  "error_type": "UnboundLocalError",
+  "message": "cannot access local variable '_simple_batch_tts' where it is not associated with a value"
+}

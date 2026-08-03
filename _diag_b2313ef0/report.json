@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "b2313ef00f8c4b0582352f9cba415f07",
+  "created_at": "2026-08-02T17:48:09.346618+00:00",
+  "task_id": "b2313ef00f8c4b0582352f9cba415f07",
+  "stage": "TTS",
+  "developer": {
+    "error_code": "UNBOUNDLOCALERROR",
+    "stage": "TTS",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "TTS",
+    "task_id": "b2313ef00f8c4b0582352f9cba415f07",
+    "error_type": "UnboundLocalError",
+    "message": "cannot access local variable '_simple_batch_tts' where it is not associated with a value"
+  },
+  "exception": {
+    "type": "UnboundLocalError",
+    "message": "cannot access local variable '_simple_batch_tts' where it is not associated with a value"
+  },
+  "timeline_event_count": 20
+}

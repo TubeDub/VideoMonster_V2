@@ -1,0 +1,292 @@
+{
+  "project_uuid": "69cffe34-5f5d-4bea-a593-9fe45afb86b3",
+  "pipeline_version": "2.0.0",
+  "manifest_version": "3.0",
+  "protocol_versions": {
+    "platform_spec_version": "3.0",
+    "ai_bus_version": "1.0",
+    "protocol_version": "1.0",
+    "manifest_version": "3.0",
+    "state_version": "1.0",
+    "global_skill_version": "1.0"
+  },
+  "ai_core_version": "3.0",
+  "planner_version": "3.0",
+  "task_id": "b2313ef00f8c4b0582352f9cba415f07",
+  "video_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\uploads\\video_d9897eceb4.mp4",
+  "target_lang": "uk",
+  "source_lang": "it",
+  "created_at": "2026-08-02T17:44:28+00:00",
+  "video_exists": true,
+  "audio_track_count": 1,
+  "duration_ms": 178773,
+  "segment_count_estimate": 22,
+  "language_hint": "it",
+  "content_type": "music",
+  "music_detected": true,
+  "noise_level": "high",
+  "audio_quality_score": 0.75,
+  "capability_matrix": {
+    "ffmpeg": true,
+    "ffprobe": true,
+    "pydub": true,
+    "langdetect": true,
+    "llm": false,
+    "asr": true,
+    "tts": true,
+    "gpu": false,
+    "cuda": false,
+    "whisper_model": true,
+    "details": {
+      "llm": "unavailable",
+      "whisper_device": "cpu",
+      "whisper_compute": "int8",
+      "hardware": {
+        "platform": "Windows-10-10.0.19045-SP0",
+        "cuda_devices": 0
+      },
+      "capability_registry": {
+        "llm": "NOT_CONFIGURED",
+        "asr": "CPU_FALLBACK",
+        "tts": "READY",
+        "voice_clone": "NOT_INSTALLED",
+        "lipsync": "NOT_AVAILABLE",
+        "separation": "READY",
+        "gpu": "CPU"
+      }
+    },
+    "registry": {
+      "schema": "tubedub.capability_registry.v1",
+      "capabilities": [
+        {
+          "id": "llm",
+          "label": "LLM",
+          "status": "NOT_CONFIGURED",
+          "model": "",
+          "provider": ""
+        },
+        {
+          "id": "asr",
+          "label": "ASR / Whisper",
+          "status": "CPU_FALLBACK",
+          "device": "cpu"
+        },
+        {
+          "id": "tts",
+          "label": "TTS",
+          "status": "READY",
+          "engine": "edge-tts"
+        },
+        {
+          "id": "voice_clone",
+          "label": "Voice Clone",
+          "status": "NOT_INSTALLED",
+          "adapter_id": "clone-null",
+          "hint": "Install Coqui TTS / XTTS (pip install TTS) for minimal clone flow"
+        },
+        {
+          "id": "lipsync",
+          "label": "LipSync",
+          "status": "NOT_AVAILABLE"
+        },
+        {
+          "id": "separation",
+          "label": "Separation",
+          "status": "READY"
+        },
+        {
+          "id": "gpu",
+          "label": "GPU",
+          "status": "CPU"
+        }
+      ],
+      "by_id": {
+        "llm": {
+          "id": "llm",
+          "label": "LLM",
+          "status": "NOT_CONFIGURED",
+          "model": "",
+          "provider": ""
+        },
+        "asr": {
+          "id": "asr",
+          "label": "ASR / Whisper",
+          "status": "CPU_FALLBACK",
+          "device": "cpu"
+        },
+        "tts": {
+          "id": "tts",
+          "label": "TTS",
+          "status": "READY",
+          "engine": "edge-tts"
+        },
+        "voice_clone": {
+          "id": "voice_clone",
+          "label": "Voice Clone",
+          "status": "NOT_INSTALLED",
+          "adapter_id": "clone-null",
+          "hint": "Install Coqui TTS / XTTS (pip install TTS) for minimal clone flow"
+        },
+        "lipsync": {
+          "id": "lipsync",
+          "label": "LipSync",
+          "status": "NOT_AVAILABLE"
+        },
+        "separation": {
+          "id": "separation",
+          "label": "Separation",
+          "status": "READY"
+        },
+        "gpu": {
+          "id": "gpu",
+          "label": "GPU",
+          "status": "CPU"
+        }
+      },
+      "llm_ready": false,
+      "asr_ready": true,
+      "tts_ready": true
+    },
+    "registry_schema": "tubedub.capability_registry.v1",
+    "llm_status": "NOT_CONFIGURED"
+  },
+  "smoke_tests": {
+    "tests": [
+      {
+        "name": "disk",
+        "passed": true,
+        "detail": "free_gb=16.70",
+        "elapsed_ms": 0.0
+      },
+      {
+        "name": "ram",
+        "passed": true,
+        "detail": "available_gb=5.65",
+        "elapsed_ms": 0.0
+      },
+      {
+        "name": "gpu",
+        "passed": true,
+        "detail": "cpu_only",
+        "elapsed_ms": 0.0
+      },
+      {
+        "name": "llm_ping",
+        "passed": false,
+        "detail": "offline",
+        "elapsed_ms": 0.0
+      },
+      {
+        "name": "whisper_warmup",
+        "passed": true,
+        "detail": "cpu/int8",
+        "elapsed_ms": 0.0
+      },
+      {
+        "name": "tts_test",
+        "passed": true,
+        "detail": "edge_tts",
+        "elapsed_ms": 0.0
+      },
+      {
+        "name": "ffmpeg",
+        "passed": true,
+        "detail": "found",
+        "elapsed_ms": 0.0
+      }
+    ],
+    "passed": 6,
+    "total": 7,
+    "all_passed": false,
+    "elapsed_ms": 99.0
+  },
+  "confidence_scores": {
+    "language": 0.45,
+    "content_type": 0.7,
+    "voice_clone": 0.8,
+    "music": 0.85,
+    "speakers": 0.7
+  },
+  "complexity_score": "MEDIUM",
+  "processing_strategy": "LOCAL_ONLY",
+  "resource_estimation": {
+    "time_estimate_sec": 268,
+    "llm_calls": 5,
+    "tts_chars": 1760,
+    "gpu_mem_mb": 0,
+    "ram_mb": 2048,
+    "disk_mb": 174
+  },
+  "decision_reasons": {
+    "complexity": "duration+segments+quality → MEDIUM",
+    "strategy": {
+      "llm": "LLM unavailable — LOCAL_ONLY"
+    },
+    "language": "hint=it conf=0.45",
+    "content_type": "music"
+  },
+  "agent_dependencies": {
+    "planner": [],
+    "extract_audio": [
+      "planner"
+    ],
+    "stt": [
+      "extract_audio"
+    ],
+    "translate": [
+      "stt"
+    ],
+    "tts": [
+      "translate"
+    ],
+    "timing": [
+      "tts"
+    ],
+    "dub": [
+      "timing"
+    ]
+  },
+  "success_criteria": {
+    "planner": {
+      "status": "success"
+    },
+    "stt": {
+      "segments_min": 1
+    },
+    "translate": {
+      "segments_min": 1
+    },
+    "tts": {
+      "audio_generated": true
+    },
+    "dub": {
+      "output_exists": true
+    }
+  },
+  "fallback_map": {
+    "llm": "rule_based_adaptation",
+    "tts": "edge_tts",
+    "stt": "smaller_whisper_model",
+    "translate": "mt_engine"
+  },
+  "agent_capabilities": {
+    "planner": {
+      "read_only": true,
+      "write_artifacts": true
+    },
+    "stt": {
+      "enabled": true,
+      "gpu": false
+    },
+    "translate": {
+      "enabled": true,
+      "llm": false
+    },
+    "tts": {
+      "enabled": true
+    },
+    "dub": {
+      "enabled": true
+    }
+  }
+}
