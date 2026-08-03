@@ -54,6 +54,125 @@ DEFAULT_EDGE_VOICE = "uk-UA-OstapNeural"
 DEFAULT_TTS_UK_VOICE = "mykyta"
 DEFAULT_PIPER_VOICE = "uk_UA-mykyta-high"
 
+# Stage 22 — Mykyta / tts_uk voice controls (clamped)
+MYKYTA_RATE_DEFAULT = 1.0
+MYKYTA_PITCH_DEFAULT = 0.0
+MYKYTA_VOLUME_DEFAULT = 1.0
+MYKYTA_LENGTH_SCALE_DEFAULT = 1.0
+MYKYTA_RATE_RANGE = (0.85, 1.15)
+MYKYTA_PITCH_RANGE = (-4.0, 4.0)
+MYKYTA_VOLUME_RANGE = (0.7, 1.3)
+MYKYTA_LENGTH_SCALE_RANGE = (0.85, 1.15)
+
+_pipeline_mykyta_controls: contextvars.ContextVar[dict[str, float] | None] = (
+    contextvars.ContextVar("pipeline_mykyta_controls", default=None)
+)
+
+
+def _clamp(val: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, float(val)))
+
+
+def _parse_mykyta_float(val: Any, default: float) -> float:
+    """Parse Mykyta numeric control; ignore Edge-style rate/pitch strings."""
+    if val is None:
+        return float(default)
+    if isinstance(val, (int, float)):
+        return float(val)
+    s = str(val).strip()
+    if not s:
+        return float(default)
+    # Edge-style: "-5%", "+2Hz" — not Mykyta numeric; keep default.
+    if s.endswith("%") or s.lower().endswith("hz"):
+        return float(default)
+    try:
+        return float(s)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def resolve_mykyta_controls(
+    raw: dict[str, Any] | None = None,
+    *,
+    env: bool = True,
+) -> dict[str, float]:
+    """Resolve rate / pitch / volume / length_scale for tts_uk (Mykyta)."""
+    src = dict(raw or {})
+    ctx = _pipeline_mykyta_controls.get()
+    if ctx:
+        for k, v in ctx.items():
+            src.setdefault(k, v)
+    if env:
+        for key, env_keys in (
+            ("rate", ("MYKYTA_RATE", "VM_MYKYTA_RATE", "TTS_UK_RATE")),
+            ("pitch", ("MYKYTA_PITCH", "VM_MYKYTA_PITCH", "TTS_UK_PITCH")),
+            ("volume", ("MYKYTA_VOLUME", "VM_MYKYTA_VOLUME", "TTS_UK_VOLUME")),
+            (
+                "length_scale",
+                ("MYKYTA_LENGTH_SCALE", "VM_MYKYTA_LENGTH_SCALE", "TTS_UK_LENGTH_SCALE"),
+            ),
+        ):
+            if key in src and src[key] is not None:
+                continue
+            for ek in env_keys:
+                ev = os.getenv(ek)
+                if ev is not None and str(ev).strip() != "":
+                    src[key] = ev
+                    break
+    rate = _clamp(
+        _parse_mykyta_float(src.get("rate"), MYKYTA_RATE_DEFAULT),
+        *MYKYTA_RATE_RANGE,
+    )
+    pitch = _clamp(
+        _parse_mykyta_float(src.get("pitch"), MYKYTA_PITCH_DEFAULT),
+        *MYKYTA_PITCH_RANGE,
+    )
+    volume = _clamp(
+        _parse_mykyta_float(src.get("volume"), MYKYTA_VOLUME_DEFAULT),
+        *MYKYTA_VOLUME_RANGE,
+    )
+    length_scale = _clamp(
+        _parse_mykyta_float(src.get("length_scale"), MYKYTA_LENGTH_SCALE_DEFAULT),
+        *MYKYTA_LENGTH_SCALE_RANGE,
+    )
+    return {
+        "rate": rate,
+        "pitch": pitch,
+        "volume": volume,
+        "length_scale": length_scale,
+    }
+
+
+def set_pipeline_mykyta_controls(controls: dict[str, Any] | None) -> None:
+    """Bind Mykyta controls for the current pipeline task."""
+    if not controls:
+        _pipeline_mykyta_controls.set(None)
+        return
+    _pipeline_mykyta_controls.set(resolve_mykyta_controls(controls, env=False))
+
+
+def bind_pipeline_tts_from_info(info: dict[str, Any] | None) -> str:
+    """Bind backend + Mykyta controls from task info; return engine id."""
+    info = info or {}
+    eid = normalize_backend_name(
+        info.get("tts_engine") or info.get("tts_backend") or DEFAULT_TTS_BACKEND
+    )
+    set_pipeline_tts_backend(eid)
+    if eid == ENGINE_TTS_UK:
+        set_pipeline_mykyta_controls(
+            {
+                "rate": info.get("mykyta_rate", info.get("tts_rate")),
+                "pitch": info.get("mykyta_pitch", info.get("tts_pitch")),
+                "volume": info.get("mykyta_volume", info.get("tts_volume")),
+                "length_scale": info.get(
+                    "mykyta_length_scale", info.get("tts_length_scale")
+                ),
+            }
+        )
+    else:
+        set_pipeline_mykyta_controls(None)
+    return eid
+
 _BACKEND_ALIASES = {
     "edge": ENGINE_EDGE,
     "edge-offline": ENGINE_EDGE,
@@ -204,8 +323,9 @@ def stamp_tts_backend_meta(
     engine_id: str | None,
     voice: str,
     sample_rate: int | None = None,
+    controls: dict[str, Any] | None = None,
 ) -> None:
-    """Write tts_backend / tts_voice / tts_sample_rate onto a segment."""
+    """Write tts_backend / tts_voice / tts_sample_rate (+ Mykyta controls) onto a segment."""
     eid = normalize_backend_name(engine_id)
     display = backend_display_name(eid)
     resolved = resolve_voice_for_backend(voice, eid)
@@ -220,6 +340,12 @@ def stamp_tts_backend_meta(
         seg.setdefault("tts_sample_rate", 22050)
     else:
         seg.setdefault("tts_sample_rate", 24000)
+    if eid == ENGINE_TTS_UK:
+        ctrl = resolve_mykyta_controls(controls)
+        seg["tts_rate"] = ctrl["rate"]
+        seg["tts_pitch"] = ctrl["pitch"]
+        seg["tts_volume"] = ctrl["volume"]
+        seg["tts_length_scale"] = ctrl["length_scale"]
 
 
 def estimate_duration_ms(
@@ -264,20 +390,36 @@ def synthesize_with_backend(
     engine_id: str | None = None,
     rate: str | None = None,
     pitch: str | None = None,
+    volume: float | None = None,
+    length_scale: float | None = None,
+    mykyta_controls: dict[str, Any] | None = None,
 ) -> Any:
     """Synthesize with normalize + voice resolve + Edge fallback."""
     from engines.tts_engines.registry import synthesize
 
     eid = normalize_backend_name(engine_id)
     resolved = resolve_voice_for_backend(voice, eid)
-    result = synthesize(
-        text,
-        resolved,
-        output_path,
-        engine_id=eid,
-        rate=rate,
-        pitch=pitch,
-    )
+    synth_kwargs: dict[str, Any] = {
+        "engine_id": eid,
+        "rate": rate,
+        "pitch": pitch,
+    }
+    if eid == ENGINE_TTS_UK:
+        ctrl = resolve_mykyta_controls(
+            {
+                **(mykyta_controls or {}),
+                **({} if rate is None else {"rate": rate}),
+                **({} if pitch is None else {"pitch": pitch}),
+                **({} if volume is None else {"volume": volume}),
+                **({} if length_scale is None else {"length_scale": length_scale}),
+            }
+        )
+        # Prefer numeric Mykyta controls over Edge-style rate/pitch strings.
+        synth_kwargs["rate"] = str(ctrl["rate"])
+        synth_kwargs["pitch"] = str(ctrl["pitch"])
+        synth_kwargs["volume"] = ctrl["volume"]
+        synth_kwargs["length_scale"] = ctrl["length_scale"]
+    result = synthesize(text, resolved, output_path, **synth_kwargs)
     if not result.ok and eid != ENGINE_EDGE:
         logger.warning(
             "[TTS] %s failed (%s) — fallback edge-offline",

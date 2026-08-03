@@ -1617,6 +1617,26 @@ body.dev-mode .tr-dev-only { display: block; }
   opacity: 0.7;
   line-height: 1.35;
 }
+.wizard-mykyta-controls {
+  margin: 0 0 1rem;
+  max-width: 28rem;
+}
+.wizard-mykyta-sliders {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+.wizard-mykyta-sliders label {
+  display: grid;
+  grid-template-columns: 6.5em 1fr 3.2em;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+.wizard-mykyta-sliders input[type="range"] {
+  width: 100%;
+}
 .wizard-voice-tile {
   min-height: 84px;
   align-items: flex-start;

@@ -61,21 +61,31 @@ STAGE19J_OK_FILL_LO = 0.85
 STAGE19J_OK_FILL_HI = 1.12
 STAGE21_OK_FILL_LO = 0.85
 STAGE21_OK_FILL_HI = 1.12
+# Stage 22: tighter dead-air band — expand until ≥0.90, never past 1.12.
+STAGE22_OK_FILL_LO = 0.90
+STAGE22_OK_FILL_HI = 1.12
 UNDERFLOW_TRIGGER_MS = 350
 OVERFLOW_TRIGGER_MS = 350
 MAX_SOFT_PADS_PER_SEG = 1
+ALLOWED_EXPAND: tuple[str, ...] = (
+    "semantic_repeat_key",
+    "glossary_full_term",
+    "soft_pad_whitelist_once",
+)
 # Soft expand pads (strict whitelist — never "Саме про … тут ідеться").
 SOFT_PAD_WHITELIST: tuple[str, ...] = (
     "саме тоді",
     "і саме в цей момент",
     "отже",
     "тому",
+    "в той момент",
 )
 _STAGE19G_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19H_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19I_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19J_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE21_SOFT_PADS = SOFT_PAD_WHITELIST
+_STAGE22_SOFT_PADS = SOFT_PAD_WHITELIST
 # Stage 21: kill garbage expand — "Саме про …", ", Джордж.", crumbs.
 GARBAGE_EXPAND_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"(?i)Саме про .+ тут ідеться\.?"),
@@ -1606,6 +1616,17 @@ def _stage19g_repeat_key_noun(text: str) -> tuple[str, bool]:
     return _stage19j_repeat_key_phrase(text)
 
 
+def _fill_ratio_for_text(text: str, slot_ms: int, lang: str = "uk") -> float:
+    slot = max(1, int(slot_ms or 0))
+    pred = max(0, int(estimate_tts_ms(text, lang) or 0))
+    return pred / float(slot)
+
+
+def _in_stage22_fill_band(text: str, slot_ms: int, lang: str = "uk") -> bool:
+    fr = _fill_ratio_for_text(text, slot_ms, lang)
+    return STAGE22_OK_FILL_LO <= fr <= STAGE22_OK_FILL_HI
+
+
 def expand_to_fill(
     final_text: str,
     *,
@@ -1617,83 +1638,66 @@ def expand_to_fill(
     target_chars: int | None = None,
     strategy_order: list[str] | tuple[str, ...] | None = None,
 ) -> tuple[str, list[str]]:
-    """Stage 21: lengthen only with clean utterances — hard-refuse garbage.
+    """Stage 22: smart expand — only clean strategies, fill band 0.90–1.12.
 
-    Order: semantic_repeat_key_entity → glossary_full_term → soft_pad_whitelist_once (≤1).
-    If no clean growth possible → return original (expand_executed = False).
+    Order: semantic_repeat_key → glossary_full_term → soft_pad_whitelist_once (≤1).
+    Better dead-air than garbage. Returns (text, reasons); grown iff
+    ``stage22:text_grown`` in reasons.
     """
+    del target_chars  # Stage 22 uses predicted TTS ms / slot fill, not char budget.
     before = strip_garbage_expand_phrases(_normalize_chunk(final_text))
-    before_chars = len(clean_text_chars(before))
-    slot_equiv = int(max(0, target_ms) / max(EXPAND_AIM_RATIO, 0.01))
-    aim_chars = int(target_chars) if target_chars is not None else char_budget(slot_equiv)
-    anchor = strip_garbage_expand_phrases(_normalize_chunk(prefer_raw or raw_mt))
+    if is_garbage_expand(before):
+        before = strip_garbage_expand_phrases(before)
     reasons: list[str] = []
     blocked = 0
-    aim = max(200, int(target_ms or 0))
-    order = list(
-        strategy_order
-        or ("semantic_repeat_key", "glossary_expand", "soft_pad_once")
-    )
+    slot_ms = max(1, int(target_ms or 0))
+    # Spec: expand aim is the slot itself (0.90–1.12 of slot).
+    if not before:
+        reasons.append("stage22:expand_refused")
+        return before, reasons
+    if _fill_ratio_for_text(before, slot_ms, lang) >= STAGE22_OK_FILL_LO:
+        reasons.append("stage22:already_filled")
+        return before, reasons
 
-    def _accept(candidate: str) -> bool:
+    anchor = strip_garbage_expand_phrases(_normalize_chunk(prefer_raw or raw_mt))
+    order = list(strategy_order or ALLOWED_EXPAND)
+
+    def _accept_clean(candidate: str) -> bool:
         c = strip_garbage_expand_phrases(_normalize_chunk(candidate))
         if not c or c == before:
-            return False
-        if len(clean_text_chars(c)) <= before_chars:
             return False
         if is_garbage_expand(c):
             return False
         if soft_pad_count(c) > MAX_SOFT_PADS_PER_SEG:
             return False
-        if not is_clean_utterance(c) and not (
-            _is_complete_thought(c) and not is_garbage_expand(c)
-        ):
+        if not is_clean_utterance(c):
             return False
         if not _expand_lang_ok(c, lang):
             return False
         return True
 
-    def _still_short(candidate: str) -> bool:
-        c = _normalize_chunk(candidate)
-        return (
-            len(clean_text_chars(c)) < int(aim_chars * 0.85)
-            or estimate_tts_ms(c, lang) < aim
-        )
+    def _try_accept(cand: str, tag: str) -> str | None:
+        nonlocal blocked
+        c = strip_garbage_expand_phrases(_normalize_chunk(cand))
+        if not _accept_clean(c):
+            if c and c != before:
+                blocked += 1
+                reasons.append("stage22:garbage_expand_blocked")
+            return None
+        fr = _fill_ratio_for_text(c, slot_ms, lang)
+        # Stage 22: accept only clean candidates inside fill band 0.90–1.12.
+        if fr > STAGE22_OK_FILL_HI:
+            blocked += 1
+            reasons.append("stage22:expand_overshoot_blocked")
+            return None
+        if fr < STAGE22_OK_FILL_LO:
+            return None
+        reasons.append(tag)
+        return c
 
     out = before
-    # Rule expand first — accept only if clean.
-    try:
-        ruled, rule_reasons = expand_text_to_slot(
-            before,
-            slot_equiv,
-            lang,
-            source_hint=source_hint,
-            raw_mt=anchor or raw_mt,
-        )
-        ruled = strip_garbage_expand_phrases(_normalize_chunk(ruled) or before)
-        if _accept(ruled):
-            out = ruled
-            reasons.extend(list(rule_reasons or []))
-        elif ruled != before:
-            blocked += 1
-            reasons.append("stage21:garbage_expand_blocked")
-    except Exception:
-        pass
-
-    # Longer clean semantic/raw replacement (whole text, not a crumb append).
-    if (
-        (_still_short(out) or out == before)
-        and anchor
-        and anchor != out
-        and _accept(anchor)
-    ):
-        out = strip_slot_pad_fillers(anchor)
-        reasons.append("stage21:force_raw_prefer")
-        if "raw_prefer" not in reasons:
-            reasons.append("raw_prefer")
-
     for step in order:
-        if _accept(out) and not _still_short(out) and out != before:
+        if _in_stage22_fill_band(out, slot_ms, lang) and out != before:
             break
         if step in (
             "semantic_repeat_key",
@@ -1701,62 +1705,68 @@ def expand_to_fill(
             "semantic_repeat_key_entity",
         ):
             rep, ok = _stage19j_repeat_key_phrase(out)
-            if ok and _accept(rep):
-                out = rep
-                reasons.append("stage21:semantic_repeat_key")
-            elif ok or (rep != out and is_garbage_expand(rep)):
-                blocked += 1
-                reasons.append("stage21:garbage_expand_blocked")
+            if ok:
+                got = _try_accept(rep, "stage22:semantic_repeat_key")
+                if got:
+                    out = got
+                    if _in_stage22_fill_band(out, slot_ms, lang):
+                        break
         elif step in ("glossary_expand", "glossary_full_term"):
             inj, ok = _stage19g_inject_glossary_anchors(
                 out, source_hint=source_hint, raw_mt=anchor or raw_mt
             )
-            inj = strip_garbage_expand_phrases(_normalize_chunk(inj))
-            if ok and _accept(inj):
-                out = inj
-                reasons.append("stage21:glossary_expand")
-            elif ok:
-                blocked += 1
-                reasons.append("stage21:garbage_expand_blocked")
+            if ok:
+                got = _try_accept(inj, "stage22:glossary_full_term")
+                if got:
+                    out = got
+                    if _in_stage22_fill_band(out, slot_ms, lang):
+                        break
         elif step in ("soft_pad_once", "soft_pad_whitelist_once"):
             if soft_pad_count(out) >= MAX_SOFT_PADS_PER_SEG:
                 continue
-            padded, ok = _stage19g_soft_pad_once(out, lang)
-            padded = strip_garbage_expand_phrases(_normalize_chunk(padded))
-            if (
-                ok
-                and _accept(padded)
-                and soft_pad_count(padded) <= MAX_SOFT_PADS_PER_SEG
-            ):
-                out = padded
-                reasons.append("stage21:soft_pad")
-            elif ok:
-                blocked += 1
-                reasons.append("stage21:garbage_expand_blocked")
+            # Stage 22 preferred form: "<sentence>, <pad>."
+            base = out.rstrip(".!?…")
+            for pad in SOFT_PAD_WHITELIST:
+                if pad.lower() in out.lower():
+                    continue
+                trial = f"{base}, {pad}."
+                got = _try_accept(trial, "stage22:soft_pad_whitelist_once")
+                if got:
+                    out = got
+                    break
+            if _in_stage22_fill_band(out, slot_ms, lang) and out != before:
+                break
 
-    out = strip_garbage_expand_phrases(
-        strip_slot_pad_fillers(_normalize_chunk(out))
-    )
-    # Hard refuse: any garbage pattern, soft_pad>1, or no real clean growth.
+    out = strip_garbage_expand_phrases(strip_slot_pad_fillers(_normalize_chunk(out)))
     if (
-        is_garbage_expand(out)
+        out == before
+        or is_garbage_expand(out)
         or soft_pad_count(out) > MAX_SOFT_PADS_PER_SEG
-        or not _accept(out)
+        or not is_clean_utterance(out)
+        or not _in_stage22_fill_band(out, slot_ms, lang)
     ):
-        if out != before:
+        if out != before and is_garbage_expand(out):
             blocked += 1
-            reasons.append("stage21:garbage_expand_blocked")
+            reasons.append("stage22:garbage_expand_blocked")
         out = before
-        reasons = [r for r in reasons if "grown" not in str(r)]
+        reasons = [
+            r
+            for r in reasons
+            if "grown" not in str(r)
+            and "semantic_repeat" not in str(r)
+            and "glossary" not in str(r)
+            and "soft_pad" not in str(r)
+        ]
         if blocked:
-            reasons.append(f"stage21:blocked_count:{blocked}")
-        # expand_executed = False signal for callers
-        reasons.append("stage21:expand_refused")
+            reasons.append(f"stage22:blocked_count:{blocked}")
+        reasons.append("stage22:expand_refused")
         return out, reasons
+
+    reasons.append("stage22:text_grown")
     reasons.append("stage21:text_grown")
-    reasons.append("stage19j:text_grown")  # backward-compatible reason tag
+    reasons.append("stage19j:text_grown")
     if blocked:
-        reasons.append(f"stage21:blocked_count:{blocked}")
+        reasons.append(f"stage22:blocked_count:{blocked}")
     return out, reasons
 
 

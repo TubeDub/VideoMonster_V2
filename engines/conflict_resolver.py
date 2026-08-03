@@ -33,6 +33,8 @@ SAFE_ATEMPO_MIN = 0.95  # TZ v4.0 P2: ±5%
 EMERGENCY_ATEMPO_MAX = 1.12  # red overflow after DSAL exhausted
 MAX_REFLOW_MS = 185
 LOCAL_WINDOW_NEIGHBORS = 1
+# Stage 22: force ripple shift of neighbors when placement overlap is severe.
+STAGE22_RIPPLE_OVERLAP_MS = 400
 
 
 @dataclass
@@ -287,11 +289,43 @@ def _resolve_pair(
         _record_trace(traces, cur, "safe_stretch", t0)
         return True
 
+    # Stage 22: severe overlap → forced ripple shift of next neighbor(s).
+    if overlap > STAGE22_RIPPLE_OVERLAP_MS and _try_ripple_shift_neighbors(
+        segments, i
+    ):
+        _record_trace(traces, nxt, "ripple_shift", t0)
+        return True
+
     cur.status = "overflow"
     cur.strategy = "overflow"
     cur.decision_path.append("overflow:unresolved")
     _record_trace(traces, cur, "overflow", t0)
     return False
+
+
+def _try_ripple_shift_neighbors(segments: list[SegmentPlacement], i: int) -> bool:
+    """Push following segments forward until overlap with i is cleared (cascade)."""
+    if i + 1 >= len(segments):
+        return False
+    cur = segments[i]
+    nxt = segments[i + 1]
+    if _overlap_ms(cur, nxt) <= STAGE22_RIPPLE_OVERLAP_MS:
+        return False
+    for j in range(i, len(segments) - 1):
+        a = segments[j]
+        b = segments[j + 1]
+        ov = _overlap_ms(a, b)
+        if ov <= OVERLAP_TOLERANCE_MS:
+            continue
+        new_start = a.effective_end_ms + MIN_GAP_MS
+        if new_start <= b.place_start_ms:
+            continue
+        old = b.place_start_ms
+        b.place_start_ms = new_start
+        b.status = "shift"
+        b.strategy = "ripple_shift"
+        b.decision_path.append(f"stage22:ripple_shift {old}->{new_start}")
+    return _overlap_ms(cur, nxt) <= OVERLAP_TOLERANCE_MS
 
 
 def _record_trace(
@@ -402,6 +436,7 @@ def resolve_conflicts(
         "local_shift": 0,
         "local_reflow": 0,
         "safe_stretch": 0,
+        "ripple_shift": 0,
         "overflow": 0,
         "intact": 0,
     }
@@ -418,7 +453,11 @@ def resolve_conflicts(
             strategy_counts["local_shift"] += 1
 
     intact = strategy_counts["intact"]
-    shift_only = strategy_counts["free_window"] + strategy_counts["local_shift"]
+    shift_only = (
+        strategy_counts["free_window"]
+        + strategy_counts["local_shift"]
+        + strategy_counts["ripple_shift"]
+    )
     stretch_only = strategy_counts["safe_stretch"] + strategy_counts["local_reflow"]
     overflow = strategy_counts["overflow"]
 

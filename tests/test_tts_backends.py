@@ -108,7 +108,7 @@ def test_synthesize_with_backend_fallback_on_failure(tmp_path: Path):
     out = str(tmp_path / "out.mp3")
     calls = []
 
-    def _synth(text, voice, output_path, *, engine_id=None, rate=None, pitch=None):
+    def _synth(text, voice, output_path, *, engine_id=None, rate=None, pitch=None, **_kw):
         calls.append(engine_id)
         if engine_id == "tts_uk":
             return TTSResult(ok=False, engine_id="tts_uk", error="missing")

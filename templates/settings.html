@@ -131,6 +131,39 @@
       </select>
     </div>
 
+    <div id="s-mykyta-controls" class="field-group" style="display:none">
+      <label>Mykyta / tts_uk — параметры голоса</label>
+      <div style="display:grid;gap:10px;margin-top:8px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
+          <span style="min-width:7.5em">Скорость</span>
+          <input type="range" id="s-mykyta-rate" min="0.85" max="1.15" step="0.01" value="1.00"
+            oninput="onMykytaSlider('rate', this.value)" style="flex:1" />
+          <span id="s-mykyta-rate-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.00</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
+          <span style="min-width:7.5em">Высота</span>
+          <input type="range" id="s-mykyta-pitch" min="-4" max="4" step="0.5" value="0"
+            oninput="onMykytaSlider('pitch', this.value)" style="flex:1" />
+          <span id="s-mykyta-pitch-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">0</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
+          <span style="min-width:7.5em">Громкость</span>
+          <input type="range" id="s-mykyta-volume" min="0.7" max="1.3" step="0.01" value="1.00"
+            oninput="onMykytaSlider('volume', this.value)" style="flex:1" />
+          <span id="s-mykyta-volume-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.00</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
+          <span style="min-width:7.5em">Длительность</span>
+          <input type="range" id="s-mykyta-length" min="0.85" max="1.15" step="0.01" value="1.00"
+            oninput="onMykytaSlider('length_scale', this.value)" style="flex:1" />
+          <span id="s-mykyta-length-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.00</span>
+        </label>
+      </div>
+      <p class="field-hint" style="margin-top:6px;opacity:.75;font-size:.9em">
+        Применяются только для backend tts_uk (Mykyta / Lada / Tetiana).
+      </p>
+    </div>
+
     <div class="field-group">
       <label>Предпрослушать голос</label>
       <div class="row-group">
@@ -551,8 +584,28 @@
     ],
   };
 
+  function onMykytaSlider(kind, val) {
+    const n = Number(val);
+    const map = {
+      rate: 's-mykyta-rate-label',
+      pitch: 's-mykyta-pitch-label',
+      volume: 's-mykyta-volume-label',
+      length_scale: 's-mykyta-length-label',
+    };
+    const el = document.getElementById(map[kind]);
+    if (!el) return;
+    el.textContent = kind === 'pitch' ? String(n) : n.toFixed(2);
+  }
+
+  function syncMykytaControlsVisibility() {
+    const backend = (document.getElementById('s-tts-backend') || {}).value || 'edge-offline';
+    const box = document.getElementById('s-mykyta-controls');
+    if (box) box.style.display = backend === 'tts_uk' ? '' : 'none';
+  }
+
   function onTtsBackendChange() {
     updateVoiceList();
+    syncMykytaControlsVisibility();
   }
 
   function updateVoiceList() {
@@ -579,10 +632,21 @@
     const engine_id = (document.getElementById('s-tts-backend') || {}).value || 'edge-offline';
     if (!text) return;
     setStatus('Генерация превью...');
+    const body = { text: text.slice(0, 300), voice, engine_id };
+    if (engine_id === 'tts_uk') {
+      body.rate = Number((document.getElementById('s-mykyta-rate') || {}).value || 1);
+      body.pitch = Number((document.getElementById('s-mykyta-pitch') || {}).value || 0);
+      body.volume = Number((document.getElementById('s-mykyta-volume') || {}).value || 1);
+      body.length_scale = Number((document.getElementById('s-mykyta-length') || {}).value || 1);
+      body.mykyta_rate = body.rate;
+      body.mykyta_pitch = body.pitch;
+      body.mykyta_volume = body.volume;
+      body.mykyta_length_scale = body.length_scale;
+    }
     fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text.slice(0, 300), voice, engine_id })
+      body: JSON.stringify(body)
     }).then(r => r.json()).then(d => {
       if (d.error) { setStatus('Ошибка: ' + d.error); return; }
       const player = document.getElementById('preview-player');
@@ -612,6 +676,10 @@
     const strictEl = document.getElementById('s-strict-llm-adaptation');
     const origVolEl = document.getElementById('s-original-volume');
     const backendEl = document.getElementById('s-tts-backend');
+    const rateEl = document.getElementById('s-mykyta-rate');
+    const pitchEl = document.getElementById('s-mykyta-pitch');
+    const volEl = document.getElementById('s-mykyta-volume');
+    const lenEl = document.getElementById('s-mykyta-length');
     const settings = {
       ...prev,
       voice: document.getElementById('s-voice').value,
@@ -623,6 +691,10 @@
       uiSounds: document.getElementById('s-ui-sounds').checked,
       strictLlmAdaptation: strictEl ? strictEl.value : (prev.strictLlmAdaptation || 'automatic'),
       originalVolume: origVolEl ? Math.max(0, Math.min(100, Number(origVolEl.value) || 0)) : (prev.originalVolume ?? 20),
+      mykyta_rate: rateEl ? Number(rateEl.value) : (prev.mykyta_rate ?? 1.0),
+      mykyta_pitch: pitchEl ? Number(pitchEl.value) : (prev.mykyta_pitch ?? 0),
+      mykyta_volume: volEl ? Number(volEl.value) : (prev.mykyta_volume ?? 1.0),
+      mykyta_length_scale: lenEl ? Number(lenEl.value) : (prev.mykyta_length_scale ?? 1.0),
     };
     localStorage.setItem('vm_settings', JSON.stringify(settings));
     vmNotify('Настройки сохранены ✓', 'success', 2500);
@@ -1521,6 +1593,19 @@
       const vsel = document.getElementById('s-voice');
       if (vsel) vsel.value = saved.voice;
     }
+    const rateEl = document.getElementById('s-mykyta-rate');
+    const pitchEl = document.getElementById('s-mykyta-pitch');
+    const volEl = document.getElementById('s-mykyta-volume');
+    const lenEl = document.getElementById('s-mykyta-length');
+    if (rateEl && saved.mykyta_rate != null) rateEl.value = String(saved.mykyta_rate);
+    if (pitchEl && saved.mykyta_pitch != null) pitchEl.value = String(saved.mykyta_pitch);
+    if (volEl && saved.mykyta_volume != null) volEl.value = String(saved.mykyta_volume);
+    if (lenEl && saved.mykyta_length_scale != null) lenEl.value = String(saved.mykyta_length_scale);
+    if (rateEl) onMykytaSlider('rate', rateEl.value);
+    if (pitchEl) onMykytaSlider('pitch', pitchEl.value);
+    if (volEl) onMykytaSlider('volume', volEl.value);
+    if (lenEl) onMykytaSlider('length_scale', lenEl.value);
+    syncMykytaControlsVisibility();
     refreshLlmCapabilityLine();
     const uiSoundsEl = document.getElementById('s-ui-sounds');
     if (uiSoundsEl) uiSoundsEl.checked = saved.uiSounds !== false;

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Stage 20 — tts_uk (RAD-TTS++ + Vocos) backend adapter."""
+"""Stage 20/22 — tts_uk (RAD-TTS++ + Vocos) backend adapter + Mykyta controls."""
 
 from __future__ import annotations
 
@@ -38,7 +38,6 @@ class TtsUkEngine:
         t = " ".join(str(text or "").split()).strip()
         if not t:
             return 0
-        # Comfortable UK CPS ~14 chars/sec (spaces excluded lightly).
         chars = len(t.replace(" ", ""))
         return max(200, int((chars / 14.0) * 1000.0))
 
@@ -50,6 +49,9 @@ class TtsUkEngine:
         *,
         rate: str | None = None,
         pitch: str | None = None,
+        volume: float | None = None,
+        length_scale: float | None = None,
+        **kwargs,
     ) -> TTSResult:
         t0 = time.perf_counter()
         if not self.is_available():
@@ -61,7 +63,7 @@ class TtsUkEngine:
         from engines.tts_backends import (
             TTS_UK_VOICES,
             ensure_wav_sample_rate,
-            rate_to_length_scale,
+            resolve_mykyta_controls,
             resolve_voice_for_backend,
         )
 
@@ -82,20 +84,25 @@ class TtsUkEngine:
         v = resolve_voice_for_backend(voice, self.id).lower()
         if v not in TTS_UK_VOICES:
             v = "mykyta"
-        length_scale = rate_to_length_scale(rate)
-        # token_dur_scaling: >1 lengthens speech (inverse of Edge rate speedup)
-        token_dur = max(0.5, min(2.0, 1.0 / max(0.5, length_scale)))
-        # Optional pitch → mild f0_mean shift (Hz-ish; package accepts relative)
-        f0_mean = 0.0
-        if pitch:
-            try:
-                p = str(pitch).strip()
-                if p.endswith("Hz"):
-                    f0_mean = float(p.replace("Hz", "").replace("+", ""))
-                elif p.endswith("%"):
-                    f0_mean = float(p[:-1].replace("+", "")) * 0.5
-            except (TypeError, ValueError):
-                f0_mean = 0.0
+
+        ctrl = resolve_mykyta_controls(
+            {
+                "rate": rate,
+                "pitch": pitch,
+                "volume": volume if volume is not None else kwargs.get("volume"),
+                "length_scale": length_scale
+                if length_scale is not None
+                else kwargs.get("length_scale"),
+            }
+        )
+        # token_dur_scaling: >1 lengthens; combine speaking rate + length_scale.
+        # Faster rate → shorter duration → lower token_dur.
+        token_dur = max(
+            0.5,
+            min(2.0, float(ctrl["length_scale"]) / max(0.5, float(ctrl["rate"]))),
+        )
+        # Pitch in semitones → mild f0_mean shift (~12 Hz per semitone).
+        f0_mean = float(ctrl["pitch"]) * 12.0
 
         path = Path(output_path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -134,7 +141,21 @@ class TtsUkEngine:
         if not wav_path.is_file() or wav_path.stat().st_size == 0:
             return TTSResult(ok=False, engine_id=self.id, error="empty_output")
 
-        # Downstream Edge path often expects mp3/24k — resample + optional convert.
+        # Volume gain (pydub) when ≠ 1.0
+        if abs(float(ctrl["volume"]) - 1.0) > 0.01:
+            try:
+                from pydub import AudioSegment
+
+                audio = AudioSegment.from_wav(str(wav_path))
+                # dB ≈ 20*log10(volume)
+                import math
+
+                db = 20.0 * math.log10(max(0.01, float(ctrl["volume"])))
+                audio = audio.apply_gain(db)
+                audio.export(str(wav_path), format="wav")
+            except Exception as exc:
+                logger.debug("tts_uk volume apply skipped: %s", exc)
+
         out = ensure_wav_sample_rate(wav_path, _DOWNSTREAM_SR)
         final = Path(output_path)
         if final.suffix.lower() == ".mp3" and out.suffix.lower() == ".wav":
@@ -148,7 +169,6 @@ class TtsUkEngine:
                     except Exception:
                         pass
             except Exception:
-                # Keep wav if mp3 export fails — rename/copy
                 if out != final:
                     final = out if out.suffix == ".wav" else wav_path
         elif out != final:
@@ -179,6 +199,10 @@ class TtsUkEngine:
                 "voice": v,
                 "tts_backend": "tts_uk",
                 "tts_sample_rate": _SAMPLE_RATE,
+                "tts_rate": ctrl["rate"],
+                "tts_pitch": ctrl["pitch"],
+                "tts_volume": ctrl["volume"],
+                "tts_length_scale": ctrl["length_scale"],
                 "token_dur_scaling": token_dur,
                 "stats": stats if isinstance(stats, dict) else {},
                 "duration_ms": dur_ms,

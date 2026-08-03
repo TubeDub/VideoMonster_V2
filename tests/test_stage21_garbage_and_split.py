@@ -65,7 +65,11 @@ def test_expand_never_produces_same_pro_filler():
     assert soft_pad_count(out) <= 1
     assert ", Джордж." not in out
     if out == short:
-        assert "stage21:expand_refused" in reasons or "blocked" in " ".join(reasons)
+        assert (
+            "stage22:expand_refused" in reasons
+            or "stage21:expand_refused" in reasons
+            or "blocked" in " ".join(reasons)
+        )
 
 
 def test_strip_garbage_expand_phrases():

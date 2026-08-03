@@ -57,6 +57,9 @@ STAGE19J_OK_FILL_LO = 0.85
 STAGE19J_OK_FILL_HI = 1.12
 STAGE21_OK_FILL_LO = 0.85
 STAGE21_OK_FILL_HI = 1.12
+# Stage 22: tighter OK band for dead-air killer.
+STAGE22_OK_FILL_LO = 0.90
+STAGE22_OK_FILL_HI = 1.12
 UNDERFLOW_TRIGGER_MS = 350
 OVERFLOW_TRIGGER_MS = 350
 OVERFLOW_FORCE_SPLIT_MS = 350
@@ -1724,29 +1727,34 @@ def _stamp_stage19e_fields(
     )
     cps_ok = (cps_now <= 0.0) or (MIN_CPS_UK <= cps_now <= MAX_CPS_UK)
     if is_garbage_expand(seg_text):
-        final_status = "stage21_partial"
+        final_status = "stage22_partial"
         garbage_blocked = max(garbage_blocked, 1)
     elif not unique_text_ok or not clean_split_ok:
-        final_status = "overflow_unresolved" if not unique_text_ok else "stage21_partial"
+        final_status = "overflow_unresolved" if not unique_text_ok else "stage22_partial"
     elif pad_n > 1:
-        final_status = "stage21_partial"
+        final_status = "stage22_partial"
+    elif fill < STAGE22_OK_FILL_LO:
+        final_status = "dead_air_risk"
     elif (
         abs(delta) <= TEXT_FIT_DELTA_MS
-        and STAGE21_OK_FILL_LO <= fill <= STAGE21_OK_FILL_HI
+        and STAGE22_OK_FILL_LO <= fill <= STAGE22_OK_FILL_HI
         and cps_ok
         and final_status not in ("failed_tts_regen", "failed_no_regen", "dead_air_risk")
     ):
         final_status = "ok"
     elif final_status == "ok":
-        if int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS and not expand_executed:
+        if (
+            int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS or fill < STAGE22_OK_FILL_LO
+        ) and not expand_executed:
             final_status = "dead_air_risk"
-        elif fill > STAGE21_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
+        elif fill > STAGE22_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
             final_status = "overflow_unresolved"
         else:
-            final_status = "stage21_partial"
-    # Forbidden: never stamp ok with garbage text, fill>1.12, or unresolved dead air.
+            final_status = "stage22_partial"
+    # Forbidden: never stamp ok with garbage text, fill outside 0.90–1.12, or dead air.
     if final_status == "ok" and (
-        fill > STAGE21_OK_FILL_HI
+        fill < STAGE22_OK_FILL_LO
+        or fill > STAGE22_OK_FILL_HI
         or overflow_ms > OVERFLOW_FORCE_SPLIT_MS
         or (abs(delta) > TEXT_FIT_DELTA_MS and not atempo_ok)
         or not cps_ok
@@ -1755,12 +1763,14 @@ def _stamp_stage19e_fields(
         or not clean_split_ok
         or is_garbage_expand(seg_text)
     ):
-        if fill > STAGE21_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
+        if fill > STAGE22_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
             final_status = "overflow_unresolved"
-        elif int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS and not expand_executed:
+        elif (
+            int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS or fill < STAGE22_OK_FILL_LO
+        ) and not expand_executed:
             final_status = "dead_air_risk"
         else:
-            final_status = "stage21_partial"
+            final_status = "stage22_partial"
     split_depth = int(
         seg.get("stage21_split_depth")
         or seg.get("stage19j_split_depth")
@@ -1808,7 +1818,7 @@ def _stamp_stage19e_fields(
         "split_parent_idx": prev.get("split_parent_idx", seg.get("split_parent_idx")),
         "split_child": prev.get("split_child", seg.get("split_child")),
     }
-    # Stage 21 status names preferred when unresolved after fit.
+    # Stage 22 status names preferred when unresolved after fit.
     if final_status in (
         "stage19d_partial",
         "stage19f_partial",
@@ -1817,11 +1827,12 @@ def _stamp_stage19e_fields(
         "stage19h_partial",
         "stage19i_partial",
         "stage19j_partial",
+        "stage21_partial",
     ) and (
         abs(delta) > TEXT_FIT_DELTA_MS or seg.get("needs_post_restore_split")
     ):
-        meta19["final_status"] = "stage21_partial"
-        final_status = "stage21_partial"
+        meta19["final_status"] = "stage22_partial"
+        final_status = "stage22_partial"
         if budget.final_status in (
             "stage19d_partial",
             "stage19f_partial",
@@ -1830,8 +1841,9 @@ def _stamp_stage19e_fields(
             "stage19h_partial",
             "stage19i_partial",
             "stage19j_partial",
+            "stage21_partial",
         ):
-            budget.final_status = "stage21_partial"
+            budget.final_status = "stage22_partial"
     if budget.final_status == "ok" and meta19["final_status"] != "ok":
         budget.final_status = meta19["final_status"]
     seg["stage19e"] = dict(meta19)
@@ -1847,6 +1859,43 @@ def _stamp_stage19e_fields(
     seg["stage19j"] = {**prev_j, **meta19}
     prev_21 = dict(seg.get("stage21") or {})
     seg["stage21"] = {**prev_21, **meta19}
+    try:
+        from engines.tts_backends import resolve_mykyta_controls
+
+        ctrl = resolve_mykyta_controls(
+            {
+                "rate": seg.get("tts_rate"),
+                "pitch": seg.get("tts_pitch"),
+                "volume": seg.get("tts_volume"),
+                "length_scale": seg.get("tts_length_scale"),
+            }
+        )
+    except Exception:
+        ctrl = {
+            "rate": float(seg.get("tts_rate") or 1.0),
+            "pitch": float(seg.get("tts_pitch") or 0.0),
+            "volume": float(seg.get("tts_volume") or 1.0),
+            "length_scale": float(seg.get("tts_length_scale") or 1.0),
+        }
+    meta22 = {
+        **meta19,
+        "expand_executed": bool(expand_executed and text_changed),
+        "text_changed": bool(text_changed),
+        "garbage_expand_blocked": garbage_blocked,
+        "soft_pad_count": pad_n,
+        "fill_ratio": fill,
+        "underflow_ms": int(budget.underflow or 0),
+        "overflow_ms": overflow_ms,
+        "final_status": final_status,
+        "tts_backend": str(seg.get("tts_backend") or ""),
+        "tts_voice": str(seg.get("tts_voice") or ""),
+        "tts_rate": ctrl["rate"],
+        "tts_pitch": ctrl["pitch"],
+        "tts_volume": ctrl["volume"],
+        "tts_length_scale": ctrl["length_scale"],
+    }
+    prev_22 = dict(seg.get("stage22") or {})
+    seg["stage22"] = {**prev_22, **meta22}
     seg["unique_text_ok"] = unique_text_ok
     seg["clean_split_ok"] = clean_split_ok
     seg["fill_ratio"] = fill
@@ -2052,8 +2101,8 @@ def apply_stage19b_rule_text_fit(
         return budget, False
 
     from engines.text_slot_fit import (
-        EXPAND_AIM_RATIO,
         MIN_CPS_UK,
+        STAGE22_OK_FILL_LO,
         UNDERFILL_EXPAND_RATIO,
         char_budget,
         clean_text_chars,
@@ -2077,9 +2126,12 @@ def apply_stage19b_rule_text_fit(
     if not original:
         return budget, False
     cps_now = estimated_cps(original, meas0) if meas0 > 0 else 0.0
-    # Stage 19i: expand on underfill >350 OR CPS below MIN; CPS over → shorten/split.
+    fill0 = float(meas0) / float(max(1, slot0)) if slot0 > 0 else 0.0
+    # Stage 22: expand on underflow >350 OR fill_ratio < 0.90 (dead-air killer).
     expand_required = (
         delta_before < -UNDERFLOW_TRIGGER_MS
+        or fill0 < STAGE22_OK_FILL_LO
+        or int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS
         or (0 < cps_now < MIN_CPS_UK)
         or cps_under_budget(original, slot0)
     )
@@ -2144,7 +2196,7 @@ def apply_stage19b_rule_text_fit(
             try:
                 exp_text, exp_reasons = expand_to_fill(
                     base_for_expand,
-                    target_ms=int(slot * EXPAND_AIM_RATIO),
+                    target_ms=int(slot),  # Stage 22: fill vs full slot (0.90–1.12)
                     lang=str(target_lang or "uk"),
                     source_hint=str(source_hint or ""),
                     raw_mt=preferred,
@@ -2152,8 +2204,8 @@ def apply_stage19b_rule_text_fit(
                     target_chars=char_budget(slot),
                     strategy_order=(
                         "semantic_repeat_key",
-                        "glossary_expand",
-                        "soft_pad_once",
+                        "glossary_full_term",
+                        "soft_pad_whitelist_once",
                     ),
                 )
                 exp_text = strip_garbage_expand_phrases(

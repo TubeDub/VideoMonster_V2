@@ -135,6 +135,9 @@ def synthesize(
     engine_id: str | None = None,
     rate: str | None = None,
     pitch: str | None = None,
+    volume: float | None = None,
+    length_scale: float | None = None,
+    **kwargs,
 ) -> TTSResult:
     offline = offline_tts_mode()
     eng = get_engine(engine_id)
@@ -199,4 +202,12 @@ def synthesize(
     from engines.tts_backends import resolve_voice_for_backend
 
     resolved_voice = resolve_voice_for_backend(voice, eng.id)
-    return eng.synthesize(text, resolved_voice, output_path, rate=rate, pitch=pitch)
+    synth_kw: dict = {"rate": rate, "pitch": pitch}
+    if volume is not None:
+        synth_kw["volume"] = volume
+    if length_scale is not None:
+        synth_kw["length_scale"] = length_scale
+    for k, v in kwargs.items():
+        if v is not None and k not in synth_kw:
+            synth_kw[k] = v
+    return eng.synthesize(text, resolved_voice, output_path, **synth_kw)

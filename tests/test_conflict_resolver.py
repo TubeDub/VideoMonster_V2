@@ -59,13 +59,15 @@ class TestNoOverlapInvariant:
 
 class TestDeterminism:
     def test_identical_results_on_repeat(self):
-        segments = [
-            _seg(0, 0, 1200, place=0),
-            _seg(1, 1000, 900, place=1000),
-            _seg(2, 2200, 600, place=2200),
-        ]
-        r1 = resolve_conflicts([s for s in segments], collect_traces=False)
-        r2 = resolve_conflicts([s for s in segments], collect_traces=False)
+        def _clone():
+            return [
+                _seg(0, 0, 1200, place=0),
+                _seg(1, 1000, 900, place=1000),
+                _seg(2, 2200, 600, place=2200),
+            ]
+
+        r1 = resolve_conflicts(_clone(), collect_traces=False)
+        r2 = resolve_conflicts(_clone(), collect_traces=False)
         assert [s.place_start_ms for s in r1.segments] == [s.place_start_ms for s in r2.segments]
         assert [s.strategy for s in r1.segments] == [s.strategy for s in r2.segments]
         assert r1.intervention_map == r2.intervention_map
@@ -83,8 +85,16 @@ class TestStrategyPriority:
         prev = _seg(0, 0, 3000, place=0)
         cur = _seg(1, 500, 5000, place=500, slot_end=600)
         result = resolve_conflicts([prev, cur], collect_traces=False)
-        assert prev.status == "overflow"
-        assert result.strategy_counts["overflow"] >= 1
+        # Stage 22: overlap >400ms may be cleared by ripple_shift instead of overflow.
+        segs = {s.idx: s for s in result.segments}
+        cleared = segs[1].place_start_ms >= segs[0].effective_end_ms
+        assert prev.status == "overflow" or (
+            segs[1].strategy == "ripple_shift" and cleared
+        )
+        assert (
+            result.strategy_counts["overflow"] >= 1
+            or result.strategy_counts.get("ripple_shift", 0) >= 1
+        )
 
 
 class TestLipTiming:

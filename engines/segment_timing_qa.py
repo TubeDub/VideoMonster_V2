@@ -2273,8 +2273,10 @@ def build_openddf_segment_diagnostics(
                 "stage19i": seg.get("stage19i") or {},
                 "stage19j": seg.get("stage19j") or {},
                 "stage21": seg.get("stage21") or {},
+                "stage22": seg.get("stage22") or {},
                 "text_changed": bool(
                     seg.get("text_changed")
+                    or (seg.get("stage22") or {}).get("text_changed")
                     or (seg.get("stage21") or {}).get("text_changed")
                     or (seg.get("stage19j") or {}).get("text_changed")
                     or (seg.get("stage19i") or {}).get("text_changed")

@@ -298,14 +298,32 @@ async def _generate_single(
         log_tts_failure(report)
         raise VoiceGenerationError(str(last_err), report=report, cause=last_err) from last_err
 
-    from engines.tts_backends import synthesize_with_backend
+    from engines.tts_backends import resolve_mykyta_controls, synthesize_with_backend
 
     loop = asyncio.get_running_loop()
+    mykyta = None
+    if eid in ("tts_uk",):
+        mykyta = resolve_mykyta_controls(
+            {
+                "rate": (context or {}).get("tts_rate", rate),
+                "pitch": (context or {}).get("tts_pitch", pitch),
+                "volume": (context or {}).get("tts_volume"),
+                "length_scale": (context or {}).get("tts_length_scale"),
+            }
+        )
 
     def _sync() -> None:
         t_sync = time.perf_counter()
         result = synthesize_with_backend(
-            text, voice, path, engine_id=eid, rate=rate, pitch=pitch
+            text,
+            voice,
+            path,
+            engine_id=eid,
+            rate=rate if mykyta is None else str(mykyta["rate"]),
+            pitch=pitch if mykyta is None else str(mykyta["pitch"]),
+            volume=None if mykyta is None else mykyta["volume"],
+            length_scale=None if mykyta is None else mykyta["length_scale"],
+            mykyta_controls=mykyta,
         )
         if not result.ok:
             duration_ms = (time.perf_counter() - t_sync) * 1000.0

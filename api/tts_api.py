@@ -53,6 +53,8 @@ def api_tts():
     engine_id = data.get("engine_id")
     emotion = data.get("emotion")
     task_id = data.get("task_id")
+    volume = data.get("volume", data.get("mykyta_volume"))
+    length_scale = data.get("length_scale", data.get("mykyta_length_scale"))
 
     if not text:
         return jsonify({"error": "Нет текста для озвучки"}), 400
@@ -62,6 +64,33 @@ def api_tts():
     segments = split_by_timing_map(text, timing_map)
 
     try:
+        from engines.tts_backends import (
+            normalize_backend_name,
+            resolve_mykyta_controls,
+            set_pipeline_mykyta_controls,
+        )
+
+        eid = normalize_backend_name(engine_id)
+        ctx = None
+        if eid == "tts_uk":
+            mk = resolve_mykyta_controls(
+                {
+                    "rate": rate,
+                    "pitch": pitch,
+                    "volume": volume,
+                    "length_scale": length_scale,
+                }
+            )
+            set_pipeline_mykyta_controls(mk)
+            rate = str(mk["rate"])
+            pitch = str(mk["pitch"])
+            ctx = {
+                "tts_rate": mk["rate"],
+                "tts_pitch": mk["pitch"],
+                "tts_volume": mk["volume"],
+                "tts_length_scale": mk["length_scale"],
+                "tts_backend": "tts_uk",
+            }
         files = generate_audio(
             text=text,
             voice=voice,
@@ -71,6 +100,7 @@ def api_tts():
             engine_id=engine_id,
             emotion=emotion,
             task_id=str(task_id) if task_id else None,
+            context=ctx,
         )
     except Exception as e:
         return jsonify({"error": f"Ошибка TTS: {e}"}), 500

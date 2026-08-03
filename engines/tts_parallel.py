@@ -139,6 +139,7 @@ def _synthesize_one_edge(
             engine_id=eid,
             rate=effective_rate,
             pitch=effective_pitch,
+            mykyta_controls=None,  # resolved from pipeline ContextVar / env
         )
         if not result.ok:
             raise RuntimeError(result.error or "TTS failed")

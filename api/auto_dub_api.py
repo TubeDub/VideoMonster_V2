@@ -1617,6 +1617,16 @@ def _commit_tts_group_result(
                     or (task_info or {}).get("voice")
                     or ""
                 ),
+                controls={
+                    "rate": (task_info or {}).get("mykyta_rate")
+                    or (task_info or {}).get("tts_rate"),
+                    "pitch": (task_info or {}).get("mykyta_pitch")
+                    or (task_info or {}).get("tts_pitch"),
+                    "volume": (task_info or {}).get("mykyta_volume")
+                    or (task_info or {}).get("tts_volume"),
+                    "length_scale": (task_info or {}).get("mykyta_length_scale")
+                    or (task_info or {}).get("tts_length_scale"),
+                },
             )
         except Exception:
             pass
@@ -3164,6 +3174,26 @@ def _regen_segment_tts(
         stage="slot_fit_regen",
         detail=f"text_len={len(text)} engine={eid}",
     )
+    ctx_extra: dict = {
+        "segment_id": suid,
+        "segment_uuid": suid,
+        "segment_index": segment_index,
+        "task_id": task_id or "",
+        "tts_backend": eid,
+    }
+    if eid == "tts_uk":
+        try:
+            from engines.tts_backends import resolve_mykyta_controls
+
+            _mk = resolve_mykyta_controls(
+                {"rate": tts_rate, "pitch": tts_pitch}
+            )
+            ctx_extra["tts_rate"] = _mk["rate"]
+            ctx_extra["tts_pitch"] = _mk["pitch"]
+            ctx_extra["tts_volume"] = _mk["volume"]
+            ctx_extra["tts_length_scale"] = _mk["length_scale"]
+        except Exception:
+            pass
     gen_kwargs: dict = {
         "text": text,
         "voice": voice,
@@ -3173,13 +3203,7 @@ def _regen_segment_tts(
         "emotion": emotion,
         "engine_id": eid,
         "output_dir": _artifacts_dir(),
-        "context": {
-            "segment_id": suid,
-            "segment_uuid": suid,
-            "segment_index": segment_index,
-            "task_id": task_id or "",
-            "tts_backend": eid,
-        },
+        "context": ctx_extra,
     }
     files = generate_audio(**gen_kwargs)
     if not files:
@@ -5022,7 +5046,9 @@ def api_auto_dub_start():
     try:
         from engines.tts_backends import (
             normalize_backend_name,
+            resolve_mykyta_controls,
             resolve_voice_for_backend,
+            set_pipeline_mykyta_controls,
             set_pipeline_tts_backend,
         )
 
@@ -5037,6 +5063,36 @@ def api_auto_dub_start():
         _voice0 = str(data.get("voice") or task_payload["info"].get("voice") or "")
         if _voice0:
             task_payload["info"]["voice"] = resolve_voice_for_backend(_voice0, _eid)
+        # Stage 22 — Mykyta / tts_uk voice controls
+        _mk_raw = {
+            "rate": data.get("mykyta_rate", data.get("tts_uk_rate", data.get("tts_rate"))),
+            "pitch": data.get(
+                "mykyta_pitch", data.get("tts_uk_pitch", data.get("tts_pitch"))
+            ),
+            "volume": data.get(
+                "mykyta_volume", data.get("tts_uk_volume", data.get("tts_volume"))
+            ),
+            "length_scale": data.get(
+                "mykyta_length_scale",
+                data.get("tts_uk_length_scale", data.get("tts_length_scale")),
+            ),
+        }
+        _mk = resolve_mykyta_controls(_mk_raw)
+        task_payload["info"]["mykyta_rate"] = _mk["rate"]
+        task_payload["info"]["mykyta_pitch"] = _mk["pitch"]
+        task_payload["info"]["mykyta_volume"] = _mk["volume"]
+        task_payload["info"]["mykyta_length_scale"] = _mk["length_scale"]
+        task_payload["info"]["tts_volume"] = _mk["volume"]
+        task_payload["info"]["tts_length_scale"] = _mk["length_scale"]
+        if _eid == "tts_uk":
+            # Prefer numeric Mykyta rate/pitch over Edge-style strings when set.
+            if data.get("mykyta_rate") is not None or data.get("tts_uk_rate") is not None:
+                task_payload["info"]["tts_rate"] = str(_mk["rate"])
+            if data.get("mykyta_pitch") is not None or data.get("tts_uk_pitch") is not None:
+                task_payload["info"]["tts_pitch"] = str(_mk["pitch"])
+            set_pipeline_mykyta_controls(_mk)
+        else:
+            set_pipeline_mykyta_controls(None)
     except Exception:
         pass
     init_auto_task(task_id, task_payload)
@@ -11206,9 +11262,9 @@ def _run_pipeline_inner(
                 )
             tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
             try:
-                from engines.tts_backends import set_pipeline_tts_backend
+                from engines.tts_backends import bind_pipeline_tts_from_info
 
-                set_pipeline_tts_backend(tts_engine_id)
+                tts_engine_id = bind_pipeline_tts_from_info(task["info"])
             except Exception:
                 pass
             _skip_timing_adapt = bool(task["info"].get("translation_agent_path"))
@@ -13419,10 +13475,11 @@ def _run_pipeline_inner(
 
             with STATE_LOCK:
                 tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+                _tts_info_snap = dict(task.get("info") or {})
             try:
-                from engines.tts_backends import set_pipeline_tts_backend
+                from engines.tts_backends import bind_pipeline_tts_from_info
 
-                set_pipeline_tts_backend(tts_engine_id)
+                tts_engine_id = bind_pipeline_tts_from_info(_tts_info_snap)
             except Exception:
                 pass
 
@@ -13601,10 +13658,11 @@ def _run_pipeline_inner(
             with STATE_LOCK:
                 use_parallel_tts = not control.get("stop_after_segment")
                 tts_engine_id = task["info"].get("tts_engine") or "edge-offline"
+                _tts_info_snap = dict(task.get("info") or {})
             try:
-                from engines.tts_backends import set_pipeline_tts_backend
+                from engines.tts_backends import bind_pipeline_tts_from_info
 
-                set_pipeline_tts_backend(tts_engine_id)
+                tts_engine_id = bind_pipeline_tts_from_info(_tts_info_snap)
             except Exception:
                 pass
             _pipeline_mode = str(task["info"].get("pipeline_mode") or "")

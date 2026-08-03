@@ -1188,12 +1188,73 @@ const UK_TTS_BACKEND_VOICES = {
   ],
 };
 
+function syncMykytaWizardVisibility(backendId) {
+  const box = document.getElementById('wizard-mykyta-controls');
+  if (!box) return;
+  box.hidden = (backendId || currentTtsBackend()) !== 'tts_uk';
+}
+
+function readMykytaControls() {
+  const settings = typeof loadSettings === 'function' ? loadSettings() : {};
+  const num = (id, key, fallback) => {
+    const el = document.getElementById(id);
+    if (el && el.value !== '') return Number(el.value);
+    if (settings[key] != null) return Number(settings[key]);
+    return fallback;
+  };
+  return {
+    mykyta_rate: num('wizard-mykyta-rate', 'mykyta_rate', 1.0),
+    mykyta_pitch: num('wizard-mykyta-pitch', 'mykyta_pitch', 0),
+    mykyta_volume: num('wizard-mykyta-volume', 'mykyta_volume', 1.0),
+    mykyta_length_scale: num('wizard-mykyta-length', 'mykyta_length_scale', 1.0),
+  };
+}
+
+function bindMykytaWizardSliders() {
+  const pairs = [
+    ['wizard-mykyta-rate', 'wizard-mykyta-rate-label', false],
+    ['wizard-mykyta-pitch', 'wizard-mykyta-pitch-label', true],
+    ['wizard-mykyta-volume', 'wizard-mykyta-volume-label', false],
+    ['wizard-mykyta-length', 'wizard-mykyta-length-label', false],
+  ];
+  const settings = typeof loadSettings === 'function' ? loadSettings() : {};
+  const apply = (el, lbl, intish) => {
+    if (!el || !lbl) return;
+    const v = Number(el.value);
+    lbl.textContent = intish ? String(v) : v.toFixed(2);
+  };
+  const mapSaved = {
+    'wizard-mykyta-rate': 'mykyta_rate',
+    'wizard-mykyta-pitch': 'mykyta_pitch',
+    'wizard-mykyta-volume': 'mykyta_volume',
+    'wizard-mykyta-length': 'mykyta_length_scale',
+  };
+  pairs.forEach(([id, lid, intish]) => {
+    const el = document.getElementById(id);
+    const lbl = document.getElementById(lid);
+    if (!el) return;
+    const sk = mapSaved[id];
+    if (sk && settings[sk] != null) el.value = String(settings[sk]);
+    apply(el, lbl, intish);
+    el.addEventListener('input', () => {
+      apply(el, lbl, intish);
+      try {
+        const s = typeof loadSettings === 'function' ? loadSettings() : {};
+        const ctrl = readMykytaControls();
+        Object.assign(s, ctrl);
+        localStorage.setItem('vm_settings', JSON.stringify(s));
+      } catch (_) {}
+    });
+  });
+}
+
 function syncTtsEngineControls(backendId) {
   const id = backendId || 'edge-offline';
   const hidden = document.getElementById('tts-engine');
   const wiz = document.getElementById('wizard-tts-backend');
   if (hidden) hidden.value = id;
   if (wiz && wiz.value !== id) wiz.value = id;
+  syncMykytaWizardVisibility(id);
   try {
     const s = typeof loadSettings === 'function' ? loadSettings() : {};
     s.ttsEngine = id;
@@ -2221,6 +2282,7 @@ async function startDub() {
     voice: state.selectedVoice || document.getElementById('voice-select').value,
     tts_engine: currentTtsBackend(),
     tts_backend: currentTtsBackend(),
+    ...(currentTtsBackend() === 'tts_uk' ? readMykytaControls() : {}),
     model_size: (function () {
       if (typeof syncWizardModelSize === 'function') syncWizardModelSize(true);
       return document.getElementById('model-size')?.value || 'small';
@@ -4406,6 +4468,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateVoiceList();
     });
   }
+  bindMykytaWizardSliders();
+  syncMykytaWizardVisibility(currentTtsBackend());
 
   updateVoiceList();
   renderWizardLangGrid();
