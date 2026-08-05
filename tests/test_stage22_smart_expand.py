@@ -149,9 +149,64 @@ def test_stage22_meta_status_dead_air():
         split_executed=False,
     )
     meta = seg.get("stage22") or {}
-    assert meta.get("final_status") in ("dead_air_risk", "stage22_partial", "ok")
+    assert meta.get("final_status") == "dead_air_risk"
     assert "tts_rate" in meta
-    assert meta.get("fill_ratio", 1) < 0.90 or meta.get("final_status") == "dead_air_risk"
+    assert float(meta.get("fill_ratio") or 0) < 0.90
+
+
+def test_stage22_in_band_fill_not_dead_air_despite_abs_underflow():
+    from engines.closed_loop_timing import TimingBudget, _stamp_stage19e_fields
+
+    seg = {
+        "text": "Досить довгий текст щоб заповнити слот майже повністю без сміття.",
+        "final_tts_text": "Досить довгий текст щоб заповнити слот майже повністю без сміття.",
+        "tts_backend": "tts_uk",
+        "tts_voice": "mykyta",
+    }
+    # fill = 17000/17500 ≈ 0.971 but abs delta = -500 > 350
+    budget = TimingBudget(
+        index=0,
+        slot_duration=17500,
+        measured_duration=17000,
+        original_duration=17000,
+        underflow=500,
+        overflow=0,
+        final_status="dead_air_risk",
+        delta=-500,
+    )
+    _stamp_stage19e_fields(
+        seg,
+        budget=budget,
+        algorithm_reason="dead_air_risk",
+        expand_executed=False,
+        shorten_executed=False,
+        split_executed=False,
+    )
+    meta = seg.get("stage22") or {}
+    assert 0.90 <= float(meta.get("fill_ratio") or 0) <= 1.12
+    assert meta.get("final_status") == "ok"
+
+
+def test_ripple_shift_segment_dicts():
+    from engines.conflict_resolver import ripple_shift_segment_dicts
+
+    segs = [
+        {
+            "index": 0,
+            "start_time_ms": 0,
+            "final_tts_duration_ms": 2500,
+        },
+        {
+            "index": 1,
+            "start_time_ms": 1800,
+            "final_tts_duration_ms": 1000,
+        },
+    ]
+    # overlap 700 > 400
+    stats = ripple_shift_segment_dicts(segs)
+    assert stats["severe_shifted"] >= 1
+    assert segs[1]["start_time_ms"] >= 2500
+    assert segs[1].get("merge_adjusted_start") >= 2500
 
 
 def test_ripple_shift_on_severe_overlap():

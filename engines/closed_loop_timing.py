@@ -1726,38 +1726,33 @@ def _stamp_stage19e_fields(
         and abs(delta) <= TEXT_FIT_DELTA_MS
     )
     cps_ok = (cps_now <= 0.0) or (MIN_CPS_UK <= cps_now <= MAX_CPS_UK)
-    if is_garbage_expand(seg_text):
+    # Stage 22: final_status is driven by fill band (0.90–1.12). Absolute
+    # underflow >350 only triggers expand attempts — not a dead_air stamp when
+    # fill is already in band.
+    hard_fail = final_status in ("failed_tts_regen", "failed_no_regen")
+    if hard_fail:
+        pass
+    elif is_garbage_expand(seg_text):
         final_status = "stage22_partial"
         garbage_blocked = max(garbage_blocked, 1)
-    elif not unique_text_ok or not clean_split_ok:
-        final_status = "overflow_unresolved" if not unique_text_ok else "stage22_partial"
-    elif pad_n > 1:
-        final_status = "stage22_partial"
+    elif not unique_text_ok:
+        final_status = "overflow_unresolved"
     elif fill < STAGE22_OK_FILL_LO:
         final_status = "dead_air_risk"
-    elif (
-        abs(delta) <= TEXT_FIT_DELTA_MS
-        and STAGE22_OK_FILL_LO <= fill <= STAGE22_OK_FILL_HI
-        and cps_ok
-        and final_status not in ("failed_tts_regen", "failed_no_regen", "dead_air_risk")
-    ):
+    elif fill > STAGE22_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
+        final_status = "overflow_unresolved"
+    elif not clean_split_ok or pad_n > 1:
+        final_status = "stage22_partial"
+    elif STAGE22_OK_FILL_LO <= fill <= STAGE22_OK_FILL_HI:
+        # In-band fill → ok (even if |delta|>350ms or CPS off on a long slot).
         final_status = "ok"
-    elif final_status == "ok":
-        if (
-            int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS or fill < STAGE22_OK_FILL_LO
-        ) and not expand_executed:
-            final_status = "dead_air_risk"
-        elif fill > STAGE22_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
-            final_status = "overflow_unresolved"
-        else:
-            final_status = "stage22_partial"
-    # Forbidden: never stamp ok with garbage text, fill outside 0.90–1.12, or dead air.
+    else:
+        final_status = "stage22_partial"
+    # Forbidden: never stamp ok with garbage / out-of-band fill / unclean split.
     if final_status == "ok" and (
         fill < STAGE22_OK_FILL_LO
         or fill > STAGE22_OK_FILL_HI
         or overflow_ms > OVERFLOW_FORCE_SPLIT_MS
-        or (abs(delta) > TEXT_FIT_DELTA_MS and not atempo_ok)
-        or not cps_ok
         or pad_n > 1
         or not unique_text_ok
         or not clean_split_ok
@@ -1765,9 +1760,7 @@ def _stamp_stage19e_fields(
     ):
         if fill > STAGE22_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
             final_status = "overflow_unresolved"
-        elif (
-            int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS or fill < STAGE22_OK_FILL_LO
-        ) and not expand_executed:
+        elif fill < STAGE22_OK_FILL_LO:
             final_status = "dead_air_risk"
         else:
             final_status = "stage22_partial"
@@ -2540,12 +2533,18 @@ def apply_stage19b_rule_text_fit(
             seg["expand_required"] = True
             seg["requires_strong_expand"] = True
             seg["expand_executed"] = False
-            # Stage 19g §C: expand must lengthen; otherwise honest dead_air_risk.
-            budget.final_status = "dead_air_risk"
-            seg["strategy"] = "dead_air_risk"
-            budget.rewrite_reason = "stage19g:expand_no_change"
-            algorithm_reason = "dead_air_risk"
-            lock_text_fit_algorithm_reason(seg, "dead_air_risk")
+            # Stage 22: dead_air only when fill still < 0.90 after expand attempt.
+            # Absolute underflow on a long slot with fill≥0.90 is not dead air.
+            slot_chk = max(1, int(budget.slot_duration or 1))
+            fill_chk = float(int(budget.measured_duration or 0)) / float(slot_chk)
+            if fill_chk < STAGE22_OK_FILL_LO:
+                budget.final_status = "dead_air_risk"
+                seg["strategy"] = "dead_air_risk"
+                budget.rewrite_reason = "stage22:expand_no_change"
+                algorithm_reason = "dead_air_risk"
+                lock_text_fit_algorithm_reason(seg, "dead_air_risk")
+            else:
+                budget.rewrite_reason = "stage22:expand_skipped_fill_ok"
             seg["text_changed"] = False
 
     seg["shorten_executed"] = bool(shorten_executed)

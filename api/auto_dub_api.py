@@ -4052,6 +4052,26 @@ def _build_timed_dub_track(
     except Exception:
         pass
 
+    # Stage 22: forced ripple when placement overlaps (esp. >400ms) before mix.
+    try:
+        from engines.conflict_resolver import ripple_shift_segment_dicts
+
+        _ripple = ripple_shift_segment_dicts(list(segments_data or []))
+        if int(_ripple.get("ripple_shifted") or 0) > 0:
+            logger.info(
+                "Task %s: stage22 ripple_shift shifted=%s severe=%s",
+                task_id,
+                _ripple.get("ripple_shifted"),
+                _ripple.get("severe_shifted"),
+            )
+            if task_id:
+                with STATE_LOCK:
+                    _t = AUTO_TASKS.get(task_id)
+                    if _t and isinstance(_t.get("info"), dict):
+                        _t["info"]["stage22_ripple"] = _ripple
+    except Exception as _ripple_exc:
+        logger.debug("stage22 ripple_shift skipped: %s", _ripple_exc)
+
     style_params = style_params or {}
     task_info: dict | None = None
     if task_id:

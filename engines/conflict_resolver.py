@@ -493,6 +493,87 @@ def resolve_conflicts(
     )
 
 
+def ripple_shift_segment_dicts(
+    segments: list[dict[str, Any]],
+    *,
+    overlap_trigger_ms: int = STAGE22_RIPPLE_OVERLAP_MS,
+    min_gap_ms: int = MIN_GAP_MS,
+    clear_all_above_ms: int | None = OVERLAP_TOLERANCE_MS,
+) -> dict[str, Any]:
+    """Stage 22: push later segments when placement overlap is severe.
+
+    Mutates ``merge_adjusted_start`` / ``start_time_ms`` / ``start_ms`` so both
+    the mix builder and OpenDDF overlap diagnostics see a non-overlapping timeline.
+
+    - Always force-shift when overlap > ``overlap_trigger_ms`` (default 400).
+    - Optionally also clear residual overlaps above ``clear_all_above_ms``.
+    """
+    if not segments:
+        return {"ripple_shifted": 0, "severe_shifted": 0}
+    active = [
+        (i, s)
+        for i, s in enumerate(segments)
+        if isinstance(s, dict) and s.get("merged_into") is None
+    ]
+    shifted = 0
+    severe = 0
+
+    def _start(seg: dict) -> int:
+        return int(
+            seg.get("merge_adjusted_start")
+            or seg.get("start_ms")
+            or seg.get("start_time_ms")
+            or 0
+        )
+
+    def _dur(seg: dict) -> int:
+        return int(
+            seg.get("final_tts_duration_ms")
+            or seg.get("tts_ms")
+            or seg.get("playback_duration")
+            or seg.get("actual_duration_ms")
+            or 0
+        )
+
+    def _set_start(seg: dict, new_start: int, old: int) -> None:
+        seg["merge_adjusted_start"] = int(new_start)
+        if "start_ms" in seg or seg.get("start_ms") is not None:
+            seg["start_ms"] = int(new_start)
+        if "start_time_ms" in seg or seg.get("start_time_ms") is not None:
+            seg["start_time_ms"] = int(new_start)
+        seg["stage22_ripple_shift_ms"] = int(new_start - old)
+        seg["placement_overlap"] = False
+
+    for pass_trigger in (overlap_trigger_ms, clear_all_above_ms):
+        if pass_trigger is None:
+            continue
+        for k in range(len(active) - 1):
+            _ia, a = active[k]
+            _ib, b = active[k + 1]
+            dur_a = _dur(a)
+            if dur_a <= 0:
+                continue
+            start_a = _start(a)
+            start_b = _start(b)
+            ov = (start_a + dur_a) - start_b
+            if ov <= int(pass_trigger):
+                continue
+            new_start = start_a + dur_a + int(min_gap_ms)
+            if new_start <= start_b:
+                continue
+            _set_start(b, new_start, start_b)
+            shifted += 1
+            if ov > overlap_trigger_ms:
+                severe += 1
+                b["stage22_ripple_severe"] = True
+
+    return {
+        "ripple_shifted": shifted,
+        "severe_shifted": severe,
+        "overlap_trigger_ms": overlap_trigger_ms,
+    }
+
+
 def apply_resolver_to_fitted(
     fitted_placements: list[dict],
     fitted_for_mix: list[tuple],
