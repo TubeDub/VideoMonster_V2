@@ -1382,3 +1382,14 @@
 {"event": "PROJECT_MIGRATED", "ts": 1785773340.0981517, "payload": {"project_id": "af7677b6-69ce-51b4-996e-b0d3396e990e", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785773340.162618, "payload": {"project_id": "c7bfc35c-3fc1-5814-af40-ea76d61cd3d8", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1785773340.2125561, "payload": {"project_id": "5bf4b90a-ff02-51c9-9da6-c3e65470c8b0", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785780427.2614775, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785780427.4197655, "payload": {"project_id": "fcaffa8e-3606-5470-8bde-3d5d938915e7", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785780427.775168, "payload": {"project_id": "33d541b3-2b4d-505d-9337-90b5709eefe7", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785780427.8133254, "payload": {"project_id": "84878ed3-5bb0-5853-b412-97a91f7d1796", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785780427.8344, "payload": {"project_id": "9d13f8e8-8cf5-5995-b0cb-e15adbc7584e", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785780427.8742723, "payload": {"project_id": "318258d5-18e1-5f63-8b9f-c63bb9ac1a64", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785917938.8267527, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1785917939.4143853, "payload": {"project_id": "a100d1ec-dcea-534b-b8d3-b6975d6e329e", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1785917941.0325143, "payload": {"project_id": "bb23b0ae-976f-5fc6-8d43-2c801cdf929d", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1785918479.3444626, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1785918646.0276914, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}

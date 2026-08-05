@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\openddf_diagnostics.py", line 571, in guard_check_with_diagnostics
+    StageSnapshotGuard.check(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        before,
+        ^^^^^^^
+    ...<2 lines>...
+        mutator_module=mutator_module,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\pipeline_integrity\guards.py", line 339, in check
+    raise StageSnapshotIntegrityError(
+    ...<9 lines>...
+    )
+engines.pipeline_integrity.exceptions.StageSnapshotIntegrityError: segment ca5577689c41446f993dc818bb324b02: disallowed mutation of 'tts_length_scale' at stage 'tts'

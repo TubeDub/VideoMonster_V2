@@ -1,0 +1,2367 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "a3b07d7fdd394cf0ae9f397147807011",
+  "created_at": "2026-08-03T18:13:30.772815+00:00",
+  "task_id": "a3b07d7fdd394cf0ae9f397147807011",
+  "stage": "tts",
+  "developer": {
+    "version": "TubeDub-Passive-1.0",
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "error_code": "STAGE_SNAPSHOT_INTEGRITY",
+    "stage": "tts",
+    "segment_id": "ca5577689c41446f993dc818bb324b02",
+    "snapshot_diff": {
+      "field": "tts_length_scale",
+      "old_value": "None",
+      "new_value": "1.0",
+      "structured_diff": [
+        {
+          "segment_id": "ca5577689c41446f993dc818bb324b02",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "ca5577689c41446f993dc818bb324b02",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "ca5577689c41446f993dc818bb324b02",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "ca5577689c41446f993dc818bb324b02",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "64acaf281f024af395d40563abd4a86d",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "64acaf281f024af395d40563abd4a86d",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "64acaf281f024af395d40563abd4a86d",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "64acaf281f024af395d40563abd4a86d",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "eb6d746608f7441c9e8169519128baf8",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "eb6d746608f7441c9e8169519128baf8",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "eb6d746608f7441c9e8169519128baf8",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "eb6d746608f7441c9e8169519128baf8",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "7e952622088e482c98cc7630badf95f3",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "7e952622088e482c98cc7630badf95f3",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "7e952622088e482c98cc7630badf95f3",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "7e952622088e482c98cc7630badf95f3",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "7eef148025014411aa60694e8ce769e7",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "7eef148025014411aa60694e8ce769e7",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "7eef148025014411aa60694e8ce769e7",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "7eef148025014411aa60694e8ce769e7",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "20241083ab154259b6a8f2f1487d4117",
+          "field": "tts_length_scale",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_length_scale",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "20241083ab154259b6a8f2f1487d4117",
+          "field": "tts_pitch",
+          "old_value": null,
+          "new_value": 0.0,
+          "structured_diff": {
+            "field": "tts_pitch",
+            "old": "null",
+            "new": "0.0"
+          }
+        },
+        {
+          "segment_id": "20241083ab154259b6a8f2f1487d4117",
+          "field": "tts_rate",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_rate",
+            "old": "null",
+            "new": "1.0"
+          }
+        },
+        {
+          "segment_id": "20241083ab154259b6a8f2f1487d4117",
+          "field": "tts_volume",
+          "old_value": null,
+          "new_value": 1.0,
+          "structured_diff": {
+            "field": "tts_volume",
+            "old": "null",
+            "new": "1.0"
+          }
+        }
+      ]
+    },
+    "traceability": {
+      "module": "tts",
+      "function": "(unknown)",
+      "file_path": "tts.py",
+      "line_number": 0,
+      "full_path": "engines.tts"
+    },
+    "mutation_policy": {
+      "allowed": [
+        "actual_duration_ms",
+        "adaptation_decision",
+        "audio_bound_uuid",
+        "audio_sha256",
+        "audio_uuid",
+        "index",
+        "need_adaptation",
+        "need_adaptation_force_reason",
+        "original_duration_ms",
+        "playback_duration",
+        "runtime_history",
+        "runtime_registry_path",
+        "segment_id",
+        "status",
+        "tts_backend",
+        "tts_cache_hit",
+        "tts_engine",
+        "tts_file_path",
+        "tts_lifecycle",
+        "tts_ms",
+        "tts_sample_rate",
+        "tts_status",
+        "tts_synth_pitch",
+        "tts_synth_rate",
+        "tts_text",
+        "tts_uuid",
+        "tts_voice",
+        "wav_owner"
+      ],
+      "forbidden": [
+        "tts_length_scale"
+      ],
+      "violated_rule": "mutation_of_tts_length_scale",
+      "reason": "Поле «tts_length_scale» не входит в Allowed Mutations этапа «tts»."
+    },
+    "dependency_pipeline": [
+      "Segment",
+      "STT",
+      "Translation",
+      "Timing-Aware Translation",
+      "TTS",
+      "FAILED"
+    ],
+    "event_timeline": [
+      {
+        "timestamp": "2026-08-03T18:09:27.998051+00:00",
+        "message": "Audio Extraction completed (1192.8ms)"
+      },
+      {
+        "timestamp": "2026-08-03T18:09:28.113166+00:00",
+        "message": "Source Separation completed (89.9ms)"
+      },
+      {
+        "timestamp": "2026-08-03T18:11:42.784397+00:00",
+        "message": "STT completed (134656.3ms)"
+      },
+      {
+        "timestamp": "2026-08-03T18:13:16.164084+00:00",
+        "message": "Translation completed (78691.1ms)"
+      },
+      {
+        "timestamp": "18:13:30",
+        "message": "tts validation started"
+      },
+      {
+        "timestamp": "18:13:30",
+        "message": "tts_length_scale modified (snapshot diff detected)"
+      },
+      {
+        "timestamp": "18:13:30",
+        "message": "Snapshot validation failed"
+      }
+    ],
+    "recovery_hint": {
+      "probable_cause": "Поле «tts_length_scale» изменено модулем tts.",
+      "text": "Либо прекратить изменение tts_length_scale,\nлибо добавить поле в Allowed Mutations этапа tts,\nесли изменение является частью архитектуры.",
+      "options": [
+        "прекратить изменение tts_length_scale",
+        "добавить «tts_length_scale» в Allowed Mutations этапа «tts», если изменение является частью архитектуры"
+      ],
+      "note": "Автоматическое исправление запрещено (Passive OpenDDF)."
+    },
+    "developer_details": {
+      "field": "tts_length_scale",
+      "old_value": "None",
+      "new_value": "1.0",
+      "module": "tts",
+      "function": "(unknown)",
+      "file": "tts.py",
+      "line": 0,
+      "allowed_mutations": [
+        "actual_duration_ms",
+        "adaptation_decision",
+        "audio_bound_uuid",
+        "audio_sha256",
+        "audio_uuid",
+        "index",
+        "need_adaptation",
+        "need_adaptation_force_reason",
+        "original_duration_ms",
+        "playback_duration",
+        "runtime_history",
+        "runtime_registry_path",
+        "segment_id",
+        "status",
+        "tts_backend",
+        "tts_cache_hit",
+        "tts_engine",
+        "tts_file_path",
+        "tts_lifecycle",
+        "tts_ms",
+        "tts_sample_rate",
+        "tts_status",
+        "tts_synth_pitch",
+        "tts_synth_rate",
+        "tts_text",
+        "tts_uuid",
+        "tts_voice",
+        "wav_owner"
+      ],
+      "recovery_hint": "Либо прекратить изменение tts_length_scale,\nлибо добавить поле в Allowed Mutations этапа tts,\nесли изменение является частью архитектуры."
+    },
+    "artifacts": {},
+    "violations_count": 36,
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "tts",
+    "task_id": "a3b07d7fdd394cf0ae9f397147807011",
+    "segment_id": "ca5577689c41446f993dc818bb324b02",
+    "violations": [
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment ca5577689c41446f993dc818bb324b02: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment ca5577689c41446f993dc818bb324b02: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment ca5577689c41446f993dc818bb324b02: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment ca5577689c41446f993dc818bb324b02: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 64acaf281f024af395d40563abd4a86d: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 64acaf281f024af395d40563abd4a86d: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 64acaf281f024af395d40563abd4a86d: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 64acaf281f024af395d40563abd4a86d: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment eb6d746608f7441c9e8169519128baf8: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment eb6d746608f7441c9e8169519128baf8: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment eb6d746608f7441c9e8169519128baf8: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment eb6d746608f7441c9e8169519128baf8: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment dea46d49d1aa4bf1858779b7811ba223: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment dea46d49d1aa4bf1858779b7811ba223: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment dea46d49d1aa4bf1858779b7811ba223: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment dea46d49d1aa4bf1858779b7811ba223: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 02d16d867d0546e2a12d9de0beb884f6: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 02d16d867d0546e2a12d9de0beb884f6: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 02d16d867d0546e2a12d9de0beb884f6: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 02d16d867d0546e2a12d9de0beb884f6: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7e952622088e482c98cc7630badf95f3: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7e952622088e482c98cc7630badf95f3: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7e952622088e482c98cc7630badf95f3: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7e952622088e482c98cc7630badf95f3: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 22a8200822af4f57b3c3ff85ed54ff81: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 22a8200822af4f57b3c3ff85ed54ff81: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 22a8200822af4f57b3c3ff85ed54ff81: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 22a8200822af4f57b3c3ff85ed54ff81: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7eef148025014411aa60694e8ce769e7: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7eef148025014411aa60694e8ce769e7: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7eef148025014411aa60694e8ce769e7: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 7eef148025014411aa60694e8ce769e7: disallowed mutation of 'tts_volume' at stage 'tts'"
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 20241083ab154259b6a8f2f1487d4117: disallowed mutation of 'tts_length_scale' at stage 'tts'"
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 20241083ab154259b6a8f2f1487d4117: disallowed mutation of 'tts_pitch' at stage 'tts'"
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 20241083ab154259b6a8f2f1487d4117: disallowed mutation of 'tts_rate' at stage 'tts'"
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "stage": "tts",
+        "allowed_mutations": [
+          "actual_duration_ms",
+          "adaptation_decision",
+          "audio_bound_uuid",
+          "audio_sha256",
+          "audio_uuid",
+          "index",
+          "need_adaptation",
+          "need_adaptation_force_reason",
+          "original_duration_ms",
+          "playback_duration",
+          "runtime_history",
+          "runtime_registry_path",
+          "segment_id",
+          "status",
+          "tts_backend",
+          "tts_cache_hit",
+          "tts_engine",
+          "tts_file_path",
+          "tts_lifecycle",
+          "tts_ms",
+          "tts_sample_rate",
+          "tts_status",
+          "tts_synth_pitch",
+          "tts_synth_rate",
+          "tts_text",
+          "tts_uuid",
+          "tts_voice",
+          "wav_owner"
+        ],
+        "mutator_module": "engines.tts",
+        "message": "segment 20241083ab154259b6a8f2f1487d4117: disallowed mutation of 'tts_volume' at stage 'tts'"
+      }
+    ],
+    "structured_diff": [
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "ca5577689c41446f993dc818bb324b02",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "64acaf281f024af395d40563abd4a86d",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "eb6d746608f7441c9e8169519128baf8",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "dea46d49d1aa4bf1858779b7811ba223",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "02d16d867d0546e2a12d9de0beb884f6",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "7e952622088e482c98cc7630badf95f3",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "22a8200822af4f57b3c3ff85ed54ff81",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "7eef148025014411aa60694e8ce769e7",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_length_scale",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_length_scale",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_pitch",
+        "old_value": null,
+        "new_value": 0.0,
+        "structured_diff": {
+          "field": "tts_pitch",
+          "old": "null",
+          "new": "0.0"
+        }
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_rate",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_rate",
+          "old": "null",
+          "new": "1.0"
+        }
+      },
+      {
+        "segment_id": "20241083ab154259b6a8f2f1487d4117",
+        "field": "tts_volume",
+        "old_value": null,
+        "new_value": 1.0,
+        "structured_diff": {
+          "field": "tts_volume",
+          "old": "null",
+          "new": "1.0"
+        }
+      }
+    ],
+    "traceback": "Traceback (most recent call last):\n  File \"<USER>\\Desktop\\VideoMonster_V2\\engines\\pipeline_integrity\\openddf_diagnostics.py\", line 571, in guard_check_with_diagnostics\n    StageSnapshotGuard.check(\n    ~~~~~~~~~~~~~~~~~~~~~~~~^\n        before,\n        ^^^^^^^\n    ...<2 lines>...\n        mutator_module=mutator_module,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<USER>\\Desktop\\VideoMonster_V2\\engines\\pipeline_integrity\\guards.py\", line 339, in check\n    raise StageSnapshotIntegrityError(\n    ...<9 lines>...\n    )\nengines.pipeline_integrity.exceptions.StageSnapshotIntegrityError: segment ca5577689c41446f993dc818bb324b02: disallowed mutation of 'tts_length_scale' at stage 'tts'\n"
+  },
+  "exception": {},
+  "timeline_event_count": 19
+}

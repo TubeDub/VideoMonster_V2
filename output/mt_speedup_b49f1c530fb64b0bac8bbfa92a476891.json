@@ -1,0 +1,32 @@
+{
+  "task_id": "b49f1c530fb64b0bac8bbfa92a476891",
+  "translate_method": "marian_batch",
+  "mt_wall_sec": 142.752,
+  "mt_segments": 9,
+  "mt_batch_size": 10,
+  "mt_calls": 3,
+  "mt_engine": "marian_batch+cache",
+  "mt_cache_hits": 5,
+  "mt_cache_misses": 4,
+  "mt_concurrency_used": 1,
+  "mt_retries": 0,
+  "mt_path": "marian_batch",
+  "mt_guard_splits": 4,
+  "mt_segment_engines": [
+    "marian_batch",
+    "cache+glossary",
+    "cache+glossary",
+    "cache+glossary",
+    "marian_batch+remt",
+    "marian_batch+remt",
+    "cache+glossary",
+    "cache+glossary",
+    "marian_batch"
+  ],
+  "mt_cache_bypassed": false,
+  "mt_long_cache_skips": 4,
+  "mt_incomplete_remts": 2,
+  "translation_agent_path": false,
+  "llm_adaptation_used": false,
+  "simple_mt_locked": true
+}
