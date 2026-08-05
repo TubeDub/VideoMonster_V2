@@ -1958,6 +1958,9 @@ def _post_tts_timing_qa(
                 or task_info.get("tts_engine")
                 or task_info.get("tts_engine_id")
                 or "edge-offline",
+                length_scale=kwargs.get("length_scale"),
+                volume=kwargs.get("volume"),
+                mykyta_controls=kwargs.get("mykyta_controls"),
             )
 
         watch = run_segment_bounded(
@@ -3297,6 +3300,9 @@ def _regen_segment_tts(
     segment_index: int | None = None,
     segment_id: str | None = None,
     engine_id: str | None = None,
+    length_scale: float | None = None,
+    volume: float | None = None,
+    mykyta_controls: dict | None = None,
 ) -> tuple[str | None, int]:
     from engines.pipeline_integrity.audio_identity import (
         allocate_tts_path,
@@ -3328,15 +3334,28 @@ def _regen_segment_tts(
     }
     if eid == "tts_uk":
         try:
-            from engines.tts_backends import resolve_mykyta_controls
-
-            _mk = resolve_mykyta_controls(
-                {"rate": tts_rate, "pitch": tts_pitch}
+            from engines.tts_backends import (
+                resolve_mykyta_controls,
+                set_pipeline_mykyta_controls,
             )
+
+            _mk_src = dict(mykyta_controls or {})
+            if tts_rate is not None:
+                _mk_src.setdefault("rate", tts_rate)
+            if tts_pitch is not None:
+                _mk_src.setdefault("pitch", tts_pitch)
+            if volume is not None:
+                _mk_src.setdefault("volume", volume)
+            if length_scale is not None:
+                _mk_src.setdefault("length_scale", length_scale)
+            _mk = resolve_mykyta_controls(_mk_src)
             ctx_extra["tts_rate"] = _mk["rate"]
             ctx_extra["tts_pitch"] = _mk["pitch"]
             ctx_extra["tts_volume"] = _mk["volume"]
             ctx_extra["tts_length_scale"] = _mk["length_scale"]
+            set_pipeline_mykyta_controls(_mk)
+            tts_rate = str(_mk["rate"])
+            tts_pitch = str(_mk["pitch"])
         except Exception:
             pass
     gen_kwargs: dict = {
@@ -4197,25 +4216,37 @@ def _build_timed_dub_track(
     except Exception:
         pass
 
-    # Stage 22: forced ripple when placement overlaps (esp. >400ms) before mix.
+    # Stage 23: forced ripple when placement overlaps (>300ms) before mix.
     try:
         from engines.conflict_resolver import ripple_shift_segment_dicts
 
         _ripple = ripple_shift_segment_dicts(list(segments_data or []))
-        if int(_ripple.get("ripple_shifted") or 0) > 0:
+        if int(_ripple.get("ripple_shifted") or 0) > 0 or int(
+            _ripple.get("overlap_after_ripple") or 0
+        ) > 0:
             logger.info(
-                "Task %s: stage22 ripple_shift shifted=%s severe=%s",
+                "Task %s: stage23 ripple_shift shifted=%s severe=%s residual=%s",
                 task_id,
                 _ripple.get("ripple_shifted"),
                 _ripple.get("severe_shifted"),
+                _ripple.get("overlap_after_ripple"),
             )
             if task_id:
                 with STATE_LOCK:
                     _t = AUTO_TASKS.get(task_id)
                     if _t and isinstance(_t.get("info"), dict):
                         _t["info"]["stage22_ripple"] = _ripple
+                        _t["info"]["stage23_ripple"] = _ripple
+            # Stamp residual overlap count onto segments for stage23 meta.
+            try:
+                residual = int(_ripple.get("overlap_after_ripple") or 0)
+                for _s in segments_data or []:
+                    if isinstance(_s, dict) and "stage23" in _s:
+                        _s["stage23"]["overlap_after_ripple"] = residual
+            except Exception:
+                pass
     except Exception as _ripple_exc:
-        logger.debug("stage22 ripple_shift skipped: %s", _ripple_exc)
+        logger.debug("stage23 ripple_shift skipped: %s", _ripple_exc)
 
     style_params = style_params or {}
     task_info: dict | None = None

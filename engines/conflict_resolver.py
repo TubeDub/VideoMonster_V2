@@ -35,6 +35,10 @@ MAX_REFLOW_MS = 185
 LOCAL_WINDOW_NEIGHBORS = 1
 # Stage 22: force ripple shift of neighbors when placement overlap is severe.
 STAGE22_RIPPLE_OVERLAP_MS = 400
+# Stage 23: kill overlaps earlier; cap single shift; force-clear residual >400.
+STAGE23_RIPPLE_OVERLAP_MS = 300
+STAGE23_RIPPLE_MAX_SHIFT_MS = 400
+STAGE23_FORCE_SPLIT_OVERLAP_MS = 400
 
 
 @dataclass
@@ -289,8 +293,8 @@ def _resolve_pair(
         _record_trace(traces, cur, "safe_stretch", t0)
         return True
 
-    # Stage 22: severe overlap → forced ripple shift of next neighbor(s).
-    if overlap > STAGE22_RIPPLE_OVERLAP_MS and _try_ripple_shift_neighbors(
+    # Stage 23: overlap >300ms → ripple (max shift 400); residual >400 → force clear.
+    if overlap > STAGE23_RIPPLE_OVERLAP_MS and _try_ripple_shift_neighbors(
         segments, i
     ):
         _record_trace(traces, nxt, "ripple_shift", t0)
@@ -309,7 +313,7 @@ def _try_ripple_shift_neighbors(segments: list[SegmentPlacement], i: int) -> boo
         return False
     cur = segments[i]
     nxt = segments[i + 1]
-    if _overlap_ms(cur, nxt) <= STAGE22_RIPPLE_OVERLAP_MS:
+    if _overlap_ms(cur, nxt) <= STAGE23_RIPPLE_OVERLAP_MS:
         return False
     for j in range(i, len(segments) - 1):
         a = segments[j]
@@ -317,14 +321,36 @@ def _try_ripple_shift_neighbors(segments: list[SegmentPlacement], i: int) -> boo
         ov = _overlap_ms(a, b)
         if ov <= OVERLAP_TOLERANCE_MS:
             continue
-        new_start = a.effective_end_ms + MIN_GAP_MS
-        if new_start <= b.place_start_ms:
+        desired = a.effective_end_ms + MIN_GAP_MS
+        if desired <= b.place_start_ms:
             continue
         old = b.place_start_ms
-        b.place_start_ms = new_start
-        b.status = "shift"
-        b.strategy = "ripple_shift"
-        b.decision_path.append(f"stage22:ripple_shift {old}->{new_start}")
+        shift = desired - old
+        # Prefer capped shift; always clear residual so overlaps die.
+        if shift > STAGE23_RIPPLE_MAX_SHIFT_MS:
+            capped = old + STAGE23_RIPPLE_MAX_SHIFT_MS
+            b.place_start_ms = capped
+            b.status = "shift"
+            b.strategy = "ripple_shift"
+            b.decision_path.append(f"stage23:ripple_shift_capped {old}->{capped}")
+            residual = _overlap_ms(a, b)
+            if residual > OVERLAP_TOLERANCE_MS:
+                b.place_start_ms = desired
+                b.decision_path.append(
+                    f"stage23:ripple_force_clear {capped}->{desired}"
+                )
+                if residual > STAGE23_FORCE_SPLIT_OVERLAP_MS or shift > (
+                    STAGE23_RIPPLE_MAX_SHIFT_MS + STAGE23_FORCE_SPLIT_OVERLAP_MS
+                ):
+                    longer = a if a.duration_ms >= b.duration_ms else b
+                    longer.decision_path.append(
+                        "stage23:force_split_longest_offender"
+                    )
+        else:
+            b.place_start_ms = desired
+            b.status = "shift"
+            b.strategy = "ripple_shift"
+            b.decision_path.append(f"stage23:ripple_shift {old}->{desired}")
     return _overlap_ms(cur, nxt) <= OVERLAP_TOLERANCE_MS
 
 
@@ -496,20 +522,24 @@ def resolve_conflicts(
 def ripple_shift_segment_dicts(
     segments: list[dict[str, Any]],
     *,
-    overlap_trigger_ms: int = STAGE22_RIPPLE_OVERLAP_MS,
+    overlap_trigger_ms: int = STAGE23_RIPPLE_OVERLAP_MS,
     min_gap_ms: int = MIN_GAP_MS,
     clear_all_above_ms: int | None = OVERLAP_TOLERANCE_MS,
+    max_shift_ms: int = STAGE23_RIPPLE_MAX_SHIFT_MS,
+    force_clear_above_ms: int = STAGE23_FORCE_SPLIT_OVERLAP_MS,
 ) -> dict[str, Any]:
-    """Stage 22: push later segments when placement overlap is severe.
+    """Stage 23: push later segments when placement overlap is severe.
 
     Mutates ``merge_adjusted_start`` / ``start_time_ms`` / ``start_ms`` so both
     the mix builder and OpenDDF overlap diagnostics see a non-overlapping timeline.
 
-    - Always force-shift when overlap > ``overlap_trigger_ms`` (default 400).
+    - Force-shift when overlap > ``overlap_trigger_ms`` (default 300).
+    - Cap single shift at ``max_shift_ms`` (400); if residual still >
+      ``force_clear_above_ms``, uncapped clear + mark longest offender.
     - Optionally also clear residual overlaps above ``clear_all_above_ms``.
     """
     if not segments:
-        return {"ripple_shifted": 0, "severe_shifted": 0}
+        return {"ripple_shifted": 0, "severe_shifted": 0, "overlap_after_ripple": 0}
     active = [
         (i, s)
         for i, s in enumerate(segments)
@@ -517,6 +547,7 @@ def ripple_shift_segment_dicts(
     ]
     shifted = 0
     severe = 0
+    force_split_marked = 0
 
     def _start(seg: dict) -> int:
         return int(
@@ -542,6 +573,7 @@ def ripple_shift_segment_dicts(
         if "start_time_ms" in seg or seg.get("start_time_ms") is not None:
             seg["start_time_ms"] = int(new_start)
         seg["stage22_ripple_shift_ms"] = int(new_start - old)
+        seg["stage23_ripple_shift_ms"] = int(new_start - old)
         seg["placement_overlap"] = False
 
     for pass_trigger in (overlap_trigger_ms, clear_all_above_ms):
@@ -558,19 +590,58 @@ def ripple_shift_segment_dicts(
             ov = (start_a + dur_a) - start_b
             if ov <= int(pass_trigger):
                 continue
-            new_start = start_a + dur_a + int(min_gap_ms)
-            if new_start <= start_b:
+            desired = start_a + dur_a + int(min_gap_ms)
+            if desired <= start_b:
                 continue
-            _set_start(b, new_start, start_b)
-            shifted += 1
-            if ov > overlap_trigger_ms:
+            shift = desired - start_b
+            if (
+                pass_trigger == overlap_trigger_ms
+                and max_shift_ms > 0
+                and shift > int(max_shift_ms)
+            ):
+                capped = start_b + int(max_shift_ms)
+                _set_start(b, capped, start_b)
+                shifted += 1
                 severe += 1
                 b["stage22_ripple_severe"] = True
+                b["stage23_ripple_capped"] = True
+                residual = (start_a + dur_a) - _start(b)
+                if residual > int(force_clear_above_ms):
+                    _set_start(b, desired, _start(b))
+                    longer = a if _dur(a) >= _dur(b) else b
+                    longer["needs_post_restore_split"] = True
+                    longer["stage23_force_split_overlap"] = True
+                    force_split_marked += 1
+            else:
+                _set_start(b, desired, start_b)
+                shifted += 1
+                if ov > overlap_trigger_ms:
+                    severe += 1
+                    b["stage22_ripple_severe"] = True
+
+    # Count residual overlaps after ripple (for stage23 meta).
+    overlap_after = 0
+    for k in range(len(active) - 1):
+        _ia, a = active[k]
+        _ib, b = active[k + 1]
+        dur_a = _dur(a)
+        if dur_a <= 0:
+            continue
+        ov = (_start(a) + dur_a) - _start(b)
+        if ov > OVERLAP_TOLERANCE_MS:
+            overlap_after += 1
+            b["overlap_after_ripple"] = 1
+            a["overlap_after_ripple"] = int(a.get("overlap_after_ripple") or 0)
+        else:
+            b["overlap_after_ripple"] = 0
 
     return {
         "ripple_shifted": shifted,
         "severe_shifted": severe,
         "overlap_trigger_ms": overlap_trigger_ms,
+        "max_shift_ms": max_shift_ms,
+        "overlap_after_ripple": overlap_after,
+        "force_split_marked": force_split_marked,
     }
 
 

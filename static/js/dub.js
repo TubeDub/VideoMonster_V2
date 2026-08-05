@@ -1203,10 +1203,10 @@ function readMykytaControls() {
     return fallback;
   };
   return {
-    mykyta_rate: num('wizard-mykyta-rate', 'mykyta_rate', 1.0),
+    mykyta_rate: num('wizard-mykyta-rate', 'mykyta_rate', 0.97),
     mykyta_pitch: num('wizard-mykyta-pitch', 'mykyta_pitch', 0),
-    mykyta_volume: num('wizard-mykyta-volume', 'mykyta_volume', 1.0),
-    mykyta_length_scale: num('wizard-mykyta-length', 'mykyta_length_scale', 1.0),
+    mykyta_volume: num('wizard-mykyta-volume', 'mykyta_volume', 1.05),
+    mykyta_length_scale: num('wizard-mykyta-length', 'mykyta_length_scale', 1.05),
   };
 }
 

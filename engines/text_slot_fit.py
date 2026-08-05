@@ -64,13 +64,17 @@ STAGE21_OK_FILL_HI = 1.12
 # Stage 22: tighter dead-air band — expand until ≥0.90, never past 1.12.
 STAGE22_OK_FILL_LO = 0.90
 STAGE22_OK_FILL_HI = 1.12
-UNDERFLOW_TRIGGER_MS = 350
+# Stage 23: production fill — prefer Mykyta length_scale first, then clean expand.
+STAGE23_OK_FILL_LO = 0.92
+STAGE23_OK_FILL_HI = 1.12
+UNDERFLOW_TRIGGER_MS = 250
 OVERFLOW_TRIGGER_MS = 350
-MAX_SOFT_PADS_PER_SEG = 1
+MAX_SOFT_PADS_PER_SEG = 2
 ALLOWED_EXPAND: tuple[str, ...] = (
     "semantic_repeat_key",
     "glossary_full_term",
     "soft_pad_whitelist_once",
+    "soft_pad_whitelist_twice",
 )
 # Soft expand pads (strict whitelist — never "Саме про … тут ідеться").
 SOFT_PAD_WHITELIST: tuple[str, ...] = (
@@ -1627,6 +1631,11 @@ def _in_stage22_fill_band(text: str, slot_ms: int, lang: str = "uk") -> bool:
     return STAGE22_OK_FILL_LO <= fr <= STAGE22_OK_FILL_HI
 
 
+def _in_stage23_fill_band(text: str, slot_ms: int, lang: str = "uk") -> bool:
+    fr = _fill_ratio_for_text(text, slot_ms, lang)
+    return STAGE23_OK_FILL_LO <= fr <= STAGE23_OK_FILL_HI
+
+
 def expand_to_fill(
     final_text: str,
     *,
@@ -1638,24 +1647,26 @@ def expand_to_fill(
     target_chars: int | None = None,
     strategy_order: list[str] | tuple[str, ...] | None = None,
 ) -> tuple[str, list[str]]:
-    """Stage 22: smart expand — only clean strategies, fill band 0.90–1.12.
+    """Stage 23: clean expand — fill band 0.92–1.12, up to 2 soft pads.
 
-    Order: semantic_repeat_key → glossary_full_term → soft_pad_whitelist_once (≤1).
-    Better dead-air than garbage. Returns (text, reasons); grown iff
-    ``stage22:text_grown`` in reasons.
+    Order: semantic_repeat_key → glossary_full_term → soft_pad (≤2 whitelist).
+    Soft pads may improve fill stepwise; final accept requires band or best clean
+    growth without garbage. Better dead-air than garbage.
     """
-    del target_chars  # Stage 22 uses predicted TTS ms / slot fill, not char budget.
+    del target_chars
     before = strip_garbage_expand_phrases(_normalize_chunk(final_text))
     if is_garbage_expand(before):
         before = strip_garbage_expand_phrases(before)
     reasons: list[str] = []
     blocked = 0
     slot_ms = max(1, int(target_ms or 0))
-    # Spec: expand aim is the slot itself (0.90–1.12 of slot).
+    fill_lo = STAGE23_OK_FILL_LO
+    fill_hi = STAGE23_OK_FILL_HI
     if not before:
-        reasons.append("stage22:expand_refused")
+        reasons.append("stage23:expand_refused")
         return before, reasons
-    if _fill_ratio_for_text(before, slot_ms, lang) >= STAGE22_OK_FILL_LO:
+    if _fill_ratio_for_text(before, slot_ms, lang) >= fill_lo:
+        reasons.append("stage23:already_filled")
         reasons.append("stage22:already_filled")
         return before, reasons
 
@@ -1676,28 +1687,31 @@ def expand_to_fill(
             return False
         return True
 
-    def _try_accept(cand: str, tag: str) -> str | None:
+    def _try_accept(cand: str, tag: str, *, allow_underfill: bool = False) -> str | None:
         nonlocal blocked
         c = strip_garbage_expand_phrases(_normalize_chunk(cand))
         if not _accept_clean(c):
             if c and c != before:
                 blocked += 1
-                reasons.append("stage22:garbage_expand_blocked")
+                reasons.append("stage23:garbage_expand_blocked")
             return None
         fr = _fill_ratio_for_text(c, slot_ms, lang)
-        # Stage 22: accept only clean candidates inside fill band 0.90–1.12.
-        if fr > STAGE22_OK_FILL_HI:
+        if fr > fill_hi:
             blocked += 1
-            reasons.append("stage22:expand_overshoot_blocked")
+            reasons.append("stage23:expand_overshoot_blocked")
             return None
-        if fr < STAGE22_OK_FILL_LO:
-            return None
+        if fr < fill_lo:
+            if not allow_underfill:
+                return None
+            # Soft pads may step toward the band without landing in one shot.
+            if fr <= _fill_ratio_for_text(out, slot_ms, lang):
+                return None
         reasons.append(tag)
         return c
 
     out = before
     for step in order:
-        if _in_stage22_fill_band(out, slot_ms, lang) and out != before:
+        if _in_stage23_fill_band(out, slot_ms, lang) and out != before:
             break
         if step in (
             "semantic_repeat_key",
@@ -1706,48 +1720,68 @@ def expand_to_fill(
         ):
             rep, ok = _stage19j_repeat_key_phrase(out)
             if ok:
-                got = _try_accept(rep, "stage22:semantic_repeat_key")
+                got = _try_accept(rep, "stage23:semantic_repeat_key")
                 if got:
                     out = got
-                    if _in_stage22_fill_band(out, slot_ms, lang):
+                    if _in_stage23_fill_band(out, slot_ms, lang):
                         break
         elif step in ("glossary_expand", "glossary_full_term"):
             inj, ok = _stage19g_inject_glossary_anchors(
                 out, source_hint=source_hint, raw_mt=anchor or raw_mt
             )
             if ok:
-                got = _try_accept(inj, "stage22:glossary_full_term")
+                got = _try_accept(inj, "stage23:glossary_full_term")
                 if got:
                     out = got
-                    if _in_stage22_fill_band(out, slot_ms, lang):
+                    if _in_stage23_fill_band(out, slot_ms, lang):
                         break
-        elif step in ("soft_pad_once", "soft_pad_whitelist_once"):
+        elif step in (
+            "soft_pad_once",
+            "soft_pad_whitelist_once",
+            "soft_pad_whitelist_twice",
+        ):
             if soft_pad_count(out) >= MAX_SOFT_PADS_PER_SEG:
                 continue
-            # Stage 22 preferred form: "<sentence>, <pad>."
+            # Stage 23: second pad only if first already present and still short.
+            if step == "soft_pad_whitelist_twice" and soft_pad_count(out) < 1:
+                continue
+            if (
+                step in ("soft_pad_once", "soft_pad_whitelist_once")
+                and soft_pad_count(out) >= 1
+            ):
+                continue
             base = out.rstrip(".!?…")
             for pad in SOFT_PAD_WHITELIST:
                 if pad.lower() in out.lower():
                     continue
                 trial = f"{base}, {pad}."
-                got = _try_accept(trial, "stage22:soft_pad_whitelist_once")
+                got = _try_accept(
+                    trial,
+                    "stage23:soft_pad_whitelist",
+                    allow_underfill=True,
+                )
                 if got:
                     out = got
                     break
-            if _in_stage22_fill_band(out, slot_ms, lang) and out != before:
+            if _in_stage23_fill_band(out, slot_ms, lang) and out != before:
                 break
 
     out = strip_garbage_expand_phrases(strip_slot_pad_fillers(_normalize_chunk(out)))
+    # Stage 23: keep clean growth even if still slightly under 0.92 (duration
+    # control / atempo may finish the job). Refuse garbage / overshoot.
+    fr_out = _fill_ratio_for_text(out, slot_ms, lang) if out else 0.0
+    fr_before = _fill_ratio_for_text(before, slot_ms, lang)
     if (
         out == before
         or is_garbage_expand(out)
         or soft_pad_count(out) > MAX_SOFT_PADS_PER_SEG
         or not is_clean_utterance(out)
-        or not _in_stage22_fill_band(out, slot_ms, lang)
+        or fr_out > fill_hi
+        or fr_out <= fr_before
     ):
         if out != before and is_garbage_expand(out):
             blocked += 1
-            reasons.append("stage22:garbage_expand_blocked")
+            reasons.append("stage23:garbage_expand_blocked")
         out = before
         reasons = [
             r
@@ -1758,15 +1792,17 @@ def expand_to_fill(
             and "soft_pad" not in str(r)
         ]
         if blocked:
-            reasons.append(f"stage22:blocked_count:{blocked}")
+            reasons.append(f"stage23:blocked_count:{blocked}")
+        reasons.append("stage23:expand_refused")
         reasons.append("stage22:expand_refused")
         return out, reasons
 
+    reasons.append("stage23:text_grown")
     reasons.append("stage22:text_grown")
     reasons.append("stage21:text_grown")
     reasons.append("stage19j:text_grown")
     if blocked:
-        reasons.append(f"stage22:blocked_count:{blocked}")
+        reasons.append(f"stage23:blocked_count:{blocked}")
     return out, reasons
 
 

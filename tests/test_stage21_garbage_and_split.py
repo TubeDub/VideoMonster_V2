@@ -62,11 +62,12 @@ def test_expand_never_produces_same_pro_filler():
     assert "Саме про" not in out
     assert "тут ідеться" not in out.lower()
     assert is_garbage_expand(out) is False
-    assert soft_pad_count(out) <= 1
+    assert soft_pad_count(out) <= 2
     assert ", Джордж." not in out
     if out == short:
         assert (
-            "stage22:expand_refused" in reasons
+            "stage23:expand_refused" in reasons
+            or "stage22:expand_refused" in reasons
             or "stage21:expand_refused" in reasons
             or "blocked" in " ".join(reasons)
         )

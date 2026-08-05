@@ -60,11 +60,16 @@ STAGE21_OK_FILL_HI = 1.12
 # Stage 22: tighter OK band for dead-air killer.
 STAGE22_OK_FILL_LO = 0.90
 STAGE22_OK_FILL_HI = 1.12
-UNDERFLOW_TRIGGER_MS = 350
+# Stage 23: production fill — length_scale first, then clean expand.
+STAGE23_OK_FILL_LO = 0.92
+STAGE23_OK_FILL_HI = 1.12
+UNDERFLOW_TRIGGER_MS = 250
 OVERFLOW_TRIGGER_MS = 350
 OVERFLOW_FORCE_SPLIT_MS = 350
 ATEMPO_MIN = 0.90
 ATEMPO_MAX = 1.20
+STAGE23_ATEMPO_SLOW_LO = 0.90
+STAGE23_ATEMPO_SLOW_HI = 1.0
 
 # Honest algorithm reasons that must not be overwritten by AudioOnly.
 _TEXT_FIT_REASON_PREFIXES = (
@@ -1733,37 +1738,37 @@ def _stamp_stage19e_fields(
     if hard_fail:
         pass
     elif is_garbage_expand(seg_text):
-        final_status = "stage22_partial"
+        final_status = "stage23_partial"
         garbage_blocked = max(garbage_blocked, 1)
     elif not unique_text_ok:
         final_status = "overflow_unresolved"
-    elif fill < STAGE22_OK_FILL_LO:
+    elif fill < STAGE23_OK_FILL_LO:
         final_status = "dead_air_risk"
-    elif fill > STAGE22_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
+    elif fill > STAGE23_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
         final_status = "overflow_unresolved"
-    elif not clean_split_ok or pad_n > 1:
-        final_status = "stage22_partial"
-    elif STAGE22_OK_FILL_LO <= fill <= STAGE22_OK_FILL_HI:
-        # In-band fill → ok (even if |delta|>350ms or CPS off on a long slot).
+    elif not clean_split_ok or pad_n > 2:
+        final_status = "stage23_partial"
+    elif STAGE23_OK_FILL_LO <= fill <= STAGE23_OK_FILL_HI:
+        # In-band fill → ok (even if |delta| large or CPS off on a long slot).
         final_status = "ok"
     else:
-        final_status = "stage22_partial"
+        final_status = "stage23_partial"
     # Forbidden: never stamp ok with garbage / out-of-band fill / unclean split.
     if final_status == "ok" and (
-        fill < STAGE22_OK_FILL_LO
-        or fill > STAGE22_OK_FILL_HI
+        fill < STAGE23_OK_FILL_LO
+        or fill > STAGE23_OK_FILL_HI
         or overflow_ms > OVERFLOW_FORCE_SPLIT_MS
-        or pad_n > 1
+        or pad_n > 2
         or not unique_text_ok
         or not clean_split_ok
         or is_garbage_expand(seg_text)
     ):
-        if fill > STAGE22_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
+        if fill > STAGE23_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
             final_status = "overflow_unresolved"
-        elif fill < STAGE22_OK_FILL_LO:
+        elif fill < STAGE23_OK_FILL_LO:
             final_status = "dead_air_risk"
         else:
-            final_status = "stage22_partial"
+            final_status = "stage23_partial"
     split_depth = int(
         seg.get("stage21_split_depth")
         or seg.get("stage19j_split_depth")
@@ -1811,7 +1816,7 @@ def _stamp_stage19e_fields(
         "split_parent_idx": prev.get("split_parent_idx", seg.get("split_parent_idx")),
         "split_child": prev.get("split_child", seg.get("split_child")),
     }
-    # Stage 22 status names preferred when unresolved after fit.
+    # Stage 23 status names preferred when unresolved after fit.
     if final_status in (
         "stage19d_partial",
         "stage19f_partial",
@@ -1821,11 +1826,12 @@ def _stamp_stage19e_fields(
         "stage19i_partial",
         "stage19j_partial",
         "stage21_partial",
+        "stage22_partial",
     ) and (
         abs(delta) > TEXT_FIT_DELTA_MS or seg.get("needs_post_restore_split")
     ):
-        meta19["final_status"] = "stage22_partial"
-        final_status = "stage22_partial"
+        meta19["final_status"] = "stage23_partial"
+        final_status = "stage23_partial"
         if budget.final_status in (
             "stage19d_partial",
             "stage19f_partial",
@@ -1835,8 +1841,9 @@ def _stamp_stage19e_fields(
             "stage19i_partial",
             "stage19j_partial",
             "stage21_partial",
+            "stage22_partial",
         ):
-            budget.final_status = "stage22_partial"
+            budget.final_status = "stage23_partial"
     if budget.final_status == "ok" and meta19["final_status"] != "ok":
         budget.final_status = meta19["final_status"]
     seg["stage19e"] = dict(meta19)
@@ -1870,6 +1877,11 @@ def _stamp_stage19e_fields(
             "volume": float(seg.get("tts_volume") or 1.0),
             "length_scale": float(seg.get("tts_length_scale") or 1.0),
         }
+    duration_control_used = str(
+        seg.get("duration_control_used")
+        or meta19.get("duration_control_used")
+        or "none"
+    )
     meta22 = {
         **meta19,
         "expand_executed": bool(expand_executed and text_changed),
@@ -1886,14 +1898,32 @@ def _stamp_stage19e_fields(
         "tts_pitch": ctrl["pitch"],
         "tts_volume": ctrl["volume"],
         "tts_length_scale": ctrl["length_scale"],
+        "duration_control_used": duration_control_used,
     }
     prev_22 = dict(seg.get("stage22") or {})
     seg["stage22"] = {**prev_22, **meta22}
+    meta23 = {
+        "duration_control_used": duration_control_used,
+        "tts_length_scale": ctrl["length_scale"],
+        "tts_rate": ctrl["rate"],
+        "expand_executed": bool(expand_executed and text_changed),
+        "text_changed": bool(text_changed),
+        "fill_ratio": fill,
+        "underflow_ms": int(budget.underflow or 0),
+        "overflow_ms": overflow_ms,
+        "final_status": final_status,
+        "garbage_expand_blocked": garbage_blocked,
+        "soft_pad_count": pad_n,
+        "overlap_after_ripple": int(seg.get("overlap_after_ripple") or 0),
+    }
+    prev_23 = dict(seg.get("stage23") or {})
+    seg["stage23"] = {**prev_23, **meta23}
     seg["unique_text_ok"] = unique_text_ok
     seg["clean_split_ok"] = clean_split_ok
     seg["fill_ratio"] = fill
     seg["text_changed"] = bool(text_changed)
     seg["garbage_expand_blocked"] = garbage_blocked
+    seg["duration_control_used"] = duration_control_used
 
 
 def _stamp_stage19b_meta(
@@ -1951,6 +1981,237 @@ def _stamp_stage19b_meta(
         "action": action,
         "reasons": list(getattr(fit, "reasons", None) or []),
     }
+
+
+def _apply_stage23_duration_control(
+    seg: dict,
+    idx: int,
+    timing_map: list,
+    budget: TimingBudget,
+    *,
+    voice: str,
+    work_dir: Path,
+    regen_fn: Callable[..., Any] | None,
+    commit_fn: Callable[..., Any] | None,
+    tts_rate: str | None,
+    tts_pitch: str | None,
+    task_id: str | None,
+    resolve_path: Callable[[str], str] | None,
+) -> TimingBudget:
+    """Stage 23: length_scale → rate → re-TTS (same text) before expand.
+
+    Trigger: underflow_ms > 250 or fill_ratio < 0.92.
+    """
+    slot = int(budget.slot_duration or 0)
+    meas = int(budget.measured_duration or 0)
+    if slot <= 0 or meas <= 0:
+        return budget
+    fill = meas / float(slot)
+    underflow = max(0, slot - meas)
+    if underflow <= UNDERFLOW_TRIGGER_MS and fill >= STAGE23_OK_FILL_LO:
+        return budget
+    if regen_fn is None:
+        return budget
+
+    backend = str(seg.get("tts_backend") or seg.get("tts_engine") or "").lower()
+    voice_l = str(seg.get("tts_voice") or voice or "").lower()
+    is_mykyta = "tts_uk" in backend or "mykyta" in voice_l
+    if not is_mykyta:
+        try:
+            from engines.tts_backends import get_pipeline_tts_backend
+
+            pipe = str(get_pipeline_tts_backend() or "").lower()
+            is_mykyta = pipe in ("tts_uk", "tts-uk")
+        except Exception:
+            is_mykyta = False
+    if not is_mykyta:
+        return budget
+
+    try:
+        from engines.tts_backends import (
+            compute_mykyta_duration_controls,
+            resolve_mykyta_controls,
+            set_pipeline_mykyta_controls,
+        )
+    except Exception:
+        return budget
+
+    base = resolve_mykyta_controls(
+        {
+            "rate": seg.get("tts_rate", tts_rate),
+            "pitch": seg.get("tts_pitch", tts_pitch),
+            "volume": seg.get("tts_volume"),
+            "length_scale": seg.get("tts_length_scale"),
+        },
+        env=False,
+    )
+    ctrl = compute_mykyta_duration_controls(slot, meas, base=base)
+    # Need a meaningful stretch (length_scale up or rate down).
+    if (
+        ctrl["length_scale"] <= base["length_scale"] + 0.005
+        and ctrl["rate"] >= base["rate"] - 0.005
+    ):
+        # Still apply when base is already near defaults but slot needs stretch.
+        if ctrl["length_scale"] < 1.01 and fill >= 0.90:
+            return budget
+
+    text = _segment_text(seg)
+    if not text:
+        return budget
+
+    used = "length_scale"
+    if abs(ctrl["length_scale"] - base["length_scale"]) < 0.01 and abs(
+        ctrl["rate"] - base["rate"]
+    ) >= 0.01:
+        used = "rate"
+
+    try:
+        set_pipeline_mykyta_controls(ctrl)
+    except Exception:
+        pass
+
+    try:
+        regen_result = regen_fn(
+            text,
+            voice=voice,
+            tts_rate=str(ctrl["rate"]),
+            tts_pitch=str(ctrl["pitch"]),
+            length_scale=ctrl["length_scale"],
+            volume=ctrl["volume"],
+            mykyta_controls=ctrl,
+            task_id=task_id,
+            segment_index=idx,
+            segment_id=str(seg.get("segment_id") or ""),
+            engine_id=str(seg.get("tts_backend") or seg.get("tts_engine") or "tts_uk"),
+        )
+    except Exception as exc:
+        logger.debug("stage23 duration_control regen skipped: %s", exc)
+        return budget
+
+    if isinstance(regen_result, tuple):
+        new_file, new_ms = regen_result[0], int(regen_result[1] or 0)
+    else:
+        new_file, new_ms = regen_result, 0
+    if not new_file:
+        return budget
+
+    seg["file"] = new_file
+    seg["tts_file_path"] = new_file
+    if new_ms <= 0:
+        new_ms = measure_actual_ms(seg, resolve_path=resolve_path)
+    else:
+        seg["playback_duration"] = new_ms
+        seg["tts_ms"] = new_ms
+        seg["actual_duration_ms"] = new_ms
+        seg["final_tts_duration_ms"] = new_ms
+
+    seg["tts_rate"] = ctrl["rate"]
+    seg["tts_pitch"] = ctrl["pitch"]
+    seg["tts_volume"] = ctrl["volume"]
+    seg["tts_length_scale"] = ctrl["length_scale"]
+    seg["duration_control_used"] = used
+    stages = list(seg.get("adaptation_stages") or [])
+    tag = f"stage23:duration_control:{used}:ls={ctrl['length_scale']:.3f}:rate={ctrl['rate']:.3f}"
+    if tag not in stages:
+        stages.append(tag)
+    seg["adaptation_stages"] = stages
+
+    if commit_fn:
+        try:
+            commit_fn(
+                None,
+                [idx],
+                tts_text=text,
+                audio_filename=str(seg.get("file") or new_file),
+            )
+        except Exception as exc:
+            logger.debug("stage23 duration_control commit skipped: %s", exc)
+
+    saved_pause = budget.pause_adjustments_ms
+    saved_stages = list(budget.pause_stages or [])
+    orig = budget.original_duration
+    iters = budget.rewrite_iterations
+    reason = budget.rewrite_reason
+    budget = build_timing_budget(seg, idx, timing_map)
+    budget.rewrite_iterations = iters
+    budget.rewrite_reason = reason or f"stage23:duration_control:{used}"
+    budget.pause_adjustments_ms = saved_pause
+    budget.pause_stages = saved_stages
+    budget.original_duration = orig or int(
+        seg.get("first_tts_duration_ms") or budget.measured_duration
+    )
+    slot_n = max(1, int(budget.slot_duration or 1))
+    seg["fill_ratio"] = round(int(budget.measured_duration or 0) / float(slot_n), 4)
+    return budget
+
+
+def _apply_stage23_atempo_slow(
+    seg: dict,
+    *,
+    budget: TimingBudget,
+    work_dir: Path,
+    resolve_path: Callable[[str], str] | None,
+) -> TimingBudget:
+    """Stage 23: if fill still < 0.88 after length_scale/expand → atempo slow [0.90, 1.0]."""
+    slot = int(budget.slot_duration or 0)
+    tts = int(budget.measured_duration or 0)
+    if slot <= 0 or tts <= 0:
+        return budget
+    fill = tts / float(slot)
+    if fill >= 0.88:
+        return budget
+    # Slow down to lengthen: atempo = measured/slot clamped to [0.90, 1.0].
+    tempo = max(STAGE23_ATEMPO_SLOW_LO, min(STAGE23_ATEMPO_SLOW_HI, fill))
+    if abs(tempo - 1.0) < 0.02:
+        return budget
+
+    src = str(seg.get("file") or seg.get("tts_file_path") or "").strip()
+    if resolve_path and src:
+        try:
+            src = resolve_path(src) or src
+        except Exception:
+            pass
+    if not src or not Path(src).is_file():
+        return budget
+    try:
+        from engines.timing_fit import fit_segment_audio
+
+        fitted, meta = fit_segment_audio(
+            src,
+            0,
+            slot,
+            work_dir=work_dir / "stage23_atempo_slow",
+            allow_atempo=True,
+            max_atempo=1.0,
+            text_hint=_segment_text(seg),
+        )
+        if fitted and Path(fitted).is_file():
+            seg["file"] = fitted
+            seg["tts_file_path"] = fitted
+            fitted_ms = int((meta or {}).get("fitted_ms") or (meta or {}).get("tts_ms") or 0)
+            if fitted_ms <= 0:
+                fitted_ms = measure_actual_ms(seg, resolve_path=resolve_path)
+            if fitted_ms > 0:
+                seg["playback_duration"] = fitted_ms
+                seg["tts_ms"] = fitted_ms
+                seg["actual_duration_ms"] = fitted_ms
+                seg["final_tts_duration_ms"] = fitted_ms
+            applied = float((meta or {}).get("atempo") or tempo)
+            applied = max(STAGE23_ATEMPO_SLOW_LO, min(STAGE23_ATEMPO_SLOW_HI, applied))
+            seg["atempo"] = round(applied, 4)
+            seg["strategy"] = "atempo_slow"
+            if str(seg.get("duration_control_used") or "none") in ("none", ""):
+                seg["duration_control_used"] = "atempo"
+            elif fill < STAGE23_OK_FILL_LO:
+                seg["duration_control_used"] = "atempo"
+            stages = list(seg.get("adaptation_stages") or [])
+            tag = f"stage23_atempo_slow:{applied:.3f}"
+            if tag not in stages:
+                stages.append(tag)
+            seg["adaptation_stages"] = stages
+    except Exception as exc:
+        logger.debug("stage23 atempo_slow skipped: %s", exc)
+    return budget
 
 
 def _apply_light_atempo_after_fit(
@@ -2087,15 +2348,19 @@ def apply_stage19b_rule_text_fit(
     slot0 = max(1, int(budget.slot_duration or 0) or 1)
     meas0 = int(budget.measured_duration or 0)
     fill_now = (meas0 / float(slot0)) if meas0 > 0 else 0.0
-    needs_fit = _needs_stage19b_text_fit(budget) or (
-        0 < fill_now < STAGE19G_UNDERFILL_FILL_RATIO
+    # Stage 23: enter on |Δ|>350, fill<0.92, or underflow>250.
+    needs_fit = (
+        _needs_stage19b_text_fit(budget)
+        or (0 < fill_now < STAGE23_OK_FILL_LO)
+        or int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS
+        or _slot_delta_ms(budget) < -UNDERFLOW_TRIGGER_MS
     )
     if not needs_fit:
         return budget, False
 
     from engines.text_slot_fit import (
         MIN_CPS_UK,
-        STAGE22_OK_FILL_LO,
+        STAGE23_OK_FILL_LO,
         UNDERFILL_EXPAND_RATIO,
         char_budget,
         clean_text_chars,
@@ -2120,14 +2385,44 @@ def apply_stage19b_rule_text_fit(
         return budget, False
     cps_now = estimated_cps(original, meas0) if meas0 > 0 else 0.0
     fill0 = float(meas0) / float(max(1, slot0)) if slot0 > 0 else 0.0
-    # Stage 22: expand on underflow >350 OR fill_ratio < 0.90 (dead-air killer).
+    # Stage 23: duration-control / expand on underflow >250 OR fill < 0.92.
     expand_required = (
         delta_before < -UNDERFLOW_TRIGGER_MS
-        or fill0 < STAGE22_OK_FILL_LO
+        or fill0 < STAGE23_OK_FILL_LO
         or int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS
         or (0 < cps_now < MIN_CPS_UK)
         or cps_under_budget(original, slot0)
     )
+
+    # Stage 23 primary lever: Mykyta length_scale/rate re-TTS before text expand.
+    if expand_required and regen_fn is not None:
+        budget = _apply_stage23_duration_control(
+            seg,
+            idx,
+            timing_map,
+            budget,
+            voice=voice,
+            work_dir=work_dir,
+            regen_fn=regen_fn,
+            commit_fn=commit_fn,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            task_id=task_id,
+            resolve_path=resolve_path,
+        )
+        meas0 = int(budget.measured_duration or 0)
+        slot0 = max(1, int(budget.slot_duration or 0) or 1)
+        fill0 = float(meas0) / float(slot0) if meas0 > 0 else 0.0
+        delta_before = _slot_delta_ms(budget)
+        # Re-evaluate expand need after duration control.
+        expand_required = (
+            delta_before < -UNDERFLOW_TRIGGER_MS
+            or fill0 < STAGE23_OK_FILL_LO
+            or int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS
+            or fill0 < 0.90
+            or (0 < cps_now < MIN_CPS_UK)
+            or cps_under_budget(original, slot0)
+        )
     shorten_required = (
         delta_before > OVERFLOW_TRIGGER_MS
         or cps_over_budget(original, slot0)
@@ -2189,7 +2484,7 @@ def apply_stage19b_rule_text_fit(
             try:
                 exp_text, exp_reasons = expand_to_fill(
                     base_for_expand,
-                    target_ms=int(slot),  # Stage 22: fill vs full slot (0.90–1.12)
+                    target_ms=int(slot),  # Stage 23: fill vs full slot (0.92–1.12)
                     lang=str(target_lang or "uk"),
                     source_hint=str(source_hint or ""),
                     raw_mt=preferred,
@@ -2199,6 +2494,7 @@ def apply_stage19b_rule_text_fit(
                         "semantic_repeat_key",
                         "glossary_full_term",
                         "soft_pad_whitelist_once",
+                        "soft_pad_whitelist_twice",
                     ),
                 )
                 exp_text = strip_garbage_expand_phrases(
@@ -2383,6 +2679,8 @@ def apply_stage19b_rule_text_fit(
             or expansion_strategy in ("llm_expand", "raw_prefer", "rule_expand", "rule_expand_from_raw", "expand_to_fill")
         )
     )
+    if expand_executed:
+        seg["duration_control_used"] = "expand"
     if text_changed and fit.action == "shorten":
         shorten_executed = True
     if text_changed and expansion_strategy == "none":
@@ -2533,18 +2831,17 @@ def apply_stage19b_rule_text_fit(
             seg["expand_required"] = True
             seg["requires_strong_expand"] = True
             seg["expand_executed"] = False
-            # Stage 22: dead_air only when fill still < 0.90 after expand attempt.
-            # Absolute underflow on a long slot with fill≥0.90 is not dead air.
+            # Stage 23: dead_air only when fill still < 0.92 after expand attempt.
             slot_chk = max(1, int(budget.slot_duration or 1))
             fill_chk = float(int(budget.measured_duration or 0)) / float(slot_chk)
-            if fill_chk < STAGE22_OK_FILL_LO:
+            if fill_chk < STAGE23_OK_FILL_LO:
                 budget.final_status = "dead_air_risk"
                 seg["strategy"] = "dead_air_risk"
-                budget.rewrite_reason = "stage22:expand_no_change"
+                budget.rewrite_reason = "stage23:expand_no_change"
                 algorithm_reason = "dead_air_risk"
                 lock_text_fit_algorithm_reason(seg, "dead_air_risk")
             else:
-                budget.rewrite_reason = "stage22:expand_skipped_fill_ok"
+                budget.rewrite_reason = "stage23:expand_skipped_fill_ok"
             seg["text_changed"] = False
 
     seg["shorten_executed"] = bool(shorten_executed)
@@ -2566,7 +2863,8 @@ def apply_stage19b_rule_text_fit(
 
     # Light atempo AFTER text fit / re-TTS only (never sole strategy when |Δ|>350).
     if budget.final_status != "failed_tts_regen" and (
-        _needs_stage19b_text_fit(budget) or float(seg.get("fill_ratio") or 0) < 0.90
+        _needs_stage19b_text_fit(budget)
+        or float(seg.get("fill_ratio") or 0) < STAGE23_OK_FILL_LO
     ):
         budget = _apply_light_atempo_after_fit(
             seg,
@@ -2575,6 +2873,16 @@ def apply_stage19b_rule_text_fit(
             resolve_path=resolve_path,
             fit=fit,
         )
+        # Stage 23: if still fill < 0.88 → dedicated atempo_slow [0.90, 1.0].
+        slot_chk = max(1, int(budget.slot_duration or 1))
+        fill_chk = float(int(budget.measured_duration or 0)) / float(slot_chk)
+        if fill_chk < 0.88:
+            budget = _apply_stage23_atempo_slow(
+                seg,
+                budget=budget,
+                work_dir=work_dir,
+                resolve_path=resolve_path,
+            )
         saved_pause = budget.pause_adjustments_ms
         saved_stages = list(budget.pause_stages or [])
         orig = budget.original_duration

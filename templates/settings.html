@@ -136,9 +136,9 @@
       <div style="display:grid;gap:10px;margin-top:8px">
         <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
           <span style="min-width:7.5em">Скорость</span>
-          <input type="range" id="s-mykyta-rate" min="0.85" max="1.15" step="0.01" value="1.00"
+          <input type="range" id="s-mykyta-rate" min="0.85" max="1.15" step="0.01" value="0.97"
             oninput="onMykytaSlider('rate', this.value)" style="flex:1" />
-          <span id="s-mykyta-rate-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.00</span>
+          <span id="s-mykyta-rate-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">0.97</span>
         </label>
         <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
           <span style="min-width:7.5em">Высота</span>
@@ -148,15 +148,15 @@
         </label>
         <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
           <span style="min-width:7.5em">Громкость</span>
-          <input type="range" id="s-mykyta-volume" min="0.7" max="1.3" step="0.01" value="1.00"
+          <input type="range" id="s-mykyta-volume" min="0.7" max="1.3" step="0.01" value="1.05"
             oninput="onMykytaSlider('volume', this.value)" style="flex:1" />
-          <span id="s-mykyta-volume-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.00</span>
+          <span id="s-mykyta-volume-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.05</span>
         </label>
         <label style="display:flex;align-items:center;gap:10px;font-weight:normal">
           <span style="min-width:7.5em">Длительность</span>
-          <input type="range" id="s-mykyta-length" min="0.85" max="1.15" step="0.01" value="1.00"
+          <input type="range" id="s-mykyta-length" min="0.85" max="1.18" step="0.01" value="1.05"
             oninput="onMykytaSlider('length_scale', this.value)" style="flex:1" />
-          <span id="s-mykyta-length-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.00</span>
+          <span id="s-mykyta-length-label" style="min-width:3.5em;font-variant-numeric:tabular-nums;">1.05</span>
         </label>
       </div>
       <p class="field-hint" style="margin-top:6px;opacity:.75;font-size:.9em">
@@ -634,10 +634,10 @@
     setStatus('Генерация превью...');
     const body = { text: text.slice(0, 300), voice, engine_id };
     if (engine_id === 'tts_uk') {
-      body.rate = Number((document.getElementById('s-mykyta-rate') || {}).value || 1);
+      body.rate = Number((document.getElementById('s-mykyta-rate') || {}).value || 0.97);
       body.pitch = Number((document.getElementById('s-mykyta-pitch') || {}).value || 0);
-      body.volume = Number((document.getElementById('s-mykyta-volume') || {}).value || 1);
-      body.length_scale = Number((document.getElementById('s-mykyta-length') || {}).value || 1);
+      body.volume = Number((document.getElementById('s-mykyta-volume') || {}).value || 1.05);
+      body.length_scale = Number((document.getElementById('s-mykyta-length') || {}).value || 1.05);
       body.mykyta_rate = body.rate;
       body.mykyta_pitch = body.pitch;
       body.mykyta_volume = body.volume;
@@ -691,10 +691,10 @@
       uiSounds: document.getElementById('s-ui-sounds').checked,
       strictLlmAdaptation: strictEl ? strictEl.value : (prev.strictLlmAdaptation || 'automatic'),
       originalVolume: origVolEl ? Math.max(0, Math.min(100, Number(origVolEl.value) || 0)) : (prev.originalVolume ?? 20),
-      mykyta_rate: rateEl ? Number(rateEl.value) : (prev.mykyta_rate ?? 1.0),
+      mykyta_rate: rateEl ? Number(rateEl.value) : (prev.mykyta_rate ?? 0.97),
       mykyta_pitch: pitchEl ? Number(pitchEl.value) : (prev.mykyta_pitch ?? 0),
-      mykyta_volume: volEl ? Number(volEl.value) : (prev.mykyta_volume ?? 1.0),
-      mykyta_length_scale: lenEl ? Number(lenEl.value) : (prev.mykyta_length_scale ?? 1.0),
+      mykyta_volume: volEl ? Number(volEl.value) : (prev.mykyta_volume ?? 1.05),
+      mykyta_length_scale: lenEl ? Number(lenEl.value) : (prev.mykyta_length_scale ?? 1.05),
     };
     localStorage.setItem('vm_settings', JSON.stringify(settings));
     vmNotify('Настройки сохранены ✓', 'success', 2500);

@@ -23,6 +23,11 @@ def set_pipeline_tts_backend(name: str | None) -> None:
         str(name).strip() if name else None
     )
 
+
+def get_pipeline_tts_backend() -> str | None:
+    """Return currently bound pipeline TTS backend (if any)."""
+    return _pipeline_tts_backend.get()
+
 # Canonical backend names (UI / settings)
 TTS_BACKEND_EDGE = "edge"
 TTS_BACKEND_TTS_UK = "tts_uk"
@@ -54,15 +59,19 @@ DEFAULT_EDGE_VOICE = "uk-UA-OstapNeural"
 DEFAULT_TTS_UK_VOICE = "mykyta"
 DEFAULT_PIPER_VOICE = "uk_UA-mykyta-high"
 
-# Stage 22 — Mykyta / tts_uk voice controls (clamped)
-MYKYTA_RATE_DEFAULT = 1.0
+# Stage 23 — production Mykyta defaults (slightly slower / longer)
+MYKYTA_RATE_DEFAULT = 0.97
 MYKYTA_PITCH_DEFAULT = 0.0
-MYKYTA_VOLUME_DEFAULT = 1.0
-MYKYTA_LENGTH_SCALE_DEFAULT = 1.0
+MYKYTA_VOLUME_DEFAULT = 1.05
+MYKYTA_LENGTH_SCALE_DEFAULT = 1.05
 MYKYTA_RATE_RANGE = (0.85, 1.15)
 MYKYTA_PITCH_RANGE = (-4.0, 4.0)
 MYKYTA_VOLUME_RANGE = (0.7, 1.3)
-MYKYTA_LENGTH_SCALE_RANGE = (0.85, 1.15)
+# Duration-control may stretch length_scale up to 1.18
+MYKYTA_LENGTH_SCALE_RANGE = (0.85, 1.18)
+# Stage 23 duration-control clamps (slot fill via synth params)
+MYKYTA_DURATION_LENGTH_SCALE_RANGE = (0.92, 1.18)
+MYKYTA_DURATION_RATE_RANGE = (0.88, 1.08)
 
 _pipeline_mykyta_controls: contextvars.ContextVar[dict[str, float] | None] = (
     contextvars.ContextVar("pipeline_mykyta_controls", default=None)
@@ -149,6 +158,36 @@ def set_pipeline_mykyta_controls(controls: dict[str, Any] | None) -> None:
         _pipeline_mykyta_controls.set(None)
         return
     _pipeline_mykyta_controls.set(resolve_mykyta_controls(controls, env=False))
+
+
+def compute_mykyta_duration_controls(
+    slot_ms: int,
+    measured_ms: int,
+    *,
+    base: dict[str, Any] | None = None,
+) -> dict[str, float]:
+    """Stage 23: length_scale / rate to stretch short TTS toward the slot.
+
+    length_scale = clamp(slot/measured, 0.92, 1.18)
+    rate         = clamp(1/length_scale, 0.88, 1.08)
+    """
+    slot = max(1, int(slot_ms or 0))
+    meas = max(1, int(measured_ms or 0))
+    length_scale = _clamp(
+        float(slot) / float(meas),
+        *MYKYTA_DURATION_LENGTH_SCALE_RANGE,
+    )
+    rate = _clamp(
+        1.0 / max(0.5, length_scale),
+        *MYKYTA_DURATION_RATE_RANGE,
+    )
+    base_ctrl = resolve_mykyta_controls(base, env=False)
+    return {
+        "rate": rate,
+        "pitch": base_ctrl["pitch"],
+        "volume": base_ctrl["volume"],
+        "length_scale": length_scale,
+    }
 
 
 def bind_pipeline_tts_from_info(info: dict[str, Any] | None) -> str:

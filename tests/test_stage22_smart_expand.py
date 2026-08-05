@@ -42,11 +42,13 @@ def test_expand_refuses_garbage_and_never_emits_same_pro():
     assert "Саме про" not in out
     assert "тут ідеться" not in out.lower()
     assert is_garbage_expand(out) is False
-    assert soft_pad_count(out) <= 1
+    assert soft_pad_count(out) <= 2
     # Huge slot: either clean growth in band or honest refuse (no garbage).
     if out == cleaned or out == strip_garbage_expand_phrases(dirty):
-        assert "stage22:expand_refused" in reasons or "already_filled" in " ".join(
-            reasons
+        assert (
+            "stage22:expand_refused" in reasons
+            or "stage23:expand_refused" in reasons
+            or "already_filled" in " ".join(reasons)
         )
 
 
@@ -103,7 +105,7 @@ def test_mykyta_controls_clamp_and_stamp():
     assert ctrl["rate"] == 1.15
     assert ctrl["pitch"] == -4.0
     assert ctrl["volume"] == 0.7
-    assert ctrl["length_scale"] == 1.15
+    assert ctrl["length_scale"] == 1.18
 
     set_pipeline_mykyta_controls({"rate": 1.05, "pitch": 1.0, "volume": 1.1, "length_scale": 0.95})
     seg: dict = {}
@@ -216,7 +218,10 @@ def test_ripple_shift_on_severe_overlap():
         resolve_conflicts,
     )
 
+    from engines.conflict_resolver import STAGE23_RIPPLE_OVERLAP_MS
+
     assert STAGE22_RIPPLE_OVERLAP_MS == 400
+    assert STAGE23_RIPPLE_OVERLAP_MS == 300
     a = SegmentPlacement(
         idx=0,
         original_start_ms=0,
@@ -231,7 +236,7 @@ def test_ripple_shift_on_severe_overlap():
         place_start_ms=1800,
         duration_ms=1000,
     )
-    # overlap = 2500 - 1800 = 700 > 400
+    # overlap = 2500 - 1800 = 700 > 300
     result = resolve_conflicts([a, b], collect_traces=False)
     segs = {s.idx: s for s in result.segments}
     assert segs[1].place_start_ms >= segs[0].effective_end_ms
