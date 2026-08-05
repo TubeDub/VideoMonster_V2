@@ -26,10 +26,12 @@ class TtsUkEngine:
     supports_ssml = False
 
     def is_available(self) -> bool:
+        # Do NOT import tts_uk.inference here — that loads RAD-TTS++ / Vocos
+        # and can stall desktop startup for minutes. Probe package presence only.
         try:
-            from tts_uk.inference import synthesis  # noqa: F401
+            import importlib.util
 
-            return True
+            return importlib.util.find_spec("tts_uk") is not None
         except Exception:
             return False
 

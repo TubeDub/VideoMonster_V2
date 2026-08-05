@@ -33,7 +33,8 @@ except Exception:
     pass
 
 PORT = 5199
-STARTUP_TIMEOUT = 45.0
+# Heavy imports (TTS backends / model registry) often exceed 45s on cold start.
+STARTUP_TIMEOUT = float(os.environ.get("VM_DESKTOP_STARTUP_TIMEOUT") or "120")
 ERROR_LOG = APP_DIR / "output" / "desktop_error.log"
 
 _flask_error: str | None = None
@@ -64,6 +65,9 @@ def _write_error(msg: str) -> None:
 def run_flask(port: int) -> None:
     try:
         os.environ["PORT"] = str(port)
+        # Skip slow storage audits on desktop boot so UI comes up sooner.
+        os.environ.setdefault("VM_FAST_START", "1")
+        os.environ.setdefault("VM_SKIP_STARTUP_STORAGE_AUDIT", "1")
         try:
             from engines.owner_first_run import run_if_needed
 
