@@ -1770,6 +1770,140 @@ def _post_tts_max_retries(task_info: dict | None = None) -> int:
         return 5
 
 
+def _repair_missing_tts_files(
+    segments_data: list,
+    *,
+    voice: str,
+    task_info: dict | None,
+    task_id: str | None = None,
+    tts_rate: str | None = None,
+    tts_pitch: str | None = None,
+) -> dict:
+    """Stage 22: force-split children kept without regen must get audio before handoff.
+
+    Regenerates TTS for every active segment that has text but no ``file`` /
+    ``tts_file_path``. Falls back to Edge if the preferred engine fails.
+    """
+    from engines.pipeline_integrity.tts_segment_fields import resolve_segment_text_for_tts
+    from engines.tts_backends import normalize_backend_name
+
+    info = task_info or {}
+    primary = normalize_backend_name(
+        info.get("tts_engine") or info.get("tts_backend") or "edge-offline"
+    )
+    engines_try = [primary]
+    if primary != "edge-offline":
+        engines_try.append("edge-offline")
+
+    repaired = 0
+    failed = 0
+    skipped = 0
+    work_root = _artifacts_dir() / "closed_loop" / str(task_id or "repair")
+    work_root.mkdir(parents=True, exist_ok=True)
+
+    for idx, seg in enumerate(segments_data):
+        if not isinstance(seg, dict):
+            continue
+        if seg.get("merged_into") is not None or seg.get("merged_into_id"):
+            skipped += 1
+            continue
+        if seg.get("tts_blocked") or seg.get("skip_tts") or seg.get("status") == "failed":
+            skipped += 1
+            continue
+        if seg.get("file") or seg.get("tts_file_path"):
+            continue
+        text = str(
+            resolve_segment_text_for_tts(seg)
+            or seg.get("final_tts_text")
+            or seg.get("plain_text")
+            or seg.get("text")
+            or ""
+        ).strip()
+        if not text:
+            seg["status"] = "failed"
+            seg["tts_status"] = "failed"
+            seg["tts_blocked"] = True
+            failed += 1
+            continue
+
+        got = None
+        got_ms = 0
+        for eid in engines_try:
+            try:
+                rr = _regen_segment_tts(
+                    text,
+                    voice=str(seg.get("voice") or voice or ""),
+                    work_dir=work_root,
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                    task_id=task_id,
+                    segment_index=idx,
+                    segment_id=str(seg.get("segment_id") or ""),
+                    engine_id=eid,
+                )
+                if isinstance(rr, tuple):
+                    nf, nms = rr[0], int(rr[1] or 0)
+                else:
+                    nf, nms = rr, 0
+                if nf:
+                    got, got_ms = nf, nms
+                    break
+            except Exception as exc:
+                logger.warning(
+                    "Task %s: repair TTS idx=%s engine=%s failed: %s",
+                    task_id,
+                    idx,
+                    eid,
+                    exc,
+                )
+        if not got:
+            seg["needs_re_tts"] = True
+            seg["status"] = "failed"
+            seg["tts_status"] = "failed"
+            failed += 1
+            continue
+
+        seg["file"] = got
+        seg["tts_file_path"] = got
+        seg["final_tts_text"] = text
+        seg["status"] = "generated"
+        seg["tts_status"] = "generated"
+        seg["needs_re_tts"] = False
+        if got_ms > 0:
+            seg["playback_duration"] = got_ms
+            seg["tts_ms"] = got_ms
+            seg["actual_duration_ms"] = got_ms
+        try:
+            info["identity_allow_rebind"] = True
+            _commit_tts_group_result(
+                segments_data,
+                [idx],
+                tts_text=text,
+                audio_filename=str(got),
+                task_info=info,
+            )
+        except Exception as exc:
+            logger.debug("repair commit skipped idx=%s: %s", idx, exc)
+        finally:
+            info["identity_allow_rebind"] = False
+        repaired += 1
+
+    stats = {
+        "repaired": repaired,
+        "failed": failed,
+        "skipped": skipped,
+        "engines_tried": engines_try,
+    }
+    if repaired or failed:
+        logger.info(
+            "Task %s: missing-TTS repair repaired=%s failed=%s",
+            task_id,
+            repaired,
+            failed,
+        )
+    return stats
+
+
 def _post_tts_timing_qa(
     task_id: str,
     segments_data: list,
@@ -1878,6 +2012,17 @@ def _post_tts_timing_qa(
         max_iterations=_post_tts_max_retries(task_info),
         resolve_path=_resolve_path,
     )
+
+    # Stage 22: force-split may keep children without audio — repair before mix/handoff.
+    repair_stats = _repair_missing_tts_files(
+        segments_data,
+        voice=voice,
+        task_info=task_info,
+        task_id=task_id,
+        tts_rate=tts_rate,
+        tts_pitch=tts_pitch,
+    )
+    retry_stats["missing_tts_repair"] = repair_stats
 
     # Re-run closed loop only on timeline problem segments (no cascade shift).
     timeline = validate_timeline(segments_data, normalized_map)
@@ -15102,6 +15247,24 @@ def _run_pipeline_inner(
             )
             with STATE_LOCK:
                 _handoff_info = dict(task.get("info") or {})
+            # Last-chance repair: split children without WAV must not reach Studio.
+            try:
+                _handoff_repair = _repair_missing_tts_files(
+                    segments_data,
+                    voice=voice,
+                    task_info=_handoff_info,
+                    task_id=task_id,
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                )
+                with STATE_LOCK:
+                    task["info"]["missing_tts_repair_handoff"] = _handoff_repair
+            except Exception as _rep_exc:
+                logger.warning(
+                    "Task %s: pre-handoff missing-TTS repair failed: %s",
+                    task_id,
+                    _rep_exc,
+                )
             _handoff_info["segments_data"] = segments_data
             _pi_sf.validate_pipeline(
                 segments_data,

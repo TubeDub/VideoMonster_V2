@@ -3629,15 +3629,22 @@ def run_closed_loop_timing(
                             _s["needs_re_tts"] = True
                             _s["force_split_executed"] = True
                             _s["split_executed"] = True
+                            # Do not advertise "generated" without a WAV — handoff
+                            # repair / Edge fallback must fill file before Studio.
+                            if not (_s.get("file") or _s.get("tts_file_path")):
+                                _s["status"] = "pending_regen"
+                                _s["tts_status"] = "pending_regen"
                             meta21 = dict(_s.get("stage21") or {})
                             meta21.update(
                                 {
                                     "force_split_executed": True,
                                     "split_executed": True,
-                                    "final_status": "stage21_partial",
+                                    "final_status": "stage22_partial",
+                                    "needs_re_tts": True,
                                 }
                             )
                             _s["stage21"] = meta21
+                            _s["stage22"] = {**dict(_s.get("stage22") or {}), **meta21}
                             _s["stage19j"] = {**dict(_s.get("stage19j") or {}), **meta21}
                         stats["resegmented"] += 1
                         stats["adaptation_executed"] = True
@@ -4143,15 +4150,20 @@ def run_closed_loop_timing(
                             _s["needs_re_tts"] = True
                             _s["force_split_executed"] = True
                             _s["split_executed"] = True
+                            if not (_s.get("file") or _s.get("tts_file_path")):
+                                _s["status"] = "pending_regen"
+                                _s["tts_status"] = "pending_regen"
                             meta21 = dict(_s.get("stage21") or {})
                             meta21.update(
                                 {
                                     "force_split_executed": True,
                                     "split_executed": True,
-                                    "final_status": "stage21_partial",
+                                    "final_status": "stage22_partial",
+                                    "needs_re_tts": True,
                                 }
                             )
                             _s["stage21"] = meta21
+                            _s["stage22"] = {**dict(_s.get("stage22") or {}), **meta21}
                             _s["stage19j"] = {**dict(_s.get("stage19j") or {}), **meta21}
                         stats["resegmented"] += 1
                         stats["adaptation_executed"] = True
