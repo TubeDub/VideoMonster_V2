@@ -27,6 +27,51 @@ def test_stage23_fill_and_underflow_constants():
     assert MAX_SOFT_PADS_PER_SEG == 2
 
 
+def test_apply_stage19b_no_unboundlocal_on_underfill():
+    """Regression: STAGE23_OK_FILL_LO must not be shadowed by a late import."""
+    from pathlib import Path
+
+    from engines.closed_loop_timing import (
+        TextFitNoRegenError,
+        TimingBudget,
+        apply_stage19b_rule_text_fit,
+    )
+
+    seg = {
+        "text": "Короткий текст.",
+        "final_tts_text": "Короткий текст.",
+        "tts_backend": "tts_uk",
+        "tts_voice": "mykyta",
+    }
+    budget = TimingBudget(
+        index=0,
+        slot_duration=5000,
+        measured_duration=3000,
+        original_duration=3000,
+        underflow=2000,
+        overflow=0,
+        final_status="dead_air_risk",
+        delta=-2000,
+    )
+    timing_map = [{"start_ms": 0, "end_ms": 5000, "duration_ms": 5000}]
+    try:
+        apply_stage19b_rule_text_fit(
+            seg,
+            0,
+            timing_map,
+            budget,
+            source_hint="",
+            target_lang="uk",
+            voice="mykyta",
+            work_dir=Path("."),
+            regen_fn=None,
+        )
+    except TextFitNoRegenError:
+        pass  # expected without regen — proves we passed the needs_fit gate
+    except UnboundLocalError as exc:  # pragma: no cover
+        raise AssertionError(f"STAGE23_OK_FILL_LO shadowed: {exc}") from exc
+
+
 def test_mykyta_production_defaults():
     from engines.tts_backends import (
         MYKYTA_LENGTH_SCALE_DEFAULT,
