@@ -2360,7 +2360,6 @@ def apply_stage19b_rule_text_fit(
 
     from engines.text_slot_fit import (
         MIN_CPS_UK,
-        STAGE23_OK_FILL_LO,
         UNDERFILL_EXPAND_RATIO,
         char_budget,
         clean_text_chars,
@@ -2378,6 +2377,8 @@ def apply_stage19b_rule_text_fit(
         word_retention_ratio,
         MIN_WORD_RETENTION,
     )
+    # STAGE23_OK_FILL_LO is the module-level constant (do not re-import here —
+    # a late import would shadow it and raise UnboundLocalError above).
 
     delta_before = _slot_delta_ms(budget)
     original = _segment_text(seg)
