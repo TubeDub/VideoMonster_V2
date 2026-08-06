@@ -17,6 +17,15 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
+# Stage 23 constants — single source in text_slot_fit (module-level only; never re-import in funcs).
+from engines.text_slot_fit import (
+    MAX_SOFT_PADS_PER_SEG,
+    OVERFLOW_TRIGGER_MS,
+    STAGE23_OK_FILL_HI,
+    STAGE23_OK_FILL_LO,
+    UNDERFLOW_TRIGGER_MS,
+)
+
 logger = logging.getLogger("tubedub.closed_loop_timing")
 
 MAX_REWRITE_ITERATIONS = 5
@@ -60,11 +69,6 @@ STAGE21_OK_FILL_HI = 1.12
 # Stage 22: tighter OK band for dead-air killer.
 STAGE22_OK_FILL_LO = 0.90
 STAGE22_OK_FILL_HI = 1.12
-# Stage 23: production fill — length_scale first, then clean expand.
-STAGE23_OK_FILL_LO = 0.92
-STAGE23_OK_FILL_HI = 1.12
-UNDERFLOW_TRIGGER_MS = 250
-OVERFLOW_TRIGGER_MS = 350
 OVERFLOW_FORCE_SPLIT_MS = 350
 ATEMPO_MIN = 0.90
 ATEMPO_MAX = 1.20
@@ -1746,7 +1750,7 @@ def _stamp_stage19e_fields(
         final_status = "dead_air_risk"
     elif fill > STAGE23_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
         final_status = "overflow_unresolved"
-    elif not clean_split_ok or pad_n > 2:
+    elif not clean_split_ok or pad_n > int(MAX_SOFT_PADS_PER_SEG or 2):
         final_status = "stage23_partial"
     elif STAGE23_OK_FILL_LO <= fill <= STAGE23_OK_FILL_HI:
         # In-band fill → ok (even if |delta| large or CPS off on a long slot).
@@ -1758,7 +1762,7 @@ def _stamp_stage19e_fields(
         fill < STAGE23_OK_FILL_LO
         or fill > STAGE23_OK_FILL_HI
         or overflow_ms > OVERFLOW_FORCE_SPLIT_MS
-        or pad_n > 2
+        or pad_n > int(MAX_SOFT_PADS_PER_SEG or 2)
         or not unique_text_ok
         or not clean_split_ok
         or is_garbage_expand(seg_text)
@@ -2348,12 +2352,15 @@ def apply_stage19b_rule_text_fit(
     slot0 = max(1, int(budget.slot_duration or 0) or 1)
     meas0 = int(budget.measured_duration or 0)
     fill_now = (meas0 / float(slot0)) if meas0 > 0 else 0.0
+    # Module-level Stage 23 constants only (never re-import these names in this fn).
+    _fill_lo = float(STAGE23_OK_FILL_LO) if STAGE23_OK_FILL_LO is not None else 0.92
+    _under_ms = int(UNDERFLOW_TRIGGER_MS) if UNDERFLOW_TRIGGER_MS is not None else 250
     # Stage 23: enter on |Δ|>350, fill<0.92, or underflow>250.
     needs_fit = (
         _needs_stage19b_text_fit(budget)
-        or (0 < fill_now < STAGE23_OK_FILL_LO)
-        or int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS
-        or _slot_delta_ms(budget) < -UNDERFLOW_TRIGGER_MS
+        or (0 < fill_now < _fill_lo)
+        or int(budget.underflow or 0) > _under_ms
+        or _slot_delta_ms(budget) < -_under_ms
     )
     if not needs_fit:
         return budget, False
@@ -2377,8 +2384,6 @@ def apply_stage19b_rule_text_fit(
         word_retention_ratio,
         MIN_WORD_RETENTION,
     )
-    # STAGE23_OK_FILL_LO is the module-level constant (do not re-import here —
-    # a late import would shadow it and raise UnboundLocalError above).
 
     delta_before = _slot_delta_ms(budget)
     original = _segment_text(seg)
@@ -2388,9 +2393,9 @@ def apply_stage19b_rule_text_fit(
     fill0 = float(meas0) / float(max(1, slot0)) if slot0 > 0 else 0.0
     # Stage 23: duration-control / expand on underflow >250 OR fill < 0.92.
     expand_required = (
-        delta_before < -UNDERFLOW_TRIGGER_MS
-        or fill0 < STAGE23_OK_FILL_LO
-        or int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS
+        delta_before < -_under_ms
+        or fill0 < _fill_lo
+        or int(budget.underflow or 0) > _under_ms
         or (0 < cps_now < MIN_CPS_UK)
         or cps_under_budget(original, slot0)
     )
@@ -2417,15 +2422,16 @@ def apply_stage19b_rule_text_fit(
         delta_before = _slot_delta_ms(budget)
         # Re-evaluate expand need after duration control.
         expand_required = (
-            delta_before < -UNDERFLOW_TRIGGER_MS
-            or fill0 < STAGE23_OK_FILL_LO
-            or int(budget.underflow or 0) > UNDERFLOW_TRIGGER_MS
+            delta_before < -_under_ms
+            or fill0 < _fill_lo
+            or int(budget.underflow or 0) > _under_ms
             or fill0 < 0.90
             or (0 < cps_now < MIN_CPS_UK)
             or cps_under_budget(original, slot0)
         )
+    _overflow_ms = int(OVERFLOW_TRIGGER_MS) if OVERFLOW_TRIGGER_MS is not None else 350
     shorten_required = (
-        delta_before > OVERFLOW_TRIGGER_MS
+        delta_before > _overflow_ms
         or cps_over_budget(original, slot0)
     )
 
@@ -2835,7 +2841,7 @@ def apply_stage19b_rule_text_fit(
             # Stage 23: dead_air only when fill still < 0.92 after expand attempt.
             slot_chk = max(1, int(budget.slot_duration or 1))
             fill_chk = float(int(budget.measured_duration or 0)) / float(slot_chk)
-            if fill_chk < STAGE23_OK_FILL_LO:
+            if fill_chk < _fill_lo:
                 budget.final_status = "dead_air_risk"
                 seg["strategy"] = "dead_air_risk"
                 budget.rewrite_reason = "stage23:expand_no_change"
@@ -2865,7 +2871,7 @@ def apply_stage19b_rule_text_fit(
     # Light atempo AFTER text fit / re-TTS only (never sole strategy when |Δ|>350).
     if budget.final_status != "failed_tts_regen" and (
         _needs_stage19b_text_fit(budget)
-        or float(seg.get("fill_ratio") or 0) < STAGE23_OK_FILL_LO
+        or float(seg.get("fill_ratio") or 0) < _fill_lo
     ):
         budget = _apply_light_atempo_after_fit(
             seg,
@@ -3268,10 +3274,18 @@ def run_closed_loop_segment(
                         task_id=task_id,
                         resolve_path=resolve_path,
                     )
+                except UnboundLocalError as exc:
+                    logger.error(
+                        "Stage23 UnboundLocalError suppressed seg=%s: %s", idx, exc
+                    )
+                    budget.rewrite_reason = "stage23:unboundlocal_suppressed"
                 except TextFitNoRegenError as exc:
                     budget.final_status = "failed_no_regen"
                     budget.rewrite_reason = str(exc.error_code)
                     logger.error("closed_loop seg=%s: %s", idx, exc)
+                except Exception as exc:
+                    logger.exception("Stage23 text fit failed seg=%s: %s", idx, exc)
+                    budget.rewrite_reason = "stage23:text_fit_failed"
                 return _done(budget)
             mark_adaptation_skipped(
                 seg,
@@ -3305,12 +3319,21 @@ def run_closed_loop_segment(
             task_id=task_id,
             resolve_path=resolve_path,
         )
+    except UnboundLocalError as exc:
+        # Never kill the whole dub job over a Stage 23 constant/scoping bug.
+        logger.error("Stage23 UnboundLocalError suppressed seg=%s: %s", idx, exc)
+        budget.rewrite_reason = "stage23:unboundlocal_suppressed"
+        stage19b_ran = False
     except TextFitNoRegenError as exc:
         budget.final_status = "failed_no_regen"
         budget.rewrite_reason = str(exc.error_code)
         stage19b_ran = True
         logger.error("closed_loop seg=%s: %s", idx, exc)
         return _done(budget)
+    except Exception as exc:
+        logger.exception("Stage23 text fit failed seg=%s: %s", idx, exc)
+        budget.rewrite_reason = "stage23:text_fit_failed"
+        stage19b_ran = False
     needs, reason = _needs_rewrite(budget)
     if not needs and abs(_slot_delta_ms(budget)) <= TEXT_FIT_DELTA_MS:
         budget.final_status = "ok"

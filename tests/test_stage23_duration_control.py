@@ -27,6 +27,17 @@ def test_stage23_fill_and_underflow_constants():
     assert MAX_SOFT_PADS_PER_SEG == 2
 
 
+def test_stage23_constants_importable_at_module_level():
+    from engines.closed_loop_timing import STAGE23_OK_FILL_LO, UNDERFLOW_TRIGGER_MS
+    from engines.text_slot_fit import STAGE23_OK_FILL_LO as LO2
+
+    assert STAGE23_OK_FILL_LO == 0.92
+    assert LO2 == 0.92
+    assert UNDERFLOW_TRIGGER_MS == 250
+    # Same object identity / single source: closed_loop re-exports text_slot_fit.
+    assert STAGE23_OK_FILL_LO is LO2
+
+
 def test_apply_stage19b_no_unboundlocal_on_underfill():
     """Regression: STAGE23_OK_FILL_LO must not be shadowed by a late import."""
     from pathlib import Path
@@ -68,7 +79,7 @@ def test_apply_stage19b_no_unboundlocal_on_underfill():
         )
     except TextFitNoRegenError:
         pass  # expected without regen — proves we passed the needs_fit gate
-    except UnboundLocalError as exc:  # pragma: no cover
+    except UnboundLocalError as exc:
         raise AssertionError(f"STAGE23_OK_FILL_LO shadowed: {exc}") from exc
 
 
