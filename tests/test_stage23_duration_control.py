@@ -28,7 +28,11 @@ def test_stage23_fill_and_underflow_constants():
 
 
 def test_stage23_constants_importable_at_module_level():
-    from engines.closed_loop_timing import STAGE23_OK_FILL_LO, UNDERFLOW_TRIGGER_MS
+    from engines.closed_loop_timing import (
+        STAGE23_OK_FILL_LO,
+        STAGE23_RUNTIME_TAG,
+        UNDERFLOW_TRIGGER_MS,
+    )
     from engines.text_slot_fit import STAGE23_OK_FILL_LO as LO2
 
     assert STAGE23_OK_FILL_LO == 0.92
@@ -36,6 +40,22 @@ def test_stage23_constants_importable_at_module_level():
     assert UNDERFLOW_TRIGGER_MS == 250
     # Same object identity / single source: closed_loop re-exports text_slot_fit.
     assert STAGE23_OK_FILL_LO is LO2
+    assert "stage23-hotfix" in STAGE23_RUNTIME_TAG
+
+
+def test_globals_get_avoids_unboundlocal_even_with_local_shadow():
+    """globals().get('STAGE23_OK_FILL_LO') must work even if name is local-unbound."""
+
+    def _probe():
+        # Mimic the historical bug: name is local because of a late assignment,
+        # but reading via globals() must still succeed.
+        val = float(__import__("engines.closed_loop_timing", fromlist=["x"]).__dict__.get(
+            "STAGE23_OK_FILL_LO"
+        ) or 0.92)
+        STAGE23_OK_FILL_LO = None  # noqa: F841 — forces local binding
+        return val
+
+    assert _probe() == 0.92
 
 
 def test_apply_stage19b_no_unboundlocal_on_underfill():

@@ -26,6 +26,9 @@ from engines.text_slot_fit import (
     UNDERFLOW_TRIGGER_MS,
 )
 
+# Logged at closed-loop entry so diagnostics prove which Stage23 build is running.
+STAGE23_RUNTIME_TAG = "stage23-hotfix-20260806b"
+
 logger = logging.getLogger("tubedub.closed_loop_timing")
 
 MAX_REWRITE_ITERATIONS = 5
@@ -2352,9 +2355,10 @@ def apply_stage19b_rule_text_fit(
     slot0 = max(1, int(budget.slot_duration or 0) or 1)
     meas0 = int(budget.measured_duration or 0)
     fill_now = (meas0 / float(slot0)) if meas0 > 0 else 0.0
-    # Module-level Stage 23 constants only (never re-import these names in this fn).
-    _fill_lo = float(STAGE23_OK_FILL_LO) if STAGE23_OK_FILL_LO is not None else 0.92
-    _under_ms = int(UNDERFLOW_TRIGGER_MS) if UNDERFLOW_TRIGGER_MS is not None else 250
+    # Read Stage23 thresholds via globals() so a late local import cannot
+    # UnboundLocalError this gate (desktop stale bytecode / accidental re-import).
+    _fill_lo = float(globals().get("STAGE23_OK_FILL_LO") or 0.92)
+    _under_ms = int(globals().get("UNDERFLOW_TRIGGER_MS") or 250)
     # Stage 23: enter on |Δ|>350, fill<0.92, or underflow>250.
     needs_fit = (
         _needs_stage19b_text_fit(budget)
@@ -2429,7 +2433,7 @@ def apply_stage19b_rule_text_fit(
             or (0 < cps_now < MIN_CPS_UK)
             or cps_under_budget(original, slot0)
         )
-    _overflow_ms = int(OVERFLOW_TRIGGER_MS) if OVERFLOW_TRIGGER_MS is not None else 350
+    _overflow_ms = int(globals().get("OVERFLOW_TRIGGER_MS") or 350)
     shorten_required = (
         delta_before > _overflow_ms
         or cps_over_budget(original, slot0)
@@ -3170,6 +3174,13 @@ def run_closed_loop_segment(
     resolve_path: Callable[[str], str] | None = None,
 ) -> TimingBudget:
     """Closed loop for one segment — never shifts neighbors."""
+    logger.info(
+        "closed_loop seg=%s tag=%s fill_lo=%s under_ms=%s",
+        idx,
+        STAGE23_RUNTIME_TAG,
+        globals().get("STAGE23_OK_FILL_LO"),
+        globals().get("UNDERFLOW_TRIGGER_MS"),
+    )
     from engines.semantic_optimizer import (
         optimize_expand_for_slot,
         optimize_llm_rephrase_for_slot,

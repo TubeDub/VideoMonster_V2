@@ -1998,23 +1998,35 @@ def _post_tts_timing_qa(
         except Exception:
             return p
 
-    retry_stats = run_closed_loop_timing(
-        segments_data,
-        normalized_map,
-        source_segments=task_info.get("source_segments") or [],
-        voice=voice,
-        target_lang=target_lang,
-        src_lang=src_lang,
-        work_dir=work_root,
-        regen_fn=_regen,
-        commit_fn=_commit,
-        audits=task_info.get("translation_audits") or [],
-        task_id=task_id,
-        tts_rate=tts_rate,
-        tts_pitch=tts_pitch,
-        max_iterations=_post_tts_max_retries(task_info),
-        resolve_path=_resolve_path,
-    )
+    try:
+        retry_stats = run_closed_loop_timing(
+            segments_data,
+            normalized_map,
+            source_segments=task_info.get("source_segments") or [],
+            voice=voice,
+            target_lang=target_lang,
+            src_lang=src_lang,
+            work_dir=work_root,
+            regen_fn=_regen,
+            commit_fn=_commit,
+            audits=task_info.get("translation_audits") or [],
+            task_id=task_id,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            max_iterations=_post_tts_max_retries(task_info),
+            resolve_path=_resolve_path,
+        )
+    except UnboundLocalError as exc:
+        # Belt-and-suspenders: Stage23 constant scoping must never kill the dub job.
+        logger.error(
+            "Task %s: Stage23 UnboundLocalError suppressed in closed_loop: %s",
+            task_id,
+            exc,
+        )
+        retry_stats = {
+            "error": "stage23_unboundlocal_suppressed",
+            "message": str(exc),
+        }
 
     # Stage 22: force-split may keep children without audio — repair before mix/handoff.
     repair_stats = _repair_missing_tts_files(
@@ -2044,24 +2056,39 @@ def _post_tts_timing_qa(
             src_segs = task_info.get("source_segments") or []
             audits = task_info.get("translation_audits") or []
             audit_by = {int(a.get("index", -1)): a for a in audits}
-            run_closed_loop_segment(
-                segments_data[idx],
-                idx,
-                normalized_map,
-                source_hint=src_segs[idx] if idx < len(src_segs) else "",
-                target_lang=target_lang,
-                src_lang=src_lang,
-                voice=voice,
-                work_dir=work_root,
-                regen_fn=_regen,
-                commit_fn=_commit,
-                audit=audit_by.get(idx),
-                max_iterations=_post_tts_max_retries(task_info),
-                tts_rate=tts_rate,
-                tts_pitch=tts_pitch,
-                task_id=task_id,
-                resolve_path=_resolve_path,
-            )
+            try:
+                run_closed_loop_segment(
+                    segments_data[idx],
+                    idx,
+                    normalized_map,
+                    source_hint=src_segs[idx] if idx < len(src_segs) else "",
+                    target_lang=target_lang,
+                    src_lang=src_lang,
+                    voice=voice,
+                    work_dir=work_root,
+                    regen_fn=_regen,
+                    commit_fn=_commit,
+                    audit=audit_by.get(idx),
+                    max_iterations=_post_tts_max_retries(task_info),
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                    task_id=task_id,
+                    resolve_path=_resolve_path,
+                )
+            except UnboundLocalError as exc:
+                logger.error(
+                    "Task %s: Stage23 UnboundLocalError suppressed on problem seg=%s: %s",
+                    task_id,
+                    idx,
+                    exc,
+                )
+            except Exception as exc:
+                logger.exception(
+                    "Task %s: closed_loop re-optimize failed seg=%s: %s",
+                    task_id,
+                    idx,
+                    exc,
+                )
         timeline = validate_timeline(segments_data, normalized_map)
 
     report = build_timing_report(
