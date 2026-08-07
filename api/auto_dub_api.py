@@ -1790,7 +1790,6 @@ def _repair_missing_tts_files(
     from engines.pipeline_integrity.audio_presence import (
         MIN_AUDIO_BYTES,
         audio_stat,
-        resolve_segment_audio_path,
         segment_needs_audio_repair,
         stamp_audio_presence,
     )
