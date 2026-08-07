@@ -27,7 +27,7 @@ from engines.text_slot_fit import (
 )
 
 # Logged at closed-loop entry so diagnostics prove which Stage23 build is running.
-STAGE23_RUNTIME_TAG = "stage23-hotfix-20260806b"
+STAGE23_RUNTIME_TAG = "stage23b-audio-duration-20260806"
 
 logger = logging.getLogger("tubedub.closed_loop_timing")
 
@@ -402,6 +402,19 @@ def _slot_delta_ms(budget: TimingBudget) -> int:
 
 def _needs_stage19b_text_fit(budget: TimingBudget) -> bool:
     return abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS
+
+
+def _needs_stage23_fill(budget: TimingBudget) -> bool:
+    """Stage 23b: force duration-control/expand when underfill is material."""
+    slot = max(1, int(budget.slot_duration or 1))
+    meas = int(budget.measured_duration or 0)
+    if meas <= 0:
+        return True
+    fill = meas / float(slot)
+    underflow = max(0, slot - meas)
+    _fill_lo = float(globals().get("STAGE23_OK_FILL_LO") or 0.92)
+    _under_ms = int(globals().get("UNDERFLOW_TRIGGER_MS") or 250)
+    return underflow > _under_ms or fill < _fill_lo
 
 
 def large_overflow_needs_split(*, overflow_ms: int, slot_ms: int) -> bool:
@@ -1738,9 +1751,7 @@ def _stamp_stage19e_fields(
         and abs(delta) <= TEXT_FIT_DELTA_MS
     )
     cps_ok = (cps_now <= 0.0) or (MIN_CPS_UK <= cps_now <= MAX_CPS_UK)
-    # Stage 22: final_status is driven by fill band (0.90–1.12). Absolute
-    # underflow >350 only triggers expand attempts — not a dead_air stamp when
-    # fill is already in band.
+    # Stage 23b: never stamp ok when fill < 0.90; target band is 0.92–1.12.
     hard_fail = final_status in ("failed_tts_regen", "failed_no_regen")
     if hard_fail:
         pass
@@ -1749,6 +1760,8 @@ def _stamp_stage19e_fields(
         garbage_blocked = max(garbage_blocked, 1)
     elif not unique_text_ok:
         final_status = "overflow_unresolved"
+    elif fill < 0.90:
+        final_status = "dead_air_risk"
     elif fill < STAGE23_OK_FILL_LO:
         final_status = "dead_air_risk"
     elif fill > STAGE23_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
@@ -1762,7 +1775,8 @@ def _stamp_stage19e_fields(
         final_status = "stage23_partial"
     # Forbidden: never stamp ok with garbage / out-of-band fill / unclean split.
     if final_status == "ok" and (
-        fill < STAGE23_OK_FILL_LO
+        fill < 0.90
+        or fill < STAGE23_OK_FILL_LO
         or fill > STAGE23_OK_FILL_HI
         or overflow_ms > OVERFLOW_FORCE_SPLIT_MS
         or pad_n > int(MAX_SOFT_PADS_PER_SEG or 2)
@@ -1772,7 +1786,7 @@ def _stamp_stage19e_fields(
     ):
         if fill > STAGE23_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
             final_status = "overflow_unresolved"
-        elif fill < STAGE23_OK_FILL_LO:
+        elif fill < 0.90 or fill < STAGE23_OK_FILL_LO:
             final_status = "dead_air_risk"
         else:
             final_status = "stage23_partial"
@@ -1909,6 +1923,28 @@ def _stamp_stage19e_fields(
     }
     prev_22 = dict(seg.get("stage22") or {})
     seg["stage22"] = {**prev_22, **meta22}
+    try:
+        from engines.pipeline_integrity.audio_presence import stamp_audio_presence
+
+        _ap = stamp_audio_presence(seg)
+        audio_exists = bool(_ap.get("ok"))
+        audio_size = int(_ap.get("size") or 0)
+    except Exception:
+        audio_exists = bool(seg.get("audio_exists"))
+        audio_size = int(seg.get("audio_size_bytes") or 0)
+    # Underfill without a duration-control lever is dishonest — stamp intent.
+    if (
+        duration_control_used in ("none", "", None)
+        and (
+            int(budget.underflow or 0) > int(globals().get("UNDERFLOW_TRIGGER_MS") or 250)
+            or fill < float(globals().get("STAGE23_OK_FILL_LO") or 0.92)
+        )
+    ):
+        # Prefer the strongest lever that actually ran this pass.
+        if expand_executed and text_changed:
+            duration_control_used = "expand"
+        elif float(seg.get("atempo") or 1.0) < 0.995:
+            duration_control_used = "atempo"
     meta23 = {
         "duration_control_used": duration_control_used,
         "tts_length_scale": ctrl["length_scale"],
@@ -1922,6 +1958,9 @@ def _stamp_stage19e_fields(
         "garbage_expand_blocked": garbage_blocked,
         "soft_pad_count": pad_n,
         "overlap_after_ripple": int(seg.get("overlap_after_ripple") or 0),
+        "audio_exists": audio_exists,
+        "audio_size_bytes": audio_size,
+        "runtime_tag": STAGE23_RUNTIME_TAG,
     }
     prev_23 = dict(seg.get("stage23") or {})
     seg["stage23"] = {**prev_23, **meta23}
@@ -2022,17 +2061,20 @@ def _apply_stage23_duration_control(
 
     backend = str(seg.get("tts_backend") or seg.get("tts_engine") or "").lower()
     voice_l = str(seg.get("tts_voice") or voice or "").lower()
-    is_mykyta = "tts_uk" in backend or "mykyta" in voice_l
-    if not is_mykyta:
-        try:
-            from engines.tts_backends import get_pipeline_tts_backend
+    engine_id = "tts_uk"
+    try:
+        from engines.tts_backends import get_pipeline_tts_backend, normalize_backend_name
 
-            pipe = str(get_pipeline_tts_backend() or "").lower()
-            is_mykyta = pipe in ("tts_uk", "tts-uk")
-        except Exception:
-            is_mykyta = False
-    if not is_mykyta:
-        return budget
+        pipe = str(get_pipeline_tts_backend() or backend or "").lower()
+        if pipe:
+            engine_id = normalize_backend_name(pipe)
+        elif "tts_uk" in backend or "mykyta" in voice_l:
+            engine_id = "tts_uk"
+        elif backend:
+            engine_id = normalize_backend_name(backend)
+    except Exception:
+        if backend:
+            engine_id = backend
 
     try:
         from engines.tts_backends import (
@@ -2052,15 +2094,12 @@ def _apply_stage23_duration_control(
         },
         env=False,
     )
+    # Stage 23b: ALWAYS compute stretch toward the slot when underfill triggered.
     ctrl = compute_mykyta_duration_controls(slot, meas, base=base)
-    # Need a meaningful stretch (length_scale up or rate down).
-    if (
-        ctrl["length_scale"] <= base["length_scale"] + 0.005
-        and ctrl["rate"] >= base["rate"] - 0.005
-    ):
-        # Still apply when base is already near defaults but slot needs stretch.
-        if ctrl["length_scale"] < 1.01 and fill >= 0.90:
-            return budget
+    # Force at least a mild stretch when still short.
+    if ctrl["length_scale"] <= base["length_scale"] + 0.001:
+        ctrl["length_scale"] = max(ctrl["length_scale"], min(1.18, max(1.05, float(slot) / float(meas))))
+        ctrl["rate"] = max(0.88, min(1.08, 1.0 / max(0.5, ctrl["length_scale"])))
 
     text = _segment_text(seg)
     if not text:
@@ -2089,10 +2128,10 @@ def _apply_stage23_duration_control(
             task_id=task_id,
             segment_index=idx,
             segment_id=str(seg.get("segment_id") or ""),
-            engine_id=str(seg.get("tts_backend") or seg.get("tts_engine") or "tts_uk"),
+            engine_id=engine_id or "tts_uk",
         )
     except Exception as exc:
-        logger.debug("stage23 duration_control regen skipped: %s", exc)
+        logger.warning("stage23 duration_control regen failed: %s", exc)
         return budget
 
     if isinstance(regen_result, tuple):
@@ -2100,7 +2139,30 @@ def _apply_stage23_duration_control(
     else:
         new_file, new_ms = regen_result, 0
     if not new_file:
+        logger.warning("stage23 duration_control regen returned empty file idx=%s", idx)
         return budget
+
+    # Hard audio presence check — never keep a ghost path.
+    try:
+        from engines.pipeline_integrity.audio_presence import audio_stat
+
+        check_path = str(new_file)
+        if resolve_path:
+            try:
+                check_path = str(resolve_path(check_path) or check_path)
+            except Exception:
+                pass
+        ok_a, size_a = audio_stat(check_path)
+        if not ok_a:
+            logger.error(
+                "stage23 duration_control produced missing/tiny audio idx=%s path=%s size=%s",
+                idx,
+                check_path,
+                size_a,
+            )
+            return budget
+    except Exception:
+        pass
 
     seg["file"] = new_file
     seg["tts_file_path"] = new_file
@@ -3265,8 +3327,12 @@ def run_closed_loop_segment(
                 overflow_ms=int(budget.overflow or 0),
                 underflow_ms=int(budget.underflow or 0),
             )
-            # FitsNoChange only when truly in band (|delta|≤350). Never with need=True.
-            if _need or _needs_stage19b_text_fit(budget):
+            # Stage 23b: also enter when fill<0.92 or underflow>250 (not only |Δ|>350).
+            if (
+                _need
+                or _needs_stage19b_text_fit(budget)
+                or _needs_stage23_fill(budget)
+            ):
                 try:
                     budget, _ = apply_stage19b_rule_text_fit(
                         seg,
@@ -3307,6 +3373,30 @@ def run_closed_loop_segment(
                 need_adaptation=False,
                 decision="fits_no_change",
             )
+        # Even when pause-only "fits", Stage 23b must still stretch short audio.
+        if _needs_stage23_fill(budget):
+            try:
+                budget, _ = apply_stage19b_rule_text_fit(
+                    seg,
+                    idx,
+                    timing_map,
+                    budget,
+                    source_hint=source_hint,
+                    target_lang=target_lang,
+                    voice=voice,
+                    work_dir=work_dir,
+                    regen_fn=regen_fn,
+                    commit_fn=commit_fn,
+                    audit=audit,
+                    tts_rate=tts_rate,
+                    tts_pitch=tts_pitch,
+                    task_id=task_id,
+                    resolve_path=resolve_path,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Stage23 fill pass skipped seg=%s: %s", idx, exc
+                )
         return _done(budget)
 
     # Stage 19b/19c/19d: rule expand/shorten BEFORE LLM / before pause-only short-circuit.
@@ -3956,12 +4046,12 @@ def run_closed_loop_timing(
                                 regen_ok_all_e = False
                                 break
                     if not regen_ok_all_e:
-                        # Stage 21: never roll back a clean structural split just
-                        # because child TTS/network failed — keep children and
-                        # mark re-TTS; rolling back re-creates parent overflow.
+                        # Stage 23b: keep structural split, but never leave ghost
+                        # paths / tts_ms=0 pretending to be generated — repair must
+                        # fill real audio before mux.
                         logger.warning(
-                            "[Stage21] keep force-split seg#%d children=%d "
-                            "despite regen failure (no rollback)",
+                            "[Stage23b] keep force-split seg#%d children=%d "
+                            "despite regen failure (repair required)",
                             idx,
                             n_children_e,
                         )
@@ -3972,9 +4062,18 @@ def run_closed_loop_timing(
                             _s["needs_re_tts"] = True
                             _s["force_split_executed"] = True
                             _s["split_executed"] = True
-                            # Do not advertise "generated" without a WAV — handoff
-                            # repair / Edge fallback must fill file before Studio.
-                            if not (_s.get("file") or _s.get("tts_file_path")):
+                            _s["split_child"] = True
+                            _has_file = bool(_s.get("file") or _s.get("tts_file_path"))
+                            _tts_ms = int(
+                                _s.get("tts_ms")
+                                or _s.get("playback_duration")
+                                or 0
+                            )
+                            if not _has_file or _tts_ms <= 0:
+                                _s["file"] = None
+                                _s["tts_file_path"] = None
+                                _s["tts_ms"] = 0
+                                _s["playback_duration"] = 0
                                 _s["status"] = "pending_regen"
                                 _s["tts_status"] = "pending_regen"
                             meta21 = dict(_s.get("stage21") or {})
@@ -3982,12 +4081,17 @@ def run_closed_loop_timing(
                                 {
                                     "force_split_executed": True,
                                     "split_executed": True,
-                                    "final_status": "stage22_partial",
+                                    "final_status": "stage23_partial",
                                     "needs_re_tts": True,
                                 }
                             )
                             _s["stage21"] = meta21
                             _s["stage22"] = {**dict(_s.get("stage22") or {}), **meta21}
+                            _s["stage23"] = {
+                                **dict(_s.get("stage23") or {}),
+                                "needs_re_tts": True,
+                                "final_status": "stage23_partial",
+                            }
                             _s["stage19j"] = {**dict(_s.get("stage19j") or {}), **meta21}
                         stats["resegmented"] += 1
                         stats["adaptation_executed"] = True
@@ -4479,9 +4583,9 @@ def run_closed_loop_timing(
                                 regen_ok_e2 = False
                                 break
                     if not regen_ok_e2:
-                        # Stage 21: keep structural split; do not restore overflow parent.
+                        # Stage 23b: keep structural split; clear ghosts for repair.
                         logger.warning(
-                            "[Stage21] keep force-split (post-pass) seg#%d "
+                            "[Stage23b] keep force-split (post-pass) seg#%d "
                             "children=%d despite regen failure",
                             idx,
                             n_e2,
@@ -4493,7 +4597,18 @@ def run_closed_loop_timing(
                             _s["needs_re_tts"] = True
                             _s["force_split_executed"] = True
                             _s["split_executed"] = True
-                            if not (_s.get("file") or _s.get("tts_file_path")):
+                            _s["split_child"] = True
+                            _has_file = bool(_s.get("file") or _s.get("tts_file_path"))
+                            _tts_ms = int(
+                                _s.get("tts_ms")
+                                or _s.get("playback_duration")
+                                or 0
+                            )
+                            if not _has_file or _tts_ms <= 0:
+                                _s["file"] = None
+                                _s["tts_file_path"] = None
+                                _s["tts_ms"] = 0
+                                _s["playback_duration"] = 0
                                 _s["status"] = "pending_regen"
                                 _s["tts_status"] = "pending_regen"
                             meta21 = dict(_s.get("stage21") or {})
@@ -4501,12 +4616,17 @@ def run_closed_loop_timing(
                                 {
                                     "force_split_executed": True,
                                     "split_executed": True,
-                                    "final_status": "stage22_partial",
+                                    "final_status": "stage23_partial",
                                     "needs_re_tts": True,
                                 }
                             )
                             _s["stage21"] = meta21
                             _s["stage22"] = {**dict(_s.get("stage22") or {}), **meta21}
+                            _s["stage23"] = {
+                                **dict(_s.get("stage23") or {}),
+                                "needs_re_tts": True,
+                                "final_status": "stage23_partial",
+                            }
                             _s["stage19j"] = {**dict(_s.get("stage19j") or {}), **meta21}
                         stats["resegmented"] += 1
                         stats["adaptation_executed"] = True
