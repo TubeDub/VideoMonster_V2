@@ -1778,12 +1778,22 @@ def _repair_missing_tts_files(
     task_id: str | None = None,
     tts_rate: str | None = None,
     tts_pitch: str | None = None,
+    resolve_path=None,
+    min_bytes: int | None = None,
 ) -> dict:
-    """Stage 22: force-split children kept without regen must get audio before handoff.
+    """Stage 23b: repair missing/empty/tiny TTS before handoff and mux.
 
-    Regenerates TTS for every active segment that has text but no ``file`` /
-    ``tts_file_path``. Falls back to Edge if the preferred engine fails.
+    Regenerates when path missing, file missing on disk, size < min_bytes,
+    or split child with tts_ms=0. Falls back to Edge if preferred engine fails.
+    Never leaves a dead path pointing at size=0.
     """
+    from engines.pipeline_integrity.audio_presence import (
+        MIN_AUDIO_BYTES,
+        audio_stat,
+        resolve_segment_audio_path,
+        segment_needs_audio_repair,
+        stamp_audio_presence,
+    )
     from engines.pipeline_integrity.tts_segment_fields import resolve_segment_text_for_tts
     from engines.tts_backends import normalize_backend_name
 
@@ -1795,11 +1805,23 @@ def _repair_missing_tts_files(
     if primary != "edge-offline":
         engines_try.append("edge-offline")
 
+    floor = int(min_bytes if min_bytes is not None else MIN_AUDIO_BYTES)
     repaired = 0
     failed = 0
     skipped = 0
     work_root = _artifacts_dir() / "closed_loop" / str(task_id or "repair")
     work_root.mkdir(parents=True, exist_ok=True)
+
+    def _resolve(p: str) -> str:
+        if resolve_path:
+            try:
+                return str(resolve_path(p) or p)
+            except Exception:
+                return p
+        try:
+            return str(_resolve_segment_audio_path(p) or p)
+        except Exception:
+            return p
 
     for idx, seg in enumerate(segments_data):
         if not isinstance(seg, dict):
@@ -1807,11 +1829,24 @@ def _repair_missing_tts_files(
         if seg.get("merged_into") is not None or seg.get("merged_into_id"):
             skipped += 1
             continue
-        if seg.get("tts_blocked") or seg.get("skip_tts") or seg.get("status") == "failed":
+        if seg.get("tts_blocked") or seg.get("skip_tts"):
             skipped += 1
             continue
-        if seg.get("file") or seg.get("tts_file_path"):
+
+        if not segment_needs_audio_repair(seg, resolve_path=_resolve):
+            stamp_audio_presence(seg, resolve_path=_resolve)
+            skipped += 1
             continue
+
+        # Drop ghost paths so mux cannot pick size=0.
+        for key in ("file", "tts_file_path"):
+            raw = str(seg.get(key) or "").strip()
+            if not raw:
+                continue
+            ok_g, size_g = audio_stat(_resolve(raw))
+            if not ok_g or size_g < floor:
+                seg[key] = None
+
         text = str(
             resolve_segment_text_for_tts(seg)
             or seg.get("final_tts_text")
@@ -1823,19 +1858,34 @@ def _repair_missing_tts_files(
             seg["status"] = "failed"
             seg["tts_status"] = "failed"
             seg["tts_blocked"] = True
+            stamp_audio_presence(seg, resolve_path=_resolve)
             failed += 1
             continue
 
         got = None
         got_ms = 0
+        mk_controls = {
+            "rate": seg.get("tts_rate") or info.get("mykyta_rate") or tts_rate,
+            "pitch": seg.get("tts_pitch") or info.get("mykyta_pitch") or tts_pitch,
+            "volume": seg.get("tts_volume") or info.get("mykyta_volume"),
+            "length_scale": seg.get("tts_length_scale")
+            or info.get("mykyta_length_scale"),
+        }
         for eid in engines_try:
             try:
                 rr = _regen_segment_tts(
                     text,
                     voice=str(seg.get("voice") or voice or ""),
                     work_dir=work_root,
-                    tts_rate=tts_rate,
-                    tts_pitch=tts_pitch,
+                    tts_rate=tts_rate if tts_rate is not None else (
+                        str(mk_controls["rate"]) if mk_controls["rate"] is not None else None
+                    ),
+                    tts_pitch=tts_pitch if tts_pitch is not None else (
+                        str(mk_controls["pitch"]) if mk_controls["pitch"] is not None else None
+                    ),
+                    length_scale=mk_controls.get("length_scale"),
+                    volume=mk_controls.get("volume"),
+                    mykyta_controls=mk_controls,
                     task_id=task_id,
                     segment_index=idx,
                     segment_id=str(seg.get("segment_id") or ""),
@@ -1845,9 +1895,20 @@ def _repair_missing_tts_files(
                     nf, nms = rr[0], int(rr[1] or 0)
                 else:
                     nf, nms = rr, 0
-                if nf:
-                    got, got_ms = nf, nms
-                    break
+                if not nf:
+                    continue
+                abs_p = _resolve(str(nf))
+                ok_n, size_n = audio_stat(abs_p)
+                if not ok_n or size_n < floor:
+                    logger.warning(
+                        "Task %s: repair TTS idx=%s engine=%s produced tiny/missing file",
+                        task_id,
+                        idx,
+                        eid,
+                    )
+                    continue
+                got, got_ms = nf, nms
+                break
             except Exception as exc:
                 logger.warning(
                     "Task %s: repair TTS idx=%s engine=%s failed: %s",
@@ -1860,6 +1921,9 @@ def _repair_missing_tts_files(
             seg["needs_re_tts"] = True
             seg["status"] = "failed"
             seg["tts_status"] = "failed"
+            seg["file"] = None
+            seg["tts_file_path"] = None
+            stamp_audio_presence(seg, resolve_path=_resolve)
             failed += 1
             continue
 
@@ -1869,10 +1933,16 @@ def _repair_missing_tts_files(
         seg["status"] = "generated"
         seg["tts_status"] = "generated"
         seg["needs_re_tts"] = False
+        if got_ms <= 0:
+            try:
+                got_ms = len(AudioSegment.from_file(str(_resolve(str(got)))))
+            except Exception:
+                got_ms = 0
         if got_ms > 0:
             seg["playback_duration"] = got_ms
             seg["tts_ms"] = got_ms
             seg["actual_duration_ms"] = got_ms
+            seg["final_tts_duration_ms"] = got_ms
         try:
             info["identity_allow_rebind"] = True
             _commit_tts_group_result(
@@ -1886,6 +1956,7 @@ def _repair_missing_tts_files(
             logger.debug("repair commit skipped idx=%s: %s", idx, exc)
         finally:
             info["identity_allow_rebind"] = False
+        stamp_audio_presence(seg, resolve_path=_resolve)
         repaired += 1
 
     stats = {
@@ -1893,6 +1964,7 @@ def _repair_missing_tts_files(
         "failed": failed,
         "skipped": skipped,
         "engines_tried": engines_try,
+        "min_bytes": floor,
     }
     if repaired or failed:
         logger.info(
@@ -1902,6 +1974,69 @@ def _repair_missing_tts_files(
             failed,
         )
     return stats
+
+
+def _assert_segments_audio_ready(
+    segments_data: list,
+    *,
+    task_id: str | None = None,
+    resolve_path=None,
+) -> dict:
+    """Stage 23b pre-mux gate: every active speakable segment must have real audio."""
+    from engines.pipeline_integrity.audio_presence import (
+        audio_stat,
+        resolve_segment_audio_path,
+        stamp_audio_presence,
+    )
+    from engines.pipeline_integrity.tts_segment_fields import resolve_segment_text_for_tts
+
+    def _resolve(p: str) -> str:
+        if resolve_path:
+            try:
+                return str(resolve_path(p) or p)
+            except Exception:
+                return p
+        try:
+            return str(_resolve_segment_audio_path(p) or p)
+        except Exception:
+            return p
+
+    missing: list[int] = []
+    for idx, seg in enumerate(segments_data or []):
+        if not isinstance(seg, dict):
+            continue
+        if seg.get("merged_into") is not None or seg.get("merged_into_id"):
+            continue
+        if seg.get("tts_blocked") or seg.get("skip_tts"):
+            continue
+        text = str(
+            resolve_segment_text_for_tts(seg)
+            or seg.get("final_tts_text")
+            or seg.get("text")
+            or ""
+        ).strip()
+        if not text:
+            continue
+        path = resolve_segment_audio_path(seg, resolve_path=_resolve)
+        ok, size = audio_stat(path)
+        stamp_audio_presence(seg, resolve_path=_resolve)
+        if not ok:
+            missing.append(idx)
+            # Never hand a zero-byte path to FFmpeg.
+            seg["file"] = None
+            seg["tts_file_path"] = None
+            logger.error(
+                "Task %s: FATAL audio missing idx=%s path=%s size=%s",
+                task_id,
+                idx,
+                path,
+                size,
+            )
+    return {
+        "missing_indices": missing,
+        "missing_count": len(missing),
+        "ok": len(missing) == 0,
+    }
 
 
 def _post_tts_timing_qa(
@@ -3435,6 +3570,27 @@ def _regen_segment_tts(
         tts_ms = len(AudioSegment.from_file(str(dest)))
     except Exception:
         tts_ms = 0
+    try:
+        from engines.pipeline_integrity.audio_presence import MIN_AUDIO_BYTES, audio_stat
+
+        ok_a, size_a = audio_stat(dest)
+        if not ok_a or size_a < MIN_AUDIO_BYTES:
+            log_tts_lifecycle(
+                task_id,
+                event="gen_end",
+                segment_id=suid,
+                segment_index=segment_index,
+                filename=dest.name,
+                path=dest,
+                stage="slot_fit_regen",
+                success=False,
+                exists=dest.is_file(),
+                detail=f"tiny_or_missing size={size_a} duration_ms={tts_ms}",
+            )
+            return None, 0
+    except Exception:
+        if not dest.is_file() or dest.stat().st_size < 1000:
+            return None, 0
     log_tts_lifecycle(
         task_id,
         event="gen_end",
@@ -4283,6 +4439,67 @@ def _build_timed_dub_track(
             if _task:
                 task_info = _task.get("info") or {}
 
+    # Stage 23b: mass-repair missing/empty audio, then hard-fail if still missing.
+    def _mux_resolve(p: str) -> str:
+        try:
+            return str(_resolve_segment_audio_path(p) or p)
+        except Exception:
+            return p
+
+    try:
+        _voice = str(
+            (task_info or {}).get("voice")
+            or next(
+                (
+                    s.get("voice")
+                    for s in (segments_data or [])
+                    if isinstance(s, dict) and s.get("voice")
+                ),
+                "",
+            )
+            or ""
+        )
+        _repair_stats = _repair_missing_tts_files(
+            list(segments_data or []),
+            voice=_voice,
+            task_info=task_info or {},
+            task_id=task_id,
+            tts_rate=(task_info or {}).get("tts_rate"),
+            tts_pitch=(task_info or {}).get("tts_pitch"),
+            resolve_path=_mux_resolve,
+        )
+        if task_info is not None:
+            task_info["stage23b_pre_mux_repair"] = _repair_stats
+    except Exception as _rep_exc:
+        logger.warning("Task %s: pre-mux audio repair failed: %s", task_id, _rep_exc)
+
+    _audio_gate = _assert_segments_audio_ready(
+        list(segments_data or []),
+        task_id=task_id,
+        resolve_path=_mux_resolve,
+    )
+    if task_info is not None:
+        task_info["stage23b_audio_gate"] = _audio_gate
+    if not _audio_gate.get("ok"):
+        logger.error(
+            "FATAL: %d segments without audio — refusing mux",
+            int(_audio_gate.get("missing_count") or 0),
+        )
+        if task_info is not None:
+            task_info["export_blocked_reason"] = (
+                f"STAGE23B_MISSING_AUDIO — "
+                f"{int(_audio_gate.get('missing_count') or 0)} segments have no usable wav"
+            )
+        return (
+            None,
+            ["EXPORT_BLOCKED_MISSING_AUDIO"],
+            {
+                "ok": False,
+                "fitted_overlap_count": 0,
+                "missing_audio": _audio_gate,
+            },
+        )
+
     _happy_path_timing = False
     try:
         from engines.happy_path import skip_advanced_text_shorteners as _hp_tm
@@ -4371,6 +4588,10 @@ def _build_timed_dub_track(
 
         for candidate_name in audio_candidates:
             from engines.dubbing_engine.session_adapter import resolve_session_audio
+            from engines.pipeline_integrity.audio_presence import (
+                MIN_AUDIO_BYTES,
+                audio_stat,
+            )
 
             candidate_path = resolve_session_audio(
                 candidate_name,
@@ -4378,10 +4599,19 @@ def _build_timed_dub_track(
                 default_dir=OUTPUT_DIR,
                 segment_index=idx,
             )
-            if candidate_path.is_file():
+            ok_c, size_c = audio_stat(candidate_path)
+            if ok_c and size_c >= MIN_AUDIO_BYTES:
                 path = candidate_path
                 file_name = candidate_name
                 break
+            if candidate_path.is_file() and size_c < MIN_AUDIO_BYTES:
+                logger.error(
+                    "Task %s: refusing tiny wav idx=%s path=%s size=%s",
+                    task_id,
+                    idx,
+                    candidate_path,
+                    size_c,
+                )
 
         if path is not None and file_name:
             slot_ms = max(1, end_ms - start_ms)

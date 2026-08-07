@@ -40,7 +40,7 @@ def test_stage23_constants_importable_at_module_level():
     assert UNDERFLOW_TRIGGER_MS == 250
     # Same object identity / single source: closed_loop re-exports text_slot_fit.
     assert STAGE23_OK_FILL_LO is LO2
-    assert "stage23-hotfix" in STAGE23_RUNTIME_TAG
+    assert "stage23" in STAGE23_RUNTIME_TAG
 
 
 def test_globals_get_avoids_unboundlocal_even_with_local_shadow():
