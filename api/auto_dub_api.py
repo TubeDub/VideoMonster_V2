@@ -1975,19 +1975,36 @@ def _repair_missing_tts_files(
     return stats
 
 
+def _assert_audio_file(path: str | Path, min_bytes: int = 1000) -> Path:
+    """Hard gate: file must exist and be usable for mux."""
+    from engines.pipeline_integrity.audio_presence import assert_audio_file
+
+    return assert_audio_file(path, min_bytes=min_bytes)
+
+
 def _assert_segments_audio_ready(
     segments_data: list,
     *,
     task_id: str | None = None,
     resolve_path=None,
+    task_info: dict | None = None,
+    voice: str | None = None,
+    allow_repair: bool = True,
 ) -> dict:
-    """Stage 23b pre-mux gate: every active speakable segment must have real audio."""
+    """Stage 23b pre-mux gate: every active speakable segment must have real audio.
+
+    On missing/tiny file: immediate re-TTS with current Mykyta controls, re-assert.
+    If still missing → ok=False, final_status=audio_missing_fatal (mux must not run).
+    """
     from engines.pipeline_integrity.audio_presence import (
+        MIN_AUDIO_BYTES,
         audio_stat,
         resolve_segment_audio_path,
         stamp_audio_presence,
     )
     from engines.pipeline_integrity.tts_segment_fields import resolve_segment_text_for_tts
+
+    info = task_info or {}
 
     def _resolve(p: str) -> str:
         if resolve_path:
@@ -2001,6 +2018,10 @@ def _assert_segments_audio_ready(
             return p
 
     missing: list[int] = []
+    repaired = 0
+    work_root = _artifacts_dir() / "closed_loop" / str(task_id or "assert")
+    work_root.mkdir(parents=True, exist_ok=True)
+
     for idx, seg in enumerate(segments_data or []):
         if not isinstance(seg, dict):
             continue
@@ -2017,13 +2038,79 @@ def _assert_segments_audio_ready(
         if not text:
             continue
         path = resolve_segment_audio_path(seg, resolve_path=_resolve)
+        try:
+            if path:
+                _assert_audio_file(path, min_bytes=MIN_AUDIO_BYTES)
+            else:
+                raise FileNotFoundError("Audio missing or empty: <empty>")
+            stamp_audio_presence(seg, resolve_path=_resolve)
+            continue
+        except FileNotFoundError:
+            pass
+
+        if allow_repair:
+            mk_controls = {
+                "rate": seg.get("tts_rate") or info.get("mykyta_rate") or info.get("tts_rate"),
+                "pitch": seg.get("tts_pitch") or info.get("mykyta_pitch") or info.get("tts_pitch"),
+                "volume": seg.get("tts_volume") or info.get("mykyta_volume"),
+                "length_scale": seg.get("tts_length_scale")
+                or info.get("mykyta_length_scale"),
+            }
+            engine_id = str(
+                seg.get("tts_backend")
+                or seg.get("tts_engine")
+                or info.get("tts_engine")
+                or info.get("tts_backend")
+                or "tts_uk"
+            )
+            try:
+                rr = _regen_segment_tts(
+                    text,
+                    voice=str(seg.get("voice") or voice or info.get("voice") or ""),
+                    work_dir=work_root,
+                    tts_rate=str(mk_controls["rate"]) if mk_controls["rate"] is not None else None,
+                    tts_pitch=str(mk_controls["pitch"]) if mk_controls["pitch"] is not None else None,
+                    length_scale=mk_controls.get("length_scale"),
+                    volume=mk_controls.get("volume"),
+                    mykyta_controls=mk_controls,
+                    task_id=task_id,
+                    segment_index=idx,
+                    segment_id=str(seg.get("segment_id") or ""),
+                    engine_id=engine_id,
+                )
+                if isinstance(rr, tuple):
+                    nf, nms = rr[0], int(rr[1] or 0)
+                else:
+                    nf, nms = rr, 0
+                if nf:
+                    abs_p = _resolve(str(nf))
+                    _assert_audio_file(abs_p, min_bytes=MIN_AUDIO_BYTES)
+                    seg["file"] = nf
+                    seg["tts_file_path"] = nf
+                    seg["needs_re_tts"] = False
+                    if nms > 0:
+                        seg["playback_duration"] = nms
+                        seg["tts_ms"] = nms
+                        seg["actual_duration_ms"] = nms
+                    stamp_audio_presence(seg, resolve_path=_resolve)
+                    repaired += 1
+                    continue
+            except Exception as exc:
+                logger.error(
+                    "Task %s: assert re-TTS failed idx=%s: %s",
+                    task_id,
+                    idx,
+                    exc,
+                )
+
+        path = resolve_segment_audio_path(seg, resolve_path=_resolve)
         ok, size = audio_stat(path)
         stamp_audio_presence(seg, resolve_path=_resolve)
         if not ok:
             missing.append(idx)
-            # Never hand a zero-byte path to FFmpeg.
             seg["file"] = None
             seg["tts_file_path"] = None
+            seg["needs_re_tts"] = True
             logger.error(
                 "Task %s: FATAL audio missing idx=%s path=%s size=%s",
                 task_id,
@@ -2031,11 +2118,20 @@ def _assert_segments_audio_ready(
                 path,
                 size,
             )
-    return {
+    result = {
         "missing_indices": missing,
         "missing_count": len(missing),
+        "repaired": repaired,
         "ok": len(missing) == 0,
     }
+    if missing:
+        result["final_status"] = "audio_missing_fatal"
+        if info is not None:
+            info["final_status"] = "audio_missing_fatal"
+            info["export_blocked_reason"] = (
+                f"audio_missing_fatal — {len(missing)} segments have no usable audio"
+            )
+    return result
 
 
 def _post_tts_timing_qa(
@@ -2133,6 +2229,14 @@ def _post_tts_timing_qa(
             return p
 
     try:
+        _vid_ms = int(task_info.get("target_duration_ms") or 0)
+        if _vid_ms <= 0:
+            try:
+                _vid_ms = int(
+                    _video_duration_ms(str(task_info.get("video_path") or "")) or 0
+                )
+            except Exception:
+                _vid_ms = 0
         retry_stats = run_closed_loop_timing(
             segments_data,
             normalized_map,
@@ -2149,6 +2253,7 @@ def _post_tts_timing_qa(
             tts_pitch=tts_pitch,
             max_iterations=_post_tts_max_retries(task_info),
             resolve_path=_resolve_path,
+            video_duration_ms=_vid_ms or None,
         )
     except UnboundLocalError as exc:
         # Belt-and-suspenders: Stage23 constant scoping must never kill the dub job.
@@ -4383,6 +4488,18 @@ def _build_timed_dub_track(
     """Gap-aware dub track on silence base; logs dub_segment_log + dub_timing_fit_log."""
     from engines.timing_fit import _segment_start_delays
 
+    # Keep placements inside the video mux window (speech-expanded splits).
+    try:
+        _vid_clamp = int(target_duration_ms or 0)
+        if _vid_clamp > 0:
+            from engines.segment_timing_qa import clamp_timeline_to_video_duration
+
+            clamp_timeline_to_video_duration(
+                segments_data, timing_map, _vid_clamp
+            )
+    except Exception as _clamp_exc:
+        logger.debug("pre-mix video clamp skipped: %s", _clamp_exc)
+
     # TZ Root Cause Audit — diagnostic only (no mutation)
     try:
         from engines.pipeline_integrity.timing_lifecycle_audit import (
@@ -4476,26 +4593,44 @@ def _build_timed_dub_track(
         list(segments_data or []),
         task_id=task_id,
         resolve_path=_mux_resolve,
+        task_info=task_info,
+        voice=_voice,
+        allow_repair=True,
     )
     if task_info is not None:
         task_info["stage23b_audio_gate"] = _audio_gate
+        # Diagnostics AFTER repair / BEFORE cleanup — disk truth only.
+        try:
+            from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
+
+            task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(task_info)
+            _tp = task_info["tts_pipeline"]
+            if int(_tp.get("audio_missing") or 0) > 0:
+                task_info["final_status"] = "audio_missing_fatal"
+                _audio_gate = dict(_audio_gate)
+                _audio_gate["ok"] = False
+                _audio_gate["final_status"] = "audio_missing_fatal"
+        except Exception:
+            pass
     if not _audio_gate.get("ok"):
         logger.error(
-            "FATAL: %d segments without audio — refusing mux",
+            "FATAL: %d segments without audio — refusing mux (audio_missing_fatal)",
             int(_audio_gate.get("missing_count") or 0),
         )
         if task_info is not None:
+            task_info["final_status"] = "audio_missing_fatal"
             task_info["export_blocked_reason"] = (
-                f"STAGE23B_MISSING_AUDIO — "
+                f"audio_missing_fatal — "
                 f"{int(_audio_gate.get('missing_count') or 0)} segments have no usable wav"
             )
         return (
             None,
-            ["EXPORT_BLOCKED_MISSING_AUDIO"],
+            ["EXPORT_BLOCKED_MISSING_AUDIO", "audio_missing_fatal"],
             {
                 "ok": False,
                 "fitted_overlap_count": 0,
                 "missing_audio": _audio_gate,
+                "final_status": "audio_missing_fatal",
             },
         )
 
@@ -4547,6 +4682,7 @@ def _build_timed_dub_track(
 
         # If adapted (or need_adaptation forced by duration delta): bind end to TTS length,
         # never keep Whisper/original_duration_ms as the clip end.
+        # Cap at next neighbor / video duration so mux -t cannot cut the ending.
         _adapted = bool(seg.get("adaptation_executed")) or bool(
             (seg.get("adaptation_decision") or {}).get("need_adaptation")
         ) or bool(seg.get("need_adaptation"))
@@ -4560,6 +4696,37 @@ def _build_timed_dub_track(
             )
             if _tts_len > 0:
                 end_ms = int(start_ms) + _tts_len
+                _cap = None
+                if idx + 1 < len(timing_map):
+                    try:
+                        _cap = int(_parse_timing(timing_map[idx + 1])[0])
+                    except Exception:
+                        _cap = None
+                if segments_data is not None and idx + 1 < len(segments_data):
+                    try:
+                        _ns = segments_data[idx + 1].get("start_ms")
+                        if _ns is not None:
+                            _cap = (
+                                min(int(_cap), int(_ns))
+                                if _cap is not None
+                                else int(_ns)
+                            )
+                    except Exception:
+                        pass
+                _vid_cap = None
+                try:
+                    _vid_cap = int(
+                        (task_info or {}).get("target_duration_ms")
+                        or target_duration_ms
+                        or 0
+                    ) or None
+                except Exception:
+                    _vid_cap = None
+                if _cap is not None and _cap > int(start_ms):
+                    end_ms = min(end_ms, int(_cap))
+                if _vid_cap is not None and _vid_cap > int(start_ms):
+                    end_ms = min(end_ms, int(_vid_cap))
+                end_ms = max(end_ms, int(start_ms) + 1)
                 _place_source = f"{_place_source}+tts_duration_end"
                 try:
                     _scheduler_set_segment_slot(
@@ -16855,11 +17022,36 @@ def _run_pipeline_inner(
         with STATE_LOCK:
             is_editing = control.get("editing", False)
 
+        # Stamp tts_pipeline audio presence AFTER repair/mux and BEFORE cleanup
+        # (disk truth — never count files that cleanup may later remove).
+        with STATE_LOCK:
+            _pre_clean_info = task.get("info") or {}
+            try:
+                from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
+
+                _pre_clean_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
+                    _pre_clean_info
+                )
+                _tp_pre = _pre_clean_info["tts_pipeline"]
+                if int(_tp_pre.get("audio_missing") or 0) > 0:
+                    _pre_clean_info["final_status"] = "audio_missing_fatal"
+            except Exception:
+                pass
+
         if not is_editing:
             keep_assets = bool(task.get("info", {}).get("keep_studio_assets"))
+            # Never delete session segment audio (slot_fit_/pause_run_/tts_*.wav|mp3).
+            # Output-dir loose TTS copies may still be trimmed when keep_assets=False.
             if not keep_assets:
                 for f in set(tts_files):
-                    (OUTPUT_DIR / f).unlink(missing_ok=True)
+                    p = OUTPUT_DIR / f
+                    name = p.name.lower()
+                    if name.startswith(("slot_fit_", "pause_run_", "tts_")):
+                        continue
+                    if p.suffix.lower() in (".wav", ".mp3", ".ogg", ".flac"):
+                        # Prefer keeping if also referenced under session_dir
+                        continue
+                    p.unlink(missing_ok=True)
             if not keep_original_track:
                 Path(audio_path).unlink(missing_ok=True)
             if timed_audio_path and Path(timed_audio_path).exists() and not keep_assets:
@@ -16901,6 +17093,24 @@ def _run_pipeline_inner(
 
             dub_qa = build_final_dub_qa_report(info)
             info["final_dub_qa"] = dub_qa
+            try:
+                from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
+
+                # Keep pre-cleanup census when post-cleanup would falsely show missing.
+                _tp_now = _build_openddf_tts_pipeline_block(info)
+                _tp_prev = info.get("tts_pipeline") or {}
+                if int(_tp_prev.get("audio_present") or 0) >= int(
+                    _tp_now.get("audio_present") or 0
+                ) and int(_tp_prev.get("expected_segments") or 0) > 0:
+                    info["tts_pipeline"] = _tp_prev
+                else:
+                    info["tts_pipeline"] = _tp_now
+                if int(info["tts_pipeline"].get("audio_missing") or 0) > 0:
+                    info["final_status"] = "audio_missing_fatal"
+                elif not info.get("final_status"):
+                    info["final_status"] = "ok"
+            except Exception:
+                pass
             try:
                 from engines.dub_quality_stabilization import write_dub_quality_report_json
 

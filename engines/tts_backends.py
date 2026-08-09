@@ -470,13 +470,33 @@ def synthesize_with_backend(
             if not str(voice).startswith("uk-UA-")
             else voice
         )
+        # Edge rejects Mykyta float rates like "0.97"; convert to ±N%.
+        edge_rate = rate
+        try:
+            raw = str(rate or "").strip()
+            if raw and not raw.endswith("%") and not raw.startswith(("+", "-")):
+                ratio = float(raw)
+                if 0.5 <= ratio <= 2.0:
+                    pct = int(round((ratio - 1.0) * 100))
+                    edge_rate = f"{pct:+d}%"
+        except Exception:
+            edge_rate = "-4%"
+        if not edge_rate or str(edge_rate).replace(".", "", 1).isdigit():
+            edge_rate = "-4%"
+        edge_pitch = pitch
+        try:
+            pr = str(pitch or "").strip()
+            if pr and not pr.endswith("Hz") and not pr.startswith(("+", "-")):
+                edge_pitch = None
+        except Exception:
+            edge_pitch = None
         result = synthesize(
             text,
             edge_voice,
             output_path,
             engine_id=ENGINE_EDGE,
-            rate=rate,
-            pitch=pitch,
+            rate=edge_rate,
+            pitch=edge_pitch,
         )
     return result
 

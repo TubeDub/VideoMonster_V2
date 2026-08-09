@@ -113,6 +113,185 @@ def detect_long_pauses(
     return issues
 
 
+def clamp_timeline_to_video_duration(
+    segments_data: list[dict] | None,
+    timing_map: list | None,
+    video_duration_ms: int,
+    *,
+    min_slot_ms: int = 800,
+    min_gap_ms: int = 40,
+) -> list[dict[str, Any]]:
+    """Keep every segment inside [0, video_duration_ms].
+
+    Speech-expanded splits can push later children past the mux ``-t`` cut
+    (video length). Those lines are never heard — «дубляж не доходит до конца».
+
+    Strategy:
+      1) shrink long inter-segment gaps (largest first);
+      2) if still overshooting, scale the whole timeline into the video;
+      3) hard-cap last end and pull any start that still lands at/after video.
+    Mutates ``segments_data`` / ``timing_map`` in place. Returns fix log.
+    """
+    video_ms = int(video_duration_ms or 0)
+    fixes: list[dict[str, Any]] = []
+    if video_ms <= min_slot_ms:
+        return fixes
+    if not timing_map:
+        return fixes
+
+    def _bounds(i: int) -> tuple[int, int]:
+        if segments_data is not None and i < len(segments_data):
+            seg = segments_data[i]
+            if seg.get("start_ms") is not None and seg.get("end_ms") is not None:
+                return int(seg["start_ms"]), int(seg["end_ms"])
+        if i < len(timing_map):
+            return _parse_timing(timing_map[i])
+        return 0, 0
+
+    def _write(i: int, start_ms: int, end_ms: int) -> None:
+        start_ms = max(0, int(start_ms))
+        end_ms = max(start_ms + 1, int(end_ms))
+        if i < len(timing_map):
+            _write_timing(timing_map[i], start_ms, end_ms)
+        if segments_data is not None and i < len(segments_data):
+            seg = segments_data[i]
+            seg["start_ms"] = start_ms
+            seg["end_ms"] = end_ms
+            seg["slot_ms"] = max(1, end_ms - start_ms)
+
+    n = min(
+        len(timing_map),
+        len(segments_data) if segments_data is not None else len(timing_map),
+    )
+    if n <= 0:
+        return fixes
+
+    ends = [_bounds(i)[1] for i in range(n)]
+    max_end = max(ends) if ends else 0
+    if max_end <= video_ms:
+        # Still pull any stray start that sits at/after video (empty tail).
+        for i in range(n):
+            st, en = _bounds(i)
+            if st >= video_ms:
+                new_st = max(0, video_ms - min_slot_ms)
+                new_en = video_ms
+                _write(i, new_st, new_en)
+                fixes.append(
+                    {
+                        "index": i,
+                        "action": "pull_start_into_video",
+                        "old_start_ms": st,
+                        "old_end_ms": en,
+                        "new_start_ms": new_st,
+                        "new_end_ms": new_en,
+                    }
+                )
+        return fixes
+
+    overshoot = max_end - video_ms
+    fixes.append(
+        {
+            "index": -1,
+            "action": "overshoot_detected",
+            "max_end_ms": max_end,
+            "video_ms": video_ms,
+            "overshoot_ms": overshoot,
+        }
+    )
+
+    # 1) Absorb overshoot from gaps (keep relative speech order).
+    gap_idxs = list(range(n - 1))
+    gap_idxs.sort(
+        key=lambda i: max(0, _bounds(i + 1)[0] - _bounds(i)[1]),
+        reverse=True,
+    )
+    for i in gap_idxs:
+        if overshoot <= 0:
+            break
+        st_i, en_i = _bounds(i)
+        st_j, en_j = _bounds(i + 1)
+        gap = st_j - en_i
+        reducible = gap - min_gap_ms
+        if reducible <= 0:
+            continue
+        take = min(reducible, overshoot)
+        # Shift segment i+1 … n-1 left by ``take``.
+        for k in range(i + 1, n):
+            st_k, en_k = _bounds(k)
+            _write(k, st_k - take, en_k - take)
+        overshoot -= take
+        fixes.append(
+            {
+                "index": i,
+                "action": "shrink_gap",
+                "reduced_ms": take,
+                "remaining_overshoot_ms": overshoot,
+            }
+        )
+
+    ends = [_bounds(i)[1] for i in range(n)]
+    max_end = max(ends) if ends else 0
+
+    # 2) Scale whole timeline into the video window.
+    if max_end > video_ms and max_end > 0:
+        scale = float(video_ms) / float(max_end)
+        for i in range(n):
+            st, en = _bounds(i)
+            new_st = int(round(st * scale))
+            new_en = int(round(en * scale))
+            if new_en - new_st < min_slot_ms and en > st:
+                new_en = min(video_ms, new_st + min_slot_ms)
+            _write(i, new_st, min(video_ms, new_en))
+        fixes.append(
+            {
+                "index": -1,
+                "action": "scale_to_video",
+                "scale": round(scale, 6),
+                "old_max_end_ms": max_end,
+                "new_max_end_ms": video_ms,
+            }
+        )
+
+    # 3) Hard cap + pull starts that still sit at/after video.
+    for i in range(n):
+        st, en = _bounds(i)
+        if en > video_ms or st >= video_ms:
+            new_st = st if st < video_ms else max(0, video_ms - min_slot_ms)
+            new_en = video_ms
+            if new_en - new_st < 1:
+                new_st = max(0, video_ms - min_slot_ms)
+            _write(i, new_st, new_en)
+            fixes.append(
+                {
+                    "index": i,
+                    "action": "hard_cap_video",
+                    "old_start_ms": st,
+                    "old_end_ms": en,
+                    "new_start_ms": new_st,
+                    "new_end_ms": new_en,
+                }
+            )
+
+    # Keep monotonic non-overlapping order after edits.
+    cursor = 0
+    for i in range(n):
+        st, en = _bounds(i)
+        if st < cursor:
+            delta = cursor - st
+            st += delta
+            en = max(st + 1, en + delta)
+        if en > video_ms:
+            en = video_ms
+            st = min(st, max(0, en - min_slot_ms))
+        if en <= st:
+            en = min(video_ms, st + max(1, min_slot_ms // 4))
+            st = max(0, en - max(1, min_slot_ms // 4))
+        _write(i, st, en)
+        cursor = en + min_gap_ms
+
+    return fixes
+
+
 def normalize_timing_map_joints(
     timing_map: list,
     *,
@@ -1148,22 +1327,58 @@ def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, An
 
     rows: list[dict[str, Any]] = []
     present = 0
+    try:
+        from engines.pipeline_integrity.audio_presence import (
+            MIN_AUDIO_BYTES,
+            audio_stat,
+            resolve_segment_audio_path,
+        )
+    except Exception:
+        MIN_AUDIO_BYTES = 1000
+        audio_stat = None
+        resolve_segment_audio_path = None
+
     for idx, seg in enumerate(segments_data):
         if seg.get("merged_into") is not None:
             continue
-        name = seg.get("fitted_file") or seg.get("file")
         resolved = None
         exists = False
         size = 0
-        if name and base is not None:
-            cand = base / _Path(str(name)).name
-            resolved = str(cand)
+        # Prefer absolute / stamped paths; fall back to session basename lookup.
+        cand_path = ""
+        if resolve_segment_audio_path is not None:
             try:
-                if cand.is_file():
-                    exists = True
-                    size = cand.stat().st_size
-            except OSError:
-                pass
+                cand_path = resolve_segment_audio_path(seg) or ""
+            except Exception:
+                cand_path = ""
+        if not cand_path:
+            name = (
+                seg.get("resolved_path")
+                or seg.get("fitted_file")
+                or seg.get("file")
+                or seg.get("tts_file_path")
+            )
+            if name and base is not None:
+                cand_path = str(base / _Path(str(name)).name)
+            elif name:
+                cand_path = str(name)
+        if cand_path:
+            p = _Path(cand_path)
+            if not p.is_file() and base is not None:
+                p2 = base / p.name
+                if p2.is_file():
+                    p = p2
+            resolved = str(p)
+            if audio_stat is not None:
+                ok, size = audio_stat(p)
+                exists = bool(ok)
+            else:
+                try:
+                    if p.is_file():
+                        size = int(p.stat().st_size)
+                        exists = size >= int(MIN_AUDIO_BYTES)
+                except OSError:
+                    pass
         if exists:
             present += 1
         rows.append(
@@ -1178,14 +1393,19 @@ def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, An
             }
         )
 
-    return {
+    missing = len(rows) - present
+    block = {
         "session_dir": str(session_dir) if session_dir else None,
         "expected_segments": len(rows),
         "audio_present": present,
-        "audio_missing": len(rows) - present,
+        "audio_missing": missing,
         "source_map": sources,
         "segments": rows,
+        "min_bytes": int(MIN_AUDIO_BYTES),
     }
+    if missing > 0:
+        block["final_status"] = "audio_missing_fatal"
+    return block
 
 
 def _build_openddf_adaptation_capabilities(task_info: dict[str, Any]) -> dict[str, Any]:
@@ -1851,7 +2071,12 @@ def build_openddf_full_report(task_info: dict[str, Any]) -> dict[str, Any]:
         "pre_tts_integrity": task_info.get("pre_tts_integrity") or {},
         "llm_effectiveness": build_llm_effectiveness_report(task_info, segments),
         "llm_diagnostics": build_llm_diagnostics(task_info),
-        "tts_pipeline": _build_openddf_tts_pipeline_block(task_info),
+        "tts_pipeline": (
+            task_info.get("tts_pipeline")
+            if isinstance(task_info.get("tts_pipeline"), dict)
+            and int((task_info.get("tts_pipeline") or {}).get("expected_segments") or 0) > 0
+            else _build_openddf_tts_pipeline_block(task_info)
+        ),
         "adaptation_mode": _build_openddf_adaptation_mode_block(task_info),
         "adaptation_capabilities": _build_openddf_adaptation_capabilities(task_info),
         "storage_report": _build_openddf_storage_report(task_info),

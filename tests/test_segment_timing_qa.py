@@ -5,10 +5,38 @@ from __future__ import annotations
 from engines.segment_timing_qa import (
     build_final_dub_qa_report,
     build_openddf_segment_diagnostics,
+    clamp_timeline_to_video_duration,
     detect_long_pauses,
     detect_timing_overlaps,
     normalize_timing_map_joints,
 )
+
+
+def test_clamp_timeline_pulls_segments_past_video_end():
+    """Speech-expanded tail must not start after video (mux -t cut)."""
+    video_ms = 178773
+    segments = [
+        {"start_ms": 0, "end_ms": 17521, "slot_ms": 17521},
+        {"start_ms": 174028, "end_ms": 182826, "slot_ms": 8798},
+        {
+            "start_ms": 182826,
+            "end_ms": 190872,
+            "slot_ms": 8046,
+            "original_text": "and his film franchise was Star Wars",
+        },
+    ]
+    timing = [
+        {"start": 0, "end": 17521},
+        {"start": 174028, "end": 182826},
+        {"start": 182826, "end": 190872},
+    ]
+    fixes = clamp_timeline_to_video_duration(segments, timing, video_ms)
+    assert fixes
+    assert all(int(s["start_ms"]) < video_ms for s in segments)
+    assert all(int(s["end_ms"]) <= video_ms for s in segments)
+    assert segments[-1]["end_ms"] <= video_ms
+    assert segments[-1]["start_ms"] < video_ms
+    assert timing[-1]["end"] <= video_ms
 
 
 def test_detect_timing_overlap():

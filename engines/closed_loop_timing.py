@@ -430,11 +430,15 @@ def _allocate_times_speech_expanded(
     chunks: list[str],
     start_ms: int,
     lang: str = "uk",
+    hard_end_ms: int | None = None,
 ) -> list[tuple[str, int, int]]:
     """Stage 19i: child slots proportional to speech/text (not squeezed into parent).
 
     Duration follows predicted TTS so fill≈1.0; oversized children re-split
     via needs_post_restore_split. Floor at MIN_CHILD_SLOT_MS (2.2s).
+
+    When ``hard_end_ms`` is set (video duration), scale children into
+    ``[start_ms, hard_end_ms]`` so mux ``-t video`` cannot cut the ending.
     """
     from engines.text_slot_fit import (
         EXPAND_AIM_RATIO,
@@ -452,6 +456,7 @@ def _allocate_times_speech_expanded(
         for p in preds
     ) or 1
     even = max(lens) <= min(lens) * 1.25 if lens else True
+    durs: list[int] = []
     for i, chunk in enumerate(chunks):
         if even:
             dur = max(
@@ -463,8 +468,30 @@ def _allocate_times_speech_expanded(
                 MIN_CHILD_SLOT_MS,
                 int(total_speech * (lens[i] / float(total_len))),
             )
-        out.append((str(chunk), cursor, cursor + dur))
-        cursor += dur
+        durs.append(int(dur))
+
+    hard = int(hard_end_ms) if hard_end_ms is not None else 0
+    if hard > int(start_ms) and durs:
+        avail = max(len(durs), hard - int(start_ms))
+        total = sum(durs) or 1
+        if total > avail:
+            # Keep relative weights; floor each child so none collapses to 0.
+            floor = max(1, min(MIN_CHILD_SLOT_MS, avail // max(1, len(durs))))
+            scaled = [max(floor, int(round(d * avail / float(total)))) for d in durs]
+            drift = sum(scaled) - avail
+            # Trim from the longest child until we fit.
+            while drift > 0 and scaled:
+                j = max(range(len(scaled)), key=lambda k: scaled[k])
+                cut = min(drift, max(0, scaled[j] - floor))
+                if cut <= 0:
+                    break
+                scaled[j] -= cut
+                drift -= cut
+            durs = scaled
+
+    for chunk, dur in zip(chunks, durs):
+        out.append((str(chunk), cursor, cursor + int(dur)))
+        cursor += int(dur)
     return out
 
 
@@ -981,6 +1008,7 @@ def try_stage19e_post_restore_split(
     audits: list[dict] | None,
     idx: int,
     lang: str = "uk",
+    video_duration_ms: int | None = None,
 ) -> bool:
     """Stage 21: overflow>350ms → aggressive clean split + independent re-TTS.
 
@@ -1162,7 +1190,12 @@ def try_stage19e_post_restore_split(
     if len(src_chunks) != len(tgt_chunks):
         src_chunks = list(tgt_chunks)
 
-    allocated = _allocate_times_speech_expanded(tgt_chunks, start_ms, lang)
+    hard_end = None
+    if video_duration_ms is not None and int(video_duration_ms) > int(start_ms):
+        hard_end = int(video_duration_ms)
+    allocated = _allocate_times_speech_expanded(
+        tgt_chunks, start_ms, lang, hard_end_ms=hard_end
+    )
     if len(allocated) < 2:
         return False
     n = len(allocated)
@@ -1184,6 +1217,21 @@ def try_stage19e_post_restore_split(
     parent_end = end_ms
     new_end = int(allocated[-1][2])
     shift_ms = max(0, new_end - parent_end)
+    # Never cascade neighbors past the video mux cut.
+    if hard_end is not None and shift_ms > 0 and timing_map:
+        max_later = 0
+        for j in range(idx + 1, len(timing_map)):
+            item = timing_map[j]
+            if isinstance(item, dict):
+                max_later = max(
+                    max_later, int(item.get("end") or item.get("end_ms") or 0)
+                )
+            elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                max_later = max(max_later, int(item[1]))
+        if max_later > 0:
+            projected = max_later + shift_ms
+            if projected > hard_end:
+                shift_ms = max(0, shift_ms - (projected - hard_end))
     child_depth = depth + 1
 
     children: list[dict] = []
@@ -1933,6 +1981,7 @@ def _stamp_stage19e_fields(
         audio_exists = bool(seg.get("audio_exists"))
         audio_size = int(seg.get("audio_size_bytes") or 0)
     # Underfill without a duration-control lever is dishonest — stamp intent.
+    # TZ: underflow_ms > 250 ⇒ duration_control_used MUST NOT stay "none".
     if (
         duration_control_used in ("none", "", None)
         and (
@@ -1945,6 +1994,14 @@ def _stamp_stage19e_fields(
             duration_control_used = "expand"
         elif float(seg.get("atempo") or 1.0) < 0.995:
             duration_control_used = "atempo"
+        elif float(seg.get("tts_length_scale") or ctrl.get("length_scale") or 1.0) > 1.001:
+            duration_control_used = "length_scale"
+        elif abs(float(seg.get("tts_rate") or ctrl.get("rate") or 1.0) - 1.0) >= 0.01:
+            duration_control_used = "rate"
+        else:
+            # Still short with no lever stamped — mark required length_scale path.
+            duration_control_used = "length_scale"
+            seg["duration_control_required"] = True
     meta23 = {
         "duration_control_used": duration_control_used,
         "tts_length_scale": ctrl["length_scale"],
@@ -3884,6 +3941,7 @@ def run_closed_loop_timing(
     tts_pitch: str | None = None,
     max_iterations: int | None = None,
     resolve_path: Callable[[str], str] | None = None,
+    video_duration_ms: int | None = None,
 ) -> dict[str, Any]:
     """Run Closed Loop Timing for every segment independently."""
     max_iters = int(
@@ -3970,6 +4028,7 @@ def run_closed_loop_timing(
                     audits=_audits_mut_e,
                     idx=idx,
                     lang=str(target_lang or "uk"),
+                    video_duration_ms=video_duration_ms,
                 ):
                     if isinstance(source_segments, list) and source_segments is not _src_list_e:
                         source_segments[:] = _src_list_e
@@ -4522,6 +4581,7 @@ def run_closed_loop_timing(
                     audits=_audits_mut_e2,
                     idx=idx,
                     lang=str(target_lang or "uk"),
+                    video_duration_ms=video_duration_ms,
                 ):
                     if isinstance(source_segments, list) and source_segments is not _src_list_e2:
                         source_segments[:] = _src_list_e2
@@ -4728,6 +4788,30 @@ def run_closed_loop_timing(
             "segment_indices": needing,
             "reason": "closed_loop_unresolved",
         }
+
+    # Final safety: speech-expanded splits must not land past the mux cut.
+    if video_duration_ms is not None and int(video_duration_ms) > 0:
+        try:
+            from engines.segment_timing_qa import clamp_timeline_to_video_duration
+
+            clamp_fixes = clamp_timeline_to_video_duration(
+                segments_data,
+                timing_map,
+                int(video_duration_ms),
+            )
+            if clamp_fixes:
+                stats["timeline_clamped_to_video"] = {
+                    "video_ms": int(video_duration_ms),
+                    "fixes": len(clamp_fixes),
+                    "actions": [f.get("action") for f in clamp_fixes[:12]],
+                }
+                logger.info(
+                    "closed_loop: clamped timeline to video_ms=%s fixes=%d",
+                    int(video_duration_ms),
+                    len(clamp_fixes),
+                )
+        except Exception as clamp_exc:
+            logger.warning("closed_loop: video clamp skipped: %s", clamp_exc)
 
     return stats
 

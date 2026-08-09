@@ -31,6 +31,8 @@ SKIP_UNKNOWN = "UnknownSkip"
 
 # Stage 19b: force need_adaptation when |orig−tts| > 350 ms (text fit, not FitsNoChange).
 DURATION_DELTA_FORCE_ADAPT_MS = 350
+# Stage 23: underflow > 250 ms ⇒ never FitsNoChange / audio-only skip.
+UNDERFLOW_FORCE_DURATION_CONTROL_MS = 250
 
 KNOWN_SKIP_REASONS = frozenset(
     {
@@ -132,6 +134,17 @@ def resolve_need_adaptation(
         seg["need_adaptation_force_reason"] = (
             f"DurationDelta>{DURATION_DELTA_FORCE_ADAPT_MS}ms (delta={delta})"
         )
+    elif und > UNDERFLOW_FORCE_DURATION_CONTROL_MS:
+        # TZ Stage 23: underflow > 250 → duration control required (not FitsNoChange).
+        need = True
+        seg["need_adaptation"] = True
+        seg["need_adaptation_force_reason"] = (
+            f"Underflow>{UNDERFLOW_FORCE_DURATION_CONTROL_MS}ms (underflow={und})"
+        )
+        if str(seg.get("adaptation_skip_reason") or "") == SKIP_FITS_NO_CHANGE:
+            seg["adaptation_skip_reason"] = ""
+        if str(seg.get("duration_control_used") or "none") in ("none", ""):
+            seg["duration_control_required"] = True
     else:
         seg["need_adaptation"] = bool(need)
     return bool(need)
@@ -306,6 +319,7 @@ def infer_skip_reason(
         return SKIP_OVERFLOW_BELOW_THRESHOLD
     if underflow_ms > 0 and underflow_ms <= overflow_threshold_ms:
         return SKIP_UNDERFLOW_BELOW_THRESHOLD
+    # FitsNoChange only when both deltas are zero — underflow>250 never lands here.
     if overflow_ms <= 0 and underflow_ms <= 0 and not seg.get("requires_llm_adaptation"):
         return SKIP_FITS_NO_CHANGE
     if not rule_adapter_enabled:

@@ -160,7 +160,7 @@ def test_intermediate_cleanup_preserves_session_tts_audio(tmp_path):
     """RCA: `for pattern in ("*.json")` iterated chars; the '*' glob deleted
 
     every file (incl. TTS mp3) before the studio mix → "Нет TTS-файлов".
-    Cleanup must keep segment audio in the session root.
+    Cleanup must keep segment audio in the session root / salvage from work dirs.
     """
     from engines.pipeline_cleanup import cleanup_intermediate_work_dirs
 
@@ -168,18 +168,23 @@ def test_intermediate_cleanup_preserves_session_tts_audio(tmp_path):
     session.mkdir(parents=True)
     (session / "e713d101_g0000.mp3").write_bytes(b"\xff\xfb\x00")
     (session / "segment_0001.mp3").write_bytes(b"\xff\xfb\x00")
+    (session / "tts_0000.mp3").write_bytes(b"\xff\xfb" + b"\x00" * 1200)
     (session / "project.json").write_text("{}")
     (session / "intermediate.json").write_text("{}")
     (session / "slot_fit").mkdir()
-    (session / "slot_fit" / "cand.mp3").write_bytes(b"\xff")
+    (session / "slot_fit" / "slot_fit_000.wav").write_bytes(b"R" * 1500)
+    (session / "slot_fit" / "cand.tmp.wav").write_bytes(b"\xff")
 
     cleanup_intermediate_work_dirs(session, keep_segment_audio=True)
 
     assert (session / "e713d101_g0000.mp3").is_file()
     assert (session / "segment_0001.mp3").is_file()
+    assert (session / "tts_0000.mp3").is_file()
     assert (session / "project.json").is_file()
     assert not (session / "intermediate.json").exists()
-    assert not (session / "slot_fit").exists()
+    # Protected audio salvaged from work subdir to session root.
+    assert (session / "slot_fit_000.wav").is_file()
+    assert (session / "slot_fit_000.wav").stat().st_size >= 1000
 
 
 def test_empty_tts_diagnosis_returns_reason():

@@ -602,9 +602,36 @@ def _render_studio_timed_audio(task_id: str, state: dict[str, Any]) -> tuple[str
     """Build gap-adjusted dub track from current studio segment placements."""
     segments_data, timing_map = _segments_data_from_state(state)
     if timing_map:
-        from engines.segment_timing_qa import normalize_timing_map_joints
+        from engines.segment_timing_qa import (
+            clamp_timeline_to_video_duration,
+            normalize_timing_map_joints,
+        )
 
         timing_map, _joint_fixes = normalize_timing_map_joints(timing_map)
+        # Prefer real video length over stretched studio duration_ms.
+        _vid_ms = 0
+        try:
+            from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+
+            with STATE_LOCK:
+                _info = dict((AUTO_TASKS.get(task_id) or {}).get("info") or {})
+            _vid_ms = int(_info.get("target_duration_ms") or 0)
+            if _vid_ms <= 0 and _info.get("video_path"):
+                from api.auto_dub_api import _video_duration_ms
+
+                _vid_ms = int(_video_duration_ms(str(_info.get("video_path"))) or 0)
+        except Exception:
+            _vid_ms = 0
+        if _vid_ms <= 0:
+            _vid_ms = int(state.get("duration_ms") or 0)
+        if _vid_ms > 0:
+            clamp_timeline_to_video_duration(segments_data, timing_map, _vid_ms)
+            try:
+                state["duration_ms"] = min(
+                    int(state.get("duration_ms") or _vid_ms), _vid_ms
+                )
+            except Exception:
+                state["duration_ms"] = _vid_ms
     segment_paths_preview = [
         str(_resolve_task_audio(s.get("file"), task_id=task_id))
         for s in segments_data

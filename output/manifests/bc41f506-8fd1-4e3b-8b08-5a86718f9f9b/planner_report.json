@@ -1,0 +1,21 @@
+{
+  "project_uuid": "bc41f506-8fd1-4e3b-8b08-5a86718f9f9b",
+  "planner_version": "3.0",
+  "task_id": "9f755a7b029d4c01b2ef3c0ad7b02eca",
+  "status": "warning",
+  "execution_time_ms": 7219.8,
+  "warnings": [
+    "smoke_tests_incomplete"
+  ],
+  "errors": [],
+  "decision_log": [
+    "project_uuid=bc41f506-8fd1-4e3b-8b08-5a86718f9f9b",
+    "video_exists=True"
+  ],
+  "smoke_summary": {
+    "passed": 6,
+    "total": 7,
+    "all_passed": false
+  },
+  "manifest_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\manifests\\bc41f506-8fd1-4e3b-8b08-5a86718f9f9b\\project_manifest.json"
+}

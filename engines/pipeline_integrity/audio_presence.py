@@ -31,8 +31,19 @@ def resolve_segment_audio_path(
     *,
     resolve_path: Callable[[str], str] | None = None,
 ) -> str:
-    """Best-effort absolute/relative path from segment fields."""
-    raw = str(seg.get("file") or seg.get("tts_file_path") or "").strip()
+    """Best-effort path: resolved_path → fitted_file → file → tts_file_path."""
+    candidates = (
+        seg.get("resolved_path"),
+        seg.get("fitted_file"),
+        seg.get("file"),
+        seg.get("tts_file_path"),
+    )
+    raw = ""
+    for cand in candidates:
+        val = str(cand or "").strip()
+        if val:
+            raw = val
+            break
     if not raw:
         return ""
     if resolve_path:
@@ -43,6 +54,14 @@ def resolve_segment_audio_path(
         except Exception:
             pass
     return raw
+
+
+def assert_audio_file(path: str | Path, min_bytes: int = MIN_AUDIO_BYTES) -> Path:
+    """Raise FileNotFoundError when audio is missing or smaller than min_bytes."""
+    p = Path(path)
+    if not p.is_file() or p.stat().st_size < int(min_bytes):
+        raise FileNotFoundError(f"Audio missing or empty: {p}")
+    return p
 
 
 def stamp_audio_presence(

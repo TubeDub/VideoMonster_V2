@@ -1,5 +1,20 @@
 # Changelog
 
+## [2026-08-09] P0 — Dub cut off before video end (timeline overshoot)
+
+- Root cause: Stage19i `_allocate_times_speech_expanded` + neighbor shift pushed last segments past video; mux `-t` cut the ending (task 17a74f… seg23 start 182.8s > video 178.8s)
+- `clamp_timeline_to_video_duration` + hard_end on speech-expanded splits; clamp before closed-loop exit / timed-track / studio mix
+- Edge fallback: convert Mykyta float rate `0.97` → `-3%` (was `Invalid rate '0.97'`)
+- Tests: `test_clamp_timeline_pulls_segments_past_video_end`, `test_allocate_times_video_hard_end`
+
+## [2026-08-08] P0 — Audio never deleted + Stage23 duration control
+
+- `cleanup_after_dub_complete`: never wipe session_dir; `keep_segment_audio=True`; salvage `slot_fit_`/`pause_run_`/`tts_` + wav/mp3 from work dirs
+- Pre-mux `_assert_audio_file` + re-TTS; `audio_missing > 0` → `final_status=audio_missing_fatal`, mux blocked
+- `tts_pipeline` census uses disk size≥1000, stamped before cleanup
+- Underflow >250 / fill <0.92 ⇒ `duration_control_used` ≠ `none` (length_scale/rate/expand/atempo)
+- Tests: `tests/test_pipeline_cleanup_keep_audio.py`, stage23b / duration_control
+
 ## [2026-07-25] P0 — TTS↔Review align (15×): oзвучка = Final, debleed at populate
 
 - Root cause: Review Final shown at pause; after resume DubbingEngine/SlotBudget rewrote spoken text

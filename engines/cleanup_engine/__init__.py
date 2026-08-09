@@ -79,9 +79,20 @@ class CleanupReport:
         }
 
 
+def _is_protected_segment_audio(path: Path) -> bool:
+    name = path.name.lower()
+    if name.startswith(("slot_fit_", "pause_run_", "tts_")):
+        return True
+    if path.suffix.lower() in (".wav", ".mp3", ".ogg", ".flac"):
+        return True
+    return False
+
+
 def _is_protected(path: Path, keep_names: set[str]) -> bool:
     name = path.name
     if name in keep_names or name in PROTECTED_NAMES:
+        return True
+    if _is_protected_segment_audio(path):
         return True
     if path.suffix.lower() in PROTECTED_SUFFIXES and name in keep_names:
         return True
@@ -97,17 +108,61 @@ def _is_protected(path: Path, keep_names: set[str]) -> bool:
     return False
 
 
+def _salvage_protected_from_dir(src_dir: Path, dest_dir: Path) -> None:
+    """Move protected segment audio to session root before wiping a work subdir."""
+    if not src_dir.is_dir():
+        return
+    for path in list(src_dir.rglob("*")):
+        if not path.is_file() or not _is_protected_segment_audio(path):
+            continue
+        target = dest_dir / path.name
+        if target.exists():
+            stem, suf = path.stem, path.suffix
+            n = 1
+            while target.exists():
+                target = dest_dir / f"{stem}_keep{n}{suf}"
+                n += 1
+        try:
+            shutil.move(str(path), str(target))
+        except OSError:
+            pass
+
+
 def _unlink(path: Path, report: CleanupReport, keep_names: set[str]) -> None:
-    if _is_protected(path, keep_names):
+    if path.is_file() and _is_protected(path, keep_names):
         report.skipped.append(str(path))
         return
     try:
-        sz = path.stat().st_size if path.is_file() else 0
         if path.is_dir():
-            shutil.rmtree(path, ignore_errors=True)
-            report.dirs_removed.append(str(path))
-        else:
-            path.unlink(missing_ok=True)
+            # Salvage segment audio out of work subdirs, then remove leftovers.
+            parent = path.parent
+            _salvage_protected_from_dir(path, parent)
+            for child in sorted(path.rglob("*"), reverse=True):
+                if child.is_file():
+                    if _is_protected_segment_audio(child):
+                        report.skipped.append(str(child))
+                        continue
+                    try:
+                        sz = child.stat().st_size
+                        child.unlink(missing_ok=True)
+                        report.files_deleted += 1
+                        report.bytes_freed += sz
+                    except OSError as exc:
+                        report.errors.append(f"{child}: {exc}")
+                elif child.is_dir():
+                    try:
+                        child.rmdir()
+                    except OSError:
+                        pass
+            try:
+                if not any(path.iterdir()):
+                    path.rmdir()
+                    report.dirs_removed.append(str(path))
+            except OSError:
+                pass
+            return
+        sz = path.stat().st_size if path.is_file() else 0
+        path.unlink(missing_ok=True)
         report.files_deleted += 1
         report.bytes_freed += sz
     except OSError as exc:

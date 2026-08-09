@@ -269,6 +269,8 @@ def test_ripple_trigger_300_and_residual_count():
 
 
 def test_duration_control_pipeline_sets_length_scale():
+    import tempfile
+
     from engines.closed_loop_timing import (
         TimingBudget,
         _apply_stage23_duration_control,
@@ -276,49 +278,52 @@ def test_duration_control_pipeline_sets_length_scale():
     from engines.tts_backends import set_pipeline_tts_backend
 
     set_pipeline_tts_backend("tts_uk")
-    calls: list[dict] = []
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "fake_out.wav"
+        out.write_bytes(b"RIFF" + b"\x00" * 1600)
+        calls: list[dict] = []
 
-    def fake_regen(text, **kwargs):
-        calls.append({"text": text, **kwargs})
-        # Pretend length_scale stretch filled the slot.
-        return ("fake_out.wav", 9600)
+        def fake_regen(text, **kwargs):
+            calls.append({"text": text, **kwargs})
+            # Pretend length_scale stretch filled the slot.
+            return (str(out), 9600)
 
-    seg = {
-        "text": "Тестовий текст для контролю тривалості.",
-        "final_tts_text": "Тестовий текст для контролю тривалості.",
-        "tts_backend": "tts_uk",
-        "tts_voice": "mykyta",
-        "tts_rate": 0.97,
-        "tts_length_scale": 1.05,
-        "file": "in.wav",
-    }
-    budget = TimingBudget(
-        index=0,
-        slot_duration=10000,
-        measured_duration=7000,
-        original_duration=7000,
-        underflow=3000,
-        overflow=0,
-        final_status="dead_air_risk",
-        delta=-3000,
-    )
-    timing_map = [{"start_ms": 0, "end_ms": 10000, "duration_ms": 10000}]
-    new_budget = _apply_stage23_duration_control(
-        seg,
-        0,
-        timing_map,
-        budget,
-        voice="mykyta",
-        work_dir=Path("."),
-        regen_fn=fake_regen,
-        commit_fn=None,
-        tts_rate="0.97",
-        tts_pitch="0",
-        task_id="t23",
-        resolve_path=None,
-    )
-    assert calls, "duration control must re-TTS"
-    assert float(calls[0].get("length_scale") or 0) >= 1.05
-    assert seg.get("duration_control_used") == "length_scale"
-    assert int(new_budget.measured_duration or 0) == 9600
+        seg = {
+            "text": "Тестовий текст для контролю тривалості.",
+            "final_tts_text": "Тестовий текст для контролю тривалості.",
+            "tts_backend": "tts_uk",
+            "tts_voice": "mykyta",
+            "tts_rate": 0.97,
+            "tts_length_scale": 1.05,
+            "file": "in.wav",
+        }
+        budget = TimingBudget(
+            index=0,
+            slot_duration=10000,
+            measured_duration=7000,
+            original_duration=7000,
+            underflow=3000,
+            overflow=0,
+            final_status="dead_air_risk",
+            delta=-3000,
+        )
+        timing_map = [{"start_ms": 0, "end_ms": 10000, "duration_ms": 10000}]
+        new_budget = _apply_stage23_duration_control(
+            seg,
+            0,
+            timing_map,
+            budget,
+            voice="mykyta",
+            work_dir=Path(td),
+            regen_fn=fake_regen,
+            commit_fn=None,
+            tts_rate="0.97",
+            tts_pitch="0",
+            task_id="t23",
+            resolve_path=None,
+        )
+        assert calls, "duration control must re-TTS"
+        assert float(calls[0].get("length_scale") or 0) >= 1.05
+        assert seg.get("duration_control_used") == "length_scale"
+        assert int(new_budget.measured_duration or 0) == 9600
     set_pipeline_tts_backend(None)

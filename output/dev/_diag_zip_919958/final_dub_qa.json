@@ -1,0 +1,291 @@
+{
+  "ok": true,
+  "issue_count": 29,
+  "issues": [
+    {
+      "index": 0,
+      "code": "long_pause",
+      "gap_ms": 3364,
+      "prev_end_ms": 17521,
+      "next_start_ms": 20885,
+      "severity": "warning"
+    },
+    {
+      "index": 1,
+      "code": "long_pause",
+      "gap_ms": 2293,
+      "prev_end_ms": 32619,
+      "next_start_ms": 34912,
+      "severity": "warning"
+    },
+    {
+      "index": 7,
+      "code": "long_pause",
+      "gap_ms": 3079,
+      "prev_end_ms": 74105,
+      "next_start_ms": 77184,
+      "severity": "warning"
+    },
+    {
+      "index": 8,
+      "code": "long_pause",
+      "gap_ms": 2134,
+      "prev_end_ms": 95626,
+      "next_start_ms": 97760,
+      "severity": "warning"
+    },
+    {
+      "idx": 2,
+      "code": "duration_overflow",
+      "tts_ms": 6062,
+      "slot_ms": 5413,
+      "window_ms": 5413,
+      "overflow_ms": 649,
+      "index": 2,
+      "severity": "warning"
+    },
+    {
+      "idx": 2,
+      "code": "overlap_with_next",
+      "overlap_ms": 649,
+      "next_index": 3,
+      "tts_ms": 6062,
+      "window_ms": 5413,
+      "index": 2,
+      "severity": "warning"
+    },
+    {
+      "idx": 4,
+      "code": "duration_overflow",
+      "tts_ms": 8851,
+      "slot_ms": 8484,
+      "window_ms": 8484,
+      "overflow_ms": 367,
+      "index": 4,
+      "severity": "warning"
+    },
+    {
+      "idx": 4,
+      "code": "overlap_with_next",
+      "overlap_ms": 367,
+      "next_index": 5,
+      "tts_ms": 8851,
+      "window_ms": 8484,
+      "index": 4,
+      "severity": "warning"
+    },
+    {
+      "idx": 6,
+      "code": "duration_overflow",
+      "tts_ms": 9041,
+      "slot_ms": 8420,
+      "window_ms": 8420,
+      "overflow_ms": 621,
+      "index": 6,
+      "severity": "warning"
+    },
+    {
+      "idx": 6,
+      "code": "overlap_with_next",
+      "overlap_ms": 621,
+      "next_index": 7,
+      "tts_ms": 9041,
+      "window_ms": 8420,
+      "index": 6,
+      "severity": "warning"
+    },
+    {
+      "idx": 8,
+      "code": "duration_overflow",
+      "tts_ms": 19608,
+      "slot_ms": 18442,
+      "window_ms": 18442,
+      "overflow_ms": 1166,
+      "index": 8,
+      "severity": "warning"
+    },
+    {
+      "idx": 11,
+      "code": "duration_overflow",
+      "tts_ms": 5035,
+      "slot_ms": 4761,
+      "window_ms": 4761,
+      "overflow_ms": 274,
+      "index": 11,
+      "severity": "warning"
+    },
+    {
+      "idx": 11,
+      "code": "overlap_with_next",
+      "overlap_ms": 274,
+      "next_index": 12,
+      "tts_ms": 5035,
+      "window_ms": 4761,
+      "index": 11,
+      "severity": "warning"
+    },
+    {
+      "idx": 14,
+      "code": "duration_overflow",
+      "tts_ms": 6043,
+      "slot_ms": 5639,
+      "window_ms": 5639,
+      "overflow_ms": 404,
+      "index": 14,
+      "severity": "warning"
+    },
+    {
+      "idx": 14,
+      "code": "overlap_with_next",
+      "overlap_ms": 404,
+      "next_index": 15,
+      "tts_ms": 6043,
+      "window_ms": 5639,
+      "index": 14,
+      "severity": "warning"
+    },
+    {
+      "idx": 15,
+      "code": "duration_overflow",
+      "tts_ms": 2586,
+      "slot_ms": 2481,
+      "window_ms": 2481,
+      "overflow_ms": 105,
+      "index": 15,
+      "severity": "warning"
+    },
+    {
+      "idx": 15,
+      "code": "overlap_with_next",
+      "overlap_ms": 105,
+      "next_index": 16,
+      "tts_ms": 2586,
+      "window_ms": 2481,
+      "index": 15,
+      "severity": "warning"
+    },
+    {
+      "idx": 16,
+      "code": "duration_overflow",
+      "tts_ms": 9337,
+      "slot_ms": 9174,
+      "window_ms": 9174,
+      "overflow_ms": 163,
+      "index": 16,
+      "severity": "warning"
+    },
+    {
+      "idx": 16,
+      "code": "overlap_with_next",
+      "overlap_ms": 163,
+      "next_index": 17,
+      "tts_ms": 9337,
+      "window_ms": 9174,
+      "index": 16,
+      "severity": "warning"
+    },
+    {
+      "idx": 17,
+      "code": "duration_overflow",
+      "tts_ms": 2421,
+      "slot_ms": 2200,
+      "window_ms": 2200,
+      "overflow_ms": 221,
+      "index": 17,
+      "severity": "warning"
+    },
+    {
+      "idx": 17,
+      "code": "overlap_with_next",
+      "overlap_ms": 221,
+      "next_index": 18,
+      "tts_ms": 2421,
+      "window_ms": 2200,
+      "index": 17,
+      "severity": "warning"
+    },
+    {
+      "idx": 18,
+      "code": "duration_overflow",
+      "tts_ms": 5008,
+      "slot_ms": 4361,
+      "window_ms": 4361,
+      "overflow_ms": 647,
+      "index": 18,
+      "severity": "warning"
+    },
+    {
+      "idx": 18,
+      "code": "overlap_with_next",
+      "overlap_ms": 647,
+      "next_index": 19,
+      "tts_ms": 5008,
+      "window_ms": 4361,
+      "index": 18,
+      "severity": "warning"
+    },
+    {
+      "idx": 19,
+      "code": "duration_overflow",
+      "tts_ms": 8632,
+      "slot_ms": 8271,
+      "window_ms": 8271,
+      "overflow_ms": 361,
+      "index": 19,
+      "severity": "warning"
+    },
+    {
+      "idx": 19,
+      "code": "overlap_with_next",
+      "overlap_ms": 361,
+      "next_index": 20,
+      "tts_ms": 8632,
+      "window_ms": 8271,
+      "index": 19,
+      "severity": "warning"
+    },
+    {
+      "idx": 21,
+      "code": "overlap_with_next",
+      "overlap_ms": 83,
+      "next_index": 22,
+      "tts_ms": 5948,
+      "window_ms": 5865,
+      "index": 21,
+      "severity": "warning"
+    },
+    {
+      "idx": 22,
+      "code": "duration_overflow",
+      "tts_ms": 9052,
+      "slot_ms": 8798,
+      "window_ms": 8798,
+      "overflow_ms": 254,
+      "index": 22,
+      "severity": "warning"
+    },
+    {
+      "idx": 22,
+      "code": "overlap_with_next",
+      "overlap_ms": 254,
+      "next_index": 23,
+      "tts_ms": 9052,
+      "window_ms": 8798,
+      "index": 22,
+      "severity": "warning"
+    },
+    {
+      "idx": 23,
+      "code": "duration_overflow",
+      "tts_ms": 10512,
+      "slot_ms": 8046,
+      "window_ms": 8046,
+      "overflow_ms": 2466,
+      "index": 23,
+      "severity": "warning"
+    }
+  ],
+  "overlap_count": 0,
+  "split_sentence_count": 0,
+  "long_pause_count": 4
+}

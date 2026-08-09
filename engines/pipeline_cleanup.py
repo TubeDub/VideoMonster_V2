@@ -1,4 +1,7 @@
-"""Удаление временных артефактов пайплайна (output/, sessions/)."""
+"""Удаление временных артефактов пайплайна (output/, sessions/).
+
+После готового MP4: чистим мусор, но session_dir и сегментное аудио НЕ трогаем.
+"""
 
 from __future__ import annotations
 
@@ -10,13 +13,12 @@ from pathlib import Path
 
 logger = logging.getLogger("tubedub.pipeline_cleanup")
 
+# Never include slot_fit_* / pause_run_* / tts_* here.
 TEMP_GLOBS = (
     "segment_*",
     "chunk_*",
     "temp_*",
     "cache_*",
-    "*_seg*.mp3",
-    "*_g*.mp3",
     "*_extracted.mp3",
     "*_extracted.wav",
     "*_timed.mp3",
@@ -36,6 +38,46 @@ WORK_SUBDIRS = (
     "ffmpeg",
     "work",
 )
+
+_PROTECTED_AUDIO_SUFFIXES = (".wav", ".mp3", ".ogg", ".flac")
+_PROTECTED_AUDIO_PREFIXES = ("slot_fit_", "pause_run_", "tts_")
+
+
+def _is_protected_segment_audio(path: Path) -> bool:
+    """True for slot_fit_/pause_run_/tts_* or any segment media extension."""
+    name = path.name.lower()
+    if any(name.startswith(p) for p in _PROTECTED_AUDIO_PREFIXES):
+        return True
+    if path.suffix.lower() in _PROTECTED_AUDIO_SUFFIXES:
+        return True
+    return False
+
+
+def _salvage_protected_audio(src_dir: Path, dest_dir: Path) -> int:
+    """Move protected audio out of a work subdir into session root before rmtree."""
+    moved = 0
+    if not src_dir.is_dir():
+        return 0
+    for path in src_dir.rglob("*"):
+        if not path.is_file():
+            continue
+        if not _is_protected_segment_audio(path):
+            continue
+        target = dest_dir / path.name
+        if target.resolve() == path.resolve():
+            continue
+        if target.exists():
+            stem, suf = path.stem, path.suffix
+            n = 1
+            while target.exists():
+                target = dest_dir / f"{stem}_keep{n}{suf}"
+                n += 1
+        try:
+            shutil.move(str(path), str(target))
+            moved += 1
+        except OSError as exc:
+            logger.debug("salvage skip %s: %s", path, exc)
+    return moved
 
 
 def cleanup_pipeline_artifacts(
@@ -57,6 +99,8 @@ def cleanup_pipeline_artifacts(
                 if not path.is_file():
                     continue
                 if path.name in keep:
+                    continue
+                if _is_protected_segment_audio(path):
                     continue
                 try:
                     path.unlink()
@@ -90,7 +134,9 @@ def cleanup_intermediate_work_dirs(
 ) -> int:
     """
     Remove pipeline work folders (slot_fit, post_tts_retry, …) and stray temp media.
-    Keeps final segment mp3 in session root when keep_segment_audio=True (for Studio mix).
+
+    When keep_segment_audio=True (default): never delete slot_fit_*/pause_run_*/tts_*
+    or .wav/.mp3/.ogg/.flac — salvage them to session root before removing work dirs.
     """
     removed = 0
     base = Path(base_dir)
@@ -99,18 +145,43 @@ def cleanup_intermediate_work_dirs(
 
     for sub in WORK_SUBDIRS:
         path = base / sub
-        if path.is_dir():
+        if not path.is_dir():
+            continue
+        if keep_segment_audio:
+            _salvage_protected_audio(path, base)
+        try:
+            # Delete only non-protected leftovers, then remove empty tree.
+            for child in sorted(path.rglob("*"), reverse=True):
+                if child.is_file():
+                    if keep_segment_audio and _is_protected_segment_audio(child):
+                        continue
+                    try:
+                        child.unlink()
+                        removed += 1
+                    except OSError:
+                        pass
+                elif child.is_dir():
+                    try:
+                        child.rmdir()
+                    except OSError:
+                        pass
             try:
-                shutil.rmtree(path, ignore_errors=True)
-                removed += 1
+                if not any(path.iterdir()):
+                    path.rmdir()
+                    removed += 1
+                elif not keep_segment_audio:
+                    shutil.rmtree(path, ignore_errors=True)
+                    removed += 1
             except OSError as exc:
                 logger.debug("cleanup work dir skip %s: %s", path, exc)
+        except OSError as exc:
+            logger.debug("cleanup work dir skip %s: %s", path, exc)
 
     for pattern in ("*.tmp.wav", "*.tmp.mp3", "ffmpeg_*", "*.ffmpeg.*"):
         for path in base.rglob(pattern):
             if not path.is_file():
                 continue
-            if keep_segment_audio and path.suffix.lower() == ".mp3" and path.parent == base:
+            if keep_segment_audio and _is_protected_segment_audio(path):
                 continue
             try:
                 path.unlink()
@@ -126,7 +197,6 @@ def cleanup_intermediate_work_dirs(
                 continue
             if "dev" in path.parts or "diagnostics" in path.parts:
                 continue
-            # Never remove segment audio or non-json media via the json sweep.
             if path.suffix.lower() != ".json":
                 continue
             try:
@@ -150,15 +220,12 @@ def cleanup_after_dub_complete(
     *,
     keep_names: set[str] | None = None,
 ) -> int:
-    """After MP4 is ready: drop intermediates, keep final video and user exports."""
+    """После готового MP4: чистим мусор, но session_dir и сегментное аудио НЕ трогаем."""
     removed = cleanup_pipeline_artifacts(output_dir, keep_names=keep_names)
     if session_dir and Path(session_dir).is_dir():
         removed += cleanup_intermediate_work_dirs(
-            Path(session_dir), keep_segment_audio=False
+            Path(session_dir),
+            keep_segment_audio=True,  # ОБЯЗАТЕЛЬНО True
         )
-        try:
-            shutil.rmtree(session_dir, ignore_errors=True)
-            removed += 1
-        except OSError:
-            pass
+        # Session directory itself is never recursively deleted after dub.
     return removed
