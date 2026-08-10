@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026-08-10] P0 — Soft-pad instead of audio_missing_fatal (TZ)
+
+- Pre-mux Stage 23b: never `EXPORT_BLOCKED_MISSING_AUDIO` / never abort mux
+- After 2× re-TTS (Mykyta→edge): silence pad `pad_silence_{segment_id}.wav` of slot length; mux always continues
+- `final_status`: `ok` | `ok_with_pads` (not `audio_missing_fatal`); stamp `padded_count` / `padded_indices` from repair + soft-pad + segment flags
+- Track = video duration; diagnostics include pad + duration fields
+- Tests: `tests/test_soft_pad_mux_gate.py`
+
 ## [2026-08-10] P0 — Dub reaches video end (TZ)
 
 - Pre-mux: re-TTS holes (no file / size<1000 / tts_ms==0 / needs_re_tts / split children); 2 attempts Mykyta→edge; silence pad fallback (no silent mux cut)
@@ -17,7 +25,7 @@
 ## [2026-08-08] P0 — Audio never deleted + Stage23 duration control
 
 - `cleanup_after_dub_complete`: never wipe session_dir; `keep_segment_audio=True`; salvage `slot_fit_`/`pause_run_`/`tts_` + wav/mp3 from work dirs
-- Pre-mux `_assert_audio_file` + re-TTS; `audio_missing > 0` → `final_status=audio_missing_fatal`, mux blocked
+- Pre-mux `_assert_audio_file` + re-TTS; residual holes → silence pad + mux continues (`ok_with_pads`; was fatal — superseded 2026-08-10)
 - `tts_pipeline` census uses disk size≥1000, stamped before cleanup
 - Underflow >250 / fill <0.92 ⇒ `duration_control_used` ≠ `none` (length_scale/rate/expand/atempo)
 - Tests: `tests/test_pipeline_cleanup_keep_audio.py`, stage23b / duration_control

@@ -1772,7 +1772,13 @@ def _post_tts_max_retries(task_info: dict | None = None) -> int:
 
 def _slot_duration_ms_for_pad(seg: dict, idx: int = 0) -> int:
     """Best-effort slot length for silence-pad fallback."""
-    for key in ("slot_ms", "playback_duration", "tts_ms", "final_tts_duration_ms"):
+    for key in (
+        "slot_ms",
+        "original_duration_ms",
+        "playback_duration",
+        "tts_ms",
+        "final_tts_duration_ms",
+    ):
         try:
             val = int(seg.get(key) or 0)
             if val > 0:
@@ -1789,6 +1795,16 @@ def _slot_duration_ms_for_pad(seg: dict, idx: int = 0) -> int:
     return 1000
 
 
+def _make_silence_pad(slot_ms: int, out_path: Path) -> Path:
+    """TZ: silent wav of slot length (min 200ms) so mux never aborts on holes."""
+    ms = max(200, int(slot_ms or 500))
+    ms = min(ms, 30_000)
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    AudioSegment.silent(duration=ms).export(str(out_path), format="wav")
+    return out_path
+
+
 def _write_silence_pad_for_segment(
     *,
     work_dir: Path,
@@ -1798,13 +1814,169 @@ def _write_silence_pad_for_segment(
     duration_ms: int,
 ) -> tuple[str, int]:
     """Write a short silence wav so mux can continue without cutting the video end."""
+    work_dir = Path(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
     dur = max(200, min(int(duration_ms or 1000), 30_000))
-    sid = (segment_id or f"idx{idx}")[:12]
-    name = f"silence_pad_{str(task_id or 'task')[:8]}_{sid}_{idx}.wav"
-    path = work_dir / name
-    AudioSegment.silent(duration=dur).export(str(path), format="wav")
+    sid = (segment_id or f"idx{idx}")[:24]
+    name = f"pad_silence_{sid or idx}.wav"
+    path = _make_silence_pad(dur, work_dir / name)
     return str(path), dur
+
+
+def _soft_pad_missing_segments(
+    segments_data: list,
+    *,
+    task_info: dict | None,
+    task_id: str | None,
+    timing_map: list | None = None,
+    resolve_path=None,
+) -> dict:
+    """Fill any remaining audio holes with silence pads — mux must always continue.
+
+    Returns stats: padded_indices, padded_count, missing_before.
+    """
+    from engines.pipeline_integrity.audio_presence import (
+        MIN_AUDIO_BYTES,
+        audio_stat,
+        resolve_segment_audio_path,
+        stamp_audio_presence,
+    )
+    from engines.pipeline_integrity.tts_segment_fields import resolve_segment_text_for_tts
+
+    info = task_info if isinstance(task_info, dict) else {}
+
+    def _resolve(p: str) -> str:
+        if resolve_path:
+            try:
+                return str(resolve_path(p) or p)
+            except Exception:
+                return p
+        try:
+            return str(_resolve_segment_audio_path(p) or p)
+        except Exception:
+            return p
+
+    session_dir = None
+    try:
+        raw_sd = info.get("session_dir")
+        if raw_sd:
+            session_dir = Path(str(raw_sd))
+    except Exception:
+        session_dir = None
+    if session_dir is None:
+        session_dir = _artifacts_dir() / "closed_loop" / str(task_id or "pad")
+    session_dir.mkdir(parents=True, exist_ok=True)
+
+    padded_indices: list[int] = []
+    missing_before: list[int] = []
+
+    for idx, seg in enumerate(segments_data or []):
+        if not isinstance(seg, dict):
+            continue
+        if seg.get("merged_into") is not None or seg.get("merged_into_id"):
+            continue
+        if seg.get("tts_blocked") or seg.get("skip_tts"):
+            continue
+        text = str(
+            resolve_segment_text_for_tts(seg)
+            or seg.get("final_tts_text")
+            or seg.get("text")
+            or ""
+        ).strip()
+        # Pad speakable holes and also empty-text slots that still occupy timeline.
+        path = resolve_segment_audio_path(seg, resolve_path=_resolve)
+        ok, _size = audio_stat(path)
+        try:
+            tts_ms = int(
+                seg.get("tts_ms")
+                or seg.get("playback_duration")
+                or seg.get("final_tts_duration_ms")
+                or 0
+            )
+        except (TypeError, ValueError):
+            tts_ms = 0
+        if ok and tts_ms > 0 and not seg.get("needs_re_tts"):
+            continue
+        if not text and ok:
+            continue
+        missing_before.append(idx)
+
+        slot_ms = _slot_duration_ms_for_pad(seg, idx)
+        if timing_map is not None and idx < len(timing_map):
+            try:
+                from engines.timing_fit import _parse_timing as _pt
+
+                st, en = _pt(timing_map[idx])
+                if en > st:
+                    slot_ms = max(200, min(en - st, 30_000))
+            except Exception:
+                pass
+
+        sid = str(seg.get("segment_id") or f"idx{idx}")
+        out = session_dir / f"pad_silence_{sid}.wav"
+        try:
+            pad_path = _make_silence_pad(slot_ms, out)
+            _assert_audio_file(pad_path, min_bytes=MIN_AUDIO_BYTES)
+            abs_p = str(pad_path)
+            seg["file"] = abs_p
+            seg["tts_file_path"] = abs_p
+            seg["fitted_file"] = abs_p
+            seg["resolved_path"] = abs_p
+            seg["playback_duration"] = slot_ms
+            seg["tts_ms"] = slot_ms
+            seg["actual_duration_ms"] = slot_ms
+            seg["final_tts_duration_ms"] = slot_ms
+            seg["audio_padded"] = True
+            seg["silence_pad"] = True
+            seg["pad_reason"] = "missing_tts_after_repair"
+            seg["needs_re_tts"] = False
+            seg["status"] = "silence_pad"
+            seg["tts_status"] = "silence_pad"
+            meta = dict(seg.get("stage23") or {})
+            meta["silence_pad"] = True
+            meta["audio_padded"] = True
+            meta["pad_reason"] = "missing_tts_after_repair"
+            meta["silence_pad_ms"] = slot_ms
+            seg["stage23"] = meta
+            stamp_audio_presence(seg, resolve_path=_resolve)
+            padded_indices.append(idx)
+            logger.warning(
+                "Task %s: soft-pad idx=%s sid=%s ms=%s (mux continues)",
+                task_id,
+                idx,
+                sid[:16],
+                slot_ms,
+            )
+        except Exception as pad_exc:
+            logger.error(
+                "Task %s: soft-pad FAILED idx=%s: %s — mux still continues",
+                task_id,
+                idx,
+                pad_exc,
+            )
+
+    stats = {
+        "padded_indices": padded_indices,
+        "padded_count": len(padded_indices),
+        "missing_before": missing_before,
+        "missing_before_count": len(missing_before),
+    }
+    if info is not None:
+        info["padded_indices"] = list(
+            dict.fromkeys(list(info.get("padded_indices") or []) + padded_indices)
+        )
+        info["padded_count"] = len(info["padded_indices"])
+        if padded_indices:
+            info["final_status"] = "ok_with_pads"
+            # Never block export because of pads.
+            info.pop("export_blocked_reason", None)
+        elif not info.get("final_status") or info.get("final_status") in (
+            "audio_missing_fatal",
+            "silence_pad_used",
+        ):
+            info["final_status"] = "ok"
+            info.pop("export_blocked_reason", None)
+    return stats
 
 
 def _repair_missing_tts_files(
@@ -1991,6 +2163,8 @@ def _repair_missing_tts_files(
                 seg["tts_status"] = "silence_pad"
                 seg["needs_re_tts"] = False
                 seg["silence_pad"] = True
+                seg["audio_padded"] = True
+                seg["pad_reason"] = "missing_tts_after_repair"
                 warn = {
                     "index": idx,
                     "code": "silence_pad_fallback",
@@ -2000,6 +2174,8 @@ def _repair_missing_tts_files(
                 warnings.append(warn)
                 meta = dict(seg.get("stage23") or {})
                 meta["silence_pad"] = True
+                meta["audio_padded"] = True
+                meta["pad_reason"] = "missing_tts_after_repair"
                 meta["silence_pad_ms"] = pad_ms
                 seg["stage23"] = meta
                 stamp_audio_presence(seg, resolve_path=_resolve)
@@ -2034,6 +2210,7 @@ def _repair_missing_tts_files(
         seg["tts_status"] = "generated"
         seg["needs_re_tts"] = False
         seg.pop("silence_pad", None)
+        seg.pop("audio_padded", None)
         if got_ms <= 0:
             try:
                 got_ms = len(AudioSegment.from_file(str(_resolve(str(got)))))
@@ -2060,11 +2237,20 @@ def _repair_missing_tts_files(
         stamp_audio_presence(seg, resolve_path=_resolve)
         repaired += 1
 
+    padded_indices = [
+        int(w.get("index"))
+        for w in warnings
+        if isinstance(w, dict)
+        and w.get("code") == "silence_pad_fallback"
+        and w.get("index") is not None
+    ]
     stats = {
         "repaired": repaired,
         "failed": failed,
         "skipped": skipped,
         "padded": padded,
+        "padded_count": padded,
+        "padded_indices": padded_indices,
         "warnings": warnings,
         "engines_tried": engines_try,
         "min_bytes": floor,
@@ -2073,6 +2259,13 @@ def _repair_missing_tts_files(
         prev = list(info.get("audio_repair_warnings") or [])
         prev.extend(warnings)
         info["audio_repair_warnings"] = prev
+    if info is not None and padded_indices:
+        info["padded_indices"] = list(
+            dict.fromkeys(list(info.get("padded_indices") or []) + padded_indices)
+        )
+        info["padded_count"] = len(info["padded_indices"])
+        info["final_status"] = "ok_with_pads"
+        info.pop("export_blocked_reason", None)
     if repaired or failed or padded:
         logger.info(
             "Task %s: missing-TTS repair repaired=%s padded=%s failed=%s",
@@ -2278,6 +2471,8 @@ def _assert_segments_audio_ready(
                 seg["tts_status"] = "silence_pad"
                 seg["needs_re_tts"] = False
                 seg["silence_pad"] = True
+                seg["audio_padded"] = True
+                seg["pad_reason"] = "missing_tts_after_repair"
                 warn = {
                     "index": idx,
                     "code": "silence_pad_fallback",
@@ -2287,6 +2482,8 @@ def _assert_segments_audio_ready(
                 warnings.append(warn)
                 meta = dict(seg.get("stage23") or {})
                 meta["silence_pad"] = True
+                meta["audio_padded"] = True
+                meta["pad_reason"] = "missing_tts_after_repair"
                 meta["silence_pad_ms"] = pad_ms
                 seg["stage23"] = meta
                 stamp_audio_presence(seg, resolve_path=_resolve)
@@ -2314,30 +2511,51 @@ def _assert_segments_audio_ready(
                 size,
                 seg.get("tts_ms"),
             )
+    padded_indices = [
+        int(w.get("index"))
+        for w in warnings
+        if isinstance(w, dict) and w.get("code") == "silence_pad_fallback"
+        and w.get("index") is not None
+    ]
     result = {
         "missing_indices": missing,
         "missing_count": len(missing),
         "repaired": repaired,
         "padded": padded,
+        "padded_count": padded,
+        "padded_indices": padded_indices,
         "warnings": warnings,
-        "ok": len(missing) == 0,
+        # Soft-ok when only pads remain; residual missing is handled by
+        # _soft_pad_missing_segments before mux (never EXPORT_BLOCKED).
+        "ok": True,
     }
     if info is not None and warnings:
         prev = list(info.get("audio_repair_warnings") or [])
         prev.extend(warnings)
         info["audio_repair_warnings"] = prev
-    if missing:
-        # Soft: pads should have covered holes; residual missing is fatal.
-        result["final_status"] = "audio_missing_fatal"
-        if info is not None:
-            info["final_status"] = "audio_missing_fatal"
-            info["export_blocked_reason"] = (
-                f"audio_missing_fatal — {len(missing)} segments have no usable audio"
+        if padded_indices:
+            info["padded_indices"] = list(
+                dict.fromkeys(list(info.get("padded_indices") or []) + padded_indices)
             )
-    elif padded:
-        result["final_status"] = "silence_pad_used"
-        if info is not None and not info.get("final_status"):
-            info["final_status"] = "silence_pad_used"
+            info["padded_count"] = len(info["padded_indices"])
+    if padded:
+        result["final_status"] = "ok_with_pads"
+        if info is not None:
+            info["final_status"] = "ok_with_pads"
+            info.pop("export_blocked_reason", None)
+    elif missing:
+        # Residual holes — still soft; outer soft-pad will fill before mux.
+        result["final_status"] = "needs_soft_pad"
+        result["ok"] = False  # signal outer pad step; does NOT block mux
+    else:
+        result["final_status"] = "ok"
+        if info is not None and info.get("final_status") in (
+            None,
+            "",
+            "audio_missing_fatal",
+        ):
+            info["final_status"] = "ok"
+            info.pop("export_blocked_reason", None)
     return result
 
 
@@ -4838,42 +5056,101 @@ def _build_timed_dub_track(
         voice=_voice,
         allow_repair=True,
     )
+    # TZ: never abort mux on missing audio — soft-pad residual holes and continue.
+    _pad_stats = _soft_pad_missing_segments(
+        list(segments_data or []),
+        task_info=task_info if isinstance(task_info, dict) else {},
+        task_id=task_id,
+        timing_map=timing_map,
+        resolve_path=_mux_resolve,
+    )
+    _audio_gate = dict(_audio_gate or {})
+    _audio_gate["padded_indices"] = list(_pad_stats.get("padded_indices") or [])
+    _audio_gate["padded_count"] = int(_pad_stats.get("padded_count") or 0)
+    _audio_gate["missing_before_pad"] = list(_pad_stats.get("missing_before") or [])
+    # After pads, gate is always soft-ok (mux proceeds).
+    _audio_gate["ok"] = True
+    if int(_audio_gate.get("padded_count") or 0) > 0 or int(
+        _audio_gate.get("padded") or 0
+    ) > 0:
+        _audio_gate["final_status"] = "ok_with_pads"
+    else:
+        _audio_gate["final_status"] = "ok"
+    _audio_gate.pop("export_blocked_reason", None)
+
     if task_info is not None:
         task_info["stage23b_audio_gate"] = _audio_gate
-        # Diagnostics AFTER repair / BEFORE cleanup — disk truth only.
+        # Sync pads from repair + soft-pad + segment flags (repair may pad
+        # before soft-pad runs, leaving _pad_stats empty).
+        _from_segs = [
+            int(s.get("index") if s.get("index") is not None else i)
+            for i, s in enumerate(segments_data or [])
+            if isinstance(s, dict)
+            and (s.get("audio_padded") or s.get("silence_pad"))
+        ]
+        task_info["padded_indices"] = list(
+            dict.fromkeys(
+                list(task_info.get("padded_indices") or [])
+                + list(_pad_stats.get("padded_indices") or [])
+                + list(_audio_gate.get("padded_indices") or [])
+                + _from_segs
+            )
+        )
+        task_info["padded_count"] = len(task_info["padded_indices"])
+        if task_info["padded_count"] > 0:
+            task_info["final_status"] = "ok_with_pads"
+            _audio_gate["final_status"] = "ok_with_pads"
+            _audio_gate["padded_count"] = task_info["padded_count"]
+            _audio_gate["padded_indices"] = list(task_info["padded_indices"])
+        elif task_info.get("final_status") in (
+            None,
+            "",
+            "audio_missing_fatal",
+            "silence_pad_used",
+        ):
+            task_info["final_status"] = "ok"
+        task_info.pop("export_blocked_reason", None)
+        # Diagnostics AFTER repair+pad / BEFORE cleanup — disk truth only.
         try:
             from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
 
             task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(task_info)
             _tp = task_info["tts_pipeline"]
+            _tp["padded_count"] = int(task_info.get("padded_count") or 0)
+            _tp["padded_indices"] = list(task_info.get("padded_indices") or [])
             if int(_tp.get("audio_missing") or 0) > 0:
-                task_info["final_status"] = "audio_missing_fatal"
-                _audio_gate = dict(_audio_gate)
-                _audio_gate["ok"] = False
-                _audio_gate["final_status"] = "audio_missing_fatal"
+                # Re-pad anything the census still sees as missing, then refresh.
+                _soft_pad_missing_segments(
+                    list(segments_data or []),
+                    task_info=task_info,
+                    task_id=task_id,
+                    timing_map=timing_map,
+                    resolve_path=_mux_resolve,
+                )
+                task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(task_info)
+                task_info["tts_pipeline"]["padded_count"] = int(
+                    task_info.get("padded_count") or 0
+                )
+                task_info["tts_pipeline"]["padded_indices"] = list(
+                    task_info.get("padded_indices") or []
+                )
+            # Never escalate to audio_missing_fatal — pads keep mux alive.
+            if task_info.get("final_status") == "audio_missing_fatal":
+                task_info["final_status"] = (
+                    "ok_with_pads"
+                    if int(task_info.get("padded_count") or 0) > 0
+                    else "ok"
+                )
+            task_info.pop("export_blocked_reason", None)
         except Exception:
             pass
-    if not _audio_gate.get("ok"):
-        logger.error(
-            "FATAL: %d segments without audio — refusing mux (audio_missing_fatal)",
-            int(_audio_gate.get("missing_count") or 0),
-        )
-        if task_info is not None:
-            task_info["final_status"] = "audio_missing_fatal"
-            task_info["export_blocked_reason"] = (
-                f"audio_missing_fatal — "
-                f"{int(_audio_gate.get('missing_count') or 0)} segments have no usable wav"
+        if int(_pad_stats.get("padded_count") or 0) > 0:
+            logger.warning(
+                "Task %s: soft-pad pre-mux padded=%s indices=%s — mux continues",
+                task_id,
+                _pad_stats.get("padded_count"),
+                _pad_stats.get("padded_indices"),
             )
-        return (
-            None,
-            ["EXPORT_BLOCKED_MISSING_AUDIO", "audio_missing_fatal"],
-            {
-                "ok": False,
-                "fitted_overlap_count": 0,
-                "missing_audio": _audio_gate,
-                "final_status": "audio_missing_fatal",
-            },
-        )
 
     _happy_path_timing = False
     try:
@@ -17292,8 +17569,21 @@ def _run_pipeline_inner(
                     _pre_clean_info
                 )
                 _tp_pre = _pre_clean_info["tts_pipeline"]
-                if int(_tp_pre.get("audio_missing") or 0) > 0:
-                    _pre_clean_info["final_status"] = "audio_missing_fatal"
+                _tp_pre["padded_count"] = int(
+                    _pre_clean_info.get("padded_count") or 0
+                )
+                _tp_pre["padded_indices"] = list(
+                    _pre_clean_info.get("padded_indices") or []
+                )
+                if int(_pre_clean_info.get("padded_count") or 0) > 0:
+                    _pre_clean_info["final_status"] = "ok_with_pads"
+                elif _pre_clean_info.get("final_status") in (
+                    None,
+                    "",
+                    "audio_missing_fatal",
+                ):
+                    _pre_clean_info["final_status"] = "ok"
+                _pre_clean_info.pop("export_blocked_reason", None)
             except Exception:
                 pass
 
@@ -17364,10 +17654,19 @@ def _run_pipeline_inner(
                     info["tts_pipeline"] = _tp_prev
                 else:
                     info["tts_pipeline"] = _tp_now
-                if int(info["tts_pipeline"].get("audio_missing") or 0) > 0:
-                    info["final_status"] = "audio_missing_fatal"
-                elif not info.get("final_status"):
+                info["tts_pipeline"]["padded_count"] = int(
+                    info.get("padded_count") or 0
+                )
+                info["tts_pipeline"]["padded_indices"] = list(
+                    info.get("padded_indices") or []
+                )
+                if int(info.get("padded_count") or 0) > 0:
+                    info["final_status"] = "ok_with_pads"
+                elif not info.get("final_status") or info.get("final_status") in (
+                    "audio_missing_fatal",
+                ):
                     info["final_status"] = "ok"
+                info.pop("export_blocked_reason", None)
             except Exception:
                 pass
             try:

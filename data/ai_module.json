@@ -17,21 +17,6 @@
   },
   "install_log": [
     {
-      "ts": "2026-07-27T21:50:48.044701+00:00",
-      "level": "info",
-      "message": "Headless AI server started"
-    },
-    {
-      "ts": "2026-07-27T21:50:48.667220+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T02:37:46.939094+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
       "ts": "2026-07-28T02:37:47.024275+00:00",
       "level": "info",
       "message": "Headless AI server started"
@@ -1013,6 +998,21 @@
     },
     {
       "ts": "2026-08-10T15:37:42.463594+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-10T17:08:42.357359+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-10T17:08:42.392260+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-08-10T17:08:43.436628+00:00",
       "level": "info",
       "message": "Backend GUI/launcher suppressed (headless mode)"
     }

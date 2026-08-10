@@ -1464,12 +1464,30 @@ def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, An
         )
         <= 0
     )
+    padded_indices = [
+        int(seg.get("index", i))
+        for i, seg in enumerate(segments_data)
+        if seg.get("merged_into") is None
+        and (seg.get("audio_padded") or seg.get("silence_pad"))
+    ]
+    if not padded_indices and task_info.get("padded_indices"):
+        try:
+            padded_indices = [int(x) for x in (task_info.get("padded_indices") or [])]
+        except Exception:
+            padded_indices = []
+    padded_count = int(
+        task_info.get("padded_count")
+        or len(padded_indices)
+        or 0
+    )
     block = {
         "session_dir": str(session_dir) if session_dir else None,
         "expected_segments": len(rows),
         "audio_present": present,
         "audio_missing": missing,
         "tts_ms_zero": zero_tts,
+        "padded_count": padded_count,
+        "padded_indices": padded_indices,
         "video_duration_ms": video_ms or None,
         "track_duration_ms": track_ms or None,
         "tail_gap_ms": tail_gap_ms,
@@ -1477,13 +1495,16 @@ def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, An
         "segments": rows,
         "min_bytes": int(MIN_AUDIO_BYTES),
         "silence_pads": sum(
-            1 for seg in segments_data if seg.get("silence_pad")
+            1 for seg in segments_data if seg.get("silence_pad") or seg.get("audio_padded")
         ),
     }
-    if missing > 0:
-        block["final_status"] = "audio_missing_fatal"
+    # Soft statuses only — never audio_missing_fatal (mux must complete).
+    if padded_count > 0:
+        block["final_status"] = "ok_with_pads"
     elif video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
         block["final_status"] = "track_shorter_than_video"
+    else:
+        block["final_status"] = "ok"
     return block
 
 
