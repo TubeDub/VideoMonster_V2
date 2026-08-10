@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026-08-10] P0 — Dub reaches video end (TZ)
+
+- Pre-mux: re-TTS holes (no file / size<1000 / tts_ms==0 / needs_re_tts / split children); 2 attempts Mykyta→edge; silence pad fallback (no silent mux cut)
+- Track master = ffprobe video_ms; pad silence to video_end; do not shrink to last segment
+- Diagnostics: `video_duration_ms`, `track_duration_ms`, `tail_gap_ms`; warn `track_shorter_than_video` if gap>500
+- Tests: `tests/test_dub_to_video_end_tz.py`
+
 ## [2026-08-09] P0 — Dub cut off before video end (timeline overshoot)
 
 - Root cause: Stage19i `_allocate_times_speech_expanded` + neighbor shift pushed last segments past video; mux `-t` cut the ending (task 17a74f… seg23 start 182.8s > video 178.8s)

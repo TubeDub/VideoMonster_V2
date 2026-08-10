@@ -94,7 +94,11 @@ def segment_needs_audio_repair(
     *,
     resolve_path: Callable[[str], str] | None = None,
 ) -> bool:
-    """True when active segment has speakable text but no usable audio."""
+    """True when speakable segment has no usable audio / must re-TTS.
+
+    TZ: text AND (no file OR size < 1000 OR tts_ms == 0 OR needs_re_tts
+    OR force/post_restore split child) → repair before mux.
+    """
     if not isinstance(seg, dict):
         return False
     if seg.get("merged_into") is not None or seg.get("merged_into_id"):
@@ -109,6 +113,13 @@ def segment_needs_audio_repair(
     ).strip()
     if not text:
         return False
+    if bool(seg.get("needs_re_tts")):
+        return True
+    if seg.get("status") in ("pending_regen",) or seg.get("tts_status") in (
+        "pending_regen",
+        "failed",
+    ):
+        return True
     path = resolve_segment_audio_path(seg, resolve_path=resolve_path)
     ok, _size = audio_stat(path)
     if not ok:
@@ -118,16 +129,19 @@ def segment_needs_audio_repair(
             seg.get("tts_ms")
             or seg.get("playback_duration")
             or seg.get("actual_duration_ms")
+            or seg.get("final_tts_duration_ms")
             or 0
         )
     except (TypeError, ValueError):
         tts_ms = 0
-    if tts_ms <= 0 and bool(
-        seg.get("needs_re_tts") or seg.get("split_child") or seg.get("pending_regen")
-    ):
+    if tts_ms <= 0:
         return True
-    if seg.get("status") in ("pending_regen",) or seg.get("tts_status") in (
-        "pending_regen",
-    ):
+    # Split children must never reach mux with inherited/empty audio.
+    if bool(
+        seg.get("force_split_executed")
+        or seg.get("post_restore_split")
+        or seg.get("split_child")
+        or seg.get("needs_post_restore_split")
+    ) and (not ok or tts_ms <= 0):
         return True
     return False

@@ -1144,10 +1144,15 @@ def build_gap_adjusted_track(
     n = min(len(segment_paths), len(timing_map))
     parsed = [_parse_timing(timing_map[i]) for i in range(n)]
     max_end = max(e for _, e in parsed) if parsed else 0
-    master_ms = max(max_end, int(video_duration_ms or 0))
+    video_ms = int(video_duration_ms or 0)
+    # TZ: master length = source video (ffprobe). Pad silence to video_end;
+    # never shrink the track to last-segment end when video is longer.
+    if video_ms > 0:
+        master_ms = video_ms
+    else:
+        master_ms = max(max_end, 1) + 500
     if master_ms <= 0:
         raise RuntimeError("invalid master duration")
-    master_ms += 500
 
     log_lines: list[str] = []
     fitted_placements: list[dict] = []
@@ -1272,10 +1277,16 @@ def build_gap_adjusted_track(
             else:
                 place.pop("dead_air_unresolved", None)
 
-        max_end = master_ms
+        speech_end = 0
         for _, place_start, fitted_ms in fitted_for_mix:
-            max_end = max(max_end, place_start + fitted_ms)
-        master_ms = max_end + 500
+            speech_end = max(speech_end, int(place_start) + int(fitted_ms))
+        if video_ms > 0:
+            # Lock to video: pad silence to video_end; do not grow past source.
+            master_ms = video_ms
+            tail_gap_ms = max(0, video_ms - speech_end)
+        else:
+            master_ms = max(max_end, speech_end) + 500
+            tail_gap_ms = 0
 
         from engines.conflict_resolver import apply_resolver_to_fitted
 
@@ -1290,6 +1301,10 @@ def build_gap_adjusted_track(
             "conflict_resolver_profile": resolver_result.profile,
             "conflict_strategy_counts": resolver_result.strategy_counts,
             "gap_close_audits": gap_audits,
+            "video_duration_ms": video_ms or None,
+            "track_duration_ms": master_ms,
+            "speech_end_ms": speech_end,
+            "tail_gap_ms": tail_gap_ms,
         }
 
         ffmpeg_out = _mix_fitted_segments_ffmpeg(fitted_for_mix, master_ms, work_dir)
@@ -1299,11 +1314,23 @@ def build_gap_adjusted_track(
             master = AudioSegment.silent(duration=master_ms)
             for path, place_start, _ in fitted_for_mix:
                 seg = AudioSegment.from_file(path)
-                if place_start + len(seg) > len(master):
-                    master = master + AudioSegment.silent(
-                        duration=place_start + len(seg) + 500 - len(master)
-                    )
+                # Clip overlay that would extend past video master.
+                if place_start >= master_ms:
+                    continue
+                if place_start + len(seg) > master_ms:
+                    seg = seg[: max(1, master_ms - place_start)]
                 master = master.overlay(seg, position=place_start)
+
+        # Hard pad/trim to exact video length (± encoder grain).
+        if video_ms > 0:
+            cur = len(master)
+            if cur < video_ms:
+                master = master + AudioSegment.silent(duration=video_ms - cur)
+            elif cur > video_ms:
+                master = master[:video_ms]
+            master_ms = len(master)
+            overlap_report_extra["track_duration_ms"] = master_ms
+            overlap_report_extra["tail_gap_ms"] = max(0, video_ms - speech_end)
 
         from engines.overlap_quality import build_quality_report, detect_fitted_overlaps
 
@@ -1319,9 +1346,12 @@ def build_gap_adjusted_track(
                 f.write(header + "\n".join(log_lines) + "\n")
 
         logger.info(
-            "timing_fit: %d segments, master=%d ms, overlaps=%d",
+            "timing_fit: %d segments, master=%d ms video=%s speech_end=%d tail_gap=%d overlaps=%d",
             n,
             master_ms,
+            video_ms or "-",
+            speech_end,
+            tail_gap_ms,
             len(fitted_overlaps),
         )
         return master, log_lines, overlap_report

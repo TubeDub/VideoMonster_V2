@@ -1246,6 +1246,51 @@ def build_final_dub_qa_report(task_info: dict[str, Any]) -> dict[str, Any]:
             if pi["code"] in ("duration_overflow", "overlap_with_next"):
                 issues.append({**pi, "index": idx, "severity": "warning"})
 
+        # Split children must not leave tts_ms=0 in final QA JSON.
+        try:
+            tts_ms = int(
+                seg.get("tts_ms")
+                or seg.get("playback_duration")
+                or seg.get("final_tts_duration_ms")
+                or 0
+            )
+        except (TypeError, ValueError):
+            tts_ms = 0
+        if tts_ms <= 0 and str(
+            seg.get("final_tts_text") or seg.get("text") or ""
+        ).strip():
+            issues.append(
+                {
+                    "index": idx,
+                    "code": "tts_ms_zero",
+                    "severity": "error",
+                }
+            )
+            ok = False
+
+    video_ms = int(
+        task_info.get("video_duration_ms")
+        or task_info.get("target_duration_ms")
+        or 0
+    )
+    track_ms = int(task_info.get("track_duration_ms") or 0)
+    if track_ms <= 0 and timing_map:
+        try:
+            track_ms = max(_parse_timing(t)[1] for t in timing_map)
+        except Exception:
+            track_ms = 0
+    tail_gap_ms = max(0, video_ms - track_ms) if video_ms > 0 and track_ms > 0 else 0
+    if video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
+        issues.append(
+            {
+                "code": "track_shorter_than_video",
+                "severity": "warning",
+                "video_duration_ms": video_ms,
+                "track_duration_ms": track_ms,
+                "tail_gap_ms": tail_gap_ms,
+            }
+        )
+
     report = {
         "ok": ok,
         "issue_count": len(issues),
@@ -1255,7 +1300,12 @@ def build_final_dub_qa_report(task_info: dict[str, Any]) -> dict[str, Any]:
             1 for i in issues if i.get("code") == "split_sentence"
         ),
         "long_pause_count": sum(1 for i in issues if i.get("code") == "long_pause"),
+        "video_duration_ms": video_ms or None,
+        "track_duration_ms": track_ms or None,
+        "tail_gap_ms": tail_gap_ms,
     }
+    if video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
+        report["final_status"] = "track_shorter_than_video"
     return report
 
 
@@ -1394,17 +1444,46 @@ def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, An
         )
 
     missing = len(rows) - present
+    video_ms = int(
+        task_info.get("video_duration_ms")
+        or task_info.get("target_duration_ms")
+        or 0
+    )
+    track_ms = int(task_info.get("track_duration_ms") or 0)
+    tail_gap_ms = max(0, video_ms - track_ms) if video_ms > 0 and track_ms > 0 else 0
+    zero_tts = sum(
+        1
+        for seg in segments_data
+        if seg.get("merged_into") is None
+        and str(seg.get("final_tts_text") or seg.get("text") or "").strip()
+        and int(
+            seg.get("tts_ms")
+            or seg.get("playback_duration")
+            or seg.get("final_tts_duration_ms")
+            or 0
+        )
+        <= 0
+    )
     block = {
         "session_dir": str(session_dir) if session_dir else None,
         "expected_segments": len(rows),
         "audio_present": present,
         "audio_missing": missing,
+        "tts_ms_zero": zero_tts,
+        "video_duration_ms": video_ms or None,
+        "track_duration_ms": track_ms or None,
+        "tail_gap_ms": tail_gap_ms,
         "source_map": sources,
         "segments": rows,
         "min_bytes": int(MIN_AUDIO_BYTES),
+        "silence_pads": sum(
+            1 for seg in segments_data if seg.get("silence_pad")
+        ),
     }
     if missing > 0:
         block["final_status"] = "audio_missing_fatal"
+    elif video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
+        block["final_status"] = "track_shorter_than_video"
     return block
 
 

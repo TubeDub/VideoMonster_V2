@@ -16,6 +16,7 @@ def test_repair_missing_tts_files_fills_gap(tmp_path, monkeypatch):
     from api import auto_dub_api as api
 
     monkeypatch.setattr(api, "_artifacts_dir", lambda *_a, **_k: tmp_path)
+    out = tmp_path / "repaired.wav"
     segs = [
         {
             "index": 0,
@@ -29,7 +30,8 @@ def test_repair_missing_tts_files_fills_gap(tmp_path, monkeypatch):
     ]
 
     def _fake_regen(*_a, **_k):
-        return ("repaired.mp3", 1200)
+        out.write_bytes(b"RIFF" + b"\x00" * 1500)
+        return (str(out), 1200)
 
     with patch.object(api, "_regen_segment_tts", side_effect=_fake_regen):
         with patch.object(api, "_commit_tts_group_result", return_value=None):
@@ -40,7 +42,8 @@ def test_repair_missing_tts_files_fills_gap(tmp_path, monkeypatch):
                 task_id="t1",
             )
     assert stats["repaired"] == 1
-    assert segs[0]["file"] == "repaired.mp3"
-    assert segs[0]["tts_file_path"] == "repaired.mp3"
+    assert segs[0]["file"] == str(out)
+    assert segs[0]["tts_file_path"] == str(out)
     assert segs[0]["needs_re_tts"] is False
     assert segs[0]["status"] == "generated"
+    assert int(segs[0]["tts_ms"]) == 1200
