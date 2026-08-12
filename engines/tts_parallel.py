@@ -102,11 +102,24 @@ def _synthesize_one_edge(
     if not text0:
         raise RuntimeError("PIPELINE_LANG_MIX: empty TTS text after sanitize")
 
-    # Stage 18: same voice lock as serial Edge path (no bypass).
+    # Stage 18/24: voice lock + force UK identity (never Edge with voice=mykyta).
     from engines.tts import _detect_lang_from_voice
-    from engines.tts_lang_lock import assert_voice_matches_target, is_uk_tts_text_ok
+    from engines.tts_backends import normalize_backend_name, resolve_voice_for_backend
+    from engines.tts_lang_lock import (
+        assert_voice_matches_target,
+        force_uk_tts_identity,
+        is_uk_tts_text_ok,
+    )
 
+    eid = normalize_backend_name(engine_id or "edge-offline")
     _lang = _detect_lang_from_voice(voice) or "uk"
+    if str(_lang).split("-")[0].lower() == "uk" or eid == "tts_uk":
+        ident = force_uk_tts_identity(
+            target_lang="uk", engine_id=eid, voice=voice
+        )
+        eid = normalize_backend_name(ident.get("engine_id") or eid)
+        voice = str(ident.get("voice") or voice)
+        _lang = "uk"
     assert_voice_matches_target(voice, _lang, raise_error=True)
     if str(_lang).split("-")[0].lower() == "uk" and not is_uk_tts_text_ok(text0):
         raise RuntimeError(
@@ -116,19 +129,15 @@ def _synthesize_one_edge(
     try:
         from engines.stress_marks import add_stress_marks
 
-        text0 = add_stress_marks(text0, lang=_detect_lang_from_voice(voice))
+        text0 = add_stress_marks(text0, lang=_lang)
     except Exception:
         pass
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     effective_rate = (rate or _tts_rate()).strip() or "-5%"
     effective_pitch = _sanitize_pitch(pitch) if pitch else None
-    kwargs: dict = {"text": text0, "voice": voice, "rate": effective_rate}
-    if effective_pitch:
-        kwargs["pitch"] = effective_pitch
 
-    # Non-edge engines via Stage 20 factory (Edge fallback if tts_uk/piper missing).
-    eid = (engine_id or "edge-offline").strip() or "edge-offline"
+    # Non-edge engines via Stage 20 factory (Edge uk-UA fallback only).
     if eid not in ("edge-offline", "edge", "edge-tts", "edge_tts"):
         from engines.tts_backends import synthesize_with_backend
 
@@ -146,6 +155,17 @@ def _synthesize_one_edge(
         if not is_valid_tts_file(out_path):
             raise RuntimeError(f"TTS produced empty/invalid file: {out_path}")
         return
+
+    # Edge path: resolve mykyta/lada/tetiana → uk-UA-* before Communicate.
+    edge_voice = resolve_voice_for_backend(voice, "edge-offline")
+    if not str(edge_voice).startswith("uk-UA-") and str(_lang).split("-")[0].lower() == "uk":
+        edge_voice = force_uk_tts_identity(
+            target_lang="uk", engine_id="edge-offline", voice=voice
+        )["voice"]
+    assert_voice_matches_target(edge_voice, "uk", raise_error=True)
+    kwargs: dict = {"text": text0, "voice": edge_voice, "rate": effective_rate}
+    if effective_pitch:
+        kwargs["pitch"] = effective_pitch
 
     async def _run() -> None:
         communicate = edge_tts.Communicate(**kwargs)

@@ -221,7 +221,7 @@ def test_ripple_shift_on_severe_overlap():
     from engines.conflict_resolver import STAGE23_RIPPLE_OVERLAP_MS
 
     assert STAGE22_RIPPLE_OVERLAP_MS == 400
-    assert STAGE23_RIPPLE_OVERLAP_MS == 300
+    assert STAGE23_RIPPLE_OVERLAP_MS == 80
     a = SegmentPlacement(
         idx=0,
         original_start_ms=0,

@@ -1,5 +1,85 @@
 # Changelog
 
+## [2026-08-12] P0 — Fix StageSnapshotIntegrityError on TTS Stage 24 stamps (929afb54)
+
+- Root cause: TTS stamped `cyrillic_ratio` / `tts_language` / `file` / `resolved_path`
+  (Stage 24 UK identity + absolute paths), but `STAGE_ALLOWED_MUTATIONS["tts"]`
+  did not whitelist them → hard fail at TTS guard.
+- Allow those fields in `stage_contracts.py`; `allowed_fields_for_stage("tts")`
+  also unions canonical `TTS_ALLOWED_MUTATIONS` so they stay in sync.
+- Regression: `test_tts_stage24_identity_stamps_are_allowed`
+
+## [2026-08-12] P0/P1/P2 — Spec v3 scaffold (opt-in, Simple mode unchanged)
+
+Opt-in via `stt_quality=high` / `spec_v3=True` / env `VM_STT_QUALITY=high`,
+`VM_4STEM=1`, `VM_DIARIZE=1`. Simple/Happy-Path default behaviour untouched.
+
+- **P0-D STT quality tiers** (`engines/simple_stt_policy.py`)
+  `simple` (small, no word_ts) / `standard` (medium, beam=3) / `high`
+  (large-v3, beam=5, word_timestamps=on). `apply_simple_stt_policy` respects
+  `stt_quality`; `simple_stt_locked=False` in standard/high so ASR retries and
+  voice verification are allowed. Wired into `POST /api/auto_dub` via
+  `data["stt_quality"]` / `data["spec_v3"]`.
+- **P0-B 4-stem source separation** (`engines/source_separation.py`)
+  New `_try_demucs_4stem` (HTDemucs vocals/drums/bass/other → dialogue +
+  music_mix via ffmpeg amix). Adds `SeparationResult.stems_v3` +
+  `stems_count`. Task_info flag `spec_v3`/`stems_v3` or `VM_4STEM=1` enables it;
+  2-stem legacy remains the fallback when disabled or demucs fails.
+- **P0-A PyAnnote diarization + speaker profiles** (`engines/diarization.py`)
+  `run_diarization()` tries `pyannote/speaker-diarization-3.1` (needs
+  `HF_TOKEN`), else safe single-speaker fallback (never raises). Stamps
+  `seg["speaker"] / speaker_confidence` via overlap-max heuristic and extracts
+  a 5–12 s reference clip per speaker at 16 kHz mono into
+  `<session>/speaker_profiles_<task_id>/speaker_<id>.wav`. Diagnostics written
+  to `task["info"]["diarization"]` + `speaker_profiles` + `speakers`.
+- **P0-C Voice cloning + cosine verification** (`engines/speaker_verification.py`,
+  `engines/voice_platform/cloning.py`, `engines/streamdub/modules/voice_clone.py`)
+  ECAPA-TDNN via SpeechBrain when installed, MFCC-mean fallback via librosa;
+  `verify()` returns similarity + threshold + method. New
+  `clone_voice_with_verification(threshold=0.75, max_attempts=3)` picks the
+  best retry and stamps `voice_verification` into `SynthesisResult.meta`
+  (attempts, similarities, method). StreamDub voice_clone reads
+  `clone_cosine_threshold` / `clone_max_attempts` from payload.
+- **P1 LanguageLeakError + Spec v3 Semantic Gate** (`engines/spec_v3_errors.py`,
+  `engines/spec_v3_semantic_gate.py`)
+  Hierarchy `SpecV3Error` → `LanguageLeakError` / `SemanticIntegrityError` /
+  `TimingBudgetError` / `VoiceIdentityError` — each carries structured context.
+  `check_translation(strict=True)` raises typed errors; `check_segments_batch`
+  stamps `seg["spec_v3_language_gate"]` and returns aggregate summary
+  (`language_leak_indices`, `semantic_degraded_indices`,
+  `average_similarity`).
+- **P1 Cleanup keeps spec v3 lineage** (`engines/pipeline_cleanup.py`)
+  Protected prefixes now include `speaker_*`, `dialogue*`, `music_sfx*`,
+  `vocals*`, `drums*`, `bass*`, `other*`; work dirs `_demucs_out(_v3)`,
+  `_spk_parts` removed as junk; `speaker_profiles_*` / `openddf_*` dirs kept.
+- **P2 Per-stage restart via OpenDDF** (`engines/stage_restart.py`)
+  Ordered stages (`extract → source_separation → stt → diarization →
+  translate → semantic_gate → timing → tts → post_tts_qa → mux`).
+  `save_stage / load_stage / resume_from / reset_from / list_stages` write
+  JSON snapshots + manifest to `<session>/openddf_stages/`. Idempotent replays.
+- **Tests**: `tests/test_spec_v3_scaffold.py` (23 tests, 1 heavy skipped).
+  Existing Stage 24 / soft-pad / cleanup suites remain green (17 tests).
+
+## [2026-08-11] P0 — Stage 24 fix: Czech voice + missing audio (ae2a1b0e)
+
+- Edge path never receives `voice=mykyta` (Invalid voice) — resolve to uk-UA-* only; ban cs/sk/pl/ru
+- tts_uk retry once, then Edge uk-UA-OstapNeural only; stamp tts_language/cyrillic_ratio
+- TTS cache key v3 = text+backend+voice+lang+rate+length_scale (old caches miss)
+- Absolute paths on commit/fitted/TTS; protect `tts_regen_*`; soft-pad sets duration_control_used
+- Census: never `final_status=ok` while audio_missing>0 (`degraded` / `ok_with_pads`)
+- Double ripple pass @80ms; studio rows carry absolute file + TTS identity
+- Tests: `tests/test_stage24_uk_voice_paths.py`
+
+## [2026-08-10] P0 — Stage 24: UK TTS + audio presence + overlaps
+
+- Force `target=uk` → language=uk, voice=mykyta (tts_uk) / uk-UA-OstapNeural (edge); ban cs/sk/pl/ru
+- Latin >30% → warning + refuse as-is (remt/fail → edge-offline uk)
+- Stamp `tts_backend` / `tts_voice` / `tts_language`; absolutize segment paths
+- Fix census: sync repaired snapshot into `task_info.segments_data` before `tts_pipeline` (root cause of audio_present=0 / padded_count=0)
+- Soft-pad always; cleanup keeps `pad_silence_*`; mux never blocked
+- Ripple trigger 80ms; stamp `overlap_count`; atempo mark on residual >400ms
+- Tests: `tests/test_stage24_uk_audio_overlap.py`
+
 ## [2026-08-10] P0 — Soft-pad instead of audio_missing_fatal (TZ)
 
 - Pre-mux Stage 23b: never `EXPORT_BLOCKED_MISSING_AUDIO` / never abort mux

@@ -176,3 +176,91 @@ def clone_voice(
     return get_clone_adapter().clone_synthesize(
         text, reference_wav, output_path, language=language
     )
+
+
+def clone_voice_with_verification(
+    text: str,
+    reference_wav: str,
+    output_path: str,
+    *,
+    language: str | None = None,
+    threshold: float = 0.75,
+    max_attempts: int = 3,
+) -> SynthesisResult:
+    """Spec v3: clone + cosine verify with up to ``max_attempts`` retries.
+
+    Returns the last-attempted ``SynthesisResult`` with
+    ``meta["voice_verification"]`` populated. Never raises — degrades to plain
+    ``clone_voice`` output if cosine is unavailable.
+    """
+    from engines.speaker_verification import (
+        DEFAULT_COSINE_THRESHOLD,
+        retry_until_verified,
+    )
+
+    if threshold is None:
+        threshold = DEFAULT_COSINE_THRESHOLD
+
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    attempts_log: list[dict[str, Any]] = []
+    last_result: SynthesisResult | None = None
+
+    def _synth(attempt: int) -> str | None:
+        nonlocal last_result
+        attempt_out = (
+            output
+            if attempt == 1
+            else output.parent / f"{output.stem}_try{attempt}{output.suffix}"
+        )
+        res = clone_voice(text, reference_wav, str(attempt_out), language=language)
+        last_result = res
+        attempts_log.append(
+            {
+                "attempt": attempt,
+                "ok": bool(getattr(res, "ok", False)),
+                "provider": getattr(res, "provider", ""),
+                "output": str(attempt_out.resolve()) if attempt_out.is_file() else None,
+                "error": getattr(res, "error", None),
+            }
+        )
+        if getattr(res, "ok", False) and attempt_out.is_file():
+            return str(attempt_out)
+        return None
+
+    verdict = retry_until_verified(
+        _synth,
+        reference_wav,
+        threshold=float(threshold),
+        max_attempts=int(max_attempts),
+    )
+
+    # Elevate the best candidate to ``output_path`` if a later try beat the first.
+    best_path = verdict.get("candidate")
+    if best_path and Path(best_path).is_file() and Path(best_path) != output:
+        try:
+            import shutil as _sh
+
+            _sh.copy2(best_path, output)
+        except Exception:
+            pass
+
+    if last_result is None:
+        last_result = SynthesisResult(
+            ok=False,
+            error="voice_clone_no_attempts",
+            provider="clone-verify",
+        )
+
+    last_result.meta = dict(getattr(last_result, "meta", None) or {})
+    last_result.meta["voice_verification"] = {
+        "ok": bool(verdict.get("ok")),
+        "similarity": verdict.get("similarity"),
+        "threshold": verdict.get("threshold"),
+        "method": verdict.get("method"),
+        "attempts_used": verdict.get("attempts_used"),
+        "all_similarities": verdict.get("all_similarities"),
+        "attempts": attempts_log,
+    }
+    last_result.ok = bool(verdict.get("ok")) and Path(output).is_file()
+    return last_result

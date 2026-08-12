@@ -79,18 +79,34 @@ class VoiceCloneEngine(StreamModule):
         # Minimal clone synth when adapter available + text + reference
         if text.strip() and ref_path and ref_path.is_file():
             try:
-                from engines.voice_platform.cloning import clone_voice, get_clone_adapter
+                from engines.voice_platform.cloning import (
+                    clone_voice_with_verification,
+                    get_clone_adapter,
+                )
 
                 adapter = get_clone_adapter()
                 if adapter.is_available():
                     out = self._bank / f"{voice_id or 'clone'}_synth.wav"
-                    result = clone_voice(text, str(ref_path), str(out))
+                    _threshold = float(
+                        (payload.get("clone_cosine_threshold") or 0.75) or 0.75
+                    )
+                    _max_attempts = int(payload.get("clone_max_attempts") or 3)
+                    result = clone_voice_with_verification(
+                        text,
+                        str(ref_path),
+                        str(out),
+                        threshold=_threshold,
+                        max_attempts=_max_attempts,
+                    )
                     if getattr(result, "ok", False) and out.is_file():
                         clone_meta = {
                             **clone_meta,
                             "status": "cloned",
                             "engine": getattr(adapter, "adapter_id", "clone"),
                             "output_path": str(out),
+                            "voice_verification": (result.meta or {}).get(
+                                "voice_verification"
+                            ),
                         }
                         payload = {**payload, "cloned_audio": str(out)}
                     else:
@@ -98,6 +114,9 @@ class VoiceCloneEngine(StreamModule):
                             "ok": False,
                             "error": getattr(result, "error", "clone_failed"),
                             "adapter_id": getattr(adapter, "adapter_id", ""),
+                            "voice_verification": (result.meta or {}).get(
+                                "voice_verification"
+                            ),
                         }
                 else:
                     from engines.voice_platform.cloning import clone_readiness

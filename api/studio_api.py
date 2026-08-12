@@ -229,8 +229,12 @@ def build_session_from_auto_dub_task(task_id: str) -> dict[str, Any] | None:
 
     video_path = info.get("video_path_backup") or ""
     video_preview = _video_preview_name(video_path)
-    voice = str(info.get("voice") or info.get("tts_voice") or "ru-RU-DmitryNeural")
-    lang = str(info.get("target_lang") or "ru")
+    lang = str(info.get("target_lang") or "uk")
+    _lang0 = lang.split("-")[0].lower()
+    _default_voice = (
+        "mykyta" if _lang0 == "uk" else "ru-RU-DmitryNeural"
+    )
+    voice = str(info.get("voice") or info.get("tts_voice") or _default_voice)
     duration_ms = int(info.get("target_duration_ms") or 0)
 
     studio_segments: list[dict[str, Any]] = []
@@ -246,11 +250,31 @@ def build_session_from_auto_dub_task(task_id: str) -> dict[str, Any] | None:
         fitted_ms = int(seg.get("fitted_ms") or 0)
         tts_ms = int(seg.get("tts_ms") or 0)
         visual_ms = fitted_ms or tts_ms
-        tts_file = seg.get("file")
+        tts_file = seg.get("file") or seg.get("fitted_file") or seg.get("tts_file_path")
+        # Stage 24: absolutize for studio UI / mux so relative basenames don't vanish.
+        try:
+            resolved_audio = _resolve_task_audio(tts_file, task_id=task_id) if tts_file else ""
+            if resolved_audio and Path(resolved_audio).is_file():
+                tts_file = str(Path(resolved_audio).resolve())
+                seg["file"] = tts_file
+                seg["resolved_path"] = tts_file
+                if seg.get("fitted_file") and not Path(str(seg.get("fitted_file"))).is_file():
+                    seg["fitted_file"] = tts_file
+        except Exception:
+            pass
         if not visual_ms and tts_file:
-            visual_ms = _audio_duration_ms(_resolve_task_audio(tts_file, task_id=task_id))
+            visual_ms = _audio_duration_ms(tts_file)
         if not tts_ms:
             tts_ms = visual_ms
+        # Propagate TTS identity into studio rows.
+        if not seg.get("tts_voice"):
+            seg["tts_voice"] = voice
+        if not seg.get("tts_language"):
+            seg["tts_language"] = _lang0
+        if not seg.get("tts_backend"):
+            seg["tts_backend"] = str(
+                info.get("tts_backend") or info.get("tts_engine") or "tts_uk"
+            )
 
         slot_ms = max(1, end_ms - start_ms)
         try:
@@ -270,7 +294,8 @@ def build_session_from_auto_dub_task(task_id: str) -> dict[str, Any] | None:
                 "start_ms": start_ms,
                 "end_ms": end_ms,
                 "file": tts_file,
-                "fitted_file": seg.get("fitted_file"),
+                "fitted_file": seg.get("fitted_file") or tts_file,
+                "resolved_path": seg.get("resolved_path") or tts_file,
                 "tts_ms": tts_ms,
                 "fitted_ms": fitted_ms or visual_ms,
                 "overflow_ms": overflow_ms,
@@ -279,6 +304,14 @@ def build_session_from_auto_dub_task(task_id: str) -> dict[str, Any] | None:
                 or _overflow_status(overflow_pct),
                 "tts_status": seg.get("tts_status"),
                 "tts_error": seg.get("tts_error"),
+                "tts_backend": seg.get("tts_backend"),
+                "tts_voice": seg.get("tts_voice") or voice,
+                "tts_language": seg.get("tts_language") or _lang0,
+                "cyrillic_ratio": seg.get("cyrillic_ratio"),
+                "audio_padded": bool(
+                    seg.get("audio_padded") or seg.get("silence_pad")
+                ),
+                "duration_control_used": seg.get("duration_control_used"),
                 "emotion": seg.get("emotion") or "neutral",
                 "timing_meta": seg.get("timing_meta") or {},
             }
@@ -687,6 +720,26 @@ def _render_studio_timed_audio(task_id: str, state: dict[str, Any]) -> tuple[str
         task_id,
         style_params=style_params,
     )
+    # Stage 24: write repaired/padded snapshot back into live task + studio state.
+    try:
+        from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(task_id)
+            if task and isinstance(task.get("info"), dict):
+                task["info"]["segments_data"] = list(segments_data or [])
+                if isinstance(_overlap, dict):
+                    task["info"]["overlap_count"] = int(
+                        _overlap.get("overlap_count")
+                        or _overlap.get("fitted_overlap_count")
+                        or task["info"].get("overlap_count")
+                        or 0
+                    )
+        if isinstance(state, dict):
+            state["segments"] = state.get("segments")  # keep studio UI list
+            state["segments_data"] = list(segments_data or [])
+    except Exception:
+        pass
     if timed_audio_obj is None:
         return None, ["Не удалось собрать тайминговую дорожку"]
 

@@ -3,6 +3,10 @@
 
 Default: faster-whisper small, beam=1, VAD on, word_timestamps off.
 CUDA → float16; CPU → int8. Cap model at small (no medium/large in Simple).
+
+Spec v3: opt-in `stt_quality` = simple | standard | high.
+  high → large-v3 + word_timestamps (opt-in via VM_STT_QUALITY=high or
+  task.info.stt_quality/spec_v3=True). Simple stays small by default.
 """
 
 from __future__ import annotations
@@ -15,7 +19,47 @@ logger = logging.getLogger("tubedub.simple_stt_policy")
 
 SIMPLE_STT_DEFAULT_MODEL = "small"
 SIMPLE_STT_MAX_MODEL = "small"
+STANDARD_STT_MODEL = "medium"
+HIGH_STT_MODEL = "large-v3"
 _MODEL_RANK = ("tiny", "base", "small", "medium", "large", "large-v2", "large-v3")
+
+
+def resolve_stt_quality(task_info: dict[str, Any] | None = None) -> str:
+    """spec v3: return one of simple | standard | high (default simple)."""
+    info = dict(task_info or {})
+    q = str(info.get("stt_quality") or "").strip().lower()
+    if q in ("simple", "standard", "high"):
+        return q
+    if info.get("spec_v3"):
+        return "high"
+    env = (os.getenv("VM_STT_QUALITY") or "").strip().lower()
+    if env in ("simple", "standard", "high"):
+        return env
+    return "simple"
+
+
+def resolve_stt_model_for_quality(
+    quality: str,
+    *,
+    requested: str | None = None,
+) -> str:
+    """Map quality tier → model. Never downgrade below requested when it's larger."""
+    q = str(quality or "simple").strip().lower()
+    if q == "high":
+        return HIGH_STT_MODEL
+    if q == "standard":
+        # Standard: user request wins if between small..large; else medium.
+        req = str(requested or "").strip().lower()
+        if req in ("medium", "large", "large-v2", "large-v3"):
+            return req
+        return STANDARD_STT_MODEL
+    # simple → capped
+    return resolve_simple_stt_model(requested)
+
+
+def word_timestamps_for_quality(quality: str) -> bool:
+    """Spec: high quality → word-level timestamps on."""
+    return str(quality or "").lower() == "high"
 
 
 def _env_model_override() -> str | None:
@@ -59,8 +103,13 @@ def resolve_simple_stt_device() -> tuple[str, str]:
 
 
 def should_force_simple_stt(task_info: dict[str, Any] | None = None) -> bool:
-    """True only for Simple / Happy Path — Pro may keep medium/large + beam>1."""
+    """True only for Simple / Happy Path — Pro may keep medium/large + beam>1.
+
+    Spec v3: `stt_quality` = standard/high or `spec_v3=True` opts out of Simple.
+    """
     info = dict(task_info or {})
+    if resolve_stt_quality(info) in ("standard", "high"):
+        return False
     if info.get("simple_pipeline") or info.get("happy_path"):
         return True
     if info.get("simple_stt_locked"):
@@ -79,12 +128,30 @@ def apply_simple_stt_policy(
     *,
     requested_model: str | None = None,
 ) -> dict[str, Any]:
-    """Stamp Simple STT knobs onto task info (idempotent)."""
-    model = resolve_simple_stt_model(
-        requested_model if requested_model is not None else task_info.get("model_size")
-    )
+    """Stamp STT knobs onto task info (idempotent). Simple by default,
+    spec v3 high/standard when opted in."""
+    quality = resolve_stt_quality(task_info)
+    if quality in ("standard", "high"):
+        model = resolve_stt_model_for_quality(
+            quality,
+            requested=(
+                requested_model
+                if requested_model is not None
+                else task_info.get("model_size")
+            ),
+        )
+        word_ts = word_timestamps_for_quality(quality)
+        beam = 5 if quality == "high" else 3
+        locked = False
+    else:
+        model = resolve_simple_stt_model(
+            requested_model if requested_model is not None else task_info.get("model_size")
+        )
+        word_ts = False
+        beam = resolve_simple_stt_beam(model_size=model)
+        locked = True
+
     device, compute = resolve_simple_stt_device()
-    beam = resolve_simple_stt_beam(model_size=model)
     task_info.update(
         {
             "model_size": model,
@@ -92,18 +159,21 @@ def apply_simple_stt_policy(
             "stt_engine": "faster-whisper",
             "stt_beam_size": beam,
             "stt_vad_filter": True,
-            "stt_word_timestamps": False,
+            "stt_word_timestamps": word_ts,
             "stt_device": device,
             "stt_compute_type": compute,
             "stt_best_of": 1,
-            "simple_stt_locked": True,
-            "voice_verification_asr_allowed": False,
-            "post_tts_restt_allowed": False,
+            "simple_stt_locked": locked,
+            "voice_verification_asr_allowed": quality == "high",
+            "post_tts_restt_allowed": quality == "high",
+            "stt_quality": quality,
         }
     )
     logger.info(
-        "simple_stt: model=%s device=%s compute=%s beam=%s",
+        "stt_policy: quality=%s model=%s word_ts=%s device=%s compute=%s beam=%s",
+        quality,
         model,
+        word_ts,
         device,
         compute,
         beam,

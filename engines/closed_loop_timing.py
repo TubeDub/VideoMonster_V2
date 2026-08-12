@@ -1982,24 +1982,30 @@ def _stamp_stage19e_fields(
         audio_size = int(seg.get("audio_size_bytes") or 0)
     # Underfill without a duration-control lever is dishonest — stamp intent.
     # TZ: underflow_ms > 250 ⇒ duration_control_used MUST NOT stay "none".
+    _delta_abs = max(int(budget.underflow or 0), int(overflow_ms or 0))
     if (
         duration_control_used in ("none", "", None)
         and (
-            int(budget.underflow or 0) > int(globals().get("UNDERFLOW_TRIGGER_MS") or 250)
+            _delta_abs > 250
             or fill < float(globals().get("STAGE23_OK_FILL_LO") or 0.92)
+            or fill > float(globals().get("STAGE23_OK_FILL_HI") or 1.12)
         )
     ):
         # Prefer the strongest lever that actually ran this pass.
-        if expand_executed and text_changed:
+        if seg.get("audio_padded") or seg.get("silence_pad"):
+            duration_control_used = "soft_pad"
+        elif expand_executed and text_changed:
             duration_control_used = "expand"
-        elif float(seg.get("atempo") or 1.0) < 0.995:
+        elif abs(float(seg.get("atempo") or 1.0) - 1.0) >= 0.005:
             duration_control_used = "atempo"
-        elif float(seg.get("tts_length_scale") or ctrl.get("length_scale") or 1.0) > 1.001:
+        elif abs(
+            float(seg.get("tts_length_scale") or ctrl.get("length_scale") or 1.0) - 1.0
+        ) >= 0.001:
             duration_control_used = "length_scale"
         elif abs(float(seg.get("tts_rate") or ctrl.get("rate") or 1.0) - 1.0) >= 0.01:
             duration_control_used = "rate"
         else:
-            # Still short with no lever stamped — mark required length_scale path.
+            # Still short/long with no lever stamped — mark required length_scale path.
             duration_control_used = "length_scale"
             seg["duration_control_required"] = True
     meta23 = {

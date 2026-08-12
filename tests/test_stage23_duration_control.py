@@ -243,13 +243,13 @@ def test_stage23_dead_air_below_092():
     assert meta.get("final_status") == "dead_air_risk"
 
 
-def test_ripple_trigger_300_and_residual_count():
+def test_ripple_trigger_80_and_residual_count():
     from engines.conflict_resolver import (
         STAGE23_RIPPLE_OVERLAP_MS,
         ripple_shift_segment_dicts,
     )
 
-    assert STAGE23_RIPPLE_OVERLAP_MS == 300
+    assert STAGE23_RIPPLE_OVERLAP_MS == 80
     segs = [
         {
             "index": 0,
@@ -258,7 +258,7 @@ def test_ripple_trigger_300_and_residual_count():
         },
         {
             "index": 1,
-            "start_time_ms": 1650,  # overlap 350 > 300
+            "start_time_ms": 1850,  # overlap 150 > 80
             "final_tts_duration_ms": 800,
         },
     ]
@@ -266,6 +266,7 @@ def test_ripple_trigger_300_and_residual_count():
     assert stats["ripple_shifted"] >= 1
     assert segs[1]["start_time_ms"] >= 2000
     assert int(stats.get("overlap_after_ripple") or 0) == 0
+    assert int(stats.get("overlap_count") or 0) == 0
 
 
 def test_duration_control_pipeline_sets_length_scale():

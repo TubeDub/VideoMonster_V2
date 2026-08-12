@@ -1353,15 +1353,26 @@ def _build_openddf_source_separation_block(task_info: dict[str, Any]) -> dict[st
         }
 
 
-def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, Any]:
+def _build_openddf_tts_pipeline_block(
+    task_info: dict[str, Any],
+    *,
+    segments_data: list | None = None,
+) -> dict[str, Any]:
     """TTS Pipeline lifecycle per segment (TZ §7).
 
     For each segment: file name, resolved path, on-disk size, existence, plus the
     producer/consumer source locations so a missing file is fully traceable.
+
+    Stage 24: pass ``segments_data`` explicitly when repair/pad ran on a snapshot
+    so census matches the list that will be muxed (not a stale live copy).
     """
     from pathlib import Path as _Path
 
-    segments_data = task_info.get("segments_data") or []
+    segments_data = (
+        segments_data
+        if segments_data is not None
+        else (task_info.get("segments_data") or [])
+    )
     session_dir = task_info.get("session_dir")
     base = _Path(str(session_dir)) if session_dir else None
 
@@ -1440,6 +1451,14 @@ def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, An
                 "resolved_path": resolved,
                 "exists": exists,
                 "size_bytes": size,
+                "tts_backend": seg.get("tts_backend"),
+                "tts_voice": seg.get("tts_voice") or seg.get("voice"),
+                "tts_language": seg.get("tts_language")
+                or seg.get("target_lang")
+                or task_info.get("target_lang"),
+                "audio_padded": bool(
+                    seg.get("audio_padded") or seg.get("silence_pad")
+                ),
             }
         )
 
@@ -1499,7 +1518,12 @@ def _build_openddf_tts_pipeline_block(task_info: dict[str, Any]) -> dict[str, An
         ),
     }
     # Soft statuses only — never audio_missing_fatal (mux must complete).
-    if padded_count > 0:
+    # Never report bare "ok" while audio_missing > 0.
+    if missing > 0 and padded_count > 0:
+        block["final_status"] = "ok_with_pads"
+    elif missing > 0:
+        block["final_status"] = "degraded"
+    elif padded_count > 0:
         block["final_status"] = "ok_with_pads"
     elif video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
         block["final_status"] = "track_shorter_than_video"

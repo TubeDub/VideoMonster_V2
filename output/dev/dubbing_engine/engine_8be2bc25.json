@@ -1,0 +1,522 @@
+{
+  "task_id": "ae2a1b0e62ad4cea92c3efb2d7956da2",
+  "run_id": "8be2bc25",
+  "lang": "uk",
+  "elapsed_sec": 0.643,
+  "segments_total": 9,
+  "segments_adapted": 7,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 2,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 7,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "An 18-year-old boy named George Jr. drove through his hometown on his way home f",
+      "input": "Вісімнадцятирічний Джордж молодший поїхав по дорозі додому на вечерю, але коли ї",
+      "output": "Вісімнадцятирічний Джордж молодший поїхав по дорозі додому на вечерю, але́ коли́",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 19678,
+      "slot_ms": 17521,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=2 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=19678ms slot=17521ms prev_end=0ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "missing_entity:So George Jr"
+      ]
+    },
+    {
+      "index": 1,
+      "original": "That is except for cars. And at that point his father actually bought him a smal",
+      "input": "Це за винятком автомобілів. Батько купив йому маленьку італійську машину Фіат, а",
+      "output": "Це за винятком автомобілів. Батько купив йому маленьку італійську машину Фіат, а",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 15351,
+      "slot_ms": 11544,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=2 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=15351ms slot=11544ms prev_end=17521ms overflow=33.0% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "missing_entity:FIAT",
+        "severe_overflow: predicted=15351ms slot=11544ms ratio=1.33",
+        "voice_quality_risk: projected_atempo=1.33 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 2,
+      "original": "Like why aren't you able to take that focus and apply it to other things that wi",
+      "input": "Наприклад, чому ти не можеш зосередити свою увагу на інших речах, які принесуть ",
+      "output": "Наприклад, чому ти не можеш зосередити свою увагу на інших речах, які принесуть ",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 7810,
+      "slot_ms": 4965,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=7810ms slot=4965ms prev_end=32429ms overflow=57.3% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied",
+        "severe_overflow: predicted=7810ms slot=4965ms ratio=1.57",
+        "voice_quality_risk: projected_atempo=1.57 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 3,
+      "original": "And so basically every dinner these days it became this huge argument between fa",
+      "input": "І фактично кожна вечеря в наші дні стала величезним конфліктом між батьком і син",
+      "output": "І фактично кожна вечеря в наші дні стала величезним конфліктом між батьком і син",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 14806,
+      "slot_ms": 13646,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=14806ms slot=13646ms prev_end=39877ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 4,
+      "original": "Two weeks later George Jr. was laying in a hospital bed in the intensive care un",
+      "input": "Через два тижні Джордж молодший лежав у лікарняному ліжку в реанімаційному відді",
+      "output": "Че́рез два тижні Джордж молодший лежав у лікарняному ліжку в реанімаційному відд",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 23588,
+      "slot_ms": 17216,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=1 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=23588ms slot=17216ms prev_end=53885ms overflow=37.0% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=23588ms slot=17216ms ratio=1.37",
+        "voice_quality_risk: projected_atempo=1.37 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 5,
+      "original": "Two years later George Jr., who by this point was fully recovered from his injur",
+      "input": "Через два роки Джордж молодший, який до цього часу повністю одужав від травм, ст",
+      "output": "Че́рез два роки Джордж молодший, яки́й до цього часу повністю одужав від травм, ",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 22418,
+      "slot_ms": 18042,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=2 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=22418ms slot=18042ms prev_end=73752ms overflow=24.3% (15-25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "missing_entity:So George Jr",
+        "voice_quality_risk: projected_atempo=1.24 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 6,
+      "original": "Instead he had picked up his camera and really gotten back into his old hobby of",
+      "input": "Замість цього він взяв свою камеру і повернувся в своє старе хобі фотографії.",
+      "output": "Замість цього ві́н взяв свою камеру і повернувся в своє старе хобі фотографії.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 5785,
+      "slot_ms": 4640,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=5785ms slot=4640ms prev_end=94922ms overflow=24.7% (15-25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "voice_quality_risk: projected_atempo=1.25 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 7,
+      "original": "In fact George Jr. had applied to the prestigious cinematography program at the ",
+      "input": "Насправді Джордж молодший подав заявку на престижну програму з кінематографії в ",
+      "output": "Насправді Джордж молодший подав заявку на престижну програму з кінематографії в ",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 14230,
+      "slot_ms": 8797,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=4 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=14230ms slot=8797ms prev_end=102096ms overflow=61.8% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "missing_entity:University of Southern California; missing_entity:California; missing_entity:Southern California",
+        "severe_overflow: predicted=14230ms slot=8797ms ratio=1.62",
+        "voice_quality_risk: projected_atempo=1.62 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 8,
+      "original": "Now George Jr. walked over to the podium to take some photos of the winning driv",
+      "input": "Тепер Джордж молодший підійшов до подіуму, щоб сфотографувати переможного гонщик",
+      "output": "Тепер Джордж молодший підійшов до подіуму, щоб сфотографувати переможного гонщик",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 84900,
+      "slot_ms": 53904,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=8 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": true,
+          "note": "fixed: USC→Ю Ес Сі"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=84900ms slot=53904ms prev_end=111499ms overflow=57.5% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "missing_entity:USC; missing_entity:Now George Jr; missing_entity:Haskell Wexler; missing_entity:George Lucas; missing_entity:Star Wars George Jr; missing_entity:Star Wars",
+        "severe_overflow: predicted=84900ms slot=53904ms ratio=1.58",
+        "voice_quality_risk: projected_atempo=1.58 (max=1.2) — recommend text adaptation"
+      ]
+    }
+  ]
+}

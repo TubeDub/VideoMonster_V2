@@ -19,9 +19,9 @@
     "overlaps_resolved": 1
   },
   "profile": {
-    "total_ms": 0.145,
-    "avg_segment_ms": 0.126,
-    "max_segment_ms": 0.126,
+    "total_ms": 0.197,
+    "avg_segment_ms": 0.181,
+    "max_segment_ms": 0.181,
     "segment_count": 2
   },
   "segments": [
@@ -67,7 +67,7 @@
         "local_shift:fail",
         "local_reflow:save=120ms"
       ],
-      "resolve_ms": 0.105
+      "resolve_ms": 0.153
     }
   ],
   "task_id": "tsoft"

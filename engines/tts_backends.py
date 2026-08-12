@@ -363,14 +363,50 @@ def stamp_tts_backend_meta(
     voice: str,
     sample_rate: int | None = None,
     controls: dict[str, Any] | None = None,
+    language: str | None = None,
+    cyrillic_ratio: float | None = None,
 ) -> None:
-    """Write tts_backend / tts_voice / tts_sample_rate (+ Mykyta controls) onto a segment."""
+    """Write tts_backend / tts_voice / tts_language (+ Mykyta controls) onto a segment."""
     eid = normalize_backend_name(engine_id)
     display = backend_display_name(eid)
-    resolved = resolve_voice_for_backend(voice, eid)
+    lang = str(language or seg.get("tts_language") or seg.get("target_lang") or "uk")
+    lang0 = lang.split("-")[0].lower()
+    if lang0 == "uk":
+        try:
+            from engines.tts_lang_lock import force_uk_tts_identity
+
+            ident = force_uk_tts_identity(
+                target_lang="uk", engine_id=eid, voice=voice
+            )
+            eid = normalize_backend_name(ident.get("engine_id") or eid)
+            display = backend_display_name(eid)
+            resolved = str(ident.get("voice") or voice)
+            lang0 = "uk"
+        except Exception:
+            resolved = resolve_voice_for_backend(voice, eid)
+    else:
+        resolved = resolve_voice_for_backend(voice, eid)
     seg["tts_backend"] = display
     seg["tts_engine"] = eid
     seg["tts_voice"] = resolved
+    seg["tts_language"] = lang0
+    seg["voice"] = resolved
+    if cyrillic_ratio is not None:
+        seg["cyrillic_ratio"] = float(cyrillic_ratio)
+    elif "cyrillic_ratio" not in seg:
+        try:
+            from engines.tts_lang_lock import cyrillic_letter_ratio
+
+            txt = str(
+                seg.get("final_tts_text")
+                or seg.get("tts_text")
+                or seg.get("text")
+                or ""
+            )
+            if txt.strip():
+                seg["cyrillic_ratio"] = round(cyrillic_letter_ratio(txt), 3)
+        except Exception:
+            pass
     if sample_rate:
         seg["tts_sample_rate"] = int(sample_rate)
     elif eid == ENGINE_TTS_UK:
@@ -458,18 +494,32 @@ def synthesize_with_backend(
         synth_kwargs["pitch"] = str(ctrl["pitch"])
         synth_kwargs["volume"] = ctrl["volume"]
         synth_kwargs["length_scale"] = ctrl["length_scale"]
+    # One retry on same backend before any fallback (Stage 24).
     result = synthesize(text, resolved, output_path, **synth_kwargs)
+    if not result.ok and eid == ENGINE_TTS_UK:
+        logger.warning(
+            "[TTS] tts_uk retry once (%s)",
+            (result.error or "")[:160],
+        )
+        result = synthesize(text, resolved, output_path, **synth_kwargs)
     if not result.ok and eid != ENGINE_EDGE:
         logger.warning(
-            "[TTS] %s failed (%s) — fallback edge-offline",
+            "[TTS] %s failed (%s) — fallback Edge uk-UA only",
             eid,
             (result.error or "")[:160],
         )
-        edge_voice = (
-            DEFAULT_EDGE_VOICE
-            if not str(voice).startswith("uk-UA-")
-            else voice
-        )
+        try:
+            from engines.tts_lang_lock import force_uk_tts_identity
+
+            edge_ident = force_uk_tts_identity(
+                target_lang="uk", engine_id=ENGINE_EDGE, voice=voice
+            )
+            edge_voice = str(edge_ident.get("voice") or DEFAULT_EDGE_VOICE)
+        except Exception:
+            edge_voice = DEFAULT_EDGE_VOICE
+        # Never fall back to cs/sk/pl/ru — only uk-UA-*.
+        if not str(edge_voice).startswith("uk-UA-"):
+            edge_voice = DEFAULT_EDGE_VOICE
         # Edge rejects Mykyta float rates like "0.97"; convert to ±N%.
         edge_rate = rate
         try:
@@ -498,6 +548,14 @@ def synthesize_with_backend(
             rate=edge_rate,
             pitch=edge_pitch,
         )
+        if result.ok:
+            try:
+                meta = dict(result.meta or {})
+                meta["edge_uk_fallback"] = True
+                meta["edge_voice"] = edge_voice
+                result.meta = meta
+            except Exception:
+                pass
     return result
 
 

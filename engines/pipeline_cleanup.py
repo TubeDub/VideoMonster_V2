@@ -37,14 +37,41 @@ WORK_SUBDIRS = (
     "timing_fit",
     "ffmpeg",
     "work",
+    # spec v3 intermediate dirs (safe to remove: outputs are copied elsewhere)
+    "_demucs_out",
+    "_demucs_out_v3",
+    "_spk_parts",
 )
 
 _PROTECTED_AUDIO_SUFFIXES = (".wav", ".mp3", ".ogg", ".flac")
-_PROTECTED_AUDIO_PREFIXES = ("slot_fit_", "pause_run_", "tts_")
+_PROTECTED_AUDIO_PREFIXES = (
+    "slot_fit_",
+    "pause_run_",
+    "tts_",
+    "tts_regen_",
+    "pad_silence_",
+    # spec v3 speaker reference clips
+    "speaker_",
+    # spec v3 4-stem outputs
+    "dialogue",
+    "music_sfx",
+    "vocals",
+    "drums",
+    "bass",
+    "other",
+)
+
+# Directories that hold spec v3 lineage artifacts we always keep, even after
+# a successful dub (they're small and vital for stage restart / audit).
+_SPEC_V3_KEEP_DIR_PREFIXES = (
+    "speaker_profiles_",
+    "diarization_",
+    "openddf_",
+)
 
 
 def _is_protected_segment_audio(path: Path) -> bool:
-    """True for slot_fit_/pause_run_/tts_* or any segment media extension."""
+    """True for slot_fit_/pause_run_/tts_/pad_silence_* or any segment media."""
     name = path.name.lower()
     if any(name.startswith(p) for p in _PROTECTED_AUDIO_PREFIXES):
         return True
@@ -146,6 +173,8 @@ def cleanup_intermediate_work_dirs(
     for sub in WORK_SUBDIRS:
         path = base / sub
         if not path.is_dir():
+            continue
+        if any(sub.startswith(p) for p in _SPEC_V3_KEEP_DIR_PREFIXES):
             continue
         if keep_segment_audio:
             _salvage_protected_audio(path, base)

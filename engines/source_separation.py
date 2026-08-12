@@ -39,6 +39,9 @@ class SeparationResult:
     duration_ms: int | None = None
     accompaniment_attenuation_db: float = DEFAULT_ACCOMPANIMENT_ATTENUATION_DB
     warning: str | None = None
+    # Spec v3: individual stems from 4-stem HTDemucs (drums/bass/other)
+    stems_v3: dict[str, str] | None = None
+    stems_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -266,6 +269,89 @@ def _try_demucs(
         return False
 
 
+def _try_demucs_4stem(
+    stereo_path: str,
+    dialogue_wav: str,
+    accompaniment_wav: str,
+    ffmpeg: str,
+) -> tuple[bool, dict[str, str]]:
+    """Spec v3 4-stem HTDemucs: vocals/drums/bass/other → dialogue + music_mix.
+
+    Returns (ok, {"vocals","drums","bass","other","music"} absolute paths).
+    Music = drums+bass+other combined via ffmpeg amix (music+SFX aggregate).
+    """
+    demucs_cli = shutil.which("demucs")
+    if not demucs_cli:
+        return False, {}
+
+    out_root = Path(dialogue_wav).parent / "_demucs_out_v3"
+    out_root.mkdir(parents=True, exist_ok=True)
+    try:
+        cmd = [
+            demucs_cli,
+            "-n",
+            "htdemucs",  # 4 stems: vocals, drums, bass, other
+            "-o",
+            str(out_root),
+            stereo_path,
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+        if res.returncode != 0:
+            logger.debug("demucs 4-stem exit=%s stderr=%s", res.returncode, (res.stderr or "")[-400:])
+            return False, {}
+
+        stem_dir = out_root / "htdemucs" / Path(stereo_path).stem
+        vocals = stem_dir / "vocals.wav"
+        drums = stem_dir / "drums.wav"
+        bass = stem_dir / "bass.wav"
+        other = stem_dir / "other.wav"
+        if not all(p.is_file() for p in (vocals, drums, bass, other)):
+            return False, {}
+
+        shutil.copy2(vocals, dialogue_wav)
+        ok_mix, err_mix = _run_ffmpeg(
+            [
+                ffmpeg,
+                "-y",
+                "-i", str(drums),
+                "-i", str(bass),
+                "-i", str(other),
+                "-filter_complex",
+                "[0:a][1:a][2:a]amix=inputs=3:duration=longest:normalize=0[m]",
+                "-map", "[m]",
+                "-acodec", "pcm_s16le",
+                accompaniment_wav,
+            ],
+            timeout=900,
+        )
+        if not ok_mix:
+            logger.debug("4-stem music amix failed: %s", err_mix[:200])
+            return False, {}
+
+        stems = {
+            "vocals": str(vocals.resolve()),
+            "drums": str(drums.resolve()),
+            "bass": str(bass.resolve()),
+            "other": str(other.resolve()),
+            "music": str(Path(accompaniment_wav).resolve()),
+        }
+        return (
+            Path(dialogue_wav).is_file() and Path(accompaniment_wav).is_file(),
+            stems,
+        )
+    except Exception as exc:
+        logger.debug("demucs 4-stem separation failed: %s", exc)
+        return False, {}
+
+
+def is_four_stem_enabled(info: dict[str, Any] | None = None) -> bool:
+    """Spec v3 opt-in: task.info.spec_v3 / stems_v3 or env VM_4STEM=1."""
+    import os as _os
+    if info and (info.get("spec_v3") or info.get("stems_v3") or info.get("four_stem")):
+        return True
+    return (_os.getenv("VM_4STEM") or "").strip() in ("1", "true", "yes", "on")
+
+
 def _try_ffmpeg_center_side(
     stereo_path: str,
     dialogue_wav: str,
@@ -404,12 +490,27 @@ def try_separate_audio(
 
     method = "none"
     separated = False
-    if _try_demucs(stereo_path, dialogue_wav, accompaniment_wav):
+    stems_v3: dict[str, str] = {}
+    stems_count = 0
+    prefer_4stem = is_four_stem_enabled(task_info)
+    if prefer_4stem:
+        ok4, stems_v3 = _try_demucs_4stem(
+            stereo_path, dialogue_wav, accompaniment_wav, ffmpeg
+        )
+        if ok4:
+            method = "demucs_htdemucs_4stem"
+            separated = True
+            stems_count = 4
+    if not separated and _try_demucs(stereo_path, dialogue_wav, accompaniment_wav):
         method = "demucs_htdemucs"
         separated = True
-    elif _try_ffmpeg_center_side(stereo_path, dialogue_wav, accompaniment_wav, ffmpeg):
+        stems_count = 2
+    if not separated and _try_ffmpeg_center_side(
+        stereo_path, dialogue_wav, accompaniment_wav, ffmpeg
+    ):
         method = "ffmpeg_center_side"
         separated = True
+        stems_count = 2
 
     if not separated:
         elapsed_ms = int((time.perf_counter() - started) * 1000)
@@ -448,6 +549,8 @@ def try_separate_audio(
         duration_ms=duration_ms or elapsed_ms,
         accompaniment_attenuation_db=DEFAULT_ACCOMPANIMENT_ATTENUATION_DB,
         warning=None,
+        stems_v3=(stems_v3 or None),
+        stems_count=stems_count,
     )
 
 

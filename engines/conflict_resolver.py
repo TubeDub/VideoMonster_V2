@@ -35,10 +35,12 @@ MAX_REFLOW_MS = 185
 LOCAL_WINDOW_NEIGHBORS = 1
 # Stage 22: force ripple shift of neighbors when placement overlap is severe.
 STAGE22_RIPPLE_OVERLAP_MS = 400
-# Stage 23: kill overlaps earlier; cap single shift; force-clear residual >400.
-STAGE23_RIPPLE_OVERLAP_MS = 300
+# Stage 24: ripple when overlap >80ms; cap single shift; force-clear residual >400.
+STAGE23_RIPPLE_OVERLAP_MS = 80
 STAGE23_RIPPLE_MAX_SHIFT_MS = 400
 STAGE23_FORCE_SPLIT_OVERLAP_MS = 400
+STAGE24_ATEMPO_CLAMP_MIN = 0.92
+STAGE24_ATEMPO_CLAMP_MAX = 1.12
 
 
 @dataclass
@@ -533,13 +535,20 @@ def ripple_shift_segment_dicts(
     Mutates ``merge_adjusted_start`` / ``start_time_ms`` / ``start_ms`` so both
     the mix builder and OpenDDF overlap diagnostics see a non-overlapping timeline.
 
-    - Force-shift when overlap > ``overlap_trigger_ms`` (default 300).
+    - Force-shift when overlap > ``overlap_trigger_ms`` (default 80, Stage 24).
     - Cap single shift at ``max_shift_ms`` (400); if residual still >
-      ``force_clear_above_ms``, uncapped clear + mark longest offender.
+      ``force_clear_above_ms``, uncapped clear + mark longest offender for split
+      or atempo clamp 0.92–1.12.
     - Optionally also clear residual overlaps above ``clear_all_above_ms``.
     """
     if not segments:
-        return {"ripple_shifted": 0, "severe_shifted": 0, "overlap_after_ripple": 0}
+        return {
+            "ripple_shifted": 0,
+            "severe_shifted": 0,
+            "overlap_after_ripple": 0,
+            "overlap_count": 0,
+            "atempo_marked": 0,
+        }
     active = [
         (i, s)
         for i, s in enumerate(segments)
@@ -548,6 +557,7 @@ def ripple_shift_segment_dicts(
     shifted = 0
     severe = 0
     force_split_marked = 0
+    atempo_marked = 0
 
     def _start(seg: dict) -> int:
         return int(
@@ -611,7 +621,12 @@ def ripple_shift_segment_dicts(
                     longer = a if _dur(a) >= _dur(b) else b
                     longer["needs_post_restore_split"] = True
                     longer["stage23_force_split_overlap"] = True
+                    # Stage 24: also request atempo clamp when overflow still severe.
+                    longer["atempo_clamp_min"] = STAGE24_ATEMPO_CLAMP_MIN
+                    longer["atempo_clamp_max"] = STAGE24_ATEMPO_CLAMP_MAX
+                    longer["needs_atempo_clamp"] = True
                     force_split_marked += 1
+                    atempo_marked += 1
             else:
                 _set_start(b, desired, start_b)
                 shifted += 1
@@ -619,7 +634,7 @@ def ripple_shift_segment_dicts(
                     severe += 1
                     b["stage22_ripple_severe"] = True
 
-    # Count residual overlaps after ripple (for stage23 meta).
+    # Count residual overlaps after ripple (for stage23/24 meta).
     overlap_after = 0
     for k in range(len(active) - 1):
         _ia, a = active[k]
@@ -632,6 +647,27 @@ def ripple_shift_segment_dicts(
             overlap_after += 1
             b["overlap_after_ripple"] = 1
             a["overlap_after_ripple"] = int(a.get("overlap_after_ripple") or 0)
+            # Never leave >150ms placement overlap without a shift mark.
+            if ov > 150 and not b.get("stage23_ripple_shift_ms"):
+                desired = _start(a) + dur_a + int(min_gap_ms)
+                if desired > _start(b):
+                    _set_start(b, desired, _start(b))
+                    shifted += 1
+        else:
+            b["overlap_after_ripple"] = 0
+
+    # Re-count after late clear.
+    overlap_after = 0
+    for k in range(len(active) - 1):
+        _ia, a = active[k]
+        _ib, b = active[k + 1]
+        dur_a = _dur(a)
+        if dur_a <= 0:
+            continue
+        ov = (_start(a) + dur_a) - _start(b)
+        if ov > OVERLAP_TOLERANCE_MS:
+            overlap_after += 1
+            b["overlap_after_ripple"] = 1
         else:
             b["overlap_after_ripple"] = 0
 
@@ -641,7 +677,9 @@ def ripple_shift_segment_dicts(
         "overlap_trigger_ms": overlap_trigger_ms,
         "max_shift_ms": max_shift_ms,
         "overlap_after_ripple": overlap_after,
+        "overlap_count": overlap_after,
         "force_split_marked": force_split_marked,
+        "atempo_marked": atempo_marked,
     }
 
 

@@ -1597,16 +1597,25 @@ def _commit_tts_group_result(
         return
     if audio_filename:
         audio_path = _resolve_segment_audio_path(audio_filename, task_info)
+        try:
+            abs_audio = (
+                str(audio_path.resolve())
+                if audio_path.is_file()
+                else str(audio_path)
+            )
+        except OSError:
+            abs_audio = str(audio_path)
         duration = measure_playback_duration_ms(audio_path)
         apply_tts_synthesis_result(
             segments_data[head_idx],
             tts_text=tts_text,
-            tts_file_path=audio_filename,
+            tts_file_path=abs_audio if abs_audio else audio_filename,
             playback_duration=duration or None,
             status="generated",
         )
         try:
             from engines.tts_backends import stamp_tts_backend_meta
+            from engines.tts_lang_lock import cyrillic_letter_ratio
 
             stamp_tts_backend_meta(
                 segments_data[head_idx],
@@ -1617,6 +1626,12 @@ def _commit_tts_group_result(
                     or (task_info or {}).get("voice")
                     or ""
                 ),
+                language=str(
+                    (task_info or {}).get("tts_language")
+                    or (task_info or {}).get("target_lang")
+                    or "uk"
+                ),
+                cyrillic_ratio=cyrillic_letter_ratio(tts_text),
                 controls={
                     "rate": (task_info or {}).get("mykyta_rate")
                     or (task_info or {}).get("tts_rate"),
@@ -1932,11 +1947,13 @@ def _soft_pad_missing_segments(
             seg["needs_re_tts"] = False
             seg["status"] = "silence_pad"
             seg["tts_status"] = "silence_pad"
+            seg["duration_control_used"] = "soft_pad"
             meta = dict(seg.get("stage23") or {})
             meta["silence_pad"] = True
             meta["audio_padded"] = True
             meta["pad_reason"] = "missing_tts_after_repair"
             meta["silence_pad_ms"] = slot_ms
+            meta["duration_control_used"] = "soft_pad"
             seg["stage23"] = meta
             stamp_audio_presence(seg, resolve_path=_resolve)
             padded_indices.append(idx)
@@ -2007,14 +2024,18 @@ def _repair_missing_tts_files(
 
     info = task_info or {}
     primary = normalize_backend_name(
-        info.get("tts_engine") or info.get("tts_backend") or "edge-offline"
+        info.get("tts_engine") or info.get("tts_backend") or "tts_uk"
     )
-    engines_try = [primary]
-    if primary != "edge-offline":
-        engines_try.append("edge-offline")
-    # Prefer Mykyta first when primary is edge but tts_uk is available.
-    if "tts_uk" not in engines_try and primary == "edge-offline":
+    _tgt0 = str(info.get("target_lang") or info.get("lang") or "uk").split("-")[0].lower()
+    # Stage 24 UK: always Mykyta → edge-offline uk-UA (never cs/sk/pl/ru).
+    if _tgt0 == "uk":
         engines_try = ["tts_uk", "edge-offline"]
+    else:
+        engines_try = [primary]
+        if primary != "edge-offline":
+            engines_try.append("edge-offline")
+        if "tts_uk" not in engines_try and primary == "edge-offline":
+            engines_try = ["tts_uk", "edge-offline"]
 
     floor = int(min_bytes if min_bytes is not None else MIN_AUDIO_BYTES)
     repaired = 0
@@ -2084,7 +2105,13 @@ def _repair_missing_tts_files(
             "length_scale": seg.get("tts_length_scale")
             or info.get("mykyta_length_scale"),
         }
-        # Up to 2 full engine rounds (Mykyta → edge).
+        _tgt_lang = str(
+            seg.get("target_lang")
+            or info.get("target_lang")
+            or info.get("lang")
+            or "uk"
+        )
+        # Up to 2 full engine rounds (Mykyta → edge-offline uk-UA).
         for _attempt in range(2):
             if got:
                 break
@@ -2111,6 +2138,8 @@ def _repair_missing_tts_files(
                         segment_index=idx,
                         segment_id=str(seg.get("segment_id") or ""),
                         engine_id=eid,
+                        target_lang=_tgt_lang,
+                        stamp_seg=seg,
                     )
                     if isinstance(rr, tuple):
                         nf, nms = rr[0], int(rr[1] or 0)
@@ -2165,6 +2194,7 @@ def _repair_missing_tts_files(
                 seg["silence_pad"] = True
                 seg["audio_padded"] = True
                 seg["pad_reason"] = "missing_tts_after_repair"
+                seg["duration_control_used"] = "soft_pad"
                 warn = {
                     "index": idx,
                     "code": "silence_pad_fallback",
@@ -2177,6 +2207,7 @@ def _repair_missing_tts_files(
                 meta["audio_padded"] = True
                 meta["pad_reason"] = "missing_tts_after_repair"
                 meta["silence_pad_ms"] = pad_ms
+                meta["duration_control_used"] = "soft_pad"
                 seg["stage23"] = meta
                 stamp_audio_presence(seg, resolve_path=_resolve)
                 padded += 1
@@ -2203,8 +2234,14 @@ def _repair_missing_tts_files(
                 failed += 1
                 continue
 
-        seg["file"] = got
-        seg["tts_file_path"] = got
+        # Prefer absolute path after successful regen.
+        try:
+            _got_abs = str(Path(_resolve(str(got))).resolve())
+        except Exception:
+            _got_abs = str(got)
+        seg["file"] = _got_abs
+        seg["tts_file_path"] = _got_abs
+        seg["resolved_path"] = _got_abs
         seg["final_tts_text"] = text
         seg["status"] = "generated"
         seg["tts_status"] = "generated"
@@ -2332,11 +2369,17 @@ def _assert_segments_audio_ready(
     primary = normalize_backend_name(
         info.get("tts_engine") or info.get("tts_backend") or "tts_uk"
     )
-    engines_try = [primary]
-    if primary != "edge-offline":
-        engines_try.append("edge-offline")
-    if "tts_uk" not in engines_try:
-        engines_try.insert(0, "tts_uk")
+    _tgt_assert = str(info.get("target_lang") or info.get("lang") or "uk").split("-")[
+        0
+    ].lower()
+    if _tgt_assert == "uk":
+        engines_try = ["tts_uk", "edge-offline"]
+    else:
+        engines_try = [primary]
+        if primary != "edge-offline":
+            engines_try.append("edge-offline")
+        if "tts_uk" not in engines_try:
+            engines_try.insert(0, "tts_uk")
 
     for idx, seg in enumerate(segments_data or []):
         if not isinstance(seg, dict):
@@ -2410,6 +2453,13 @@ def _assert_segments_audio_ready(
                             segment_index=idx,
                             segment_id=str(seg.get("segment_id") or ""),
                             engine_id=engine_id,
+                            target_lang=str(
+                                seg.get("target_lang")
+                                or info.get("target_lang")
+                                or info.get("lang")
+                                or "uk"
+                            ),
+                            stamp_seg=seg,
                         )
                         if isinstance(rr, tuple):
                             nf, nms = rr[0], int(rr[1] or 0)
@@ -2916,6 +2966,23 @@ def _tts_context_for_segment(
     tts_file_path: str | Path,
     engine_id: str | None = None,
 ) -> dict:
+    eid = engine_id or "tts_uk"
+    v = voice
+    lang = str(target_lang or "uk").split("-")[0].lower()
+    if lang == "uk":
+        try:
+            from engines.tts_lang_lock import force_uk_tts_identity
+
+            ident = force_uk_tts_identity(
+                target_lang="uk", engine_id=eid, voice=voice
+            )
+            eid = str(ident.get("engine_id") or eid)
+            v = str(ident.get("voice") or voice)
+            lang = "uk"
+        except Exception:
+            eid = "tts_uk"
+            v = "mykyta"
+            lang = "uk"
     return {
         "task_id": task_id,
         "segment_id": segment_id,
@@ -2924,10 +2991,14 @@ def _tts_context_for_segment(
         "total": total,
         "original_text": original_text,
         "tts_text": tts_text,
-        "voice": voice,
-        "language": target_lang,
+        "voice": v,
+        "language": lang,
+        "target_lang": lang,
+        "tts_language": lang,
+        "tts_voice": v,
+        "tts_backend": eid,
         "tts_file_path": str(tts_file_path),
-        "engine_id": engine_id or "edge-offline",
+        "engine_id": eid,
     }
 
 
@@ -3979,6 +4050,50 @@ def _log_dub_slot_fit(
             detail["slot_fit_log"] = logs[-300:]
 
 
+def _absolutize_segment_audio_paths(
+    segments_data: list,
+    session_dir: str | Path | None = None,
+) -> int:
+    """Stage 24: rewrite segment audio keys to absolute resolved paths."""
+    base = Path(str(session_dir)) if session_dir else None
+    fixed = 0
+    for seg in segments_data or []:
+        if not isinstance(seg, dict):
+            continue
+        for key in ("file", "tts_file_path", "fitted_file", "resolved_path"):
+            raw = str(seg.get(key) or "").strip()
+            if not raw:
+                continue
+            p = Path(raw)
+            if not p.is_file() and base is not None:
+                cand = base / p.name
+                if cand.is_file():
+                    p = cand
+            try:
+                if p.is_file():
+                    abs_p = str(p.resolve())
+                    if seg.get(key) != abs_p:
+                        seg[key] = abs_p
+                        fixed += 1
+            except OSError:
+                continue
+        # Prefer fitted → file as canonical absolute path.
+        for prefer in ("fitted_file", "file", "tts_file_path"):
+            pref = str(seg.get(prefer) or "").strip()
+            if pref and Path(pref).is_file():
+                try:
+                    abs_p = str(Path(pref).resolve())
+                    seg["resolved_path"] = abs_p
+                    if prefer != "file" and not (
+                        seg.get("file") and Path(str(seg.get("file"))).is_file()
+                    ):
+                        seg["file"] = abs_p
+                except OSError:
+                    pass
+                break
+    return fixed
+
+
 def _regen_segment_tts(
     text: str,
     *,
@@ -3994,6 +4109,8 @@ def _regen_segment_tts(
     length_scale: float | None = None,
     volume: float | None = None,
     mykyta_controls: dict | None = None,
+    target_lang: str | None = None,
+    stamp_seg: dict | None = None,
 ) -> tuple[str | None, int]:
     from engines.pipeline_integrity.audio_identity import (
         allocate_tts_path,
@@ -4004,17 +4121,63 @@ def _regen_segment_tts(
     from engines.pipeline_integrity.tts_file_lifecycle import log_tts_lifecycle
     from engines.tts import generate_audio
     from engines.tts_backends import normalize_backend_name
+    from engines.tts_lang_lock import (
+        force_uk_tts_identity,
+        guard_uk_tts_text,
+        is_latin_heavy,
+    )
 
     seg_meta = {"segment_id": segment_id or "", "index": segment_index or 0}
     suid = ensure_segment_uuid(seg_meta)
-    eid = normalize_backend_name(engine_id or "edge-offline")
+    # Stage 24: force Ukrainian identity when target=uk.
+    _ident = force_uk_tts_identity(
+        target_lang=target_lang, engine_id=engine_id, voice=voice
+    )
+    eid = normalize_backend_name(_ident.get("engine_id") or engine_id or "edge-offline")
+    voice = str(_ident.get("voice") or voice or "")
+    _lang = str(_ident.get("language") or target_lang or "uk")
+    speak_text = " ".join(str(text or "").split()).strip()
+    if _lang == "uk" and speak_text:
+        heavy, lat_r = is_latin_heavy(speak_text, threshold=0.30)
+        if heavy:
+            logger.warning(
+                "[TTS] latin_heavy_warning seg#%s ratio=%.2f text=%.80s — refuse as-is",
+                segment_index if segment_index is not None else "?",
+                lat_r,
+                speak_text,
+            )
+            if stamp_seg is not None:
+                stamp_seg["latin_heavy_warning"] = True
+                stamp_seg["latin_letter_ratio"] = round(lat_r, 3)
+            remt_text, meta = guard_uk_tts_text(
+                speak_text,
+                source_text=str(
+                    (stamp_seg or {}).get("original")
+                    or (stamp_seg or {}).get("original_text")
+                    or (stamp_seg or {}).get("source_text")
+                    or ""
+                ),
+                src_lang=str((stamp_seg or {}).get("source_lang") or "en"),
+                tgt_lang="uk",
+                segment_index=int(segment_index or 0),
+                allow_remt=True,
+                fail_loud=False,
+            )
+            if meta.get("tts_lang_ok") and remt_text:
+                speak_text = remt_text
+            else:
+                # Do not voice Latin-heavy non-UK text — caller will try edge/pad.
+                if stamp_seg is not None:
+                    stamp_seg["tts_skip_reason"] = "latin_heavy_refused"
+                return None, 0
+    text = speak_text
     log_tts_lifecycle(
         task_id,
         event="gen_start",
         segment_id=suid,
         segment_index=segment_index,
         stage="slot_fit_regen",
-        detail=f"text_len={len(text)} engine={eid}",
+        detail=f"text_len={len(text)} engine={eid} lang={_lang} voice={voice}",
     )
     ctx_extra: dict = {
         "segment_id": suid,
@@ -4022,6 +4185,10 @@ def _regen_segment_tts(
         "segment_index": segment_index,
         "task_id": task_id or "",
         "tts_backend": eid,
+        "target_lang": _lang,
+        "language": _lang,
+        "tts_language": _lang,
+        "tts_voice": voice,
     }
     if eid == "tts_uk":
         try:
@@ -4132,7 +4299,20 @@ def _regen_segment_tts(
         exists=dest.is_file(),
         detail=f"duration_ms={tts_ms}",
     )
-    return dest.name, tts_ms
+    # Stage 24: stamp TTS identity on the segment when provided.
+    if stamp_seg is not None:
+        try:
+            abs_dest = str(Path(dest).resolve())
+        except OSError:
+            abs_dest = str(dest)
+        stamp_seg["tts_backend"] = eid
+        stamp_seg["tts_voice"] = voice
+        stamp_seg["tts_language"] = _lang
+        stamp_seg["voice"] = voice
+        stamp_seg["file"] = abs_dest
+        stamp_seg["tts_file_path"] = abs_dest
+        stamp_seg["resolved_path"] = abs_dest
+    return str(Path(dest).resolve()) if Path(dest).is_file() else dest.name, tts_ms
 
 
 def _premux_segment_fits(audio_path: str | Path, slot_ms: int, tolerance_ms: int | None = None) -> tuple[bool, int]:
@@ -4177,7 +4357,11 @@ def _commit_fitted_wav(
         return None
     if not dest.is_file() or dest.stat().st_size < 64:
         return None
-    return dest.name
+    # Stage 24: always return absolute path (never bare basename).
+    try:
+        return str(dest.resolve())
+    except OSError:
+        return str(dest)
 
 
 def _repair_missing_fitted_files(
@@ -4975,16 +5159,42 @@ def _build_timed_dub_track(
     except Exception:
         pass
 
-    # Stage 23: forced ripple when placement overlaps (>300ms) before mix.
+    # Stage 24: forced ripple when placement overlaps (>80ms) before mix.
+    # Two passes — clear residual after first shift cascade.
     try:
         from engines.conflict_resolver import ripple_shift_segment_dicts
 
         _ripple = ripple_shift_segment_dicts(list(segments_data or []))
+        _ripple2 = ripple_shift_segment_dicts(list(segments_data or []))
+        _ripple = {
+            **_ripple,
+            "ripple_shifted": int(_ripple.get("ripple_shifted") or 0)
+            + int(_ripple2.get("ripple_shifted") or 0),
+            "overlap_after_ripple": int(
+                _ripple2.get("overlap_after_ripple")
+                or _ripple.get("overlap_after_ripple")
+                or 0
+            ),
+            "overlap_count": int(
+                _ripple2.get("overlap_count")
+                or _ripple2.get("overlap_after_ripple")
+                or 0
+            ),
+            "pass2": _ripple2,
+        }
+        if task_info is not None:
+            task_info["stage22_ripple"] = _ripple
+            task_info["stage23_ripple"] = _ripple
+            task_info["overlap_count"] = int(
+                _ripple.get("overlap_count")
+                or _ripple.get("overlap_after_ripple")
+                or 0
+            )
         if int(_ripple.get("ripple_shifted") or 0) > 0 or int(
             _ripple.get("overlap_after_ripple") or 0
         ) > 0:
             logger.info(
-                "Task %s: stage23 ripple_shift shifted=%s severe=%s residual=%s",
+                "Task %s: stage24 ripple_shift shifted=%s severe=%s residual=%s",
                 task_id,
                 _ripple.get("ripple_shifted"),
                 _ripple.get("severe_shifted"),
@@ -4996,16 +5206,22 @@ def _build_timed_dub_track(
                     if _t and isinstance(_t.get("info"), dict):
                         _t["info"]["stage22_ripple"] = _ripple
                         _t["info"]["stage23_ripple"] = _ripple
-            # Stamp residual overlap count onto segments for stage23 meta.
+                        _t["info"]["overlap_count"] = int(
+                            _ripple.get("overlap_count")
+                            or _ripple.get("overlap_after_ripple")
+                            or 0
+                        )
             try:
                 residual = int(_ripple.get("overlap_after_ripple") or 0)
                 for _s in segments_data or []:
-                    if isinstance(_s, dict) and "stage23" in _s:
-                        _s["stage23"]["overlap_after_ripple"] = residual
+                    if isinstance(_s, dict):
+                        meta = dict(_s.get("stage23") or {})
+                        meta["overlap_after_ripple"] = residual
+                        _s["stage23"] = meta
             except Exception:
                 pass
     except Exception as _ripple_exc:
-        logger.debug("stage23 ripple_shift skipped: %s", _ripple_exc)
+        logger.debug("stage24 ripple_shift skipped: %s", _ripple_exc)
 
     style_params = style_params or {}
     if task_info is None and task_id:
@@ -5110,11 +5326,24 @@ def _build_timed_dub_track(
         ):
             task_info["final_status"] = "ok"
         task_info.pop("export_blocked_reason", None)
+        # Stage 24: absolutize paths + sync repaired/padded list into task_info
+        # BEFORE census (studio/auto_dub often pass a deepcopy snapshot).
+        try:
+            _sd = (
+                task_info.get("session_dir")
+                or (task_info.get("artifacts_dir") if task_info else None)
+            )
+            _absolutize_segment_audio_paths(segments_data, _sd)
+        except Exception:
+            pass
+        task_info["segments_data"] = list(segments_data or [])
         # Diagnostics AFTER repair+pad / BEFORE cleanup — disk truth only.
         try:
             from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
 
-            task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(task_info)
+            task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
+                task_info, segments_data=segments_data
+            )
             _tp = task_info["tts_pipeline"]
             _tp["padded_count"] = int(task_info.get("padded_count") or 0)
             _tp["padded_indices"] = list(task_info.get("padded_indices") or [])
@@ -5127,7 +5356,16 @@ def _build_timed_dub_track(
                     timing_map=timing_map,
                     resolve_path=_mux_resolve,
                 )
-                task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(task_info)
+                try:
+                    _absolutize_segment_audio_paths(
+                        segments_data, task_info.get("session_dir")
+                    )
+                except Exception:
+                    pass
+                task_info["segments_data"] = list(segments_data or [])
+                task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
+                    task_info, segments_data=segments_data
+                )
                 task_info["tts_pipeline"]["padded_count"] = int(
                     task_info.get("padded_count") or 0
                 )
@@ -5963,20 +6201,34 @@ def api_auto_dub_start():
     if "_OUTPUT_" in Path(video_path).name.upper():
         return jsonify({"error": lp.get("output_file_blocked", lp["not_found"])}), 400
 
-    allowed_models = ["tiny", "base", "small", "medium", "large"]
+    allowed_models = ["tiny", "base", "small", "medium", "large", "large-v3"]
     model_size = data.get("model_size", "tiny")
     if model_size not in allowed_models:
         model_size = "tiny"
-    # Stage 8: Simple UI often sends medium — cap to fast default before pipeline.
+    # Spec v3 opt-in: high quality → large-v3 + word_timestamps; Simple stays capped.
+    _stt_quality_req = str(
+        data.get("stt_quality") or ("high" if data.get("spec_v3") else "")
+    ).strip().lower()
     try:
         from engines.happy_path import is_simple_mode
-        from engines.simple_stt_policy import resolve_simple_stt_model
+        from engines.simple_stt_policy import (
+            resolve_simple_stt_model,
+            resolve_stt_model_for_quality,
+        )
 
-        if is_simple_mode({"user_mode": _user_mode}):
+        if _stt_quality_req in ("standard", "high"):
+            model_size = resolve_stt_model_for_quality(
+                _stt_quality_req, requested=model_size
+            )
+        elif is_simple_mode({"user_mode": _user_mode}):
             model_size = resolve_simple_stt_model(model_size)
     except Exception:
-        if _user_mode in ("basic", "simple"):
-            if model_size in ("medium", "large"):
+        if _stt_quality_req == "high":
+            model_size = "large-v3"
+        elif _stt_quality_req == "standard" and model_size in ("tiny", "base", "small"):
+            model_size = "medium"
+        elif _user_mode in ("basic", "simple"):
+            if model_size in ("medium", "large", "large-v3"):
                 model_size = "small"
 
     ui_lang = _resolve_ui_lang(data.get("ui_lang"))
@@ -6182,6 +6434,8 @@ def api_auto_dub_start():
             "user_mode": _user_mode,
             "mix_mode": mix_mode,
             "underlay_style_gated": bool(_style_gated),
+            "stt_quality": _stt_quality_req or "simple",
+            "spec_v3": bool(data.get("spec_v3") or _stt_quality_req == "high"),
         },
     }
     try:
@@ -6208,6 +6462,33 @@ def api_auto_dub_start():
         )
 
         _eid = normalize_backend_name(task_payload["info"].get("tts_engine"))
+        _tgt_start = str(
+            data.get("target_lang")
+            or data.get("lang")
+            or task_payload["info"].get("target_lang")
+            or "uk"
+        ).split("-")[0].lower()
+        # Stage 24: UK jobs always start on tts_uk + mykyta (no cs/sk/pl/ru).
+        if _tgt_start == "uk":
+            try:
+                from engines.tts_lang_lock import force_uk_tts_identity
+
+                _ident0 = force_uk_tts_identity(
+                    target_lang="uk",
+                    engine_id=_eid or "tts_uk",
+                    voice=str(
+                        data.get("voice") or task_payload["info"].get("voice") or ""
+                    ),
+                )
+                _eid = normalize_backend_name(_ident0.get("engine_id") or "tts_uk")
+                task_payload["info"]["voice"] = str(_ident0.get("voice") or "mykyta")
+                task_payload["info"]["tts_voice"] = task_payload["info"]["voice"]
+                task_payload["info"]["tts_language"] = "uk"
+                task_payload["info"]["target_lang"] = "uk"
+            except Exception:
+                _eid = "tts_uk"
+                task_payload["info"]["voice"] = "mykyta"
+                task_payload["info"]["tts_language"] = "uk"
         task_payload["info"]["tts_engine"] = _eid
         task_payload["info"]["tts_backend"] = (
             "tts_uk"
@@ -6218,6 +6499,18 @@ def api_auto_dub_start():
         _voice0 = str(data.get("voice") or task_payload["info"].get("voice") or "")
         if _voice0:
             task_payload["info"]["voice"] = resolve_voice_for_backend(_voice0, _eid)
+            if _tgt_start == "uk":
+                try:
+                    from engines.tts_lang_lock import force_uk_tts_identity
+
+                    _ident1 = force_uk_tts_identity(
+                        target_lang="uk", engine_id=_eid, voice=task_payload["info"]["voice"]
+                    )
+                    task_payload["info"]["voice"] = str(_ident1.get("voice") or "mykyta")
+                    task_payload["info"]["tts_voice"] = task_payload["info"]["voice"]
+                    task_payload["info"]["tts_language"] = "uk"
+                except Exception:
+                    pass
         # Stage 22 — Mykyta / tts_uk voice controls
         _mk_raw = {
             "rate": data.get("mykyta_rate", data.get("tts_uk_rate", data.get("tts_rate"))),
@@ -9999,6 +10292,7 @@ def _run_pipeline_inner(
                 artifacts_dir=_artifacts_dir(task.get("info")),
                 base_id=base_id,
                 task_id=task_id,
+                task_info=task.get("info") or {},
             )
             with STATE_LOCK:
                 task["info"]["source_separation"] = sep_result.to_dict()
@@ -10331,6 +10625,49 @@ def _run_pipeline_inner(
                 "hit" if _stt_cache_hit else "miss",
                 len(timing_map or []),
             )
+
+            # Spec v3: PyAnnote diarization + per-speaker reference clips.
+            # Safe no-op unless spec_v3 / VM_DIARIZE opted in and pyannote is installed.
+            try:
+                from engines.diarization import (
+                    assign_speakers_to_segments,
+                    build_speaker_profiles,
+                    is_diarization_enabled,
+                    run_diarization,
+                )
+
+                _info_dia = task.get("info") or {}
+                if is_diarization_enabled(_info_dia):
+                    _dia_audio = (
+                        stt_audio_path
+                        if Path(stt_audio_path).is_file()
+                        else audio_path
+                    )
+                    dia_res = run_diarization(_dia_audio, task_info=_info_dia)
+                    if timing_map:
+                        assign_speakers_to_segments(timing_map, dia_res)
+                    _profiles_dir = (
+                        Path(_info_dia.get("session_dir") or APP_DIR / "output")
+                        / f"speaker_profiles_{task_id}"
+                    )
+                    _profiles = (
+                        build_speaker_profiles(_dia_audio, dia_res, str(_profiles_dir))
+                        if dia_res.success
+                        else {}
+                    )
+                    with STATE_LOCK:
+                        task["info"]["diarization"] = dia_res.to_dict()
+                        task["info"]["speaker_profiles"] = _profiles
+                        task["info"]["speakers"] = list(dia_res.speakers or [])
+                    logger.info(
+                        "Task %s: diarization method=%s speakers=%s profiles=%s",
+                        task_id,
+                        dia_res.method,
+                        len(dia_res.speakers or []),
+                        sum(1 for p in _profiles.values() if p.get("ok")),
+                    )
+            except Exception as _dia_exc:
+                logger.debug("Task %s: diarization skipped: %s", task_id, _dia_exc)
 
             logger.debug(
                 "STT completed lang=%s chars=%s",
@@ -17014,6 +17351,22 @@ def _run_pipeline_inner(
                     style_params=style_cfg,
                     on_segment_progress=_timing_mix_progress,
                 )
+                # Stage 24: repaired/padded snapshot is source of truth — write back.
+                with STATE_LOCK:
+                    if task_id in AUTO_TASKS:
+                        AUTO_TASKS[task_id]["info"]["segments_data"] = list(
+                            current_segments_snapshot or []
+                        )
+                        AUTO_TASKS[task_id]["info"]["timing_map_backup"] = list(
+                            current_timing_map_snapshot or []
+                        )
+                        if isinstance(overlap_report, dict):
+                            AUTO_TASKS[task_id]["info"]["overlap_count"] = int(
+                                overlap_report.get("overlap_count")
+                                or overlap_report.get("fitted_overlap_count")
+                                or AUTO_TASKS[task_id]["info"].get("overlap_count")
+                                or 0
+                            )
                 if not overlap_report.get("ok"):
                     logger.info(
                         "Task %s: %d timing overlaps after mix (accepted)",
@@ -17067,9 +17420,10 @@ def _run_pipeline_inner(
                                 or voice
                                 or ""
                             )
+                            # Prefer post-repair snapshot (pads/abs paths), not stale live.
                             _da_sd = list(
-                                _da_info.get("segments_data")
-                                or current_segments_snapshot
+                                current_segments_snapshot
+                                or _da_info.get("segments_data")
                                 or []
                             )
                             _da_simple = bool(

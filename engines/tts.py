@@ -110,9 +110,11 @@ async def _generate_single(
     if not text:
         return
 
-    # Stage 12/18: refuse non-target (uk) lang mix / wrong voice before Edge.
+    # Stage 12/18/24: refuse non-target (uk) lang mix / wrong voice before Edge.
     _tgt = str(
         (context or {}).get("target_lang")
+        or (context or {}).get("tts_language")
+        or (context or {}).get("language")
         or _detect_lang_from_voice(voice)
         or ""
     )
@@ -126,10 +128,35 @@ async def _generate_single(
     try:
         from engines.tts_lang_lock import (
             assert_voice_matches_target,
+            force_uk_tts_identity,
+            is_latin_heavy,
             is_uk_tts_text_ok,
         )
 
-        # Stage 18: raise — no silent cs/sk/pl fallback for uk.
+        if _tgt_n == "uk":
+            _ident = force_uk_tts_identity(
+                target_lang="uk", engine_id=engine_id, voice=voice
+            )
+            voice = str(_ident.get("voice") or voice)
+            if _ident.get("engine_id"):
+                engine_id = _ident["engine_id"]
+            _ctx["tts_language"] = "uk"
+            _ctx["tts_voice"] = voice
+            _ctx["language"] = "uk"
+            heavy, lat_r = is_latin_heavy(text, threshold=0.30)
+            if heavy:
+                logger.warning(
+                    "[TTS] latin_heavy_warning path=%s ratio=%.2f text=%.80s",
+                    path,
+                    lat_r,
+                    text,
+                )
+                raise RuntimeError(
+                    "PIPELINE_LANG_MIX: latin_letter_ratio>0.30 before TTS "
+                    f"path={path} ratio={lat_r:.2f} text={text[:80]!r}"
+                )
+
+        # Stage 18/24: raise — no silent cs/sk/pl/ru fallback for uk.
         assert_voice_matches_target(
             voice, _tgt or _detect_lang_from_voice(voice) or "uk", raise_error=True
         )
@@ -165,6 +192,22 @@ async def _generate_single(
         eid = (engine_id or "edge-offline").strip() or "edge-offline"
     if eid == "edge-offline":
         import edge_tts
+
+        # Stage 24: never call Edge with tts_uk short ids (mykyta → Invalid voice).
+        try:
+            from engines.tts_backends import resolve_voice_for_backend as _rvb
+            from engines.tts_lang_lock import force_uk_tts_identity
+
+            if _tgt_n == "uk":
+                _eident = force_uk_tts_identity(
+                    target_lang="uk", engine_id="edge-offline", voice=voice
+                )
+                voice = str(_eident.get("voice") or "uk-UA-OstapNeural")
+            else:
+                voice = _rvb(voice, eid)
+        except Exception:
+            if not str(voice).startswith("uk-UA-") and _tgt_n == "uk":
+                voice = "uk-UA-OstapNeural"
 
         last_err: Exception | None = None
         effective_rate = (rate or _tts_rate()).strip() or "-5%"

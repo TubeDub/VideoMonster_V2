@@ -20,7 +20,11 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
         "tts_backend",
         "tts_engine",
         "tts_voice",
+        "tts_language",
         "tts_sample_rate",
+        "cyrillic_ratio",
+        "file",
+        "resolved_path",
         # Stage 22 — Mykyta / tts_uk voice controls
         "tts_rate",
         "tts_pitch",
@@ -194,9 +198,25 @@ def apply_tts_synthesis_result(
 ) -> None:
     """Mutate only TTS-contract fields on a segment row."""
     seg["tts_text"] = tts_text
-    seg["tts_file_path"] = tts_file_path
+    abs_path = tts_file_path
+    if tts_file_path:
+        try:
+            p = Path(str(tts_file_path))
+            if p.is_file():
+                abs_path = str(p.resolve())
+        except OSError:
+            abs_path = tts_file_path
+    seg["tts_file_path"] = abs_path
+    if abs_path:
+        seg["file"] = abs_path
+        seg["resolved_path"] = abs_path
     if playback_duration is not None:
         seg["playback_duration"] = int(playback_duration)
+        try:
+            if int(playback_duration) > 0:
+                seg["tts_ms"] = int(playback_duration)
+        except (TypeError, ValueError):
+            pass
     seg["status"] = status
 
 

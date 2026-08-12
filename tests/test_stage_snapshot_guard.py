@@ -142,3 +142,33 @@ def test_slot_fit_tts_ms_mutation_is_forbidden():
     with pytest.raises(StageSnapshotIntegrityError) as exc:
         StageSnapshotGuard.check(before, after, stage="slot_fit", mutator_module="api.auto_dub_api")
     assert exc.value.field == "tts_ms"
+
+
+def test_tts_stage24_identity_stamps_are_allowed():
+    """Regression: diagnostic 929afb54 — StageSnapshotIntegrityError on cyrillic_ratio/file/tts_language."""
+    from engines.pipeline_integrity.stage_contracts import allowed_fields_for_stage
+    from engines.pipeline_integrity.tts_segment_fields import TTS_ALLOWED_MUTATIONS
+
+    allowed = allowed_fields_for_stage("tts")
+    for field in ("cyrillic_ratio", "file", "resolved_path", "tts_language"):
+        assert field in allowed
+    assert TTS_ALLOWED_MUTATIONS <= allowed
+
+    before = [{"segment_id": "f931312d8ed94c3d9ed9b50d52e03837", "index": 0}]
+    after = [
+        {
+            "segment_id": "f931312d8ed94c3d9ed9b50d52e03837",
+            "index": 0,
+            "cyrillic_ratio": 1.0,
+            "tts_language": "uk",
+            "tts_backend": "tts_uk",
+            "tts_voice": "mykyta",
+            "file": r"C:\tmp\seg.mp3",
+            "resolved_path": r"C:\tmp\seg.mp3",
+            "tts_file_path": r"C:\tmp\seg.mp3",
+            "tts_ms": 500,
+            "playback_duration": 500,
+        }
+    ]
+    StageSnapshotGuard.check(before, after, stage="tts", mutator_module="engines.tts")
+    assert StageSnapshotGuard.diff_violations(before, after, stage="tts") == []

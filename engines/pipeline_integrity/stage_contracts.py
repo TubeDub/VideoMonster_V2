@@ -175,11 +175,16 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             "tts_cache_hit",
             "tts_synth_rate",
             "tts_synth_pitch",
-            # Stage 20 — Ukrainian TTS backend metadata
+            # Stage 20 / 24 — Ukrainian TTS backend + language identity
             "tts_backend",
             "tts_engine",
             "tts_voice",
+            "tts_language",
             "tts_sample_rate",
+            "cyrillic_ratio",
+            # Absolute path stamps (Stage 24 — audio must not "disappear")
+            "file",
+            "resolved_path",
             # Stage 22 — Mykyta / tts_uk voice controls
             "tts_rate",
             "tts_pitch",
@@ -417,4 +422,14 @@ POST_LOCK_STAGES: frozenset[str] = frozenset(
 def allowed_fields_for_stage(stage: str) -> frozenset[str]:
     base = set(CORE_IDENTITY_FIELDS)
     base.update(STAGE_ALLOWED_MUTATIONS.get(stage, frozenset()))
+    # Keep TTS stage in sync with canonical TTS_ALLOWED_MUTATIONS (Stage 24 stamps).
+    if str(stage or "").strip().lower() == "tts":
+        try:
+            from engines.pipeline_integrity.tts_segment_fields import (
+                TTS_ALLOWED_MUTATIONS,
+            )
+
+            base.update(TTS_ALLOWED_MUTATIONS)
+        except Exception:
+            pass
     return frozenset(base)

@@ -43,6 +43,103 @@ def cyrillic_letter_ratio(text: str) -> float:
     return cyr / len(letters)
 
 
+def latin_letter_ratio(text: str) -> float:
+    """Share of Latin letters among alphabetic chars (Stage 24)."""
+    letters = [c for c in str(text or "") if c.isalpha()]
+    if not letters:
+        return 0.0
+    lat = sum(1 for c in letters if _LAT.match(c))
+    return lat / len(letters)
+
+
+def is_latin_heavy(text: str, *, threshold: float = 0.30) -> tuple[bool, float]:
+    """True when Latin letters exceed threshold (default 30%)."""
+    ratio = latin_letter_ratio(text)
+    return ratio > float(threshold), ratio
+
+
+def force_uk_tts_identity(
+    *,
+    target_lang: str | None,
+    engine_id: str | None = None,
+    voice: str | None = None,
+) -> dict[str, Any]:
+    """Stage 24: for target=uk force language=uk and a Ukrainian voice only.
+
+    - tts_uk → voice=mykyta
+    - edge → uk-UA-OstapNeural (never cs/sk/pl/ru)
+    """
+    from engines.tts_backends import (
+        DEFAULT_EDGE_VOICE,
+        DEFAULT_TTS_UK_VOICE,
+        normalize_backend_name,
+        resolve_voice_for_backend,
+    )
+
+    tgt = str(target_lang or "").split("-")[0].strip().lower()
+    eid = normalize_backend_name(engine_id or "tts_uk")
+    v = str(voice or "").strip()
+    if tgt != "uk":
+        return {
+            "language": tgt or "uk",
+            "engine_id": eid,
+            "voice": v,
+            "forced": False,
+        }
+
+    # Drop forbidden cross-locale voices immediately.
+    ok, _reason = assert_voice_matches_target(v or DEFAULT_TTS_UK_VOICE, "uk", raise_error=False)
+    if eid == "tts_uk":
+        from engines.tts_backends import TTS_UK_VOICES
+
+        vl = v.lower()
+        # Default mykyta; allow tetiana/lada only when explicitly requested.
+        if vl in TTS_UK_VOICES:
+            v = vl
+        elif "tetiana" in vl or "polina" in vl:
+            v = "tetiana"
+        elif "lada" in vl:
+            v = "lada"
+        else:
+            v = DEFAULT_TTS_UK_VOICE
+    elif eid in ("edge-offline", "edge"):
+        # Never pass tts_uk short ids (mykyta) to Edge — Invalid voice / wrong locale.
+        if v.lower() in ("mykyta", "lada", "tetiana") or not v.startswith("uk-UA-"):
+            from engines.tts_backends import TTS_UK_VOICES
+
+            if v.lower() in TTS_UK_VOICES and TTS_UK_VOICES[v.lower()] == "female":
+                v = "uk-UA-PolinaNeural"
+            else:
+                v = DEFAULT_EDGE_VOICE
+        else:
+            v = resolve_voice_for_backend(v, eid)
+            ok2, _ = assert_voice_matches_target(v, "uk", raise_error=False)
+            if not ok2:
+                v = DEFAULT_EDGE_VOICE
+    else:
+        v = resolve_voice_for_backend(v or DEFAULT_TTS_UK_VOICE, eid)
+        ok2, _ = assert_voice_matches_target(v, "uk", raise_error=False)
+        if not ok2:
+            eid = "tts_uk"
+            v = DEFAULT_TTS_UK_VOICE
+
+    # Hard ban: never leave cs/sk/pl/ru/en on uk target.
+    ok_final, _ = assert_voice_matches_target(v, "uk", raise_error=False)
+    if not ok_final:
+        if eid in ("edge-offline", "edge"):
+            v = DEFAULT_EDGE_VOICE
+        else:
+            eid = "tts_uk"
+            v = DEFAULT_TTS_UK_VOICE
+
+    return {
+        "language": "uk",
+        "engine_id": eid,
+        "voice": v,
+        "forced": True,
+    }
+
+
 def is_uk_tts_text_ok(
     text: str, *, min_ratio: float = DEFAULT_UK_CYRILLIC_MIN
 ) -> bool:
