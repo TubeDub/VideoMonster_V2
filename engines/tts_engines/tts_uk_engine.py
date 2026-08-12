@@ -141,7 +141,50 @@ class TtsUkEngine:
             )
 
         if not wav_path.is_file() or wav_path.stat().st_size == 0:
+            logger.warning(
+                "[TTS_UK] fail voice=%s reason=empty_output path=%s", v, wav_path
+            )
             return TTSResult(ok=False, engine_id=self.id, error="empty_output")
+
+        # Stage 26 §3.1 — bytes floor + optional energy check so that near-silent
+        # or truncated wavs never masquerade as OK. Callers rely on this signal
+        # to trigger the Edge uk-UA fallback in `synthesize_with_backend`.
+        try:
+            bytes_now = int(wav_path.stat().st_size)
+        except OSError:
+            bytes_now = 0
+        if bytes_now < 1000:
+            logger.warning(
+                "[TTS_UK] fail voice=%s reason=tiny_output size=%s path=%s",
+                v,
+                bytes_now,
+                wav_path,
+            )
+            return TTSResult(
+                ok=False,
+                engine_id=self.id,
+                error=f"tiny_output_{bytes_now}b",
+            )
+        try:
+            import numpy as np
+            import torch  # noqa: F401 — wave tensor may already be a torch tensor
+
+            _wave = wave.detach().cpu().to(dtype=torch.float32).flatten().numpy()
+            if _wave.size > 0:
+                rms = float(np.sqrt(np.mean(np.square(_wave))))
+                if rms < 1e-4:
+                    logger.warning(
+                        "[TTS_UK] fail voice=%s reason=silent_output rms=%.6f",
+                        v,
+                        rms,
+                    )
+                    return TTSResult(
+                        ok=False,
+                        engine_id=self.id,
+                        error=f"silent_output_rms_{rms:.6f}",
+                    )
+        except Exception as _energy_exc:
+            logger.debug("[TTS_UK] energy check skipped: %s", _energy_exc)
 
         # Volume gain (pydub) when ≠ 1.0
         if abs(float(ctrl["volume"]) - 1.0) > 0.01:
@@ -192,6 +235,26 @@ class TtsUkEngine:
                         break
                     except (TypeError, ValueError):
                         pass
+        if not dur_ms:
+            try:
+                from pydub import AudioSegment
+
+                dur_ms = int(len(AudioSegment.from_file(str(final))))
+            except Exception:
+                dur_ms = None
+        try:
+            final_bytes = int(Path(final).stat().st_size)
+        except OSError:
+            final_bytes = 0
+        # Stage 26 §3.1 — proof-of-life for the JSON pipeline log so callers can
+        # tell tts_uk really produced Ukrainian speech (not the Edge fallback).
+        logger.info(
+            "[TTS_UK] ok voice=%s bytes=%s duration_ms=%s elapsed_ms=%.1f",
+            v,
+            final_bytes,
+            dur_ms if dur_ms is not None else "?",
+            elapsed,
+        )
         return TTSResult(
             ok=True,
             output_path=str(final),
@@ -208,5 +271,6 @@ class TtsUkEngine:
                 "token_dur_scaling": token_dur,
                 "stats": stats if isinstance(stats, dict) else {},
                 "duration_ms": dur_ms,
+                "output_bytes": final_bytes,
             },
         )

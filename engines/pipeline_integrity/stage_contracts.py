@@ -196,6 +196,17 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             # Edge uk-UA-* fallback. Recorded via `voice_override_reason`.
             "voice",
             "voice_override_reason",
+            # Stage 26 §3 — honest post-synth stamps + duration control.
+            "tts_fallback_reason",
+            "tts_engine_requested",
+            "tts_voice_requested",
+            "duration_control_used",
+            "audio_padded",
+            "silence_pad",
+            "pad_reason",
+            "audio_exists",
+            "audio_size_bytes",
+            "needs_re_tts",
         }
     ),
     "slot_fit": frozenset(

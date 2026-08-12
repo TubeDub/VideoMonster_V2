@@ -37,6 +37,24 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
         # cross-locale id. Guarded by StageSnapshotIntegrityError otherwise.
         "voice",
         "voice_override_reason",
+        # Stage 26 §3 — honest post-synth stamps: when tts_uk retry fails
+        # and we transparently fall back to Edge uk-UA-*Neural, record why
+        # + what the caller had originally requested so the JSON does not
+        # lie about backend/voice identity.
+        "tts_fallback_reason",
+        "tts_engine_requested",
+        "tts_voice_requested",
+        # Stage 26 §5 — duration-control diagnostics ("length_scale" /
+        # "atempo" / "text_expand" / "text_shorten" / "soft_pad") when
+        # |slot_ms − tts_ms| > 250ms so callers can audit the strategy.
+        "duration_control_used",
+        # Stage 26 §1.3 — presence / audit stamps (mirror `audio_presence`).
+        "audio_padded",
+        "silence_pad",
+        "pad_reason",
+        "audio_exists",
+        "audio_size_bytes",
+        "needs_re_tts",
     }
 )
 

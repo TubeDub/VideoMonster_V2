@@ -298,6 +298,7 @@ def should_force_split(
     *,
     predicted_ms: int | None = None,
     measured_ms: int | None = None,
+    split_children: int | None = None,
 ) -> bool:
     """Stage 21/25 §3.2: predicted/measured fill > 1.12, overflow > 350 ms, or CPS over.
 
@@ -305,9 +306,15 @@ def should_force_split(
     :data:`MIN_FORCE_SPLIT_SLOT_MS` (2500 ms). Short slots must be handled by
     length_scale + atempo clamp instead — splitting them just creates crumbs
     and inflates the overlap count.
+
+    Stage 26 §4 additional guard: refuse a second/third split when the segment
+    already has ``split_children >= 2``. Repeated splits explode the overlap
+    count in overshoot situations; length_scale + atempo re-TTS is preferred.
     """
     slot = max(0, int(slot_ms or 0))
     if 0 < slot < MIN_FORCE_SPLIT_SLOT_MS:
+        return False
+    if split_children is not None and int(split_children or 0) >= 2:
         return False
     pred = int(predicted_ms) if predicted_ms is not None else estimate_tts_ms(text, lang)
     measured = int(measured_ms) if measured_ms is not None else 0

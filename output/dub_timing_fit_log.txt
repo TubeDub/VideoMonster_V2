@@ -2368,3 +2368,12 @@ idx=20 slot_ms=6188 tts_ms=8616 atempo=1.15 pause_added_ms=0 pause_borrowed_ms=0
 idx=21 slot_ms=4925 tts_ms=7176 atempo=1.15 pause_added_ms=19 pause_borrowed_ms=0 pause_compressed_ms=780 strategy=pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow overflow_ms=0 fill_ratio=0.9961 underfill_ms=19 slot_shrunk=False inter_pause_ms=0 place_start=159703 delay_ms=0
 idx=22 slot_ms=7388 tts_ms=10392 atempo=1.15 pause_added_ms=19 pause_borrowed_ms=0 pause_compressed_ms=890 strategy=pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow overflow_ms=0 fill_ratio=0.9974 underfill_ms=19 slot_shrunk=False inter_pause_ms=0 place_start=164628 delay_ms=0
 idx=23 slot_ms=6757 tts_ms=76968 atempo=1.15 pause_added_ms=0 pause_borrowed_ms=0 pause_compressed_ms=4970 strategy=pause_compress+atempo_gentle+atempo_no_trim+no_trim_overflow+overflow overflow_ms=47645 fill_ratio=8.0512 underfill_ms=0 slot_shrunk=False inter_pause_ms=0 place_start=172016 delay_ms=0
+=== task=t24 ===
+idx=0 slot_ms=1000 tts_ms=800 atempo=0.85 pause_added_ms=87 pause_borrowed_ms=0 pause_compressed_ms=0 strategy=atempo_slow overflow_ms=0 fill_ratio=0.913 underfill_ms=87 slot_shrunk=False inter_pause_ms=0 place_start=0 delay_ms=0
+idx=1 slot_ms=1500 tts_ms=1500 atempo=1.0 pause_added_ms=0 pause_borrowed_ms=0 pause_compressed_ms=0 strategy=none overflow_ms=0 fill_ratio=1.0 underfill_ms=0 slot_shrunk=False inter_pause_ms=0 place_start=1000 delay_ms=0
+=== task=t24 ===
+idx=0 slot_ms=1000 tts_ms=800 atempo=0.85 pause_added_ms=87 pause_borrowed_ms=0 pause_compressed_ms=0 strategy=atempo_slow overflow_ms=0 fill_ratio=0.913 underfill_ms=87 slot_shrunk=False inter_pause_ms=0 place_start=0 delay_ms=0
+idx=1 slot_ms=1500 tts_ms=1500 atempo=1.0 pause_added_ms=0 pause_borrowed_ms=0 pause_compressed_ms=0 strategy=none overflow_ms=0 fill_ratio=1.0 underfill_ms=0 slot_shrunk=False inter_pause_ms=0 place_start=1000 delay_ms=0
+=== task=tsoft ===
+idx=0 slot_ms=1000 tts_ms=800 atempo=0.85 pause_added_ms=87 pause_borrowed_ms=0 pause_compressed_ms=0 strategy=atempo_slow overflow_ms=0 fill_ratio=0.913 underfill_ms=87 slot_shrunk=False inter_pause_ms=0 place_start=0 delay_ms=0
+idx=1 slot_ms=1500 tts_ms=1500 atempo=1.0 pause_added_ms=0 pause_borrowed_ms=0 pause_compressed_ms=0 strategy=none overflow_ms=0 fill_ratio=1.0 underfill_ms=0 slot_shrunk=False inter_pause_ms=0 place_start=1000 delay_ms=0

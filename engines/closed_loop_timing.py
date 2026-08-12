@@ -536,7 +536,13 @@ def segment_needs_stage19e_split(
         return False
     if seg.get("needs_post_restore_split"):
         return True
-    if should_force_split(text, slot, lang, predicted_ms=pred):
+    if should_force_split(
+        text,
+        slot,
+        lang,
+        predicted_ms=pred,
+        split_children=int(seg.get("split_children") or 0),
+    ):
         return True
     return bool(overfilled)
 
@@ -1084,7 +1090,11 @@ def try_stage19e_post_restore_split(
     if not (
         seg.get("needs_post_restore_split")
         or should_force_split(
-            parent_text, slot_ms, lang, measured_ms=measured_ms or None
+            parent_text,
+            slot_ms,
+            lang,
+            measured_ms=measured_ms or None,
+            split_children=int(seg.get("split_children") or 0),
         )
         or fill_ratio_now > MAX_CHILD_FILL
         or overflow_ms_now > OVERFLOW_FORCE_SPLIT_MS
@@ -1581,7 +1591,12 @@ def assert_no_silent_truncate(
     seg["rule_rewrite_used"] = True
     seg["retention_score"] = round(word_retention_ratio(raw, restored), 4)
     # Stage 19e: giant restore must force-split — do not claim shorten-only fit.
-    force_split = should_force_split(restored, slot if slot > 0 else 0, lang)
+    force_split = should_force_split(
+        restored,
+        slot if slot > 0 else 0,
+        lang,
+        split_children=int(seg.get("split_children") or 0),
+    )
     if force_split:
         seg["needs_post_restore_split"] = True
         seg["shorten_executed"] = bool(seg.get("shorten_executed"))
@@ -2578,7 +2593,12 @@ def apply_stage19b_rule_text_fit(
     slot_for_split = int(budget.slot_duration or 0)
     if (
         (shorten_required or seg.get("needs_post_restore_split") or seg.get("truncation_blocked"))
-        and should_force_split(original, slot_for_split, str(target_lang or "uk"))
+        and should_force_split(
+            original,
+            slot_for_split,
+            str(target_lang or "uk"),
+            split_children=int(seg.get("split_children") or 0),
+        )
         and not seg.get("stage19e_split_done")
         and not seg.get("stage19c_split_done")
     ):
@@ -2946,7 +2966,10 @@ def apply_stage19b_rule_text_fit(
         seg["text_changed"] = True
         # Expanded text may now require post-restore split (raw >> slot).
         if expand_executed and should_force_split(
-            new_text, int(budget.slot_duration or 0), str(target_lang or "uk")
+            new_text,
+            int(budget.slot_duration or 0),
+            str(target_lang or "uk"),
+            split_children=int(seg.get("split_children") or 0),
         ):
             seg["needs_post_restore_split"] = True
         saved_pause = budget.pause_adjustments_ms

@@ -167,6 +167,23 @@ def cleanup_task_tts_files(
         if val:
             keep_names.add(Path(str(val)).name)
 
+    # Stage 26 §1.2 — never wipe segment TTS audio by their canonical prefixes,
+    # even from OUTPUT_DIR / stray places. Names like `<base>_seg000X.mp3`
+    # (legacy per-segment MP3 dumps) remain deletable so the mux MP4 stays
+    # the sole survivor.
+    _PROT_PREFIXES = (
+        "slot_fit_",
+        "pause_run_",
+        "tts_",
+        "tts_regen_",
+        "pad_silence_",
+        "softpad_",
+    )
+
+    def _is_protected_seg_audio(path: Path) -> bool:
+        n = path.name.lower()
+        return any(n.startswith(p) for p in _PROT_PREFIXES)
+
     removed = 0
 
     def _unlink(path: Path) -> None:
@@ -174,6 +191,8 @@ def cleanup_task_tts_files(
         if not path.is_file():
             return
         if path.name in keep_names:
+            return
+        if _is_protected_seg_audio(path):
             return
         try:
             path.unlink()
@@ -197,18 +216,21 @@ def cleanup_task_tts_files(
 
     session_dir = info.get("session_dir")
     if session_dir and not keep_assets:
+        # Stage 26 §1.2 — session_dir holds all slot_fit_/pause_run_/tts_/
+        # pad_silence_ media the mux consumes. Never rmtree until *after* the
+        # final MP4 has been muxed. When mux has completed, `keep_studio_assets`
+        # will still be False here, so we salvage protected media into a sibling
+        # `keep/` dir instead of blowing away the whole tree.
         try:
-            import shutil
+            from engines.pipeline_cleanup import cleanup_intermediate_work_dirs
 
-            shutil.rmtree(str(session_dir), ignore_errors=True)
-        except OSError as exc:
-            logger.debug("cleanup session_dir skip %s: %s", session_dir, exc)
-        try:
-            from engines.dubbing_engine.project_session import cleanup_session
-
-            cleanup_session(task_id, keep_output=False)
-        except Exception:
-            pass
+            cleanup_intermediate_work_dirs(
+                Path(str(session_dir)),
+                keep_segment_audio=True,
+            )
+        except Exception as exc:
+            logger.debug("cleanup session_dir salvage skip %s: %s", session_dir, exc)
+        # Session directory itself is never recursively deleted from here.
 
     base_id = str(info.get("mux_base_id") or task_id[:8])
     for pattern in (

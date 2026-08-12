@@ -234,6 +234,18 @@ def synthesize_one_with_cache(
 
     _use_cache = bool(use_cache) and not tts_cache_disabled()
     _lang = str(_tgt_lang).split("-")[0].lower()
+    # Stage 26 §3.4 — include Mykyta length_scale in the cache key so entries
+    # produced with different token_dur_scaling values (e.g. 0.95 vs 1.05 for
+    # the same text) never alias. Also blocks stale piper/oleksa uk caches.
+    _mk_len_scale = None
+    if str(engine_id or "").strip().lower() in ("tts_uk", "tts-uk"):
+        try:
+            from engines.tts_backends import get_pipeline_mykyta_controls
+
+            _mk = get_pipeline_mykyta_controls() or {}
+            _mk_len_scale = _mk.get("length_scale")
+        except Exception:
+            _mk_len_scale = None
     if _use_cache:
         cached = lookup_tts_cache(
             text0,
@@ -244,6 +256,7 @@ def synthesize_one_with_cache(
             cache_dir=cache_dir,
             ext=dest.suffix or ".mp3",
             lang=_lang,
+            length_scale=_mk_len_scale if _mk_len_scale is not None else "",
         )
         if cached is not None and materialize_cached(cached, dest):
             result["cache_hit"] = True
@@ -272,6 +285,7 @@ def synthesize_one_with_cache(
                     pitch=pitch,
                     engine_id=engine_id,
                     lang=_lang,
+                    length_scale=_mk_len_scale if _mk_len_scale is not None else "",
                     cache_dir=cache_dir,
                 )
             result["retries"] = attempt

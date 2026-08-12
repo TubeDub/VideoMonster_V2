@@ -28,6 +28,37 @@ def get_pipeline_tts_backend() -> str | None:
     """Return currently bound pipeline TTS backend (if any)."""
     return _pipeline_tts_backend.get()
 
+
+# Stage 26 §3 — pass the actually-used backend / voice / fallback-reason back
+# to `_commit_tts_group_result` and `_regen_segment_tts` through a per-process
+# sidecar dictionary keyed by the resolved output path. Consumers pop entries
+# after stamping the segment so this never leaks across runs.
+_LAST_SYNTH_META: dict[str, dict[str, Any]] = {}
+
+
+def _synth_meta_key(path: str | Path) -> str:
+    try:
+        return str(Path(str(path)).resolve()).lower()
+    except OSError:
+        return str(path).lower()
+
+
+def record_last_synth_meta(path: str | Path, meta: dict[str, Any]) -> None:
+    """Stash post-synth metadata (backend/voice/fallback reason) for one path."""
+    try:
+        _LAST_SYNTH_META[_synth_meta_key(path)] = dict(meta or {})
+    except Exception:
+        pass
+
+
+def pop_last_synth_meta(path: str | Path) -> dict[str, Any]:
+    """Retrieve + remove the last-synth sidecar meta for a given output path."""
+    key = _synth_meta_key(path)
+    try:
+        return _LAST_SYNTH_META.pop(key, {})
+    except Exception:
+        return {}
+
 # Canonical backend names (UI / settings)
 TTS_BACKEND_EDGE = "edge"
 TTS_BACKEND_TTS_UK = "tts_uk"
@@ -158,6 +189,11 @@ def set_pipeline_mykyta_controls(controls: dict[str, Any] | None) -> None:
         _pipeline_mykyta_controls.set(None)
         return
     _pipeline_mykyta_controls.set(resolve_mykyta_controls(controls, env=False))
+
+
+def get_pipeline_mykyta_controls() -> dict[str, Any] | None:
+    """Return the currently bound Mykyta controls (or None if unbound)."""
+    return _pipeline_mykyta_controls.get()
 
 
 def compute_mykyta_duration_controls(
@@ -537,13 +573,18 @@ def synthesize_with_backend(
         synth_kwargs["volume"] = ctrl["volume"]
         synth_kwargs["length_scale"] = ctrl["length_scale"]
     # One retry on same backend before any fallback (Stage 24).
+    fallback_reason: str | None = None
+    first_error: str | None = None
     result = synthesize(text, resolved, output_path, **synth_kwargs)
     if not result.ok and eid == ENGINE_TTS_UK:
+        first_error = (result.error or "")[:200]
         logger.warning(
             "[TTS] tts_uk retry once (%s)",
-            (result.error or "")[:160],
+            first_error,
         )
         result = synthesize(text, resolved, output_path, **synth_kwargs)
+        if not result.ok:
+            fallback_reason = "tts_uk_failed"
     if not result.ok and eid != ENGINE_EDGE:
         logger.warning(
             "[TTS] %s failed (%s) — fallback Edge uk-UA only",
@@ -595,9 +636,54 @@ def synthesize_with_backend(
                 meta = dict(result.meta or {})
                 meta["edge_uk_fallback"] = True
                 meta["edge_voice"] = edge_voice
+                meta["tts_fallback_reason"] = (
+                    fallback_reason or "tts_uk_failed"
+                    if eid == ENGINE_TTS_UK
+                    else f"{eid}_failed"
+                )
+                meta["tts_backend_effective"] = "edge-offline"
+                meta["tts_voice_effective"] = edge_voice
+                meta["tts_engine_requested"] = eid
+                meta["tts_voice_requested"] = resolved
+                if first_error:
+                    meta["tts_fallback_first_error"] = first_error
                 result.meta = meta
             except Exception:
                 pass
+    # Stage 26 §3.2 — publish the actually-used backend/voice for downstream
+    # segment stamping. `_commit_tts_group_result` / `_regen_segment_tts` pop
+    # this meta by the resolved output path and stamp `tts_fallback_reason`,
+    # honest `tts_backend` and `tts_voice` on the segment.
+    try:
+        used_engine = (
+            (result.meta or {}).get("tts_backend_effective")
+            or (result.meta or {}).get("tts_backend")
+            or (result.engine_id if getattr(result, "ok", False) else eid)
+            or eid
+        )
+        used_voice = (
+            (result.meta or {}).get("tts_voice_effective")
+            or (result.meta or {}).get("voice")
+            or (result.meta or {}).get("edge_voice")
+            or resolved
+        )
+        sidecar_meta = {
+            "tts_engine": normalize_backend_name(used_engine),
+            "tts_backend": normalize_backend_name(used_engine),
+            "tts_voice": str(used_voice or resolved or ""),
+            "tts_engine_requested": eid,
+            "tts_voice_requested": resolved,
+            "tts_fallback_reason": (
+                (result.meta or {}).get("tts_fallback_reason")
+                or (fallback_reason if not result.ok else None)
+            ),
+            "ok": bool(getattr(result, "ok", False)),
+            "output_bytes": (result.meta or {}).get("output_bytes"),
+            "duration_ms": (result.meta or {}).get("duration_ms"),
+        }
+        record_last_synth_meta(output_path, sidecar_meta)
+    except Exception as _sc_exc:
+        logger.debug("last_synth_meta stash skipped: %s", _sc_exc)
     return result
 
 
