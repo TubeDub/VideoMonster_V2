@@ -1,6 +1,6 @@
 # VideoMonster V2 Architecture
 
-*Auto-generated: 2026-07-14 05:47*
+*Auto-generated: 2026-08-12 14:44*
 
 ## Platform Layers (Stages 1–10)
 
@@ -86,7 +86,7 @@
 - `core/performance_optimizer.py` (653 lines, stage 7)
 - `core/pipeline_engine.py` (676 lines, stage 4)
 - `core/plugin_api.py` (212 lines, stage 9)
-- `core/plugin_manager.py` (499 lines, stage 9)
+- `core/plugin_manager.py` (988 lines, stage 9)
 - `core/recommendation_engine.py` (131 lines, stage 0)
 - `core/recovery_manager.py` (564 lines, stage 5)
 - `core/refactoring_advisor.py` (96 lines, stage 0)

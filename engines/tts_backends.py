@@ -191,11 +191,45 @@ def compute_mykyta_duration_controls(
 
 
 def bind_pipeline_tts_from_info(info: dict[str, Any] | None) -> str:
-    """Bind backend + Mykyta controls from task info; return engine id."""
+    """Bind backend + Mykyta controls from task info; return engine id.
+
+    Stage 25 §1.1: when ``target_lang`` starts with ``uk`` we route the
+    resolution through :func:`force_uk_tts_identity` so that piper / edge / cache
+    hints can never win over ``tts_uk`` when the ``tts_uk`` package is
+    installed. Task info fields are updated in-place so downstream lookups
+    see the enforced backend/voice/language.
+    """
     info = info or {}
     eid = normalize_backend_name(
         info.get("tts_engine") or info.get("tts_backend") or DEFAULT_TTS_BACKEND
     )
+    tgt = str(
+        info.get("target_lang") or info.get("lang") or ""
+    ).split("-")[0].strip().lower()
+    if tgt == "uk":
+        try:
+            from engines.tts_lang_lock import force_uk_tts_identity
+
+            ident = force_uk_tts_identity(
+                target_lang="uk",
+                engine_id=eid,
+                voice=str(info.get("voice") or info.get("tts_voice") or ""),
+            )
+            eid = normalize_backend_name(ident.get("engine_id") or eid)
+            voice_out = str(ident.get("voice") or "")
+            if voice_out:
+                info["voice"] = voice_out
+                info["tts_voice"] = voice_out
+            info["tts_engine"] = eid
+            info["tts_backend"] = (
+                TTS_BACKEND_TTS_UK if eid == ENGINE_TTS_UK
+                else (TTS_BACKEND_PIPER if eid == ENGINE_PIPER else TTS_BACKEND_EDGE)
+            )
+            info["tts_language"] = "uk"
+        except Exception as exc:
+            logger.warning(
+                "[TTS] bind_pipeline_tts_from_info uk-lock soft-fail: %s", exc
+            )
     set_pipeline_tts_backend(eid)
     if eid == ENGINE_TTS_UK:
         set_pipeline_mykyta_controls(
@@ -390,7 +424,15 @@ def stamp_tts_backend_meta(
     seg["tts_engine"] = eid
     seg["tts_voice"] = resolved
     seg["tts_language"] = lang0
-    seg["voice"] = resolved
+    prev_voice = seg.get("voice")
+    if prev_voice != resolved:
+        seg["voice"] = resolved
+        if lang0 == "uk" and prev_voice:
+            seg["voice_override_reason"] = (
+                f"uk_hard_lock:{prev_voice}->{resolved}@{eid}"
+            )
+    else:
+        seg["voice"] = resolved
     if cyrillic_ratio is not None:
         seg["cyrillic_ratio"] = float(cyrillic_ratio)
     elif "cyrillic_ratio" not in seg:

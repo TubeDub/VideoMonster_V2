@@ -1,7 +1,7 @@
 {
   "schema": "tubedub.trh.segment_trace.v1",
   "task_id": "trh2",
-  "created_at": "2026-07-18T15:28:50Z",
+  "created_at": "2026-08-12T11:48:39Z",
   "segments": [
     {
       "index": 0,
@@ -14,7 +14,7 @@
       "original_preview": "Hello George Jr.",
       "raw_mt_preview": "Привіт Жр.",
       "naturalized_preview": "Привіт молодший.",
-      "approved_preview": "Привіт молодший.",
+      "approved_preview": "",
       "dirty_mt_score": 0.4,
       "dirty": true,
       "dirty_reasons": [

@@ -1,0 +1,42 @@
+{
+  "project_id": "198a0bee-6f6f-5b1c-a707-715a7be08433",
+  "title": "198a0bee-6f6f-5b1c-a707-715a7be08433",
+  "storage_version": 1,
+  "created_at": 1786535066.1325097,
+  "updated_at": 1786535066.142465,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "legacy_task_id": "1b9047f5cc2d4507897fe168185ca595",
+  "legacy_project_uuid": "",
+  "studio_session": {
+    "session_id": "1b9047f5cc2d4507897fe168185ca595",
+    "task_id": "1b9047f5cc2d4507897fe168185ca595",
+    "segments": [
+      {
+        "id": "0",
+        "index": 0,
+        "text": "Test",
+        "start_ms": 0,
+        "end_ms": 2000,
+        "file": null,
+        "overflow_pct": 40.0,
+        "container_status": "red"
+      }
+    ],
+    "timing_map": [
+      {
+        "start": 0,
+        "end": 2000
+      }
+    ],
+    "duration_ms": 10000,
+    "video_path": "C:\\Users\\serhii\\AppData\\Local\\Temp\\pytest-of-serhii\\pytest-745\\test_studio_mix_endpoint_force0\\fake.mp4",
+    "video_preview": null,
+    "output_file": "output.mp4"
+  },
+  "tdproj": {},
+  "metadata": {},
+  "source": "legacy_studio_session",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\studio_sessions\\1b9047f5cc2d4507897fe168185ca595.json"
+}

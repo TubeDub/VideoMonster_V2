@@ -1,0 +1,12 @@
+=== DUBBING ENGINE REPORT task= run=1591768e ===
+lang=uk  segments=1  elapsed=0.05s
+adapted=1  skipped=0  strategies={'direct': 0, 'adapted': 0, 'video_adapt': 0, 'merge_next': 1, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=merge_next pred=5031ms slot=1500ms
+       IN : Він не міг позбутися відчуття, що йому справді страшно туди дістатися.
+       OUT: Ві́н не міг позбутися відчуття, що йому справді страшно туди дістатися.
+       [stress] ok
+       [timing] strategy=merge_next pred=5031ms slot=1500ms prev_end=0ms overflow=235.4% (>25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=5031ms slot=1500ms ratio=3.35; voice_quality_risk: projected_atempo=3.35 (max=1.2) — recommen

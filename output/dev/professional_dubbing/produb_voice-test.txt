@@ -1,0 +1,11 @@
+=== PROFESSIONAL DUBBING task=voice-test ===
+groups=1
+
+--- Group 1 indices=[0] ---
+Original Translation: Привіт.
+Text for TTS: Привіт.
+Segment duration: 3000 ms
+Est TTS before: 2000 ms
+Est TTS after: 2100 ms
+Fill %: 70.0
+Rate: -8%

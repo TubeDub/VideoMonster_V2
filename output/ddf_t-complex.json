@@ -1,0 +1,32 @@
+{
+  "task_id": "t-complex",
+  "created_at": "2026-08-12T11:46:26+00:00",
+  "agents": [
+    {
+      "agent_name": "Planner/v3",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "LOCAL_ONLY",
+      "fallback_used": true,
+      "timestamp": "2026-08-12T11:46:26+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    }
+  ],
+  "segment_attention": [],
+  "summary": {
+    "total_agents": 1,
+    "failed_agents": 0,
+    "fallback_used": 1,
+    "warnings": 0,
+    "total_execution_time_ms": 0.0,
+    "total_llm_calls": 0
+  },
+  "saved_at": "2026-08-12T11:46:26+00:00"
+}

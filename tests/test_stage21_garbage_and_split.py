@@ -119,10 +119,17 @@ def test_force_split_depth_and_fill_band():
 
 
 def test_should_force_split_on_overflow_350():
-    from engines.text_slot_fit import should_force_split
+    from engines.text_slot_fit import MIN_FORCE_SPLIT_SLOT_MS, should_force_split
 
     text = "Джордж молодший завжди любив кіно і мріяв про зйомки щодня."
-    assert should_force_split(text, 2000, "uk", measured_ms=2500) is True
+    # Stage 25 §3.2: slots < MIN_FORCE_SPLIT_SLOT_MS (2500) must NEVER be
+    # force-split (prevents crumbs + overlap inflation). Use length_scale +
+    # atempo clamp on the child instead.
+    assert should_force_split(text, 2000, "uk", measured_ms=2500) is False
+    # Slots ≥ threshold with real overflow > 350 ms still trigger split.
+    assert should_force_split(
+        text, MIN_FORCE_SPLIT_SLOT_MS + 500, "uk", measured_ms=MIN_FORCE_SPLIT_SLOT_MS + 900
+    ) is True
     assert should_force_split(text, 5000, "uk", measured_ms=5100) is False
 
 

@@ -172,3 +172,40 @@ def test_tts_stage24_identity_stamps_are_allowed():
     ]
     StageSnapshotGuard.check(before, after, stage="tts", mutator_module="engines.tts")
     assert StageSnapshotGuard.diff_violations(before, after, stage="tts") == []
+
+
+def test_tts_stage25_uk_hard_lock_voice_override_is_allowed():
+    """Regression: diagnostic 0233d766 — StageSnapshotIntegrityError on 'voice' at 'tts'.
+
+    Stage 25 §1 requires TTS stage to override the per-speaker `voice` from
+    Piper style `uk_UA-*-high` to the canonical tts_uk short id (mykyta /
+    tetiana / lada) or the safe Edge uk-UA-*Neural fallback when tts_uk is
+    unavailable. This is an intentional architectural mutation, not a bug.
+    """
+    from engines.pipeline_integrity.stage_contracts import allowed_fields_for_stage
+
+    allowed = allowed_fields_for_stage("tts")
+    assert "voice" in allowed
+    assert "voice_override_reason" in allowed
+
+    before = [
+        {
+            "segment_id": "48dd35225dae44f79c8aace44263ee4a",
+            "index": 0,
+            "voice": "uk_UA-mykyta-high",
+        }
+    ]
+    after = [
+        {
+            "segment_id": "48dd35225dae44f79c8aace44263ee4a",
+            "index": 0,
+            "voice": "mykyta",
+            "voice_override_reason": "uk_hard_lock:uk_UA-mykyta-high->mykyta@tts_uk",
+            "tts_backend": "tts_uk",
+            "tts_engine": "tts_uk",
+            "tts_voice": "mykyta",
+            "tts_language": "uk",
+        }
+    ]
+    StageSnapshotGuard.check(before, after, stage="tts", mutator_module="engines.tts")
+    assert StageSnapshotGuard.diff_violations(before, after, stage="tts") == []

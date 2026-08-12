@@ -1,0 +1,17 @@
+=== DUBBING ENGINE REPORT task= run=c44803ca ===
+lang=uk  segments=2  elapsed=0.10s
+adapted=0  skipped=2  strategies={'direct': 0, 'adapted': 0, 'video_adapt': 0, 'merge_next': 0, 'skip_tts': 2, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✗] seg#00 strategy=skip_tts pred=785ms slot=3000ms
+       IN : Він вийшов.
+       OUT: Ві́н вийшов.
+       [stress] ok
+       [validate] passed=False checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: meaning_lost: word_retention=0.50 (min=0.55)
+  [✗] seg#01 strategy=skip_tts pred=566ms slot=2500ms
+       IN : Де він?
+       OUT: Де ві́н?
+       [stress] ok
+       [validate] passed=False checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: meaning_lost: word_retention=0.00 (min=0.55)

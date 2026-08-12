@@ -430,9 +430,16 @@ def try_separate_audio(
     artifacts_dir: Path,
     base_id: str,
     task_id: str = "",
+    task_info: dict[str, Any] | None = None,
+    **_extra_kwargs: Any,
 ) -> SeparationResult:
     """
     Attempt dialogue / music+SFX separation. On failure returns fallback (STT uses full mix).
+
+    ``task_info`` (optional) — used to detect Spec v3 4-stem preference and other feature flags
+    per task; kwargs must not be renamed by callers (TZ Stage 25 §4).
+    ``_extra_kwargs`` — future-proof shield: unexpected kwargs are ignored instead of raising
+    ``TypeError`` (breaks fallback path). New keys should be added explicitly.
     """
     duration_ms = _probe_duration_ms(mono_audio_path)
     enabled = is_source_separation_enabled()
@@ -492,7 +499,7 @@ def try_separate_audio(
     separated = False
     stems_v3: dict[str, str] = {}
     stems_count = 0
-    prefer_4stem = is_four_stem_enabled(task_info)
+    prefer_4stem = is_four_stem_enabled(task_info or {})
     if prefer_4stem:
         ok4, stems_v3 = _try_demucs_4stem(
             stereo_path, dialogue_wav, accompaniment_wav, ffmpeg

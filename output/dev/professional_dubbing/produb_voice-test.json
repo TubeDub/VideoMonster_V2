@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "voice-test",
+    "groups": 1,
+    "style_id": "modern",
+    "elapsed_sec": 0.0
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {
+        "rate": "-8%",
+        "pitch": "+6%",
+        "intonation": "expressive"
+      },
+      "plain_text": "Привіт.",
+      "text_for_tts": "Привіт.",
+      "suggested_rate": "-8%",
+      "suggested_pitch": "+6%",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [],
+      "accents": [],
+      "segment_ms": 3000,
+      "est_ms_before": 2000,
+      "est_ms_after": 2100,
+      "fill_percent": 70.0,
+      "underfill": false,
+      "decisions": [],
+      "source_cues": {}
+    }
+  ]
+}

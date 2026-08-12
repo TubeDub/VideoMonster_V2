@@ -67,10 +67,20 @@ def test_stamp_tts_backend_meta():
     assert seg["tts_voice"] == "mykyta"
     assert seg["tts_sample_rate"] == 44100
 
+    # Stage 25 §1.1: for UK targets, piper is HARD-OVERRIDDEN to tts_uk when
+    # the tts_uk package is available (default). Confirm the override and the
+    # forbidden `oleksa` voice never lands on the segment.
     seg2: dict = {}
     stamp_tts_backend_meta(seg2, engine_id="piper", voice="uk_UA-oleksa-high")
-    assert seg2["tts_backend"] == "piper"
-    assert seg2["tts_voice"] == "uk_UA-oleksa-high"
+    assert seg2["tts_backend"] in ("tts_uk", "piper")  # tts_uk when installed
+    assert seg2["tts_voice"] != "uk_UA-oleksa-high"
+    # For non-UK targets piper stays piper (no forced UK identity kicks in).
+    seg3: dict = {}
+    stamp_tts_backend_meta(
+        seg3, engine_id="piper", voice="uk_UA-oleksa-high", language="ru"
+    )
+    assert seg3["tts_backend"] == "piper"
+    assert seg3["tts_voice"] == "uk_UA-oleksa-high"
 
 
 def test_rate_to_length_scale():
@@ -119,7 +129,8 @@ def test_synthesize_with_backend_fallback_on_failure(tmp_path: Path):
             "Привіт", "mykyta", out, engine_id="tts_uk"
         )
     assert result.ok
-    assert calls == ["tts_uk", "edge-offline"]
+    # Stage 24: one retry on tts_uk before Edge fallback (never cs/sk/pl/ru).
+    assert calls == ["tts_uk", "tts_uk", "edge-offline"]
 
 
 def test_pipeline_context_backend_affects_normalize():

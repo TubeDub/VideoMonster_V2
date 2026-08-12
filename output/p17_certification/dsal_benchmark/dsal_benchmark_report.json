@@ -1,0 +1,315 @@
+{
+  "ok": false,
+  "suite": "dsal_v4_p5",
+  "llm_off": true,
+  "issued_at": "2026-08-12T11:48:17Z",
+  "golden_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\tests\\golden\\dub\\george_lucas_en_uk_20.json",
+  "gates": {
+    "llm_off_ok": {
+      "name": "llm_off_ok",
+      "ok": true,
+      "detail": "benchmark ran with LLM disabled",
+      "value": true,
+      "threshold": true
+    },
+    "seg6_underflow_fixed": {
+      "name": "seg6_underflow_fixed",
+      "ok": true,
+      "detail": "seg6_delta_pct=2.54 score=100.0",
+      "value": 2.54,
+      "threshold": 15.0
+    },
+    "clause_coverage_critical": {
+      "name": "clause_coverage_critical",
+      "ok": false,
+      "detail": "avg_critical_clause=0.744",
+      "value": 0.744,
+      "threshold": 0.85
+    },
+    "must_restore": {
+      "name": "must_restore",
+      "ok": true,
+      "detail": "failures=0",
+      "value": 0,
+      "threshold": 0
+    },
+    "measured_avg_match": {
+      "name": "measured_avg_match",
+      "ok": true,
+      "detail": "avg_measured=50.0 n=2 (informational if seg6 ok)",
+      "value": 50.0,
+      "threshold": 85.0
+    },
+    "stretch_avg_gt_90": {
+      "name": "stretch_avg_gt_90",
+      "ok": false,
+      "detail": "avg_all=53.6 (informational; LLM-off estimate vs slot often yellow — stretch target)",
+      "value": 53.6,
+      "threshold": 90.0
+    }
+  },
+  "metrics": {
+    "avg_duration_match_score": 53.6,
+    "avg_measured_match_score": 50.0,
+    "avg_critical_clause_coverage": 0.744,
+    "seg6_delta_pct": 2.54,
+    "adapted": 19,
+    "measured_segments": 2,
+    "lock_gate_failures": 12,
+    "segments": 20,
+    "dsal_pre_lock": {
+      "dsal_pre_lock": true,
+      "segments": 20,
+      "yellow_red": 10,
+      "adapted": 19,
+      "block_merge": {
+        "skipped": true
+      },
+      "allow_llm": false
+    },
+    "stretch_avg_gt_90": false
+  },
+  "segments": [
+    {
+      "index": 1,
+      "dsal_band": "red",
+      "duration_match_score": 0.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": 2038,
+      "delta_pct": 29.11,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 2,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": 519,
+      "delta_pct": 6.49,
+      "adaptation_executed": true,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 3,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -333,
+      "delta_pct": 3.03,
+      "adaptation_executed": true,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 4,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -407,
+      "delta_pct": 4.52,
+      "adaptation_executed": true,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 5,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.233,
+      "clause_total": 3,
+      "dsal_delta_ms": -666,
+      "delta_pct": 6.66,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 6,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 1.0,
+      "clause_total": 1,
+      "dsal_delta_ms": 309,
+      "delta_pct": 2.54,
+      "adaptation_executed": true,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 7,
+      "dsal_band": "red",
+      "duration_match_score": 0.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -2325,
+      "delta_pct": 41.52,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 8,
+      "dsal_band": "red",
+      "duration_match_score": 0.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -3259,
+      "delta_pct": 32.59,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 9,
+      "dsal_band": "yellow",
+      "duration_match_score": 49.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": 575,
+      "delta_pct": 12.78,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 10,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -37,
+      "delta_pct": 0.41,
+      "adaptation_executed": true,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 11,
+      "dsal_band": "red",
+      "duration_match_score": 0.0,
+      "clause_coverage": 1.0,
+      "clause_total": 1,
+      "dsal_delta_ms": -3777,
+      "delta_pct": 31.48,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 12,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": 149,
+      "delta_pct": 2.48,
+      "adaptation_executed": true,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 13,
+      "dsal_band": "red",
+      "duration_match_score": 0.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -3148,
+      "delta_pct": 28.62,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 14,
+      "dsal_band": "yellow",
+      "duration_match_score": 10.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -1240,
+      "delta_pct": 22.55,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 15,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -1037,
+      "delta_pct": 8.64,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 16,
+      "dsal_band": "red",
+      "duration_match_score": 0.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -3185,
+      "delta_pct": 26.54,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 17,
+      "dsal_band": "yellow",
+      "duration_match_score": 13.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -2407,
+      "delta_pct": 21.88,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    },
+    {
+      "index": 18,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -203,
+      "delta_pct": 3.69,
+      "adaptation_executed": true,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 19,
+      "dsal_band": "green",
+      "duration_match_score": 100.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": 0,
+      "delta_pct": 0.0,
+      "adaptation_executed": false,
+      "lock_gate_ok": true,
+      "must_restore_ok": true
+    },
+    {
+      "index": 20,
+      "dsal_band": "red",
+      "duration_match_score": 0.0,
+      "clause_coverage": 0.0,
+      "clause_total": 0,
+      "dsal_delta_ms": -2481,
+      "delta_pct": 27.57,
+      "adaptation_executed": true,
+      "lock_gate_ok": false,
+      "must_restore_ok": true
+    }
+  ],
+  "path": ""
+}

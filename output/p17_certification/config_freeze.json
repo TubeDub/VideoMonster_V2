@@ -1,0 +1,58 @@
+{
+  "versions": {
+    "system_version": "2.0.0-rc1",
+    "translation_engine_version": "1.0.0",
+    "dub_engine_version": "1.0.0",
+    "contract_versions": {
+      "recognition_contract_version": 1,
+      "sentence_contract_version": 1,
+      "translation_contract_version": 1,
+      "dub_contract_version": 1,
+      "scheduler_contract_version": 1,
+      "alignment_contract_version": 1,
+      "merge_contract_version": 1,
+      "studio_contract_version": 1,
+      "tts_contract_version": 1
+    },
+    "performance_budgets_ms": {
+      "scheduler": 20.0,
+      "merge": 30.0,
+      "alignment": 50.0,
+      "runtime_integrity": 10.0,
+      "diagnostics": 5.0
+    }
+  },
+  "contracts": {
+    "recognition_contract_version": 1,
+    "sentence_contract_version": 1,
+    "translation_contract_version": 1,
+    "dub_contract_version": 1,
+    "scheduler_contract_version": 1,
+    "alignment_contract_version": 1,
+    "merge_contract_version": 1,
+    "studio_contract_version": 1,
+    "tts_contract_version": 1
+  },
+  "scheduler": {
+    "sole_timing_mutator": true,
+    "api": [
+      "update_time",
+      "request_time"
+    ]
+  },
+  "audio_timing_optimizer": {
+    "tempo_min": 0.95,
+    "tempo_max": 1.05,
+    "micro_stretch_min": 0.95,
+    "micro_stretch_max": 1.05,
+    "crossfade_ms_default": 12,
+    "borrow_max_ms": 250
+  },
+  "tts": {
+    "providers_registry": "engines.tts_engines.providers",
+    "note": "Installed backend packages are environment-specific; adapters are frozen."
+  },
+  "models": {
+    "note": "Model weights/paths are environment-specific; contract versions are frozen."
+  }
+}

@@ -172,16 +172,48 @@
       "llm_calls": 0,
       "input_metrics": {},
       "output_metrics": {}
+    },
+    {
+      "agent_name": "Mix",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "output=video_3d9c47397b_OUTPUT_afac6eef.mp4",
+      "fallback_used": false,
+      "timestamp": "2026-08-12T10:46:10+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
+    },
+    {
+      "agent_name": "Mix",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "output=video_3d9c47397b_OUTPUT_afac6eef.mp4",
+      "fallback_used": false,
+      "timestamp": "2026-08-12T10:55:30+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {}
     }
   ],
   "segment_attention": [],
   "summary": {
-    "total_agents": 9,
+    "total_agents": 11,
     "failed_agents": 0,
     "fallback_used": 1,
     "warnings": 0,
     "total_execution_time_ms": 1367.3,
     "total_llm_calls": 0
   },
-  "saved_at": "2026-08-12T10:36:32+00:00"
+  "saved_at": "2026-08-12T10:55:30+00:00"
 }

@@ -17,66 +17,6 @@
   },
   "install_log": [
     {
-      "ts": "2026-07-28T17:12:54.579200+00:00",
-      "level": "info",
-      "message": "Headless AI server started"
-    },
-    {
-      "ts": "2026-07-28T17:12:55.768822+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T17:26:10.932564+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T17:26:10.988897+00:00",
-      "level": "info",
-      "message": "Headless AI server started"
-    },
-    {
-      "ts": "2026-07-28T17:26:11.712076+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T17:38:57.158277+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T17:38:57.225955+00:00",
-      "level": "info",
-      "message": "Headless AI server started"
-    },
-    {
-      "ts": "2026-07-28T17:39:00.197510+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T17:46:54.765735+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T17:46:54.824388+00:00",
-      "level": "info",
-      "message": "Headless AI server started"
-    },
-    {
-      "ts": "2026-07-28T17:46:55.750163+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
-      "ts": "2026-07-28T18:12:52.919931+00:00",
-      "level": "info",
-      "message": "Backend GUI/launcher suppressed (headless mode)"
-    },
-    {
       "ts": "2026-07-28T18:12:52.967854+00:00",
       "level": "info",
       "message": "Headless AI server started"
@@ -1013,6 +953,66 @@
     },
     {
       "ts": "2026-08-12T10:17:41.747962+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T11:40:41.630620+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T11:40:41.669896+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-08-12T11:40:42.359641+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T11:45:58.919489+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T11:45:58.963028+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-08-12T11:46:00.019356+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T12:05:05.344824+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T12:05:05.660632+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-08-12T12:05:07.742606+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T18:21:48.641777+00:00",
+      "level": "info",
+      "message": "Backend GUI/launcher suppressed (headless mode)"
+    },
+    {
+      "ts": "2026-08-12T18:21:48.763869+00:00",
+      "level": "info",
+      "message": "Headless AI server started"
+    },
+    {
+      "ts": "2026-08-12T18:21:49.665035+00:00",
       "level": "info",
       "message": "Backend GUI/launcher suppressed (headless mode)"
     }

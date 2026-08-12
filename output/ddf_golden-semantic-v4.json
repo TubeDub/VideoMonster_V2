@@ -1,0 +1,37 @@
+{
+  "task_id": "golden-semantic-v4",
+  "created_at": "2026-08-12T11:47:46+00:00",
+  "agents": [
+    {
+      "agent_name": "Semantic/v4.0",
+      "called": true,
+      "success": true,
+      "error_msg": null,
+      "decision": "rule_engine",
+      "fallback_used": true,
+      "timestamp": "2026-08-12T11:47:46+00:00",
+      "segment_idx": null,
+      "execution_time_ms": 0.0,
+      "retry_count": 0,
+      "fallback_reason": null,
+      "llm_calls": 0,
+      "input_metrics": {},
+      "output_metrics": {
+        "passed_count": 0,
+        "failed_count": 4,
+        "avg_semantic_score": 0.7103,
+        "retries_total": 12
+      }
+    }
+  ],
+  "segment_attention": [],
+  "summary": {
+    "total_agents": 1,
+    "failed_agents": 0,
+    "fallback_used": 1,
+    "warnings": 0,
+    "total_execution_time_ms": 0.0,
+    "total_llm_calls": 0
+  },
+  "saved_at": "2026-08-12T11:47:46+00:00"
+}

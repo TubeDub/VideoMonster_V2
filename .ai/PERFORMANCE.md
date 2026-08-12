@@ -1,6 +1,6 @@
 # Performance Guidelines
 
-*Auto-generated: 2026-07-14 05:47*
+*Auto-generated: 2026-08-12 14:44*
 
 ## Rules
 - No fixed worker/thread counts — use Performance Optimizer

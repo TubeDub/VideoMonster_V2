@@ -30,6 +30,13 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
         "tts_pitch",
         "tts_volume",
         "tts_length_scale",
+        # Stage 25 §1 — UK hard-lock (`resolve_uk_tts`) may override the
+        # per-speaker `voice` field to the canonical tts_uk short id
+        # (mykyta / tetiana / lada) or the safe Edge uk-UA-* fallback when
+        # `voice` came in as `uk_UA-*-high` (Piper) or a forbidden
+        # cross-locale id. Guarded by StageSnapshotIntegrityError otherwise.
+        "voice",
+        "voice_override_reason",
     }
 )
 

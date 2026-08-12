@@ -190,6 +190,12 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             "tts_pitch",
             "tts_volume",
             "tts_length_scale",
+            # Stage 25 §1 — UK hard-lock (`resolve_uk_tts`) may rewrite the
+            # per-speaker `voice` from Piper `uk_UA-*-high` / forbidden
+            # cross-locale id to the canonical tts_uk short id or the safe
+            # Edge uk-UA-* fallback. Recorded via `voice_override_reason`.
+            "voice",
+            "voice_override_reason",
         }
     ),
     "slot_fit": frozenset(

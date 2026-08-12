@@ -58,26 +58,61 @@ def is_latin_heavy(text: str, *, threshold: float = 0.30) -> tuple[bool, float]:
     return ratio > float(threshold), ratio
 
 
+_TTS_UK_AVAILABLE_CACHE: dict[str, bool] = {}
+
+
+def _tts_uk_backend_available() -> bool:
+    """Cheap cached probe: is the ``tts_uk`` package installed and importable?
+
+    Stage 25 §1.2 — used to gate: when tts_uk is present we NEVER fall back to
+    piper/edge as the default backend for target=uk.
+    """
+    if "ok" in _TTS_UK_AVAILABLE_CACHE:
+        return _TTS_UK_AVAILABLE_CACHE["ok"]
+    try:
+        import importlib.util
+
+        ok = importlib.util.find_spec("tts_uk") is not None
+    except Exception:
+        ok = False
+    _TTS_UK_AVAILABLE_CACHE["ok"] = bool(ok)
+    return _TTS_UK_AVAILABLE_CACHE["ok"]
+
+
 def force_uk_tts_identity(
     *,
     target_lang: str | None,
     engine_id: str | None = None,
     voice: str | None = None,
 ) -> dict[str, Any]:
-    """Stage 24: for target=uk force language=uk and a Ukrainian voice only.
+    """Stage 25 §1: for target=uk force language=uk and Ukrainian voice+backend.
 
-    - tts_uk → voice=mykyta
-    - edge → uk-UA-OstapNeural (never cs/sk/pl/ru)
+    Contract for ``target_lang`` starting with ``uk``:
+
+      - engine_id ∈ {``tts_uk``} → keep tts_uk, pick mykyta/tetiana/lada.
+      - engine_id ∈ {``edge``, ``edge-offline``} → keep Edge; force
+        ``uk-UA-OstapNeural`` (male) / ``uk-UA-PolinaNeural`` (female).
+        Short tts_uk ids (mykyta/lada/tetiana) are NEVER sent to Edge.
+      - engine_id ∈ {``piper``, unknown, empty} → prefer ``tts_uk`` when the
+        ``tts_uk`` package is installed (§1.1 ЖЁСТКО, ignore UI/cache/fallback
+        preference for piper); otherwise fall back to ``edge-offline``
+        (uk-UA-* only, never cs/sk/pl/ru/en/de/fr).
+      - Explicitly forbidden voices (cs/sk/pl/ru/de/fr/en) are rewritten to
+        the safe UK default for the chosen backend.
+
+    Non-uk targets are returned unchanged (only normalized).
     """
     from engines.tts_backends import (
         DEFAULT_EDGE_VOICE,
         DEFAULT_TTS_UK_VOICE,
+        TTS_UK_VOICES,
         normalize_backend_name,
         resolve_voice_for_backend,
     )
 
     tgt = str(target_lang or "").split("-")[0].strip().lower()
-    eid = normalize_backend_name(engine_id or "tts_uk")
+    eid_raw = str(engine_id or "").strip().lower()
+    eid = normalize_backend_name(eid_raw or "tts_uk")
     v = str(voice or "").strip()
     if tgt != "uk":
         return {
@@ -87,57 +122,111 @@ def force_uk_tts_identity(
             "forced": False,
         }
 
-    # Drop forbidden cross-locale voices immediately.
-    ok, _reason = assert_voice_matches_target(v or DEFAULT_TTS_UK_VOICE, "uk", raise_error=False)
-    if eid == "tts_uk":
-        from engines.tts_backends import TTS_UK_VOICES
+    vl = v.lower()
 
-        vl = v.lower()
-        # Default mykyta; allow tetiana/lada only when explicitly requested.
+    def _pick_tts_uk_voice() -> str:
         if vl in TTS_UK_VOICES:
-            v = vl
-        elif "tetiana" in vl or "polina" in vl:
-            v = "tetiana"
-        elif "lada" in vl:
-            v = "lada"
-        else:
-            v = DEFAULT_TTS_UK_VOICE
-    elif eid in ("edge-offline", "edge"):
-        # Never pass tts_uk short ids (mykyta) to Edge — Invalid voice / wrong locale.
-        if v.lower() in ("mykyta", "lada", "tetiana") or not v.startswith("uk-UA-"):
-            from engines.tts_backends import TTS_UK_VOICES
+            return vl
+        if "tetiana" in vl or "polina" in vl:
+            return "tetiana"
+        if "lada" in vl:
+            return "lada"
+        return DEFAULT_TTS_UK_VOICE
 
-            if v.lower() in TTS_UK_VOICES and TTS_UK_VOICES[v.lower()] == "female":
-                v = "uk-UA-PolinaNeural"
-            else:
-                v = DEFAULT_EDGE_VOICE
-        else:
-            v = resolve_voice_for_backend(v, eid)
-            ok2, _ = assert_voice_matches_target(v, "uk", raise_error=False)
-            if not ok2:
-                v = DEFAULT_EDGE_VOICE
-    else:
-        v = resolve_voice_for_backend(v or DEFAULT_TTS_UK_VOICE, eid)
-        ok2, _ = assert_voice_matches_target(v, "uk", raise_error=False)
-        if not ok2:
-            eid = "tts_uk"
-            v = DEFAULT_TTS_UK_VOICE
+    def _pick_edge_voice() -> str:
+        # tts_uk short ids → Edge Neural (Ostap for male, Polina for female).
+        if vl in TTS_UK_VOICES:
+            return (
+                "uk-UA-PolinaNeural"
+                if TTS_UK_VOICES[vl] == "female"
+                else DEFAULT_EDGE_VOICE
+            )
+        if "polina" in vl or "tetiana" in vl or "lada" in vl:
+            return "uk-UA-PolinaNeural"
+        if v.startswith("uk-UA-"):
+            res = resolve_voice_for_backend(v, "edge-offline")
+            ok2, _ = assert_voice_matches_target(res, "uk", raise_error=False)
+            if ok2 and res.startswith("uk-UA-"):
+                return res
+        return DEFAULT_EDGE_VOICE
 
-    # Hard ban: never leave cs/sk/pl/ru/en on uk target.
-    ok_final, _ = assert_voice_matches_target(v, "uk", raise_error=False)
-    if not ok_final:
-        if eid in ("edge-offline", "edge"):
-            v = DEFAULT_EDGE_VOICE
-        else:
-            eid = "tts_uk"
-            v = DEFAULT_TTS_UK_VOICE
+    # Case A: caller explicitly asks for tts_uk → keep tts_uk + Mykyta family.
+    if eid == "tts_uk":
+        new_v = _pick_tts_uk_voice()
+        return {
+            "language": "uk",
+            "engine_id": "tts_uk",
+            "voice": new_v,
+            "forced": True,
+            "tts_uk_available": _tts_uk_backend_available(),
+        }
 
+    # Case B: caller explicitly asks for Edge → keep Edge with valid uk-UA voice.
+    if eid in ("edge-offline", "edge"):
+        edge_v = _pick_edge_voice()
+        ok_final, _ = assert_voice_matches_target(edge_v, "uk", raise_error=False)
+        if not ok_final or not str(edge_v).startswith("uk-UA-"):
+            edge_v = DEFAULT_EDGE_VOICE
+        return {
+            "language": "uk",
+            "engine_id": "edge-offline",
+            "voice": edge_v,
+            "forced": True,
+            "tts_uk_available": _tts_uk_backend_available(),
+        }
+
+    # Case C: piper / unknown / anything else → §1.1 override to tts_uk when
+    # available; otherwise degrade to Edge (never piper stays default for UK).
+    if _tts_uk_backend_available():
+        logger.warning(
+            "[TTS] uk_backend_override %s→tts_uk (mykyta family) — piper/other "
+            "must never be default for target=uk when tts_uk is installed",
+            eid_raw or eid,
+        )
+        new_v = _pick_tts_uk_voice()
+        return {
+            "language": "uk",
+            "engine_id": "tts_uk",
+            "voice": new_v,
+            "forced": True,
+            "tts_uk_available": True,
+            "override_from": eid_raw or eid,
+        }
+
+    edge_v = _pick_edge_voice()
+    if not str(edge_v).startswith("uk-UA-"):
+        edge_v = DEFAULT_EDGE_VOICE
+    logger.warning(
+        "[TTS] uk_backend_fallback %s→edge-offline (%s) — tts_uk not installed",
+        eid_raw or eid,
+        edge_v,
+    )
     return {
         "language": "uk",
-        "engine_id": eid,
-        "voice": v,
+        "engine_id": "edge-offline",
+        "voice": edge_v,
         "forced": True,
+        "tts_uk_available": False,
+        "override_from": eid_raw or eid,
     }
+
+
+def resolve_uk_tts(
+    target_lang: str | None,
+    requested_backend: str | None = None,
+    requested_voice: str | None = None,
+) -> tuple[str, str]:
+    """Stage 25 §1.1 — single entry point resolver: (backend, voice) for UK.
+
+    Wraps :func:`force_uk_tts_identity` so callers can consume a plain tuple.
+    For non-UK targets returns the requested backend/voice normalized as-is.
+    """
+    ident = force_uk_tts_identity(
+        target_lang=target_lang,
+        engine_id=requested_backend,
+        voice=requested_voice,
+    )
+    return str(ident.get("engine_id") or ""), str(ident.get("voice") or "")
 
 
 def is_uk_tts_text_ok(

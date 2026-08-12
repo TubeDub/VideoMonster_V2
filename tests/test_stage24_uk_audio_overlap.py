@@ -27,6 +27,69 @@ def test_force_uk_tts_identity_bans_cs_sk_pl_ru():
     assert mk["engine_id"] == "tts_uk"
 
 
+def test_uk_backend_override_piper_to_tts_uk_when_available(monkeypatch):
+    """Stage 25 §1.1: for target=uk, piper MUST NEVER stay as default when
+    tts_uk is installed. Voice must be a Mykyta family member, not
+    ``uk_UA-oleksa-high``.
+    """
+    from engines import tts_lang_lock
+
+    # Simulate tts_uk installed.
+    monkeypatch.setattr(tts_lang_lock, "_TTS_UK_AVAILABLE_CACHE", {"ok": True})
+    ident = tts_lang_lock.force_uk_tts_identity(
+        target_lang="uk", engine_id="piper", voice="uk_UA-oleksa-high"
+    )
+    assert ident["engine_id"] == "tts_uk"
+    assert ident["voice"] in ("mykyta", "tetiana", "lada")
+    assert ident.get("tts_uk_available") is True
+
+    # Simulate tts_uk NOT installed → fall back to Edge uk-UA-* (never piper/oleksa).
+    monkeypatch.setattr(tts_lang_lock, "_TTS_UK_AVAILABLE_CACHE", {"ok": False})
+    ident2 = tts_lang_lock.force_uk_tts_identity(
+        target_lang="uk", engine_id="piper", voice="uk_UA-oleksa-high"
+    )
+    assert ident2["engine_id"] == "edge-offline"
+    assert ident2["voice"].startswith("uk-UA-")
+    assert ident2["voice"] != "uk_UA-oleksa-high"
+
+
+def test_bind_pipeline_tts_from_info_uk_overrides_piper(monkeypatch):
+    """Stage 25 §1.1: pipeline binder must override piper→tts_uk for target=uk."""
+    from engines import tts_backends, tts_lang_lock
+
+    monkeypatch.setattr(tts_lang_lock, "_TTS_UK_AVAILABLE_CACHE", {"ok": True})
+    info = {
+        "tts_engine": "piper",
+        "voice": "uk_UA-oleksa-high",
+        "target_lang": "uk",
+    }
+    eid = tts_backends.bind_pipeline_tts_from_info(info)
+    assert eid == "tts_uk"
+    assert info["tts_engine"] == "tts_uk"
+    assert info["voice"] in ("mykyta", "tetiana", "lada")
+    assert info["tts_backend"] == "tts_uk"
+    assert info["tts_language"] == "uk"
+
+
+def test_resolve_uk_tts_returns_tuple(monkeypatch):
+    """Stage 25 §1.1 wrapper — single entry point returning (backend, voice)."""
+    from engines import tts_lang_lock
+
+    monkeypatch.setattr(tts_lang_lock, "_TTS_UK_AVAILABLE_CACHE", {"ok": True})
+    backend, voice = tts_lang_lock.resolve_uk_tts("uk", "piper", None)
+    assert backend == "tts_uk"
+    assert voice == "mykyta"
+
+    backend2, voice2 = tts_lang_lock.resolve_uk_tts("uk-UA", "edge-offline", "cs-CZ-AntoninNeural")
+    assert backend2 == "edge-offline"
+    assert voice2.startswith("uk-UA-")
+
+    # Non-uk targets are pass-through.
+    backend3, voice3 = tts_lang_lock.resolve_uk_tts("ru", "piper", "uk_UA-oleksa-high")
+    assert backend3 == "piper"
+    assert voice3 == "uk_UA-oleksa-high"
+
+
 def test_latin_heavy_warning_threshold():
     from engines.tts_lang_lock import is_latin_heavy
 

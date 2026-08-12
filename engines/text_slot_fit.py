@@ -53,6 +53,10 @@ MAX_SPLIT_DEPTH = 5
 OVERFLOW_FORCE_SPLIT_MS = 350
 MIN_CHILD_SLOT_MS = 2200
 MAX_CHILD_SLOT_MS = 7500
+# Stage 25 §3.2: never force-split slots below this threshold (prefer
+# length_scale + atempo clamp). Prevents ballooning segment count and
+# preserves natural cadence for short lines.
+MIN_FORCE_SPLIT_SLOT_MS = 2500
 STAGE19H_OK_FILL_LO = 0.85
 STAGE19H_OK_FILL_HI = 1.12
 STAGE19I_OK_FILL_LO = 0.85
@@ -295,8 +299,16 @@ def should_force_split(
     predicted_ms: int | None = None,
     measured_ms: int | None = None,
 ) -> bool:
-    """Stage 21: predicted/measured fill > 1.12, overflow > 350 ms, or CPS over."""
+    """Stage 21/25 §3.2: predicted/measured fill > 1.12, overflow > 350 ms, or CPS over.
+
+    Stage 25 hard guard: refuse to force-split a slot shorter than
+    :data:`MIN_FORCE_SPLIT_SLOT_MS` (2500 ms). Short slots must be handled by
+    length_scale + atempo clamp instead — splitting them just creates crumbs
+    and inflates the overlap count.
+    """
     slot = max(0, int(slot_ms or 0))
+    if 0 < slot < MIN_FORCE_SPLIT_SLOT_MS:
+        return False
     pred = int(predicted_ms) if predicted_ms is not None else estimate_tts_ms(text, lang)
     measured = int(measured_ms) if measured_ms is not None else 0
     speech = max(pred, measured)

@@ -1932,7 +1932,10 @@ def _soft_pad_missing_segments(
         try:
             pad_path = _make_silence_pad(slot_ms, out)
             _assert_audio_file(pad_path, min_bytes=MIN_AUDIO_BYTES)
-            abs_p = str(pad_path)
+            try:
+                abs_p = str(Path(pad_path).resolve())
+            except OSError:
+                abs_p = str(pad_path)
             seg["file"] = abs_p
             seg["tts_file_path"] = abs_p
             seg["fitted_file"] = abs_p
@@ -2666,6 +2669,9 @@ def _post_tts_timing_qa(
                 length_scale=kwargs.get("length_scale"),
                 volume=kwargs.get("volume"),
                 mykyta_controls=kwargs.get("mykyta_controls"),
+                target_lang=kwargs.get("target_lang")
+                or task_info.get("target_lang")
+                or target_lang,
             )
 
         watch = run_segment_bounded(
@@ -4299,19 +4305,42 @@ def _regen_segment_tts(
         exists=dest.is_file(),
         detail=f"duration_ms={tts_ms}",
     )
-    # Stage 24: stamp TTS identity on the segment when provided.
+    # Stage 24/25: stamp TTS identity on the segment when provided.
     if stamp_seg is not None:
         try:
             abs_dest = str(Path(dest).resolve())
         except OSError:
             abs_dest = str(dest)
-        stamp_seg["tts_backend"] = eid
+        try:
+            from engines.tts_backends import backend_display_name
+
+            display = backend_display_name(eid)
+        except Exception:
+            display = "tts_uk" if eid == "tts_uk" else ("edge" if eid in ("edge", "edge-offline") else eid)
+        stamp_seg["tts_backend"] = display
+        stamp_seg["tts_engine"] = eid
         stamp_seg["tts_voice"] = voice
         stamp_seg["tts_language"] = _lang
         stamp_seg["voice"] = voice
         stamp_seg["file"] = abs_dest
         stamp_seg["tts_file_path"] = abs_dest
         stamp_seg["resolved_path"] = abs_dest
+        # Diagnostics (TZ §5): honest exists / size / cyrillic ratio.
+        try:
+            from engines.pipeline_integrity.audio_presence import audio_stat
+
+            _ok_a, _size_a = audio_stat(abs_dest)
+            stamp_seg["audio_exists"] = bool(_ok_a)
+            stamp_seg["audio_size_bytes"] = int(_size_a)
+        except Exception:
+            pass
+        try:
+            from engines.tts_lang_lock import cyrillic_letter_ratio
+
+            if text:
+                stamp_seg["cyrillic_ratio"] = round(cyrillic_letter_ratio(text), 3)
+        except Exception:
+            pass
     return str(Path(dest).resolve()) if Path(dest).is_file() else dest.name, tts_ms
 
 
