@@ -1,5 +1,84 @@
 # Changelog
 
+## [2026-08-13] Stage 28 — Path truth, honest census, UK pre-flight (4a512fd6)
+
+Root diagnostic:
+- `tts_pipeline.audio_present=6 / audio_missing=20 / padded_count=0` even after
+  the LAST-RESORT pad from Stage 26 wrote silence to disk. The census could not
+  see pads because it only searched `session_dir/basename`, not
+  `session_dir/closed_loop/<task_id>/basename` where soft-pad/repair/regen
+  actually wrote. Result: mux ordered from a "half-empty" segments_data.
+- Mixed relative `output\sessions\...\pause\*.wav` and absolute
+  `C:\Users\...\pad_silence_*.wav` in the same JSON.
+- `tts_backend=tts_uk / tts_voice=mykyta` stamped yet audio in Czech/Slovak —
+  a forbidden voice reached synth without the UK ban gate rewriting it.
+
+### Block A — Path truth
+- `session_adapter.bind_task_info` now resolves absolute, and stamps `task_id`.
+- `resolve_session_audio` (§A2) prioritises `session_dir/closed_loop/<task_id>`
+  and `session_dir/closed_loop/*` before rglob so relative
+  `output/sessions/*` inputs still find the physical file.
+- `_absolutize_segment_audio_paths` accepts `task_id`; deep-resolves stale
+  ghost paths against the closed_loop subtree before overwriting stamps.
+- `_repair_missing_tts_files`, `_soft_pad_missing_segments`, LAST-RESORT pad,
+  and `_commit_fitted_wav` **always** write into
+  `session_dir/closed_loop/<task_id>/` — never bare `session_dir/` or raw
+  `OUTPUT_DIR/`.
+- Census (`_build_openddf_tts_pipeline_block`) does the same deep-resolve
+  fallback via `resolve_session_audio(...)`, so a pad in the closed_loop
+  subtree is never miscounted as `audio_missing`.
+
+### Block B — Soft-pad enforcement
+- Order after Stage 26 unchanged: repair → assert_ready → soft-pad →
+  absolutize → census → (re-pad + refresh if census still missing) →
+  LAST-RESORT stdlib-`wave` pad → absolutize → census (Stage 28 wiring
+  guarantees the census sees pads on the second pass).
+- Pad name convention: `session_dir/closed_loop/<task_id>/pad_silence_<sid>.wav`
+  and `softpad_<task>_<idx>_<sid>.wav` — both are protected from cleanup.
+
+### Block C — UK hard-lock
+- `synthesize_with_backend(target_lang="uk")` runs `force_uk_tts_identity`
+  BEFORE synth to rewrite any cs-CZ / sk-SK / pl-PL / ru-RU / en-* / de-* /
+  fr-* / hu-* / ro-* / bg-* voice to a safe UK voice (mykyta or
+  uk-UA-*Neural). Short ids (mykyta/lada/tetiana) never leak into Edge.
+- Sidecar `_LAST_SYNTH_META` unchanged; commit paths still stamp honest
+  `tts_backend / tts_voice / tts_fallback_reason` from the sidecar.
+- `_regen_segment_tts` runs `strip_slot_pad_fillers` on the TTS text before
+  synth so Stage-5 pacing pads never get voiced.
+
+### Block D — Text before speed
+- `HAPPY_PATH_MAX_ATEMPO_UK = 1.05`, `HAPPY_PATH_HARD_MAX_ATEMPO_UK = 1.08`;
+  `stamp_happy_path_meta` uses the UK cap when `target_lang.startswith("uk")`
+  and mode is basic. The UK cap is threaded through
+  `apply_simple_pipeline_policy` as `task_info["max_atempo"]` (per-run), so
+  non-UK / advanced / legacy paths keep their existing budget (1.15 / 1.20).
+- `duration_control_used` backstop extended to cover
+  `split | expand | shorten | trim_silence` in addition to
+  `soft_pad | atempo | length_scale`.
+- `_apply_stage23_duration_control` now saves + restores the ContextVar
+  Mykyta controls after regen (a pre-existing leak flipped
+  `resolve_mykyta_controls({}, env=False)` to 0.88 for later tests / segments).
+
+### Block E — Cleanup
+- `_PROTECTED_AUDIO_PREFIXES` gains `softpad_` (session-owned last-resort
+  pad prefix). `slot_fit_ / pause_run_ / tts_ / tts_regen_ / pad_silence_ /
+  softpad_` are all protected during `cleanup_intermediate_work_dirs`.
+
+### Block F — UK Simple defaults (no user knobs)
+- `apply_simple_pipeline_policy` for `target_lang=uk`:
+  `tts_engine=tts_uk`, `mykyta_rate=0.97`, `mykyta_length_scale=1.05`,
+  `mykyta_volume=1.05`, `mykyta_pitch=0`, `max_atempo=1.05`.
+- `run_simple_dub_pipeline(target_lang="uk", voice=None)` defaults voice to
+  `mykyta` (falls back to `uk-UA-OstapNeural` if tts_uk not installed).
+
+### Tests
+- `tests/test_stage28_paths_and_pad.py` — 10 tests covering census
+  deep-resolve, absolutize into closed_loop, soft-pad target dir, UK
+  pre-flight ban, softpad_ cleanup protection, simple defaults, and
+  filler-stripping.
+- Regression fix: 0.85 → 0.97 leak in `_apply_stage23_duration_control`
+  restores ContextVar cleanly.
+
 ## [2026-08-12] P0 — Fix StageSnapshotIntegrityError on TTS Stage 24 stamps (929afb54)
 
 - Root cause: TTS stamped `cyrillic_ratio` / `tts_language` / `file` / `resolved_path`
@@ -362,4 +441,22 @@ See `docs/` for Stages 1–5 documentation.
 - Documentation auto-sync
 
 ## [2026-08-12] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-13] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-13] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-13] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-13] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-13] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-13] Documentation sync
 - Documentation auto-sync

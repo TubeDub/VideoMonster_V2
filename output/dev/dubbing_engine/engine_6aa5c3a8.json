@@ -1,0 +1,119 @@
+{
+  "task_id": "",
+  "run_id": "6aa5c3a8",
+  "lang": "uk",
+  "elapsed_sec": 0.071,
+  "segments_total": 2,
+  "segments_adapted": 0,
+  "segments_skipped": 1,
+  "strategies": {
+    "direct": 1,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 0,
+    "skip_tts": 1,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "",
+      "input": "",
+      "output": "",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 0,
+      "slot_ms": 1000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "no_slot_or_empty"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=0ms slot=1000ms prev_end=0ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 1,
+      "original": "",
+      "input": "Він вийшов.",
+      "output": "Ві́н вийшов.",
+      "passed": false,
+      "strategy": "skip_tts",
+      "predicted_ms": 785,
+      "slot_ms": 3000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "PASS: predicted=785ms slot=3000ms ratio=0.26 (<115%)"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=785ms slot=3000ms prev_end=1000ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=False checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "meaning_lost: word_retention=0.50 (min=0.55)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "project_id": "4432a3ee-9602-5120-aaf8-f218de1a24d9",
+  "title": "4432a3ee-9602-5120-aaf8-f218de1a24d9",
+  "storage_version": 0,
+  "legacy_task_id": "7f70472480864d89a39213954329c5b7",
+  "legacy_project_uuid": "",
+  "studio_session": {
+    "session_id": "7f70472480864d89a39213954329c5b7",
+    "task_id": "7f70472480864d89a39213954329c5b7",
+    "segments": [],
+    "timing_map": [],
+    "source_segments": [],
+    "tracks": {
+      "original": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Original Voice",
+        "i18n_key": "studio.track.original",
+        "color": "#22c55e"
+      },
+      "user_voice": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "User Voice",
+        "i18n_key": "studio.track.user_voice",
+        "color": "#ec4899"
+      },
+      "music": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Music",
+        "i18n_key": "studio.track.music",
+        "color": "#a855f7"
+      },
+      "sfx": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "SFX",
+        "i18n_key": "studio.track.sfx",
+        "color": "#64748b"
+      },
+      "tts": {
+        "muted": false,
+        "solo": false,
+        "volume": 1.0,
+        "label": "Dub Voice",
+        "i18n_key": "studio.track.dub",
+        "color": "#f59e0b"
+      }
+    },
+    "voice": "mykyta",
+    "lang": "uk",
+    "plugin_order": [
+      "eq",
+      "compressor"
+    ],
+    "duration_ms": 120000,
+    "video_path": "",
+    "video_preview": null,
+    "original_audio": null,
+    "task_status": "running",
+    "output_file": null,
+    "studio_url": "/studio?task_id=7f70472480864d89a39213954329c5b7"
+  },
+  "created_at": 1786647742.5795877,
+  "updated_at": 1786647742.5795882,
+  "last_opened_at": 0.0,
+  "trashed": false,
+  "trashed_at": 0.0,
+  "source": "legacy_studio_session",
+  "source_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\output\\studio_sessions\\7f70472480864d89a39213954329c5b7.json"
+}

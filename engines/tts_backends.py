@@ -546,11 +546,40 @@ def synthesize_with_backend(
     volume: float | None = None,
     length_scale: float | None = None,
     mykyta_controls: dict[str, Any] | None = None,
+    target_lang: str | None = None,
 ) -> Any:
-    """Synthesize with normalize + voice resolve + Edge fallback."""
+    """Synthesize with normalize + voice resolve + Edge fallback.
+
+    Stage 28 §C1 — hard UK ban gate before synth: any cs-CZ / sk-SK / pl-PL /
+    ru-RU / en-* / de-* / fr-* / hu-* / ro-* / bg-* voice is rewritten to a
+    safe Ukrainian voice (tts_uk mykyta or edge-offline uk-UA-*Neural). Short
+    ids like ``mykyta`` are never leaked into Edge.
+    """
     from engines.tts_engines.registry import synthesize
 
     eid = normalize_backend_name(engine_id)
+    _tgt = str(target_lang or "").split("-")[0].strip().lower()
+    if _tgt == "uk":
+        try:
+            from engines.tts_lang_lock import force_uk_tts_identity
+
+            _ident = force_uk_tts_identity(
+                target_lang="uk", engine_id=eid, voice=voice
+            )
+            _new_eid = normalize_backend_name(_ident.get("engine_id") or eid)
+            _new_voice = str(_ident.get("voice") or voice or "")
+            if _new_eid != eid or _new_voice != str(voice or ""):
+                logger.warning(
+                    "[TTS] UK pre-flight rewrite %s/%s -> %s/%s",
+                    eid,
+                    voice,
+                    _new_eid,
+                    _new_voice,
+                )
+            eid = _new_eid
+            voice = _new_voice
+        except Exception:
+            pass
     resolved = resolve_voice_for_backend(voice, eid)
     synth_kwargs: dict[str, Any] = {
         "engine_id": eid,

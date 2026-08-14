@@ -1,6 +1,6 @@
 {
   "task_id": "stream-test",
-  "created_at": "2026-08-12T11:48:09+00:00",
+  "created_at": "2026-08-13T19:10:19+00:00",
   "agents": [
     {
       "agent_name": "StreamingPipeline/4.2",
@@ -9,7 +9,7 @@
       "error_msg": null,
       "decision": null,
       "fallback_used": false,
-      "timestamp": "2026-08-12T11:48:09+00:00",
+      "timestamp": "2026-08-13T19:10:19+00:00",
       "segment_idx": null,
       "execution_time_ms": 0.0,
       "retry_count": 0,
@@ -19,8 +19,8 @@
       "output_metrics": {
         "success": true,
         "completed_segments": 2,
-        "total_elapsed_ms": 109.5,
-        "throughput_segments_per_sec": 18.259,
+        "total_elapsed_ms": 63.4,
+        "throughput_segments_per_sec": 31.552,
         "peer_returns_total": 8,
         "retries_total": 6
       }
@@ -35,5 +35,5 @@
     "total_execution_time_ms": 0.0,
     "total_llm_calls": 0
   },
-  "saved_at": "2026-08-12T11:48:09+00:00"
+  "saved_at": "2026-08-13T19:10:19+00:00"
 }

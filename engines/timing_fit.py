@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 
 # ─── Quality-first constants (TZ text-fit / Stage 15–19) ──────────────────────
 # meaning completeness > timing fit > atempo (Happy Path ≤1.15, ≥0.85 slow).
+# Stage 28 §D1: UK Simple pipeline runtime caps to 1.05 via the
+# `max_atempo` argument in `apply_simple_pipeline_policy` (not globally, so
+# non-UK / advanced paths keep their existing budget).
 _ATEMPO_MIN = 0.85               # Stage 19 MAX_ATEMPO_SLOW
 _ATEMPO_ABSOLUTE_MAX = 1.20      # hard ceiling (advanced / legacy)
 _ATEMPO_EMERGENCY_MAX = 1.20

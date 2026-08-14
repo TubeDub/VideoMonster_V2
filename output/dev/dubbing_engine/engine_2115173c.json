@@ -1,0 +1,69 @@
+{
+  "task_id": "",
+  "run_id": "2115173c",
+  "lang": "ru",
+  "elapsed_sec": 0.041,
+  "segments_total": 1,
+  "segments_adapted": 0,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 1,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 0,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "",
+      "input": "Он вышел на улицу.",
+      "output": "Он вышел на улицу.",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 1560,
+      "slot_ms": 3000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "PASS: predicted=1560ms slot=3000ms ratio=0.52 (<115%)"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=1560ms slot=3000ms prev_end=0ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    }
+  ]
+}

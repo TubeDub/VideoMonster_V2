@@ -2,7 +2,7 @@
   "ok": false,
   "suite": "dsal_v4_p5",
   "llm_off": true,
-  "issued_at": "2026-08-12T11:45:14Z",
+  "issued_at": "2026-08-13T19:08:00Z",
   "golden_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\tests\\golden\\dub\\george_lucas_en_uk_20.json",
   "gates": {
     "llm_off_ok": {

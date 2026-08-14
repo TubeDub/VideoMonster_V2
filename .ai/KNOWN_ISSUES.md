@@ -1,6 +1,6 @@
 # Known Issues
 
-*Auto-generated: 2026-08-12 14:44*
+*Auto-generated: 2026-08-13 22:07*
 
 - **[high]** `core/ai_benchmark.py`: Function 'run_ai_benchmark' complexity=28
 - **[high]** `core/ai_memory.py`: Function 'learn' complexity=29

@@ -1399,6 +1399,58 @@ def _build_openddf_tts_pipeline_block(
         audio_stat = None
         resolve_segment_audio_path = None
 
+    # Stage 28 §A3 — census MUST look inside `session_dir/closed_loop/<task_id>/`
+    # where soft-pad / repair / regen actually write their files. Prior shallow
+    # `base / basename` lookup missed all pads and repaired regens sitting
+    # under closed_loop/, causing the diagnostic (task 4a512fd6): audio_missing=20
+    # with padded_count=0 even after re-pad.
+    try:
+        from engines.dubbing_engine.session_adapter import (
+            resolve_session_audio as _resolve_session_audio,
+        )
+    except Exception:
+        _resolve_session_audio = None
+
+    _task_id_for_lookup = str(task_info.get("task_id") or "").strip()
+
+    def _deep_resolve(seg_or_name: Any) -> _Path | None:
+        """Try session-aware resolver first, then closed_loop, then shallow."""
+        # Extract candidate name from seg dict or accept a raw name.
+        if isinstance(seg_or_name, dict):
+            for k in ("resolved_path", "fitted_file", "file", "tts_file_path"):
+                v = seg_or_name.get(k)
+                if v:
+                    seg_or_name = v
+                    break
+        raw = str(seg_or_name or "").strip()
+        if not raw:
+            return None
+        p = _Path(raw)
+        if p.is_file():
+            return p
+        # Session-adapter rglob under session_dir (fast for a few dozen files).
+        if _resolve_session_audio is not None:
+            try:
+                cand = _resolve_session_audio(raw, task_info=task_info)
+                if cand and cand.is_file():
+                    return cand
+            except Exception:
+                pass
+        # Explicit fallbacks: session_dir/closed_loop/<task_id>/basename
+        if base is not None:
+            for sub in (
+                _Path("closed_loop") / _task_id_for_lookup / p.name
+                if _task_id_for_lookup
+                else _Path(p.name),
+                _Path(p.name),
+            ):
+                if sub is None:
+                    continue
+                cand = base / sub
+                if cand.is_file():
+                    return cand
+        return None
+
     for idx, seg in enumerate(segments_data):
         if seg.get("merged_into") is not None:
             continue
@@ -1425,10 +1477,14 @@ def _build_openddf_tts_pipeline_block(
                 cand_path = str(name)
         if cand_path:
             p = _Path(cand_path)
-            if not p.is_file() and base is not None:
-                p2 = base / p.name
-                if p2.is_file():
-                    p = p2
+            if not p.is_file():
+                deep = _deep_resolve(seg)
+                if deep is not None:
+                    p = deep
+                elif base is not None:
+                    p2 = base / p.name
+                    if p2.is_file():
+                        p = p2
             resolved = str(p)
             if audio_stat is not None:
                 ok, size = audio_stat(p)

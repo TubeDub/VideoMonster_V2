@@ -1482,3 +1482,50 @@
 {"event": "PROJECT_MIGRATED", "ts": 1786565082.5464573, "payload": {"project_id": "de59fd22-8a4b-5bf1-b1b6-0d72bd4db92a", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1786565082.5812624, "payload": {"project_id": "8a098cbf-5dc0-5b3f-ad52-1d18ab6e161a", "source": "tdproj"}}
 {"event": "STORAGE_CLEANUP", "ts": 1786565202.4780517, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1786646464.4512377, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646464.6148703, "payload": {"project_id": "375da7fc-24c5-5c72-8908-b2f40152c633", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646464.8306177, "payload": {"project_id": "f08f1cd1-e0c5-54ef-8bac-25e8b48adaea", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646464.858781, "payload": {"project_id": "c01afe03-efaa-52ac-9739-0757caf37d88", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646464.8946016, "payload": {"project_id": "6deb9b63-395d-5dd5-949a-000dfcc0db6e", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646464.9372897, "payload": {"project_id": "35a2e711-dc72-5d53-8f84-b97cd5b77e6c", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1786646547.3077245, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1786646963.5155728, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646963.5532277, "payload": {"project_id": "656ddf2f-bdf0-5106-9f5c-3f9a3b71c9e2", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646963.5997097, "payload": {"project_id": "6870ce15-2c9f-5758-a315-bb71db70ad64", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646963.639504, "payload": {"project_id": "f7cdb8c7-4d36-5a31-afff-5c649e4de96e", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646963.8917322, "payload": {"project_id": "bc3a7d99-9893-5400-bde5-983db8a54860", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646963.9337702, "payload": {"project_id": "c845bd85-373b-51ac-9da3-a755c6c98675", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786646963.9735353, "payload": {"project_id": "99a58af9-3274-5dfc-9c29-c43846ccfe51", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1786647036.6924975, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1786647209.2606182, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647209.293066, "payload": {"project_id": "0aea5935-c36c-5a9a-8d2b-0c879f400d0d", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647209.319238, "payload": {"project_id": "587c04c4-46bd-58cd-b2bd-d411d0cdf07c", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647209.3491566, "payload": {"project_id": "f24aae49-b9ae-5502-91b2-acac7b87e548", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647209.5622387, "payload": {"project_id": "659db48e-5b2a-552d-87ea-2f5332a34427", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647209.589899, "payload": {"project_id": "4c882455-4da7-52d7-8d1e-689e52b67a3f", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647209.613409, "payload": {"project_id": "2b41f13f-5847-5a0e-8eb7-7bb54d311a7c", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1786647280.2175822, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1786647458.8879278, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647458.930195, "payload": {"project_id": "1700de90-85c6-5bbf-8555-d75fcdbf2b17", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647458.9573662, "payload": {"project_id": "21d2f7c0-c189-5ec9-9789-6b91167e7e1d", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647458.9848669, "payload": {"project_id": "f45ce1d9-737e-5c8f-8203-82bc518fe7b0", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647459.2157931, "payload": {"project_id": "f4e85d03-4ef7-5037-868b-999460d05c79", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647459.2527354, "payload": {"project_id": "6f233321-913c-5ff1-be13-fefea05296c0", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647459.2834349, "payload": {"project_id": "1ca2eb73-ce0b-5214-ab01-18eb6cc490e7", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1786647537.1423326, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1786647742.5173998, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647742.5523648, "payload": {"project_id": "3bf07335-8f70-5a86-9ef7-de08a4157260", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647742.578239, "payload": {"project_id": "2da90e76-a245-5416-8317-d4c5e3670713", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647742.603486, "payload": {"project_id": "4432a3ee-9602-5120-aaf8-f218de1a24d9", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647742.8209229, "payload": {"project_id": "85780a92-bb45-5a41-9496-eff889dba2ce", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647742.844585, "payload": {"project_id": "0712900e-d003-5441-8862-6a356550e8c3", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786647742.8695269, "payload": {"project_id": "9bb99fa8-6d1f-578f-ae4f-4230b49bc424", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1786647827.0580716, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "STORAGE_CLEANUP", "ts": 1786648038.4695094, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1786648038.505176, "payload": {"project_id": "2b144336-5090-58c1-90b4-e0874bf8e475", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786648038.5300386, "payload": {"project_id": "1ee874ef-73c6-5e22-a1b1-0d0df7b599f8", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786648038.5535738, "payload": {"project_id": "fea5b136-f8de-589d-8920-a2109c2a1848", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786648038.7702725, "payload": {"project_id": "c201e63d-232b-5ed6-9946-78c8a598c775", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786648038.8035653, "payload": {"project_id": "17877c61-ad56-5c44-91e8-dd27a84b6db6", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1786648038.825846, "payload": {"project_id": "580e386c-b05d-5a6c-bedc-261e9c928488", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1786648117.3775876, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}

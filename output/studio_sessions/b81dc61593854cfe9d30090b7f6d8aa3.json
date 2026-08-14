@@ -1,0 +1,25 @@
+{
+  "session_id": "b81dc61593854cfe9d30090b7f6d8aa3",
+  "task_id": "b81dc61593854cfe9d30090b7f6d8aa3",
+  "segments": [
+    {
+      "id": "0",
+      "index": 0,
+      "text": "Test",
+      "start_ms": 0,
+      "end_ms": 2000,
+      "file": null,
+      "overflow_pct": 40.0,
+      "container_status": "red"
+    }
+  ],
+  "timing_map": [
+    {
+      "start": 0,
+      "end": 2000
+    }
+  ],
+  "duration_ms": 10000,
+  "video_path": "C:\\Users\\serhii\\AppData\\Local\\Temp\\pytest-of-serhii\\pytest-767\\test_studio_mix_endpoint_check0\\fake.mp4",
+  "video_preview": null
+}

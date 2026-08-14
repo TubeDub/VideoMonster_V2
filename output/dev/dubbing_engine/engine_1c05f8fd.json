@@ -1,0 +1,74 @@
+{
+  "task_id": "",
+  "run_id": "1c05f8fd",
+  "lang": "uk",
+  "elapsed_sec": 0.041,
+  "segments_total": 1,
+  "segments_adapted": 0,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 1,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 0,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "This makes sense.",
+      "input": "Це має сенс.",
+      "output": "Це має сенс.",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 993,
+      "slot_ms": 2000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=993ms slot=2000ms prev_end=0ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    }
+  ]
+}

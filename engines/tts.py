@@ -357,6 +357,12 @@ async def _generate_single(
 
     def _sync() -> None:
         t_sync = time.perf_counter()
+        _tgt_pass = str(
+            (context or {}).get("target_lang")
+            or (context or {}).get("tts_language")
+            or (context or {}).get("language")
+            or ""
+        )
         result = synthesize_with_backend(
             text,
             voice,
@@ -367,6 +373,7 @@ async def _generate_single(
             volume=None if mykyta is None else mykyta["volume"],
             length_scale=None if mykyta is None else mykyta["length_scale"],
             mykyta_controls=mykyta,
+            target_lang=_tgt_pass or None,
         )
         if not result.ok:
             duration_ms = (time.perf_counter() - t_sync) * 1000.0

@@ -50,6 +50,8 @@ _PROTECTED_AUDIO_PREFIXES = (
     "tts_",
     "tts_regen_",
     "pad_silence_",
+    # Stage 28 §E — softpad_ is the last-resort pad prefix; must survive cleanup.
+    "softpad_",
     # spec v3 speaker reference clips
     "speaker_",
     # spec v3 4-stem outputs

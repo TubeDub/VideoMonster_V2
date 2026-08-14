@@ -22,8 +22,11 @@ logger = logging.getLogger("tubedub.happy_path")
 USE_ADVANCED_ADAPTATION = False
 
 # Happy Path timing (Stage 15/19): meaning > fit > atempo (0.85–1.15).
+# Stage 28 §D1 — UK Simple caps atempo at 1.05 (max 1.08) — no "cartoon speedup".
 HAPPY_PATH_MIN_ATEMPO = 0.85
 HAPPY_PATH_MAX_ATEMPO = 1.15
+HAPPY_PATH_MAX_ATEMPO_UK = 1.05
+HAPPY_PATH_HARD_MAX_ATEMPO_UK = 1.08
 HAPPY_PATH_NO_SPEECH_TRIM = True
 
 _TRUE = frozenset({"1", "true", "yes", "on"})
@@ -131,6 +134,16 @@ def stamp_happy_path_meta(
     """Write path labels into task info for clean logs / Review diagnostics."""
     mode = resolve_user_mode(task_info, explicit=user_mode)
     advanced = advanced_adaptation_enabled(task_info, user_mode=mode)
+    # Stage 28 §D1 — UK Simple tightens the atempo window so speech never
+    # accelerates past ~1.05× (max ~1.08×) — "cartoon speedup" is the
+    # perceptual fingerprint the operator flagged.
+    _tgt = str(task_info.get("target_lang") or task_info.get("lang") or "").split("-")[0].lower()
+    if not advanced and _tgt == "uk":
+        _max_atempo = HAPPY_PATH_MAX_ATEMPO_UK
+    elif advanced:
+        _max_atempo = 1.20
+    else:
+        _max_atempo = HAPPY_PATH_MAX_ATEMPO
     meta = {
         "user_mode": mode,
         "happy_path": not advanced,
@@ -141,12 +154,14 @@ def stamp_happy_path_meta(
             if advanced
             else ["naturalizer", "text_slot_fit"]
         ),
-        # Explicit Simple gates (TZ reference pipeline).
         "post_tts_resegment_allowed": bool(advanced),
         "blind_timing_align_allowed": bool(advanced),
         "text_fit_required": (not advanced),
         "min_atempo": HAPPY_PATH_MIN_ATEMPO if not advanced else 0.90,
-        "max_atempo": HAPPY_PATH_MAX_ATEMPO if not advanced else 1.20,
+        "max_atempo": _max_atempo,
+        "max_atempo_hard": (
+            HAPPY_PATH_HARD_MAX_ATEMPO_UK if (not advanced and _tgt == "uk") else _max_atempo
+        ),
         "no_speech_trim": HAPPY_PATH_NO_SPEECH_TRIM if not advanced else False,
     }
     task_info.update(meta)

@@ -52,7 +52,9 @@ def apply_simple_pipeline_policy(
 ) -> dict[str, Any]:
     """Stamp all Simple/Happy Path gates onto task info (idempotent)."""
     from engines.happy_path import (
+        HAPPY_PATH_HARD_MAX_ATEMPO_UK,
         HAPPY_PATH_MAX_ATEMPO,
+        HAPPY_PATH_MAX_ATEMPO_UK,
         HAPPY_PATH_MIN_ATEMPO,
         HAPPY_PATH_NO_SPEECH_TRIM,
         is_simple_mode,
@@ -72,22 +74,29 @@ def apply_simple_pipeline_policy(
         task_info["adaptation_path"] = "happy_path"
         task_info["adaptation_shorteners"] = ["naturalizer", "text_slot_fit"]
 
+    # Stage 28 §D1/F — UK Simple caps atempo at 1.05 (hard 1.08) and prefers
+    # tts_uk/mykyta with rate=0.97 / length_scale=1.05 / volume=1.05 (no manual
+    # knobs, meaning-first). Non-UK targets keep the legacy Edge default.
+    _tgt = str(task_info.get("target_lang") or task_info.get("lang") or "").split("-")[0].lower()
+    _uk_simple = _tgt == "uk"
+    _max_atempo = float(HAPPY_PATH_MAX_ATEMPO_UK if _uk_simple else HAPPY_PATH_MAX_ATEMPO)
+    _default_engine = "tts_uk" if _uk_simple else "edge-offline"
     policy = {
         "simple_pipeline": True,
         "simple_pipeline_steps": list(SIMPLE_PIPELINE_STEPS),
         "simple_disabled_modules": list(SIMPLE_DISABLED),
         # Timing / speech
         "min_atempo": float(HAPPY_PATH_MIN_ATEMPO),
-        "max_atempo": float(HAPPY_PATH_MAX_ATEMPO),
+        "max_atempo": _max_atempo,
+        "max_atempo_hard": float(HAPPY_PATH_HARD_MAX_ATEMPO_UK if _uk_simple else HAPPY_PATH_MAX_ATEMPO),
         "no_speech_trim": bool(HAPPY_PATH_NO_SPEECH_TRIM),
         "text_fit_required": True,
         "post_tts_resegment_allowed": False,
         "blind_timing_align_allowed": False,
         # Like pyVideoTrans: finish with an MP4, don't stop at Studio.
         "simple_auto_mix": True,
-        # Prefer Edge-TTS in Simple unless caller already set another engine.
-        "tts_engine": str(task_info.get("tts_engine") or "edge-offline").strip()
-        or "edge-offline",
+        "tts_engine": str(task_info.get("tts_engine") or _default_engine).strip()
+        or _default_engine,
         # Segmentation: Happy Path glue, never adaptive re-split.
         "segmentation_mode": "happy_path",
         # Stage 7: never fall into AI-Core streaming_text after MT.
@@ -108,6 +117,12 @@ def apply_simple_pipeline_policy(
         "simple_voice_locked": True,
         "voice_platform_multi_speaker_allowed": False,
     }
+    if _uk_simple:
+        # Stage 28 §F — UK Simple defaults (only lang + volume are user-facing).
+        policy.setdefault("mykyta_rate", 0.97)
+        policy.setdefault("mykyta_length_scale", 1.05)
+        policy.setdefault("mykyta_volume", 1.05)
+        policy.setdefault("mykyta_pitch", 0)
     task_info.update(policy)
     try:
         from engines.simple_stt_policy import apply_simple_stt_policy
@@ -192,13 +207,15 @@ def run_simple_dub_pipeline(
         task_id,
         ",".join(SIMPLE_PIPELINE_STEPS),
     )
+    # Stage 28 §F — UK Simple defaults to tts_uk/mykyta (fallback resolves in
+    # force_uk_tts_identity: Edge uk-UA-Ostap only if tts_uk missing).
     return _run_pipeline(
         task_id=task_id,
         video_path=video_path,
         target_lang=target_lang,
         voice=voice
         or (
-            "uk-UA-OstapNeural"
+            "mykyta"
             if str(target_lang or "").startswith("uk")
             else "en-US-GuyNeural"
         ),

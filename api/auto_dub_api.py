@@ -1885,14 +1885,22 @@ def _write_silence_pad_for_segment(
     segment_id: str,
     duration_ms: int,
 ) -> tuple[str, int]:
-    """Write a short silence wav so mux can continue without cutting the video end."""
+    """Write a short silence wav so mux can continue without cutting the video end.
+
+    Stage 28 §A2 — always returns an absolute resolved path so downstream
+    stamping cannot drift back to a relative `output/sessions/...` form.
+    """
     work_dir = Path(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
     dur = max(200, min(int(duration_ms or 1000), 30_000))
     sid = (segment_id or f"idx{idx}")[:24]
     name = f"pad_silence_{sid or idx}.wav"
     path = _make_silence_pad(dur, work_dir / name)
-    return str(path), dur
+    try:
+        abs_path = str(Path(path).resolve())
+    except OSError:
+        abs_path = str(path)
+    return abs_path, dur
 
 
 def _soft_pad_missing_segments(
@@ -1928,15 +1936,25 @@ def _soft_pad_missing_segments(
         except Exception:
             return p
 
-    session_dir = None
+    # Stage 28 §A1/B3 — ALWAYS write pads to session_dir/closed_loop/<task_id>/,
+    # never bare session root or relative output/sessions/... paths. The census
+    # searches this exact subtree, so pads land where the resolver can find them.
+    session_root: Path | None = None
     try:
         raw_sd = info.get("session_dir")
         if raw_sd:
-            session_dir = Path(str(raw_sd))
+            session_root = Path(str(raw_sd)).resolve()
     except Exception:
-        session_dir = None
-    if session_dir is None:
-        session_dir = _artifacts_dir() / "closed_loop" / str(task_id or "pad")
+        session_root = None
+    if session_root is None:
+        try:
+            session_root = _artifacts_dir(info).resolve()
+        except Exception:
+            session_root = _artifacts_dir(info)
+    if isinstance(info, dict):
+        info["session_dir"] = str(session_root)
+    tid = str(task_id or info.get("task_id") or "pad").strip() or "pad"
+    session_dir = (session_root / "closed_loop" / tid).resolve()
     session_dir.mkdir(parents=True, exist_ok=True)
 
     padded_indices: list[int] = []
@@ -2103,7 +2121,24 @@ def _repair_missing_tts_files(
     skipped = 0
     padded = 0
     warnings: list[dict] = []
-    work_root = _artifacts_dir() / "closed_loop" / str(task_id or "repair")
+    # Stage 28 §A1 — repair MUST write under session_dir/closed_loop/<task_id>/;
+    # never raw OUTPUT_DIR or a stale thread-local. Census walks this exact tree.
+    _repair_root: Path | None = None
+    try:
+        _raw_sd_repair = info.get("session_dir") if isinstance(info, dict) else None
+        if _raw_sd_repair:
+            _repair_root = Path(str(_raw_sd_repair)).resolve()
+    except Exception:
+        _repair_root = None
+    if _repair_root is None:
+        try:
+            _repair_root = _artifacts_dir(info).resolve()
+        except Exception:
+            _repair_root = _artifacts_dir(info)
+    if isinstance(info, dict):
+        info["session_dir"] = str(_repair_root)
+    _tid_repair = str(task_id or (info.get("task_id") if isinstance(info, dict) else "") or "repair").strip() or "repair"
+    work_root = (_repair_root / "closed_loop" / _tid_repair).resolve()
     work_root.mkdir(parents=True, exist_ok=True)
 
     def _resolve(p: str) -> str:
@@ -4116,9 +4151,56 @@ def _log_dub_slot_fit(
 def _absolutize_segment_audio_paths(
     segments_data: list,
     session_dir: str | Path | None = None,
+    *,
+    task_id: str | None = None,
 ) -> int:
-    """Stage 24: rewrite segment audio keys to absolute resolved paths."""
+    """Stage 24/28: rewrite segment audio keys to absolute resolved paths.
+
+    Stage 28 §A2 — a stale/relative path no longer wins over a valid file in
+    ``session_dir/closed_loop/<task_id>/`` (where soft-pad / repair / regen
+    actually write). If a key holds a ghost path we look through session-adapter
+    rglob before writing it back, so census cannot report exists:false for a
+    file that is physically on disk.
+    """
     base = Path(str(session_dir)) if session_dir else None
+    if base is not None:
+        try:
+            base = base.resolve()
+        except OSError:
+            pass
+    tid = str(task_id or "").strip()
+
+    try:
+        from engines.dubbing_engine.session_adapter import (
+            resolve_session_audio as _resolve_session_audio,
+        )
+    except Exception:
+        _resolve_session_audio = None
+
+    def _deep_find(raw: str) -> Path | None:
+        p = Path(raw)
+        if p.is_file():
+            return p
+        if base is not None and tid:
+            cand = base / "closed_loop" / tid / p.name
+            if cand.is_file():
+                return cand
+        if base is not None:
+            cand = base / p.name
+            if cand.is_file():
+                return cand
+        if _resolve_session_audio is not None:
+            try:
+                cand = _resolve_session_audio(
+                    raw,
+                    task_info={"session_dir": str(base)} if base is not None else None,
+                )
+                if cand and cand.is_file():
+                    return cand
+            except Exception:
+                pass
+        return None
+
     fixed = 0
     for seg in segments_data or []:
         if not isinstance(seg, dict):
@@ -4127,33 +4209,34 @@ def _absolutize_segment_audio_paths(
             raw = str(seg.get(key) or "").strip()
             if not raw:
                 continue
-            p = Path(raw)
-            if not p.is_file() and base is not None:
-                cand = base / p.name
-                if cand.is_file():
-                    p = cand
-            try:
-                if p.is_file():
-                    abs_p = str(p.resolve())
-                    if seg.get(key) != abs_p:
-                        seg[key] = abs_p
-                        fixed += 1
-            except OSError:
+            p = _deep_find(raw)
+            if p is None:
                 continue
+            try:
+                abs_p = str(p.resolve())
+            except OSError:
+                abs_p = str(p)
+            if seg.get(key) != abs_p:
+                seg[key] = abs_p
+                fixed += 1
         # Prefer fitted → file as canonical absolute path.
         for prefer in ("fitted_file", "file", "tts_file_path"):
             pref = str(seg.get(prefer) or "").strip()
-            if pref and Path(pref).is_file():
-                try:
-                    abs_p = str(Path(pref).resolve())
-                    seg["resolved_path"] = abs_p
-                    if prefer != "file" and not (
-                        seg.get("file") and Path(str(seg.get("file"))).is_file()
-                    ):
-                        seg["file"] = abs_p
-                except OSError:
-                    pass
-                break
+            if not pref:
+                continue
+            pref_path = _deep_find(pref)
+            if pref_path is None:
+                continue
+            try:
+                abs_p = str(pref_path.resolve())
+            except OSError:
+                abs_p = str(pref_path)
+            seg["resolved_path"] = abs_p
+            if prefer != "file" and not (
+                seg.get("file") and Path(str(seg.get("file"))).is_file()
+            ):
+                seg["file"] = abs_p
+            break
     return fixed
 
 
@@ -4200,6 +4283,14 @@ def _regen_segment_tts(
     voice = str(_ident.get("voice") or voice or "")
     _lang = str(_ident.get("language") or target_lang or "uk")
     speak_text = " ".join(str(text or "").split()).strip()
+    # Stage 28 §D1 — strip Stage-5 pacing pads BEFORE TTS so "ось як це було
+    # тоді"/"Саме так: …" fillers do not eat slot time in the final audio.
+    try:
+        from engines.text_slot_fit import strip_slot_pad_fillers
+
+        speak_text = strip_slot_pad_fillers(speak_text)
+    except Exception:
+        pass
     if _lang == "uk" and speak_text:
         heavy, lat_r = is_latin_heavy(speak_text, threshold=0.30)
         if heavy:
@@ -4443,10 +4534,20 @@ def _commit_fitted_wav(
     task_info: dict | None = None,
     segment_id: str | None = None,
 ) -> str | None:
-    """Copy fitted WAV into the session artifact dir under a unique name."""
+    """Copy fitted WAV into the session artifact dir under a unique name.
+
+    Stage 28 §A1 — slot-fit outputs go under
+    ``session_dir/closed_loop/<task_id>/`` alongside pads and regens, so the
+    census resolver finds them in a single tree.
+    """
     if not src_path.is_file():
         return None
-    dest_dir = _artifacts_dir(task_info)
+    try:
+        _sd_root = _artifacts_dir(task_info).resolve()
+    except Exception:
+        _sd_root = _artifacts_dir(task_info)
+    _tid_fit = str((task_info or {}).get("task_id") or "").strip() or "fit"
+    dest_dir = _sd_root / "closed_loop" / _tid_fit
     dest_dir.mkdir(parents=True, exist_ok=True)
     from engines.pipeline_integrity.audio_identity import (
         copy_to_unique_path,
@@ -5450,7 +5551,7 @@ def _build_timed_dub_track(
                 task_info.get("session_dir")
                 or (task_info.get("artifacts_dir") if task_info else None)
             )
-            _absolutize_segment_audio_paths(segments_data, _sd)
+            _absolutize_segment_audio_paths(segments_data, _sd, task_id=task_id)
         except Exception:
             pass
         task_info["segments_data"] = list(segments_data or [])
@@ -5475,7 +5576,7 @@ def _build_timed_dub_track(
                 )
                 try:
                     _absolutize_segment_audio_paths(
-                        segments_data, task_info.get("session_dir")
+                        segments_data, task_info.get("session_dir"), task_id=task_id
                     )
                 except Exception:
                     pass
@@ -5516,7 +5617,17 @@ def _build_timed_dub_track(
         _happy_path_timing = True
     if _happy_path_timing and task_info is not None:
         task_info["timing_mode"] = "happy_path_no_speech_trim"
-        task_info["timing_max_atempo"] = 1.08
+        # Stage 28 §D1 — UK Simple max_atempo honours the policy stamp
+        # (1.05 for uk, 1.15 legacy) with 1.08 as the emergency hard ceiling.
+        _tgt_ta = str(task_info.get("target_lang") or task_info.get("lang") or "").split("-")[0].lower()
+        try:
+            _policy_max = float(task_info.get("max_atempo") or 1.08)
+        except (TypeError, ValueError):
+            _policy_max = 1.08
+        if _tgt_ta == "uk":
+            task_info["timing_max_atempo"] = min(1.08, _policy_max if _policy_max > 0 else 1.05)
+        else:
+            task_info["timing_max_atempo"] = _policy_max or 1.08
 
     # Stage 26 §2 — LAST-RESORT INLINE PAD.
     # `_soft_pad_missing_segments` + `_repair_missing_tts_files` above did their
@@ -5532,15 +5643,24 @@ def _build_timed_dub_track(
             stamp_audio_presence as _stamp_last,
         )
 
-        _session_dir = None
+        # Stage 28 §A1/B — force closed_loop/<task_id> under session_dir.
+        _session_root: Path | None = None
         if isinstance(task_info, dict):
             _raw_sd = task_info.get("session_dir")
             if _raw_sd:
-                _session_dir = Path(str(_raw_sd))
-        if _session_dir is None:
-            _session_dir = _artifacts_dir(task_info) / "closed_loop" / str(
-                task_id or "pad"
-            )
+                try:
+                    _session_root = Path(str(_raw_sd)).resolve()
+                except Exception:
+                    _session_root = Path(str(_raw_sd))
+        if _session_root is None:
+            try:
+                _session_root = _artifacts_dir(task_info).resolve()
+            except Exception:
+                _session_root = _artifacts_dir(task_info)
+        if isinstance(task_info, dict):
+            task_info["session_dir"] = str(_session_root)
+        _tid_lr = str(task_id or (task_info.get("task_id") if isinstance(task_info, dict) else "") or "pad").strip() or "pad"
+        _session_dir = (_session_root / "closed_loop" / _tid_lr).resolve()
         _session_dir.mkdir(parents=True, exist_ok=True)
 
         _forced_pad_indices: list[int] = []
@@ -5621,7 +5741,7 @@ def _build_timed_dub_track(
             task_info["segments_data"] = list(segments_data or [])
             try:
                 _absolutize_segment_audio_paths(
-                    segments_data, task_info.get("session_dir")
+                    segments_data, task_info.get("session_dir"), task_id=task_id
                 )
             except Exception:
                 pass
@@ -5877,6 +5997,14 @@ def _build_timed_dub_track(
                 continue
             if _s_dc.get("silence_pad") or _s_dc.get("audio_padded"):
                 _s_dc["duration_control_used"] = "soft_pad"
+            elif _s_dc.get("split_children") or _s_dc.get("split_index") is not None:
+                _s_dc["duration_control_used"] = "split"
+            elif _s_dc.get("expand_to_fill_used") or _s_dc.get("text_expanded"):
+                _s_dc["duration_control_used"] = "expand"
+            elif _s_dc.get("text_shortened") or _s_dc.get("sso_used"):
+                _s_dc["duration_control_used"] = "shorten"
+            elif _s_dc.get("trim_trailing_silence") or _s_dc.get("silence_trimmed_ms"):
+                _s_dc["duration_control_used"] = "trim_silence"
             elif _s_dc.get("stage23_atempo") or _s_dc.get("allow_atempo"):
                 _s_dc["duration_control_used"] = "atempo"
             elif _s_dc.get("tts_length_scale") not in (None, "", 1.0):

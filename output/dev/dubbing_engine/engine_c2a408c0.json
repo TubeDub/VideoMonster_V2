@@ -1,0 +1,67 @@
+{
+  "task_id": "",
+  "run_id": "c2a408c0",
+  "lang": "uk",
+  "elapsed_sec": 0.031,
+  "segments_total": 1,
+  "segments_adapted": 0,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 1,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 0,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "",
+      "input": "він вийшов на вулицю",
+      "output": "Ві́н вийшов на вулицю.",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 1618,
+      "slot_ms": 3000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "PASS: predicted=1458ms slot=3000ms ratio=0.49 (<115%)"
+        },
+        {
+          "s": "punct",
+          "applied": true,
+          "note": "added_terminal_period,capitalised_first_word"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=1618ms slot=3000ms prev_end=0ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    }
+  ]
+}

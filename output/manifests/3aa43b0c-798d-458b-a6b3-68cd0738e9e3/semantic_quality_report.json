@@ -1,0 +1,26 @@
+{
+  "task_id": "t-never-empty",
+  "project_uuid": "3aa43b0c-798d-458b-a6b3-68cd0738e9e3",
+  "engine": "Translation+Semantic v4.0",
+  "summary": {
+    "passed_count": 0,
+    "failed_count": 1,
+    "avg_semantic_score": 0.0,
+    "retries_total": 3
+  },
+  "segment_count": 1,
+  "segments": [
+    {
+      "index": 0,
+      "original_text": null,
+      "machine_translation": null,
+      "semantic_text": "",
+      "errors_found": null,
+      "errors_fixed": null,
+      "semantic_score": null,
+      "retry_count": 3,
+      "model_used": null,
+      "quality": null
+    }
+  ]
+}

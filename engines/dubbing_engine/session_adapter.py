@@ -57,8 +57,15 @@ class SessionContextAdapter:
 
     def bind_task_info(self, info: dict[str, Any]) -> None:
         info["session_id"] = self.session.session_id
-        info["session_dir"] = str(self.session.session_dir)
+        try:
+            info["session_dir"] = str(Path(self.session.session_dir).resolve())
+        except OSError:
+            info["session_dir"] = str(self.session.session_dir)
         info["mux_base_id"] = self.base_id
+        try:
+            info["task_id"] = self.task_id
+        except Exception:
+            pass
 
     def store_pipeline_state(
         self,
@@ -193,16 +200,29 @@ def resolve_session_audio(
         except OSError:
             continue
 
-    # 3) Basename in known roots
+    # 3) Basename in known roots — Stage 28 §A2 always checks the closed_loop
+    # subtree first so pads/regens land where the census (also §A3) looks.
     search_dirs: list[Path] = []
+    task_id_val = ""
+    if task_info:
+        raw_tid = task_info.get("task_id")
+        if raw_tid:
+            task_id_val = str(raw_tid).strip()
     for directory in (session_base, out_dir):
         if directory not in search_dirs:
             search_dirs.append(directory)
 
-    for directory in search_dirs:
+    priority_dirs: list[Path] = []
+    if task_id_val:
+        priority_dirs.append(session_base / "closed_loop" / task_id_val)
+    priority_dirs.append(session_base / "closed_loop")
+    for directory in priority_dirs + search_dirs:
         candidate = directory / name
         if candidate.is_file():
-            return candidate
+            try:
+                return candidate.resolve()
+            except OSError:
+                return candidate
 
     # 4) Recursive search under session (pause/, closed_loop/, post_tts_retry/, …)
     search_roots: list[Path] = []

@@ -2189,28 +2189,44 @@ def _apply_stage23_duration_control(
     ) >= 0.01:
         used = "rate"
 
+    # Stage 28 §D — ContextVar mykyta controls MUST be restored after the
+    # regen so the leak doesn't poison unrelated segments / test runs
+    # (`_pipeline_mykyta_controls` is a per-context contextvars.ContextVar,
+    # not per-segment — leaving 0.88 stashed here previously flipped every
+    # subsequent `resolve_mykyta_controls({}, env=False)` reading).
+    try:
+        from engines.tts_backends import get_pipeline_mykyta_controls as _get_mk
+        _prev_mk = _get_mk()
+    except Exception:
+        _prev_mk = None
     try:
         set_pipeline_mykyta_controls(ctrl)
     except Exception:
         pass
 
     try:
-        regen_result = regen_fn(
-            text,
-            voice=voice,
-            tts_rate=str(ctrl["rate"]),
-            tts_pitch=str(ctrl["pitch"]),
-            length_scale=ctrl["length_scale"],
-            volume=ctrl["volume"],
-            mykyta_controls=ctrl,
-            task_id=task_id,
-            segment_index=idx,
-            segment_id=str(seg.get("segment_id") or ""),
-            engine_id=engine_id or "tts_uk",
-        )
-    except Exception as exc:
-        logger.warning("stage23 duration_control regen failed: %s", exc)
-        return budget
+        try:
+            regen_result = regen_fn(
+                text,
+                voice=voice,
+                tts_rate=str(ctrl["rate"]),
+                tts_pitch=str(ctrl["pitch"]),
+                length_scale=ctrl["length_scale"],
+                volume=ctrl["volume"],
+                mykyta_controls=ctrl,
+                task_id=task_id,
+                segment_index=idx,
+                segment_id=str(seg.get("segment_id") or ""),
+                engine_id=engine_id or "tts_uk",
+            )
+        except Exception as exc:
+            logger.warning("stage23 duration_control regen failed: %s", exc)
+            return budget
+    finally:
+        try:
+            set_pipeline_mykyta_controls(_prev_mk)
+        except Exception:
+            pass
 
     if isinstance(regen_result, tuple):
         new_file, new_ms = regen_result[0], int(regen_result[1] or 0)
