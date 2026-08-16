@@ -1374,6 +1374,14 @@ def _build_openddf_tts_pipeline_block(
         else (task_info.get("segments_data") or [])
     )
     session_dir = task_info.get("session_dir")
+    # Stage 30 — ONE absolute session_dir shared with pad writers.
+    if session_dir:
+        try:
+            session_dir = str(_Path(str(session_dir)).resolve())
+            if isinstance(task_info, dict):
+                task_info["session_dir"] = session_dir
+        except OSError:
+            session_dir = str(session_dir)
     base = _Path(str(session_dir)) if session_dir else None
 
     # Static source map of the TTS handoff chain (function · file · line).
@@ -1498,6 +1506,17 @@ def _build_openddf_tts_pipeline_block(
                     pass
         if exists:
             present += 1
+            if resolved:
+                try:
+                    abs_r = str(_Path(resolved).resolve())
+                except OSError:
+                    abs_r = str(resolved)
+                resolved = abs_r
+                # Write disk-true path back so mux/census share one absolute stamp.
+                if not str(seg.get("resolved_path") or "").strip() or not _Path(
+                    str(seg.get("resolved_path") or "")
+                ).is_file():
+                    seg["resolved_path"] = abs_r
         rows.append(
             {
                 "index": int(seg.get("index", idx)),
@@ -1542,19 +1561,18 @@ def _build_openddf_tts_pipeline_block(
     padded_indices = [
         int(seg.get("index", i))
         for i, seg in enumerate(segments_data)
-        if seg.get("merged_into") is None
+        if isinstance(seg, dict)
+        and seg.get("merged_into") is None
         and (seg.get("audio_padded") or seg.get("silence_pad"))
     ]
+    # Stage 30 honest census — padded_count matches audio_padded=True,
+    # never a stale task_info 0 that hid real pads (diag 9297ff70).
     if not padded_indices and task_info.get("padded_indices"):
         try:
             padded_indices = [int(x) for x in (task_info.get("padded_indices") or [])]
         except Exception:
             padded_indices = []
-    padded_count = int(
-        task_info.get("padded_count")
-        or len(padded_indices)
-        or 0
-    )
+    padded_count = len(padded_indices)
     block = {
         "session_dir": str(session_dir) if session_dir else None,
         "expected_segments": len(rows),
@@ -1574,17 +1592,18 @@ def _build_openddf_tts_pipeline_block(
         ),
     }
     # Soft statuses only — never audio_missing_fatal (mux must complete).
-    # Never report bare "ok" while audio_missing > 0.
-    if missing > 0 and padded_count > 0:
-        block["final_status"] = "ok_with_pads"
-    elif missing > 0:
-        block["final_status"] = "degraded"
+    # Stage 30: FORBIDDEN final_status=degraded when audio_missing==0.
+    if missing == 0:
+        if padded_count > 0:
+            block["final_status"] = "ok_with_pads"
+        elif video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
+            block["final_status"] = "track_shorter_than_video"
+        else:
+            block["final_status"] = "ok"
     elif padded_count > 0:
         block["final_status"] = "ok_with_pads"
-    elif video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
-        block["final_status"] = "track_shorter_than_video"
     else:
-        block["final_status"] = "ok"
+        block["final_status"] = "degraded"
     return block
 
 

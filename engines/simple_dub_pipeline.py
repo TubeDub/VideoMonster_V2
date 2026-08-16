@@ -118,11 +118,17 @@ def apply_simple_pipeline_policy(
         "voice_platform_multi_speaker_allowed": False,
     }
     if _uk_simple:
-        # Stage 28 §F — UK Simple defaults (only lang + volume are user-facing).
+        # Stage 28 §F / Stage 29 §D — UK Simple defaults (only lang + volume
+        # are user-facing). Segment targets ~4 / 7 / 12 s, aggressiveness medium.
         policy.setdefault("mykyta_rate", 0.97)
         policy.setdefault("mykyta_length_scale", 1.05)
         policy.setdefault("mykyta_volume", 1.05)
         policy.setdefault("mykyta_pitch", 0)
+        policy.setdefault("segment_min_ms", 4000)
+        policy.setdefault("segment_preferred_ms", 7000)
+        policy.setdefault("segment_max_ms", 12000)
+        policy.setdefault("segmentation_aggressiveness", 0.50)
+        policy.setdefault("aggressiveness", "medium")
     task_info.update(policy)
     try:
         from engines.simple_stt_policy import apply_simple_stt_policy

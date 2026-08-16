@@ -226,8 +226,14 @@ def merge_stt_segments_happy_path(
     max_span_ms: int = MAX_MERGED_SPAN_MS,
     speaker_ids: Sequence[Any] | None = None,
 ) -> tuple[List[str], List[dict]]:
-    """TZ Stage 2 Happy Path STT glue: ≥5.0s (floor 4.5s), pause < 0.9s."""
-    safe = max(4500, int(min_safe_ms or HAPPY_PATH_MIN_SAFE_MS))
+    """TZ Stage 2 Happy Path STT glue: ≥5.0s default (UK Simple may use ≥4.0s).
+
+    Stage 29 §D — when callers pass ``min_safe_ms=4000`` (UK Simple ~4/7/12),
+    honour a 4.0s floor instead of the legacy 4.5s clamp.
+    """
+    requested = int(min_safe_ms or HAPPY_PATH_MIN_SAFE_MS)
+    floor = 4000 if requested <= 4000 else 4500
+    safe = max(floor, requested)
     gap = max(900, int(max_gap_ms or HAPPY_PATH_MAX_GAP_MS))
     # Never allow a looser-than-requested gap below the TZ floor of 900ms.
     gap = max(gap, HAPPY_PATH_MAX_GAP_MS)

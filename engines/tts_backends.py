@@ -59,6 +59,29 @@ def pop_last_synth_meta(path: str | Path) -> dict[str, Any]:
     except Exception:
         return {}
 
+
+def peek_last_synth_meta(path: str | Path) -> dict[str, Any]:
+    """Read last-synth sidecar meta without consuming it."""
+    try:
+        return dict(_LAST_SYNTH_META.get(_synth_meta_key(path), {}) or {})
+    except Exception:
+        return {}
+
+
+def transfer_last_synth_meta(src: str | Path, dest: str | Path) -> dict[str, Any]:
+    """Re-key sidecar meta after a copy (regen dest != synth path).
+
+    Stage 30 C2 — `_regen_segment_tts` copies TTS to a unique dest; popping
+    meta by dest used to miss and stamp requested `tts_uk/mykyta` even when
+    Edge actually produced the wav.
+    """
+    meta = pop_last_synth_meta(src)
+    if not meta:
+        meta = peek_last_synth_meta(dest)
+    if meta:
+        record_last_synth_meta(dest, meta)
+    return dict(meta or {})
+
 # Canonical backend names (UI / settings)
 TTS_BACKEND_EDGE = "edge"
 TTS_BACKEND_TTS_UK = "tts_uk"
@@ -435,9 +458,51 @@ def stamp_tts_backend_meta(
     controls: dict[str, Any] | None = None,
     language: str | None = None,
     cyrillic_ratio: float | None = None,
+    synth_meta: dict[str, Any] | None = None,
+    audio_path: str | Path | None = None,
 ) -> None:
-    """Write tts_backend / tts_voice / tts_language (+ Mykyta controls) onto a segment."""
-    eid = normalize_backend_name(engine_id)
+    """Write tts_backend / tts_voice / tts_language (+ Mykyta controls) onto a segment.
+
+    Stage 30 C2 — FACT from ``pop_last_synth_meta`` / ``synth_meta`` only.
+    If the wav was produced by Edge, stamp ``tts_backend=edge-offline`` plus
+    ``tts_fallback_reason``. Never stamp ``tts_uk`` for an Edge synth.
+    """
+    meta = dict(synth_meta or {})
+    if not meta and audio_path:
+        try:
+            meta = pop_last_synth_meta(audio_path)
+        except Exception:
+            meta = {}
+
+    used_engine = (
+        meta.get("tts_engine")
+        or meta.get("tts_backend")
+        or meta.get("tts_backend_effective")
+        or engine_id
+    )
+    used_voice = (
+        meta.get("tts_voice")
+        or meta.get("tts_voice_effective")
+        or meta.get("edge_voice")
+        or voice
+    )
+    used_eid_raw = str(used_engine or "").strip().lower()
+    voice_s = str(used_voice or "").strip()
+    sidecar_says_edge = bool(meta) and (
+        "edge" in used_eid_raw
+        or str(meta.get("tts_backend_effective") or "").lower().startswith("edge")
+        or bool(meta.get("edge_uk_fallback"))
+    )
+    # Neural voice + fallback reason (or sidecar Edge) → never rewrite to tts_uk.
+    if sidecar_says_edge or (
+        voice_s.startswith("uk-UA-") and meta.get("tts_fallback_reason")
+    ):
+        used_engine = ENGINE_EDGE
+        if not voice_s.startswith("uk-UA-"):
+            used_voice = DEFAULT_EDGE_VOICE
+            voice_s = used_voice
+
+    eid = normalize_backend_name(used_engine)
     display = backend_display_name(eid)
     lang = str(language or seg.get("tts_language") or seg.get("target_lang") or "uk")
     lang0 = lang.split("-")[0].lower()
@@ -446,19 +511,38 @@ def stamp_tts_backend_meta(
             from engines.tts_lang_lock import force_uk_tts_identity
 
             ident = force_uk_tts_identity(
-                target_lang="uk", engine_id=eid, voice=voice
+                target_lang="uk", engine_id=eid, voice=used_voice
             )
-            eid = normalize_backend_name(ident.get("engine_id") or eid)
-            display = backend_display_name(eid)
-            resolved = str(ident.get("voice") or voice)
+            # Sidecar Edge is sticky — force_uk must not promote it back to tts_uk.
+            if eid == ENGINE_EDGE or sidecar_says_edge:
+                eid = ENGINE_EDGE
+                display = backend_display_name(eid)
+                resolved = str(ident.get("voice") or used_voice)
+                if not str(resolved).startswith("uk-UA-"):
+                    resolved = DEFAULT_EDGE_VOICE
+            else:
+                eid = normalize_backend_name(ident.get("engine_id") or eid)
+                display = backend_display_name(eid)
+                resolved = str(ident.get("voice") or used_voice)
             lang0 = "uk"
         except Exception:
-            resolved = resolve_voice_for_backend(voice, eid)
+            resolved = resolve_voice_for_backend(used_voice, eid)
     else:
-        resolved = resolve_voice_for_backend(voice, eid)
-    seg["tts_backend"] = display
+        resolved = resolve_voice_for_backend(used_voice, eid)
+    # Honest stamp: Edge → engine id `edge-offline`, never display alias `edge`
+    # and never `tts_uk` after a fallback.
+    if eid == ENGINE_EDGE:
+        seg["tts_backend"] = ENGINE_EDGE
+    else:
+        seg["tts_backend"] = display
     seg["tts_engine"] = eid
     seg["tts_voice"] = resolved
+    if meta.get("tts_fallback_reason"):
+        seg["tts_fallback_reason"] = str(meta["tts_fallback_reason"])
+    if meta.get("tts_engine_requested"):
+        seg["tts_engine_requested"] = str(meta["tts_engine_requested"])
+    if meta.get("tts_voice_requested"):
+        seg["tts_voice_requested"] = str(meta["tts_voice_requested"])
     seg["tts_language"] = lang0
     prev_voice = seg.get("voice")
     if prev_voice != resolved:
@@ -554,14 +638,22 @@ def synthesize_with_backend(
     ru-RU / en-* / de-* / fr-* / hu-* / ro-* / bg-* voice is rewritten to a
     safe Ukrainian voice (tts_uk mykyta or edge-offline uk-UA-*Neural). Short
     ids like ``mykyta`` are never leaked into Edge.
+
+    Stage 29 §A3 — for target=uk, refuse synth when cyrillic_letter_ratio < 0.55
+    (no Edge fallback either — caller pads / remts).
     """
+    from engines.tts_engines.base import TTSResult
     from engines.tts_engines.registry import synthesize
 
     eid = normalize_backend_name(engine_id)
     _tgt = str(target_lang or "").split("-")[0].strip().lower()
     if _tgt == "uk":
         try:
-            from engines.tts_lang_lock import force_uk_tts_identity
+            from engines.tts_lang_lock import (
+                cyrillic_letter_ratio,
+                force_uk_tts_identity,
+                is_uk_tts_text_ok,
+            )
 
             _ident = force_uk_tts_identity(
                 target_lang="uk", engine_id=eid, voice=voice
@@ -578,6 +670,43 @@ def synthesize_with_backend(
                 )
             eid = _new_eid
             voice = _new_voice
+            clean = " ".join(str(text or "").split()).strip()
+            if clean and not is_uk_tts_text_ok(clean):
+                ratio = cyrillic_letter_ratio(clean)
+                logger.warning(
+                    "[TTS] UK cyrillic gate refuse ratio=%.2f text=%.80s",
+                    ratio,
+                    clean,
+                )
+                refused = TTSResult(
+                    ok=False,
+                    engine_id=eid,
+                    error=f"PIPELINE_LANG_MIX: cyrillic_ratio={ratio:.2f}<0.55",
+                    meta={
+                        "cyrillic_ratio": round(ratio, 3),
+                        "needs_re_tts": True,
+                        "tts_skip_reason": "cyrillic_ratio_low",
+                        "tts_engine_requested": eid,
+                        "tts_voice_requested": voice,
+                    },
+                )
+                try:
+                    record_last_synth_meta(
+                        output_path,
+                        {
+                            "tts_engine": eid,
+                            "tts_backend": eid,
+                            "tts_voice": voice,
+                            "tts_engine_requested": eid,
+                            "tts_voice_requested": voice,
+                            "tts_fallback_reason": "cyrillic_ratio_low",
+                            "ok": False,
+                            "cyrillic_ratio": round(ratio, 3),
+                        },
+                    )
+                except Exception:
+                    pass
+                return refused
         except Exception:
             pass
     resolved = resolve_voice_for_backend(voice, eid)

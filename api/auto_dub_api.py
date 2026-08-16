@@ -1620,25 +1620,41 @@ def _commit_tts_group_result(
             )
             from engines.tts_lang_lock import cyrillic_letter_ratio
 
-            # Stage 26 §3.2 — honour the actually-used backend/voice so a silent
+            # Stage 26/30 — honour the actually-used backend/voice so a silent
             # Edge fallback never masquerades as tts_uk/Mykyta in the JSON.
             _synth_meta = pop_last_synth_meta(abs_audio if abs_audio else audio_path)
             _engine_eff = str(
                 _synth_meta.get("tts_engine")
-                or (task_info or {}).get("tts_engine")
-                or (task_info or {}).get("tts_backend")
+                or _synth_meta.get("tts_backend")
                 or ""
             )
-            _voice_eff = str(
-                _synth_meta.get("tts_voice")
-                or segments_data[head_idx].get("voice")
-                or (task_info or {}).get("voice")
-                or ""
-            )
+            _voice_eff = str(_synth_meta.get("tts_voice") or "")
+            if not _engine_eff:
+                _guess_v = str(
+                    _voice_eff
+                    or segments_data[head_idx].get("voice")
+                    or ""
+                )
+                if _guess_v.startswith("uk-UA-"):
+                    _engine_eff = "edge-offline"
+                    _voice_eff = _guess_v
+                else:
+                    _engine_eff = str(
+                        (task_info or {}).get("tts_engine")
+                        or (task_info or {}).get("tts_backend")
+                        or ""
+                    )
+            if not _voice_eff:
+                _voice_eff = str(
+                    segments_data[head_idx].get("voice")
+                    or (task_info or {}).get("voice")
+                    or ""
+                )
             stamp_tts_backend_meta(
                 segments_data[head_idx],
                 engine_id=_engine_eff or None,
                 voice=_voice_eff,
+                synth_meta=_synth_meta,
                 language=str(
                     (task_info or {}).get("tts_language")
                     or (task_info or {}).get("target_lang")
@@ -1965,15 +1981,15 @@ def _soft_pad_missing_segments(
             continue
         if seg.get("merged_into") is not None or seg.get("merged_into_id"):
             continue
-        if seg.get("tts_blocked") or seg.get("skip_tts"):
-            continue
+        # Stage 29 §B3/B4 — pad timeline holes even when skip_tts/tts_blocked
+        # (census counts every non-merged row; audio_missing must stay 0).
         text = str(
             resolve_segment_text_for_tts(seg)
             or seg.get("final_tts_text")
             or seg.get("text")
             or ""
         ).strip()
-        # Pad speakable holes and also empty-text slots that still occupy timeline.
+        # Pad speakable holes and also empty-text / blocked slots that still occupy timeline.
         path = resolve_segment_audio_path(seg, resolve_path=_resolve)
         ok, _size = audio_stat(path)
         try:
@@ -1987,7 +2003,7 @@ def _soft_pad_missing_segments(
             tts_ms = 0
         if ok and tts_ms > 0 and not seg.get("needs_re_tts"):
             continue
-        if not text and ok:
+        if not text and ok and not seg.get("needs_re_tts"):
             continue
         missing_before.append(idx)
 
@@ -2072,6 +2088,262 @@ def _soft_pad_missing_segments(
             info["final_status"] = "ok"
             info.pop("export_blocked_reason", None)
     return stats
+
+
+def _closed_loop_pad_dir(task_info: dict | None, task_id: str | None) -> Path:
+    """Absolute ``session_dir/closed_loop/<task_id>/`` — one tree for pad + census."""
+    info = task_info if isinstance(task_info, dict) else {}
+    session_root: Path | None = None
+    try:
+        raw_sd = info.get("session_dir")
+        if raw_sd:
+            session_root = Path(str(raw_sd)).resolve()
+    except Exception:
+        session_root = None
+    if session_root is None:
+        try:
+            session_root = _artifacts_dir(info).resolve()
+        except Exception:
+            session_root = _artifacts_dir(info)
+    if isinstance(info, dict):
+        info["session_dir"] = str(session_root)
+    tid = str(task_id or info.get("task_id") or "pad").strip() or "pad"
+    pad_dir = (session_root / "closed_loop" / tid).resolve()
+    pad_dir.mkdir(parents=True, exist_ok=True)
+    return pad_dir
+
+
+def _last_resort_pad_missing_segments(
+    segments_data: list,
+    *,
+    task_info: dict | None,
+    task_id: str | None,
+    timing_map: list | None = None,
+    resolve_path=None,
+) -> dict:
+    """Stage 30 §A4 — stdlib-wave pad for EVERY remaining hole before census/mux.
+
+    Writes ``session_dir/closed_loop/<task_id>/pad_silence_{sid}.wav`` and stamps
+    absolute ``file`` / ``resolved_path`` / ``tts_file_path``. Census must see
+    these on the same ``session_dir``.
+    """
+    from engines.pipeline_integrity.audio_presence import (
+        MIN_AUDIO_BYTES,
+        audio_stat,
+        resolve_segment_audio_path,
+        stamp_audio_presence,
+    )
+
+    info = task_info if isinstance(task_info, dict) else {}
+
+    def _resolve(p: str) -> str:
+        if resolve_path:
+            try:
+                return str(resolve_path(p) or p)
+            except Exception:
+                return p
+        try:
+            return str(_resolve_segment_audio_path(p) or p)
+        except Exception:
+            return p
+
+    session_dir = _closed_loop_pad_dir(info, task_id)
+    padded_indices: list[int] = []
+
+    for idx, seg in enumerate(segments_data or []):
+        if not isinstance(seg, dict):
+            continue
+        if seg.get("merged_into") is not None or seg.get("merged_into_id"):
+            continue
+        path = resolve_segment_audio_path(seg, resolve_path=_resolve)
+        ok, size = audio_stat(path)
+        if ok and size >= MIN_AUDIO_BYTES:
+            try:
+                abs_ok = str(Path(path).resolve()) if path else ""
+            except OSError:
+                abs_ok = str(path or "")
+            if abs_ok:
+                seg["file"] = abs_ok
+                seg["tts_file_path"] = abs_ok
+                seg["resolved_path"] = abs_ok
+            continue
+        slot_ms = _slot_duration_ms_for_pad(seg, idx)
+        if timing_map is not None and idx < len(timing_map):
+            try:
+                from engines.timing_fit import _parse_timing as _pt
+
+                st, en = _pt(timing_map[idx])
+                if en > st:
+                    slot_ms = max(200, min(en - st, 30_000))
+            except Exception:
+                pass
+        sid = str(seg.get("segment_id") or f"idx{idx}")[:24]
+        out = session_dir / f"pad_silence_{sid}.wav"
+        try:
+            _write_stdlib_silence_wav(out, duration_ms=slot_ms, sample_rate=24000)
+            _assert_audio_file(out, min_bytes=MIN_AUDIO_BYTES)
+            try:
+                abs_p = str(Path(out).resolve())
+            except OSError:
+                abs_p = str(out)
+            seg["file"] = abs_p
+            seg["tts_file_path"] = abs_p
+            seg["fitted_file"] = abs_p
+            seg["resolved_path"] = abs_p
+            seg["playback_duration"] = int(slot_ms)
+            seg["tts_ms"] = int(slot_ms)
+            seg["actual_duration_ms"] = int(slot_ms)
+            seg["final_tts_duration_ms"] = int(slot_ms)
+            seg["audio_padded"] = True
+            seg["silence_pad"] = True
+            seg["pad_reason"] = seg.get("pad_reason") or "last_resort_pad"
+            seg["needs_re_tts"] = False
+            seg["status"] = "silence_pad"
+            seg["tts_status"] = "silence_pad"
+            seg["duration_control_used"] = "soft_pad"
+            meta = dict(seg.get("stage23") or {})
+            meta["silence_pad"] = True
+            meta["audio_padded"] = True
+            meta["pad_reason"] = seg["pad_reason"]
+            meta["silence_pad_ms"] = int(slot_ms)
+            meta["duration_control_used"] = "soft_pad"
+            seg["stage23"] = meta
+            stamp_audio_presence(seg, resolve_path=_resolve)
+            padded_indices.append(idx)
+            logger.warning(
+                "Task %s: LAST-RESORT pad idx=%s sid=%s ms=%s path=%s (mux continues)",
+                task_id,
+                idx,
+                sid,
+                slot_ms,
+                abs_p,
+            )
+        except Exception as pad_exc:
+            logger.error(
+                "Task %s: LAST-RESORT pad FAILED idx=%s: %s",
+                task_id,
+                idx,
+                pad_exc,
+            )
+
+    stats = {
+        "padded_indices": padded_indices,
+        "padded_count": len(padded_indices),
+        "last_resort_pad_indices": padded_indices,
+        "last_resort_pad_count": len(padded_indices),
+    }
+    if padded_indices and isinstance(info, dict):
+        info["padded_indices"] = list(
+            dict.fromkeys(list(info.get("padded_indices") or []) + padded_indices)
+        )
+        info["padded_count"] = len(info["padded_indices"])
+        info["final_status"] = "ok_with_pads"
+        info["last_resort_pad_indices"] = padded_indices
+        info["last_resort_pad_count"] = len(padded_indices)
+        info.pop("export_blocked_reason", None)
+    return stats
+
+
+def _log_census_missing_after_pad(
+    *,
+    task_id: str | None,
+    segments_data: list,
+    census: dict,
+    session_dir: str | Path | None,
+) -> None:
+    """Stage 30 — per-idx diagnostic when census still sees holes after pad."""
+    sd = str(session_dir or "")
+    rows = [r for r in (census or {}).get("segments") or [] if isinstance(r, dict)]
+    missing_rows = [r for r in rows if not r.get("exists")]
+    if not missing_rows:
+        return
+    logger.error(
+        "Task %s: census still missing=%s after pad session_dir=%s",
+        task_id,
+        len(missing_rows),
+        sd,
+    )
+    segs = list(segments_data or [])
+    by_index = {
+        int(s.get("index", i)): s
+        for i, s in enumerate(segs)
+        if isinstance(s, dict)
+    }
+    for row in missing_rows:
+        idx = int(row.get("index") if row.get("index") is not None else -1)
+        seg = by_index.get(idx)
+        path = str(row.get("resolved_path") or row.get("file") or "")
+        exists = False
+        size = 0
+        padded = bool(row.get("audio_padded"))
+        if isinstance(seg, dict):
+            padded = bool(seg.get("audio_padded") or seg.get("silence_pad") or padded)
+            if not path:
+                path = str(
+                    seg.get("resolved_path")
+                    or seg.get("file")
+                    or seg.get("tts_file_path")
+                    or ""
+                )
+        if path:
+            try:
+                p = Path(path)
+                exists = p.is_file()
+                size = int(p.stat().st_size) if exists else 0
+            except OSError:
+                exists = False
+                size = 0
+        logger.error(
+            "Task %s: census-missing-after-pad idx=%s path=%s exists=%s size=%s "
+            "audio_padded=%s session_dir=%s",
+            task_id,
+            idx,
+            path,
+            exists,
+            size,
+            padded,
+            sd,
+        )
+
+
+def _sync_pad_census_fields(info: dict | None, block: dict | None) -> dict:
+    """Keep census disk truth. Never clobber padded_count with 0; never degraded if missing==0."""
+    info = info if isinstance(info, dict) else {}
+    block = block if isinstance(block, dict) else {}
+    census_padded = int(block.get("padded_count") or 0)
+    info_padded = int(info.get("padded_count") or 0)
+    padded = max(census_padded, info_padded)
+    indices = list(
+        dict.fromkeys(
+            list(block.get("padded_indices") or [])
+            + list(info.get("padded_indices") or [])
+        )
+    )
+    block["padded_count"] = padded
+    block["padded_indices"] = indices
+    info["padded_count"] = padded
+    info["padded_indices"] = indices
+    missing = int(block.get("audio_missing") or 0)
+    if missing == 0:
+        status = "ok_with_pads" if padded > 0 else "ok"
+        block["final_status"] = status
+        prev = info.get("final_status")
+        if prev in (
+            None,
+            "",
+            "audio_missing_fatal",
+            "degraded",
+            "needs_soft_pad",
+            "silence_pad_used",
+        ) or (padded > 0 and prev == "ok"):
+            info["final_status"] = status
+        elif padded > 0:
+            info["final_status"] = "ok_with_pads"
+    elif info.get("final_status") == "degraded" and padded > 0:
+        info["final_status"] = "ok_with_pads"
+        block["final_status"] = "ok_with_pads"
+    info.pop("export_blocked_reason", None)
+    return block
 
 
 def _repair_missing_tts_files(
@@ -2458,7 +2730,28 @@ def _assert_segments_audio_ready(
     repaired = 0
     padded = 0
     warnings: list[dict] = []
-    work_root = _artifacts_dir() / "closed_loop" / str(task_id or "assert")
+    # Stage 29 §B1 — assert pads/regens MUST land under session_dir/closed_loop/<task_id>/
+    # (same tree as repair/soft-pad). Prior Stage 28 leftover used bare
+    # `_artifacts_dir()` without task_info → pads invisible to census.
+    _assert_root: Path | None = None
+    try:
+        _raw_sd_assert = info.get("session_dir") if isinstance(info, dict) else None
+        if _raw_sd_assert:
+            _assert_root = Path(str(_raw_sd_assert)).resolve()
+    except Exception:
+        _assert_root = None
+    if _assert_root is None:
+        try:
+            _assert_root = _artifacts_dir(info).resolve()
+        except Exception:
+            _assert_root = _artifacts_dir(info)
+    if isinstance(info, dict):
+        info["session_dir"] = str(_assert_root)
+    _tid_assert = (
+        str(task_id or (info.get("task_id") if isinstance(info, dict) else "") or "assert").strip()
+        or "assert"
+    )
+    work_root = (_assert_root / "closed_loop" / _tid_assert).resolve()
     work_root.mkdir(parents=True, exist_ok=True)
 
     primary = normalize_backend_name(
@@ -2606,8 +2899,14 @@ def _assert_segments_audio_ready(
                     duration_ms=pad_ms,
                 )
                 _assert_audio_file(pad_path, min_bytes=MIN_AUDIO_BYTES)
-                seg["file"] = pad_path
-                seg["tts_file_path"] = pad_path
+                try:
+                    abs_pad = str(Path(pad_path).resolve())
+                except OSError:
+                    abs_pad = str(pad_path)
+                seg["file"] = abs_pad
+                seg["tts_file_path"] = abs_pad
+                seg["fitted_file"] = abs_pad
+                seg["resolved_path"] = abs_pad
                 seg["playback_duration"] = pad_ms
                 seg["tts_ms"] = pad_ms
                 seg["actual_duration_ms"] = pad_ms
@@ -2618,6 +2917,7 @@ def _assert_segments_audio_ready(
                 seg["silence_pad"] = True
                 seg["audio_padded"] = True
                 seg["pad_reason"] = "missing_tts_after_repair"
+                seg["duration_control_used"] = "soft_pad"
                 warn = {
                     "index": idx,
                     "code": "silence_pad_fallback",
@@ -4292,17 +4592,24 @@ def _regen_segment_tts(
     except Exception:
         pass
     if _lang == "uk" and speak_text:
+        from engines.tts_lang_lock import cyrillic_letter_ratio, is_uk_tts_text_ok
+
         heavy, lat_r = is_latin_heavy(speak_text, threshold=0.30)
-        if heavy:
+        cyr_ok = is_uk_tts_text_ok(speak_text)
+        if stamp_seg is not None:
+            stamp_seg["cyrillic_ratio"] = round(cyrillic_letter_ratio(speak_text), 3)
+        if heavy or not cyr_ok:
             logger.warning(
-                "[TTS] latin_heavy_warning seg#%s ratio=%.2f text=%.80s — refuse as-is",
+                "[TTS] uk_text_gate seg#%s latin=%.2f cyr_ok=%s text=%.80s — remt/refuse",
                 segment_index if segment_index is not None else "?",
                 lat_r,
+                cyr_ok,
                 speak_text,
             )
             if stamp_seg is not None:
-                stamp_seg["latin_heavy_warning"] = True
-                stamp_seg["latin_letter_ratio"] = round(lat_r, 3)
+                if heavy:
+                    stamp_seg["latin_heavy_warning"] = True
+                    stamp_seg["latin_letter_ratio"] = round(lat_r, 3)
             remt_text, meta = guard_uk_tts_text(
                 speak_text,
                 source_text=str(
@@ -4319,10 +4626,17 @@ def _regen_segment_tts(
             )
             if meta.get("tts_lang_ok") and remt_text:
                 speak_text = remt_text
-            else:
-                # Do not voice Latin-heavy non-UK text — caller will try edge/pad.
                 if stamp_seg is not None:
-                    stamp_seg["tts_skip_reason"] = "latin_heavy_refused"
+                    stamp_seg["cyrillic_ratio"] = round(
+                        cyrillic_letter_ratio(speak_text), 3
+                    )
+            else:
+                # Stage 29 §A3 — do not voice non-Cyrillic UK text; pad instead.
+                if stamp_seg is not None:
+                    stamp_seg["tts_skip_reason"] = (
+                        "latin_heavy_refused" if heavy else "cyrillic_ratio_low"
+                    )
+                    stamp_seg["needs_re_tts"] = True
                 return None, 0
     text = speak_text
     log_tts_lifecycle(
@@ -4416,6 +4730,13 @@ def _regen_segment_tts(
         run_id=str(task_id or ""),
         purpose="tts_regen",
     )
+    # Stage 30 C2 — sidecar was keyed by synth `src`; dest is a copy.
+    try:
+        from engines.tts_backends import transfer_last_synth_meta as _xfer_meta
+
+        _xfer_meta(src, dest)
+    except Exception:
+        pass
     try:
         tts_ms = len(AudioSegment.from_file(str(dest)))
     except Exception:
@@ -4469,16 +4790,30 @@ def _regen_segment_tts(
             )
 
             _synth_meta = pop_last_synth_meta(abs_dest)
+            if not _synth_meta:
+                try:
+                    _synth_meta = pop_last_synth_meta(str(Path(src).resolve()))
+                except Exception:
+                    _synth_meta = {}
             _eid_eff = normalize_backend_name(
-                _synth_meta.get("tts_engine") or eid
+                _synth_meta.get("tts_engine")
+                or _synth_meta.get("tts_backend")
+                or eid
             )
             _voice_eff = str(_synth_meta.get("tts_voice") or voice or "")
+            if str(_eid_eff).startswith("edge") or (
+                str(_voice_eff).startswith("uk-UA-")
+                and _synth_meta.get("tts_fallback_reason")
+            ):
+                _eid_eff = normalize_backend_name("edge-offline")
             display = backend_display_name(_eid_eff)
+            if str(_eid_eff).startswith("edge"):
+                display = "edge-offline"
         except Exception:
             _synth_meta = {}
             _eid_eff = eid
             _voice_eff = voice
-            display = "tts_uk" if eid == "tts_uk" else ("edge" if eid in ("edge", "edge-offline") else eid)
+            display = "tts_uk" if eid == "tts_uk" else ("edge-offline" if eid in ("edge", "edge-offline") else eid)
         stamp_seg["tts_backend"] = display
         stamp_seg["tts_engine"] = _eid_eff
         stamp_seg["tts_voice"] = _voice_eff or voice
@@ -5498,9 +5833,31 @@ def _build_timed_dub_track(
         timing_map=timing_map,
         resolve_path=_mux_resolve,
     )
+    # Stage 30 §A — LAST RESORT before census/mux (pad_silence_{sid}.wav).
+    _lr_stats = {}
+    try:
+        _lr_stats = _last_resort_pad_missing_segments(
+            list(segments_data or []),
+            task_info=task_info if isinstance(task_info, dict) else {},
+            task_id=task_id,
+            timing_map=timing_map,
+            resolve_path=_mux_resolve,
+        )
+    except Exception as _lr_exc:
+        logger.error(
+            "Task %s: last-resort pad loop failed: %s (mux still continues)",
+            task_id,
+            _lr_exc,
+        )
+        _lr_stats = {}
     _audio_gate = dict(_audio_gate or {})
-    _audio_gate["padded_indices"] = list(_pad_stats.get("padded_indices") or [])
-    _audio_gate["padded_count"] = int(_pad_stats.get("padded_count") or 0)
+    _audio_gate["padded_indices"] = list(
+        dict.fromkeys(
+            list(_pad_stats.get("padded_indices") or [])
+            + list(_lr_stats.get("padded_indices") or [])
+        )
+    )
+    _audio_gate["padded_count"] = len(_audio_gate["padded_indices"])
     _audio_gate["missing_before_pad"] = list(_pad_stats.get("missing_before") or [])
     # After pads, gate is always soft-ok (mux proceeds).
     _audio_gate["ok"] = True
@@ -5514,8 +5871,7 @@ def _build_timed_dub_track(
 
     if task_info is not None:
         task_info["stage23b_audio_gate"] = _audio_gate
-        # Sync pads from repair + soft-pad + segment flags (repair may pad
-        # before soft-pad runs, leaving _pad_stats empty).
+        # Sync pads from repair + soft-pad + last-resort + segment flags.
         _from_segs = [
             int(s.get("index") if s.get("index") is not None else i)
             for i, s in enumerate(segments_data or [])
@@ -5526,6 +5882,7 @@ def _build_timed_dub_track(
             dict.fromkeys(
                 list(task_info.get("padded_indices") or [])
                 + list(_pad_stats.get("padded_indices") or [])
+                + list(_lr_stats.get("padded_indices") or [])
                 + list(_audio_gate.get("padded_indices") or [])
                 + _from_segs
             )
@@ -5541,31 +5898,42 @@ def _build_timed_dub_track(
             "",
             "audio_missing_fatal",
             "silence_pad_used",
+            "degraded",
         ):
             task_info["final_status"] = "ok"
         task_info.pop("export_blocked_reason", None)
-        # Stage 24: absolutize paths + sync repaired/padded list into task_info
-        # BEFORE census (studio/auto_dub often pass a deepcopy snapshot).
+        # Stage 24/30: absolutize ALL paths BEFORE census (one absolute session_dir).
         try:
             _sd = (
                 task_info.get("session_dir")
                 or (task_info.get("artifacts_dir") if task_info else None)
             )
+            if _sd:
+                try:
+                    task_info["session_dir"] = str(Path(str(_sd)).resolve())
+                    _sd = task_info["session_dir"]
+                except OSError:
+                    pass
             _absolutize_segment_audio_paths(segments_data, _sd, task_id=task_id)
         except Exception:
             pass
         task_info["segments_data"] = list(segments_data or [])
-        # Diagnostics AFTER repair+pad / BEFORE cleanup — disk truth only.
+        # Diagnostics AFTER repair+pad+last-resort — disk truth only.
         try:
             from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
 
             task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
                 task_info, segments_data=segments_data
             )
+            _sync_pad_census_fields(task_info, task_info["tts_pipeline"])
             _tp = task_info["tts_pipeline"]
-            _tp["padded_count"] = int(task_info.get("padded_count") or 0)
-            _tp["padded_indices"] = list(task_info.get("padded_indices") or [])
             if int(_tp.get("audio_missing") or 0) > 0:
+                _log_census_missing_after_pad(
+                    task_id=task_id,
+                    segments_data=list(segments_data or []),
+                    census=_tp,
+                    session_dir=task_info.get("session_dir"),
+                )
                 # Re-pad anything the census still sees as missing, then refresh.
                 _soft_pad_missing_segments(
                     list(segments_data or []),
@@ -5574,6 +5942,16 @@ def _build_timed_dub_track(
                     timing_map=timing_map,
                     resolve_path=_mux_resolve,
                 )
+                try:
+                    _last_resort_pad_missing_segments(
+                        list(segments_data or []),
+                        task_info=task_info,
+                        task_id=task_id,
+                        timing_map=timing_map,
+                        resolve_path=_mux_resolve,
+                    )
+                except Exception:
+                    pass
                 try:
                     _absolutize_segment_audio_paths(
                         segments_data, task_info.get("session_dir"), task_id=task_id
@@ -5584,28 +5962,39 @@ def _build_timed_dub_track(
                 task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
                     task_info, segments_data=segments_data
                 )
-                task_info["tts_pipeline"]["padded_count"] = int(
-                    task_info.get("padded_count") or 0
-                )
-                task_info["tts_pipeline"]["padded_indices"] = list(
-                    task_info.get("padded_indices") or []
-                )
+                _sync_pad_census_fields(task_info, task_info["tts_pipeline"])
+                if int(task_info["tts_pipeline"].get("audio_missing") or 0) > 0:
+                    _log_census_missing_after_pad(
+                        task_id=task_id,
+                        segments_data=list(segments_data or []),
+                        census=task_info["tts_pipeline"],
+                        session_dir=task_info.get("session_dir"),
+                    )
             # Never escalate to audio_missing_fatal — pads keep mux alive.
-            if task_info.get("final_status") == "audio_missing_fatal":
+            if task_info.get("final_status") in ("audio_missing_fatal", "degraded"):
                 task_info["final_status"] = (
                     "ok_with_pads"
                     if int(task_info.get("padded_count") or 0) > 0
                     else "ok"
                 )
+            if int(task_info.get("tts_pipeline", {}).get("audio_missing") or 0) == 0:
+                if task_info.get("final_status") == "degraded":
+                    task_info["final_status"] = (
+                        "ok_with_pads"
+                        if int(task_info.get("padded_count") or 0) > 0
+                        else "ok"
+                    )
             task_info.pop("export_blocked_reason", None)
         except Exception:
             pass
-        if int(_pad_stats.get("padded_count") or 0) > 0:
+        if int(_pad_stats.get("padded_count") or 0) > 0 or int(
+            _lr_stats.get("padded_count") or 0
+        ) > 0:
             logger.warning(
-                "Task %s: soft-pad pre-mux padded=%s indices=%s — mux continues",
+                "Task %s: pre-mux pad soft=%s last_resort=%s — mux continues",
                 task_id,
                 _pad_stats.get("padded_count"),
-                _pad_stats.get("padded_indices"),
+                _lr_stats.get("padded_count"),
             )
 
     _happy_path_timing = False
@@ -5628,148 +6017,6 @@ def _build_timed_dub_track(
             task_info["timing_max_atempo"] = min(1.08, _policy_max if _policy_max > 0 else 1.05)
         else:
             task_info["timing_max_atempo"] = _policy_max or 1.08
-
-    # Stage 26 §2 — LAST-RESORT INLINE PAD.
-    # `_soft_pad_missing_segments` + `_repair_missing_tts_files` above did their
-    # best, but if pydub silently failed or the census still sees a hole, walk
-    # every non-merged / non-blocked segment one final time and stamp a
-    # stdlib-`wave` silence file. This is the guarantee behind the TZ rule
-    # "audio_present + padded_count == expected_segments; audio_missing == 0".
-    try:
-        from engines.pipeline_integrity.audio_presence import (
-            MIN_AUDIO_BYTES as _MIN_B,
-            audio_stat as _audio_stat_last,
-            resolve_segment_audio_path as _resolve_last,
-            stamp_audio_presence as _stamp_last,
-        )
-
-        # Stage 28 §A1/B — force closed_loop/<task_id> under session_dir.
-        _session_root: Path | None = None
-        if isinstance(task_info, dict):
-            _raw_sd = task_info.get("session_dir")
-            if _raw_sd:
-                try:
-                    _session_root = Path(str(_raw_sd)).resolve()
-                except Exception:
-                    _session_root = Path(str(_raw_sd))
-        if _session_root is None:
-            try:
-                _session_root = _artifacts_dir(task_info).resolve()
-            except Exception:
-                _session_root = _artifacts_dir(task_info)
-        if isinstance(task_info, dict):
-            task_info["session_dir"] = str(_session_root)
-        _tid_lr = str(task_id or (task_info.get("task_id") if isinstance(task_info, dict) else "") or "pad").strip() or "pad"
-        _session_dir = (_session_root / "closed_loop" / _tid_lr).resolve()
-        _session_dir.mkdir(parents=True, exist_ok=True)
-
-        _forced_pad_indices: list[int] = []
-        for _idx_lr, _seg_lr in enumerate(segments_data or []):
-            if not isinstance(_seg_lr, dict):
-                continue
-            if _seg_lr.get("merged_into") is not None or _seg_lr.get("merged_into_id"):
-                continue
-            if _seg_lr.get("tts_blocked") or _seg_lr.get("skip_tts"):
-                continue
-            _cur_path = _resolve_last(_seg_lr, resolve_path=_mux_resolve)
-            _ok_lr, _sz_lr = _audio_stat_last(_cur_path)
-            if _ok_lr and _sz_lr >= _MIN_B:
-                continue
-            _slot_ms_lr = _slot_duration_ms_for_pad(_seg_lr, _idx_lr)
-            _sid_lr = str(_seg_lr.get("segment_id") or f"idx{_idx_lr}")[:24]
-            _pad_lr = _session_dir / f"softpad_{task_id or 't'}_{_idx_lr:04d}_{_sid_lr}.wav"
-            try:
-                _write_stdlib_silence_wav(
-                    _pad_lr,
-                    duration_ms=_slot_ms_lr,
-                    sample_rate=24000,
-                )
-                _assert_audio_file(_pad_lr, min_bytes=_MIN_B)
-                try:
-                    _abs_lr = str(_pad_lr.resolve())
-                except OSError:
-                    _abs_lr = str(_pad_lr)
-                _seg_lr["file"] = _abs_lr
-                _seg_lr["tts_file_path"] = _abs_lr
-                _seg_lr["fitted_file"] = _abs_lr
-                _seg_lr["resolved_path"] = _abs_lr
-                _seg_lr["playback_duration"] = int(_slot_ms_lr)
-                _seg_lr["tts_ms"] = int(_slot_ms_lr)
-                _seg_lr["actual_duration_ms"] = int(_slot_ms_lr)
-                _seg_lr["final_tts_duration_ms"] = int(_slot_ms_lr)
-                _seg_lr["audio_padded"] = True
-                _seg_lr["silence_pad"] = True
-                _seg_lr["pad_reason"] = _seg_lr.get("pad_reason") or "last_resort_pad"
-                _seg_lr["needs_re_tts"] = False
-                _seg_lr["status"] = "silence_pad"
-                _seg_lr["tts_status"] = "silence_pad"
-                _seg_lr["duration_control_used"] = "soft_pad"
-                _meta_lr = dict(_seg_lr.get("stage23") or {})
-                _meta_lr["silence_pad"] = True
-                _meta_lr["audio_padded"] = True
-                _meta_lr["pad_reason"] = _seg_lr["pad_reason"]
-                _meta_lr["silence_pad_ms"] = int(_slot_ms_lr)
-                _meta_lr["duration_control_used"] = "soft_pad"
-                _seg_lr["stage23"] = _meta_lr
-                _stamp_last(_seg_lr, resolve_path=_mux_resolve)
-                _forced_pad_indices.append(_idx_lr)
-                logger.warning(
-                    "Task %s: LAST-RESORT pad idx=%s sid=%s ms=%s (mux continues)",
-                    task_id,
-                    _idx_lr,
-                    _sid_lr,
-                    _slot_ms_lr,
-                )
-            except Exception as _pad_lr_exc:
-                logger.error(
-                    "Task %s: LAST-RESORT pad FAILED idx=%s: %s",
-                    task_id,
-                    _idx_lr,
-                    _pad_lr_exc,
-                )
-
-        if _forced_pad_indices and isinstance(task_info, dict):
-            _prev_padded = list(task_info.get("padded_indices") or [])
-            task_info["padded_indices"] = list(
-                dict.fromkeys(_prev_padded + _forced_pad_indices)
-            )
-            task_info["padded_count"] = len(task_info["padded_indices"])
-            task_info["final_status"] = "ok_with_pads"
-            task_info["last_resort_pad_indices"] = _forced_pad_indices
-            task_info["last_resort_pad_count"] = len(_forced_pad_indices)
-            task_info.pop("export_blocked_reason", None)
-            task_info["segments_data"] = list(segments_data or [])
-            try:
-                _absolutize_segment_audio_paths(
-                    segments_data, task_info.get("session_dir"), task_id=task_id
-                )
-            except Exception:
-                pass
-            try:
-                from engines.segment_timing_qa import (
-                    _build_openddf_tts_pipeline_block as _bopdb,
-                )
-
-                task_info["tts_pipeline"] = _bopdb(
-                    task_info, segments_data=segments_data
-                )
-                task_info["tts_pipeline"]["padded_count"] = int(
-                    task_info.get("padded_count") or 0
-                )
-                task_info["tts_pipeline"]["padded_indices"] = list(
-                    task_info.get("padded_indices") or []
-                )
-                task_info["tts_pipeline"]["last_resort_pad_count"] = len(
-                    _forced_pad_indices
-                )
-            except Exception:
-                pass
-    except Exception as _lr_exc:
-        logger.error(
-            "Task %s: last-resort pad loop failed: %s (mux still continues)",
-            task_id,
-            _lr_exc,
-        )
 
     segment_paths: list[str] = []
     placed_seg_indices: list[int] = []
@@ -11212,8 +11459,20 @@ def _run_pipeline_inner(
         elif _hp_seg:
             from engines.segment_merger import merge_stt_segments_happy_path
 
+            # Stage 29 §D — UK Simple ~4/7/12s glue floor from policy stamp.
+            _merge_kw: dict = {}
+            try:
+                _info_glue = dict(task.get("info") or {})
+                _glue_min = int(_info_glue.get("segment_min_ms") or 0)
+                if _glue_min > 0:
+                    _merge_kw["min_safe_ms"] = _glue_min
+                _glue_max = int(_info_glue.get("segment_max_ms") or 0)
+                if _glue_max > 0:
+                    _merge_kw["max_span_ms"] = _glue_max
+            except Exception:
+                pass
             merged_lines, merged_timing = merge_stt_segments_happy_path(
-                raw_lines, timing_map or raw_timing_backup
+                raw_lines, timing_map or raw_timing_backup, **_merge_kw
             )
             _before_n = len(raw_lines)
             _after_n = len(merged_lines or [])
@@ -18346,22 +18605,9 @@ def _run_pipeline_inner(
                 _pre_clean_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
                     _pre_clean_info
                 )
-                _tp_pre = _pre_clean_info["tts_pipeline"]
-                _tp_pre["padded_count"] = int(
-                    _pre_clean_info.get("padded_count") or 0
+                _sync_pad_census_fields(
+                    _pre_clean_info, _pre_clean_info["tts_pipeline"]
                 )
-                _tp_pre["padded_indices"] = list(
-                    _pre_clean_info.get("padded_indices") or []
-                )
-                if int(_pre_clean_info.get("padded_count") or 0) > 0:
-                    _pre_clean_info["final_status"] = "ok_with_pads"
-                elif _pre_clean_info.get("final_status") in (
-                    None,
-                    "",
-                    "audio_missing_fatal",
-                ):
-                    _pre_clean_info["final_status"] = "ok"
-                _pre_clean_info.pop("export_blocked_reason", None)
             except Exception:
                 pass
 
@@ -18432,19 +18678,7 @@ def _run_pipeline_inner(
                     info["tts_pipeline"] = _tp_prev
                 else:
                     info["tts_pipeline"] = _tp_now
-                info["tts_pipeline"]["padded_count"] = int(
-                    info.get("padded_count") or 0
-                )
-                info["tts_pipeline"]["padded_indices"] = list(
-                    info.get("padded_indices") or []
-                )
-                if int(info.get("padded_count") or 0) > 0:
-                    info["final_status"] = "ok_with_pads"
-                elif not info.get("final_status") or info.get("final_status") in (
-                    "audio_missing_fatal",
-                ):
-                    info["final_status"] = "ok"
-                info.pop("export_blocked_reason", None)
+                _sync_pad_census_fields(info, info["tts_pipeline"])
             except Exception:
                 pass
             try:

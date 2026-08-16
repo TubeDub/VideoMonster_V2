@@ -1,5 +1,74 @@
 # Changelog
 
+## [2026-08-16] Stage 30 — cold-run fix: audio holes + honest UK stamp
+
+Closes remaining Stage 28/29 leftovers that still allowed
+`padded_count=0` while `audio_missing>0` (diag 9297ff70) and
+`tts_uk/mykyta` stamps on Edge-produced (or Czech) audio.
+
+### Block A — Pad before census
+- `_build_timed_dub_track` order is now repair → assert → soft-pad →
+  LAST-RESORT (`pad_silence_{sid}.wav` under `session_dir/closed_loop/<task_id>/`)
+  → absolutize → census-from-disk → mux.
+- LAST-RESORT extracted to `_last_resort_pad_missing_segments` (stdlib wave).
+- If census still sees holes: per-idx log (`path, exists, size, audio_padded,
+  session_dir`) then re-pad — never `audio_missing_fatal`.
+- One absolute `info["session_dir"]` shared by pad writers and census.
+
+### Block B — Honest census
+- `_build_openddf_tts_pipeline_block` counts `padded_count` from
+  `audio_padded=True` flags, not a stale `task_info.padded_count=0`.
+- FORBIDDEN: `final_status=degraded` when `audio_missing==0`.
+- `_sync_pad_census_fields` never clobbers census `padded_count` with 0
+  (the overwrite that hid pads after Stage 26/28).
+
+### Block C — Honest UK / Edge stamp
+- `stamp_tts_backend_meta` takes FACT from sidecar/`synth_meta`. Edge synth
+  stamps `tts_backend=edge-offline` + `tts_fallback_reason` — never `tts_uk`.
+- `transfer_last_synth_meta` re-keys sidecar after regen copy (src → dest)
+  so `_regen_segment_tts` cannot miss Edge meta and lie `tts_uk/mykyta`.
+- Cache lookup for `lang=uk` misses non-UK engines and non-UK voices.
+
+### Tests
+- `tests/test_stage30_census_and_stamp.py` — census after pad, no degraded
+  when missing==0, honest Edge stamp, LAST-RESORT closed_loop visibility.
+
+## [2026-08-15] Stage 29 — Production EN→UK dub lock (post-28 gaps)
+
+
+Closes remaining Stage 28 leftovers that still allowed Czech/Slovak audio,
+census holes under assert-pad, and blocked-segment `audio_missing` on cold
+UK Simple runs (~179s, target=uk).
+
+### Block A — Language lock
+- `synthesize_with_backend(target_lang="uk")` refuses synth when
+  `cyrillic_letter_ratio < 0.55` (no Edge fallback voicing of Latin/CS text).
+- `_regen_segment_tts` gates on Cyrillic (not only latin_heavy); stamps
+  `needs_re_tts` + `tts_skip_reason=cyrillic_ratio_low` so soft-pad fills.
+- TTS cache: `lang=uk` + forbidden locale voice (cs/sk/pl/ru/en/…) → hard miss
+  (old non-UK entries cannot be reused).
+
+### Block B — Audio always exists
+- `_assert_segments_audio_ready` now writes under
+  `session_dir/closed_loop/<task_id>/` (same tree as repair/soft-pad/LAST-RESORT).
+  Prior leftover used bare `_artifacts_dir()` without `task_info` → pads
+  invisible to census.
+- Soft-pad + LAST-RESORT pad **blocked / skip_tts** timeline holes so
+  `audio_missing == 0` for every non-merged census row.
+- Order unchanged in spirit: repair → assert → soft-pad → (census re-pad) →
+  LAST-RESORT → absolutize → census → mux; never `audio_missing_fatal`.
+
+### Block D — UK Simple defaults
+- `apply_simple_pipeline_policy(uk)` stamps `segment_min_ms=4000`,
+  `preferred=7000`, `max=12000`, `segmentation_aggressiveness=0.50` (medium)
+  alongside Mykyta `0.97 / 1.05 / 1.05`.
+- Happy-Path STT glue honours `segment_min_ms=4000` (4.0s floor) and
+  `segment_max_ms` as `max_span_ms` when stamped on the task.
+
+### Tests
+- `tests/test_stage29_production_uk_dub.py` — assert path, blocked soft-pad,
+  Cyrillic refuse, cache forbid, UK 4/7/12 defaults, 4s glue floor.
+
 ## [2026-08-13] Stage 28 — Path truth, honest census, UK pre-flight (4a512fd6)
 
 Root diagnostic:

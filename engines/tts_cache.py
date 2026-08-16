@@ -133,6 +133,53 @@ def lookup_tts_cache(
     if not str(voice or "").strip() or not str(engine_id or "").strip():
         logger.info("tts_cache_miss incomplete_key voice/engine empty")
         return None
+    # Stage 29 §A4 / Stage 30 C4 — for target=uk never serve a cache entry
+    # keyed under a forbidden locale voice, a non-UK engine, or a pre-uk
+    # identity (old cache without uk/mykyta must miss).
+    lang_n = _voice_lang(voice, lang)
+    if lang_n == "uk":
+        eid_n = str(engine_id or "").strip().lower()
+        if eid_n not in (
+            "tts_uk",
+            "edge-offline",
+            "edge",
+            "edge-tts",
+            "edge_tts",
+        ):
+            logger.info(
+                "tts_cache_miss forbidden_uk_engine engine=%s lang=%s", eid_n, lang_n
+            )
+            return None
+        vl = str(voice or "").strip()
+        vl_l = vl.lower()
+        uk_voice = (
+            vl_l in ("mykyta", "lada", "tetiana")
+            or vl_l.startswith("uk-ua-")
+            or vl_l.startswith("uk_ua-")
+        )
+        if not uk_voice:
+            logger.info(
+                "tts_cache_miss forbidden_uk_voice voice=%s lang=%s", vl, lang_n
+            )
+            return None
+        for bad in (
+            "cs-CZ",
+            "sk-SK",
+            "pl-PL",
+            "ru-RU",
+            "en-US",
+            "en-GB",
+            "de-DE",
+            "fr-FR",
+            "hu-HU",
+            "ro-RO",
+            "bg-BG",
+        ):
+            if vl.startswith(bad):
+                logger.info(
+                    "tts_cache_miss forbidden_uk_voice voice=%s lang=%s", vl, lang_n
+                )
+                return None
     cdir = Path(cache_dir) if cache_dir is not None else default_cache_dir()
     key = tts_cache_key(
         text,
