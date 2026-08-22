@@ -15,6 +15,8 @@ import os
 from typing import Final
 
 VM_FLAG_IDENTITY_GUARD: Final = "VM_FLAG_IDENTITY_GUARD"
+VM_FLAG_IDENTITY_GUARD_SHADOW: Final = "VM_FLAG_IDENTITY_GUARD_SHADOW"
+VM_FLAG_IDENTITY_GUARD_ENFORCE: Final = "VM_FLAG_IDENTITY_GUARD_ENFORCE"
 VM_FLAG_SEGMENT_NORMALIZER: Final = "VM_FLAG_SEGMENT_NORMALIZER"
 VM_FLAG_SLOT_BUDGET: Final = "VM_FLAG_SLOT_BUDGET"
 VM_FLAG_REVISION_MANAGER: Final = "VM_FLAG_REVISION_MANAGER"
@@ -67,6 +69,24 @@ def psa_flag_enabled(flag_id: str) -> bool:
 
 def identity_guard_flag() -> bool:
     return psa_flag_enabled("identity_guard")
+
+
+def identity_guard_enforce() -> bool:
+    """True → IdentityGuard raises. False → report-only (shadow).
+
+    Env ``VM_FLAG_IDENTITY_GUARD=1`` (unit tests) enforces unless SHADOW=1.
+    FeatureManager enable without env defaults to shadow.
+    """
+    parsed = _parse_bool(os.getenv(VM_FLAG_IDENTITY_GUARD_ENFORCE) or "")
+    if parsed is not None:
+        return parsed
+    parsed_shadow = _parse_bool(os.getenv(VM_FLAG_IDENTITY_GUARD_SHADOW) or "")
+    if parsed_shadow is not None:
+        return not parsed_shadow
+    parsed_ig = _parse_bool(os.getenv(VM_FLAG_IDENTITY_GUARD) or "")
+    if parsed_ig is True:
+        return True
+    return False
 
 
 def segment_normalizer_flag() -> bool:

@@ -3368,7 +3368,7 @@ function renderTranslationReview(data) {
           ${dev ? `<div class="tr-dev-only tr-field"><label>Engine / Route</label><div class="tr-val">${escHtml(seg.engine || '')} · ${escHtml(seg.route_label || seg.route || '')}</div></div>${dsalLine}` : ''}
         `;
       return `
-        <div class="tr-seg ${warnLabels.length || seg.needs_studio || seg.voice_truncated ? 'tr-seg-warn' : ''} ${(seg.needs_manual_review || seg.manual_review_required) ? 'tr-seg-manual' : ''} ${bandClass}" data-idx="${seg.index}">
+        <div class="tr-seg ${warnLabels.length || seg.needs_studio || seg.voice_truncated ? 'tr-seg-warn' : ''} ${(seg.needs_manual_review || seg.manual_review_required) ? 'tr-seg-manual' : ''} ${bandClass}${Number(seg.overflow_ms || 0) > 0 ? ' tr-overflow' : ''}" data-idx="${seg.index}" data-segment-id="${escHtml(seg.segment_id || '')}">
           <div class="tr-seg-head">
             <strong>#${seg.index}</strong>
             <span class="tr-status-pill ${_trStatusEmoji(fillStatus) ? 'tr-status-' + fillStatus : ''}">${_trStatusEmoji(fillStatus)} ${escHtml(statusLabel)}</span>
@@ -3388,7 +3388,7 @@ function renderTranslationReview(data) {
             <textarea id="tr-edit-${seg.index}" rows="3" class="${(seg.needs_manual_review || seg.manual_review_required) ? 'tr-edit-manual' : ''}" oninput="onReviewTextInput(${seg.index})">${escHtml(editText)}</textarea>
             <div id="tr-live-overflow-${seg.index}" class="tr-overflow-text tr-live-overflow">${_trOverflowHtml(seg, editText)}</div>
             ${ttsHint}
-            <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="saveTranslationSegment(${seg.index})">${saveLabel}</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="saveTranslationSegment(${seg.index}, '${escHtml(seg.segment_id || '')}')">${saveLabel}</button>
           </div>
         </div>`;
     }).join('');
@@ -3434,7 +3434,7 @@ function onReviewTextInput(index) {
 }
 window.onReviewTextInput = onReviewTextInput;
 
-async function saveTranslationSegment(index) {
+async function saveTranslationSegment(index, segmentId) {
   const ta = document.getElementById('tr-edit-' + index);
   if (!ta || !state.taskId) return;
   const newText = ta.value.trim();
@@ -3442,6 +3442,7 @@ async function saveTranslationSegment(index) {
     vmNotify(t('dub.review_empty_text', 'Текст не может быть пустым'), 'warning');
     return;
   }
+  const sid = segmentId || ((translationReviewState.segments || []).find(s => Number(s.index) === Number(index)) || {}).segment_id || '';
 
   if (translationReviewState.preTts) {
     try {
@@ -3450,6 +3451,7 @@ async function saveTranslationSegment(index) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           segment_index: index,
+          segment_id: sid,
           new_text: newText,
         }),
       });
@@ -3468,12 +3470,13 @@ async function saveTranslationSegment(index) {
     const r = await fetch('/api/auto_dub/regen_segment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        task_id: state.taskId,
-        segment_index: index,
-        new_text: newText,
-        voice,
-      }),
+        body: JSON.stringify({
+          task_id: state.taskId,
+          segment_index: index,
+          segment_id: sid,
+          new_text: newText,
+          voice,
+        }),
     });
     const d = await r.json();
     if (!r.ok || !d.ok) throw new Error(d.error || 'save failed');

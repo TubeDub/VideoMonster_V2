@@ -37,6 +37,9 @@ VIDEO_ADAPT_MAX_OVERFLOW_PCT = 15.0
 
 # Extra gap that can be consumed before resorting to atempo
 _MAX_BORROW_MS = 3000            # was 2500; more room for natural speech
+# If a hard tail_trim would cut more than this much speech, keep overflow
+# honest and skip the chop (closed-loop split / NeedReTTS owns the rewrite).
+SPEECH_TRIM_SPLIT_MS = 250
 
 # Pause compression
 _PAUSE_COMPRESS_THRESH = -38
@@ -468,10 +471,19 @@ def compress_internal_pauses(
 
 
 def _atempo_hard_cap(max_atempo: float) -> float:
-    """Never exceed TZ Stage 3 ceiling (1.20)."""
+    """Upper bound for speed-up. Stage 31 UK passes 1.08; never above 1.20."""
     requested = float(max_atempo)
     ceiling = float(_ATEMPO_ABSOLUTE_MAX)
     return max(1.0, min(ceiling, requested))
+
+
+def _atempo_floor(max_atempo: float, min_atempo: float | None = None) -> float:
+    """Symmetric ±8% floor when the cap is the Stage 31 band."""
+    if min_atempo is not None:
+        return max(0.85, float(min_atempo))
+    if float(max_atempo) <= 1.0801:
+        return 0.92
+    return _ATEMPO_MIN
 
 
 def _gentle_atempo_factor(need: float, *, max_atempo: float = _ATEMPO_ABSOLUTE_MAX) -> float:
@@ -501,7 +513,7 @@ def _gentle_atempo_slow_factor(
         return 1.0
     # atempo < 1 lengthens audio: tempo = speech/target = 1/fill_need
     tempo = 1.0 / float(fill_need)
-    floor = max(0.85, float(min_atempo))
+    floor = _atempo_floor(1.0, min_atempo)
     return max(floor, min(1.0, tempo))
 
 
@@ -514,7 +526,7 @@ def _atempo(
     min_atempo: float = _ATEMPO_MIN,
 ) -> None:
     hi = _atempo_hard_cap(max_atempo)
-    lo = max(0.85, float(min_atempo))
+    lo = _atempo_floor(max_atempo, min_atempo)
     tempo = max(lo, min(hi, float(tempo)))
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
@@ -650,6 +662,7 @@ def fit_segment_audio(
 
     fitted_ms = len(audio)
     pause_added_ms = 0
+    speech_trimmed_ms = 0
 
     hard_cap = effective_slot
     if next_start is not None:
@@ -662,12 +675,18 @@ def fit_segment_audio(
         need_cap = fitted_ms / max(hard_cap, 1)
         if allow_atempo and need_cap > 1.02:
             emergency = _gentle_atempo_factor(
-                need_cap, max_atempo=_ATEMPO_EMERGENCY_MAX
+                need_cap,
+                max_atempo=min(float(max_atempo), float(_ATEMPO_EMERGENCY_MAX)),
             )
             if emergency > 1.001:
                 tmp_em = work / f"{src.stem}_spd_cap.wav"
                 try:
-                    _atempo(cur, emergency, tmp_em, max_atempo=_ATEMPO_EMERGENCY_MAX)
+                    _atempo(
+                        cur,
+                        emergency,
+                        tmp_em,
+                        max_atempo=min(float(max_atempo), float(_ATEMPO_EMERGENCY_MAX)),
+                    )
                     cur = tmp_em
                     audio = AudioSegment.from_file(str(tmp_em))
                     fitted_ms = len(audio)
@@ -677,22 +696,57 @@ def fit_segment_audio(
                 except Exception as exc:
                     logger.debug("timing_fit: emergency atempo before trim failed: %s", exc)
         if fitted_ms > hard_cap:
-            audio, trim_tag = trim_audio_to_cap_word_safe(audio, hard_cap)
-            fitted_ms = len(audio)
-            # Always keep legacy "trim_overlap" token for callers/tests.
-            extra = trim_tag if trim_tag != "trim_overlap_hard" else "trim_overlap"
-            if strategy == "none":
-                strategy = extra if extra == "trim_overlap" else f"trim_overlap+{extra}"
+            cut_ms = int(fitted_ms) - int(hard_cap)
+            tail = audio[hard_cap:] if cut_ms > 0 else AudioSegment.empty()
+            speech_in_tail = 0
+            if len(tail) > 0:
+                try:
+                    _ranges = detect_nonsilent(
+                        tail,
+                        min_silence_len=55,
+                        silence_thresh=_PAUSE_COMPRESS_THRESH,
+                    )
+                    speech_in_tail = sum(
+                        max(0, int(e) - int(s)) for s, e in (_ranges or [])
+                    )
+                except Exception:
+                    speech_in_tail = cut_ms
+            if speech_in_tail > SPEECH_TRIM_SPLIT_MS:
+                overflow_left = cut_ms
+                strategy = (
+                    strategy + "+no_trim_overflow"
+                    if strategy != "none"
+                    else "no_trim_overflow"
+                )
+                logger.warning(
+                    "timing_fit: refuse speech tail_trim speech=%dms cut=%dms > %dms "
+                    "hard_cap=%dms fitted=%dms (prefer split/NeedReTTS)",
+                    speech_in_tail,
+                    cut_ms,
+                    SPEECH_TRIM_SPLIT_MS,
+                    hard_cap,
+                    fitted_ms,
+                )
             else:
-                strategy = strategy + "+trim_overlap"
-                if extra != "trim_overlap":
-                    strategy = strategy + f"+{extra}"
-            logger.info(
-                "timing_fit: %s hard_cap=%dms fitted=%dms (was overflow)",
-                trim_tag,
-                hard_cap,
-                fitted_ms,
-            )
+                pre_trim_ms = int(fitted_ms)
+                audio, trim_tag = trim_audio_to_cap_word_safe(audio, hard_cap)
+                fitted_ms = len(audio)
+                speech_trimmed_ms = max(0, pre_trim_ms - fitted_ms)
+                # Always keep legacy "trim_overlap" token for callers/tests.
+                extra = trim_tag if trim_tag != "trim_overlap_hard" else "trim_overlap"
+                if strategy == "none":
+                    strategy = extra if extra == "trim_overlap" else f"trim_overlap+{extra}"
+                else:
+                    strategy = strategy + "+trim_overlap"
+                    if extra != "trim_overlap":
+                        strategy = strategy + f"+{extra}"
+                logger.info(
+                    "timing_fit: %s hard_cap=%dms fitted=%dms trimmed=%dms (was overflow)",
+                    trim_tag,
+                    hard_cap,
+                    fitted_ms,
+                    speech_trimmed_ms,
+                )
     elif fitted_ms > hard_cap and no_speech_trim:
         # Happy Path: never chop words — try atempo ≤ caller max (≤1.08), else overflow.
         need_cap = fitted_ms / max(hard_cap, 1)
@@ -738,7 +792,8 @@ def fit_segment_audio(
         and allow_atempo
     ):
         fill_need = float(effective_slot) / float(max(fitted_ms, 1))
-        slow = _gentle_atempo_slow_factor(fill_need, min_atempo=_ATEMPO_MIN)
+        _slow_floor = _atempo_floor(max_atempo)
+        slow = _gentle_atempo_slow_factor(fill_need, min_atempo=_slow_floor)
         if slow < 0.999:
             tmp_slow = work / f"{src.stem}_slow.wav"
             try:
@@ -747,7 +802,7 @@ def fit_segment_audio(
                     slow,
                     tmp_slow,
                     max_atempo=max(1.0, float(max_atempo)),
-                    min_atempo=_ATEMPO_MIN,
+                    min_atempo=_slow_floor,
                 )
                 cur = tmp_slow
                 audio = AudioSegment.from_file(str(tmp_slow))
@@ -784,7 +839,7 @@ def fit_segment_audio(
             atempo,
         )
 
-    overflow_ms = max(0, fitted_ms - effective_slot)
+    overflow_ms = max(0, fitted_ms - effective_slot, int(speech_trimmed_ms or 0))
     # Clamp atempo into Happy Path band (0.95–1.15).
     if atempo < _ATEMPO_MIN:
         atempo = _ATEMPO_MIN
@@ -834,6 +889,7 @@ def fit_segment_audio(
         "tts_ms": orig_ms,
         "speech_ms": speech_ms,
         "speech_trimmed": speech_trimmed,
+        "speech_trimmed_ms": int(speech_trimmed_ms or 0),
         "fitted_ms": len(audio),
         "atempo": round(atempo, 4),
         "pause_added_ms": pause_added_ms,
@@ -1163,6 +1219,26 @@ def build_gap_adjusted_track(
     fitted_for_mix: list[tuple[str, int, int]] = []
 
     try:
+        # VideoLingo / pyVideoTrans: missing TTS → silence pad, never abort mix.
+        try:
+            from engines.oss_production import skip_missing_mix_inputs
+
+            _slots = [max(1, e - s) for s, e in parsed]
+            _fixed, _n_pad = skip_missing_mix_inputs(
+                [str(p) for p in segment_paths[:n]],
+                slot_ms_list=_slots,
+                work_dir=work_dir,
+            )
+            if _n_pad:
+                logger.warning(
+                    "timing_fit: skip-missing padded %d/%d clips (mix continues)",
+                    _n_pad,
+                    n,
+                )
+            segment_paths = list(_fixed) + list(segment_paths[n:])
+        except Exception as _skip_exc:
+            logger.debug("timing_fit: skip-missing skipped: %s", _skip_exc)
+
         for i in range(n):
             start, end = parsed[i]
             next_start = parsed[i + 1][0] if i + 1 < n else None
@@ -1183,17 +1259,43 @@ def build_gap_adjusted_track(
                 else 0
             )
             text_h = (text_hints[i] if text_hints and i < len(text_hints) else "")
-            fitted_path, meta = fit_segment_audio(
-                segment_paths[i],
-                start,
-                end,
-                next_start,
-                work_dir=work_dir,
-                allow_atempo=allow_spd,
-                max_atempo=max_atempo,
-                lead_in_ms=lead_in,
-                text_hint=text_h,
-            )
+            try:
+                fitted_path, meta = fit_segment_audio(
+                    segment_paths[i],
+                    start,
+                    end,
+                    next_start,
+                    work_dir=work_dir,
+                    allow_atempo=allow_spd,
+                    max_atempo=max_atempo,
+                    lead_in_ms=lead_in,
+                    text_hint=text_h,
+                )
+            except Exception as _fit_exc:
+                logger.warning(
+                    "timing_fit: fit failed idx=%d (%s) — silence pad, mix continues",
+                    i,
+                    _fit_exc,
+                )
+                from engines.oss_production import skip_missing_mix_inputs
+
+                _pads, _ = skip_missing_mix_inputs(
+                    [""],
+                    slot_ms_list=[max(1, end - start)],
+                    work_dir=work_dir,
+                )
+                fitted_path = _pads[0]
+                meta = {
+                    "slot_ms": max(0, end - start),
+                    "tts_ms": 0,
+                    "atempo": 1.0,
+                    "pause_added_ms": 0,
+                    "pause_borrowed_ms": 0,
+                    "pause_compressed_ms": 0,
+                    "strategy": "oss_skip_missing",
+                    "overflow_ms": 0,
+                    "speech_ms": 0,
+                }
             seg = AudioSegment.from_file(fitted_path)
             fitted_ms = len(seg)
             fitted_for_mix.append((fitted_path, place_start, fitted_ms))
@@ -1310,19 +1412,55 @@ def build_gap_adjusted_track(
             "tail_gap_ms": tail_gap_ms,
         }
 
-        ffmpeg_out = _mix_fitted_segments_ffmpeg(fitted_for_mix, master_ms, work_dir)
-        if ffmpeg_out:
-            master = AudioSegment.from_file(str(ffmpeg_out))
-        else:
-            master = AudioSegment.silent(duration=master_ms)
-            for path, place_start, _ in fitted_for_mix:
-                seg = AudioSegment.from_file(path)
-                # Clip overlay that would extend past video master.
-                if place_start >= master_ms:
-                    continue
-                if place_start + len(seg) > master_ms:
-                    seg = seg[: max(1, master_ms - place_start)]
-                master = master.overlay(seg, position=place_start)
+        # SoniTranslate avoid_overlap: shift next start before mix (no overlay).
+        try:
+            from engines.oss_production import sequential_place_starts
+
+            _shifted = sequential_place_starts(
+                [int(s) for _, s, _ in fitted_for_mix],
+                [int(d) for _, _, d in fitted_for_mix],
+                video_ms=master_ms if video_ms else None,
+            )
+            if _shifted and len(_shifted) == len(fitted_for_mix):
+                fitted_for_mix = [
+                    (p, int(_shifted[i]), d)
+                    for i, (p, _old, d) in enumerate(fitted_for_mix)
+                ]
+                for i, place in enumerate(fitted_placements):
+                    if isinstance(place, dict) and i < len(_shifted):
+                        place["place_start"] = int(_shifted[i])
+                        place["oss_sequential_place"] = True
+        except Exception as _seq_exc:
+            logger.debug("timing_fit: sequential place skipped: %s", _seq_exc)
+
+        # VideoLingo concat+silence (preferred). Overlay/amix only as fallback.
+        master = None
+        try:
+            from engines.oss_production import concat_sequential_track
+
+            master = concat_sequential_track(
+                [(p, int(s), int(d)) for p, s, d in fitted_for_mix],
+                video_ms=master_ms if video_ms else master_ms,
+            )
+            overlap_report_extra["oss_mix"] = "sequential_concat"
+        except Exception as _cat_exc:
+            logger.warning("timing_fit: sequential concat failed (%s)", _cat_exc)
+            master = None
+
+        if master is None:
+            ffmpeg_out = _mix_fitted_segments_ffmpeg(fitted_for_mix, master_ms, work_dir)
+            if ffmpeg_out:
+                master = AudioSegment.from_file(str(ffmpeg_out))
+            else:
+                master = AudioSegment.silent(duration=master_ms)
+                for path, place_start, _ in fitted_for_mix:
+                    seg = AudioSegment.from_file(path)
+                    # Clip overlay that would extend past video master.
+                    if place_start >= master_ms:
+                        continue
+                    if place_start + len(seg) > master_ms:
+                        seg = seg[: max(1, master_ms - place_start)]
+                    master = master.overlay(seg, position=place_start)
 
         # Hard pad/trim to exact video length (± encoder grain).
         if video_ms > 0:

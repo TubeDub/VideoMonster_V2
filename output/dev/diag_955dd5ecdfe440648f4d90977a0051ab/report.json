@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "955dd5ecdfe440648f4d90977a0051ab",
+  "created_at": "2026-08-18T13:40:10.934996+00:00",
+  "task_id": "955dd5ecdfe440648f4d90977a0051ab",
+  "stage": "Translation",
+  "developer": {
+    "error_code": "RUNTIMEERROR",
+    "stage": "Translation",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "Translation",
+    "task_id": "955dd5ecdfe440648f4d90977a0051ab",
+    "error_type": "RuntimeError",
+    "message": "PIPELINE_LANG_MIX: seg#4 no_remt_or_empty_source ratio=1.0 — refuse skip→silence"
+  },
+  "exception": {
+    "type": "RuntimeError",
+    "message": "PIPELINE_LANG_MIX: seg#4 no_remt_or_empty_source ratio=1.0 — refuse skip→silence"
+  },
+  "timeline_event_count": 18
+}

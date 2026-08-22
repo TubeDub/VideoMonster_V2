@@ -130,6 +130,30 @@ def test_psa5_identity_guard_checks_revision(ig_and_rev_on, tmp_path: Path):
         assert_sidecar_matches_segment(seg, audio_path=wav, force=True)
 
 
+def test_psa5_sidecar_relative_basename_uses_absolute_tts_path(rev_on, tmp_path: Path):
+    """Diag 8c9850ef: bind passed '0000.mp3' and wrote *.vm_rev.json into CWD."""
+    wav = tmp_path / "0000.mp3"
+    wav.write_bytes(b"ID3")
+    seg = {
+        "segment_id": _sid(7),
+        "tts_file_path": str(wav),
+        "plain_text": "Гей, чувак",
+    }
+    note_text_change(seg, "Гей, чувак", kind="translation")
+    from engines.pipeline_integrity.revision_manager import ensure_tts_uuid
+
+    ensure_tts_uuid(seg, force_new=True)
+    cwd_sidecar = Path.cwd() / "0000.mp3.vm_rev.json"
+    existed_before = cwd_sidecar.is_file()
+    path = write_wav_sidecar("0000.mp3", seg, force=True)
+    assert path is not None
+    assert path.parent == tmp_path
+    assert path.name == "0000.mp3.vm_rev.json"
+    assert path.is_file()
+    if not existed_before:
+        assert not cwd_sidecar.is_file()
+
+
 def test_psa5_flag_off_legacy(rev_off):
     seg = {"segment_id": _sid(6), "plain_text": "A"}
     forbid_inplace_text_assign(seg, "B")  # no raise

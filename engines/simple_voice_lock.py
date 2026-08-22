@@ -144,6 +144,7 @@ def lock_simple_pipeline_voice(
         "unique_voices": unique,
         "voice_lock_pinned_segments": pinned,
         "voice_platform_skipped": "simple_single_voice",
+        "oss_locked_voice": voice,
     }
     if task_info is not None:
         task_info.update(stamp)

@@ -1,0 +1,78 @@
+{
+  "task_id": "1ede3b1307e44b9e917ca7710fcc34f6",
+  "updated_at": "2026-08-19T14:01:25.499047+00:00",
+  "total_sec": 1788.042,
+  "stages": {
+    "extract": 1.644,
+    "whisper": 122.527,
+    "translation": 28.63,
+    "natural": 0.0,
+    "validation": 0.0,
+    "translation_post": 0.0,
+    "tts": 66.689,
+    "slot_fit": 9.195,
+    "timing": 0.0,
+    "mux": 0.0,
+    "export": 0.0
+  },
+  "meta": {
+    "stt_wall_sec": 122.527,
+    "stt_model": "small",
+    "stt_device": "cpu",
+    "stt_compute_type": "int8",
+    "stt_beam_size": 1,
+    "stt_cache_hit": false,
+    "translation_breakdown": {
+      "marian_sec": 28.63,
+      "llm_adaptation_sec": 0.0,
+      "validation_sec": 0.0,
+      "post_processing_sec": 0.0,
+      "translation_total_sec": 28.63,
+      "segment_count": 32,
+      "marian_segments_done": 32,
+      "llm_segments_done": 0,
+      "current_subphase": "done",
+      "ui_buckets": {
+        "marian_mt": 28.63,
+        "llm_adaptation": 0.0,
+        "post_processing": 0.0
+      },
+      "phase_status": {
+        "marian_mt": "done",
+        "llm_adaptation": "skipped",
+        "post_processing": "skipped"
+      },
+      "hidden_buckets": [
+        "llm_adaptation",
+        "post_processing"
+      ],
+      "segment_stats": {
+        "marian_mt": {
+          "segments": 32,
+          "sec": 28.6,
+          "avg_sec_per_segment": 0.895,
+          "status": "done"
+        },
+        "llm_adaptation": {
+          "segments": 0,
+          "sec": 0.0,
+          "avg_sec_per_segment": 0.0,
+          "status": "skipped"
+        },
+        "post_processing": {
+          "segments": 0,
+          "sec": 0.0,
+          "avg_sec_per_segment": 0.0,
+          "status": "skipped"
+        }
+      },
+      "ui_labels": {
+        "marian_mt": "Marian MT",
+        "llm_adaptation": "Qwen / LLM Adaptation",
+        "post_processing": "Post-processing"
+      },
+      "llm_adaptation_used": false,
+      "simple_mt_locked": true
+    }
+  }
+}

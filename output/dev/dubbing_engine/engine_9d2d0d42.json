@@ -1,0 +1,1767 @@
+{
+  "task_id": "1ede3b1307e44b9e917ca7710fcc34f6",
+  "run_id": "9d2d0d42",
+  "lang": "uk",
+  "elapsed_sec": 1.095,
+  "segments_total": 32,
+  "segments_adapted": 29,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 3,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 13,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "original": "Hey man you're doing a good job. Hey, here's a dollar. A dollar? Are you serious",
+      "input": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+      "output": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 4946,
+      "slot_ms": 5000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=4946ms slot=5000ms prev_end=0ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 1,
+      "original": "Hey real quick man are you hungry? I got this plate of food and I'm not feeling ",
+      "input": "Ти голодний, у мене є тарілка з їжею і мені вже не хочеться.",
+      "output": "Ти голодний, у мене є тарілка з їжею і мені вже́ не хочеться.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 4823,
+      "slot_ms": 5000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=4823ms slot=5000ms prev_end=9880ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 2,
+      "original": "And I don't want to toss it out. How's the whole bunch of greens? Are you okay w",
+      "input": "І я не хочу викидати його геть. Ти не проти? Я заберу все, що у тебе є.",
+      "output": "І я не хочу викидати його́ геть. Ти не проти? Я заберу все́, що у тебе є.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 5966,
+      "slot_ms": 4400,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=5966ms slot=4400ms prev_end=14880ms gap_too_small=0ms (<80ms); overflow=35.6% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=5966ms slot=4400ms ratio=1.36",
+        "voice_quality_risk: projected_atempo=1.36 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 3,
+      "original": "Hey dude hop in real quick. I got you man. Okay?",
+      "input": "Гей, чувак швидко сідай. Я з тобою. Добре?",
+      "output": "Гей, чувак швидко сідай. Я з тобою. Добре?",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 3258,
+      "slot_ms": 2000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=3258ms slot=2000ms prev_end=19280ms gap_too_small=0ms (<80ms); overflow=62.9% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied",
+        "severe_overflow: predicted=3258ms slot=2000ms ratio=1.63",
+        "voice_quality_risk: projected_atempo=1.63 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 4,
+      "original": "Hey there's my big man. Hey real quick dude. When was the last time you ate? You",
+      "input": "Гей, мій здоровяк. Гей, швидко, чувак. Коли ти останнього разу їв? Ти виглядаєш ",
+      "output": "Гей, мій здоровяк. Гей, швидко, чувак. Коли́ ти останнього разу їв? Ти виглядаєш",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 7953,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=7953ms slot=6000ms prev_end=21280ms overflow=32.5% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=7953ms slot=6000ms ratio=1.33",
+        "voice_quality_risk: projected_atempo=1.33 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 5,
+      "original": "Oh it's probably been two days man. Two whole days?",
+      "input": "О, напевно, вже два дні минуло.",
+      "output": "О, напевно, вже́ два дні минуло.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 2403,
+      "slot_ms": 5000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=2403ms slot=5000ms prev_end=29280ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 6,
+      "original": "So wait, how do you mean? Oh wait here you go man. I want to give that to you.",
+      "input": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+      "output": "То зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 4765,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": true,
+          "note": "capitalised_first_word"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=4765ms slot=4000ms prev_end=34280ms overflow=19.1% (15-25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 7,
+      "original": "I'm also going to give this to you man. So how do you manage to get food? Before",
+      "input": "То як ти можеш отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу ",
+      "output": "То як ти можеш отримати їжу? Пе́ред тим, як відкрити це, як ти можеш дістати їжу",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 7206,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=7206ms slot=6000ms prev_end=38680ms gap_too_small=0ms (<80ms); overflow=20.1% (15-25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "voice_quality_risk: projected_atempo=1.20 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 8,
+      "original": "Honestly I just dig through the trash can. I don't know there.",
+      "input": "Чесно кажучи, я просто проверяю мусорные баки. Я там не знаю, їси чуже сміття.",
+      "output": "Чесно кажучи, я про́сто проверяю мусорные баки. Я там не знаю, їси чуже сміття.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 6313,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=6313ms slot=4000ms prev_end=44680ms gap_too_small=0ms (<80ms); overflow=57.8% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=6313ms slot=4000ms ratio=1.58",
+        "voice_quality_risk: projected_atempo=1.58 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 9,
+      "original": "Come on. So wait you tell me that you eat other people's trash just to feed your",
+      "input": "Давай. Так подожди, ти говоришь мені, що ти ешь чужее мусор лише для того, щоб н",
+      "output": "Давай. Так подожди, ти говоришь мені, що ти ешь чужее мусор лише для́ того, щоб ",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 8765,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=8765ms slot=6000ms prev_end=48680ms gap_too_small=0ms (<80ms); overflow=46.1% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=8765ms slot=6000ms ratio=1.46",
+        "voice_quality_risk: projected_atempo=1.46 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 10,
+      "original": "Yeah man it's... Is that normal out here?",
+      "input": "Так, це нормально тут?",
+      "output": "Так, це нормально тут?",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 1480,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=1480ms slot=4000ms prev_end=54680ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 11,
+      "original": "Yeah I don't got any other choice. I don't got money. Yeah.",
+      "input": "У мене немає іншого вибору. У мене немає грошей. Да.",
+      "output": "У мене немає іншого вибору. У мене немає грошей. Да.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 4855,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=4855ms slot=4000ms prev_end=58680ms gap_too_small=0ms (<80ms); overflow=21.4% (15-25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied",
+        "voice_quality_risk: projected_atempo=1.21 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 12,
+      "original": "So right now you clean windows and what's the average that someone gives you for",
+      "input": "Отже, зараз ви чистите вікна і скільки зазвичай дають за таку роботу?",
+      "output": "Отже, зара́з ви чистите вікна і скільки зазвичай дають за таку роботу?",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 5230,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=5230ms slot=6000ms prev_end=62680ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 13,
+      "original": "Sometimes I do it for as low as like ten cents. Really? Just any guy's being...",
+      "input": "Іноді я роблю це за 10 центів. Просто будь-який хлопець..",
+      "output": "Іноді я роблю це за 10 центів. Про́сто будь-яки́й хлопець..",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 4051,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=4051ms slot=4000ms prev_end=69080ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 14,
+      "original": "Yeah man. And look Jonathan right?",
+      "input": "Да, и дивись Джонатана, правда?",
+      "output": "Да, и дивись Джонатана, правда?",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 2393,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=2393ms slot=4000ms prev_end=73080ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 15,
+      "original": "Yeah. Jonathan you seem smart. You seem young. I mean I don't know what went wro",
+      "input": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не",
+      "output": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 8171,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=8171ms slot=4000ms prev_end=77080ms gap_too_small=0ms (<80ms); overflow=104.3% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied",
+        "severe_overflow: predicted=8171ms slot=4000ms ratio=2.04",
+        "voice_quality_risk: projected_atempo=2.04 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 16,
+      "original": "I mean... I don't even like to talk about it because yeah I'm young. I'm only 25",
+      "input": "Я навіть не люблю про це говорити, тому що я молодий. Мені лише 25.",
+      "output": "Я нави́ть не люблю про це говорити, тому́́ що́ я молодий. Мені лише 25.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 5191,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=5191ms slot=6000ms prev_end=81080ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 17,
+      "original": "Uh huh. I grew up with... they got families and everything. They got it all and ",
+      "input": "Я виріс с. У них є сім'ї і все таке, і я бездомний.",
+      "output": "Я виріс с. У них є сім'ї і все́ таке, і я бездомний.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 3941,
+      "slot_ms": 6400,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=3941ms slot=6400ms prev_end=87080ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 18,
+      "original": "Yeah. I mean was it was just kind of like bad decisions in life or is it just ki",
+      "input": "Так. чи це було щось на кшталт поганих рішень у житті?",
+      "output": "Так. чи це бу́ло щось на кшталт поганих рішень у житті?",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 3643,
+      "slot_ms": 8000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=3643ms slot=8000ms prev_end=93480ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 19,
+      "original": "Honestly it's just a lot of... like I lost my mom.",
+      "input": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+      "output": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 4358,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=4358ms slot=6000ms prev_end=101480ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 20,
+      "original": "Oh wow. I'm sorry.",
+      "input": "Мені шкода.",
+      "output": "Мені шкода.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 993,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=993ms slot=4000ms prev_end=107480ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 21,
+      "original": "I lost my job. I lost the house. I couldn't afford to pay everything. And you kn",
+      "input": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди н",
+      "output": "Я втратила роботу. Я не міг собі дозволити заплатити все́, і ви знаєте, як люди ",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 10063,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=10063ms slot=6000ms prev_end=111480ms gap_too_small=0ms (<80ms); overflow=67.7% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=10063ms slot=6000ms ratio=1.68",
+        "voice_quality_risk: projected_atempo=1.68 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 22,
+      "original": "I'm already at a disadvantage and now I'm homeless.",
+      "input": "Я вже в незручному становищі, а тепер я бездомний.",
+      "output": "Я вже́ в незручному становищі, а тепер я бездомний.",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 3781,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=3781ms slot=4000ms prev_end=117480ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 23,
+      "original": "So it builds up throughout the time you know?",
+      "input": "То як, ви знаєте, воно зростає?",
+      "output": "То як, ви знаєте, воно зростає?",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 2601,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=2601ms slot=4000ms prev_end=121880ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 24,
+      "original": "And I'm sorry to hear that. How long have you been out here?",
+      "input": "И Мені шкода це чути, як довго ти тут?",
+      "output": "И Мені шкода це чути, як довго ти тут?",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 2938,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": false,
+          "note": "skipped"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=2938ms slot=4000ms prev_end=125880ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "stress_not_applied"
+      ]
+    },
+    {
+      "index": 25,
+      "original": "Maybe like a year. Shut up. You've been doing this for a whole year now?",
+      "input": "Може рік. Заткнись. Ти вже цілий рік робиш?",
+      "output": "Мо́же рік. Заткнись. Ти вже́ цілий рік робиш?",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 2970,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=2970ms slot=4000ms prev_end=129880ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 26,
+      "original": "Oh well look Jonathan. I'm going to let you go here but before I do...",
+      "input": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як.",
+      "output": "Добре, Джонатане, я тебе тут відпущу, але́ пе́ред тим, як.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 4438,
+      "slot_ms": 6000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=4438ms slot=6000ms prev_end=133880ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 27,
+      "original": "What was the last time you slept in the bed? A year.",
+      "input": "Який був останній раз, коли ти спав у ліжку?",
+      "output": "Яки́й був останній раз, коли́ ти спав у ліжку?",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 3146,
+      "slot_ms": 6080,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=3146ms slot=6080ms prev_end=139880ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 28,
+      "original": "Alright that's all I need to hear. Before you go I want to make sure...",
+      "input": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що..",
+      "output": "Я хочу, щоб ви мене почули, перш ніж́ ви підете, я хочу переконатися, що..",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 6056,
+      "slot_ms": 4400,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=6056ms slot=4400ms prev_end=145960ms gap_too_small=0ms (<80ms); overflow=37.6% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=6056ms slot=4400ms ratio=1.38",
+        "voice_quality_risk: projected_atempo=1.38 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 29,
+      "original": "You like greens right? I'm not a big greens person.",
+      "input": "Я не дуже люблю зелень.",
+      "output": "Я не ду́же люблю зелень.",
+      "passed": true,
+      "strategy": "add_pause",
+      "predicted_ms": 1826,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=add_pause pred=1826ms slot=4000ms prev_end=150360ms gap_too_small=0ms (<80ms)"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "index": 30,
+      "original": "I just go ahead and give them out to whoever needs it the most. But I'll give it",
+      "input": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодн",
+      "output": "Я віддам їх тому́, хто цього найбільше потребує, але́ я віддам його́ вам за сьог",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 6153,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=6153ms slot=4000ms prev_end=154360ms gap_too_small=0ms (<80ms); overflow=53.8% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=6153ms slot=4000ms ratio=1.54",
+        "voice_quality_risk: projected_atempo=1.54 (max=1.2) — recommend text adaptation"
+      ]
+    },
+    {
+      "index": 31,
+      "original": "It's just $3,000. I really hope that can help you in some type of way man.",
+      "input": "Це лише $3, 000. Я дуже сподіваюся, що це допоможе вам у чомусь.",
+      "output": "Це лише $3, 000. Я ду́же сподіваюся, що це допоможе вам у чомусь.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 4855,
+      "slot_ms": 4000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "skipped_pre_timed"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=4855ms slot=4000ms prev_end=158360ms gap_too_small=0ms (<80ms); overflow=21.4% (15-25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "voice_quality_risk: projected_atempo=1.21 (max=1.2) — recommend text adaptation"
+      ]
+    }
+  ]
+}

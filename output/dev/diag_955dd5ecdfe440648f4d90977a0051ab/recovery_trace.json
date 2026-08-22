@@ -1,0 +1,848 @@
+{
+  "task_id": "955dd5ecdfe440648f4d90977a0051ab",
+  "stage": "PRE_TTS",
+  "created_at": "2026-08-18T13:40:05.752860+00:00",
+  "healed_indices": [
+    0,
+    9,
+    19,
+    24
+  ],
+  "still_hard": [],
+  "still_soft": [
+    {
+      "index": 16,
+      "segment_id": "0c20dd6b3bee47cea9255148c64b63bf",
+      "code": "",
+      "category": "pass",
+      "detected_lang": "uk",
+      "target_lang": "uk",
+      "confidence": 0.5917,
+      "target_confidence": 0.5917,
+      "scores": {
+        "uk": 0.5917,
+        "ru": 0.4083,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "final_preview": "Я даже не люблю об этом говорить, тому що я молод. Мені лише 25.",
+      "reasons": [
+        "skip_tts_russian_in_uk"
+      ],
+      "hard_fail": false,
+      "ok": false,
+      "message": "Language Validation passed.\nExpected language: uk\nDetected: uk (confidence 0.59)\nTarget confidence: 0.59\nCategory: pass\nCode: ok\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nText: Я даже не люблю об этом говорить, тому що я молод. Мені лише 25.",
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 67,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.425,
+            "ru": 0.575,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.575,
+          "target_confidence": 0.425,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.5668
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        },
+        {
+          "step": "recovery",
+          "actions": [
+            "naturalizer",
+            "revalidate",
+            "reject_false_uk_glue_heal"
+          ],
+          "candidate_preview": "Я даже не люблю об этом говорить, тому що я молод. Мені лише 25."
+        },
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 64,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Я даже не люблю об этом говорить, тому що я молод. Мені лише 25."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.5917,
+            "ru": 0.4083,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "uk",
+          "confidence": 0.5917,
+          "target_confidence": 0.5917,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "uk",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "uk",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "ru",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "uk",
+          "raw_confidence": 0.5993
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        },
+        {
+          "step": "final",
+          "decision": "pass"
+        }
+      ],
+      "entities_masked": [],
+      "collapse": null
+    },
+    {
+      "index": 25,
+      "segment_id": "e9c85349ea534cd3847e6c85450fe88c",
+      "code": "low_confidence",
+      "category": "low_confidence",
+      "detected_lang": "ru",
+      "target_lang": "uk",
+      "confidence": 0.6112,
+      "target_confidence": 0.3888,
+      "scores": {
+        "uk": 0.3888,
+        "ru": 0.6112,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "final_preview": "Може рік. Заткнись. Ты уже целый год делаешь?",
+      "reasons": [
+        "низкая уверенность классификатора",
+        "skip_tts_russian_in_uk"
+      ],
+      "hard_fail": false,
+      "ok": false,
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.61)\nTarget confidence: 0.39\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Може рік. Заткнись. Ты уже целый год делаешь?",
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 45,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Може рік. Заткнись. Ты уже целый год делаешь?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3888,
+            "ru": 0.6112,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6112,
+          "target_confidence": 0.3888,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6184
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        },
+        {
+          "step": "recovery",
+          "actions": [
+            "revalidate"
+          ],
+          "candidate_preview": "Може рік. Заткнись. Ты уже целый год делаешь?"
+        },
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 45,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Може рік. Заткнись. Ты уже целый год делаешь?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3888,
+            "ru": 0.6112,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6112,
+          "target_confidence": 0.3888,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6184
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "entities_masked": [],
+      "collapse": null
+    }
+  ],
+  "trace": [
+    {
+      "index": 0,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.5741,
+      "text_preview": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?"
+    },
+    {
+      "index": 9,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.6314,
+      "text_preview": "Да ладно. щоб накормить себя?"
+    },
+    {
+      "index": 16,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "naturalizer",
+        "revalidate",
+        "reject_false_uk_glue_heal"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.5917,
+      "text_preview": "Я даже не люблю об этом говорить, тому що я молод. Мені лише 25."
+    },
+    {
+      "index": 19,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.7156,
+      "text_preview": "Чесно кажучи, це багато. ніби я втратила свою маму."
+    },
+    {
+      "index": 24,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.7584,
+      "text_preview": "І мені шкода це чути, как долго ти тут?"
+    },
+    {
+      "index": 25,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "revalidate"
+      ],
+      "after_ok": false,
+      "after_category": "low_confidence",
+      "after_code": "low_confidence",
+      "after_confidence": 0.6112,
+      "text_preview": "Може рік. Заткнись. Ты уже целый год делаешь?"
+    }
+  ],
+  "recovered": 4,
+  "failed_hard": 0,
+  "initial_issues": 6,
+  "decisions": [
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.7129,
+      "target_confidence": 0.2871,
+      "scores": {
+        "uk": 0.2871,
+        "ru": 0.7129,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+      "text_masked": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+      "entities_masked": [],
+      "stage": "PRE_TTS",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 0,
+      "segment_id": "0e93c7897a3e41709f44d16022bd12fa",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 66,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.2871,
+            "ru": 0.7129,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.7129,
+          "target_confidence": 0.2871,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.7129
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.71)\nTarget confidence: 0.29\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?"
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.6289,
+      "target_confidence": 0.3711,
+      "scores": {
+        "uk": 0.3711,
+        "ru": 0.6289,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Да ладно. чтобы накормить себя?",
+      "text_masked": "Да ладно. чтобы накормить себя?",
+      "entities_masked": [],
+      "stage": "PRE_TTS",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 9,
+      "segment_id": "db07cd755c734203b917ecc1c677143f",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 31,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Да ладно. чтобы накормить себя?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3711,
+            "ru": 0.6289,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6289,
+          "target_confidence": 0.3711,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6289
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.63)\nTarget confidence: 0.37\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Да ладно. чтобы накормить себя?",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Да ладно. чтобы накормить себя?"
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.575,
+      "target_confidence": 0.425,
+      "scores": {
+        "uk": 0.425,
+        "ru": 0.575,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+      "text_masked": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+      "entities_masked": [],
+      "stage": "PRE_TTS",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 16,
+      "segment_id": "0c20dd6b3bee47cea9255148c64b63bf",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 67,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.425,
+            "ru": 0.575,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.575,
+          "target_confidence": 0.425,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.5668
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.57)\nTarget confidence: 0.42\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25."
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.6461,
+      "target_confidence": 0.3539,
+      "scores": {
+        "uk": 0.3539,
+        "ru": 0.6461,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Честно говоря, это много. как будто я потеряла свою маму.",
+      "text_masked": "Честно говоря, это много. как будто я потеряла свою маму.",
+      "entities_masked": [],
+      "stage": "PRE_TTS",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 19,
+      "segment_id": "deeca43fa52b4c1da7edf7d436d1881d",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 57,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Честно говоря, это много. как будто я потеряла свою маму."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3539,
+            "ru": 0.6461,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6461,
+          "target_confidence": 0.3539,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6461
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.65)\nTarget confidence: 0.35\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Честно говоря, это много. как будто я потеряла свою маму.",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Честно говоря, это много. как будто я потеряла свою маму."
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.7584,
+      "target_confidence": 0.2416,
+      "scores": {
+        "uk": 0.2416,
+        "ru": 0.7584,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "И мне жаль это слышать, как долго ты здесь?",
+      "text_masked": "И мне жаль это слышать, как долго ты здесь?",
+      "entities_masked": [],
+      "stage": "PRE_TTS",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 24,
+      "segment_id": "db9e9789a50e490587651e8af487355a",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 43,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "И мне жаль это слышать, как долго ты здесь?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.2416,
+            "ru": 0.7584,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.7584,
+          "target_confidence": 0.2416,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.7584
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.76)\nTarget confidence: 0.24\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: И мне жаль это слышать, как долго ты здесь?",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "И мне жаль это слышать, как долго ты здесь?"
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.6112,
+      "target_confidence": 0.3888,
+      "scores": {
+        "uk": 0.3888,
+        "ru": 0.6112,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Може рік. Заткнись. Ты уже целый год делаешь?",
+      "text_masked": "Може рік. Заткнись. Ты уже целый год делаешь?",
+      "entities_masked": [],
+      "stage": "PRE_TTS",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 25,
+      "segment_id": "e9c85349ea534cd3847e6c85450fe88c",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 45,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Може рік. Заткнись. Ты уже целый год делаешь?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3888,
+            "ru": 0.6112,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6112,
+          "target_confidence": 0.3888,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6184
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.61)\nTarget confidence: 0.39\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Може рік. Заткнись. Ты уже целый год делаешь?",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Може рік. Заткнись. Ты уже целый год делаешь?"
+    }
+  ]
+}

@@ -128,11 +128,11 @@ def test_compute_mykyta_duration_controls():
         8000,
         base={"rate": 0.97, "pitch": 0.0, "volume": 1.05, "length_scale": 1.05},
     )
-    # slot/meas = 1.25 → clamp to 1.18
-    assert ctrl["length_scale"] == 1.18
-    assert 0.88 <= ctrl["rate"] <= 1.08
-    # rate ≈ 1/1.18 ≈ 0.847 → clamp 0.88
-    assert ctrl["rate"] == 0.88
+    # slot/meas = 1.25 → Stage 31 clamp to 1.08
+    assert ctrl["length_scale"] == 1.08
+    assert 0.92 <= ctrl["rate"] <= 1.08
+    # rate ≈ 1/1.08 ≈ 0.926
+    assert abs(ctrl["rate"] - (1.0 / 1.08)) < 0.02
 
 
 def test_expand_allows_two_soft_pads_no_garbage():

@@ -1,0 +1,71 @@
+{
+  "task_id": "",
+  "run_id": "f0a9a532",
+  "lang": "uk",
+  "elapsed_sec": 0.028,
+  "segments_total": 1,
+  "segments_adapted": 0,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 1,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 0,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "segment_id": "",
+      "original": "He bought a Fiat.",
+      "input": "Він купив Fiat.",
+      "output": "Ві́н купив Фіат.",
+      "passed": true,
+      "strategy": "direct",
+      "predicted_ms": 1201,
+      "slot_ms": 3000,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=1 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "PASS: predicted=785ms slot=3000ms ratio=0.26 (<115%)"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": true,
+          "note": "fixed: Fiat→Фіат"
+        },
+        {
+          "s": "timing",
+          "applied": false,
+          "note": "strategy=direct pred=1201ms slot=3000ms prev_end=0ms ok"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "meaning_lost: word_retention=0.33 (min=0.55)",
+        "missing_entity:Fiat"
+      ]
+    }
+  ]
+}

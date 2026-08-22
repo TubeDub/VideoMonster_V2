@@ -735,37 +735,92 @@ def _apply_translation_text_edits(
                     "file": None,
                 }
             )
+        _stamp_segment_identity(segments_data)
 
     if edits:
+        from engines.pipeline_integrity.identity_guard import resolve_row_by_identity
+        from engines.pipeline_integrity.pipeline_state import assert_text_change_uses_revision
+        from engines.pipeline_integrity.revision_manager import (
+            ensure_tts_uuid,
+            note_text_change,
+        )
+
         for item in edits:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text") or item.get("new_text") or "").strip()
+            if not text:
+                continue
+            sid = str(item.get("segment_id") or "").strip()
+            idx = -1
+            seg = None
+            if sid:
+                seg, how = resolve_row_by_identity(segments_data, segment_id=sid)
+                if how == "segment_id" and seg is not None:
+                    try:
+                        idx = segments_data.index(seg)
+                    except ValueError:
+                        idx = next(
+                            (
+                                i
+                                for i, s in enumerate(segments_data)
+                                if isinstance(s, dict)
+                                and str(s.get("segment_id") or "") == sid
+                            ),
+                            -1,
+                        )
+            if seg is None:
+                # Display number only (1-based). Never the identity key.
+                try:
+                    display = int(item.get("index", 0))
+                except (TypeError, ValueError):
+                    continue
+                idx = display - 1
+                if idx < 0 or idx >= len(segments_data):
+                    continue
+                seg = segments_data[idx] if isinstance(segments_data[idx], dict) else None
+            if not isinstance(seg, dict) or idx < 0:
+                continue
+            old_rev = str(
+                seg.get("adaptation_uuid")
+                or seg.get("translation_uuid")
+                or ""
+            ).strip()
+            locked = bool(seg.get("translation_locked") or info.get("translation_locked"))
+            note_text_change(seg, text, kind="adaptation")
+            ensure_tts_uuid(seg, force_new=True)
             try:
-                idx = int(item.get("index", 0)) - 1
-            except (TypeError, ValueError):
-                continue
-            text = str(item.get("text") or "").strip()
-            if idx < 0 or idx >= len(segments_data) or not text:
-                continue
-            segments_data[idx]["text"] = text
-            segments_data[idx]["plain_text"] = text
-            segments_data[idx]["translation_text"] = text
+                assert_text_change_uses_revision(
+                    info, seg, text, old_revision=old_rev
+                )
+            except Exception:
+                pass
+            seg["text"] = text
+            seg["plain_text"] = text
+            seg["translation_text"] = text
+            seg["needs_retts"] = True
+            if locked:
+                # Explicit reopen → edit → relock. Do not silently keep lock.
+                seg["translation_locked"] = False
+                seg["lock_reopened"] = True
             # Manual Review: re-approve as single ApprovedText (user is the owner)
-            if info.get("tps") or segments_data[idx].get("needs_manual_review"):
+            if info.get("tps") or seg.get("needs_manual_review"):
                 try:
                     from engines.tps.approved_text import approve_segment
 
                     approve_segment(
-                        segments_data[idx],
+                        seg,
                         text,
                         tqe_status="PASS",
                         path="manual",
                         task_id=str(info.get("task_id") or ""),
                         index=idx,
                     )
-                    segments_data[idx]["needs_manual_review"] = False
-                    segments_data[idx]["user_edited"] = True
+                    seg["needs_manual_review"] = False
+                    seg["user_edited"] = True
                 except Exception:
-                    segments_data[idx]["approved_text"] = text
-                    segments_data[idx]["needs_manual_review"] = False
+                    seg["approved_text"] = text
+                    seg["needs_manual_review"] = False
             row = audit_by_idx.get(idx)
             if row:
                 row["final_text"] = text
@@ -789,6 +844,22 @@ def _apply_translation_text_edits(
                 except Exception:
                     pass
 
+        edited_idx = []
+        for item in edits:
+            sid = str((item or {}).get("segment_id") or "").strip()
+            if sid:
+                for i, s in enumerate(segments_data):
+                    if isinstance(s, dict) and str(s.get("segment_id") or "") == sid:
+                        edited_idx.append(i)
+                        break
+                continue
+            try:
+                edited_idx.append(int(item.get("index", 0)) - 1)
+            except (TypeError, ValueError):
+                continue
+    else:
+        edited_idx = []
+
     texts = []
     for i, seg in enumerate(segments_data):
         row = audit_by_idx.get(i, {})
@@ -802,13 +873,6 @@ def _apply_translation_text_edits(
     try:
         from engines.dsal.studio_editorial import refresh_dsal_on_edits
 
-        edited_idx = []
-        if edits:
-            for item in edits:
-                try:
-                    edited_idx.append(int(item.get("index", 0)) - 1)
-                except (TypeError, ValueError):
-                    continue
         if edited_idx:
             refresh_dsal_on_edits(info, indices=edited_idx, allow_llm=False)
     except Exception:
@@ -875,9 +939,12 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
         task = AUTO_TASKS.get(task_id)
         if not task:
             return
-        info = task["info"]
-        info["task_id"] = task_id
-        # Last-resort: split shared Raw/Final blobs + sync TTS=Final before UI.
+        live = task["info"]
+        live["task_id"] = task_id
+        # Snapshot is a view (TZ §22): never write final_text/tts_text back
+        # into live pipeline state merely because Review opened / populated.
+        info = copy.deepcopy(live)
+        # Last-resort align runs on the snapshot only.
         try:
             from engines.tts_review_align import align_info_for_translation_review
 
@@ -1081,8 +1148,6 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
                     row.get("semantic_text") or row.get("semantic_engine_text") or ""
                 ).strip()
                 if info.get("final_tts_locked"):
-                    # Keep Review Final == fitted spoken text; never resurrect
-                    # a longer stale semantic blob after text-slot fit.
                     stamp_authoritative_final_text(
                         segments_data[-1],
                         text,
@@ -1115,29 +1180,23 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
                         audit=row,
                         preserve_semantic_engine=True,
                     )
-                if info.get("final_tts_locked"):
-                    pass
-                elif row.get("semantic_text") or row.get("semantic_engine_text"):
-                    pass
-                elif polished and raw_mt and polished != raw_mt:
-                    row["semantic_text"] = polished
-                    row["semantic_engine_text"] = polished
             elif blocked and row:
-                # Keep diagnostics in audit; clear TTS-bound finals
                 row["final_text"] = ""
                 row["tts_text"] = ""
                 row["approved_text"] = ""
                 row["tts_blocked"] = True
                 if rejected or raw_keep:
                     row["rejected_translation"] = rejected or raw_keep
+        # Snapshot-only: do not replace live segments_data / audits.
         info["segments_data"] = segments_data
-        info["translation_review"] = build_translation_review(info)
+        _stamp_segment_identity(segments_data)
+        live["translation_review"] = build_translation_review(info)
         if dev_diagnostics_enabled():
-            info["translation_diagnostics"] = build_developer_diagnostics(info)
+            live["translation_diagnostics"] = build_developer_diagnostics(info)
             try:
                 from engines.pipeline_platform.dev_view import build_dev_pipeline_view
 
-                info["pipeline_platform_trace"] = build_dev_pipeline_view(
+                live["pipeline_platform_trace"] = build_dev_pipeline_view(
                     info, task_id=task_id, app_dir=str(Path(__file__).resolve().parent.parent)
                 )
             except Exception:
@@ -1145,7 +1204,7 @@ def _populate_translation_review_data(task_id: str, segments: list[str]) -> None
         from engines.translation_inspector import build_translation_inspector, inspector_enabled
 
         if inspector_enabled():
-            info["translation_inspector"] = build_translation_inspector(info)
+            live["translation_inspector"] = build_translation_inspector(info)
 
 
 def _enter_translation_review_pause(task_id: str) -> None:
@@ -1366,6 +1425,67 @@ def _regen_segment_tts_simple(
     return dest.name
 
 
+def _stamp_segment_identity(rows: list) -> list:
+    """Guarantee UUID segment_id on every row (survives segments_data rebuilds)."""
+    from engines.pipeline_integrity.audio_identity import ensure_all_segment_uuids
+
+    segs = [r for r in (rows or []) if isinstance(r, dict)]
+    if segs:
+        ensure_all_segment_uuids(segs)
+        try:
+            from engines.pipeline_integrity.v2_gates import revision_manager_enabled
+            from engines.pipeline_integrity.uuid_chain import ensure_all_uuids
+
+            if revision_manager_enabled():
+                for row in segs:
+                    ensure_all_uuids(row)
+        except Exception:
+            pass
+    return rows
+
+
+def _identity_bind_after_regen(
+    seg: dict,
+    tts_text: str,
+    audio_path: str | None,
+    *,
+    segments_data: list | None = None,
+    stage: str = "regen",
+    require_wav: bool = True,
+) -> None:
+    """Bind wav↔text↔tts_uuid after intentional regen (allow_rebind)."""
+    if not isinstance(seg, dict):
+        return
+    from engines.pipeline_integrity.exceptions import IdentityMismatchError
+    from engines.pipeline_integrity.identity_guard import (
+        assert_consistent,
+        bind_after_tts,
+    )
+
+    try:
+        bind_after_tts(
+            seg,
+            tts_text=str(tts_text or ""),
+            audio_path=audio_path,
+            stage=stage,
+            allow_rebind=True,
+            segments_data=segments_data,
+        )
+    except IdentityMismatchError:
+        raise
+    except Exception as exc:
+        logger.warning("IdentityGuard bind_after_tts skipped: %s", exc)
+    if segments_data is not None:
+        try:
+            assert_consistent(
+                segments_data, stage=stage, require_wav=require_wav
+            )
+        except IdentityMismatchError:
+            raise
+        except Exception as exc:
+            logger.warning("IdentityGuard assert_consistent skipped: %s", exc)
+
+
 def _apply_text_adaptation(
     seg: dict,
     issue: dict,
@@ -1413,6 +1533,13 @@ def _apply_text_adaptation(
     seg["text"] = new_text
     seg["file"] = new_file
     tts_files.append(new_file)
+    _identity_bind_after_regen(
+        seg,
+        new_text,
+        new_file,
+        stage="post_tts_adapt_regen",
+        require_wav=False,
+    )
 
     try:
         from pydub import AudioSegment
@@ -1520,9 +1647,32 @@ def _segments_data_entries(
             "raw_mt",
             "naturalized_text",
             "trh",
+            "original",
+            "original_text",
+            "whisper_text",
+            "source_text",
         ):
             if old.get(key) not in (None, ""):
                 entry[key] = old.get(key)
+        orig = str(
+            entry.get("original")
+            or old.get("original")
+            or old.get("original_text")
+            or old.get("whisper_text")
+            or audit.get("original")
+            or audit.get("source_text")
+            or ""
+        ).strip()
+        if not orig:
+            src_rows = (
+                info.get("source_segments")
+                or info.get("source_segments_snapshot")
+                or []
+            )
+            if i < len(src_rows):
+                orig = str(src_rows[i] or "").strip()
+        if orig:
+            entry["original"] = orig
         if blocked:
             entry["tts_blocked"] = True
             entry["skip_tts"] = True
@@ -1557,6 +1707,7 @@ def _segments_data_entries(
         elif old.get("source_word_map"):
             entry["source_word_map"] = old["source_word_map"]
         out.append(entry)
+    _stamp_segment_identity(out)
     return out
 
 
@@ -1738,11 +1889,17 @@ def _commit_tts_group_result(
         (task_info or {}).get("identity_allow_rebind")
         or segments_data[head_idx].get("identity_allow_rebind")
     )
+    _head_seg = segments_data[head_idx]
+    _bind_audio = (
+        str(_head_seg.get("tts_file_path") or "").strip()
+        or str(_head_seg.get("resolved_path") or "").strip()
+        or audio_filename
+    )
     try:
         bind_after_tts(
-            segments_data[head_idx],
+            _head_seg,
             tts_text=tts_text,
-            audio_path=audio_filename,
+            audio_path=_bind_audio,
             stage="post_tts",
             allow_rebind=_allow_rebind,
             segments_data=segments_data,
@@ -3758,56 +3915,47 @@ def _mark_tts_segment_skipped(
         save_failure_report,
     )
 
-    if isinstance(report, dict):
-        fields = {f: report.get(f) for f in TTSFailureReport.__dataclass_fields__}
-        if not fields.get("reason") and report.get("error_message"):
-            fields["reason"] = report.get("error_message")
-        if fields.get("duration_ms") is None:
-            fields["duration_ms"] = 0.0
-        for _req in (
-            "segment_id",
-            "segment_index",
-            "current",
-            "total",
-            "original_text",
-            "tts_text",
-            "voice",
-            "language",
-            "tts_file_path",
-            "error_code",
-            "error_message",
-            "traceback",
-        ):
-            if fields.get(_req) is None:
-                fields[_req] = 0 if _req in ("segment_index", "current", "total") else ""
-        fields["pipeline_state"] = "PARTIAL"
-        fields["stage"] = "TTS"
-        report_obj = TTSFailureReport(**fields)
-    else:
-        report_obj = report
-        report_obj.pipeline_state = "PARTIAL"
-        report_obj.stage = "TTS"
-
-    for idx in indices:
-        if 0 <= idx < len(segments_data):
-            mark_segment_tts_failed(segments_data[idx], report_obj)
-
-    with STATE_LOCK:
-        task = AUTO_TASKS.get(task_id)
-        if task:
-            info = task.setdefault("info", {})
-            failures = info.setdefault("tts_failures", [])
-            payload = report_obj.to_dict()
-            payload["skipped_continue"] = True
-            payload["skip_reason"] = reason
-            failures.append(payload)
-            info["segments_data"] = segments_data
-            touch_task(task_id)
-
     try:
-        save_failure_report(report_obj, task_id=task_id)
+        if isinstance(report, dict):
+            report_obj = TTSFailureReport.from_partial_dict(report)
+        else:
+            report_obj = report
+            report_obj.pipeline_state = "PARTIAL"
+            report_obj.stage = "TTS"
+
+        for idx in indices:
+            if 0 <= idx < len(segments_data):
+                mark_segment_tts_failed(segments_data[idx], report_obj)
+
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(task_id)
+            if task:
+                info = task.setdefault("info", {})
+                failures = info.setdefault("tts_failures", [])
+                payload = report_obj.to_dict()
+                payload["skipped_continue"] = True
+                payload["skip_reason"] = reason
+                failures.append(payload)
+                info["segments_data"] = segments_data
+                touch_task(task_id)
+
+        try:
+            save_failure_report(report_obj, task_id=task_id)
+        except Exception as exc:
+            logger.debug("Task %s: TTS skip report save failed: %s", task_id, exc)
     except Exception as exc:
-        logger.debug("Task %s: TTS skip report save failed: %s", task_id, exc)
+        # Zip 8fadb9dd: skip handler TypeError aborted 31 successful TTS files.
+        logger.error(
+            "Task %s: TTS skip annotate failed (%s) indices=%s — continuing",
+            task_id,
+            exc,
+            indices,
+        )
+        for idx in indices or []:
+            if 0 <= idx < len(segments_data) and isinstance(segments_data[idx], dict):
+                segments_data[idx]["skip_tts"] = True
+                segments_data[idx]["tts_status"] = "failed"
+                segments_data[idx]["file"] = None
 
     logger.warning(
         "Task %s: TTS segment skipped (%s) indices=%s — continuing pipeline",
@@ -3869,11 +4017,27 @@ def _try_merge_neighbor_tts(
     head["text"] = combined
     head["tts_timing"] = [start_ms, end_ms]
     nxt["file"] = None
-    nxt["merged_into"] = idx
-    head_sid = head.get("segment_id")
-    if head_sid:
-        nxt["merged_into_id"] = head_sid
+    from engines.pipeline_integrity.segment import new_segment_id as _new_sid
+
+    head_sid = str(head.get("segment_id") or "").strip() or _new_sid()
+    head["segment_id"] = head_sid
+    head["segment_uuid"] = head.get("segment_uuid") or head_sid
+    nxt_sid = str(nxt.get("segment_id") or "").strip()
+    nxt["archived"] = True
+    nxt["merged_into_id"] = head_sid
+    nxt["merged_into"] = head_sid  # UUID, never list index
+    nxt["parent_segment_id"] = nxt_sid or None
     tts_files.append(new_file)
+    _audio_name = new_file[0] if isinstance(new_file, tuple) else new_file
+    if _audio_name:
+        head["file"] = _audio_name
+        _identity_bind_after_regen(
+            head,
+            combined,
+            _audio_name,
+            segments_data=segments_data,
+            stage="merge_neighbor_regen",
+        )
     logger.info("Task merge neighbor TTS idx=%d+%d", idx, idx + 1)
     return True
 
@@ -4176,7 +4340,36 @@ def _publish_studio_session_keep_running(task_id: str, step: str) -> str | None:
 
 
 _DUB_SLOT_TOLERANCE_MS = 75
-_DUB_MAX_ATEMPO = 1.15          # Stage 15/17 Happy Path ceiling (overflow); slow ≥0.95
+_DUB_MAX_ATEMPO = 1.15          # non-UK legacy ceiling; UK mux is clamped to 1.08
+_UK_MUX_MAX_ATEMPO = 1.08       # Stage 31/32 — zip 2286c82f still used 1.15
+
+
+def _clamp_placement_window(
+    start_ms: int,
+    end_ms: int,
+    *,
+    merge_adjusted_start: int | None = None,
+    min_slot_ms: int = 200,
+) -> tuple[int, int]:
+    """Stage 32 — never invert the mux window (diag 2286c82f idx=4 place_end < place_start).
+
+    ``merge_adjusted_start`` past ``end_ms`` produced ``slot_ms=1`` and a 500 on
+    POST /api/studio/mix. Ignore the inverted stamp; keep a positive slot.
+    """
+    start = int(start_ms or 0)
+    end = int(end_ms or 0)
+    if merge_adjusted_start is not None:
+        try:
+            adj = int(merge_adjusted_start)
+        except (TypeError, ValueError):
+            adj = start
+        if adj < end:
+            start = adj
+    if end <= start:
+        end = start + max(1, int(min_slot_ms))
+    return start, end
+
+
 _VIDEO_ADAPT_MAX_PCT = 15.0     # overlap ≤ 15% → prefer gap-borrow / video slowdown
 
 # ── Block merge constants ──────────────────────────────────────────────────────
@@ -4486,6 +4679,15 @@ def _absolutize_segment_audio_paths(
             if cand.is_file():
                 return cand
         if base is not None:
+            # VideoLingo-style segs/ is the mux workdir (Stage 36).
+            segs_hit = base / "segs" / p.name
+            if segs_hit.is_file():
+                return segs_hit
+            m = re.search(r"(?:^|[_-])(\d{4})\.(?:wav|mp3)$", p.name, re.I)
+            if m:
+                numbered = base / "segs" / f"{int(m.group(1)):04d}.wav"
+                if numbered.is_file():
+                    return numbered
             cand = base / p.name
             if cand.is_file():
                 return cand
@@ -4493,7 +4695,10 @@ def _absolutize_segment_audio_paths(
             try:
                 cand = _resolve_session_audio(
                     raw,
-                    task_info={"session_dir": str(base)} if base is not None else None,
+                    task_info={
+                        "session_dir": str(base) if base is not None else None,
+                        "task_id": tid,
+                    },
                 )
                 if cand and cand.is_file():
                     return cand
@@ -4571,6 +4776,7 @@ def _regen_segment_tts(
         force_uk_tts_identity,
         guard_uk_tts_text,
         is_latin_heavy,
+        uk_text_has_russian_leak,
     )
 
     seg_meta = {"segment_id": segment_id or "", "index": segment_index or 0}
@@ -4586,9 +4792,9 @@ def _regen_segment_tts(
     # Stage 28 §D1 — strip Stage-5 pacing pads BEFORE TTS so "ось як це було
     # тоді"/"Саме так: …" fillers do not eat slot time in the final audio.
     try:
-        from engines.text_slot_fit import strip_slot_pad_fillers
+        from engines.text_slot_fit import prepare_uk_spoken_text
 
-        speak_text = strip_slot_pad_fillers(speak_text)
+        speak_text = prepare_uk_spoken_text(speak_text)
     except Exception:
         pass
     if _lang == "uk" and speak_text:
@@ -4631,11 +4837,15 @@ def _regen_segment_tts(
                         cyrillic_letter_ratio(speak_text), 3
                     )
             else:
-                # Stage 29 §A3 — do not voice non-Cyrillic UK text; pad instead.
+                # Stage 29/33 — do not voice Latin or Russian as UK; pad instead.
                 if stamp_seg is not None:
-                    stamp_seg["tts_skip_reason"] = (
-                        "latin_heavy_refused" if heavy else "cyrillic_ratio_low"
-                    )
+                    if heavy:
+                        skip_reason = "latin_heavy_refused"
+                    elif uk_text_has_russian_leak(speak_text):
+                        skip_reason = "russian_in_uk"
+                    else:
+                        skip_reason = "cyrillic_ratio_low"
+                    stamp_seg["tts_skip_reason"] = skip_reason
                     stamp_seg["needs_re_tts"] = True
                 return None, 0
     text = speak_text
@@ -5869,6 +6079,36 @@ def _build_timed_dub_track(
         _audio_gate["final_status"] = "ok"
     _audio_gate.pop("export_blocked_reason", None)
 
+    # Stage 31: ripple AFTER pads so silence_pad durations are real, then
+    # overlap_count is taken from the final placement (not a pre-pad census).
+    try:
+        from engines.conflict_resolver import ripple_shift_segment_dicts as _ripple_fn
+
+        _rp1 = _ripple_fn(list(segments_data or []))
+        _rp2 = _ripple_fn(list(segments_data or []))
+        _rp3 = _ripple_fn(list(segments_data or []), max_shift_ms=0)
+        _ov_final = int(
+            _rp3.get("overlap_count")
+            or _rp3.get("overlap_after_ripple")
+            or 0
+        )
+        if task_info is not None:
+            task_info["stage31_post_pad_ripple"] = {
+                "ripple_shifted": int(_rp1.get("ripple_shifted") or 0)
+                + int(_rp2.get("ripple_shifted") or 0)
+                + int(_rp3.get("ripple_shifted") or 0),
+                "overlap_count": _ov_final,
+            }
+            task_info["overlap_count"] = _ov_final
+        if _ov_final:
+            logger.info(
+                "Task %s: stage31 post-pad ripple residual overlap_count=%s",
+                task_id,
+                _ov_final,
+            )
+    except Exception as _rp_exc:
+        logger.debug("stage31 post-pad ripple skipped: %s", _rp_exc)
+
     if task_info is not None:
         task_info["stage23b_audio_gate"] = _audio_gate
         # Sync pads from repair + soft-pad + last-resort + segment flags.
@@ -5917,6 +6157,21 @@ def _build_timed_dub_track(
             _absolutize_segment_audio_paths(segments_data, _sd, task_id=task_id)
         except Exception:
             pass
+        # Stage 36 — VideoLingo/pyVideoTrans workdir: copy live clips into segs/.
+        try:
+            from engines.oss_production import canonicalize_session_artifacts
+
+            _oss_root = None
+            if isinstance(task_info, dict):
+                _oss_root = task_info.get("session_dir")
+            canonicalize_session_artifacts(
+                list(segments_data or []),
+                _oss_root,
+                task_info=task_info if isinstance(task_info, dict) else None,
+                resolve_path=_mux_resolve,
+            )
+        except Exception as _oss_exc:
+            logger.debug("Task %s: oss segs canonicalize skipped: %s", task_id, _oss_exc)
         task_info["segments_data"] = list(segments_data or [])
         # Diagnostics AFTER repair+pad+last-resort — disk truth only.
         try:
@@ -5997,6 +6252,20 @@ def _build_timed_dub_track(
                 _lr_stats.get("padded_count"),
             )
 
+    # Stage 28/32 — UK Simple max_atempo is 1.08 even outside happy-path
+    # (diag 2286c82f mux logs still showed atempo=1.15).
+    _tgt_ta = str((task_info or {}).get("target_lang") or (task_info or {}).get("lang") or "").split("-")[0].lower()
+    try:
+        _policy_max = float((task_info or {}).get("max_atempo") or _UK_MUX_MAX_ATEMPO)
+    except (TypeError, ValueError):
+        _policy_max = _UK_MUX_MAX_ATEMPO
+    if _tgt_ta == "uk":
+        _mux_cap = min(_UK_MUX_MAX_ATEMPO, _policy_max if _policy_max > 0 else _UK_MUX_MAX_ATEMPO)
+    else:
+        _mux_cap = _policy_max or _DUB_MAX_ATEMPO
+    if task_info is not None:
+        task_info["timing_max_atempo"] = _mux_cap
+
     _happy_path_timing = False
     try:
         from engines.happy_path import skip_advanced_text_shorteners as _hp_tm
@@ -6048,9 +6317,14 @@ def _build_timed_dub_track(
             _place_source = "timing_map"
 
         # Block-merge: if previous segment claimed part of this segment's slot,
-        # use the adjusted start to place this segment later in the timeline.
-        if seg.get("merge_adjusted_start"):
-            start_ms = int(seg["merge_adjusted_start"])
+        # use the adjusted start — but never invert the window (diag 2286c82f).
+        _adj = seg.get("merge_adjusted_start")
+        start_ms, end_ms = _clamp_placement_window(
+            start_ms,
+            end_ms,
+            merge_adjusted_start=int(_adj) if _adj not in (None, "", False) else None,
+        )
+        if _adj not in (None, "", False) and start_ms == int(_adj):
             _place_source = f"{_place_source}+merge_adjusted_start"
 
         # If adapted (or need_adaptation forced by duration delta): bind end to TTS length,
@@ -6180,12 +6454,24 @@ def _build_timed_dub_track(
                 _mode = str(seg.get("video_adapt_mode") or "")
                 allow_overflow_flags.append(_mode in ("video_adapt", "gap_absorb"))
                 aligned_timing.append({"start": start_ms, "end": end_ms})
-                # Happy Path Stage 3: allow gentle atempo (≤1.20) when slot overflows.
-                allow_atempo_flags.append(
-                    True
-                    if _happy_path_timing
-                    else bool(seg.get("allow_atempo", False))
-                )
+                # Stage 31 UK: atempo only when |delta| still > 150 after text-fit.
+                _slot_ms_flag = max(1, int(end_ms) - int(start_ms))
+                _need_speed = abs(int(tts_dur or 0) - _slot_ms_flag) > 150
+                _uk_ta = str(
+                    (task_info or {}).get("target_lang")
+                    or (task_info or {}).get("lang")
+                    or ""
+                ).split("-")[0].lower() == "uk"
+                if _uk_ta:
+                    allow_atempo_flags.append(
+                        bool(_need_speed or seg.get("allow_atempo") or seg.get("needs_atempo_clamp"))
+                    )
+                else:
+                    allow_atempo_flags.append(
+                        True
+                        if _happy_path_timing
+                        else bool(seg.get("allow_atempo", False))
+                    )
                 prosody = seg.get("prosody") or {}
                 place_delays.append(
                     int(seg.get("place_delay_ms") or prosody.get("place_delay_ms") or 0)
@@ -6240,22 +6526,30 @@ def _build_timed_dub_track(
             if _slot <= 0 or _ttsms <= 0:
                 continue
             _delta = _ttsms - _slot
-            if abs(_delta) <= 250:
+            if abs(_delta) <= 150:
                 continue
             if _s_dc.get("silence_pad") or _s_dc.get("audio_padded"):
                 _s_dc["duration_control_used"] = "soft_pad"
             elif _s_dc.get("split_children") or _s_dc.get("split_index") is not None:
-                _s_dc["duration_control_used"] = "split"
-            elif _s_dc.get("expand_to_fill_used") or _s_dc.get("text_expanded"):
-                _s_dc["duration_control_used"] = "expand"
-            elif _s_dc.get("text_shortened") or _s_dc.get("sso_used"):
-                _s_dc["duration_control_used"] = "shorten"
+                _s_dc["duration_control_used"] = "text_split"
+            elif _s_dc.get("expand_to_fill_used") or _s_dc.get("text_expanded") or _s_dc.get("expand_executed"):
+                _s_dc["duration_control_used"] = "text_expand"
+            elif _s_dc.get("text_shortened") or _s_dc.get("sso_used") or _s_dc.get("shorten_executed"):
+                _s_dc["duration_control_used"] = "text_shorten"
             elif _s_dc.get("trim_trailing_silence") or _s_dc.get("silence_trimmed_ms"):
                 _s_dc["duration_control_used"] = "trim_silence"
-            elif _s_dc.get("stage23_atempo") or _s_dc.get("allow_atempo"):
+            elif abs(float(_s_dc.get("atempo") or 1.0) - 1.0) >= 0.01:
                 _s_dc["duration_control_used"] = "atempo"
-            elif _s_dc.get("tts_length_scale") not in (None, "", 1.0):
-                _s_dc["duration_control_used"] = "length_scale"
+            elif _s_dc.get("tts_length_scale") not in (None, "", 1.0, 1, "1.0"):
+                try:
+                    if abs(float(_s_dc.get("tts_length_scale") or 1.0) - 1.0) >= 0.01:
+                        _s_dc["duration_control_used"] = "length_scale"
+                    elif _delta > 0:
+                        _s_dc["duration_control_used"] = "atempo"
+                    else:
+                        _s_dc["duration_control_used"] = "length_scale"
+                except (TypeError, ValueError):
+                    _s_dc["duration_control_used"] = "length_scale"
             elif _delta > 0:
                 _s_dc["duration_control_used"] = "atempo"
             else:
@@ -6316,9 +6610,12 @@ def _build_timed_dub_track(
         lead_in_ms_list=lead_ins,
         text_hints=text_hints,
         max_atempo=float(
-            1.15
-            if _happy_path_timing
-            else (style_params.get("max_atempo") or _DUB_MAX_ATEMPO)
+            (task_info or {}).get("timing_max_atempo")
+            or (
+                _UK_MUX_MAX_ATEMPO
+                if str((task_info or {}).get("target_lang") or "").startswith("uk")
+                else _DUB_MAX_ATEMPO
+            )
         ),
         happy_path=_happy_path_timing,
         on_segment_progress=on_segment_progress,
@@ -6946,11 +7243,32 @@ def api_auto_dub_start():
     if orig_override is None:
         orig_override = _vol_pct("original_volume_pct")
     if _style_gated:
-        orig_override = 0.0
+        # Keep documentary-like underlay instead of silencing original (TZ §24–26).
+        orig_override = 0.20
 
     resolved_style = resolve_dub_style(style_id, original_volume=orig_override)
     mix_mode = resolved_style["mix_mode"]
     mix_volumes = resolved_style["mix_volumes"]
+    try:
+        from engines.simple_dub_pipeline import apply_simple_uk_source_underlay
+
+        _mix_info = {
+            "user_mode": _user_mode,
+            "target_lang": data.get("target_lang") or data.get("lang") or "",
+            "simple_pipeline": str(_user_mode or "").lower() in ("basic", "simple", "")
+            or bool(data.get("simple_pipeline")),
+            "happy_path": True,
+        }
+        mix_volumes = apply_simple_uk_source_underlay(
+            _mix_info,
+            mix_volumes,
+            explicit_original=orig_override if not _style_gated else None,
+            raw_style=_raw_style_req,
+            style_gated=_style_gated,
+        )
+        mix_mode = mix_volumes.get("mix_mode") or mix_mode
+    except Exception:
+        pass
     # Optional professional-mix overrides (TZ Task 9): intelligent-ducking
     # intensity / fade / per-track volumes. Carried on mix_volumes so the single
     # resolver (engines/audio_mix_config.resolve_mix_config) picks them up at mux.
@@ -7963,31 +8281,49 @@ def api_translation_review(task_id):
 
 @bp.post("/api/auto_dub/translation_review/<task_id>/apply")
 def api_translation_review_apply(task_id):
-    """Save pre-TTS text edit without regenerating audio."""
+    """Explicit reopen→edit→relock. Archives old revision; marks NeedReTTS."""
     data = request.get_json(silent=True) or {}
-    try:
-        user_idx = int(data.get("segment_index", 1))
-    except (TypeError, ValueError):
-        return jsonify({"error": "invalid segment_index"}), 400
-
-    seg_idx = user_idx - 1
-    new_text = str(data.get("new_text") or "").strip()
+    new_text = str(data.get("new_text") or data.get("text") or "").strip()
     if not new_text:
         return jsonify({"error": "new_text is required"}), 400
+
+    sid = str(data.get("segment_id") or "").strip()
+    user_idx = None
+    if data.get("segment_index") is not None:
+        try:
+            user_idx = int(data.get("segment_index", 1))
+        except (TypeError, ValueError):
+            return jsonify({"error": "invalid segment_index"}), 400
 
     with STATE_LOCK:
         task = AUTO_TASKS.get(task_id)
         if not task:
             return jsonify({"error": "Задача не найдена"}), 404
-        segments_data = task.get("info", {}).get("segments_data") or []
-        if seg_idx < 0 or seg_idx >= len(segments_data):
-            return jsonify({"error": "invalid segment_index"}), 400
         info = task.setdefault("info", {})
+        segments_data = info.get("segments_data") or []
 
-    texts = _apply_translation_text_edits(
-        info,
-        edits=[{"index": user_idx, "text": new_text}],
+    edit = {"text": new_text}
+    if sid:
+        edit["segment_id"] = sid
+    if user_idx is not None:
+        edit["index"] = user_idx
+
+    texts = _apply_translation_text_edits(info, edits=[edit])
+
+    # Locate the edited row by UUID first (index is display only).
+    from engines.pipeline_integrity.identity_guard import resolve_row_by_identity
+
+    seg, how = resolve_row_by_identity(
+        info.get("segments_data") or [],
+        segment_id=sid,
+        index=(user_idx - 1) if user_idx else None,
     )
+    seg_idx = 0
+    if isinstance(seg, dict):
+        try:
+            seg_idx = (info.get("segments_data") or []).index(seg)
+        except ValueError:
+            seg_idx = (user_idx - 1) if user_idx else 0
 
     with STATE_LOCK:
         status = AUTO_TASKS.get(task_id, {}).get("status")
@@ -7995,20 +8331,17 @@ def api_translation_review_apply(task_id):
     return jsonify(
         {
             "ok": True,
-            "segment_index": user_idx,
+            "segment_index": (user_idx if user_idx is not None else seg_idx + 1),
+            "segment_id": str((seg or {}).get("segment_id") or sid or ""),
+            "lookup": how,
             "status": status,
             "segment_count": len(texts),
-            "dsal": (info.get("segments_data") or [{}])[seg_idx].get("dsal")
-            if 0 <= seg_idx < len(info.get("segments_data") or [])
-            else None,
-            "dsal_band": (info.get("segments_data") or [{}])[seg_idx].get("dsal_band")
-            if 0 <= seg_idx < len(info.get("segments_data") or [])
-            else None,
-            "needs_studio": bool(
-                ((info.get("segments_data") or [{}])[seg_idx] or {}).get("needs_studio")
-            )
-            if 0 <= seg_idx < len(info.get("segments_data") or [])
-            else False,
+            "needs_retts": bool((seg or {}).get("needs_retts")),
+            "adaptation_uuid": (seg or {}).get("adaptation_uuid"),
+            "tts_uuid": (seg or {}).get("tts_uuid"),
+            "dsal": (seg or {}).get("dsal"),
+            "dsal_band": (seg or {}).get("dsal_band"),
+            "needs_studio": bool((seg or {}).get("needs_studio")),
         }
     )
 
@@ -8081,6 +8414,13 @@ def api_translation_review_approve(task_id):
 
     if edits:
         _apply_translation_text_edits(info, edits=edits)
+
+    try:
+        from engines.dsal.studio_editorial import relock_after_editorial
+
+        relock_after_editorial(info)
+    except Exception:
+        pass
 
     texts = _resume_from_translation_review(task_id)
     if texts is None:
@@ -8561,6 +8901,13 @@ def api_regen_segment():
             old_file = segments_data[seg_idx].get("file")
             segments_data[seg_idx]["text"] = new_text
             segments_data[seg_idx]["file"] = new_files[0]
+            _identity_bind_after_regen(
+                segments_data[seg_idx],
+                new_text,
+                new_files[0],
+                segments_data=segments_data,
+                stage="ui_segment_regen",
+            )
 
             if old_file and old_file != new_files[0]:
                 (OUTPUT_DIR / old_file).unlink(missing_ok=True)
@@ -9943,26 +10290,57 @@ def _run_voice_verification_for_task(
     result = agent.run(manifest, state, task_id)
 
     out_segments = list((result.updated_state or {}).get("segments") or agent_segments)
+    from engines.pipeline_integrity.identity_guard import resolve_row_by_identity
+
+    _vv_keys = (
+        "semantic_text",
+        "timing_text",
+        "grammar_text",
+        "tts_text",
+        "file",
+        "tts_file_path",
+        "playback_duration",
+        "voice_verification_passed",
+        "voice_verification_metrics",
+        "voice_verification_issues",
+        "voice_verification_retry_count",
+        "voice_verification_asr_text",
+        "voice_verification_route_to",
+    )
+    _sd_has_ids = any(
+        isinstance(s, dict) and str(s.get("segment_id") or "").strip()
+        for s in segments_data
+    )
     for i, seg in enumerate(out_segments):
-        if i >= len(segments_data):
+        if not isinstance(seg, dict):
             continue
-        for key in (
-            "semantic_text",
-            "timing_text",
-            "grammar_text",
-            "tts_text",
-            "file",
-            "tts_file_path",
-            "playback_duration",
-            "voice_verification_passed",
-            "voice_verification_metrics",
-            "voice_verification_issues",
-            "voice_verification_retry_count",
-            "voice_verification_asr_text",
-            "voice_verification_route_to",
-        ):
+        _sid_vv = str(seg.get("segment_id") or "").strip()
+        if _sid_vv and _sd_has_ids:
+            _tgt_vv, _how_vv = resolve_row_by_identity(
+                segments_data, segment_id=_sid_vv, index=None
+            )
+            if _tgt_vv is None:
+                logger.warning(
+                    "IdentityGuard: voice-verify no row for segment_id=%s",
+                    _sid_vv,
+                )
+                continue
+        else:
+            if i >= len(segments_data):
+                continue
+            _tgt_vv, _how_vv = resolve_row_by_identity(
+                segments_data, segment_id="", index=i
+            )
+            if _tgt_vv is None:
+                continue
+            if _sd_has_ids:
+                logger.warning(
+                    "IdentityGuard: voice-verify copy index fallback idx=%s",
+                    i,
+                )
+        for key in _vv_keys:
             if key in seg:
-                segments_data[i][key] = seg[key]
+                _tgt_vv[key] = seg[key]
 
     task_info["voice_verification_agent_path"] = True
     task_info["voice_verification_passed"] = bool(
@@ -10006,8 +10384,9 @@ def _segments_data_from_agent(segments_data: list[dict], info: dict) -> list[dic
             "file": None,
         }
         old = old_by_idx.get(i) or {}
-        if old.get("segment_id"):
-            entry["segment_id"] = old["segment_id"]
+        _keep_sid = str(old.get("segment_id") or seg.get("segment_id") or "").strip()
+        if _keep_sid:
+            entry["segment_id"] = _keep_sid
         if seg.get("start") is not None:
             entry["start"] = seg["start"]
         if seg.get("end") is not None:
@@ -10021,6 +10400,7 @@ def _segments_data_from_agent(segments_data: list[dict], info: dict) -> list[dic
         if seg.get("confidence"):
             entry["translation_confidence"] = seg["confidence"]
         out.append(entry)
+    _stamp_segment_identity(out)
     return out
 
 
@@ -10072,6 +10452,8 @@ def _prepare_translated_segments(
                                 "mt_cache_misses",
                                 "mt_calls",
                                 "translate_method",
+                                "naturalizer_executed",
+                                "naturalizer_applied",
                             )
                         },
                     }
@@ -12361,8 +12743,12 @@ def _run_pipeline_inner(
                         _stage7_done = True
                         meta = {
                             "pipeline": translate_method,
-                            "naturalizer_executed": False,
-                            "naturalizer_applied": False,
+                            "naturalizer_executed": bool(
+                                _mt_stats.get("naturalizer_executed")
+                            ),
+                            "naturalizer_applied": bool(
+                                _mt_stats.get("naturalizer_applied")
+                            ),
                             "timing_aware_executed": False,
                             "timing_aware_applied": False,
                             "translation_agent": False,
@@ -13700,11 +14086,21 @@ def _run_pipeline_inner(
                 content_mode=content_mode,
                 skip_text_adaptation=_preserve_timing_text,
             )
+            with STATE_LOCK:
+                _sd_engine = list(task["info"].get("segments_data") or [])
+            _stamp_segment_identity(_sd_engine)
+            _engine_sids = [
+                str(s.get("segment_id") or "") if isinstance(s, dict) else ""
+                for s in _sd_engine
+            ]
+            while len(_engine_sids) < len(segments):
+                _engine_sids.append("")
             _dub_engine_results = _engine.process_all(
                 segments,
                 current_timing_map_snapshot,
                 source_hints=source_segments_snapshot,
                 natural_pauses_out=_natural_pauses_for_timing,
+                segment_ids=_engine_sids[: len(segments)],
             )
             with STATE_LOCK:
                 _review_freeze_engine = bool(
@@ -13857,13 +14253,24 @@ def _run_pipeline_inner(
                 _audits_now = task["info"].get("translation_audits") or []
                 _audit_by_idx_e = {int(a.get("index", -1)): a for a in _audits_now}
                 if not _review_freeze_engine:
+                    from engines.pipeline_integrity.identity_guard import (
+                        resolve_row_by_identity,
+                        run_identity_guard,
+                    )
+                    try:
+                        from engines.pipeline_integrity.revision_manager import (
+                            note_text_change,
+                        )
+                    except Exception:
+                        note_text_change = None  # type: ignore[assignment]
+                    _sd_now = task["info"].get("segments_data") or []
                     for r in _dub_engine_results:
                         _orig_e = (_segments_before_engine[r.index]
                                    if r.index < len(_segments_before_engine) else "")
                         _out_e = (
-                            segments[r.index]
-                            if r.index < len(segments) and str(segments[r.index] or "").strip()
-                            else r.output_text
+                            str(r.output_text or "").strip()
+                            if r.passed_validation and str(r.output_text or "").strip()
+                            else _orig_e
                         )
                         if _out_e and _out_e != _orig_e:
                             _row_e = _audit_by_idx_e.get(r.index)
@@ -13878,17 +14285,72 @@ def _run_pipeline_inner(
                                 _row_e["tts_text"] = _out_clean
                                 _row_e["dubbing_engine_strategy"] = r.recommended_strategy
                                 _row_e["semantic_adapted"] = True
-                        _sd_now = task["info"].get("segments_data") or []
-                        if r.index < len(_sd_now) and _out_e:
+                        if _out_e:
                             try:
                                 from engines.stress_marks import strip_stress_marks
 
                                 _out_clean = strip_stress_marks(_out_e)
                             except Exception:
                                 _out_clean = _out_e
-                            _sd_now[r.index]["text"] = _out_clean
-                            _sd_now[r.index]["plain_text"] = _out_clean
-                            _sd_now[r.index]["translation_text"] = _out_clean
+                            _sid_r = str(getattr(r, "segment_id", "") or "").strip()
+                            _tgt, _how = resolve_row_by_identity(
+                                _sd_now,
+                                segment_id=_sid_r,
+                                index=None if _sid_r else r.index,
+                            )
+                            if _tgt is None and not _sid_r:
+                                _tgt, _how = resolve_row_by_identity(
+                                    _sd_now, segment_id="", index=r.index
+                                )
+                            if _tgt is None:
+                                logger.warning(
+                                    "IdentityGuard: dub engine result not bound "
+                                    "sid=%s index=%s",
+                                    _sid_r,
+                                    r.index,
+                                )
+                            else:
+                                if _how == "index":
+                                    logger.warning(
+                                        "IdentityGuard: engine result missing "
+                                        "segment_id; index fallback index=%s",
+                                        r.index,
+                                    )
+                                _old_txt = str(
+                                    _tgt.get("plain_text") or _tgt.get("text") or ""
+                                ).strip()
+                                if note_text_change is not None:
+                                    try:
+                                        note_text_change(
+                                            _tgt, _out_clean, kind="adaptation"
+                                        )
+                                    except Exception:
+                                        pass
+                                _tgt["text"] = _out_clean
+                                _tgt["plain_text"] = _out_clean
+                                _tgt["translation_text"] = _out_clean
+                                _tgt["final_text"] = _out_clean
+                                _tgt["tts_text"] = _out_clean
+                                if _out_clean.strip() != _old_txt:
+                                    try:
+                                        from engines.pipeline_integrity.uuid_chain import (
+                                            ensure_tts_uuid,
+                                        )
+
+                                        ensure_tts_uuid(_tgt, force_new=True)
+                                    except Exception:
+                                        pass
+                    try:
+                        run_identity_guard(
+                            _sd_now,
+                            stage="post_adapt",
+                            task_info=task["info"],
+                            require_wav=False,
+                        )
+                    except Exception as _ig_ad_exc:
+                        logger.warning(
+                            "IdentityGuard post_adapt skipped: %s", _ig_ad_exc
+                        )
                 else:
                     for r in _dub_engine_results:
                         _row_e = _audit_by_idx_e.get(r.index)
@@ -15486,6 +15948,23 @@ def _run_pipeline_inner(
                                 or task["info"].get("detected_lang")
                                 or "en"
                             )
+                        try:
+                            _src_snap = list(source_segments_snapshot or [])
+                        except NameError:
+                            _src_snap = []
+                        for _i, _ls in enumerate(segments_data or []):
+                            if not isinstance(_ls, dict):
+                                continue
+                            if str(
+                                _ls.get("original")
+                                or _ls.get("original_text")
+                                or _ls.get("whisper_text")
+                                or _ls.get("source_text")
+                                or ""
+                            ).strip():
+                                continue
+                            if _i < len(_src_snap) and str(_src_snap[_i] or "").strip():
+                                _ls["original"] = str(_src_snap[_i]).strip()
                         _lang_stats = enforce_segments_lang_lock(
                             segments_data,
                             target_lang=target_lang,
@@ -15513,9 +15992,12 @@ def _run_pipeline_inner(
                                 if segments_data[_head].get("skip_tts"):
                                     _g["plain_text"] = ""
                                     _g["text"] = ""
+                                    _g["final_tts_text"] = ""
                                     _g["skip_tts"] = True
                                 elif _nt:
                                     _g["plain_text"] = _nt
+                                    _g["final_tts_text"] = _nt
+                                    _g["text"] = _nt
                         logger.info(
                             "Task %s: TTS lang lock checked=%s remt_ok=%s skipped=%s",
                             task_id,
@@ -15978,6 +16460,20 @@ def _run_pipeline_inner(
                     except Exception:
                         pass
                     try:
+                        from engines.tts_text_authority import prefer_locked_uk_spoken_text
+
+                        _hi_lock = int(indices[0]) if indices else -1
+                        _seg_lock = (
+                            segments_data[_hi_lock]
+                            if 0 <= _hi_lock < len(segments_data)
+                            else None
+                        )
+                        text = prefer_locked_uk_spoken_text(
+                            text, group=group, seg=_seg_lock
+                        )
+                    except Exception:
+                        pass
+                    try:
                         from engines.tts_text_authority import (
                             assert_tts_matches_final,
                             text_hash,
@@ -16109,15 +16605,28 @@ def _run_pipeline_inner(
 
                         _conc = resolve_edge_tts_concurrency(None)
                         _art = _artifacts_dir(task.get("info"))
+                        try:
+                            from engines.oss_production import (
+                                resolve_oss_segs_dir,
+                                resolve_tts_out_path,
+                            )
+
+                            _segs = resolve_oss_segs_dir(_art)
+                        except Exception:
+                            _segs = Path(_art) / "segs"
+                            _segs.mkdir(parents=True, exist_ok=True)
+                        with STATE_LOCK:
+                            (task.get("info") or {})["oss_segs_dir"] = str(_segs)
                         _parallel_items = []
                         for wi in work_items:
                             _g = int(wi.get("g_idx", 0))
-                            _out = _art / f"{base_id}_g{_g:04d}.mp3"
                             _ctx_p = str(
                                 (wi.get("tts_context") or {}).get("tts_file_path") or ""
                             )
-                            if _ctx_p:
-                                _out = Path(_ctx_p)
+                            try:
+                                _out = resolve_tts_out_path(_segs, _g, _ctx_p, ext=".mp3")
+                            except Exception:
+                                _out = _segs / f"{_g:04d}.mp3"
                             _parallel_items.append(
                                 {
                                     **wi,
@@ -16241,64 +16750,72 @@ def _run_pipeline_inner(
                             pass
 
                 for res in parallel_results:
-                    g_idx = int(res.get("g_idx", 0))
-                    indices = res.get("indices") or []
-                    text = str(res.get("text") or "").strip()
-                    one_files = [res["file"]] if res.get("file") else []
-                    head_idx = indices[0] if indices else 0
-                    if res.get("tts_failure"):
-                        for _seg_idx in (indices or []):
-                            _open_ddf.record_agent(
-                                task_id, "TTS", called=True, success=False,
-                                error=str(res["tts_failure"]),
-                                fallback_used=True,
-                                segment_idx=_seg_idx,
-                                decision="silence_gap",
+                    try:
+                        g_idx = int(res.get("g_idx", 0))
+                        indices = res.get("indices") or []
+                        text = str(res.get("text") or "").strip()
+                        one_files = [res["file"]] if res.get("file") else []
+                        head_idx = indices[0] if indices else 0
+                        if res.get("tts_failure"):
+                            for _seg_idx in (indices or []):
+                                _open_ddf.record_agent(
+                                    task_id, "TTS", called=True, success=False,
+                                    error=str(res["tts_failure"]),
+                                    fallback_used=True,
+                                    segment_idx=_seg_idx,
+                                    decision="silence_gap",
+                                )
+                                _open_ddf.mark_segment_attention(task_id, _seg_idx, "tts_failed")
+                            _mark_tts_segment_skipped(
+                                task_id,
+                                segments_data,
+                                indices,
+                                res["tts_failure"],
+                                reason="tts_failure",
                             )
-                            _open_ddf.mark_segment_attention(task_id, _seg_idx, "tts_failed")
-                        _mark_tts_segment_skipped(
+                            _commit_tts_group_result(
+                                segments_data,
+                                indices,
+                                tts_text=text,
+                                audio_filename=None,
+                                task_info=task.get("info") if task else None,
+                            )
+                            continue
+                        if one_files:
+                            tts_files.extend(one_files)
+                            with STATE_LOCK:
+                                _tts_info_local = dict(task.get("info") or {})
+                            _commit_tts_group_result(
+                                segments_data,
+                                indices,
+                                tts_text=text,
+                                audio_filename=one_files[0],
+                                task_info=_tts_info_local,
+                            )
+                            if head_idx < len(segments_data) and isinstance(
+                                segments_data[head_idx], dict
+                            ):
+                                if res.get("rate") is not None:
+                                    segments_data[head_idx]["tts_synth_rate"] = res.get("rate")
+                                if res.get("pitch") is not None:
+                                    segments_data[head_idx]["tts_synth_pitch"] = res.get("pitch")
+                                segments_data[head_idx]["tts_cache_hit"] = bool(
+                                    res.get("cache_hit")
+                                )
+                        else:
+                            _commit_tts_group_result(
+                                segments_data,
+                                indices,
+                                tts_text=text,
+                                audio_filename=None,
+                                task_info=task.get("info") if task else None,
+                            )
+                    except Exception as _par_apply_exc:
+                        logger.error(
+                            "Task %s: parallel TTS result apply failed g=%s: %s — continuing",
                             task_id,
-                            segments_data,
-                            indices,
-                            res["tts_failure"],
-                            reason="tts_failure",
-                        )
-                        _commit_tts_group_result(
-                            segments_data,
-                            indices,
-                            tts_text=text,
-                            audio_filename=None,
-                            task_info=task.get("info") if task else None,
-                        )
-                        continue
-                    if one_files:
-                        tts_files.extend(one_files)
-                        with STATE_LOCK:
-                            _tts_info_local = dict(task.get("info") or {})
-                        _commit_tts_group_result(
-                            segments_data,
-                            indices,
-                            tts_text=text,
-                            audio_filename=one_files[0],
-                            task_info=_tts_info_local,
-                        )
-                        if head_idx < len(segments_data) and isinstance(
-                            segments_data[head_idx], dict
-                        ):
-                            if res.get("rate") is not None:
-                                segments_data[head_idx]["tts_synth_rate"] = res.get("rate")
-                            if res.get("pitch") is not None:
-                                segments_data[head_idx]["tts_synth_pitch"] = res.get("pitch")
-                            segments_data[head_idx]["tts_cache_hit"] = bool(
-                                res.get("cache_hit")
-                            )
-                    else:
-                        _commit_tts_group_result(
-                            segments_data,
-                            indices,
-                            tts_text=text,
-                            audio_filename=None,
-                            task_info=task.get("info") if task else None,
+                            res.get("g_idx") if isinstance(res, dict) else "?",
+                            _par_apply_exc,
                         )
 
                 with STATE_LOCK:
@@ -16319,6 +16836,20 @@ def _run_pipeline_inner(
                         from engines.text_slot_fit import strip_slot_pad_fillers
 
                         text = strip_slot_pad_fillers(text)
+                    except Exception:
+                        pass
+                    try:
+                        from engines.tts_text_authority import prefer_locked_uk_spoken_text
+
+                        _hi_s = int(indices[0]) if indices else -1
+                        _seg_s = (
+                            segments_data[_hi_s]
+                            if 0 <= _hi_s < len(segments_data)
+                            else None
+                        )
+                        text = prefer_locked_uk_spoken_text(
+                            text, group=group, seg=_seg_s
+                        )
                     except Exception:
                         pass
                     head_idx = int(indices[0]) if indices else 0
@@ -17493,6 +18024,13 @@ def _run_pipeline_inner(
                         _hseg["tts_status"] = "generated"
                         _hseg["tts_text"] = _htext
                         _hseg.pop("fitted_file", None)
+                        _identity_bind_after_regen(
+                            _hseg,
+                            _htext,
+                            _hfile,
+                            segments_data=segments_data,
+                            stage="phrase_loop_regen",
+                        )
                 with STATE_LOCK:
                     task["info"]["segments_data"] = segments_data
                     task["info"]["phrase_loop_healed_indices"] = list(_loop_healed)
@@ -17533,6 +18071,13 @@ def _run_pipeline_inner(
                     seg["tts_status"] = "generated"
                     seg["tts_text"] = _htext
                     seg.pop("fitted_file", None)
+                    _identity_bind_after_regen(
+                        seg,
+                        _htext,
+                        _hfile,
+                        segments_data=segments_data,
+                        stage="recovery_regen",
+                    )
 
             from engines.language_validation.recovery import (
                 apply_recovery_and_revalidate,
@@ -17708,15 +18253,17 @@ def _run_pipeline_inner(
                     _cu_info = dict(task.get("info") or {})
                     _cu_info["segments_data"] = segments_data
                 _cm = CleanupManager(_cu_info)
-                _cm.cleanup_orphans(
-                    [
-                        APP_DIR / "output" / "slot_fit",
-                        _artifacts_dir(_handoff_info),
-                    ],
-                    segments=segments_data,
-                    older_than_sec=0,
-                    actor="handoff_intermediate",
-                )
+                # Never wipe mux inputs at handoff (older_than_sec=0 deleted pads).
+                if _cm.pipeline_allows_cleanup():
+                    _cm.cleanup_orphans(
+                        [
+                            APP_DIR / "output" / "slot_fit",
+                            _artifacts_dir(_handoff_info),
+                        ],
+                        segments=segments_data,
+                        older_than_sec=3600,
+                        actor="handoff_intermediate",
+                    )
             except Exception as cleanup_err:
                 logger.debug(
                     "Task %s: intermediate cleanup skipped: %s",
@@ -18640,6 +19187,7 @@ def _run_pipeline_inner(
                     APP_DIR,
                     session_dir=Path(session_dir) if session_dir else None,
                     keep_names={Path(final_output).name},
+                    info=_cleanup_info,
                 )
                 with STATE_LOCK:
                     task["info"]["storage_cleanup"] = _cleanup_dict
@@ -18669,8 +19217,22 @@ def _run_pipeline_inner(
             try:
                 from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
 
+                # Stage 32: pad true holes on the archive list, then census with
+                # first-existing paths (ghost g0000.mp3 must not hide pause_run).
+                _segs_now = list(info.get("segments_data") or [])
+                try:
+                    _last_resort_pad_missing_segments(
+                        _segs_now,
+                        task_info=info,
+                        task_id=task_id,
+                    )
+                    info["segments_data"] = _segs_now
+                except Exception:
+                    pass
                 # Keep pre-cleanup census when post-cleanup would falsely show missing.
-                _tp_now = _build_openddf_tts_pipeline_block(info)
+                _tp_now = _build_openddf_tts_pipeline_block(
+                    info, segments_data=_segs_now or None
+                )
                 _tp_prev = info.get("tts_pipeline") or {}
                 if int(_tp_prev.get("audio_present") or 0) >= int(
                     _tp_now.get("audio_present") or 0
@@ -18850,6 +19412,33 @@ def _run_pipeline_inner(
             from engines.pipeline_watchdog import stop_pipeline_watchdog
 
             stop_pipeline_watchdog(task_id)
+        except Exception:
+            pass
+        # TZ §29: TEMP deleted in finally on failure (FINAL never auto-deleted).
+        try:
+            with STATE_LOCK:
+                _fin_task = AUTO_TASKS.get(task_id) or {}
+                _fin_status = str(_fin_task.get("status") or "")
+                _fin_info = dict(_fin_task.get("info") or {})
+            if _fin_status in ("error", "failed"):
+                from engines.pipeline_integrity.cleanup_manager import run_unified_cleanup
+
+                _fail_report = run_unified_cleanup(
+                    _fin_info,
+                    session_dir=_fin_info.get("session_dir"),
+                    success=False,
+                    keep_studio=bool(_fin_info.get("keep_studio_assets")),
+                    actor="pipeline_finally_failure",
+                )
+                with STATE_LOCK:
+                    if task_id in AUTO_TASKS:
+                        AUTO_TASKS[task_id].setdefault("info", {}).update(
+                            {
+                                "cleanup_deleted_files": _fail_report.get("removed") or [],
+                                "cleanup_preserved_files": _fail_report.get("preserved") or [],
+                                "cleanup_manager_ran": True,
+                            }
+                        )
         except Exception:
             pass
         if profiler is not None or pipeline_timer is not None:

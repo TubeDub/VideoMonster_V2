@@ -1,0 +1,191 @@
+=== DUBBING ENGINE REPORT task=d3b6fe7611f243868878c07ec6bf5df7 run=cb7b49a4 ===
+lang=uk  segments=32  elapsed=1.16s
+adapted=29  skipped=0  strategies={'direct': 3, 'adapted': 0, 'video_adapt': 0, 'merge_next': 9, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=4530ms slot=5000ms
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied
+  [✓] seg#01 strategy=add_pause pred=5031ms slot=5000ms
+       [timing] strategy=add_pause pred=5031ms slot=5000ms prev_end=9880ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied
+  [✓] seg#02 strategy=merge_next pred=5966ms slot=4400ms
+       IN : І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.
+       OUT: І я не хочу викидати його́ геть. Ти не проти? Я заберу все́, что у тебя есть.
+       [stress] ok
+       [timing] strategy=merge_next pred=5966ms slot=4400ms prev_end=14880ms gap_too_small=0ms (<80ms); overflow=35.
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=5966ms slot=4400ms ratio=1.36; voice_quality_risk: projected_atempo=1.36 (max=1.2) — recommen
+  [✓] seg#03 strategy=merge_next pred=4300ms slot=2000ms
+       [timing] strategy=merge_next pred=4300ms slot=2000ms prev_end=19280ms gap_too_small=0ms (<80ms); overflow=115
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied; severe_overflow: predicted=4300ms slot=2000ms ratio=2.15; voice_quality_risk: projected_atempo=2.15 
+  [✓] seg#04 strategy=merge_next pred=7328ms slot=6000ms
+       IN : Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш сх
+       OUT: Эй, мой здоровяк. Эй, быстро, чувак. Коли́ ти останнього разу їв? Ти виглядаєш с
+       [stress] ok
+       [timing] strategy=merge_next pred=7328ms slot=6000ms prev_end=21280ms overflow=22.1% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: voice_quality_risk: projected_atempo=1.22 (max=1.2) — recommend text adaptation
+  [✓] seg#05 strategy=add_pause pred=4646ms slot=5000ms
+       IN : О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.
+       OUT: О, напевно, вже́ два дні минуло, саме тоді́, і саме в цей момент.
+       [stress] ok
+       [timing] strategy=add_pause pred=4646ms slot=5000ms prev_end=29280ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#06 strategy=merge_next pred=4765ms slot=4000ms
+       IN : то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.
+       OUT: То зачекай, як ти маєш на увазі? Я хочу віддати це тобі.
+       [punct] capitalised_first_word
+       [timing] strategy=merge_next pred=4765ms slot=4000ms prev_end=34280ms overflow=19.1% (15-25%) → merge_next
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied
+  [✓] seg#07 strategy=add_pause pred=6790ms slot=6000ms
+       IN : Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати ї
+       OUT: Так как ты можешь получить еду? Пе́ред тим, як відкрити це, як ти можеш дістати 
+       [stress] ok
+       [timing] strategy=add_pause pred=6790ms slot=6000ms prev_end=38680ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#08 strategy=add_pause pred=4358ms slot=4000ms
+       IN : Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.
+       OUT: Чесно кажучи, я про́сто прокопаю смітник. Чесно кажучи.
+       [stress] ok
+       [timing] strategy=add_pause pred=4358ms slot=4000ms prev_end=44680ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#09 strategy=add_pause pred=4438ms slot=6000ms
+       IN : Да ладно. чтобы накормить себя, саме тоді, і саме в цей момент.
+       OUT: Да ладно. чтобы накормить себя, саме тоді́, і саме в цей момент.
+       [stress] ok
+       [timing] strategy=add_pause pred=4438ms slot=6000ms prev_end=48680ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#10 strategy=add_pause pred=3733ms slot=4000ms
+       IN : Так, це нормально тут, саме тоді, і саме в цей момент.
+       OUT: Так, це нормально тут, саме тоді́, і саме в цей момент.
+       [stress] ok
+       [timing] strategy=add_pause pred=3733ms slot=4000ms prev_end=54680ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#11 strategy=merge_next pred=4855ms slot=4000ms
+       [timing] strategy=merge_next pred=4855ms slot=4000ms prev_end=58680ms gap_too_small=0ms (<80ms); overflow=21.
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied; voice_quality_risk: projected_atempo=1.21 (max=1.2) — recommend text adaptation
+  [✓] seg#12 strategy=direct pred=6816ms slot=6000ms
+       IN : зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї р
+       OUT: Зара́з ви чистите вікна і яке середнє значення хтось дає вам для́ виконання цієї
+       [punct] capitalised_first_word
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#13 strategy=add_pause pred=3891ms slot=4000ms
+       IN : Іноді я роблю це за 10 центів. Просто будь-який хлопець...
+       OUT: Іноді я роблю це за 10 центів. Про́сто будь-яки́й хлопець.
+       [punct] collapsed_repeated_punct
+       [stress] ok
+       [timing] strategy=add_pause pred=3891ms slot=4000ms prev_end=69080ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#14 strategy=add_pause pred=3803ms slot=4000ms
+       [timing] strategy=add_pause pred=3803ms slot=4000ms prev_end=73080ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied
+  [✓] seg#15 strategy=merge_next pred=7546ms slot=4000ms
+       [timing] strategy=merge_next pred=7546ms slot=4000ms prev_end=77080ms gap_too_small=0ms (<80ms); overflow=88.
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied; severe_overflow: predicted=7546ms slot=4000ms ratio=1.89; voice_quality_risk: projected_atempo=1.89 
+  [✓] seg#16 strategy=add_pause pred=4983ms slot=6000ms
+       IN : Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.
+       OUT: Я даже не люблю об этом говорить, потому́ что я молод. Мені лише 25.
+       [stress] ok
+       [timing] strategy=add_pause pred=4983ms slot=6000ms prev_end=81080ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#17 strategy=add_pause pred=4646ms slot=6400ms
+       IN : Я вырос с. У них є сім'ї і все таке, і я бездомний, саме тоді.
+       OUT: Я вырос с. У них є сім'ї і все́ таке, і я бездомний, саме тоді́.
+       [stress] ok
+       [timing] strategy=add_pause pred=4646ms slot=6400ms prev_end=87080ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#18 strategy=add_pause pred=5896ms slot=8000ms
+       IN : Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей м
+       OUT: Так. чи це бу́ло щось на кшталт поганих рішень у житті, саме тоді́, і саме в цей
+       [stress] ok
+       [timing] strategy=add_pause pred=5896ms slot=8000ms prev_end=93480ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#19 strategy=add_pause pred=5768ms slot=6000ms
+       IN : Честно говоря, это много. как будто я потеряла свою маму. Честно говоря.
+       OUT: Честно говоря, э́то много. как будто я потеряла свою маму. Честно говоря.
+       [stress] ok
+       [timing] strategy=add_pause pred=5768ms slot=6000ms prev_end=101480ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#20 strategy=add_pause pred=2820ms slot=4000ms
+       IN : Мне жаль, саме тоді, і саме в цей момент.
+       OUT: Мне жаль, саме тоді́, і саме в цей момент.
+       [stress] ok
+       [timing] strategy=add_pause pred=2820ms slot=4000ms prev_end=107480ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#21 strategy=merge_next pred=10063ms slot=6000ms
+       IN : Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди н
+       OUT: Я втратила роботу. Я не міг собі дозволити заплатити все́, і ви знаєте, як люди 
+       [stress] ok
+       [timing] strategy=merge_next pred=10063ms slot=6000ms prev_end=111480ms gap_too_small=0ms (<80ms); overflow=6
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=10063ms slot=6000ms ratio=1.68; voice_quality_risk: projected_atempo=1.68 (max=1.2) — recomme
+  [✓] seg#22 strategy=direct pred=3781ms slot=4000ms
+       IN : Я вже в незручному становищі, а тепер я бездомний.
+       OUT: Я вже́ в незручному становищі, а тепер я бездомний.
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#23 strategy=add_pause pred=4230ms slot=4000ms
+       IN : То як, ви знаєте, воно зростає, саме тоді, в той момент.
+       OUT: То як, ви знаєте, воно зростає, саме тоді́, в той момент.
+       [stress] ok
+       [timing] strategy=add_pause pred=4230ms slot=4000ms prev_end=121880ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#24 strategy=add_pause pred=3028ms slot=4000ms
+       IN : И мне жаль это слышать, как долго ты здесь, саме тоді.
+       OUT: И мне жаль э́то слышать, как долго ты здесь́, саме тоді́.
+       [stress] ok
+       [timing] strategy=add_pause pred=3028ms slot=4000ms prev_end=125880ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#25 strategy=add_pause pred=3893ms slot=4000ms
+       IN : Може рік. Заткнись. Ты уже целый год делаешь, саме тоді.
+       OUT: Мо́же рік. Заткнись. Ты уже́ целый год делаешь, саме тоді́.
+       [stress] ok
+       [timing] strategy=add_pause pred=3893ms slot=4000ms prev_end=129880ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#26 strategy=add_pause pred=5848ms slot=6000ms
+       IN : Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.
+       OUT: Добре, Джонатане, я тебе тут відпущу, але́ пе́ред тим, як. Добре Джонатане.
+       [stress] ok
+       [timing] strategy=add_pause pred=5848ms slot=6000ms prev_end=133880ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#27 strategy=add_pause pred=5400ms slot=6080ms
+       IN : Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.
+       OUT: Яки́й був останній раз, коли́ ти спав у ліжку, саме тоді́, і саме в цей момент.
+       [stress] ok
+       [timing] strategy=add_pause pred=5400ms slot=6080ms prev_end=139880ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#28 strategy=merge_next pred=5896ms slot=4400ms
+       IN : Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...
+       OUT: Я хочу, щоб ви мене почули, перш ніж́ ви підете, я хочу переконатися, що.
+       [punct] collapsed_repeated_punct
+       [stress] ok
+       [timing] strategy=merge_next pred=5896ms slot=4400ms prev_end=145960ms gap_too_small=0ms (<80ms); overflow=34
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=5896ms slot=4400ms ratio=1.34; voice_quality_risk: projected_atempo=1.34 (max=1.2) — recommen
+  [✓] seg#29 strategy=add_pause pred=4070ms slot=4000ms
+       IN : Я не великий зелений, саме тоді, і саме в цей момент.
+       OUT: Я не великий зелений, саме тоді́, і саме в цей момент.
+       [stress] ok
+       [timing] strategy=add_pause pred=4070ms slot=4000ms prev_end=150360ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+  [✓] seg#30 strategy=merge_next pred=6153ms slot=4000ms
+       IN : Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодн
+       OUT: Я віддам їх тому́, хто цього найбільше потребує, але́ я віддам його́ вам за сьог
+       [stress] ok
+       [timing] strategy=merge_next pred=6153ms slot=4000ms prev_end=154360ms gap_too_small=0ms (<80ms); overflow=53
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: severe_overflow: predicted=6153ms slot=4000ms ratio=1.54; voice_quality_risk: projected_atempo=1.54 (max=1.2) — recommen
+  [✓] seg#31 strategy=add_pause pred=3990ms slot=4000ms
+       IN : Я дуже сподіваюся, що це допоможе вам у чомусь.
+       OUT: Я ду́же сподіваюся, що це допоможе вам у чомусь.
+       [stress] ok
+       [timing] strategy=add_pause pred=3990ms slot=4000ms prev_end=158360ms gap_too_small=0ms (<80ms)
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']

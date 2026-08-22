@@ -121,11 +121,12 @@ MYKYTA_LENGTH_SCALE_DEFAULT = 1.05
 MYKYTA_RATE_RANGE = (0.85, 1.15)
 MYKYTA_PITCH_RANGE = (-4.0, 4.0)
 MYKYTA_VOLUME_RANGE = (0.7, 1.3)
-# Duration-control may stretch length_scale up to 1.18
+# General Mykyta synth range (resolve_mykyta_controls). Duration-control
+# uses the tighter Stage 31 ±8% band below.
 MYKYTA_LENGTH_SCALE_RANGE = (0.85, 1.18)
-# Stage 23 duration-control clamps (slot fill via synth params)
-MYKYTA_DURATION_LENGTH_SCALE_RANGE = (0.92, 1.18)
-MYKYTA_DURATION_RATE_RANGE = (0.88, 1.08)
+# Stage 31 duration-control clamps (text-fit first; speed only ±8%).
+MYKYTA_DURATION_LENGTH_SCALE_RANGE = (0.92, 1.08)
+MYKYTA_DURATION_RATE_RANGE = (0.92, 1.08)
 
 _pipeline_mykyta_controls: contextvars.ContextVar[dict[str, float] | None] = (
     contextvars.ContextVar("pipeline_mykyta_controls", default=None)
@@ -225,10 +226,10 @@ def compute_mykyta_duration_controls(
     *,
     base: dict[str, Any] | None = None,
 ) -> dict[str, float]:
-    """Stage 23: length_scale / rate to stretch short TTS toward the slot.
+    """Stage 31: length_scale / rate after text-fit, clamped ±8%.
 
-    length_scale = clamp(slot/measured, 0.92, 1.18)
-    rate         = clamp(1/length_scale, 0.88, 1.08)
+    length_scale = clamp(slot/measured, 0.92, 1.08)
+    rate         = clamp(1/length_scale, 0.92, 1.08)
     """
     slot = max(1, int(slot_ms or 0))
     meas = max(1, int(measured_ms or 0))
@@ -653,6 +654,7 @@ def synthesize_with_backend(
                 cyrillic_letter_ratio,
                 force_uk_tts_identity,
                 is_uk_tts_text_ok,
+                uk_text_has_russian_leak,
             )
 
             _ident = force_uk_tts_identity(
@@ -673,19 +675,27 @@ def synthesize_with_backend(
             clean = " ".join(str(text or "").split()).strip()
             if clean and not is_uk_tts_text_ok(clean):
                 ratio = cyrillic_letter_ratio(clean)
+                ru_leak = uk_text_has_russian_leak(clean)
+                skip_reason = "russian_in_uk" if ru_leak else "cyrillic_ratio_low"
+                err = (
+                    f"PIPELINE_LANG_MIX: {skip_reason}"
+                    if ru_leak
+                    else f"PIPELINE_LANG_MIX: cyrillic_ratio={ratio:.2f}<0.55"
+                )
                 logger.warning(
-                    "[TTS] UK cyrillic gate refuse ratio=%.2f text=%.80s",
+                    "[TTS] UK text gate refuse reason=%s ratio=%.2f text=%.80s",
+                    skip_reason,
                     ratio,
                     clean,
                 )
                 refused = TTSResult(
                     ok=False,
                     engine_id=eid,
-                    error=f"PIPELINE_LANG_MIX: cyrillic_ratio={ratio:.2f}<0.55",
+                    error=err,
                     meta={
                         "cyrillic_ratio": round(ratio, 3),
                         "needs_re_tts": True,
-                        "tts_skip_reason": "cyrillic_ratio_low",
+                        "tts_skip_reason": skip_reason,
                         "tts_engine_requested": eid,
                         "tts_voice_requested": voice,
                     },
@@ -699,7 +709,7 @@ def synthesize_with_backend(
                             "tts_voice": voice,
                             "tts_engine_requested": eid,
                             "tts_voice_requested": voice,
-                            "tts_fallback_reason": "cyrillic_ratio_low",
+                            "tts_fallback_reason": skip_reason,
                             "ok": False,
                             "cyrillic_ratio": round(ratio, 3),
                         },

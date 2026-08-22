@@ -28,7 +28,8 @@ def test_apply_simple_policy_locks_gates():
     assert info["blind_timing_align_allowed"] is False
     assert info["text_fit_required"] is True
     assert float(info["max_atempo"]) <= 1.15
-    assert float(info["min_atempo"]) >= 0.95
+    assert float(info["min_atempo"]) >= 0.85
+    assert float(info["oss_speed_min"]) >= 0.90
     assert info["simple_auto_mix"] is True
     assert should_auto_mix_mp4(info) is True
     assert "ada" in SIMPLE_DISABLED

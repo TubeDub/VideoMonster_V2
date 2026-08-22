@@ -1,0 +1,12 @@
+=== DUBBING ENGINE REPORT task= run=f0a9a532 ===
+lang=uk  segments=1  elapsed=0.03s
+adapted=0  skipped=0  strategies={'direct': 1, 'adapted': 0, 'video_adapt': 0, 'merge_next': 0, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=1201ms slot=3000ms
+       IN : Він купив Fiat.
+       OUT: Ві́н купив Фіат.
+       [stress] ok
+       [phonetics] fixed: Fiat→Фіат
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: meaning_lost: word_retention=0.33 (min=0.55); missing_entity:Fiat

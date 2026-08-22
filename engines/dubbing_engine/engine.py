@@ -137,6 +137,7 @@ class DubbingEngine:
         final_audio_from_dubbing_engine: list[Any],
         source_hints: list[str] | None = None,
         natural_pauses_out: list[int] | None = None,
+        segment_ids: list[str] | None = None,
     ) -> list[DubbingResult]:
         """
         Process every segment through the 7-stage pipeline.
@@ -178,6 +179,11 @@ class DubbingEngine:
                     slot_start_ms=start_ms,
                     slot_end_ms=end_ms,
                     prev_end_ms=prev_end_ms,
+                    segment_id=(
+                        str(segment_ids[i]).strip()
+                        if segment_ids and i < len(segment_ids)
+                        else ""
+                    ),
                 )
 
             def _fallback_segment() -> DubbingResult:
@@ -191,6 +197,11 @@ class DubbingEngine:
                     predicted_ms=_predict_ms(seg_input, self.lang),
                     slot_ms=slot_ms,
                     recommended_strategy="direct",
+                    segment_id=(
+                        str(segment_ids[i]).strip()
+                        if segment_ids and i < len(segment_ids)
+                        else ""
+                    ),
                 )
 
             watch = run_segment_bounded(
@@ -241,6 +252,7 @@ class DubbingEngine:
         slot_start_ms: int,
         slot_end_ms: int,
         prev_end_ms: int,
+        segment_id: str = "",
     ) -> DubbingResult:
         slot_ms = max(0, slot_end_ms - slot_start_ms)
         stage_log: list[StageLog] = []
@@ -360,6 +372,7 @@ class DubbingEngine:
             voice_ok=vreport.checks.get("voice", True),
             lang_ok=vreport.checks.get("lang", True),
             meaning_ok=vreport.checks.get("meaning", True),
+            segment_id=str(segment_id or "").strip(),
         )
         return result
 

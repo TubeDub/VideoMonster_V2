@@ -116,6 +116,12 @@ def apply_simple_pipeline_policy(
         # Stage 9: one Edge voice for the whole Simple clip (no Ostap/Polina flip).
         "simple_voice_locked": True,
         "voice_platform_multi_speaker_allowed": False,
+        # Stage 36 — OSS production (VideoLingo / pyVideoTrans / SoniTranslate).
+        "oss_segs_subdir": "segs",
+        "oss_sequential_place": True,
+        "oss_never_abort_mux": True,
+        "oss_speed_min": 0.90,
+        "oss_speed_max": 1.10,
     }
     if _uk_simple:
         # Stage 28 §F / Stage 29 §D — UK Simple defaults (only lang + volume
@@ -147,6 +153,63 @@ def apply_simple_pipeline_policy(
         task_info.get("stt_model") or task_info.get("model_size"),
     )
     return task_info
+
+
+SIMPLE_UK_SOURCE_UNDERLAY = 0.20
+
+
+def apply_simple_uk_source_underlay(
+    task_info: dict[str, Any] | None,
+    mix_volumes: dict[str, Any] | None,
+    *,
+    explicit_original: float | None = None,
+    raw_style: str = "",
+    style_gated: bool = False,
+) -> dict[str, Any]:
+    """TZ §24–26: Simple auto-dub UK keeps ~20% ducked original, not silence.
+
+    Does not override an explicit user mute or an explicitly chosen full_dub
+    style (modern/cinematic). Default Simple UK (no style / gated documentary)
+    uses documentary-like underlay.
+    """
+    info = task_info or {}
+    mv = dict(mix_volumes or {})
+    tgt = str(info.get("target_lang") or info.get("lang") or "").split("-")[0].lower()
+    simple = bool(info.get("simple_pipeline") or info.get("happy_path"))
+    if not simple or tgt != "uk":
+        return mv
+
+    raw = (raw_style or "").strip().lower()
+    user_picked_full_dub = raw in (
+        "modern",
+        "full_dub",
+        "replace",
+        "cinematic",
+        "professional",
+    )
+    if user_picked_full_dub and not style_gated:
+        return mv
+    if (
+        explicit_original is not None
+        and float(explicit_original) <= 0.001
+        and not style_gated
+        and user_picked_full_dub
+    ):
+        return mv
+
+    orig = float(mv.get("original_volume") or 0.0)
+    if orig > 0.001:
+        mv.setdefault("ducking_enabled", True)
+        return mv
+
+    mv["original_volume"] = float(SIMPLE_UK_SOURCE_UNDERLAY)
+    mv["ducking_enabled"] = True
+    if float(mv.get("background_volume") or 0.0) <= 0.001:
+        mv["background_volume"] = float(SIMPLE_UK_SOURCE_UNDERLAY)
+    if str(mv.get("mix_mode") or "") == "full_dub":
+        mv["mix_mode"] = "custom"
+    info["simple_uk_source_underlay"] = float(SIMPLE_UK_SOURCE_UNDERLAY)
+    return mv
 
 
 def is_simple_pipeline(task_info: dict[str, Any] | None = None) -> bool:

@@ -1,6 +1,6 @@
 {
   "task_id": "t-readonly",
-  "created_at": "2026-08-13T19:07:58+00:00",
+  "created_at": "2026-08-21T16:25:52+00:00",
   "agents": [
     {
       "agent_name": "Director/v1",
@@ -9,7 +9,7 @@
       "error_msg": null,
       "decision": "creative_briefs_ready",
       "fallback_used": false,
-      "timestamp": "2026-08-13T19:07:58+00:00",
+      "timestamp": "2026-08-21T16:25:52+00:00",
       "segment_idx": null,
       "execution_time_ms": 0.8,
       "retry_count": 0,
@@ -31,7 +31,7 @@
       "error_msg": null,
       "decision": "LOCAL_ONLY",
       "fallback_used": true,
-      "timestamp": "2026-08-13T19:09:00+00:00",
+      "timestamp": "2026-08-21T16:26:51+00:00",
       "segment_idx": null,
       "execution_time_ms": 0.0,
       "retry_count": 0,
@@ -50,5 +50,5 @@
     "total_execution_time_ms": 0.8,
     "total_llm_calls": 0
   },
-  "saved_at": "2026-08-13T19:09:00+00:00"
+  "saved_at": "2026-08-21T16:26:51+00:00"
 }

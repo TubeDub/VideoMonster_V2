@@ -11,6 +11,16 @@ logger = logging.getLogger("tubedub.audio_presence")
 
 MIN_AUDIO_BYTES = 1000
 
+# Prefer live slot-fit / file over a stale group stamp (diag 2286c82f: ghost
+# ``resolved_path=…_g0000.mp3`` hid an existing pause_run / tts_regen).
+SEGMENT_AUDIO_KEYS = (
+    "oss_segs_path",
+    "fitted_file",
+    "file",
+    "tts_file_path",
+    "resolved_path",
+)
+
 
 def audio_stat(path: str | Path | None) -> tuple[bool, int]:
     """Return (exists_and_usable, size_bytes). Usable ⇒ file and size ≥ MIN_AUDIO_BYTES."""
@@ -26,34 +36,56 @@ def audio_stat(path: str | Path | None) -> tuple[bool, int]:
         return False, 0
 
 
+def iter_segment_audio_candidates(seg: dict[str, Any]) -> list[str]:
+    """Unique non-empty path strings; fitted/file before ghost resolved_path."""
+    out: list[str] = []
+    seen: set[str] = set()
+    if not isinstance(seg, dict):
+        return out
+    for key in SEGMENT_AUDIO_KEYS:
+        val = str(seg.get(key) or "").strip()
+        if not val or val in seen:
+            continue
+        seen.add(val)
+        out.append(val)
+    return out
+
+
 def resolve_segment_audio_path(
     seg: dict[str, Any],
     *,
     resolve_path: Callable[[str], str] | None = None,
 ) -> str:
-    """Best-effort path: resolved_path → fitted_file → file → tts_file_path."""
-    candidates = (
-        seg.get("resolved_path"),
-        seg.get("fitted_file"),
-        seg.get("file"),
-        seg.get("tts_file_path"),
-    )
-    raw = ""
-    for cand in candidates:
-        val = str(cand or "").strip()
-        if val:
-            raw = val
-            break
-    if not raw:
+    """First *existing* candidate among fitted_file / file / tts_file_path / resolved_path.
+
+    Stage 32 (diag 2286c82f): a ghost ``resolved_path`` (group mp3, relative
+    ``tts_*.mp3``) must not hide a live pause_run / slot_fit / tts_regen.
+    If nothing exists, return the first raw candidate so LAST-RESORT can pad.
+    """
+    raws = iter_segment_audio_candidates(seg)
+    if not raws:
         return ""
-    if resolve_path:
-        try:
-            resolved = resolve_path(raw)
-            if resolved:
-                return str(resolved)
-        except Exception:
-            pass
-    return raw
+
+    def _try(raw: str) -> str:
+        if resolve_path:
+            try:
+                resolved = resolve_path(raw)
+                if resolved:
+                    ok, _size = audio_stat(resolved)
+                    if ok:
+                        return str(resolved)
+            except Exception:
+                pass
+        ok, _size = audio_stat(raw)
+        if ok:
+            return str(raw)
+        return ""
+
+    for raw in raws:
+        hit = _try(raw)
+        if hit:
+            return hit
+    return raws[0]
 
 
 def assert_audio_file(path: str | Path, min_bytes: int = MIN_AUDIO_BYTES) -> Path:

@@ -81,7 +81,9 @@ class CleanupReport:
 
 def _is_protected_segment_audio(path: Path) -> bool:
     name = path.name.lower()
-    if name.startswith(("slot_fit_", "pause_run_", "tts_")):
+    if name.startswith(
+        ("slot_fit_", "pause_run_", "tts_", "tts_regen_", "pad_silence_", "softpad_")
+    ):
         return True
     if path.suffix.lower() in (".wav", ".mp3", ".ogg", ".flac"):
         return True
@@ -284,8 +286,37 @@ def cleanup_project_success(
     *,
     session_dir: Path | str | None = None,
     keep_names: set[str] | None = None,
+    info: dict | None = None,
 ) -> dict[str, Any]:
-    return CleanupEngine(app_dir).cleanup_after_success(
-        session_dir=session_dir,
-        keep_names=keep_names,
-    ).to_dict()
+    """Route through CleanupManager (TZ §27). Other deleters no-op if it already ran."""
+    payload = dict(info or {})
+    if payload.get("cleanup_manager_ran"):
+        return {
+            "files_deleted": 0,
+            "skipped": ["cleanup_manager_already_ran"],
+            "removed": [],
+            "preserved": [],
+        }
+    try:
+        from engines.pipeline_integrity.cleanup_manager import run_unified_cleanup
+
+        report = run_unified_cleanup(
+            payload,
+            session_dir=session_dir,
+            success=True,
+            keep_studio=bool(payload.get("keep_studio_assets")),
+            keep_names=keep_names,
+            actor="cleanup_engine.success",
+        )
+        # Still run legacy engine for non-session output globs (logs, tqe_work).
+        legacy = CleanupEngine(app_dir).cleanup_after_success(
+            session_dir=None,
+            keep_names=keep_names,
+        ).to_dict()
+        report["legacy_files_deleted"] = legacy.get("files_deleted") or 0
+        return report
+    except Exception:
+        return CleanupEngine(app_dir).cleanup_after_success(
+            session_dir=session_dir,
+            keep_names=keep_names,
+        ).to_dict()

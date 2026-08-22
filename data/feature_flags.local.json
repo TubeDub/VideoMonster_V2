@@ -1,0 +1,8 @@
+{
+  "features": {
+    "identity_guard": { "enabled": true },
+    "segment_normalizer": { "enabled": true },
+    "slot_budget": { "enabled": true },
+    "revision_manager": { "enabled": true }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "task_id": "b4962d35c9674b27ad5dbaf72c904edc",
+  "updated_at": "2026-08-19T04:18:00.504962+00:00",
+  "total_sec": 1961.527,
+  "stages": {
+    "extract": 1.027,
+    "whisper": 111.975,
+    "translation": 51.15,
+    "natural": 0.0,
+    "validation": 0.0,
+    "translation_post": 0.0,
+    "tts": 49.101,
+    "slot_fit": 11.599,
+    "timing": 0.0,
+    "mux": 0.0,
+    "export": 0.0
+  },
+  "meta": {
+    "stt_wall_sec": 111.975,
+    "stt_model": "small",
+    "stt_device": "cpu",
+    "stt_compute_type": "int8",
+    "stt_beam_size": 1,
+    "stt_cache_hit": false,
+    "translation_breakdown": {
+      "marian_sec": 51.15,
+      "llm_adaptation_sec": 0.0,
+      "validation_sec": 0.0,
+      "post_processing_sec": 0.0,
+      "translation_total_sec": 51.15,
+      "segment_count": 32,
+      "marian_segments_done": 32,
+      "llm_segments_done": 0,
+      "current_subphase": "done",
+      "ui_buckets": {
+        "marian_mt": 51.15,
+        "llm_adaptation": 0.0,
+        "post_processing": 0.0
+      },
+      "phase_status": {
+        "marian_mt": "done",
+        "llm_adaptation": "skipped",
+        "post_processing": "skipped"
+      },
+      "hidden_buckets": [
+        "llm_adaptation",
+        "post_processing"
+      ],
+      "segment_stats": {
+        "marian_mt": {
+          "segments": 32,
+          "sec": 51.2,
+          "avg_sec_per_segment": 1.598,
+          "status": "done"
+        },
+        "llm_adaptation": {
+          "segments": 0,
+          "sec": 0.0,
+          "avg_sec_per_segment": 0.0,
+          "status": "skipped"
+        },
+        "post_processing": {
+          "segments": 0,
+          "sec": 0.0,
+          "avg_sec_per_segment": 0.0,
+          "status": "skipped"
+        }
+      },
+      "ui_labels": {
+        "marian_mt": "Marian MT",
+        "llm_adaptation": "Qwen / LLM Adaptation",
+        "post_processing": "Post-processing"
+      },
+      "llm_adaptation_used": false,
+      "simple_mt_locked": true
+    }
+  }
+}

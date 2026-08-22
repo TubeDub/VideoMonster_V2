@@ -119,7 +119,7 @@ def _skip(report: StorageCleanupReport, path: Path, reason: str) -> None:
 
 
 def _active_task_session_ids(app_dir: Path) -> set[str]:
-    """Session / task ids that must not be deleted."""
+    """Session / task ids AND resolved session paths that must not be deleted."""
     active: set[str] = set()
     try:
         from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
@@ -130,7 +130,12 @@ def _active_task_session_ids(app_dir: Path) -> set[str]:
                 info = task.get("info") or {}
                 sd = info.get("session_dir") or ""
                 if sd:
-                    active.add(Path(str(sd)).name)
+                    p = Path(str(sd))
+                    active.add(p.name)
+                    try:
+                        active.add(str(p.resolve()).lower())
+                    except OSError:
+                        active.add(str(p).lower())
                 if task.get("status") in ("running", "studio_ready", "preparing"):
                     active.add(str(tid))
     except Exception:
@@ -177,7 +182,11 @@ def cleanup_pipeline_temp(
             if not sess.is_dir():
                 continue
             sid = sess.name
-            if sid in active:
+            try:
+                sess_key = str(sess.resolve()).lower()
+            except OSError:
+                sess_key = str(sess).lower()
+            if sid in active or sess_key in active:
                 _skip(report, sess, "active_task_session")
                 continue
             try:

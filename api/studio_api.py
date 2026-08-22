@@ -582,7 +582,10 @@ def _segment_audio_name(seg: dict[str, Any], *, task_id: str | None = None) -> s
             segment_index=idx,
         )
         if resolved.is_file():
-            return resolved.name
+            try:
+                return str(resolved.resolve())
+            except OSError:
+                return str(resolved)
     return None
 
 
@@ -600,15 +603,33 @@ def _segments_data_from_state(state: dict[str, Any]) -> tuple[list[dict[str, Any
         row: dict[str, Any] = {
             "index": idx,
             "text": str(seg.get("text") or "").strip(),
-            "file": audio_name,
+            "file": audio_name or seg.get("file"),
             "start_ms": start_ms,
             "end_ms": end_ms,
             "allow_atempo": bool(meta.get("atempo", 1.0) and float(meta.get("atempo", 1.0)) > 1.01),
             "place_delay_ms": int(meta.get("delay_ms") or 0),
             "lead_in_ms": int(meta.get("lead_in_ms") or 0),
         }
-        if seg.get("fitted_file"):
-            row["fitted_file"] = seg.get("fitted_file")
+        for extra in (
+            "segment_id",
+            "fitted_file",
+            "resolved_path",
+            "tts_file_path",
+            "final_tts_text",
+            "original_text",
+            "tts_backend",
+            "tts_voice",
+            "tts_language",
+            "audio_padded",
+            "silence_pad",
+            "merge_adjusted_start",
+            "final_tts_duration_ms",
+            "tts_ms",
+        ):
+            if seg.get(extra) not in (None, ""):
+                row[extra] = seg.get(extra)
+        if audio_name:
+            row["file"] = audio_name
         segments_data.append(row)
         timing_map.append({"start": start_ms, "end": end_ms})
     return segments_data, timing_map

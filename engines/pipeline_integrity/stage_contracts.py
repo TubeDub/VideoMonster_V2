@@ -207,6 +207,14 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             "audio_exists",
             "audio_size_bytes",
             "needs_re_tts",
+            # TubeDub TZ — post-TTS identity bind (diag 8c9850ef).
+            "identity_binding",
+            "tts_meta",
+            "revision_text_hash",
+            "wav_segment_id",
+            "owned_text_segment_id",
+            "identity_text_hash",
+            "identity_text_revision",
         }
     ),
     "slot_fit": frozenset(

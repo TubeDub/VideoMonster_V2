@@ -19,6 +19,7 @@ from engines.pipeline_integrity.psa_flags import VM_FLAG_IDENTITY_GUARD
 def flag_on(monkeypatch):
     monkeypatch.setenv(VM_FLAG_IDENTITY_GUARD, "1")
     monkeypatch.delenv("VM_IDENTITY_GUARD", raising=False)
+    monkeypatch.setenv("VM_FLAG_REVISION_MANAGER", "0")
     yield
 
 

@@ -1,0 +1,76 @@
+{
+  "task_id": "",
+  "run_id": "71a5c41d",
+  "lang": "uk",
+  "elapsed_sec": 0.028,
+  "segments_total": 1,
+  "segments_adapted": 1,
+  "segments_skipped": 0,
+  "strategies": {
+    "direct": 0,
+    "adapted": 0,
+    "video_adapt": 0,
+    "merge_next": 1,
+    "skip_tts": 0,
+    "delay_start": 0
+  },
+  "segments": [
+    {
+      "index": 0,
+      "segment_id": "",
+      "original": "",
+      "input": "Він не міг позбутися відчуття, що йому справді страшно туди дістатися.",
+      "output": "Ві́н не міг позбутися відчуття, що йому справді страшно туди дістатися.",
+      "passed": true,
+      "strategy": "merge_next",
+      "predicted_ms": 5031,
+      "slot_ms": 1500,
+      "stages": [
+        {
+          "s": "entity",
+          "applied": false,
+          "note": "found=0 restored=0"
+        },
+        {
+          "s": "adapt",
+          "applied": false,
+          "note": "round=1 method=none overflow=235.4% pred_before=5031ms pred_after=5031ms"
+        },
+        {
+          "s": "punct",
+          "applied": false,
+          "note": "ok"
+        },
+        {
+          "s": "stress",
+          "applied": true,
+          "note": "ok"
+        },
+        {
+          "s": "phonetics",
+          "applied": false,
+          "note": "no_changes"
+        },
+        {
+          "s": "voice",
+          "applied": false,
+          "note": "atempo_proj=3.35 — no safe adapt; will use video_adapt"
+        },
+        {
+          "s": "timing",
+          "applied": true,
+          "note": "strategy=merge_next pred=5031ms slot=1500ms prev_end=0ms overflow=235.4% (>25%) → merge_next"
+        },
+        {
+          "s": "validate",
+          "applied": true,
+          "note": "passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']"
+        }
+      ],
+      "notes": [
+        "severe_overflow: predicted=5031ms slot=1500ms ratio=3.35",
+        "voice_quality_risk: projected_atempo=3.35 (max=1.2) — recommend text adaptation"
+      ]
+    }
+  ]
+}

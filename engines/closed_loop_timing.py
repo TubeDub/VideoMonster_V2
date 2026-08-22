@@ -23,11 +23,25 @@ from engines.text_slot_fit import (
     OVERFLOW_TRIGGER_MS,
     STAGE23_OK_FILL_HI,
     STAGE23_OK_FILL_LO,
+    STAGE31_ATEMPO_MAX,
+    STAGE31_ATEMPO_MIN,
+    STAGE31_LENGTH_SCALE_MAX,
+    STAGE31_LENGTH_SCALE_MIN,
+    STAGE31_NEIGHBOR_JUMP_MAX,
+    STAGE31_OK_FILL_HI,
+    STAGE31_OK_FILL_LO,
+    STAGE31_SPEED_DELTA_MS,
+    STAGE31_TEXT_FIT_DELTA_MS,
     UNDERFLOW_TRIGGER_MS,
+    canon_duration_control_used,
+    clamp_stage31_tempo,
+    restore_ending_franchise_meaning,
+    ending_restore_targets,
 )
 
-# Logged at closed-loop entry so diagnostics prove which Stage23 build is running.
+# Logged at closed-loop entry so diagnostics prove which Stage23/31 build is running.
 STAGE23_RUNTIME_TAG = "stage23b-audio-duration-20260806"
+STAGE31_RUNTIME_TAG = "stage31-text-first-tempo-20260817"
 
 logger = logging.getLogger("tubedub.closed_loop_timing")
 
@@ -395,13 +409,30 @@ def _needs_rewrite(budget: TimingBudget) -> tuple[bool, str]:
     return False, ""
 
 
+def _archive_split_children(parent: dict, children: list[dict]) -> list[dict]:
+    """TZ Phase 10: archive parent UUID; every child gets a new id + NeedReTTS."""
+    if not children:
+        return children
+    try:
+        from engines.pipeline_integrity.identity_guard import reissue_split_children
+
+        archived, fresh = reissue_split_children(parent, children)
+        if fresh:
+            fresh[0]["archived_parent"] = archived
+            return fresh
+    except Exception:
+        logger.debug("split archive_and_reissue skipped", exc_info=True)
+    return children
+
+
 def _slot_delta_ms(budget: TimingBudget) -> int:
     """tts_ms - slot_ms: >0 overflow, <0 underflow."""
     return int(budget.measured_duration or 0) - int(budget.slot_duration or 0)
 
 
 def _needs_stage19b_text_fit(budget: TimingBudget) -> bool:
-    return abs(_slot_delta_ms(budget)) > TEXT_FIT_DELTA_MS
+    """Stage 31: enter text-fit when |TTS−slot| > 120 ms."""
+    return abs(_slot_delta_ms(budget)) > STAGE31_TEXT_FIT_DELTA_MS
 
 
 def _needs_stage23_fill(budget: TimingBudget) -> bool:
@@ -906,6 +937,8 @@ def try_stage19c_overflow_split(
         }
         children.append(child)
 
+    children = _archive_split_children(seg, children)
+
     # Insert siblings after idx
     for i, child in enumerate(children):
         if i == 0:
@@ -1389,6 +1422,8 @@ def try_stage19e_post_restore_split(
         child["stage21"] = dict(meta)
         children.append(child)
 
+    children = _archive_split_children(seg, children)
+
     for i, child in enumerate(children):
         if i == 0:
             segments_data[idx] = child
@@ -1830,13 +1865,22 @@ def _stamp_stage19e_fields(
     elif fill > STAGE23_OK_FILL_HI or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
         final_status = "overflow_unresolved"
     elif not clean_split_ok or pad_n > int(MAX_SOFT_PADS_PER_SEG or 2):
-        final_status = "stage23_partial"
+        # Unsplit in-band lines stay ok — 2-word complete slots are not crumbs.
+        if (
+            not force_split_executed
+            and not seg.get("split_children")
+            and STAGE23_OK_FILL_LO <= fill <= STAGE23_OK_FILL_HI
+        ):
+            final_status = "ok"
+        else:
+            final_status = "stage23_partial"
     elif STAGE23_OK_FILL_LO <= fill <= STAGE23_OK_FILL_HI:
         # In-band fill → ok (even if |delta| large or CPS off on a long slot).
         final_status = "ok"
     else:
         final_status = "stage23_partial"
     # Forbidden: never stamp ok with garbage / out-of-band fill / unclean split.
+    _split_crumb = bool(force_split_executed or seg.get("split_children"))
     if final_status == "ok" and (
         fill < 0.90
         or fill < STAGE23_OK_FILL_LO
@@ -1844,7 +1888,7 @@ def _stamp_stage19e_fields(
         or overflow_ms > OVERFLOW_FORCE_SPLIT_MS
         or pad_n > int(MAX_SOFT_PADS_PER_SEG or 2)
         or not unique_text_ok
-        or not clean_split_ok
+        or (not clean_split_ok and _split_crumb)
         or is_garbage_expand(seg_text)
     ):
         if fill > STAGE23_OK_FILL_HI or not unique_text_ok or overflow_ms > OVERFLOW_FORCE_SPLIT_MS:
@@ -2010,7 +2054,11 @@ def _stamp_stage19e_fields(
         if seg.get("audio_padded") or seg.get("silence_pad"):
             duration_control_used = "soft_pad"
         elif expand_executed and text_changed:
-            duration_control_used = "expand"
+            duration_control_used = "text_expand"
+        elif seg.get("shorten_executed"):
+            duration_control_used = "text_shorten"
+        elif seg.get("split_executed") or seg.get("split_children"):
+            duration_control_used = "text_split"
         elif abs(float(seg.get("atempo") or 1.0) - 1.0) >= 0.005:
             duration_control_used = "atempo"
         elif abs(
@@ -2018,11 +2066,12 @@ def _stamp_stage19e_fields(
         ) >= 0.001:
             duration_control_used = "length_scale"
         elif abs(float(seg.get("tts_rate") or ctrl.get("rate") or 1.0) - 1.0) >= 0.01:
-            duration_control_used = "rate"
+            duration_control_used = "length_scale"
         else:
             # Still short/long with no lever stamped — mark required length_scale path.
             duration_control_used = "length_scale"
             seg["duration_control_required"] = True
+    duration_control_used = canon_duration_control_used(duration_control_used)
     meta23 = {
         "duration_control_used": duration_control_used,
         "tts_length_scale": ctrl["length_scale"],
@@ -2107,6 +2156,67 @@ def _stamp_stage19b_meta(
     }
 
 
+def equalize_segment_tempos(segments: list[dict] | None) -> dict[str, Any]:
+    """Stage 31: no neighbor 0.95 then 1.20 — median/global bias ±5%, clamp ±8%.
+
+    Mutates ``atempo`` / ``tts_length_scale`` in place. Metadata-only: mux
+    still clamps atempo to 0.92–1.08; this stops dishonest jump stamps and
+    gives later regen a unified bias.
+    """
+    stats = {"adjusted": 0, "median_atempo": 1.0, "median_length_scale": 1.0}
+    rows: list[tuple[int, dict]] = []
+    for i, seg in enumerate(segments or []):
+        if not isinstance(seg, dict):
+            continue
+        if seg.get("merged_into") is not None:
+            continue
+        rows.append((i, seg))
+    if not rows:
+        return stats
+    atempos = [clamp_stage31_tempo(s.get("atempo") or 1.0) for _i, s in rows]
+    scales = [
+        clamp_stage31_tempo(s.get("tts_length_scale") or 1.0, default=1.0)
+        for _i, s in rows
+    ]
+    atempos_sorted = sorted(atempos)
+    scales_sorted = sorted(scales)
+    mid = len(atempos_sorted) // 2
+    median_a = atempos_sorted[mid]
+    median_ls = scales_sorted[mid]
+    if abs(median_a - 1.0) <= 0.02:
+        target_a = 1.0
+    else:
+        target_a = max(0.95, min(1.05, median_a))
+    if abs(median_ls - 1.0) <= 0.02:
+        target_ls = 1.0
+    else:
+        target_ls = max(0.95, min(1.05, median_ls))
+    stats["median_atempo"] = round(target_a, 4)
+    stats["median_length_scale"] = round(target_ls, 4)
+    prev_a = target_a
+    for _i, seg in rows:
+        a = clamp_stage31_tempo(seg.get("atempo") or 1.0)
+        ls = clamp_stage31_tempo(seg.get("tts_length_scale") or 1.0)
+        new_a = a
+        if abs(a - target_a) > STAGE31_NEIGHBOR_JUMP_MAX:
+            new_a = target_a
+        elif abs(a - prev_a) > STAGE31_NEIGHBOR_JUMP_MAX:
+            new_a = prev_a + (
+                STAGE31_NEIGHBOR_JUMP_MAX if a > prev_a else -STAGE31_NEIGHBOR_JUMP_MAX
+            )
+        new_a = clamp_stage31_tempo(new_a)
+        new_ls = ls
+        if abs(ls - target_ls) > STAGE31_NEIGHBOR_JUMP_MAX:
+            new_ls = target_ls
+        new_ls = clamp_stage31_tempo(new_ls)
+        if abs(new_a - a) >= 0.005 or abs(new_ls - ls) >= 0.005:
+            stats["adjusted"] += 1
+        seg["atempo"] = round(new_a, 4)
+        seg["tts_length_scale"] = round(new_ls, 4)
+        prev_a = new_a
+    return stats
+
+
 def _apply_stage23_duration_control(
     seg: dict,
     idx: int,
@@ -2122,17 +2232,19 @@ def _apply_stage23_duration_control(
     task_id: str | None,
     resolve_path: Callable[[str], str] | None,
 ) -> TimingBudget:
-    """Stage 23: length_scale → rate → re-TTS (same text) before expand.
+    """Stage 31: length_scale / rate AFTER text-fit, clamped 0.92–1.08.
 
-    Trigger: underflow_ms > 250 or fill_ratio < 0.92.
+    Trigger: |TTS−slot| still > 150 ms after shorten/expand/split.
     """
     slot = int(budget.slot_duration or 0)
     meas = int(budget.measured_duration or 0)
     if slot <= 0 or meas <= 0:
         return budget
     fill = meas / float(slot)
-    underflow = max(0, slot - meas)
-    if underflow <= UNDERFLOW_TRIGGER_MS and fill >= STAGE23_OK_FILL_LO:
+    delta = meas - slot
+    if abs(delta) <= STAGE31_SPEED_DELTA_MS and (
+        STAGE31_OK_FILL_LO <= fill <= STAGE31_OK_FILL_HI
+    ):
         return budget
     if regen_fn is None:
         return budget
@@ -2172,12 +2284,29 @@ def _apply_stage23_duration_control(
         },
         env=False,
     )
-    # Stage 23b: ALWAYS compute stretch toward the slot when underfill triggered.
+    # Stage 23b/31: compute stretch/compress toward the slot, ±8% only.
     ctrl = compute_mykyta_duration_controls(slot, meas, base=base)
-    # Force at least a mild stretch when still short.
-    if ctrl["length_scale"] <= base["length_scale"] + 0.001:
-        ctrl["length_scale"] = max(ctrl["length_scale"], min(1.18, max(1.05, float(slot) / float(meas))))
-        ctrl["rate"] = max(0.88, min(1.08, 1.0 / max(0.5, ctrl["length_scale"])))
+    # Underflow: at least a mild stretch, never above 1.08.
+    if meas < slot and ctrl["length_scale"] <= base["length_scale"] + 0.001:
+        ctrl["length_scale"] = max(
+            ctrl["length_scale"],
+            min(
+                STAGE31_LENGTH_SCALE_MAX,
+                max(1.0, float(slot) / float(meas)),
+            ),
+        )
+        ctrl["rate"] = max(
+            STAGE31_ATEMPO_MIN,
+            min(STAGE31_ATEMPO_MAX, 1.0 / max(0.5, ctrl["length_scale"])),
+        )
+    ctrl["length_scale"] = max(
+        STAGE31_LENGTH_SCALE_MIN,
+        min(STAGE31_LENGTH_SCALE_MAX, float(ctrl["length_scale"])),
+    )
+    ctrl["rate"] = max(
+        STAGE31_ATEMPO_MIN,
+        min(STAGE31_ATEMPO_MAX, float(ctrl["rate"])),
+    )
 
     text = _segment_text(seg)
     if not text:
@@ -2315,16 +2444,15 @@ def _apply_stage23_atempo_slow(
     work_dir: Path,
     resolve_path: Callable[[str], str] | None,
 ) -> TimingBudget:
-    """Stage 23: if fill still < 0.88 after length_scale/expand → atempo slow [0.90, 1.0]."""
+    """Stage 31: if fill still < 0.92 after length_scale/expand → atempo slow [0.92, 1.0]."""
     slot = int(budget.slot_duration or 0)
     tts = int(budget.measured_duration or 0)
     if slot <= 0 or tts <= 0:
         return budget
     fill = tts / float(slot)
-    if fill >= 0.88:
+    if fill >= STAGE31_OK_FILL_LO:
         return budget
-    # Slow down to lengthen: atempo = measured/slot clamped to [0.90, 1.0].
-    tempo = max(STAGE23_ATEMPO_SLOW_LO, min(STAGE23_ATEMPO_SLOW_HI, fill))
+    tempo = max(STAGE31_ATEMPO_MIN, min(1.0, fill))
     if abs(tempo - 1.0) < 0.02:
         return budget
 
@@ -2360,7 +2488,7 @@ def _apply_stage23_atempo_slow(
                 seg["actual_duration_ms"] = fitted_ms
                 seg["final_tts_duration_ms"] = fitted_ms
             applied = float((meta or {}).get("atempo") or tempo)
-            applied = max(STAGE23_ATEMPO_SLOW_LO, min(STAGE23_ATEMPO_SLOW_HI, applied))
+            applied = max(STAGE31_ATEMPO_MIN, min(1.0, applied))
             seg["atempo"] = round(applied, 4)
             seg["strategy"] = "atempo_slow"
             if str(seg.get("duration_control_used") or "none") in ("none", ""):
@@ -2385,10 +2513,8 @@ def _apply_light_atempo_after_fit(
     resolve_path: Callable[[str], str] | None,
     fit: Any,
 ) -> TimingBudget:
-    """Stage 19i: atempo only when |Δ|≤350 and ratio ∈ [0.90, 1.20]."""
+    """Stage 31: atempo last resort after text-fit when |Δ|>150, clamp 0.92–1.08."""
     from engines.text_slot_fit import (
-        ATEMPO_MAX,
-        ATEMPO_MIN,
         UNDERFILL_EXPAND_RATIO,
         forbid_fast_then_gap,
         suggested_atempo_for_fill,
@@ -2400,24 +2526,18 @@ def _apply_light_atempo_after_fit(
         return budget
     fill = tts / float(slot)
     delta = abs(slot - tts)
-    # Spec ratio = slot/measured; apply factor must stay in [ATEMPO_MIN, ATEMPO_MAX].
-    ratio_slot_over_meas = slot / float(tts)
+    if delta <= STAGE31_SPEED_DELTA_MS and STAGE31_OK_FILL_LO <= fill <= STAGE31_OK_FILL_HI:
+        return budget
     tempo = float(getattr(fit, "atempo", 0) or 0) or suggested_atempo_for_fill(tts, slot)
-    tempo = max(ATEMPO_MIN, min(ATEMPO_MAX, tempo))
+    tempo = clamp_stage31_tempo(tempo)
     if forbid_fast_then_gap(tempo, fill):
-        tempo = max(ATEMPO_MIN, min(1.0, fill))
-    # Forbidden outside hard band or when |Δ| > 350.
-    if delta > TEXT_FIT_DELTA_MS:
-        return budget
-    if not (ATEMPO_MIN <= ratio_slot_over_meas <= ATEMPO_MAX):
-        return budget
-    if not (ATEMPO_MIN <= tempo <= ATEMPO_MAX):
-        return budget
+        tempo = max(STAGE31_ATEMPO_MIN, min(1.0, fill))
+        tempo = clamp_stage31_tempo(tempo)
     # Skip near-noop tempos.
     if abs(tempo - 1.0) < 0.02:
         return budget
     # Already inside comfortable fill band → skip.
-    if fill >= UNDERFILL_EXPAND_RATIO and fill <= 1.08 and delta <= TEXT_FIT_DELTA_MS:
+    if STAGE31_OK_FILL_LO <= fill <= STAGE31_OK_FILL_HI:
         return budget
 
     src = str(seg.get("file") or seg.get("tts_file_path") or "").strip()
@@ -2437,7 +2557,7 @@ def _apply_light_atempo_after_fit(
             slot,
             work_dir=work_dir / "stage19b_atempo",
             allow_atempo=True,
-            max_atempo=ATEMPO_MAX,
+            max_atempo=STAGE31_ATEMPO_MAX,
             text_hint=_segment_text(seg),
         )
         if fitted and Path(fitted).is_file():
@@ -2450,8 +2570,16 @@ def _apply_light_atempo_after_fit(
                 seg["playback_duration"] = fitted_ms
                 seg["tts_ms"] = fitted_ms
                 seg["actual_duration_ms"] = fitted_ms
-            applied = float((meta or {}).get("atempo") or tempo)
+            applied = clamp_stage31_tempo((meta or {}).get("atempo") or tempo)
             seg["atempo"] = round(applied, 4)
+            if abs(applied - 1.0) >= 0.02:
+                if canon_duration_control_used(seg.get("duration_control_used")) in (
+                    "none",
+                    "",
+                ):
+                    seg["duration_control_used"] = "atempo"
+                elif fill < STAGE31_OK_FILL_LO or fill > STAGE31_OK_FILL_HI:
+                    seg["duration_control_used"] = "atempo"
             if fill < UNDERFILL_EXPAND_RATIO:
                 seg["strategy"] = (
                     "expand_then_slow"
@@ -2551,47 +2679,31 @@ def apply_stage19b_rule_text_fit(
         return budget, False
     cps_now = estimated_cps(original, meas0) if meas0 > 0 else 0.0
     fill0 = float(meas0) / float(max(1, slot0)) if slot0 > 0 else 0.0
-    # Stage 23: duration-control / expand on underflow >250 OR fill < 0.92.
-    expand_required = (
-        delta_before < -_under_ms
+    audio_overflow = (
+        delta_before > STAGE31_TEXT_FIT_DELTA_MS or fill0 > STAGE31_OK_FILL_HI
+    )
+    audio_under = (
+        delta_before < -STAGE31_TEXT_FIT_DELTA_MS
         or fill0 < _fill_lo
         or int(budget.underflow or 0) > _under_ms
-        or (0 < cps_now < MIN_CPS_UK)
-        or cps_under_budget(original, slot0)
+    )
+    # Stage 31: never EXPAND when measured audio already overflows the slot.
+    expand_required = bool(
+        audio_under
+        or (
+            not audio_overflow
+            and (
+                (0 < cps_now < MIN_CPS_UK)
+                or cps_under_budget(original, slot0)
+            )
+        )
     )
 
-    # Stage 23 primary lever: Mykyta length_scale/rate re-TTS before text expand.
-    if expand_required and regen_fn is not None:
-        budget = _apply_stage23_duration_control(
-            seg,
-            idx,
-            timing_map,
-            budget,
-            voice=voice,
-            work_dir=work_dir,
-            regen_fn=regen_fn,
-            commit_fn=commit_fn,
-            tts_rate=tts_rate,
-            tts_pitch=tts_pitch,
-            task_id=task_id,
-            resolve_path=resolve_path,
-        )
-        meas0 = int(budget.measured_duration or 0)
-        slot0 = max(1, int(budget.slot_duration or 0) or 1)
-        fill0 = float(meas0) / float(slot0) if meas0 > 0 else 0.0
-        delta_before = _slot_delta_ms(budget)
-        # Re-evaluate expand need after duration control.
-        expand_required = (
-            delta_before < -_under_ms
-            or fill0 < _fill_lo
-            or int(budget.underflow or 0) > _under_ms
-            or fill0 < 0.90
-            or (0 < cps_now < MIN_CPS_UK)
-            or cps_under_budget(original, slot0)
-        )
+    # Stage 31: TEXT FIRST. length_scale/atempo only after shorten/expand/split.
     _overflow_ms = int(globals().get("OVERFLOW_TRIGGER_MS") or 350)
     shorten_required = (
-        delta_before > _overflow_ms
+        audio_overflow
+        or delta_before > _overflow_ms
         or cps_over_budget(original, slot0)
     )
 
@@ -2622,6 +2734,7 @@ def apply_stage19b_rule_text_fit(
         lock_text_fit_algorithm_reason(seg, "TextSlotFitSplit")
         budget.final_status = "stage19e_partial"
         budget.rewrite_reason = "stage19e:force_split_pending"
+        seg["duration_control_used"] = "text_split"
         _stamp_stage19e_fields(
             seg,
             budget=budget,
@@ -2637,7 +2750,7 @@ def apply_stage19b_rule_text_fit(
         int(budget.slot_duration or 0),
         str(target_lang or "uk"),
         source_hint=str(source_hint or ""),
-        allow_expand=True,
+        allow_expand=not audio_overflow,
         raw_mt=raw_mt,
     )
     new_text = " ".join(str(fit.text or "").split()).strip()
@@ -2817,27 +2930,25 @@ def apply_stage19b_rule_text_fit(
             logger.debug("stage19d forced safe_shorten skipped: %s", exc)
         if not text_changed:
             try:
-                from engines.translation_adapt import llm_rephrase_available
                 from engines.semantic_optimizer import optimize_llm_rephrase_for_slot
 
-                if llm_rephrase_available():
-                    opt = optimize_llm_rephrase_for_slot(
-                        original,
-                        source_hint=source_hint,
-                        slot_ms=budget.slot_duration,
-                        tgt_lang=target_lang,
-                        max_rounds=1,
-                        current_ms=int(budget.measured_duration or 0),
-                    )
-                    if opt.changed and str(opt.text or "").strip() != original:
-                        new_text = " ".join(str(opt.text).split()).strip()
-                        text_changed = True
-                        llm_used = True
-                        shorten_executed = True
-                        fit.changed = True
-                        fit.text = new_text
-                        fit.action = "shorten"
-                        fit.strategy = "shorten"
+                opt = optimize_llm_rephrase_for_slot(
+                    original,
+                    source_hint=source_hint,
+                    slot_ms=budget.slot_duration,
+                    tgt_lang=target_lang,
+                    max_rounds=1,
+                    current_ms=int(budget.measured_duration or 0),
+                )
+                if opt.changed and str(opt.text or "").strip() != original:
+                    new_text = " ".join(str(opt.text).split()).strip()
+                    text_changed = True
+                    llm_used = True
+                    shorten_executed = True
+                    fit.changed = True
+                    fit.text = new_text
+                    fit.action = "shorten"
+                    fit.strategy = "shorten"
             except Exception as exc:
                 logger.debug("stage19d LLM shorten skipped: %s", exc)
 
@@ -2852,9 +2963,14 @@ def apply_stage19b_rule_text_fit(
         )
     )
     if expand_executed:
-        seg["duration_control_used"] = "expand"
+        seg["duration_control_used"] = "text_expand"
     if text_changed and fit.action == "shorten":
         shorten_executed = True
+        if canon_duration_control_used(seg.get("duration_control_used")) in (
+            "none",
+            "",
+        ):
+            seg["duration_control_used"] = "text_shorten"
     if text_changed and expansion_strategy == "none":
         if expand_executed:
             reasons = [str(r) for r in (fit.reasons or [])]
@@ -3036,10 +3152,32 @@ def apply_stage19b_rule_text_fit(
         seg["expansion_strategy"] = expansion_strategy
     lock_text_fit_algorithm_reason(seg, algorithm_reason)
 
-    # Light atempo AFTER text fit / re-TTS only (never sole strategy when |Δ|>350).
+    # Stage 31: AFTER text-fit, if |delta| still > 150 → length_scale then atempo.
+    if (
+        budget.final_status not in ("failed_tts_regen", "failed_no_regen")
+        and regen_fn is not None
+        and abs(_slot_delta_ms(budget)) > STAGE31_SPEED_DELTA_MS
+    ):
+        budget = _apply_stage23_duration_control(
+            seg,
+            idx,
+            timing_map,
+            budget,
+            voice=voice,
+            work_dir=work_dir,
+            regen_fn=regen_fn,
+            commit_fn=commit_fn,
+            tts_rate=tts_rate,
+            tts_pitch=tts_pitch,
+            task_id=task_id,
+            resolve_path=resolve_path,
+        )
+
+    # Light atempo AFTER text fit / re-TTS / length_scale only.
     if budget.final_status != "failed_tts_regen" and (
-        _needs_stage19b_text_fit(budget)
-        or float(seg.get("fill_ratio") or 0) < _fill_lo
+        abs(_slot_delta_ms(budget)) > STAGE31_SPEED_DELTA_MS
+        or float(seg.get("fill_ratio") or 0) < STAGE31_OK_FILL_LO
+        or float(seg.get("fill_ratio") or 0) > STAGE31_OK_FILL_HI
     ):
         budget = _apply_light_atempo_after_fit(
             seg,
@@ -3051,7 +3189,7 @@ def apply_stage19b_rule_text_fit(
         # Stage 23: if still fill < 0.88 → dedicated atempo_slow [0.90, 1.0].
         slot_chk = max(1, int(budget.slot_duration or 1))
         fill_chk = float(int(budget.measured_duration or 0)) / float(slot_chk)
-        if fill_chk < 0.88:
+        if fill_chk < STAGE31_OK_FILL_LO:
             budget = _apply_stage23_atempo_slow(
                 seg,
                 budget=budget,
@@ -4833,6 +4971,95 @@ def run_closed_loop_timing(
             "segment_indices": needing,
             "reason": "closed_loop_unresolved",
         }
+
+    # Stage 31/32: restore franchise / Lucas on the *timeline* tail (last 2–3
+    # unique indices / last 20s), not the tail of a split-child list.
+    try:
+        _vid_ms = int(video_duration_ms or 0)
+        if _vid_ms <= 0:
+            try:
+                _vid_ms = int(
+                    (timing_map[-1].get("end") if timing_map else 0)
+                    or 0
+                )
+            except Exception:
+                _vid_ms = 0
+        if _vid_ms <= 0 and segments_data:
+            try:
+                _vid_ms = max(
+                    int(s.get("end_ms") or s.get("end_time_ms") or 0)
+                    for s in segments_data
+                    if isinstance(s, dict)
+                )
+            except Exception:
+                _vid_ms = 0
+        restored_n = 0
+        for ri, seg in ending_restore_targets(
+            list(segments_data or []), n=3, video_ms=_vid_ms
+        ):
+            if not isinstance(seg, dict) or seg.get("merged_into") is not None:
+                continue
+            src_hint = str(seg.get("original_text") or seg.get("source_text") or "")
+            if not src_hint and ri < len(source_segments):
+                src_hint = str(source_segments[ri] or "")
+            cur = str(
+                seg.get("final_tts_text")
+                or seg.get("plain_text")
+                or seg.get("text")
+                or ""
+            ).strip()
+            if not cur and not src_hint:
+                continue
+            nxt = restore_ending_franchise_meaning(cur, src_hint)
+            if nxt and nxt != cur:
+                for key in (
+                    "text",
+                    "plain_text",
+                    "translation_text",
+                    "final_text",
+                    "final_tts_text",
+                ):
+                    if key in seg or key in ("text", "final_tts_text"):
+                        seg[key] = nxt
+                seg["needs_re_tts"] = True
+                seg["stage31_ending_franchise_restored"] = True
+                restored_n += 1
+                if callable(regen_fn):
+                    try:
+                        rr = regen_fn(
+                            nxt,
+                            voice=voice,
+                            tts_rate=tts_rate,
+                            tts_pitch=tts_pitch,
+                            task_id=task_id,
+                            segment_index=ri,
+                            segment_id=str(seg.get("segment_id") or ""),
+                        )
+                        if isinstance(rr, tuple):
+                            nf, nms = rr[0], int(rr[1] or 0)
+                        else:
+                            nf, nms = rr, 0
+                        if nf:
+                            seg["file"] = nf
+                            seg["tts_file_path"] = nf
+                            seg["needs_re_tts"] = False
+                            if nms > 0:
+                                seg["playback_duration"] = nms
+                                seg["tts_ms"] = nms
+                                seg["actual_duration_ms"] = nms
+                                seg["final_tts_duration_ms"] = nms
+                    except Exception as _fr_exc:
+                        logger.debug("stage31 ending franchise regen skipped: %s", _fr_exc)
+        if restored_n:
+            stats["stage31_ending_franchise_restored"] = restored_n
+    except Exception as _end_exc:
+        logger.debug("stage31 ending franchise pass skipped: %s", _end_exc)
+
+    try:
+        eq = equalize_segment_tempos(segments_data)
+        stats["stage31_tempo_evenness"] = eq
+    except Exception as _eq_exc:
+        logger.debug("stage31 tempo evenness skipped: %s", _eq_exc)
 
     # Final safety: speech-expanded splits must not land past the mux cut.
     if video_duration_ms is not None and int(video_duration_ms) > 0:

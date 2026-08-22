@@ -131,3 +131,26 @@ def dedupe_segment_texts(texts: list[str]) -> tuple[list[str], list[int]]:
         if changed:
             changed_idx.append(i)
     return out, changed_idx
+
+
+def dedupe_adjacent_copies(texts: list[str]) -> list[str]:
+    """Blank adjacent segments that repeat the previous spoken line (Stage 37)."""
+    out: list[str] = []
+    prev_norm = ""
+    for t in texts:
+        cur = str(t or "").strip()
+        try:
+            from engines.text_slot_fit import strip_slot_pad_fillers
+
+            core = _normalize(strip_slot_pad_fillers(cur))
+        except Exception:
+            core = _normalize(cur)
+        if core and prev_norm and (core == prev_norm or core in prev_norm or prev_norm in core):
+            # Same utterance (or pad-stripped clone) as the previous line.
+            if len(core) >= 8 or core == prev_norm:
+                out.append("")
+                continue
+        out.append(cur)
+        if core:
+            prev_norm = core
+    return out

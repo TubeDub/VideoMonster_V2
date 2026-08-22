@@ -717,6 +717,13 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
                 "ui_matches_tts": final == text_for_tts or not tts_synthesized,
                 "playback_duration_ms": playback_ms_val,
                 "slot_ms": slot_ms_val,
+                "source_slot_ms": int(slot_ms_val or 0),
+                "target_speech_ms": int(
+                    playback_ms_val
+                    or diagnostics.get("tts_ms")
+                    or diagnostics.get("expected_tts_ms")
+                    or 0
+                ),
                 "diagnostics": diagnostics,
                 "fill_pct": diagnostics.get("fill_pct", 0),
                 "fill_status": diagnostics.get("fill_status", "green"),

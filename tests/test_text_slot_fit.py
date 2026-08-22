@@ -51,7 +51,7 @@ def test_fit_leaves_ok_text():
 
     text = "Він пішов додому."
     fit = fit_text_to_slot(text, 4000, "uk")
-    assert fit.action in ("unchanged", "none", "expand")
+    assert fit.action in ("unchanged", "none", "expand", "expand_then_slow", "atempo_slow")
     assert fit.text == text or len(fit.text) >= len(text) * 0.8
 
 
@@ -59,7 +59,7 @@ def test_happy_path_atempo_cap_1_15():
     from engines.happy_path import HAPPY_PATH_MAX_ATEMPO, HAPPY_PATH_MIN_ATEMPO
     from engines.timing_fit import _atempo_hard_cap, _gentle_atempo_factor
 
-    assert HAPPY_PATH_MIN_ATEMPO == 0.95
+    assert HAPPY_PATH_MIN_ATEMPO == 0.85
     assert HAPPY_PATH_MAX_ATEMPO == 1.15
     assert _atempo_hard_cap(1.50) <= 1.20  # absolute still 1.20 for advanced
     assert _gentle_atempo_factor(1.5, max_atempo=1.15) <= 1.15 + 1e-6

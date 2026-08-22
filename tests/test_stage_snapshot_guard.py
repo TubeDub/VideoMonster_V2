@@ -209,3 +209,83 @@ def test_tts_stage25_uk_hard_lock_voice_override_is_allowed():
     ]
     StageSnapshotGuard.check(before, after, stage="tts", mutator_module="engines.tts")
     assert StageSnapshotGuard.diff_violations(before, after, stage="tts") == []
+
+
+def test_tts_diag_8c9850_identity_bind_is_allowed():
+    """Regression: diagnostic 8c9850ef — StageSnapshotIntegrityError at tts.
+
+    Cold EN→UK after TubeDub TZ: IdentityGuard bind_after_tts filled
+    identity_binding.audio_path / tts_bound / bound_at_stage, plus
+    RevisionManager revision_text_hash / tts_meta / wav_segment_id.
+    segment_id and text_hash were unchanged. The snapshot whitelist for
+    tts had not listed those TTS-owned bind fields, so the job aborted
+    after 20/32 synths (tts_uk/mykyta) with STAGE_SNAPSHOT_INTEGRITY.
+    """
+    from engines.pipeline_integrity.stage_contracts import allowed_fields_for_stage
+
+    allowed = allowed_fields_for_stage("tts")
+    for field in (
+        "identity_binding",
+        "tts_meta",
+        "revision_text_hash",
+        "wav_segment_id",
+    ):
+        assert field in allowed
+
+    sid = "d67f009d933b4a29b629162ff4b23745"
+    text_hash = "8794b107e30f1cd876d1b5e3"
+    text_revision = "f3af3d390eaf424d838bdc6b2ae029c3"
+    before = [
+        {
+            "segment_id": sid,
+            "index": 0,
+            "identity_binding": {
+                "segment_id": sid,
+                "text_hash": text_hash,
+                "text_revision": text_revision,
+                "audio_path": "",
+                "bound_at_stage": "pre_tts",
+                "tts_bound": False,
+            },
+            "revision_text_hash": None,
+            "tts_meta": None,
+            "wav_segment_id": None,
+        }
+    ]
+    after = [
+        {
+            "segment_id": sid,
+            "index": 0,
+            "identity_binding": {
+                "segment_id": sid,
+                "text_hash": text_hash,
+                "text_revision": text_revision,
+                "audio_path": "0000.mp3",
+                "bound_at_stage": "post_tts",
+                "tts_bound": True,
+            },
+            "revision_text_hash": "0dd698cc3dcc9d33ff24d122",
+            "tts_meta": {
+                "segment_id": sid,
+                "text_hash": text_hash,
+                "source_segment_uuid": sid,
+                "translation_uuid": "7aac86366ccbc8c24e094d4125759c62",
+                "adaptation_uuid": text_revision,
+                "tts_uuid": "cff91dc1218f4a2397a3c8222615f35c",
+                "sidecar_path": r"C:\tmp\segs\0000.mp3.vm_rev.json",
+            },
+            "wav_segment_id": sid,
+            "tts_backend": "tts_uk",
+            "tts_voice": "mykyta",
+            "tts_language": "uk",
+            "file": r"C:\tmp\segs\0000.mp3",
+            "tts_file_path": r"C:\tmp\segs\0000.mp3",
+        }
+    ]
+    StageSnapshotGuard.check(before, after, stage="tts", mutator_module="engines.tts")
+    assert StageSnapshotGuard.diff_violations(before, after, stage="tts") == []
+
+    after_text = [{**after[0], "plain_text": "changed"}]
+    with pytest.raises(StageSnapshotIntegrityError) as exc:
+        StageSnapshotGuard.check(before, after_text, stage="tts")
+    assert exc.value.field == "plain_text"

@@ -100,6 +100,7 @@ def test_mf6_fit_fail_not_success_on_huge_overflow(mf_all_on):
 
 def test_mf6_identity_guard_still_works(mf_all_on, monkeypatch):
     monkeypatch.setenv("VM_FLAG_IDENTITY_GUARD", "1")
+    monkeypatch.setenv("VM_FLAG_REVISION_MANAGER", "0")
     from engines.pipeline_integrity.exceptions import IdentityMismatchError
     from engines.pipeline_integrity.identity_guard import assert_consistent
 

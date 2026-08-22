@@ -40,7 +40,7 @@ STAGE23_RIPPLE_OVERLAP_MS = 80
 STAGE23_RIPPLE_MAX_SHIFT_MS = 400
 STAGE23_FORCE_SPLIT_OVERLAP_MS = 400
 STAGE24_ATEMPO_CLAMP_MIN = 0.92
-STAGE24_ATEMPO_CLAMP_MAX = 1.12
+STAGE24_ATEMPO_CLAMP_MAX = 1.08  # Stage 31: never >1.08 / <0.92
 
 
 @dataclass
@@ -647,8 +647,8 @@ def ripple_shift_segment_dicts(
             overlap_after += 1
             b["overlap_after_ripple"] = 1
             a["overlap_after_ripple"] = int(a.get("overlap_after_ripple") or 0)
-            # Never leave >150ms placement overlap without a shift mark.
-            if ov > 150 and not b.get("stage23_ripple_shift_ms"):
+            # Never leave >80ms placement overlap without a shift (Stage 31).
+            if ov > STAGE23_RIPPLE_OVERLAP_MS:
                 desired = _start(a) + dur_a + int(min_gap_ms)
                 if desired > _start(b):
                     _set_start(b, desired, _start(b))

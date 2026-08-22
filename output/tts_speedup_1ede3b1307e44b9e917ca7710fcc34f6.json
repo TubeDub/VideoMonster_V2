@@ -1,0 +1,14 @@
+{
+  "task_id": "1ede3b1307e44b9e917ca7710fcc34f6",
+  "path": "stage6_parallel_cache",
+  "tts_cache_hits": 12,
+  "tts_cache_misses": 20,
+  "tts_skips_existing": 0,
+  "tts_retries": 0,
+  "tts_segments_total": 32,
+  "tts_concurrency_used": 6,
+  "tts_wall_sec": 62.232,
+  "tts_rate_limit_backs": 0,
+  "oss_locked_voice": "uk_UA-mykyta-high",
+  "oss_locked_engine": "tts_uk"
+}

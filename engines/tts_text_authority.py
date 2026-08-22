@@ -131,6 +131,41 @@ def resolve_group_spoken_text(group: dict[str, Any]) -> str:
     return ""
 
 
+def prefer_locked_uk_spoken_text(
+    text: str,
+    *,
+    group: dict[str, Any] | None = None,
+    seg: dict[str, Any] | None = None,
+) -> str:
+    """Prefer recovered Final over stale voice_input / text_for_tts (zip 8fadb9dd)."""
+    spoken = _WS.sub(" ", str(text or "").strip())
+    locked = ""
+    if isinstance(seg, dict):
+        locked = str(seg.get("final_tts_text") or seg.get("plain_text") or "").strip()
+    if not locked and isinstance(group, dict):
+        locked = str(group.get("final_tts_text") or "").strip()
+    try:
+        from engines.text_slot_fit import prepare_uk_spoken_text
+        from engines.tts_lang_lock import is_uk_tts_text_ok, rewrite_russian_leak_for_uk
+
+        if locked:
+            locked = prepare_uk_spoken_text(locked)
+        spoken = prepare_uk_spoken_text(spoken)
+        if locked and is_uk_tts_text_ok(locked):
+            return locked
+        candidate = spoken or locked
+        if candidate and not is_uk_tts_text_ok(candidate):
+            rewritten = prepare_uk_spoken_text(rewrite_russian_leak_for_uk(candidate))
+            if rewritten and is_uk_tts_text_ok(rewritten):
+                return rewritten
+        if locked:
+            return locked
+    except Exception:
+        pass
+    return spoken or locked
+
+
+
 def assert_tts_matches_final(
     spoken: str,
     expected: str,

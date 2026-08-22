@@ -59,7 +59,56 @@ class TTSFailureReport:
 
     @property
     def timestamp_iso(self) -> str:
-        return datetime.fromtimestamp(self.timestamp_ms / 1000.0, tz=timezone.utc).isoformat()
+        ms = self.timestamp_ms
+        if ms is None:
+            ms = int(time.time() * 1000)
+        try:
+            ms_f = float(ms)
+        except (TypeError, ValueError):
+            ms_f = float(int(time.time() * 1000))
+        return datetime.fromtimestamp(ms_f / 1000.0, tz=timezone.utc).isoformat()
+
+    @classmethod
+    def from_partial_dict(cls, payload: dict[str, Any] | None) -> "TTSFailureReport":
+        """Build a report from a sparse tts_failure dict (parallel path).
+
+        Zip 8fadb9dd: ``{"error_message": "PIPELINE_LANG_MIX: ..."}`` was passed
+        into the dataclass with ``timestamp_ms=None``, then ``to_dict()`` did
+        ``None / 1000.0`` and killed TTS after 31 successful synths.
+        """
+        src = payload if isinstance(payload, dict) else {}
+        # Copy only non-None values so dataclass defaults (timestamp_ms) apply.
+        fields = {
+            k: v
+            for k, v in src.items()
+            if k in cls.__dataclass_fields__ and v is not None
+        }
+        err = str(src.get("error_message") or src.get("reason") or "tts_failure")
+        fields.setdefault("reason", err)
+        fields.setdefault("error_message", err)
+        fields.setdefault("error_code", "TTS_SKIP")
+        for req in (
+            "segment_id",
+            "original_text",
+            "tts_text",
+            "voice",
+            "language",
+            "tts_file_path",
+            "traceback",
+        ):
+            fields.setdefault(req, "")
+        for req in ("segment_index", "current", "total"):
+            try:
+                fields[req] = int(fields[req])
+            except (TypeError, ValueError, KeyError):
+                fields[req] = 0
+        try:
+            fields["duration_ms"] = float(fields["duration_ms"])
+        except (TypeError, ValueError, KeyError):
+            fields["duration_ms"] = 0.0
+        fields["pipeline_state"] = "PARTIAL"
+        fields["stage"] = STAGE_TTS
+        return cls(**fields)
 
     @property
     def engine_label(self) -> str:

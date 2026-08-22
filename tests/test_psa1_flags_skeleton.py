@@ -51,7 +51,12 @@ def clear_psa1_env(monkeypatch):
     yield
 
 
-def test_psa1_flags_default_off(clear_psa1_env):
+def test_psa1_flags_default_off(clear_psa1_env, monkeypatch):
+    # Env-unset must not inherit FeatureManager / local.json overrides.
+    monkeypatch.setattr(
+        "engines.core.feature_flags.is_enabled",
+        lambda *a, **k: False,
+    )
     flags = list_psa1_flags()
     assert flags["identity_guard"] is False
     assert flags["segment_normalizer"] is False
@@ -64,12 +69,20 @@ def test_psa1_flags_default_off(clear_psa1_env):
 
 
 def test_psa1_flag_env_on(monkeypatch, clear_psa1_env):
+    monkeypatch.setattr(
+        "engines.core.feature_flags.is_enabled",
+        lambda *a, **k: False,
+    )
     monkeypatch.setenv(VM_FLAG_IDENTITY_GUARD, "1")
     assert identity_guard_flag() is True
     assert segment_normalizer_flag() is False
 
 
-def test_psa1_skeleton_noop_when_flags_off(clear_psa1_env):
+def test_psa1_skeleton_noop_when_flags_off(clear_psa1_env, monkeypatch):
+    monkeypatch.setattr(
+        "engines.core.feature_flags.is_enabled",
+        lambda *a, **k: False,
+    )
     segs = [{"segment_id": "a" * 32, "plain_text": "x"}]
     ig = skeleton_identity_guard(segs, stage="legacy")
     assert ig["enabled"] is False and ig["noop"] is True
@@ -102,8 +115,12 @@ def test_psa1_invariant_error_types_exist():
     assert issubclass(RevisionInvariantError, Exception)
 
 
-def test_psa1_legacy_smoke_flags_off(clear_psa1_env):
+def test_psa1_legacy_smoke_flags_off(clear_psa1_env, monkeypatch):
     """Legacy integrity helpers still work with PSA flags OFF."""
+    monkeypatch.setattr(
+        "engines.core.feature_flags.is_enabled",
+        lambda *a, **k: False,
+    )
     from engines.pipeline_integrity.segment import ensure_segment_ids, new_segment_id
     from engines.pipeline_integrity.guards import ArchitectureGuard
 

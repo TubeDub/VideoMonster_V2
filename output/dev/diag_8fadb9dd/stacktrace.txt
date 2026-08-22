@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 16408, in _run_pipeline_inner
+    _mark_tts_segment_skipped(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        task_id,
+        ^^^^^^^^
+    ...<3 lines>...
+        reason="tts_failure",
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 3816, in _mark_tts_segment_skipped
+    mark_segment_tts_failed(segments_data[idx], report_obj)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\dubbing_engine\tts_failure_diag.py", line 284, in mark_segment_tts_failed
+    segment["tts_error"] = report.to_dict()
+                           ~~~~~~~~~~~~~~^^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\dubbing_engine\tts_failure_diag.py", line 92, in to_dict
+    "timestamp": self.timestamp_iso,
+                 ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\dubbing_engine\tts_failure_diag.py", line 62, in timestamp_iso
+    return datetime.fromtimestamp(self.timestamp_ms / 1000.0, tz=timezone.utc).isoformat()
+                                  ~~~~~~~~~~~~~~~~~~^~~~~~~~
+TypeError: unsupported operand type(s) for /: 'NoneType' and 'float'

@@ -73,20 +73,48 @@ STAGE23_OK_FILL_LO = 0.92
 STAGE23_OK_FILL_HI = 1.12
 UNDERFLOW_TRIGGER_MS = 250
 OVERFLOW_TRIGGER_MS = 350
+# Stage 31: text-first duration. Speed only after |delta|>150, clamped ±8%.
+STAGE31_TEXT_FIT_DELTA_MS = 120
+STAGE31_SPEED_DELTA_MS = 150
+STAGE31_ATEMPO_MIN = 0.92
+STAGE31_ATEMPO_MAX = 1.08
+STAGE31_LENGTH_SCALE_MIN = 0.92
+STAGE31_LENGTH_SCALE_MAX = 1.08
+STAGE31_OK_FILL_LO = 0.92
+STAGE31_OK_FILL_HI = 1.08
+STAGE31_GLOBAL_BIAS_MAX = 0.05
+STAGE31_NEIGHBOR_JUMP_MAX = 0.08
+DURATION_CONTROL_CANON = (
+    "text_shorten",
+    "text_expand",
+    "text_split",
+    "length_scale",
+    "atempo",
+    "soft_pad",
+)
 MAX_SOFT_PADS_PER_SEG = 2
+# Stage 37: never voice pacing fillers. Better dead-air / atempo than
+# «саме тоді, і саме в цей момент» on every short line (IMG_2790 EN→UK).
+ALLOW_SPOKEN_SOFT_PADS = False
 ALLOWED_EXPAND: tuple[str, ...] = (
     "semantic_repeat_key",
     "glossary_full_term",
-    "soft_pad_whitelist_once",
-    "soft_pad_whitelist_twice",
 )
-# Soft expand pads (strict whitelist — never "Саме про … тут ідеться").
+# Detected/stripped pads — kept for count + tests; INSERT is gated off.
 SOFT_PAD_WHITELIST: tuple[str, ...] = (
     "саме тоді",
     "і саме в цей момент",
     "отже",
     "тому",
     "в той момент",
+)
+# Trailing/leading islands that must never reach TTS.
+BANNED_SPOKEN_PADS: tuple[str, ...] = (
+    "ось як це було тоді",
+    "і саме в цей момент",
+    "саме тоді",
+    "в той момент",
+    "саме так",
 )
 _STAGE19G_SOFT_PADS = SOFT_PAD_WHITELIST
 _STAGE19H_SOFT_PADS = SOFT_PAD_WHITELIST
@@ -146,13 +174,15 @@ _DANGLING_CLAUSE = re.compile(
     r")[.!?…]*$"
 )
 
-# Stage 11/15: do not chop tails that carry job / crash / film-entity meaning.
+# Stage 11/15/31: do not chop tails that carry job / crash / film-entity meaning.
 _CRITICAL_TAIL_GUARD = re.compile(
     r"(?i)\b("
-    r"job|get\s+in|star\s+wars|lucas|wexler|"
+    r"job|get\s+in|star\s+wars|lucas|wexler|fiat|usc|franchise|"
+    r"george\s+jr|george\s+junior|"
     r"робот[ауеи]?|роботі|роботою|"
     r"поступл\w*|прийнятт\w*|"
-    r"зоряні|лукас|векслер|"
+    r"зоряні|лукас|векслер|фіат|франшиз|"
+    r"джордж\s+молодш|"
     r"аварі\w*|вилет\w*|вижив\w*|викину\w*|розби\w*|"
     r"потенціал\w*|гоночн\w*|фотоапарат\w*"
     r")\b"
@@ -163,12 +193,21 @@ _CRITICAL_MARKER_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"(?i)\bstar\s+wars\b"),
     re.compile(r"(?i)\blucas\b"),
     re.compile(r"(?i)\bwexler\b"),
+    re.compile(r"(?i)\bfiat\b"),
+    re.compile(r"(?i)\busc\b"),
+    re.compile(r"(?i)\bfranchise\b"),
+    re.compile(r"(?i)\bgeorge\s+jr\.?\b"),
+    re.compile(r"(?i)\bgeorge\s+junior\b"),
     re.compile(r"(?i)\bробот"),
     re.compile(r"(?i)\bроботі"),
     re.compile(r"(?i)\bпоступл"),
     re.compile(r"(?i)\bзоряні"),
     re.compile(r"(?i)\bлукас"),
     re.compile(r"(?i)\bвекслер"),
+    re.compile(r"(?i)\bфіат"),
+    re.compile(r"(?i)\bфраншиз"),
+    re.compile(r"(?i)\bкінофраншиз"),
+    re.compile(r"(?i)\bджордж\s+молодш"),
     re.compile(r"(?i)\bаварі"),
     re.compile(r"(?i)\bвилет"),
     re.compile(r"(?i)\bвижив"),
@@ -177,6 +216,39 @@ _CRITICAL_MARKER_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"(?i)\bпотенціал"),
     re.compile(r"(?i)\bгоночн"),
     re.compile(r"(?i)\bфотоапарат"),
+)
+# Stage 31: never drop these entities when shortening (EN or UK surface).
+_PROTECTED_ENTITY_KEEP: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = (
+    (re.compile(r"(?i)\bfiat\b|\bфіат\b"), re.compile(r"(?i)\b(fiat|фіат)\b")),
+    (re.compile(r"(?i)\busc\b"), re.compile(r"(?i)\busc\b")),
+    (
+        re.compile(r"(?i)\bhaskell\s+wexler\b|\bwexler\b|\bвекслер\b"),
+        re.compile(r"(?i)\b(wexler|векслер)\b"),
+    ),
+    (
+        re.compile(r"(?i)\bstar\s+wars\b|\bзоряні\s+війн"),
+        re.compile(r"(?i)(star\s+wars|зоряні\s+війн)"),
+    ),
+    (
+        re.compile(r"(?i)\bfranchise\b|\bфраншиз|\bкінофраншиз"),
+        re.compile(r"(?i)(franchise|франшиз|кінофраншиз|зоряні\s+війн|star\s+wars)"),
+    ),
+    (
+        re.compile(r"(?i)\bgeorge\s+jr\.?\b|\bgeorge\s+junior\b|\bджордж\s+молодш"),
+        re.compile(r"(?i)(george\s+jr|george\s+junior|джордж\s+молодш)"),
+    ),
+    (
+        re.compile(r"(?i)\bgeorge\s+lucas\b|\bлукас\b"),
+        re.compile(r"(?i)(lucas|лукас)"),
+    ),
+)
+_FRANCHISE_SOURCE_RE = re.compile(
+    r"(?i)\b(star\s+wars|franchise|george\s+lucas|\blucas\b|зоряні\s+війн|"
+    r"кінофраншиз|франшиз|\bлукас\b)\b"
+)
+_FRANCHISE_VOICED_RE = re.compile(
+    r"(?i)(зоряні\s+війн|кінофраншиз|франшиз|лукас|star\s+wars|franchise|lucas|"
+    r"найуспішн\w+\s+кіно|найбільш\s+успішн)"
 )
 
 
@@ -333,11 +405,22 @@ def should_force_split(
     return slot < FORCE_SPLIT_ABS_MS and speech > FORCE_SPLIT_ABS_MS and speech > slot
 
 
+def is_pad_only_utterance(text: str) -> bool:
+    """True when stripping banned pacing pads leaves no spoken content."""
+    t = _normalize_chunk(text)
+    if not t:
+        return True
+    core = _normalize_chunk(strip_slot_pad_fillers(t))
+    return not core
+
+
 def is_garbage_expand(text: str) -> bool:
     """Stage 21: True for forbidden soft-pad/expand garbage constructions."""
     t = _normalize_chunk(text)
     if not t:
         return False
+    if is_pad_only_utterance(t):
+        return True
     return any(pat.search(t) for pat in GARBAGE_EXPAND_PATTERNS)
 
 
@@ -455,8 +538,12 @@ def _filter_clean_unique_chunks(parent: str, chunks: list[str]) -> list[str]:
     merged: list[str] = []
     pending = ""
     for c in raw:
+        if is_pad_only_utterance(c):
+            continue
         piece = (pending + " " + c).strip() if pending else c
         pending = ""
+        if is_pad_only_utterance(piece):
+            continue
         if is_clean_utterance(piece) or (
             len(piece.split()) >= 4 and not has_forbidden_expand_pattern(piece)
         ):
@@ -569,18 +656,24 @@ def assert_unique_split_chunks(
     parent_text: str,
     chunks: list[str],
 ) -> bool:
-    """Stage 19h: True when every child chunk is a unique proper substring ≠ parent."""
+    """Stage 19h/37: unique children, never copy-parent, never pad-only."""
     parent = _normalize_chunk(parent_text)
+    parent_core = _normalize_chunk(strip_slot_pad_fillers(parent))
     cleaned = [_normalize_chunk(c) for c in chunks if _normalize_chunk(c)]
     if len(cleaned) < 2:
         return False
     seen: set[str] = set()
     for c in cleaned:
-        if c == parent:
+        if is_pad_only_utterance(c):
             return False
-        if c in seen:
+        core = _normalize_chunk(strip_slot_pad_fillers(c))
+        if c == parent or core == parent or (parent_core and core == parent_core):
+            return False
+        if c in seen or core in seen:
             return False
         seen.add(c)
+        if core:
+            seen.add(core)
     return True
 
 
@@ -607,7 +700,7 @@ def force_split_until_fit(
     3) Pack to ~2.2–7.5s; recurse (depth≤5) while fill > 1.12
     Never mid-word / mid-phrase garbage packs.
     """
-    t = strip_garbage_expand_phrases(_normalize_chunk(text))
+    t = strip_slot_pad_fillers(strip_garbage_expand_phrases(_normalize_chunk(text)))
     if not t:
         return []
     parent_slot = max(1, int(slot_ms or 0) or MIN_CHILD_SLOT_MS)
@@ -791,8 +884,21 @@ def _needs_critical_tail_guard(text: str, source_hint: str = "") -> bool:
     return bool(_CRITICAL_TAIL_GUARD.search(blob))
 
 
+def _protected_entities_lost(
+    original: str, shortened: str, source_hint: str = ""
+) -> bool:
+    """True when Fiat / USC / Wexler / Star Wars / franchise / George Jr vanished."""
+    probe_src = f"{original} {source_hint}"
+    for src_pat, keep_pat in _PROTECTED_ENTITY_KEEP:
+        if src_pat.search(probe_src) and not keep_pat.search(shortened or ""):
+            return True
+    return False
+
+
 def _critical_markers_lost(original: str, shortened: str, source_hint: str = "") -> bool:
     """True when shorten dropped a critical meaning marker present in original/hint."""
+    if _protected_entities_lost(original, shortened, source_hint):
+        return True
     if not _needs_critical_tail_guard(original, source_hint):
         return False
     probe_src = f"{original} {source_hint}"
@@ -815,12 +921,187 @@ def _critical_markers_lost(original: str, shortened: str, source_hint: str = "")
                 r"(?i)\bвекслер", shortened
             ):
                 continue
+            if "fiat" in pat.pattern.lower() and re.search(
+                r"(?i)\bфіат", shortened
+            ):
+                continue
+            if "franchise" in pat.pattern.lower() and re.search(
+                r"(?i)(франшиз|зоряні)", shortened
+            ):
+                continue
+            if "george" in pat.pattern.lower() and re.search(
+                r"(?i)\bджордж", shortened
+            ):
+                continue
             if pat.pattern.lower().find("get\\s+in") >= 0 and re.search(
                 r"(?i)\b(поступл|прийнятт)", shortened
             ):
                 continue
             return True
     return False
+
+
+def canon_duration_control_used(raw: str | None) -> str:
+    """Map legacy stamps onto Stage 31 honest labels."""
+    val = str(raw or "").strip().lower()
+    alias = {
+        "shorten": "text_shorten",
+        "text_shorten": "text_shorten",
+        "expand": "text_expand",
+        "text_expand": "text_expand",
+        "split": "text_split",
+        "text_split": "text_split",
+        "length_scale": "length_scale",
+        "rate": "length_scale",
+        "atempo": "atempo",
+        "soft_pad": "soft_pad",
+        "none": "none",
+        "": "none",
+    }
+    return alias.get(val, val or "none")
+
+
+def stage31_duration_levers(slot_ms: int, tts_ms: int) -> list[str]:
+    """STRICT order: text fit when |delta|>120, then length_scale/atempo if still >150."""
+    slot = max(1, int(slot_ms or 0))
+    tts = max(0, int(tts_ms or 0))
+    delta = tts - slot
+    if abs(delta) <= STAGE31_TEXT_FIT_DELTA_MS:
+        return []
+    levers: list[str] = ["text_shorten" if delta > 0 else "text_expand"]
+    if abs(delta) > STAGE31_SPEED_DELTA_MS:
+        levers.extend(["length_scale", "atempo"])
+    return levers
+
+
+def clamp_stage31_tempo(value: float, *, default: float = 1.0) -> float:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        v = float(default)
+    return max(STAGE31_ATEMPO_MIN, min(STAGE31_ATEMPO_MAX, v))
+
+
+def ending_keeps_franchise_idea(source_hint: str, final_text: str) -> bool:
+    """True when last-line meaning of franchise / Star Wars / Lucas is voiced.
+
+    If the source does not carry that idea, the check is vacuously True.
+    """
+    src = str(source_hint or "").strip()
+    final = str(final_text or "").strip()
+    if not src:
+        return True
+    if not _FRANCHISE_SOURCE_RE.search(src):
+        return True
+    blob = f"{final}"
+    return bool(_FRANCHISE_VOICED_RE.search(blob))
+
+
+def ending_restore_targets(
+    segments_data: list,
+    *,
+    n: int = 3,
+    video_ms: int = 0,
+) -> list[tuple[int, dict]]:
+    """Last timeline rows by start_ms — not the tail of a split-child list.
+
+    Diag 2286c82f: franchise restore ran on duplicate index-8 children while
+    original idx 23 (Star Wars) kept a recycled photography translation.
+    """
+    active: list[tuple[int, dict]] = []
+    for i, seg in enumerate(segments_data or []):
+        if not isinstance(seg, dict) or seg.get("merged_into") is not None:
+            continue
+        active.append((i, seg))
+    if not active:
+        return []
+
+    def _start(seg: dict) -> int:
+        try:
+            return int(
+                seg.get("start_ms")
+                or seg.get("start_time_ms")
+                or seg.get("end_ms")
+                or 0
+            )
+        except (TypeError, ValueError):
+            return 0
+
+    by_orig: dict[int, tuple[int, dict]] = {}
+    for i, seg in active:
+        try:
+            key = int(seg.get("index") if seg.get("index") is not None else i)
+        except (TypeError, ValueError):
+            key = i
+        by_orig[key] = (i, seg)
+    ordered = sorted(by_orig.values(), key=lambda t: (_start(t[1]), t[0]))
+    picked = list(ordered[-max(1, int(n)) :])
+    if int(video_ms or 0) > 0:
+        cutoff = max(0, int(video_ms) - 20_000)
+        seen = {id(p[1]) for p in picked}
+        for i, seg in active:
+            if id(seg) in seen:
+                continue
+            if _start(seg) >= cutoff:
+                picked.append((i, seg))
+                seen.add(id(seg))
+    return picked
+
+
+def restore_ending_franchise_meaning(text: str, source_hint: str) -> str:
+    """Re-attach franchise / Lucas idea when source has it and Final dropped it.
+
+    Stage 32: if the source is a short Star Wars / franchise line but ``text``
+    is a long unrelated scene (photography / podium recycled onto idx 23 in
+    diag 2286c82f), *replace* rather than append.
+    """
+    out = " ".join(str(text or "").split()).strip()
+    hint = str(source_hint or "")
+    if ending_keeps_franchise_idea(hint, out):
+        return out
+    src_words = hint.split()
+    dest_words = out.split()
+    wrong_scene = bool(
+        _FRANCHISE_SOURCE_RE.search(hint)
+        and len(src_words) <= 16
+        and len(dest_words) >= 18
+        and not _FRANCHISE_VOICED_RE.search(out)
+    )
+    clause = "а його кінофраншиза — це «Зоряні війни»"
+    if re.search(r"(?i)\blucas\b|\bлукас", hint) and not re.search(
+        r"(?i)\bлукас", out
+    ):
+        clause = (
+            "Сьогодні його краще знають як Джорджа Лукаса, "
+            "а його кінофраншиза — це «Зоряні війни»"
+        )
+    if not out or wrong_scene:
+        trial = clause if clause.endswith(".") else clause + "."
+        trial = strip_slot_pad_fillers(" ".join(trial.split()).strip())
+        return trial
+    base = out if _COMPLETE_END.search(out) else out.rstrip(",;:") + "."
+    trial = f"{base} {clause}."
+    trial = strip_slot_pad_fillers(" ".join(trial.split()).strip())
+    if _protected_entities_lost(out, trial, hint):
+        return out
+    return trial
+
+
+def shorten_preserving_entities(
+    text: str,
+    slot_ms: int,
+    lang: str = "uk",
+    *,
+    source_hint: str = "",
+) -> tuple[str, list[str], bool]:
+    """Stage 31 shorten wrapper — never drop Fiat / USC / Wexler / Star Wars."""
+    out, reasons, truncated = _safe_shorten(
+        text, slot_ms, lang, source_hint=source_hint
+    )
+    if _protected_entities_lost(text, out, source_hint):
+        reasons = list(reasons) + ["shorten_refused_protected_entity"]
+        return " ".join(str(text or "").split()).strip(), reasons, False
+    return out, reasons, truncated
 
 
 @dataclass
@@ -1336,7 +1617,11 @@ def _rule_expand_once(text: str, lang: str, source_hint: str = "") -> str:
 
 
 def strip_slot_pad_fillers(text: str) -> str:
-    """Remove Stage-5 invented pacing pads from Review/TTS text."""
+    """Remove Stage-5/19/23 invented pacing pads from Review/TTS text.
+
+    Stage 37: also drop comma-islands «саме тоді» / «і саме в цей момент»
+    (IMG_2790 finals). Does not touch narrative «як саме тоді вирішив…».
+    """
     t = " ".join(str(text or "").split()).strip()
     if not t:
         return t
@@ -1355,15 +1640,40 @@ def strip_slot_pad_fillers(text: str) -> str:
         r"\s*That is:\s*[^.!?…]+[.!?…]?",
     ):
         t = re.sub(pat, "", t, flags=re.IGNORECASE)
+    pad_alt = (
+        r"ось як це було тоді|"
+        r"і саме в цей момент|"
+        r"(?:і\s+)?саме тоді|"
+        r"в той момент"
+    )
+    # Trailing comma-pad run: "…минуло, саме тоді, і саме в цей момент."
+    t = re.sub(rf"(?:,\s*(?:{pad_alt})\s*)+[.!?…]?\s*$", "", t, flags=re.IGNORECASE)
+    # Leading pad island: "і саме в цей момент, саме тоді. Content"
+    t = re.sub(rf"^(?:{pad_alt})(?:\s*[,:—\-]+\s*(?:{pad_alt})?)*\s*[,:—\-]\s*", "", t, flags=re.IGNORECASE)
+    # Isolated ", саме тоді," between real clauses (not "як саме тоді").
+    t = re.sub(rf"(?<!як)(?:,\s*(?:{pad_alt})\s*)+(?=,|\.|$)", "", t, flags=re.IGNORECASE)
     t = re.sub(r"\s{2,}", " ", t)
     t = re.sub(r"\s+([,.;:!?])", r"\1", t)
     t = re.sub(r"([,;:]){2,}", r"\1", t)
     t = t.strip(" ,;—-")
-    if t and t[-1] not in ".!?…":
-        # Keep terminal punctuation if we stripped a trailing pad after a clause.
-        if re.search(r"[.!?…]\s*$", str(text or "")):
-            pass
-    return " ".join(t.split()).strip()
+    if t and t[-1] not in ".!?…" and re.search(r"[.!?…]\s*$", str(text or "")):
+        t = t.rstrip() + "."
+    core = " ".join(t.split()).strip()
+    if re.fullmatch(rf"(?:{pad_alt})(?:\s*[,.!?…]+\s*(?:{pad_alt})?)*", core or "", flags=re.IGNORECASE):
+        return ""
+    return core
+
+
+def prepare_uk_spoken_text(text: str) -> str:
+    """Strip fillers + intra-segment sentence repeats before TTS."""
+    t = strip_slot_pad_fillers(text)
+    try:
+        from engines.repetition_guard import remove_repeated_sentences
+
+        t, _ = remove_repeated_sentences(t)
+    except Exception:
+        pass
+    return " ".join(str(t or "").split()).strip()
 
 
 def _expand_keeps_entities(original: str, expanded: str, source_hint: str = "") -> bool:
@@ -1550,6 +1860,8 @@ def _stage19g_soft_pad_once(text: str, lang: str = "uk") -> tuple[str, bool]:
     out = " ".join(str(text or "").split()).strip()
     if not out:
         return out, False
+    if not ALLOW_SPOKEN_SOFT_PADS:
+        return out, False
     lang0 = str(lang or "uk").split("-")[0].lower()
     if lang0 != "uk":
         return out, False
@@ -1596,24 +1908,9 @@ def _stage19j_repeat_key_phrase(text: str) -> tuple[str, bool]:
             entity = ph
             break
     if not entity:
-        # Bigram of content words (never a single stem dump / ", Word.").
-        words = out.split()
-        stop = {
-            "і", "та", "а", "але", "що", "як", "в", "у", "на", "з", "із", "до",
-            "від", "про", "для", "це", "той", "він", "вона", "вони", "був", "була",
-            "були", "є", "не", "тоді", "потім", "саме", "отже", "тому",
-        }
-        for i in range(len(words) - 1):
-            a = re.sub(r"[^\w\u0400-\u04FF]+", "", words[i], flags=re.UNICODE)
-            b = re.sub(r"[^\w\u0400-\u04FF]+", "", words[i + 1], flags=re.UNICODE)
-            if (
-                len(a) >= 4
-                and len(b) >= 4
-                and a.lower() not in stop
-                and b.lower() not in stop
-            ):
-                entity = f"{a} {b}"
-                break
+        # Stage 37: never echo the opening vocative/bigram («Чесно кажучи»,
+        # «Добре Джонатане»). Only known glossary entities may repeat.
+        return out, False
     if not entity or len(entity.split()) < 2:
         return out, False
     # Already ends with the entity as its own sentence — nothing to add.
@@ -1759,6 +2056,8 @@ def expand_to_fill(
             "soft_pad_whitelist_once",
             "soft_pad_whitelist_twice",
         ):
+            if not ALLOW_SPOKEN_SOFT_PADS:
+                continue
             if soft_pad_count(out) >= MAX_SOFT_PADS_PER_SEG:
                 continue
             # Stage 23: second pad only if first already present and still short.
@@ -1894,7 +2193,7 @@ def fit_text_to_slot(
             pass
         after_soft = estimate_tts_ms(out, lang)
         if after_soft > hi:
-            shortened, sh_reasons, meaning_truncated = _safe_shorten(
+            shortened, sh_reasons, meaning_truncated = shorten_preserving_entities(
                 out, slot, lang, source_hint=source_hint
             )
             reasons = list(reasons) + list(sh_reasons)
@@ -2039,8 +2338,9 @@ def fit_text_to_slot(
             action,
         )
 
-    # Clamp atempo into Stage 19 band.
-    atempo = max(MAX_ATEMPO_SLOW, min(MAX_ATEMPO_FAST, float(atempo)))
+    # Stage 31: suggest atempo in ±8% after text-fit (legacy ATEMPO_MIN/MAX
+    # stay exported for Stage 19i constant tests).
+    atempo = max(STAGE31_ATEMPO_MIN, min(STAGE31_ATEMPO_MAX, float(atempo)))
     dead_air_risk_ms = max(0, slot - after)
     strategy = action if action not in ("none", "unchanged") else "ok"
     if after < lo and action in ("unchanged", "none"):

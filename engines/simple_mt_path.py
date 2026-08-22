@@ -34,6 +34,86 @@ def use_locked_simple_mt(task_info: dict[str, Any] | None = None) -> bool:
     return mode in ("basic", "simple", "")
 
 
+def finalize_living_uk_segments(
+    source_segments: list[str],
+    mt_lines: list[str],
+    *,
+    app_dir: Path | None = None,
+) -> tuple[list[str], dict[str, Any]]:
+    """Rule naturalizer + glossary + RU rewrite + pad strip after Marian.
+
+    Happy Path metadata promised naturalizer; Stage 7b skipped it, so Simple
+    voiced raw Marian + «саме тоді» pads (task 8fadb9dd / IMG_2790).
+    """
+    sources = [str(s or "") for s in (source_segments or [])]
+    lines = [str(t or "") for t in (mt_lines or [])]
+    n = len(sources)
+    while len(lines) < n:
+        lines.append("")
+    lines = lines[:n]
+    meta = {
+        "naturalizer_executed": False,
+        "naturalizer_applied": False,
+        "ru_rewrites": 0,
+        "pads_stripped": 0,
+    }
+    if not n:
+        return [], meta
+
+    polished = list(lines)
+    try:
+        from engines.translation_naturalizer import polish_lines
+
+        polished = polish_lines(
+            lines,
+            source_segments=sources,
+            tgt_lang="uk",
+            src_lang="en",
+            use_llm=False,
+            app_dir=app_dir,
+        )
+        meta["naturalizer_executed"] = True
+        if len(polished) != n:
+            polished = (list(polished) + [""] * n)[:n]
+    except Exception as exc:
+        logger.warning("simple_mt naturalizer skipped: %s", exc)
+        polished = list(lines)
+
+    from engines.mt.glossary_en_uk import finalize_mt_text, restore_dropped_source_entities
+    from engines.text_slot_fit import prepare_uk_spoken_text
+    from engines.tts_lang_lock import rewrite_russian_leak_for_uk, uk_text_has_russian_leak
+
+    out: list[str] = []
+    applied = 0
+    for src, raw in zip(sources, polished):
+        t = finalize_mt_text("en", "uk", raw)
+        before = t
+        t = prepare_uk_spoken_text(t)
+        if t != before:
+            meta["pads_stripped"] += 1
+        t = restore_dropped_source_entities(src, t)
+        if t and uk_text_has_russian_leak(t):
+            rewritten = rewrite_russian_leak_for_uk(t)
+            rewritten = prepare_uk_spoken_text(rewritten)
+            if rewritten:
+                t = rewritten
+                meta["ru_rewrites"] += 1
+        if t != str(raw or "").strip():
+            applied += 1
+        out.append(t)
+
+    try:
+        from engines.repetition_guard import dedupe_adjacent_copies, dedupe_segment_texts
+
+        out, _ = dedupe_segment_texts(out)
+        out = dedupe_adjacent_copies(out)
+    except Exception:
+        pass
+
+    meta["naturalizer_applied"] = applied > 0
+    return out, meta
+
+
 def resolve_translate_method(stats: dict[str, Any] | None) -> str:
     st = dict(stats or {})
     engine = str(st.get("mt_engine") or "").lower()
@@ -119,8 +199,10 @@ def stamp_simple_mt_lock(task_info: dict[str, Any]) -> dict[str, Any]:
     task_info["translation_agent_path"] = False
     task_info["llm_adaptation_used"] = False
     task_info["tps_skip_orchestrator"] = True
-    task_info["naturalizer_executed"] = False
-    task_info["naturalizer_applied"] = False
+    # Stage 37: rule naturalizer runs inside run_locked_simple_mt — do not
+    # clobber a True stamp from that pass.
+    task_info.setdefault("naturalizer_executed", False)
+    task_info.setdefault("naturalizer_applied", False)
     return task_info
 
 
@@ -171,7 +253,22 @@ def run_locked_simple_mt(
             f"simple_mt parity broken: {len(segments)}!={len(source_segments or [])}"
         )
 
+    tgt0 = str(target_lang or "").split("-")[0].lower()
+    if tgt0 == "uk":
+        segments, live_meta = finalize_living_uk_segments(
+            list(source_segments or []),
+            list(segments),
+            app_dir=app_dir,
+        )
+        if len(segments) != len(source_segments or []):
+            raise RuntimeError(
+                f"simple_mt living_uk parity broken: {len(segments)}!={len(source_segments or [])}"
+            )
+    else:
+        live_meta = {}
+
     stats = dict(stats or {})
+    stats.update(live_meta)
     stats["mt_wall_sec"] = round(
         float(stats.get("mt_wall_sec") or (time.perf_counter() - t0)), 3
     )

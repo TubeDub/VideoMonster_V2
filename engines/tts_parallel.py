@@ -88,8 +88,6 @@ def _synthesize_one_edge(
 
     Single attempt — outer synthesize_one_with_cache owns retries.
     """
-    import edge_tts
-
     from engines.tts import _sanitize_pitch, _tts_rate, sanitize_tts_text
     from engines.tts_cache import is_valid_tts_file
 
@@ -109,6 +107,8 @@ def _synthesize_one_edge(
         assert_voice_matches_target,
         force_uk_tts_identity,
         is_uk_tts_text_ok,
+        rewrite_russian_leak_for_uk,
+        uk_text_has_russian_leak,
     )
 
     eid = normalize_backend_name(engine_id or "edge-offline")
@@ -122,9 +122,23 @@ def _synthesize_one_edge(
         _lang = "uk"
     assert_voice_matches_target(voice, _lang, raise_error=True)
     if str(_lang).split("-")[0].lower() == "uk" and not is_uk_tts_text_ok(text0):
-        raise RuntimeError(
-            f"PIPELINE_LANG_MIX: cyrillic_ratio < 0.55 parallel TTS text={text0[:80]!r}"
-        )
+        rewritten = rewrite_russian_leak_for_uk(text0)
+        if rewritten and is_uk_tts_text_ok(rewritten):
+            logger.warning(
+                "tts_parallel: leftover RU rewritten before synth text=%r -> %r",
+                text0[:80],
+                rewritten[:80],
+            )
+            text0 = rewritten
+        elif uk_text_has_russian_leak(text0):
+            # Stage 34/35: pad leftover RU; do not brick TTS with PIPELINE_LANG_MIX.
+            raise RuntimeError(
+                f"russian_in_uk: leftover RU parallel TTS text={text0[:80]!r}"
+            )
+        else:
+            raise RuntimeError(
+                f"PIPELINE_LANG_MIX: cyrillic_ratio < 0.55 parallel TTS text={text0[:80]!r}"
+            )
 
     try:
         from engines.stress_marks import add_stress_marks
@@ -167,6 +181,8 @@ def _synthesize_one_edge(
     kwargs: dict = {"text": text0, "voice": edge_voice, "rate": effective_rate}
     if effective_pitch:
         kwargs["pitch"] = effective_pitch
+
+    import edge_tts
 
     async def _run() -> None:
         communicate = edge_tts.Communicate(**kwargs)
@@ -302,6 +318,10 @@ def synthesize_one_with_cache(
                 attempts,
                 exc,
             )
+            msg = str(exc)
+            if "PIPELINE_LANG_MIX" in msg or "russian_in_uk" in msg:
+                result["error"] = msg
+                return result
             if attempt < attempts - 1:
                 # Back off harder on rate-limit.
                 delay = 1.5 * (attempt + 1)
@@ -401,22 +421,38 @@ def synthesize_segments_parallel(
                 pass
 
     # A) Warmup — first N sequential (Microsoft connection settle).
+    # pyVideoTrans / VideoLingo: lock backend+voice after the first success.
     warm_items = normalized[:warm_n]
     pool_items = normalized[warm_n:]
+    _locked_voice = ""
+    _locked_engine = ""
     for it in warm_items:
-        one = synthesize_one_with_cache(
-            index=it["index"],
-            text=it["text"],
-            voice=it["voice"],
-            out_path=it["out_path"],
-            rate=it["rate"],
-            pitch=it["pitch"],
-            engine_id=it["engine_id"],
-            cache_dir=cdir,
-            retries=retries,
-            skip_existing=skip_existing,
-            use_cache=use_cache,
-        )
+        if _locked_voice:
+            it["voice"] = _locked_voice
+            it["engine_id"] = _locked_engine or it["engine_id"]
+        try:
+            one = synthesize_one_with_cache(
+                index=it["index"],
+                text=it["text"],
+                voice=it["voice"],
+                out_path=it["out_path"],
+                rate=it["rate"],
+                pitch=it["pitch"],
+                engine_id=it["engine_id"],
+                cache_dir=cdir,
+                retries=retries,
+                skip_existing=skip_existing,
+                use_cache=use_cache,
+            )
+        except Exception as exc:
+            one = {
+                "index": it["index"],
+                "path": it["out_path"],
+                "cache_hit": False,
+                "skipped_existing": False,
+                "error": str(exc),
+                "retries": retries,
+            }
         if _is_rate_limit_error(
             Exception(one["error"]) if one.get("error") else None
         ):
@@ -427,6 +463,24 @@ def synthesize_segments_parallel(
                 "tts_parallel: rate-limit during warmup → concurrency=%d", workers
             )
         _finish(one)
+        if not one.get("error") and not _locked_voice:
+            _locked_voice = str(it.get("voice") or "")
+            _locked_engine = str(it.get("engine_id") or "")
+            if _locked_voice:
+                try:
+                    from engines.oss_production import lock_voice_after_first_success
+
+                    lock_voice_after_first_success(
+                        pool_items,
+                        voice=_locked_voice,
+                        engine_id=_locked_engine,
+                    )
+                    stats["oss_locked_voice"] = _locked_voice
+                    stats["oss_locked_engine"] = _locked_engine
+                except Exception:
+                    for rest in pool_items:
+                        rest["voice"] = _locked_voice
+                        rest["engine_id"] = _locked_engine or rest.get("engine_id")
 
     # B) Remaining via ThreadPoolExecutor.
     if pool_items:

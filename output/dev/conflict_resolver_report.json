@@ -19,9 +19,9 @@
     "overlaps_resolved": 1
   },
   "profile": {
-    "total_ms": 0.212,
-    "avg_segment_ms": 0.189,
-    "max_segment_ms": 0.189,
+    "total_ms": 0.097,
+    "avg_segment_ms": 0.086,
+    "max_segment_ms": 0.086,
     "segment_count": 2
   },
   "segments": [
@@ -30,14 +30,14 @@
       "original_start_ms": 0,
       "place_start_ms": 0,
       "duration_ms": 880,
-      "atempo": 0.85,
+      "atempo": 0.92,
       "status": "reflow",
       "strategy": "local_reflow",
       "decision_path": [
-        "conflict:overlap=80ms with idx=1",
+        "conflict:overlap=44ms with idx=1",
         "free_window:skip(no_gap)",
         "local_shift:fail",
-        "local_reflow:save=120ms"
+        "local_reflow:save=84ms"
       ],
       "lip_delta_ms": 0
     },
@@ -60,15 +60,15 @@
       "strategy": "local_reflow",
       "place_start_ms": 0,
       "duration_ms": 880,
-      "atempo": 0.85,
+      "atempo": 0.92,
       "decision_path": [
-        "conflict:overlap=80ms with idx=1",
+        "conflict:overlap=44ms with idx=1",
         "free_window:skip(no_gap)",
         "local_shift:fail",
-        "local_reflow:save=120ms"
+        "local_reflow:save=84ms"
       ],
-      "resolve_ms": 0.155
+      "resolve_ms": 0.07
     }
   ],
-  "task_id": "t24"
+  "task_id": "tsoft"
 }

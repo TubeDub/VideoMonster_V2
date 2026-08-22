@@ -1,0 +1,406 @@
+{
+  "task_id": "955dd5ecdfe440648f4d90977a0051ab",
+  "stage": "PRE_TTS",
+  "created_at": "2026-08-18T13:40:05.752860+00:00",
+  "segments": [
+    {
+      "index": 0,
+      "segment_id": "0e93c7897a3e41709f44d16022bd12fa",
+      "tree": [
+        "Translation",
+        "Naturalizer",
+        "Meaning Fit",
+        "Language Validator",
+        "Confidence=0.7129",
+        "Category=low_confidence",
+        "Decision=fail",
+        "Recovery",
+        "Final=low_confidence"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 66,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.2871,
+            "ru": 0.7129,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.7129,
+          "target_confidence": 0.2871,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.7129
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.71)\nTarget confidence: 0.29\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "reasons": [
+        "низкая уверенность классификатора"
+      ]
+    },
+    {
+      "index": 9,
+      "segment_id": "db07cd755c734203b917ecc1c677143f",
+      "tree": [
+        "Translation",
+        "Naturalizer",
+        "Meaning Fit",
+        "Language Validator",
+        "Confidence=0.6289",
+        "Category=low_confidence",
+        "Decision=fail",
+        "Recovery",
+        "Final=low_confidence"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 31,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Да ладно. чтобы накормить себя?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3711,
+            "ru": 0.6289,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6289,
+          "target_confidence": 0.3711,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6289
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.63)\nTarget confidence: 0.37\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Да ладно. чтобы накормить себя?",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "reasons": [
+        "низкая уверенность классификатора"
+      ]
+    },
+    {
+      "index": 16,
+      "segment_id": "0c20dd6b3bee47cea9255148c64b63bf",
+      "tree": [
+        "Translation",
+        "Naturalizer",
+        "Meaning Fit",
+        "Language Validator",
+        "Confidence=0.575",
+        "Category=low_confidence",
+        "Decision=fail",
+        "Recovery",
+        "Final=low_confidence"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 67,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.425,
+            "ru": 0.575,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.575,
+          "target_confidence": 0.425,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.5668
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.57)\nTarget confidence: 0.42\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "reasons": [
+        "низкая уверенность классификатора"
+      ]
+    },
+    {
+      "index": 19,
+      "segment_id": "deeca43fa52b4c1da7edf7d436d1881d",
+      "tree": [
+        "Translation",
+        "Naturalizer",
+        "Meaning Fit",
+        "Language Validator",
+        "Confidence=0.6461",
+        "Category=low_confidence",
+        "Decision=fail",
+        "Recovery",
+        "Final=low_confidence"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 57,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Честно говоря, это много. как будто я потеряла свою маму."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3539,
+            "ru": 0.6461,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6461,
+          "target_confidence": 0.3539,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6461
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.65)\nTarget confidence: 0.35\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Честно говоря, это много. как будто я потеряла свою маму.",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "reasons": [
+        "низкая уверенность классификатора"
+      ]
+    },
+    {
+      "index": 24,
+      "segment_id": "db9e9789a50e490587651e8af487355a",
+      "tree": [
+        "Translation",
+        "Naturalizer",
+        "Meaning Fit",
+        "Language Validator",
+        "Confidence=0.7584",
+        "Category=low_confidence",
+        "Decision=fail",
+        "Recovery",
+        "Final=low_confidence"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 43,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "И мне жаль это слышать, как долго ты здесь?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.2416,
+            "ru": 0.7584,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.7584,
+          "target_confidence": 0.2416,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.7584
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.76)\nTarget confidence: 0.24\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: И мне жаль это слышать, как долго ты здесь?",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "reasons": [
+        "низкая уверенность классификатора"
+      ]
+    },
+    {
+      "index": 25,
+      "segment_id": "e9c85349ea534cd3847e6c85450fe88c",
+      "tree": [
+        "Translation",
+        "Naturalizer",
+        "Meaning Fit",
+        "Language Validator",
+        "Confidence=0.6112",
+        "Category=low_confidence",
+        "Decision=fail",
+        "Recovery",
+        "Final=low_confidence"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 45,
+          "stage": "PRE_TTS"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Може рік. Заткнись. Ты уже целый год делаешь?"
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3888,
+            "ru": 0.6112,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6112,
+          "target_confidence": 0.3888,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6184
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.61)\nTarget confidence: 0.39\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: PRE_TTS\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Може рік. Заткнись. Ты уже целый год делаешь?",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "reasons": [
+        "низкая уверенность классификатора"
+      ]
+    }
+  ],
+  "extra": {}
+}

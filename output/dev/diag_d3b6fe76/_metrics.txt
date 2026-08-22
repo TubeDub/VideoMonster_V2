@@ -1,0 +1,494 @@
+AFTER segs 51 BEFORE segs 51
+
+source-like keys [('source_segment_uuid', 51), ('spoken_text_source', 51), ('original_duration_ms', 51)]
+
+=== AUDIO ===
+audio_exists True/False 51 0
+exists True/False 0 0
+padded_count (audio_padded) 0
+empty path 0 ghost_g0000 0
+
+=== TTS ===
+backends [('edge-offline', 51)]
+voices [('uk-UA-OstapNeural', 51)]
+duration_control [('length_scale', 23), ('atempo', 16), ('text_expand', 9), ('none', 3)]
+atempo min/max/unique 0.92 1.08 [0.92, 1.0, 1.08]
+length_scale min/max/unique 0.92 1.08 [0.92, 0.9206, 0.9247583018074821, 0.9249, 0.9279, 0.9282, 0.9404, 0.95, 0.9660362009355298, 1.0, 1.08]
+playback_rate min/max/unique 1.0063333333333333 1.12 [1.0063333333333333, 1.0145454545454546, 1.019090909090909, 1.0222727272727272, 1.0259090909090909, 1.028, 1.05, 1.12]
+final_status [('ok', 22), ('overflow_unresolved', 16), ('stage19d_partial', 5), ('overflow', 3), ('stage19e_partial', 2), ('dead_air_risk', 2), ('stage23_partial', 1)]
+czechish 0
+uk_spec segs 49 ru_spec segs 14
+
+=== PATH SAMPLES ===
+{'i': 0, 'file': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_34b73a49c954_20260818_155517_ffbde7f6.mp3', 'resolved': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_34b73a49c954_20260818_155517_ffbde7f6.mp3', 'fitted': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_34b73a49c954_20260818_155945_f666cddf.wav', 'tts_file': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_34b73a49c954_20260818_155517_ffbde7f6.mp3'}
+{'i': 1, 'file': 'output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_585878aca531_20260818_155518_6c21e8bc.wav', 'resolved': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_585878aca531_20260818_155105_87c1826a.mp3', 'fitted': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_585878aca531_20260818_155946_de6665ff.wav', 'tts_file': 'output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_585878aca531_20260818_155518_6c21e8bc.wav'}
+{'i': 2, 'file': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_3516e350e4e7_20260818_155546_d8ad0fc3.mp3', 'resolved': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_3516e350e4e7_20260818_155546_d8ad0fc3.mp3', 'fitted': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_3516e350e4e7_20260818_155946_8050dd01.wav', 'tts_file': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_3516e350e4e7_20260818_155546_d8ad0fc3.mp3'}
+{'i': 48, 'file': 'output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_2a34ee95cf5e_20260818_155020_850fb335_fitted.wav', 'resolved': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_2a34ee95cf5e_20260818_155020_850fb335.mp3', 'fitted': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_2a34ee95cf5e_20260818_155958_554dfd9c.wav', 'tts_file': 'output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_2a34ee95cf5e_20260818_155020_850fb335_fitted.wav'}
+{'i': 49, 'file': 'output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_f51eac6d95ee_20260818_155942_aecb61f6.wav', 'resolved': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_f51eac6d95ee_20260818_155454_b267045f.mp3', 'fitted': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_f51eac6d95ee_20260818_155958_657041c7.wav', 'tts_file': 'output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_f51eac6d95ee_20260818_155942_aecb61f6.wav'}
+{'i': 50, 'file': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_637540afc67f_20260818_155501_b33c413e.mp3', 'resolved': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_637540afc67f_20260818_155501_b33c413e.mp3', 'fitted': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_637540afc67f_20260818_155958_e3aa13cd.wav', 'tts_file': '<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_637540afc67f_20260818_155501_b33c413e.mp3'}
+
+=== LAST 6 ===
+---
+idx 45
+SRC 
+DST Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.
+PATH d_loop\d3b6fe7611f243868878c07ec6bf5df7\tts_regen_d3b6fe76_cc8ed54f6d07_20260818_155939_84c72d78.mp3
+---
+idx 46
+SRC 
+DST Який був останній раз, коли ти спав у ліжку, саме тоді.
+PATH d_loop\d3b6fe7611f243868878c07ec6bf5df7\tts_regen_d3b6fe76_587e02295d14_20260818_155438_954ca58e.mp3
+---
+idx 47
+SRC 
+DST і саме в цей момент, саме тоді.
+PATH d_loop\d3b6fe7611f243868878c07ec6bf5df7\tts_regen_d3b6fe76_fc7a7b1dd5f0_20260818_155448_f9fdde5c.mp3
+---
+idx 48
+SRC 
+DST Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що.
+PATH d_loop\d3b6fe7611f243868878c07ec6bf5df7\tts_regen_d3b6fe76_2a34ee95cf5e_20260818_155020_850fb335.mp3
+---
+idx 49
+SRC 
+DST Я не великий зелений, саме тоді.
+PATH d_loop\d3b6fe7611f243868878c07ec6bf5df7\tts_regen_d3b6fe76_f51eac6d95ee_20260818_155454_b267045f.mp3
+---
+idx 50
+SRC 
+DST і саме в цей момент, саме тоді.
+PATH d_loop\d3b6fe7611f243868878c07ec6bf5df7\tts_regen_d3b6fe76_637540afc67f_20260818_155501_b33c413e.mp3
+
+=== RU-LIKE TEXTS ===
+[0] Эй, мужик, ты отлично справляешься. Ось долар, саме тоді.
+[5] Ти не проти? Я заберу все, что у тебя есть.
+[7] Я тебе дістану. Хорошо? тебе дістану.
+[8] Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.
+[9] Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.
+[10] Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.
+[11] Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.
+[15] Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?
+[16] Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?
+[18] Да ладно. чтобы накормить себя, саме тоді, і саме в цей момент.
+[21] У мене немає грошей. Да. мене немає.
+[26] Да, и смотри Джонатана, верно? смотри Джонатана, саме тоді, і саме в цей момент.
+[27] Да. Джонатан, ты кажется умным.
+[29] Я даже не люблю об этом говорить, потому что я молод. Мені лише 25, саме тоді.
+[30] Я вырос с. У них є сім'ї і все таке, і я бездомний, саме тоді, і саме в цей момент.
+[33] Честно говоря, это много, саме тоді.
+[34] как будто я потеряла свою маму. Честно говоря, саме тоді.
+[35] Мне жаль, саме тоді, в той момент.
+[42] И мне жаль это слышать, как долго ты здесь, саме тоді, і саме в цей момент.
+[43] Може рік. Заткнись. Ты уже целый год делаешь, саме тоді, і саме в цей момент.
+[44] Добре, Джонатане, я тебе тут відпущу, але перед тим, як.
+[45] Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.
+
+=== ALL SEGMENTS ===
+i=0 idx=0 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Эй, мужик, ты отлично справляешься. Ось долар, саме тоді.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_34b73a49c954_20260818_155517_ffbde7f6.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_34b73a49c954_20260818_155517_ffbde7f6.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_34b73a49c954_20260818_155945_f666cddf.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_34b73a49c954_20260818_155517_ffbde7f6.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=1 idx=1 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=1.019090909090909 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Долар? Ти серйозно, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_585878aca531_20260818_155518_6c21e8bc.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_585878aca531_20260818_155105_87c1826a.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_585878aca531_20260818_155946_de6665ff.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_585878aca531_20260818_155518_6c21e8bc.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=2 idx=2 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Ти голодний, у мене є тарілка з їжею і я її не відчуваю, саме тоді, і саме в цей момент.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_3516e350e4e7_20260818_155546_d8ad0fc3.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_3516e350e4e7_20260818_155546_d8ad0fc3.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_3516e350e4e7_20260818_155946_8050dd01.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_3516e350e4e7_20260818_155546_d8ad0fc3.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=3 idx=3 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=1.08 ls=1.08 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='і саме в цей момент, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_b0f7d36c1014_20260818_155554_371d16db_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_b0f7d36c1014_20260818_155554_371d16db.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_b0f7d36c1014_20260818_155946_48460212.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_b0f7d36c1014_20260818_155554_371d16db_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=4 idx=4 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.05 backend=edge-offline voice=uk-UA-OstapNeural
+  text='І я не хочу викидати його геть, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_7f7718f4cd47_20260818_155603_35124a1c_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_7f7718f4cd47_20260818_155603_35124a1c.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_7f7718f4cd47_20260818_155947_6265113e.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_7f7718f4cd47_20260818_155603_35124a1c_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=5 idx=5 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Ти не проти? Я заберу все, что у тебя есть.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_ae8df4a4e004_20260818_155605_e5791540.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_ae8df4a4e004_20260818_155133_c9de3d72.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_ae8df4a4e004_20260818_155947_72ad12b4.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_ae8df4a4e004_20260818_155605_e5791540.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=6 idx=6 audio_exists=True padded=None status=generated dur_ctrl=none atempo=1.0 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Гей, чувак швидко застрибує.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_96dbc25a9539_20260818_155605_8726deeb.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_96dbc25a9539_20260818_155139_5b84416e.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_96dbc25a9539_20260818_155947_e2b5d3c2.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_96dbc25a9539_20260818_155605_8726deeb.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=7 idx=7 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Я тебе дістану. Хорошо? тебе дістану.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_91942ce61412_20260818_155613_47e6c37a.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_91942ce61412_20260818_155613_47e6c37a.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_91942ce61412_20260818_155947_d283b7a1.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_91942ce61412_20260818_155613_47e6c37a.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=8 idx=8 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_dca2e0d3f8db_20260818_155628_52710b66_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_dca2e0d3f8db_20260818_155628_52710b66.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_dca2e0d3f8db_20260818_155948_52414ca2.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_dca2e0d3f8db_20260818_155628_52710b66_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=9 idx=9 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_e4d665ed3eda_20260818_155644_3502b0c7_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_e4d665ed3eda_20260818_155644_3502b0c7.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_e4d665ed3eda_20260818_155948_40ab04b7.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_e4d665ed3eda_20260818_155644_3502b0c7_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=10 idx=10 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_a59ba5c50a2b_20260818_155703_bf822ed7_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_a59ba5c50a2b_20260818_155703_bf822ed7.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_a59ba5c50a2b_20260818_155948_395aca67.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_a59ba5c50a2b_20260818_155703_bf822ed7_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=11 idx=11 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_56b38be3d101_20260818_155717_85c851f0_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_56b38be3d101_20260818_155717_85c851f0.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_56b38be3d101_20260818_155949_3e5326c9.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_56b38be3d101_20260818_155717_85c851f0_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=12 idx=12 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.95 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage23_atempo_slow\\tts_regen_d3b6fe76_5b1598b4160f_20260818_153807_74238e49_fitted_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_5b1598b4160f_20260818_153807_74238e49.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_5b1598b4160f_20260818_155949_bd6b3c12.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage23_atempo_slow\\tts_regen_d3b6fe76_5b1598b4160f_20260818_153807_74238e49_fitted_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=13 idx=13 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='то зачекай, як ти маєш на увазі, саме тоді.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_e2e57d4bfc43_20260818_155727_85c0fa2c.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_e2e57d4bfc43_20260818_155727_85c0fa2c.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_e2e57d4bfc43_20260818_155949_29fa4d1d.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_e2e57d4bfc43_20260818_155727_85c0fa2c.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=14 idx=14 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Я хочу віддати це тобі. хочу віддати.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_51dd2c7caad6_20260818_155728_2643d3fa.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_51dd2c7caad6_20260818_155159_fbb0373c.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_51dd2c7caad6_20260818_155949_a72a7730.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_51dd2c7caad6_20260818_155728_2643d3fa.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=15 idx=15 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_b8daf960256d_20260818_155742_e4ed1ab4_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_b8daf960256d_20260818_155742_e4ed1ab4.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_b8daf960256d_20260818_155950_6ede4b52.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_b8daf960256d_20260818_155742_e4ed1ab4_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=16 idx=16 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_975dbc9cf035_20260818_155757_27d3dfaf_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_975dbc9cf035_20260818_155757_27d3dfaf.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_975dbc9cf035_20260818_155950_8ce7182b.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_975dbc9cf035_20260818_155757_27d3dfaf_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=17 idx=17 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=1.0 ls=0.9404 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Чесно кажучи, я просто прокопаю смітник. Чесно кажучи, саме тоді, і саме в цей момент.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_e3a1b3858a5a_20260818_154023_2db1f628_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_e3a1b3858a5a_20260818_154023_2db1f628.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_e3a1b3858a5a_20260818_155950_33d3b451.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_e3a1b3858a5a_20260818_154023_2db1f628_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=18 idx=18 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Да ладно. чтобы накормить себя, саме тоді, і саме в цей момент.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_fe5f42bc4c72_20260818_155759_f3df13c7.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_fe5f42bc4c72_20260818_154034_86dbdce1.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_fe5f42bc4c72_20260818_155950_38fd9484.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_fe5f42bc4c72_20260818_155759_f3df13c7.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=19 idx=19 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.95 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Так, це нормально тут, саме тоді, і саме в цей момент.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage23_atempo_slow\\tts_regen_d3b6fe76_44215c7c925f_20260818_154045_56fad6bf_fitted_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_44215c7c925f_20260818_154045_56fad6bf.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_44215c7c925f_20260818_155950_a687e016.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage23_atempo_slow\\tts_regen_d3b6fe76_44215c7c925f_20260818_154045_56fad6bf_fitted_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=20 idx=20 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.9247583018074821 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='У мене немає іншого вибору, саме тоді.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_b86941e220f2_20260818_155806_73f8301a.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_b86941e220f2_20260818_155806_73f8301a.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_b86941e220f2_20260818_155951_7a6aa956.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_b86941e220f2_20260818_155806_73f8301a.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=21 idx=21 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='У мене немає грошей. Да. мене немає.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_9e7e29de9e69_20260818_155814_550fd25e.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_9e7e29de9e69_20260818_155814_550fd25e.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_9e7e29de9e69_20260818_155952_11f19962.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_9e7e29de9e69_20260818_155814_550fd25e.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=22 idx=22 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.0222727272727272 backend=edge-offline voice=uk-UA-OstapNeural
+  text='зараз ви чистите вікна, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_b16fe8c826a7_20260818_155815_f65c522e.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_b16fe8c826a7_20260818_155217_b4c64bde.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_b16fe8c826a7_20260818_155952_f51ce6e3.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_b16fe8c826a7_20260818_155815_f65c522e.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=23 idx=23 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.9282 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='і яке середнє значення хтось дає вам для виконання цієї роботи, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_fd03ded920bb_20260818_155815_5527e804.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_fd03ded920bb_20260818_155227_ef176f4f.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_fd03ded920bb_20260818_155952_8166b4a8.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_fd03ded920bb_20260818_155815_5527e804.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=24 idx=24 audio_exists=True padded=None status=generated dur_ctrl=none atempo=1.0 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Іноді я роблю це за 10 центів.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_55004e543802_20260818_155816_fd226a65.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_55004e543802_20260818_155232_a00a2227.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_55004e543802_20260818_155952_142e3694.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_55004e543802_20260818_155816_fd226a65.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=25 idx=25 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Просто будь-який хлопець, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_b493e3e34c3b_20260818_155816_f9ce4862.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_b493e3e34c3b_20260818_155243_0c669c9c.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_b493e3e34c3b_20260818_155952_48844a42.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_b493e3e34c3b_20260818_155816_f9ce4862.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=26 idx=26 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Да, и смотри Джонатана, верно? смотри Джонатана, саме тоді, і саме в цей момент.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_8887d46c1fd7_20260818_154303_04b94a17.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_8887d46c1fd7_20260818_154303_04b94a17.wav'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_8887d46c1fd7_20260818_155952_bd46f01f.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_8887d46c1fd7_20260818_154303_04b94a17.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=27 idx=27 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Да. Джонатан, ты кажется умным.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_3c61a6355b84_20260818_155817_182b344a.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_3c61a6355b84_20260818_155249_adb404c0.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_3c61a6355b84_20260818_155952_32899805.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_3c61a6355b84_20260818_155817_182b344a.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=28 idx=28 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_dc79c6d9da44_20260818_155817_193fceed.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_dc79c6d9da44_20260818_155258_d3214173.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_dc79c6d9da44_20260818_155952_330c1276.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_dc79c6d9da44_20260818_155817_193fceed.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=29 idx=29 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=0.92 ls=1.08 rate=1.028 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Я даже не люблю об этом говорить, потому что я молод. Мені лише 25, саме тоді.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_82e419ce3f57_20260818_155833_b5abeb7e.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_82e419ce3f57_20260818_155833_b5abeb7e.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_82e419ce3f57_20260818_155953_bced8bb6.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_82e419ce3f57_20260818_155833_b5abeb7e.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=30 idx=30 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=1.0063333333333333 backend=edge-offline voice=uk-UA-OstapNeural
+  text="Я вырос с. У них є сім'ї і все таке, і я бездомний, саме тоді, і саме в цей момент."
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_6b3e218f2ccc_20260818_155833_13c4b0d1.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_6b3e218f2ccc_20260818_154426_64104a5b.wav'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_6b3e218f2ccc_20260818_155954_ea94ab60.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_6b3e218f2ccc_20260818_155833_13c4b0d1.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=31 idx=31 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.9660362009355298 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Так. чи це було щось на кшталт поганих рішень у житті, саме тоді. було щось.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_f82bf0e9f403_20260818_155848_f285eb45.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_f82bf0e9f403_20260818_155848_f285eb45.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_f82bf0e9f403_20260818_155955_d066fb2a.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_f82bf0e9f403_20260818_155848_f285eb45.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=32 idx=32 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='і саме в цей момент, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_39940ae4b504_20260818_155849_abf6e9bc.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_39940ae4b504_20260818_155323_8ceeadc9.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_39940ae4b504_20260818_155955_33773547.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_39940ae4b504_20260818_155849_abf6e9bc.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=33 idx=33 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.0145454545454546 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Честно говоря, это много, саме тоді.'
+  file='tts_9e696581_711362aa8657_20260818_160007_99eb1aa9.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_711362aa8657_20260818_155332_8b74ece9.mp3'
+  fitted=None
+  tts_file='tts_9e696581_711362aa8657_20260818_160007_99eb1aa9.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=34 idx=34 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='как будто я потеряла свою маму. Честно говоря, саме тоді.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_4040297cde8e_20260818_155859_018632b7.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_4040297cde8e_20260818_155859_018632b7.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_4040297cde8e_20260818_155956_8eb90919.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_4040297cde8e_20260818_155859_018632b7.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=35 idx=35 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=1.0 ls=1.0 rate=1.0259090909090909 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Мне жаль, саме тоді, в той момент.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_4f5419ca90a2_20260818_155900_65b4d0b3.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_4f5419ca90a2_20260818_155349_aeac5b6e.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_4f5419ca90a2_20260818_155956_6a985730.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_4f5419ca90a2_20260818_155900_65b4d0b3.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=36 idx=36 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='і саме в цей момент, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_13455a0b75b7_20260818_155901_aa836606.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_13455a0b75b7_20260818_155355_7e937280.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_13455a0b75b7_20260818_155956_a2102c15.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_13455a0b75b7_20260818_155901_aa836606.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=37 idx=37 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.9206 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Я втратила роботу. Я не міг собі дозволити заплатити все.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_c41cdb6967a2_20260818_155901_3c51682d.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_c41cdb6967a2_20260818_155404_c982ff52.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_c41cdb6967a2_20260818_155956_25af6aae.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_c41cdb6967a2_20260818_155901_3c51682d.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=38 idx=38 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.9279 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_35a376c65d39_20260818_155902_ee9d99fb.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_35a376c65d39_20260818_155414_6eaf128c.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_35a376c65d39_20260818_155956_cc3aa101.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_35a376c65d39_20260818_155902_ee9d99fb.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=39 idx=39 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Я вже в незручному становищі, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_416013f47356_20260818_155902_a8698066.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_416013f47356_20260818_155421_033e932f.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_416013f47356_20260818_155956_6e189085.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_416013f47356_20260818_155902_a8698066.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=40 idx=40 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='а тепер я бездомний, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_cae92bd055b7_20260818_155903_e3de47c7.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_cae92bd055b7_20260818_155428_2451c07a.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_cae92bd055b7_20260818_155956_be025ecd.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_cae92bd055b7_20260818_155903_e3de47c7.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=41 idx=41 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=1.0 ls=0.9249 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='То як, ви знаєте, воно зростає, саме тоді, в той момент.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_071f8fa9768e_20260818_154804_7f47ec62_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_071f8fa9768e_20260818_154804_7f47ec62.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_071f8fa9768e_20260818_155956_72db91a6.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_071f8fa9768e_20260818_154804_7f47ec62_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=42 idx=42 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=0.92 ls=1.08 rate=1.05 backend=edge-offline voice=uk-UA-OstapNeural
+  text='И мне жаль это слышать, как долго ты здесь, саме тоді, і саме в цей момент.'
+  file='tts_49046d84_19d04c124f3c_20260818_160007_1468c025.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_19d04c124f3c_20260818_155916_6bcfbae0.mp3'
+  fitted=None
+  tts_file='tts_49046d84_19d04c124f3c_20260818_160007_1468c025.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=43 idx=43 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.95 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Може рік. Заткнись. Ты уже целый год делаешь, саме тоді, і саме в цей момент.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_6f257753a29d_20260818_154903_704bf633_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_6f257753a29d_20260818_154903_704bf633.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_6f257753a29d_20260818_155957_de83127e.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_6f257753a29d_20260818_154903_704bf633_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=44 idx=44 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Добре, Джонатане, я тебе тут відпущу, але перед тим, як.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_fabc12b68096_20260818_155926_53418b75.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_fabc12b68096_20260818_155926_53418b75.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_fabc12b68096_20260818_155957_18ae06c1.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_fabc12b68096_20260818_155926_53418b75.mp3'
+  fallback='tts_uk_failed'
+  orig=''
+i=45 idx=45 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=0.92 ls=0.92 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_cc8ed54f6d07_20260818_155939_84c72d78_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_cc8ed54f6d07_20260818_155939_84c72d78.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_cc8ed54f6d07_20260818_155958_365e4435.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_cc8ed54f6d07_20260818_155939_84c72d78_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=46 idx=46 audio_exists=True padded=None status=generated dur_ctrl=none atempo=1.0 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Який був останній раз, коли ти спав у ліжку, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_587e02295d14_20260818_155941_cb9e4174.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_587e02295d14_20260818_155438_954ca58e.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_587e02295d14_20260818_155958_19c2a955.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_587e02295d14_20260818_155941_cb9e4174.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=47 idx=47 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='і саме в цей момент, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_fc7a7b1dd5f0_20260818_155942_05ffcd9b.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_fc7a7b1dd5f0_20260818_155448_f9fdde5c.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_fc7a7b1dd5f0_20260818_155958_833688ea.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_fc7a7b1dd5f0_20260818_155942_05ffcd9b.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=48 idx=48 audio_exists=True padded=None status=generated dur_ctrl=atempo atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_2a34ee95cf5e_20260818_155020_850fb335_fitted.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_2a34ee95cf5e_20260818_155020_850fb335.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_2a34ee95cf5e_20260818_155958_554dfd9c.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\stage19b_atempo\\tts_regen_d3b6fe76_2a34ee95cf5e_20260818_155020_850fb335_fitted.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=49 idx=49 audio_exists=True padded=None status=generated dur_ctrl=length_scale atempo=1.0 ls=0.92 rate=None backend=edge-offline voice=uk-UA-OstapNeural
+  text='Я не великий зелений, саме тоді.'
+  file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_f51eac6d95ee_20260818_155942_aecb61f6.wav'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_f51eac6d95ee_20260818_155454_b267045f.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_f51eac6d95ee_20260818_155958_657041c7.wav'
+  tts_file='output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\pause\\pause_run_f51eac6d95ee_20260818_155942_aecb61f6.wav'
+  fallback='tts_uk_failed'
+  orig=''
+i=50 idx=50 audio_exists=True padded=None status=generated dur_ctrl=text_expand atempo=0.92 ls=1.0 rate=1.12 backend=edge-offline voice=uk-UA-OstapNeural
+  text='і саме в цей момент, саме тоді.'
+  file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_637540afc67f_20260818_155501_b33c413e.mp3'
+  resolved='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_637540afc67f_20260818_155501_b33c413e.mp3'
+  fitted='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\slot_fit_d3b6fe76_637540afc67f_20260818_155958_e3aa13cd.wav'
+  tts_file='<USER>\\Desktop\\VideoMonster_V2\\output\\sessions\\d3b6fe7611f243868878c07ec6bf5df7\\closed_loop\\d3b6fe7611f243868878c07ec6bf5df7\\tts_regen_d3b6fe76_637540afc67f_20260818_155501_b33c413e.mp3'
+  fallback='tts_uk_failed'
+  orig=''

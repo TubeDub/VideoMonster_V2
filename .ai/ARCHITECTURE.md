@@ -1,6 +1,6 @@
 # VideoMonster V2 Architecture
 
-*Auto-generated: 2026-08-13 22:07*
+*Auto-generated: 2026-08-21 19:25*
 
 ## Platform Layers (Stages 1–10)
 

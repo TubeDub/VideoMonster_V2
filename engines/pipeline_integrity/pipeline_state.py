@@ -181,6 +181,64 @@ def get_pipeline_state(container: dict[str, Any] | None) -> PipelineState:
     return parsed if parsed is not None else PipelineState.NEW
 
 
+def speech_completed(container: dict[str, Any] | None) -> bool:
+    """True after TTS produced speech (SPEECH_READY and later)."""
+    state = get_pipeline_state(container)
+    idx = _ORDER_INDEX.get(state)
+    if idx is None:
+        return False
+    return idx >= _ORDER_INDEX[PipelineState.SPEECH_READY]
+
+
+def assert_text_change_uses_revision(
+    container: dict[str, Any] | None,
+    seg: dict[str, Any],
+    new_text: str,
+    *,
+    old_revision: str = "",
+) -> None:
+    """TTS_DONE (SPEECH_READY+) cannot change text without a new revision UUID."""
+    if not speech_completed(container):
+        return
+    if not isinstance(seg, dict):
+        return
+    new = " ".join(str(new_text or "").split()).strip()
+    old = " ".join(
+        str(
+            seg.get("plain_text")
+            or seg.get("final_text")
+            or seg.get("text")
+            or ""
+        ).split()
+    ).strip()
+    if not new or new == old:
+        return
+    rev = str(
+        seg.get("adaptation_uuid")
+        or seg.get("translation_uuid")
+        or seg.get("text_revision_uuid")
+        or ""
+    ).strip()
+    prior = str(old_revision or "").strip()
+    if prior and rev == prior:
+        raise PipelineStateError(
+            "illegal text change after SPEECH_READY without new revision",
+            from_state=get_pipeline_state(container).value,
+            to_state=get_pipeline_state(container).value,
+            details={
+                "segment_id": str(seg.get("segment_id") or ""),
+                "revision_id": rev,
+            },
+        )
+    if not rev:
+        raise PipelineStateError(
+            "illegal text change after SPEECH_READY without revision uuid",
+            from_state=get_pipeline_state(container).value,
+            to_state=get_pipeline_state(container).value,
+            details={"segment_id": str(seg.get("segment_id") or "")},
+        )
+
+
 def advance_pipeline_state(
     container: dict[str, Any],
     to_state: PipelineState | str,

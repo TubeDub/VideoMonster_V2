@@ -1,0 +1,4474 @@
+[
+  {
+    "index": 0,
+    "text": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+    "plain_text": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+    "translation_text": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "final_text": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "file": null,
+    "approved_text": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "original": "Hey man you're doing a good job. Hey, here's a dollar. A dollar? Are you serious man?",
+    "source_word_map": {
+      "segment_index": 0,
+      "segment_start_ms": 4880,
+      "segment_end_ms": 9880,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Hey",
+          "start_ms": 4880,
+          "end_ms": 5043,
+          "confidence": 0.5
+        },
+        {
+          "text": "man",
+          "start_ms": 5043,
+          "end_ms": 5206,
+          "confidence": 0.5
+        },
+        {
+          "text": "you're",
+          "start_ms": 5206,
+          "end_ms": 5533,
+          "confidence": 0.5
+        },
+        {
+          "text": "doing",
+          "start_ms": 5533,
+          "end_ms": 5805,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 5805,
+          "end_ms": 5859,
+          "confidence": 0.5
+        },
+        {
+          "text": "good",
+          "start_ms": 5859,
+          "end_ms": 6077,
+          "confidence": 0.5
+        },
+        {
+          "text": "job.",
+          "start_ms": 6077,
+          "end_ms": 6295,
+          "confidence": 0.5
+        },
+        {
+          "text": "Hey,",
+          "start_ms": 6295,
+          "end_ms": 6513,
+          "confidence": 0.5
+        },
+        {
+          "text": "here's",
+          "start_ms": 6513,
+          "end_ms": 6840,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 6840,
+          "end_ms": 6894,
+          "confidence": 0.5
+        },
+        {
+          "text": "dollar.",
+          "start_ms": 6894,
+          "end_ms": 7280,
+          "confidence": 0.5
+        },
+        {
+          "text": "A",
+          "start_ms": 7280,
+          "end_ms": 7384,
+          "confidence": 0.5
+        },
+        {
+          "text": "dollar?",
+          "start_ms": 7384,
+          "end_ms": 8112,
+          "confidence": 0.5
+        },
+        {
+          "text": "Are",
+          "start_ms": 8112,
+          "end_ms": 8424,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 8424,
+          "end_ms": 8736,
+          "confidence": 0.5
+        },
+        {
+          "text": "serious",
+          "start_ms": 8736,
+          "end_ms": 9464,
+          "confidence": 0.5
+        },
+        {
+          "text": "man?",
+          "start_ms": 9464,
+          "end_ms": 9880,
+          "confidence": 0.5
+        },
+        {
+          "text": "Hey",
+          "start_ms": 9880,
+          "end_ms": 10097,
+          "confidence": 0.5
+        },
+        {
+          "text": "real",
+          "start_ms": 10097,
+          "end_ms": 10386,
+          "confidence": 0.5
+        },
+        {
+          "text": "quick",
+          "start_ms": 10386,
+          "end_ms": 10748,
+          "confidence": 0.5
+        },
+        {
+          "text": "man",
+          "start_ms": 10748,
+          "end_ms": 10965,
+          "confidence": 0.5
+        },
+        {
+          "text": "are",
+          "start_ms": 10965,
+          "end_ms": 11182,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 11182,
+          "end_ms": 11399,
+          "confidence": 0.5
+        },
+        {
+          "text": "hungry?",
+          "start_ms": 11399,
+          "end_ms": 11906,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 11906,
+          "end_ms": 11978,
+          "confidence": 0.5
+        },
+        {
+          "text": "got",
+          "start_ms": 11978,
+          "end_ms": 12195,
+          "confidence": 0.5
+        },
+        {
+          "text": "this",
+          "start_ms": 12195,
+          "end_ms": 12484,
+          "confidence": 0.5
+        },
+        {
+          "text": "plate",
+          "start_ms": 12484,
+          "end_ms": 12846,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 12846,
+          "end_ms": 12990,
+          "confidence": 0.5
+        },
+        {
+          "text": "food",
+          "start_ms": 12990,
+          "end_ms": 13279,
+          "confidence": 0.5
+        },
+        {
+          "text": "and",
+          "start_ms": 13279,
+          "end_ms": 13496,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 13496,
+          "end_ms": 13713,
+          "confidence": 0.5
+        },
+        {
+          "text": "not",
+          "start_ms": 13713,
+          "end_ms": 13930,
+          "confidence": 0.5
+        },
+        {
+          "text": "feeling",
+          "start_ms": 13930,
+          "end_ms": 14437,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 14437,
+          "end_ms": 14581,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 14581,
+          "end_ms": 14880,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "056149b21c874eab84aa5d0c7bd6d5b4",
+    "original_text": "Hey man you're doing a good job. Hey, here's a dollar. A dollar? Are you serious man?",
+    "tts_text": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+    "language_recovery": {
+      "healed": true,
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "from": "low_confidence"
+    },
+    "text_for_tts": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "final_tts_text": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+    "voice_input": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "semantic_text": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "semantic_engine_text": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "grammar_text": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "timing_text": "Эй, мужик, ты отлично справляешься. Ось долар. Долар? Ти серйозно?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+    "tts_text_hash": "9e9f16983c77",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 4880,
+    "end_ms": 9880,
+    "slot_ms": 5000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0,
+    "tts_status": "failed"
+  },
+  {
+    "index": 1,
+    "text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "plain_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "translation_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "final_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "file": null,
+    "approved_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "original": "Hey real quick man are you hungry? I got this plate of food and I'm not feeling it man.",
+    "source_word_map": {
+      "segment_index": 1,
+      "segment_start_ms": 9880,
+      "segment_end_ms": 14880,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "And",
+          "start_ms": 14880,
+          "end_ms": 14981,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 14981,
+          "end_ms": 15021,
+          "confidence": 0.5
+        },
+        {
+          "text": "don't",
+          "start_ms": 15021,
+          "end_ms": 15190,
+          "confidence": 0.5
+        },
+        {
+          "text": "want",
+          "start_ms": 15190,
+          "end_ms": 15325,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 15325,
+          "end_ms": 15392,
+          "confidence": 0.5
+        },
+        {
+          "text": "toss",
+          "start_ms": 15392,
+          "end_ms": 15527,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 15527,
+          "end_ms": 15594,
+          "confidence": 0.5
+        },
+        {
+          "text": "out.",
+          "start_ms": 15594,
+          "end_ms": 15729,
+          "confidence": 0.5
+        },
+        {
+          "text": "How's",
+          "start_ms": 15729,
+          "end_ms": 15898,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 15898,
+          "end_ms": 15999,
+          "confidence": 0.5
+        },
+        {
+          "text": "whole",
+          "start_ms": 15999,
+          "end_ms": 16168,
+          "confidence": 0.5
+        },
+        {
+          "text": "bunch",
+          "start_ms": 16168,
+          "end_ms": 16337,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 16337,
+          "end_ms": 16404,
+          "confidence": 0.5
+        },
+        {
+          "text": "greens?",
+          "start_ms": 16404,
+          "end_ms": 16640,
+          "confidence": 0.5
+        },
+        {
+          "text": "Are",
+          "start_ms": 16640,
+          "end_ms": 16741,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 16741,
+          "end_ms": 16842,
+          "confidence": 0.5
+        },
+        {
+          "text": "okay",
+          "start_ms": 16842,
+          "end_ms": 16977,
+          "confidence": 0.5
+        },
+        {
+          "text": "with",
+          "start_ms": 16977,
+          "end_ms": 17112,
+          "confidence": 0.5
+        },
+        {
+          "text": "that?",
+          "start_ms": 17112,
+          "end_ms": 17280,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "b74dc310ba0048fb9c22dde063bf4037",
+    "text_for_tts": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "tts_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "final_tts_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "voice_input": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "semantic_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "semantic_engine_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "grammar_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "timing_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Ти голодний, у мене є тарілка з їжею і я її не відчуваю.",
+    "tts_text_hash": "883320d0cbf7",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 9880,
+    "end_ms": 14880,
+    "slot_ms": 5000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 2,
+    "text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "plain_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "translation_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "final_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "file": null,
+    "approved_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "original": "And I don't want to toss it out. How's the whole bunch of greens? Are you okay with that? Yeah, yeah I'm so hungry. I'll take whatever you got.",
+    "source_word_map": {
+      "segment_index": 2,
+      "segment_start_ms": 14880,
+      "segment_end_ms": 19280,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Yeah,",
+          "start_ms": 17280,
+          "end_ms": 17507,
+          "confidence": 0.5
+        },
+        {
+          "text": "yeah",
+          "start_ms": 17507,
+          "end_ms": 17688,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 17688,
+          "end_ms": 17824,
+          "confidence": 0.5
+        },
+        {
+          "text": "so",
+          "start_ms": 17824,
+          "end_ms": 17914,
+          "confidence": 0.5
+        },
+        {
+          "text": "hungry.",
+          "start_ms": 17914,
+          "end_ms": 18232,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'll",
+          "start_ms": 18232,
+          "end_ms": 18413,
+          "confidence": 0.5
+        },
+        {
+          "text": "take",
+          "start_ms": 18413,
+          "end_ms": 18594,
+          "confidence": 0.5
+        },
+        {
+          "text": "whatever",
+          "start_ms": 18594,
+          "end_ms": 18957,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 18957,
+          "end_ms": 19093,
+          "confidence": 0.5
+        },
+        {
+          "text": "got.",
+          "start_ms": 19093,
+          "end_ms": 19280,
+          "confidence": 0.5
+        },
+        {
+          "text": "Hey",
+          "start_ms": 19280,
+          "end_ms": 19437,
+          "confidence": 0.5
+        },
+        {
+          "text": "dude",
+          "start_ms": 19437,
+          "end_ms": 19647,
+          "confidence": 0.5
+        },
+        {
+          "text": "hop",
+          "start_ms": 19647,
+          "end_ms": 19804,
+          "confidence": 0.5
+        },
+        {
+          "text": "in",
+          "start_ms": 19804,
+          "end_ms": 19909,
+          "confidence": 0.5
+        },
+        {
+          "text": "real",
+          "start_ms": 19909,
+          "end_ms": 20119,
+          "confidence": 0.5
+        },
+        {
+          "text": "quick.",
+          "start_ms": 20119,
+          "end_ms": 20434,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 20434,
+          "end_ms": 20486,
+          "confidence": 0.5
+        },
+        {
+          "text": "got",
+          "start_ms": 20486,
+          "end_ms": 20643,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 20643,
+          "end_ms": 20800,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 20800,
+          "end_ms": 21010,
+          "confidence": 0.5
+        },
+        {
+          "text": "Okay?",
+          "start_ms": 21010,
+          "end_ms": 21280,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "3bde1665aa4849d19a3dfa60538dcfa8",
+    "text_for_tts": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "tts_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "final_tts_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "voice_input": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "semantic_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "semantic_engine_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "grammar_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "timing_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, что у тебя есть.",
+    "tts_text_hash": "280d949419de",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 14880,
+    "end_ms": 19280,
+    "slot_ms": 4400,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 3,
+    "text": "Гей, чувак швидко застрибує. Я тебе дістану. Добре?",
+    "plain_text": "Гей, чувак швидко застрибує. Я тебе дістану. Добре?",
+    "translation_text": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "final_text": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "file": null,
+    "approved_text": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "original": "Hey dude hop in real quick. I got you man. Okay?",
+    "source_word_map": {
+      "segment_index": 3,
+      "segment_start_ms": 19280,
+      "segment_end_ms": 21280,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Hey",
+          "start_ms": 19280,
+          "end_ms": 19437,
+          "confidence": 0.5
+        },
+        {
+          "text": "dude",
+          "start_ms": 19437,
+          "end_ms": 19647,
+          "confidence": 0.5
+        },
+        {
+          "text": "hop",
+          "start_ms": 19647,
+          "end_ms": 19804,
+          "confidence": 0.5
+        },
+        {
+          "text": "in",
+          "start_ms": 19804,
+          "end_ms": 19909,
+          "confidence": 0.5
+        },
+        {
+          "text": "real",
+          "start_ms": 19909,
+          "end_ms": 20119,
+          "confidence": 0.5
+        },
+        {
+          "text": "quick.",
+          "start_ms": 20119,
+          "end_ms": 20434,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 20434,
+          "end_ms": 20486,
+          "confidence": 0.5
+        },
+        {
+          "text": "got",
+          "start_ms": 20486,
+          "end_ms": 20643,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 20643,
+          "end_ms": 20800,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 20800,
+          "end_ms": 21010,
+          "confidence": 0.5
+        },
+        {
+          "text": "Okay?",
+          "start_ms": 21010,
+          "end_ms": 21280,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "4fe84b14c5c54614a032d554e88a4b45",
+    "text_for_tts": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "tts_text": "Гей, чувак швидко застрибує. Я тебе дістану. Добре?",
+    "final_tts_text": "Гей, чувак швидко застрибує. Я тебе дістану. Добре?",
+    "voice_input": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "semantic_text": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "semantic_engine_text": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "grammar_text": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "timing_text": "Гей, чувак швидко застрибує. Я тебе дістану. Хорошо?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Гей, чувак швидко застрибує. Я тебе дістану. Добре?",
+    "tts_text_hash": "76aa3af93157",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 19280,
+    "end_ms": 21280,
+    "slot_ms": 2000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 4,
+    "text": "Гей, мій здоровяк. Гей, швидко, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "plain_text": "Гей, мій здоровяк. Гей, швидко, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "translation_text": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "final_text": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "file": null,
+    "approved_text": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "original": "Hey there's my big man. Hey real quick dude. When was the last time you ate? You seem pretty excited over this.",
+    "source_word_map": {
+      "segment_index": 4,
+      "segment_start_ms": 23280,
+      "segment_end_ms": 29280,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Hey",
+          "start_ms": 23280,
+          "end_ms": 23595,
+          "confidence": 0.5
+        },
+        {
+          "text": "there's",
+          "start_ms": 23595,
+          "end_ms": 24331,
+          "confidence": 0.5
+        },
+        {
+          "text": "my",
+          "start_ms": 24331,
+          "end_ms": 24541,
+          "confidence": 0.5
+        },
+        {
+          "text": "big",
+          "start_ms": 24541,
+          "end_ms": 24856,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 24856,
+          "end_ms": 25280,
+          "confidence": 0.5
+        },
+        {
+          "text": "Hey",
+          "start_ms": 25280,
+          "end_ms": 25449,
+          "confidence": 0.5
+        },
+        {
+          "text": "real",
+          "start_ms": 25449,
+          "end_ms": 25674,
+          "confidence": 0.5
+        },
+        {
+          "text": "quick",
+          "start_ms": 25674,
+          "end_ms": 25955,
+          "confidence": 0.5
+        },
+        {
+          "text": "dude.",
+          "start_ms": 25955,
+          "end_ms": 26236,
+          "confidence": 0.5
+        },
+        {
+          "text": "When",
+          "start_ms": 26236,
+          "end_ms": 26461,
+          "confidence": 0.5
+        },
+        {
+          "text": "was",
+          "start_ms": 26461,
+          "end_ms": 26630,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 26630,
+          "end_ms": 26799,
+          "confidence": 0.5
+        },
+        {
+          "text": "last",
+          "start_ms": 26799,
+          "end_ms": 27024,
+          "confidence": 0.5
+        },
+        {
+          "text": "time",
+          "start_ms": 27024,
+          "end_ms": 27249,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 27249,
+          "end_ms": 27418,
+          "confidence": 0.5
+        },
+        {
+          "text": "ate?",
+          "start_ms": 27418,
+          "end_ms": 27643,
+          "confidence": 0.5
+        },
+        {
+          "text": "You",
+          "start_ms": 27643,
+          "end_ms": 27812,
+          "confidence": 0.5
+        },
+        {
+          "text": "seem",
+          "start_ms": 27812,
+          "end_ms": 28037,
+          "confidence": 0.5
+        },
+        {
+          "text": "pretty",
+          "start_ms": 28037,
+          "end_ms": 28375,
+          "confidence": 0.5
+        },
+        {
+          "text": "excited",
+          "start_ms": 28375,
+          "end_ms": 28769,
+          "confidence": 0.5
+        },
+        {
+          "text": "over",
+          "start_ms": 28769,
+          "end_ms": 28994,
+          "confidence": 0.5
+        },
+        {
+          "text": "this.",
+          "start_ms": 28994,
+          "end_ms": 29280,
+          "confidence": 0.5
+        },
+        {
+          "text": "Oh",
+          "start_ms": 29280,
+          "end_ms": 29486,
+          "confidence": 0.5
+        },
+        {
+          "text": "it's",
+          "start_ms": 29486,
+          "end_ms": 29899,
+          "confidence": 0.5
+        },
+        {
+          "text": "probably",
+          "start_ms": 29899,
+          "end_ms": 30726,
+          "confidence": 0.5
+        },
+        {
+          "text": "been",
+          "start_ms": 30726,
+          "end_ms": 31139,
+          "confidence": 0.5
+        },
+        {
+          "text": "two",
+          "start_ms": 31139,
+          "end_ms": 31449,
+          "confidence": 0.5
+        },
+        {
+          "text": "days",
+          "start_ms": 31449,
+          "end_ms": 31862,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 31862,
+          "end_ms": 32280,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "0b7660b9608f404680f62081e6caa4ad",
+    "text_for_tts": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "tts_text": "Гей, мій здоровяк. Гей, швидко, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "final_tts_text": "Гей, мій здоровяк. Гей, швидко, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "voice_input": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "semantic_text": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "semantic_engine_text": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "grammar_text": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "timing_text": "Эй, мой здоровяк. Эй, быстро, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Гей, мій здоровяк. Гей, швидко, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+    "tts_text_hash": "7e80f8032117",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 23280,
+    "end_ms": 29280,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 5,
+    "text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "plain_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "translation_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "final_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "file": null,
+    "approved_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "original": "Oh it's probably been two days man. Two whole days?",
+    "source_word_map": {
+      "segment_index": 5,
+      "segment_start_ms": 29280,
+      "segment_end_ms": 34280,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Two",
+          "start_ms": 32280,
+          "end_ms": 32741,
+          "confidence": 0.5
+        },
+        {
+          "text": "whole",
+          "start_ms": 32741,
+          "end_ms": 33510,
+          "confidence": 0.5
+        },
+        {
+          "text": "days?",
+          "start_ms": 33510,
+          "end_ms": 34280,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "c33ccab34f314c3ab9a6d0c22ddd5286",
+    "text_for_tts": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "tts_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "final_tts_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "voice_input": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "semantic_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "semantic_engine_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "grammar_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "timing_text": "О, напевно, вже два дні минуло, саме тоді, і саме в цей момент.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "О, напевно, вже два дні минуло.",
+    "tts_text_hash": "2292e17ebb48",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 29280,
+    "end_ms": 34280,
+    "slot_ms": 5000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 6,
+    "text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "plain_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "translation_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "final_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "file": null,
+    "approved_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "original": "So wait, how do you mean? Oh wait here you go man. I want to give that to you.",
+    "source_word_map": {
+      "segment_index": 6,
+      "segment_start_ms": 34680,
+      "segment_end_ms": 38680,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "So",
+          "start_ms": 34680,
+          "end_ms": 34813,
+          "confidence": 0.5
+        },
+        {
+          "text": "wait,",
+          "start_ms": 34813,
+          "end_ms": 35146,
+          "confidence": 0.5
+        },
+        {
+          "text": "how",
+          "start_ms": 35146,
+          "end_ms": 35346,
+          "confidence": 0.5
+        },
+        {
+          "text": "do",
+          "start_ms": 35346,
+          "end_ms": 35479,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 35479,
+          "end_ms": 35679,
+          "confidence": 0.5
+        },
+        {
+          "text": "mean?",
+          "start_ms": 35679,
+          "end_ms": 36012,
+          "confidence": 0.5
+        },
+        {
+          "text": "Oh",
+          "start_ms": 36012,
+          "end_ms": 36145,
+          "confidence": 0.5
+        },
+        {
+          "text": "wait",
+          "start_ms": 36145,
+          "end_ms": 36411,
+          "confidence": 0.5
+        },
+        {
+          "text": "here",
+          "start_ms": 36411,
+          "end_ms": 36677,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 36677,
+          "end_ms": 36877,
+          "confidence": 0.5
+        },
+        {
+          "text": "go",
+          "start_ms": 36877,
+          "end_ms": 37010,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 37010,
+          "end_ms": 37276,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 37276,
+          "end_ms": 37342,
+          "confidence": 0.5
+        },
+        {
+          "text": "want",
+          "start_ms": 37342,
+          "end_ms": 37608,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 37608,
+          "end_ms": 37741,
+          "confidence": 0.5
+        },
+        {
+          "text": "give",
+          "start_ms": 37741,
+          "end_ms": 38007,
+          "confidence": 0.5
+        },
+        {
+          "text": "that",
+          "start_ms": 38007,
+          "end_ms": 38273,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 38273,
+          "end_ms": 38406,
+          "confidence": 0.5
+        },
+        {
+          "text": "you.",
+          "start_ms": 38406,
+          "end_ms": 38680,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 38680,
+          "end_ms": 38873,
+          "confidence": 0.5
+        },
+        {
+          "text": "also",
+          "start_ms": 38873,
+          "end_ms": 39131,
+          "confidence": 0.5
+        },
+        {
+          "text": "going",
+          "start_ms": 39131,
+          "end_ms": 39453,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 39453,
+          "end_ms": 39582,
+          "confidence": 0.5
+        },
+        {
+          "text": "give",
+          "start_ms": 39582,
+          "end_ms": 39840,
+          "confidence": 0.5
+        },
+        {
+          "text": "this",
+          "start_ms": 39840,
+          "end_ms": 40098,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 40098,
+          "end_ms": 40227,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 40227,
+          "end_ms": 40420,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 40420,
+          "end_ms": 40680,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "3a36be42b58847b2be427f570ed58ef3",
+    "text_for_tts": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "tts_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "final_tts_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "voice_input": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "semantic_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "semantic_engine_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "grammar_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "timing_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+    "tts_text_hash": "79fc0705c960",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 34680,
+    "end_ms": 38680,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 7,
+    "text": "Так как ти можешь отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "plain_text": "Так как ти можешь отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "translation_text": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "final_text": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "file": null,
+    "approved_text": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "original": "I'm also going to give this to you man. So how do you manage to get food? Before you open that, how do you manage to get food out here man?",
+    "source_word_map": {
+      "segment_index": 7,
+      "segment_start_ms": 38680,
+      "segment_end_ms": 44680,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "So",
+          "start_ms": 40680,
+          "end_ms": 40782,
+          "confidence": 0.5
+        },
+        {
+          "text": "how",
+          "start_ms": 40782,
+          "end_ms": 40935,
+          "confidence": 0.5
+        },
+        {
+          "text": "do",
+          "start_ms": 40935,
+          "end_ms": 41037,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 41037,
+          "end_ms": 41190,
+          "confidence": 0.5
+        },
+        {
+          "text": "manage",
+          "start_ms": 41190,
+          "end_ms": 41497,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 41497,
+          "end_ms": 41599,
+          "confidence": 0.5
+        },
+        {
+          "text": "get",
+          "start_ms": 41599,
+          "end_ms": 41752,
+          "confidence": 0.5
+        },
+        {
+          "text": "food?",
+          "start_ms": 41752,
+          "end_ms": 42008,
+          "confidence": 0.5
+        },
+        {
+          "text": "Before",
+          "start_ms": 42008,
+          "end_ms": 42315,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 42315,
+          "end_ms": 42468,
+          "confidence": 0.5
+        },
+        {
+          "text": "open",
+          "start_ms": 42468,
+          "end_ms": 42673,
+          "confidence": 0.5
+        },
+        {
+          "text": "that,",
+          "start_ms": 42673,
+          "end_ms": 42929,
+          "confidence": 0.5
+        },
+        {
+          "text": "how",
+          "start_ms": 42929,
+          "end_ms": 43082,
+          "confidence": 0.5
+        },
+        {
+          "text": "do",
+          "start_ms": 43082,
+          "end_ms": 43184,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 43184,
+          "end_ms": 43337,
+          "confidence": 0.5
+        },
+        {
+          "text": "manage",
+          "start_ms": 43337,
+          "end_ms": 43644,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 43644,
+          "end_ms": 43746,
+          "confidence": 0.5
+        },
+        {
+          "text": "get",
+          "start_ms": 43746,
+          "end_ms": 43899,
+          "confidence": 0.5
+        },
+        {
+          "text": "food",
+          "start_ms": 43899,
+          "end_ms": 44104,
+          "confidence": 0.5
+        },
+        {
+          "text": "out",
+          "start_ms": 44104,
+          "end_ms": 44257,
+          "confidence": 0.5
+        },
+        {
+          "text": "here",
+          "start_ms": 44257,
+          "end_ms": 44462,
+          "confidence": 0.5
+        },
+        {
+          "text": "man?",
+          "start_ms": 44462,
+          "end_ms": 44680,
+          "confidence": 0.5
+        },
+        {
+          "text": "Honestly",
+          "start_ms": 44680,
+          "end_ms": 45137,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 45137,
+          "end_ms": 45194,
+          "confidence": 0.5
+        },
+        {
+          "text": "just",
+          "start_ms": 45194,
+          "end_ms": 45422,
+          "confidence": 0.5
+        },
+        {
+          "text": "dig",
+          "start_ms": 45422,
+          "end_ms": 45593,
+          "confidence": 0.5
+        },
+        {
+          "text": "through",
+          "start_ms": 45593,
+          "end_ms": 45993,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 45993,
+          "end_ms": 46164,
+          "confidence": 0.5
+        },
+        {
+          "text": "trash",
+          "start_ms": 46164,
+          "end_ms": 46449,
+          "confidence": 0.5
+        },
+        {
+          "text": "can.",
+          "start_ms": 46449,
+          "end_ms": 46680,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "4193a04dbe59411092b7102ec115403b",
+    "text_for_tts": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "tts_text": "Так как ти можешь отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "final_tts_text": "Так как ти можешь отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "voice_input": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "semantic_text": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "semantic_engine_text": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "grammar_text": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "timing_text": "Так как ты можешь получить еду? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Так как ти можешь отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+    "tts_text_hash": "5bd02c7630ca",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 38680,
+    "end_ms": 44680,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 8,
+    "text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "plain_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "translation_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "final_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "file": null,
+    "approved_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "original": "Honestly I just dig through the trash can. I don't know there.",
+    "source_word_map": {
+      "segment_index": 8,
+      "segment_start_ms": 44680,
+      "segment_end_ms": 48680,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I",
+          "start_ms": 46680,
+          "end_ms": 46805,
+          "confidence": 0.5
+        },
+        {
+          "text": "don't",
+          "start_ms": 46805,
+          "end_ms": 47430,
+          "confidence": 0.5
+        },
+        {
+          "text": "know",
+          "start_ms": 47430,
+          "end_ms": 47930,
+          "confidence": 0.5
+        },
+        {
+          "text": "there.",
+          "start_ms": 47930,
+          "end_ms": 48680,
+          "confidence": 0.5
+        },
+        {
+          "text": "Come",
+          "start_ms": 48680,
+          "end_ms": 49027,
+          "confidence": 0.5
+        },
+        {
+          "text": "on.",
+          "start_ms": 49027,
+          "end_ms": 49287,
+          "confidence": 0.5
+        },
+        {
+          "text": "So",
+          "start_ms": 49287,
+          "end_ms": 49460,
+          "confidence": 0.5
+        },
+        {
+          "text": "wait",
+          "start_ms": 49460,
+          "end_ms": 49807,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 49807,
+          "end_ms": 50067,
+          "confidence": 0.5
+        },
+        {
+          "text": "tell",
+          "start_ms": 50067,
+          "end_ms": 50414,
+          "confidence": 0.5
+        },
+        {
+          "text": "me",
+          "start_ms": 50414,
+          "end_ms": 50587,
+          "confidence": 0.5
+        },
+        {
+          "text": "that",
+          "start_ms": 50587,
+          "end_ms": 50934,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 50934,
+          "end_ms": 51194,
+          "confidence": 0.5
+        },
+        {
+          "text": "eat",
+          "start_ms": 51194,
+          "end_ms": 51454,
+          "confidence": 0.5
+        },
+        {
+          "text": "other",
+          "start_ms": 51454,
+          "end_ms": 51888,
+          "confidence": 0.5
+        },
+        {
+          "text": "people's",
+          "start_ms": 51888,
+          "end_ms": 52583,
+          "confidence": 0.5
+        },
+        {
+          "text": "trash",
+          "start_ms": 52583,
+          "end_ms": 53017,
+          "confidence": 0.5
+        },
+        {
+          "text": "just",
+          "start_ms": 53017,
+          "end_ms": 53364,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 53364,
+          "end_ms": 53537,
+          "confidence": 0.5
+        },
+        {
+          "text": "feed",
+          "start_ms": 53537,
+          "end_ms": 53884,
+          "confidence": 0.5
+        },
+        {
+          "text": "yourself?",
+          "start_ms": 53884,
+          "end_ms": 54680,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "9b9c4ac2ed5b41e0a67b053ea66f47e4",
+    "text_for_tts": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "tts_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "final_tts_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "voice_input": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "semantic_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "semantic_engine_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "grammar_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "timing_text": "Чесно кажучи, я просто прокопаю смітник. Чесно кажучи.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Чесно кажучи, я просто прокопаю смітник.",
+    "tts_text_hash": "759e2c551caa",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 44680,
+    "end_ms": 48680,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 9,
+    "text": "Та ну. щоб нагодувати себе?",
+    "plain_text": "Та ну. щоб нагодувати себе?",
+    "translation_text": "Да ладно. чтобы накормить себя?",
+    "final_text": "Да ладно. чтобы накормить себя?",
+    "file": null,
+    "approved_text": "Да ладно. чтобы накормить себя?",
+    "original": "Come on. So wait you tell me that you eat other people's trash just to feed yourself?",
+    "source_word_map": {
+      "segment_index": 9,
+      "segment_start_ms": 48680,
+      "segment_end_ms": 54680,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Yeah",
+          "start_ms": 54680,
+          "end_ms": 55251,
+          "confidence": 0.5
+        },
+        {
+          "text": "man",
+          "start_ms": 55251,
+          "end_ms": 55679,
+          "confidence": 0.5
+        },
+        {
+          "text": "it's...",
+          "start_ms": 55679,
+          "end_ms": 56680,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "894a3217a48945eebece91b1f5781a11",
+    "original_text": "Come on. So wait you tell me that you eat other people's trash just to feed yourself?",
+    "tts_text": "Та ну. щоб нагодувати себе?",
+    "language_recovery": {
+      "healed": true,
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "from": "low_confidence"
+    },
+    "text_for_tts": "Да ладно. чтобы накормить себя?",
+    "final_tts_text": "Та ну. щоб нагодувати себе?",
+    "voice_input": "Да ладно. чтобы накормить себя?",
+    "semantic_text": "Да ладно. чтобы накормить себя?",
+    "semantic_engine_text": "Да ладно. чтобы накормить себя?",
+    "grammar_text": "Да ладно. чтобы накормить себя?",
+    "timing_text": "Да ладно. чтобы накормить себя?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Та ну. щоб нагодувати себе?",
+    "tts_text_hash": "86ba8a411258",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 48680,
+    "end_ms": 54680,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 10,
+    "text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "plain_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "translation_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "final_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "file": null,
+    "approved_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "original": "Yeah man it's... Is that normal out here?",
+    "source_word_map": {
+      "segment_index": 10,
+      "segment_start_ms": 54680,
+      "segment_end_ms": 58680,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Is",
+          "start_ms": 56680,
+          "end_ms": 56880,
+          "confidence": 0.5
+        },
+        {
+          "text": "that",
+          "start_ms": 56880,
+          "end_ms": 57280,
+          "confidence": 0.5
+        },
+        {
+          "text": "normal",
+          "start_ms": 57280,
+          "end_ms": 57880,
+          "confidence": 0.5
+        },
+        {
+          "text": "out",
+          "start_ms": 57880,
+          "end_ms": 58180,
+          "confidence": 0.5
+        },
+        {
+          "text": "here?",
+          "start_ms": 58180,
+          "end_ms": 58680,
+          "confidence": 0.5
+        },
+        {
+          "text": "Yeah",
+          "start_ms": 58680,
+          "end_ms": 58866,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 58866,
+          "end_ms": 58912,
+          "confidence": 0.5
+        },
+        {
+          "text": "don't",
+          "start_ms": 58912,
+          "end_ms": 59144,
+          "confidence": 0.5
+        },
+        {
+          "text": "got",
+          "start_ms": 59144,
+          "end_ms": 59283,
+          "confidence": 0.5
+        },
+        {
+          "text": "any",
+          "start_ms": 59283,
+          "end_ms": 59422,
+          "confidence": 0.5
+        },
+        {
+          "text": "other",
+          "start_ms": 59422,
+          "end_ms": 59654,
+          "confidence": 0.5
+        },
+        {
+          "text": "choice.",
+          "start_ms": 59654,
+          "end_ms": 59979,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 59979,
+          "end_ms": 60025,
+          "confidence": 0.5
+        },
+        {
+          "text": "don't",
+          "start_ms": 60025,
+          "end_ms": 60257,
+          "confidence": 0.5
+        },
+        {
+          "text": "got",
+          "start_ms": 60257,
+          "end_ms": 60396,
+          "confidence": 0.5
+        },
+        {
+          "text": "money.",
+          "start_ms": 60396,
+          "end_ms": 60680,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "c34989c53ed84be294c5115b98977ed2",
+    "text_for_tts": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "tts_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "final_tts_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "voice_input": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "semantic_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "semantic_engine_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "grammar_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "timing_text": "Так, це нормально тут, саме тоді, і саме в цей момент.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Так, це нормально тут?",
+    "tts_text_hash": "27954127a454",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 54680,
+    "end_ms": 58680,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 11,
+    "text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "plain_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "translation_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "final_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "file": null,
+    "approved_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "original": "Yeah I don't got any other choice. I don't got money. Yeah.",
+    "source_word_map": {
+      "segment_index": 11,
+      "segment_start_ms": 58680,
+      "segment_end_ms": 62680,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Yeah.",
+          "start_ms": 60680,
+          "end_ms": 62680,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "cc3acb8690884725a75c975c6e3424f7",
+    "text_for_tts": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "tts_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "final_tts_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "voice_input": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "semantic_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "semantic_engine_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "grammar_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "timing_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+    "tts_text_hash": "289335fd4826",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 58680,
+    "end_ms": 62680,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 12,
+    "text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "plain_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "translation_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "final_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "file": null,
+    "approved_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "original": "So right now you clean windows and what's the average that someone gives you for doing that type of job?",
+    "source_word_map": {
+      "segment_index": 12,
+      "segment_start_ms": 63080,
+      "segment_end_ms": 69080,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "So",
+          "start_ms": 63080,
+          "end_ms": 63221,
+          "confidence": 0.5
+        },
+        {
+          "text": "right",
+          "start_ms": 63221,
+          "end_ms": 63573,
+          "confidence": 0.5
+        },
+        {
+          "text": "now",
+          "start_ms": 63573,
+          "end_ms": 63784,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 63784,
+          "end_ms": 63995,
+          "confidence": 0.5
+        },
+        {
+          "text": "clean",
+          "start_ms": 63995,
+          "end_ms": 64347,
+          "confidence": 0.5
+        },
+        {
+          "text": "windows",
+          "start_ms": 64347,
+          "end_ms": 64841,
+          "confidence": 0.5
+        },
+        {
+          "text": "and",
+          "start_ms": 64841,
+          "end_ms": 65052,
+          "confidence": 0.5
+        },
+        {
+          "text": "what's",
+          "start_ms": 65052,
+          "end_ms": 65475,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 65475,
+          "end_ms": 65686,
+          "confidence": 0.5
+        },
+        {
+          "text": "average",
+          "start_ms": 65686,
+          "end_ms": 66180,
+          "confidence": 0.5
+        },
+        {
+          "text": "that",
+          "start_ms": 66180,
+          "end_ms": 66462,
+          "confidence": 0.5
+        },
+        {
+          "text": "someone",
+          "start_ms": 66462,
+          "end_ms": 66956,
+          "confidence": 0.5
+        },
+        {
+          "text": "gives",
+          "start_ms": 66956,
+          "end_ms": 67308,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 67308,
+          "end_ms": 67519,
+          "confidence": 0.5
+        },
+        {
+          "text": "for",
+          "start_ms": 67519,
+          "end_ms": 67730,
+          "confidence": 0.5
+        },
+        {
+          "text": "doing",
+          "start_ms": 67730,
+          "end_ms": 68082,
+          "confidence": 0.5
+        },
+        {
+          "text": "that",
+          "start_ms": 68082,
+          "end_ms": 68364,
+          "confidence": 0.5
+        },
+        {
+          "text": "type",
+          "start_ms": 68364,
+          "end_ms": 68646,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 68646,
+          "end_ms": 68787,
+          "confidence": 0.5
+        },
+        {
+          "text": "job?",
+          "start_ms": 68787,
+          "end_ms": 69080,
+          "confidence": 0.5
+        },
+        {
+          "text": "Sometimes",
+          "start_ms": 69080,
+          "end_ms": 69566,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 69566,
+          "end_ms": 69620,
+          "confidence": 0.5
+        },
+        {
+          "text": "do",
+          "start_ms": 69620,
+          "end_ms": 69728,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 69728,
+          "end_ms": 69836,
+          "confidence": 0.5
+        },
+        {
+          "text": "for",
+          "start_ms": 69836,
+          "end_ms": 69998,
+          "confidence": 0.5
+        },
+        {
+          "text": "as",
+          "start_ms": 69998,
+          "end_ms": 70106,
+          "confidence": 0.5
+        },
+        {
+          "text": "low",
+          "start_ms": 70106,
+          "end_ms": 70268,
+          "confidence": 0.5
+        },
+        {
+          "text": "as",
+          "start_ms": 70268,
+          "end_ms": 70376,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 70376,
+          "end_ms": 70592,
+          "confidence": 0.5
+        },
+        {
+          "text": "ten",
+          "start_ms": 70592,
+          "end_ms": 70754,
+          "confidence": 0.5
+        },
+        {
+          "text": "cents.",
+          "start_ms": 70754,
+          "end_ms": 71080,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "1f0c1a0994dc4a02b7d3390a0ee129c8",
+    "text_for_tts": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "tts_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "final_tts_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "voice_input": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "semantic_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "semantic_engine_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "grammar_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "timing_text": "зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Отже, зараз ви чистите вікна і яке середнє значення хтось дає вам для виконання цієї роботи?",
+    "tts_text_hash": "b1a3a1c8c296",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 63080,
+    "end_ms": 69080,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 13,
+    "text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "plain_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "translation_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "final_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "file": null,
+    "approved_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "original": "Sometimes I do it for as low as like ten cents. Really? Just any guy's being...",
+    "source_word_map": {
+      "segment_index": 13,
+      "segment_start_ms": 69080,
+      "segment_end_ms": 73080,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Really?",
+          "start_ms": 71080,
+          "end_ms": 71598,
+          "confidence": 0.5
+        },
+        {
+          "text": "Just",
+          "start_ms": 71598,
+          "end_ms": 71894,
+          "confidence": 0.5
+        },
+        {
+          "text": "any",
+          "start_ms": 71894,
+          "end_ms": 72116,
+          "confidence": 0.5
+        },
+        {
+          "text": "guy's",
+          "start_ms": 72116,
+          "end_ms": 72486,
+          "confidence": 0.5
+        },
+        {
+          "text": "being...",
+          "start_ms": 72486,
+          "end_ms": 73080,
+          "confidence": 0.5
+        },
+        {
+          "text": "Yeah",
+          "start_ms": 73080,
+          "end_ms": 74080,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 74080,
+          "end_ms": 75080,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "d4075663d1424ea19f998f1959ec1275",
+    "text_for_tts": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "tts_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "final_tts_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "voice_input": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "semantic_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "semantic_engine_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "grammar_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "timing_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець...",
+    "tts_text_hash": "4710b9eba445",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 69080,
+    "end_ms": 73080,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 14,
+    "text": "Да, и дивись Джонатана, правда?",
+    "plain_text": "Да, и дивись Джонатана, правда?",
+    "translation_text": "Да, и смотри Джонатана, верно?",
+    "final_text": "Да, и смотри Джонатана, верно?",
+    "file": null,
+    "approved_text": "Да, и смотри Джонатана, верно?",
+    "original": "Yeah man. And look Jonathan right?",
+    "source_word_map": {
+      "segment_index": 14,
+      "segment_start_ms": 73080,
+      "segment_end_ms": 77080,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "And",
+          "start_ms": 75080,
+          "end_ms": 75365,
+          "confidence": 0.5
+        },
+        {
+          "text": "look",
+          "start_ms": 75365,
+          "end_ms": 75745,
+          "confidence": 0.5
+        },
+        {
+          "text": "Jonathan",
+          "start_ms": 75745,
+          "end_ms": 76506,
+          "confidence": 0.5
+        },
+        {
+          "text": "right?",
+          "start_ms": 76506,
+          "end_ms": 77080,
+          "confidence": 0.5
+        },
+        {
+          "text": "Yeah.",
+          "start_ms": 77080,
+          "end_ms": 79080,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "f3ef12a97c664a398ee05e31fdcbf770",
+    "text_for_tts": "Да, и смотри Джонатана, верно?",
+    "tts_text": "Да, и дивись Джонатана, правда?",
+    "final_tts_text": "Да, и дивись Джонатана, правда?",
+    "voice_input": "Да, и смотри Джонатана, верно?",
+    "semantic_text": "Да, и смотри Джонатана, верно?",
+    "semantic_engine_text": "Да, и смотри Джонатана, верно?",
+    "grammar_text": "Да, и смотри Джонатана, верно?",
+    "timing_text": "Да, и смотри Джонатана, верно?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Да, и дивись Джонатана, правда?",
+    "tts_text_hash": "0da6ee9607c7",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 73080,
+    "end_ms": 77080,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 15,
+    "text": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "plain_text": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "translation_text": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "final_text": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "file": null,
+    "approved_text": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "original": "Yeah. Jonathan you seem smart. You seem young. I mean I don't know what went wrong.",
+    "source_word_map": {
+      "segment_index": 15,
+      "segment_start_ms": 77080,
+      "segment_end_ms": 81080,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Jonathan",
+          "start_ms": 79080,
+          "end_ms": 79333,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 79333,
+          "end_ms": 79428,
+          "confidence": 0.5
+        },
+        {
+          "text": "seem",
+          "start_ms": 79428,
+          "end_ms": 79554,
+          "confidence": 0.5
+        },
+        {
+          "text": "smart.",
+          "start_ms": 79554,
+          "end_ms": 79744,
+          "confidence": 0.5
+        },
+        {
+          "text": "You",
+          "start_ms": 79744,
+          "end_ms": 79839,
+          "confidence": 0.5
+        },
+        {
+          "text": "seem",
+          "start_ms": 79839,
+          "end_ms": 79965,
+          "confidence": 0.5
+        },
+        {
+          "text": "young.",
+          "start_ms": 79965,
+          "end_ms": 80155,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 80155,
+          "end_ms": 80195,
+          "confidence": 0.5
+        },
+        {
+          "text": "mean",
+          "start_ms": 80195,
+          "end_ms": 80321,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 80321,
+          "end_ms": 80361,
+          "confidence": 0.5
+        },
+        {
+          "text": "don't",
+          "start_ms": 80361,
+          "end_ms": 80519,
+          "confidence": 0.5
+        },
+        {
+          "text": "know",
+          "start_ms": 80519,
+          "end_ms": 80645,
+          "confidence": 0.5
+        },
+        {
+          "text": "what",
+          "start_ms": 80645,
+          "end_ms": 80771,
+          "confidence": 0.5
+        },
+        {
+          "text": "went",
+          "start_ms": 80771,
+          "end_ms": 80897,
+          "confidence": 0.5
+        },
+        {
+          "text": "wrong.",
+          "start_ms": 80897,
+          "end_ms": 81080,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 81080,
+          "end_ms": 81330,
+          "confidence": 0.5
+        },
+        {
+          "text": "mean...",
+          "start_ms": 81330,
+          "end_ms": 83080,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "fb024c063aa44f7496a7537ac975bb52",
+    "text_for_tts": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "tts_text": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "final_tts_text": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "voice_input": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "semantic_text": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "semantic_engine_text": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "grammar_text": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "timing_text": "Да. Джонатан, ты кажется умным. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+    "tts_text_hash": "7a4f49c60baf",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 77080,
+    "end_ms": 81080,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 16,
+    "text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "plain_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "translation_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "final_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "file": null,
+    "approved_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "original": "I mean... I don't even like to talk about it because yeah I'm young. I'm only 25.",
+    "source_word_map": {
+      "segment_index": 16,
+      "segment_start_ms": 81080,
+      "segment_end_ms": 87080,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I",
+          "start_ms": 83080,
+          "end_ms": 83150,
+          "confidence": 0.5
+        },
+        {
+          "text": "don't",
+          "start_ms": 83150,
+          "end_ms": 83500,
+          "confidence": 0.5
+        },
+        {
+          "text": "even",
+          "start_ms": 83500,
+          "end_ms": 83780,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 83780,
+          "end_ms": 84060,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 84060,
+          "end_ms": 84200,
+          "confidence": 0.5
+        },
+        {
+          "text": "talk",
+          "start_ms": 84200,
+          "end_ms": 84480,
+          "confidence": 0.5
+        },
+        {
+          "text": "about",
+          "start_ms": 84480,
+          "end_ms": 84830,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 84830,
+          "end_ms": 84970,
+          "confidence": 0.5
+        },
+        {
+          "text": "because",
+          "start_ms": 84970,
+          "end_ms": 85461,
+          "confidence": 0.5
+        },
+        {
+          "text": "yeah",
+          "start_ms": 85461,
+          "end_ms": 85741,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 85741,
+          "end_ms": 85951,
+          "confidence": 0.5
+        },
+        {
+          "text": "young.",
+          "start_ms": 85951,
+          "end_ms": 86372,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 86372,
+          "end_ms": 86582,
+          "confidence": 0.5
+        },
+        {
+          "text": "only",
+          "start_ms": 86582,
+          "end_ms": 86862,
+          "confidence": 0.5
+        },
+        {
+          "text": "25.",
+          "start_ms": 86862,
+          "end_ms": 87080,
+          "confidence": 0.5
+        },
+        {
+          "text": "Uh",
+          "start_ms": 87080,
+          "end_ms": 87746,
+          "confidence": 0.5
+        },
+        {
+          "text": "huh.",
+          "start_ms": 87746,
+          "end_ms": 89080,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "7c6e8a2f8c434cbabc88bc28cafaab4f",
+    "original_text": "I mean... I don't even like to talk about it because yeah I'm young. I'm only 25.",
+    "tts_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "language_recovery": {
+      "healed": false,
+      "actions": [
+        "naturalizer",
+        "revalidate",
+        "reject_false_uk_glue_heal"
+      ],
+      "from": "low_confidence",
+      "remaining": "pass"
+    },
+    "skip_tts": true,
+    "tts_blocked": true,
+    "tts_skip_reason": "russian_in_uk",
+    "needs_re_tts": true,
+    "audio_exists": false,
+    "text_for_tts": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "final_tts_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "voice_input": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "semantic_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "semantic_engine_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "grammar_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "timing_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я даже не люблю об этом говорить, потому что я молод. Мені лише 25.",
+    "tts_text_hash": "1e5eabd7afeb",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 81080,
+    "end_ms": 87080,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true
+  },
+  {
+    "index": 17,
+    "text": "Я виріс с. У них є сім'ї і все таке, і я бездомний.",
+    "plain_text": "Я виріс с. У них є сім'ї і все таке, і я бездомний.",
+    "translation_text": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "final_text": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "file": null,
+    "approved_text": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "original": "Uh huh. I grew up with... they got families and everything. They got it all and I'm homeless.",
+    "source_word_map": {
+      "segment_index": 17,
+      "segment_start_ms": 87080,
+      "segment_end_ms": 93480,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I",
+          "start_ms": 89480,
+          "end_ms": 89537,
+          "confidence": 0.5
+        },
+        {
+          "text": "grew",
+          "start_ms": 89537,
+          "end_ms": 89765,
+          "confidence": 0.5
+        },
+        {
+          "text": "up",
+          "start_ms": 89765,
+          "end_ms": 89879,
+          "confidence": 0.5
+        },
+        {
+          "text": "with...",
+          "start_ms": 89879,
+          "end_ms": 90279,
+          "confidence": 0.5
+        },
+        {
+          "text": "they",
+          "start_ms": 90279,
+          "end_ms": 90507,
+          "confidence": 0.5
+        },
+        {
+          "text": "got",
+          "start_ms": 90507,
+          "end_ms": 90678,
+          "confidence": 0.5
+        },
+        {
+          "text": "families",
+          "start_ms": 90678,
+          "end_ms": 91135,
+          "confidence": 0.5
+        },
+        {
+          "text": "and",
+          "start_ms": 91135,
+          "end_ms": 91306,
+          "confidence": 0.5
+        },
+        {
+          "text": "everything.",
+          "start_ms": 91306,
+          "end_ms": 91934,
+          "confidence": 0.5
+        },
+        {
+          "text": "They",
+          "start_ms": 91934,
+          "end_ms": 92162,
+          "confidence": 0.5
+        },
+        {
+          "text": "got",
+          "start_ms": 92162,
+          "end_ms": 92333,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 92333,
+          "end_ms": 92447,
+          "confidence": 0.5
+        },
+        {
+          "text": "all",
+          "start_ms": 92447,
+          "end_ms": 92618,
+          "confidence": 0.5
+        },
+        {
+          "text": "and",
+          "start_ms": 92618,
+          "end_ms": 92789,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 92789,
+          "end_ms": 92960,
+          "confidence": 0.5
+        },
+        {
+          "text": "homeless.",
+          "start_ms": 92960,
+          "end_ms": 93480,
+          "confidence": 0.5
+        },
+        {
+          "text": "Yeah.",
+          "start_ms": 93480,
+          "end_ms": 95480,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "5562fe13182640549899498b0b143bee",
+    "text_for_tts": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "tts_text": "Я виріс с. У них є сім'ї і все таке, і я бездомний.",
+    "final_tts_text": "Я виріс с. У них є сім'ї і все таке, і я бездомний.",
+    "voice_input": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "semantic_text": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "semantic_engine_text": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "grammar_text": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "timing_text": "Я вырос с. У них є сім'ї і все таке, і я бездомний.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я виріс с. У них є сім'ї і все таке, і я бездомний.",
+    "tts_text_hash": "450e7c7aa580",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 87080,
+    "end_ms": 93480,
+    "slot_ms": 6400,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 18,
+    "text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "plain_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "translation_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "final_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "file": null,
+    "approved_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "original": "Yeah. I mean was it was just kind of like bad decisions in life or is it just kind of a lot of things to all on it?",
+    "source_word_map": {
+      "segment_index": 18,
+      "segment_start_ms": 93480,
+      "segment_end_ms": 101480,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I",
+          "start_ms": 95480,
+          "end_ms": 95552,
+          "confidence": 0.5
+        },
+        {
+          "text": "mean",
+          "start_ms": 95552,
+          "end_ms": 95841,
+          "confidence": 0.5
+        },
+        {
+          "text": "was",
+          "start_ms": 95841,
+          "end_ms": 96057,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 96057,
+          "end_ms": 96201,
+          "confidence": 0.5
+        },
+        {
+          "text": "was",
+          "start_ms": 96201,
+          "end_ms": 96417,
+          "confidence": 0.5
+        },
+        {
+          "text": "just",
+          "start_ms": 96417,
+          "end_ms": 96706,
+          "confidence": 0.5
+        },
+        {
+          "text": "kind",
+          "start_ms": 96706,
+          "end_ms": 96995,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 96995,
+          "end_ms": 97139,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 97139,
+          "end_ms": 97428,
+          "confidence": 0.5
+        },
+        {
+          "text": "bad",
+          "start_ms": 97428,
+          "end_ms": 97644,
+          "confidence": 0.5
+        },
+        {
+          "text": "decisions",
+          "start_ms": 97644,
+          "end_ms": 98294,
+          "confidence": 0.5
+        },
+        {
+          "text": "in",
+          "start_ms": 98294,
+          "end_ms": 98438,
+          "confidence": 0.5
+        },
+        {
+          "text": "life",
+          "start_ms": 98438,
+          "end_ms": 98727,
+          "confidence": 0.5
+        },
+        {
+          "text": "or",
+          "start_ms": 98727,
+          "end_ms": 98871,
+          "confidence": 0.5
+        },
+        {
+          "text": "is",
+          "start_ms": 98871,
+          "end_ms": 99015,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 99015,
+          "end_ms": 99159,
+          "confidence": 0.5
+        },
+        {
+          "text": "just",
+          "start_ms": 99159,
+          "end_ms": 99448,
+          "confidence": 0.5
+        },
+        {
+          "text": "kind",
+          "start_ms": 99448,
+          "end_ms": 99737,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 99737,
+          "end_ms": 99881,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 99881,
+          "end_ms": 99953,
+          "confidence": 0.5
+        },
+        {
+          "text": "lot",
+          "start_ms": 99953,
+          "end_ms": 100169,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 100169,
+          "end_ms": 100313,
+          "confidence": 0.5
+        },
+        {
+          "text": "things",
+          "start_ms": 100313,
+          "end_ms": 100746,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 100746,
+          "end_ms": 100890,
+          "confidence": 0.5
+        },
+        {
+          "text": "all",
+          "start_ms": 100890,
+          "end_ms": 101106,
+          "confidence": 0.5
+        },
+        {
+          "text": "on",
+          "start_ms": 101106,
+          "end_ms": 101250,
+          "confidence": 0.5
+        },
+        {
+          "text": "it?",
+          "start_ms": 101250,
+          "end_ms": 101480,
+          "confidence": 0.5
+        },
+        {
+          "text": "Honestly",
+          "start_ms": 101480,
+          "end_ms": 102680,
+          "confidence": 0.5
+        },
+        {
+          "text": "it's",
+          "start_ms": 102680,
+          "end_ms": 103280,
+          "confidence": 0.5
+        },
+        {
+          "text": "just",
+          "start_ms": 103280,
+          "end_ms": 103880,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 103880,
+          "end_ms": 104030,
+          "confidence": 0.5
+        },
+        {
+          "text": "lot",
+          "start_ms": 104030,
+          "end_ms": 104480,
+          "confidence": 0.5
+        },
+        {
+          "text": "of...",
+          "start_ms": 104480,
+          "end_ms": 105230,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 105230,
+          "end_ms": 105830,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 105830,
+          "end_ms": 105980,
+          "confidence": 0.5
+        },
+        {
+          "text": "lost",
+          "start_ms": 105980,
+          "end_ms": 106580,
+          "confidence": 0.5
+        },
+        {
+          "text": "my",
+          "start_ms": 106580,
+          "end_ms": 106880,
+          "confidence": 0.5
+        },
+        {
+          "text": "mom.",
+          "start_ms": 106880,
+          "end_ms": 107480,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "cedc3805f8004c629f9b248c724c01bf",
+    "text_for_tts": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "tts_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "final_tts_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "voice_input": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "semantic_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "semantic_engine_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "grammar_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "timing_text": "Так. чи це було щось на кшталт поганих рішень у житті, саме тоді, і саме в цей момент.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Так. чи це було щось на кшталт поганих рішень у житті?",
+    "tts_text_hash": "0580f8f3a075",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 93480,
+    "end_ms": 101480,
+    "slot_ms": 8000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 19,
+    "text": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+    "plain_text": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+    "translation_text": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "final_text": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "file": null,
+    "approved_text": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "original": "Honestly it's just a lot of... like I lost my mom.",
+    "source_word_map": {
+      "segment_index": 19,
+      "segment_start_ms": 101480,
+      "segment_end_ms": 107480,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Oh",
+          "start_ms": 107480,
+          "end_ms": 108146,
+          "confidence": 0.5
+        },
+        {
+          "text": "wow.",
+          "start_ms": 108146,
+          "end_ms": 109480,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "434418556f2d4e67a0e6f90c99d21fcc",
+    "original_text": "Honestly it's just a lot of... like I lost my mom.",
+    "tts_text": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+    "language_recovery": {
+      "healed": true,
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "from": "low_confidence"
+    },
+    "text_for_tts": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "final_tts_text": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+    "voice_input": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "semantic_text": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "semantic_engine_text": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "grammar_text": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "timing_text": "Честно говоря, это много. как будто я потеряла свою маму.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+    "tts_text_hash": "262aae8907af",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 101480,
+    "end_ms": 107480,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 20,
+    "text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "plain_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "translation_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "final_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "file": null,
+    "approved_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "original": "Oh wow. I'm sorry.",
+    "source_word_map": {
+      "segment_index": 20,
+      "segment_start_ms": 107480,
+      "segment_end_ms": 111480,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I'm",
+          "start_ms": 109480,
+          "end_ms": 110146,
+          "confidence": 0.5
+        },
+        {
+          "text": "sorry.",
+          "start_ms": 110146,
+          "end_ms": 111480,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 111480,
+          "end_ms": 111520,
+          "confidence": 0.5
+        },
+        {
+          "text": "lost",
+          "start_ms": 111520,
+          "end_ms": 111662,
+          "confidence": 0.5
+        },
+        {
+          "text": "my",
+          "start_ms": 111662,
+          "end_ms": 111733,
+          "confidence": 0.5
+        },
+        {
+          "text": "job.",
+          "start_ms": 111733,
+          "end_ms": 111875,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 111875,
+          "end_ms": 111915,
+          "confidence": 0.5
+        },
+        {
+          "text": "lost",
+          "start_ms": 111915,
+          "end_ms": 112057,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 112057,
+          "end_ms": 112164,
+          "confidence": 0.5
+        },
+        {
+          "text": "house.",
+          "start_ms": 112164,
+          "end_ms": 112378,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 112378,
+          "end_ms": 112418,
+          "confidence": 0.5
+        },
+        {
+          "text": "couldn't",
+          "start_ms": 112418,
+          "end_ms": 112703,
+          "confidence": 0.5
+        },
+        {
+          "text": "afford",
+          "start_ms": 112703,
+          "end_ms": 112917,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 112917,
+          "end_ms": 112988,
+          "confidence": 0.5
+        },
+        {
+          "text": "pay",
+          "start_ms": 112988,
+          "end_ms": 113095,
+          "confidence": 0.5
+        },
+        {
+          "text": "everything.",
+          "start_ms": 113095,
+          "end_ms": 113480,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "bbc7b20a6f114d89a706e9b1dcfe1011",
+    "text_for_tts": "Мне жаль, саме тоді, і саме в цей момент.",
+    "tts_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "final_tts_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "voice_input": "Мне жаль, саме тоді, і саме в цей момент.",
+    "semantic_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "semantic_engine_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "grammar_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "timing_text": "Мне жаль, саме тоді, і саме в цей момент.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Мне жаль.",
+    "tts_text_hash": "c22fa7c0f2ba",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 107480,
+    "end_ms": 111480,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 21,
+    "text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "plain_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "translation_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "final_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "file": null,
+    "approved_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "original": "I lost my job. I lost the house. I couldn't afford to pay everything. And you know what like people like me it's tough to get out of situations like this.",
+    "source_word_map": {
+      "segment_index": 21,
+      "segment_start_ms": 111480,
+      "segment_end_ms": 117480,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "And",
+          "start_ms": 113480,
+          "end_ms": 113656,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 113656,
+          "end_ms": 113832,
+          "confidence": 0.5
+        },
+        {
+          "text": "know",
+          "start_ms": 113832,
+          "end_ms": 114067,
+          "confidence": 0.5
+        },
+        {
+          "text": "what",
+          "start_ms": 114067,
+          "end_ms": 114302,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 114302,
+          "end_ms": 114537,
+          "confidence": 0.5
+        },
+        {
+          "text": "people",
+          "start_ms": 114537,
+          "end_ms": 114889,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 114889,
+          "end_ms": 115124,
+          "confidence": 0.5
+        },
+        {
+          "text": "me",
+          "start_ms": 115124,
+          "end_ms": 115241,
+          "confidence": 0.5
+        },
+        {
+          "text": "it's",
+          "start_ms": 115241,
+          "end_ms": 115476,
+          "confidence": 0.5
+        },
+        {
+          "text": "tough",
+          "start_ms": 115476,
+          "end_ms": 115770,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 115770,
+          "end_ms": 115887,
+          "confidence": 0.5
+        },
+        {
+          "text": "get",
+          "start_ms": 115887,
+          "end_ms": 116063,
+          "confidence": 0.5
+        },
+        {
+          "text": "out",
+          "start_ms": 116063,
+          "end_ms": 116239,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 116239,
+          "end_ms": 116356,
+          "confidence": 0.5
+        },
+        {
+          "text": "situations",
+          "start_ms": 116356,
+          "end_ms": 116944,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 116944,
+          "end_ms": 117179,
+          "confidence": 0.5
+        },
+        {
+          "text": "this.",
+          "start_ms": 117179,
+          "end_ms": 117480,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "1dbd27c1d4a54e38ae189a7f5045d4da",
+    "text_for_tts": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "tts_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "final_tts_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "voice_input": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "semantic_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "semantic_engine_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "grammar_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "timing_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+    "tts_text_hash": "34ae7da20305",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 111480,
+    "end_ms": 117480,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 22,
+    "text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "plain_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "translation_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "final_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "file": null,
+    "approved_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "original": "I'm already at a disadvantage and now I'm homeless.",
+    "source_word_map": {
+      "segment_index": 22,
+      "segment_start_ms": 117880,
+      "segment_end_ms": 121880,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I'm",
+          "start_ms": 117880,
+          "end_ms": 118159,
+          "confidence": 0.5
+        },
+        {
+          "text": "already",
+          "start_ms": 118159,
+          "end_ms": 118810,
+          "confidence": 0.5
+        },
+        {
+          "text": "at",
+          "start_ms": 118810,
+          "end_ms": 118996,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 118996,
+          "end_ms": 119089,
+          "confidence": 0.5
+        },
+        {
+          "text": "disadvantage",
+          "start_ms": 119089,
+          "end_ms": 120205,
+          "confidence": 0.5
+        },
+        {
+          "text": "and",
+          "start_ms": 120205,
+          "end_ms": 120484,
+          "confidence": 0.5
+        },
+        {
+          "text": "now",
+          "start_ms": 120484,
+          "end_ms": 120763,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 120763,
+          "end_ms": 121042,
+          "confidence": 0.5
+        },
+        {
+          "text": "homeless.",
+          "start_ms": 121042,
+          "end_ms": 121880,
+          "confidence": 0.5
+        },
+        {
+          "text": "So",
+          "start_ms": 121880,
+          "end_ms": 122096,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 122096,
+          "end_ms": 122312,
+          "confidence": 0.5
+        },
+        {
+          "text": "builds",
+          "start_ms": 122312,
+          "end_ms": 122960,
+          "confidence": 0.5
+        },
+        {
+          "text": "up",
+          "start_ms": 122960,
+          "end_ms": 123176,
+          "confidence": 0.5
+        },
+        {
+          "text": "throughout",
+          "start_ms": 123176,
+          "end_ms": 124257,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 124257,
+          "end_ms": 124581,
+          "confidence": 0.5
+        },
+        {
+          "text": "time",
+          "start_ms": 124581,
+          "end_ms": 125013,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 125013,
+          "end_ms": 125337,
+          "confidence": 0.5
+        },
+        {
+          "text": "know?",
+          "start_ms": 125337,
+          "end_ms": 125880,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "bdd9b49392f647e8852a4091a803e13a",
+    "text_for_tts": "Я вже в незручному становищі, а тепер я бездомний.",
+    "tts_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "final_tts_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "voice_input": "Я вже в незручному становищі, а тепер я бездомний.",
+    "semantic_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "semantic_engine_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "grammar_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "timing_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я вже в незручному становищі, а тепер я бездомний.",
+    "tts_text_hash": "ac847476708a",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 117880,
+    "end_ms": 121880,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 23,
+    "text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "plain_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "translation_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "final_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "file": null,
+    "approved_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "original": "So it builds up throughout the time you know?",
+    "source_word_map": {
+      "segment_index": 23,
+      "segment_start_ms": 121880,
+      "segment_end_ms": 125880,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "And",
+          "start_ms": 125880,
+          "end_ms": 126130,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 126130,
+          "end_ms": 126380,
+          "confidence": 0.5
+        },
+        {
+          "text": "sorry",
+          "start_ms": 126380,
+          "end_ms": 126796,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 126796,
+          "end_ms": 126962,
+          "confidence": 0.5
+        },
+        {
+          "text": "hear",
+          "start_ms": 126962,
+          "end_ms": 127295,
+          "confidence": 0.5
+        },
+        {
+          "text": "that.",
+          "start_ms": 127295,
+          "end_ms": 127711,
+          "confidence": 0.5
+        },
+        {
+          "text": "How",
+          "start_ms": 127711,
+          "end_ms": 127961,
+          "confidence": 0.5
+        },
+        {
+          "text": "long",
+          "start_ms": 127961,
+          "end_ms": 128294,
+          "confidence": 0.5
+        },
+        {
+          "text": "have",
+          "start_ms": 128294,
+          "end_ms": 128627,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 128627,
+          "end_ms": 128877,
+          "confidence": 0.5
+        },
+        {
+          "text": "been",
+          "start_ms": 128877,
+          "end_ms": 129210,
+          "confidence": 0.5
+        },
+        {
+          "text": "out",
+          "start_ms": 129210,
+          "end_ms": 129460,
+          "confidence": 0.5
+        },
+        {
+          "text": "here?",
+          "start_ms": 129460,
+          "end_ms": 129880,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "eb66825a65024fd0b36257246b4bcfd6",
+    "text_for_tts": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "tts_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "final_tts_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "voice_input": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "semantic_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "semantic_engine_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "grammar_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "timing_text": "То як, ви знаєте, воно зростає, саме тоді, в той момент.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "То як, ви знаєте, воно зростає?",
+    "tts_text_hash": "94bad33a4c8b",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 121880,
+    "end_ms": 125880,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 24,
+    "text": "І мені шкода це чути, як довго ти тут?",
+    "plain_text": "І мені шкода це чути, як довго ти тут?",
+    "translation_text": "И мне жаль это слышать, как долго ты здесь?",
+    "final_text": "И мне жаль это слышать, как долго ты здесь?",
+    "file": null,
+    "approved_text": "И мне жаль это слышать, как долго ты здесь?",
+    "original": "And I'm sorry to hear that. How long have you been out here?",
+    "source_word_map": {
+      "segment_index": 24,
+      "segment_start_ms": 125880,
+      "segment_end_ms": 129880,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Maybe",
+          "start_ms": 129880,
+          "end_ms": 130546,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 130546,
+          "end_ms": 131079,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 131079,
+          "end_ms": 131212,
+          "confidence": 0.5
+        },
+        {
+          "text": "year.",
+          "start_ms": 131212,
+          "end_ms": 131880,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "678e391a8be142c9b1a48950e7a29ab5",
+    "original_text": "And I'm sorry to hear that. How long have you been out here?",
+    "tts_text": "І мені шкода це чути, як довго ти тут?",
+    "language_recovery": {
+      "healed": true,
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "from": "low_confidence"
+    },
+    "text_for_tts": "И мне жаль это слышать, как долго ты здесь?",
+    "final_tts_text": "І мені шкода це чути, як довго ти тут?",
+    "voice_input": "И мне жаль это слышать, как долго ты здесь?",
+    "semantic_text": "И мне жаль это слышать, как долго ты здесь?",
+    "semantic_engine_text": "И мне жаль это слышать, как долго ты здесь?",
+    "grammar_text": "И мне жаль это слышать, как долго ты здесь?",
+    "timing_text": "И мне жаль это слышать, как долго ты здесь?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "І мені шкода це чути, як довго ти тут?",
+    "tts_text_hash": "5327a894ba69",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 125880,
+    "end_ms": 129880,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 25,
+    "text": "Може рік. Заткнись. Ти вже цілий год робиш?",
+    "plain_text": "Може рік. Заткнись. Ти вже цілий год робиш?",
+    "translation_text": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "final_text": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "file": null,
+    "approved_text": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "original": "Maybe like a year. Shut up. You've been doing this for a whole year now?",
+    "source_word_map": {
+      "segment_index": 25,
+      "segment_start_ms": 129880,
+      "segment_end_ms": 133880,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Shut",
+          "start_ms": 131880,
+          "end_ms": 132066,
+          "confidence": 0.5
+        },
+        {
+          "text": "up.",
+          "start_ms": 132066,
+          "end_ms": 132205,
+          "confidence": 0.5
+        },
+        {
+          "text": "You've",
+          "start_ms": 132205,
+          "end_ms": 132484,
+          "confidence": 0.5
+        },
+        {
+          "text": "been",
+          "start_ms": 132484,
+          "end_ms": 132670,
+          "confidence": 0.5
+        },
+        {
+          "text": "doing",
+          "start_ms": 132670,
+          "end_ms": 132902,
+          "confidence": 0.5
+        },
+        {
+          "text": "this",
+          "start_ms": 132902,
+          "end_ms": 133088,
+          "confidence": 0.5
+        },
+        {
+          "text": "for",
+          "start_ms": 133088,
+          "end_ms": 133227,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 133227,
+          "end_ms": 133273,
+          "confidence": 0.5
+        },
+        {
+          "text": "whole",
+          "start_ms": 133273,
+          "end_ms": 133505,
+          "confidence": 0.5
+        },
+        {
+          "text": "year",
+          "start_ms": 133505,
+          "end_ms": 133691,
+          "confidence": 0.5
+        },
+        {
+          "text": "now?",
+          "start_ms": 133691,
+          "end_ms": 133880,
+          "confidence": 0.5
+        },
+        {
+          "text": "Oh",
+          "start_ms": 133880,
+          "end_ms": 134094,
+          "confidence": 0.5
+        },
+        {
+          "text": "well",
+          "start_ms": 134094,
+          "end_ms": 134522,
+          "confidence": 0.5
+        },
+        {
+          "text": "look",
+          "start_ms": 134522,
+          "end_ms": 134950,
+          "confidence": 0.5
+        },
+        {
+          "text": "Jonathan.",
+          "start_ms": 134950,
+          "end_ms": 135914,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'm",
+          "start_ms": 135914,
+          "end_ms": 136235,
+          "confidence": 0.5
+        },
+        {
+          "text": "going",
+          "start_ms": 136235,
+          "end_ms": 136770,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 136770,
+          "end_ms": 136984,
+          "confidence": 0.5
+        },
+        {
+          "text": "let",
+          "start_ms": 136984,
+          "end_ms": 137305,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 137305,
+          "end_ms": 137626,
+          "confidence": 0.5
+        },
+        {
+          "text": "go",
+          "start_ms": 137626,
+          "end_ms": 137840,
+          "confidence": 0.5
+        },
+        {
+          "text": "here",
+          "start_ms": 137840,
+          "end_ms": 138268,
+          "confidence": 0.5
+        },
+        {
+          "text": "but",
+          "start_ms": 138268,
+          "end_ms": 138589,
+          "confidence": 0.5
+        },
+        {
+          "text": "before",
+          "start_ms": 138589,
+          "end_ms": 139231,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 139231,
+          "end_ms": 139338,
+          "confidence": 0.5
+        },
+        {
+          "text": "do...",
+          "start_ms": 139338,
+          "end_ms": 139880,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "110f93c9e21743ea9693522de7538e35",
+    "original_text": "Maybe like a year. Shut up. You've been doing this for a whole year now?",
+    "tts_text": "Може рік. Заткнись. Ти вже цілий год робиш?",
+    "language_recovery": {
+      "healed": true,
+      "actions": [
+        "ruism_rewrite",
+        "revalidate"
+      ],
+      "from": "low_confidence"
+    },
+    "text_for_tts": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "final_tts_text": "Може рік. Заткнись. Ти вже цілий год робиш?",
+    "voice_input": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "semantic_text": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "semantic_engine_text": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "grammar_text": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "timing_text": "Може рік. Заткнись. Ты уже целый год делаешь?",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Може рік. Заткнись. Ти вже цілий год робиш?",
+    "tts_text_hash": "38398516274f",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 129880,
+    "end_ms": 133880,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 26,
+    "text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "plain_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "translation_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "final_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "file": null,
+    "approved_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "original": "Oh well look Jonathan. I'm going to let you go here but before I do...",
+    "source_word_map": {
+      "segment_index": 26,
+      "segment_start_ms": 133880,
+      "segment_end_ms": 139880,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "What",
+          "start_ms": 139880,
+          "end_ms": 140108,
+          "confidence": 0.5
+        },
+        {
+          "text": "was",
+          "start_ms": 140108,
+          "end_ms": 140279,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 140279,
+          "end_ms": 140450,
+          "confidence": 0.5
+        },
+        {
+          "text": "last",
+          "start_ms": 140450,
+          "end_ms": 140678,
+          "confidence": 0.5
+        },
+        {
+          "text": "time",
+          "start_ms": 140678,
+          "end_ms": 140906,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 140906,
+          "end_ms": 141077,
+          "confidence": 0.5
+        },
+        {
+          "text": "slept",
+          "start_ms": 141077,
+          "end_ms": 141362,
+          "confidence": 0.5
+        },
+        {
+          "text": "in",
+          "start_ms": 141362,
+          "end_ms": 141476,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 141476,
+          "end_ms": 141647,
+          "confidence": 0.5
+        },
+        {
+          "text": "bed?",
+          "start_ms": 141647,
+          "end_ms": 141880,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "0ddc7959753a449784f4c497bd0cc0c6",
+    "text_for_tts": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "tts_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "final_tts_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "voice_input": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "semantic_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "semantic_engine_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "grammar_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "timing_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як. Добре Джонатане.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як...",
+    "tts_text_hash": "753d90b0a214",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 133880,
+    "end_ms": 139880,
+    "slot_ms": 6000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 27,
+    "text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "plain_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "translation_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "final_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "file": null,
+    "approved_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "original": "What was the last time you slept in the bed? A year.",
+    "source_word_map": {
+      "segment_index": 27,
+      "segment_start_ms": 139880,
+      "segment_end_ms": 145960,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "A",
+          "start_ms": 141880,
+          "end_ms": 142560,
+          "confidence": 0.5
+        },
+        {
+          "text": "year.",
+          "start_ms": 142560,
+          "end_ms": 145960,
+          "confidence": 0.5
+        },
+        {
+          "text": "Alright",
+          "start_ms": 145960,
+          "end_ms": 146460,
+          "confidence": 0.5
+        },
+        {
+          "text": "that's",
+          "start_ms": 146460,
+          "end_ms": 146888,
+          "confidence": 0.5
+        },
+        {
+          "text": "all",
+          "start_ms": 146888,
+          "end_ms": 147102,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 147102,
+          "end_ms": 147173,
+          "confidence": 0.5
+        },
+        {
+          "text": "need",
+          "start_ms": 147173,
+          "end_ms": 147458,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 147458,
+          "end_ms": 147600,
+          "confidence": 0.5
+        },
+        {
+          "text": "hear.",
+          "start_ms": 147600,
+          "end_ms": 147960,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "00e3d1c5bc614139b48ee59cbdb16c27",
+    "text_for_tts": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "tts_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "final_tts_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "voice_input": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "semantic_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "semantic_engine_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "grammar_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "timing_text": "Який був останній раз, коли ти спав у ліжку, саме тоді, і саме в цей момент.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Який був останній раз, коли ти спав у ліжку?",
+    "tts_text_hash": "9fb60ced7304",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 139880,
+    "end_ms": 145960,
+    "slot_ms": 6080,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 28,
+    "text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "plain_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "translation_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "final_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "file": null,
+    "approved_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "original": "Alright that's all I need to hear. Before you go I want to make sure...",
+    "source_word_map": {
+      "segment_index": 28,
+      "segment_start_ms": 145960,
+      "segment_end_ms": 150360,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "Before",
+          "start_ms": 148360,
+          "end_ms": 148773,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 148773,
+          "end_ms": 148979,
+          "confidence": 0.5
+        },
+        {
+          "text": "go",
+          "start_ms": 148979,
+          "end_ms": 149116,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 149116,
+          "end_ms": 149184,
+          "confidence": 0.5
+        },
+        {
+          "text": "want",
+          "start_ms": 149184,
+          "end_ms": 149459,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 149459,
+          "end_ms": 149596,
+          "confidence": 0.5
+        },
+        {
+          "text": "make",
+          "start_ms": 149596,
+          "end_ms": 149871,
+          "confidence": 0.5
+        },
+        {
+          "text": "sure...",
+          "start_ms": 149871,
+          "end_ms": 150360,
+          "confidence": 0.5
+        },
+        {
+          "text": "You",
+          "start_ms": 150360,
+          "end_ms": 150675,
+          "confidence": 0.5
+        },
+        {
+          "text": "like",
+          "start_ms": 150675,
+          "end_ms": 151096,
+          "confidence": 0.5
+        },
+        {
+          "text": "greens",
+          "start_ms": 151096,
+          "end_ms": 151727,
+          "confidence": 0.5
+        },
+        {
+          "text": "right?",
+          "start_ms": 151727,
+          "end_ms": 152360,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "2ed8e8d506ca4c1e9f5abc7441e3f7a0",
+    "text_for_tts": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "tts_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "final_tts_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "voice_input": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "semantic_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "semantic_engine_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "grammar_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "timing_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що...",
+    "tts_text_hash": "ed1b585cbec7",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 145960,
+    "end_ms": 150360,
+    "slot_ms": 4400,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 29,
+    "text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "plain_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "translation_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "final_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "file": null,
+    "approved_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "original": "You like greens right? I'm not a big greens person.",
+    "source_word_map": {
+      "segment_index": 29,
+      "segment_start_ms": 150360,
+      "segment_end_ms": 154360,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I'm",
+          "start_ms": 152360,
+          "end_ms": 152620,
+          "confidence": 0.5
+        },
+        {
+          "text": "not",
+          "start_ms": 152620,
+          "end_ms": 152880,
+          "confidence": 0.5
+        },
+        {
+          "text": "a",
+          "start_ms": 152880,
+          "end_ms": 152966,
+          "confidence": 0.5
+        },
+        {
+          "text": "big",
+          "start_ms": 152966,
+          "end_ms": 153226,
+          "confidence": 0.5
+        },
+        {
+          "text": "greens",
+          "start_ms": 153226,
+          "end_ms": 153747,
+          "confidence": 0.5
+        },
+        {
+          "text": "person.",
+          "start_ms": 153747,
+          "end_ms": 154360,
+          "confidence": 0.5
+        },
+        {
+          "text": "I",
+          "start_ms": 154360,
+          "end_ms": 154400,
+          "confidence": 0.5
+        },
+        {
+          "text": "just",
+          "start_ms": 154400,
+          "end_ms": 154560,
+          "confidence": 0.5
+        },
+        {
+          "text": "go",
+          "start_ms": 154560,
+          "end_ms": 154640,
+          "confidence": 0.5
+        },
+        {
+          "text": "ahead",
+          "start_ms": 154640,
+          "end_ms": 154840,
+          "confidence": 0.5
+        },
+        {
+          "text": "and",
+          "start_ms": 154840,
+          "end_ms": 154960,
+          "confidence": 0.5
+        },
+        {
+          "text": "give",
+          "start_ms": 154960,
+          "end_ms": 155120,
+          "confidence": 0.5
+        },
+        {
+          "text": "them",
+          "start_ms": 155120,
+          "end_ms": 155280,
+          "confidence": 0.5
+        },
+        {
+          "text": "out",
+          "start_ms": 155280,
+          "end_ms": 155400,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 155400,
+          "end_ms": 155480,
+          "confidence": 0.5
+        },
+        {
+          "text": "whoever",
+          "start_ms": 155480,
+          "end_ms": 155760,
+          "confidence": 0.5
+        },
+        {
+          "text": "needs",
+          "start_ms": 155760,
+          "end_ms": 155960,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 155960,
+          "end_ms": 156040,
+          "confidence": 0.5
+        },
+        {
+          "text": "the",
+          "start_ms": 156040,
+          "end_ms": 156160,
+          "confidence": 0.5
+        },
+        {
+          "text": "most.",
+          "start_ms": 156160,
+          "end_ms": 156360,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "ecd3a767675943e1b3983ae7bfe1c77f",
+    "text_for_tts": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "tts_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "final_tts_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "voice_input": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "semantic_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "semantic_engine_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "grammar_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "timing_text": "Я не великий зелений, саме тоді, і саме в цей момент.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я не великий зелений.",
+    "tts_text_hash": "13842bb8e1f3",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 150360,
+    "end_ms": 154360,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 30,
+    "text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "plain_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "translation_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "final_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "file": null,
+    "approved_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "original": "I just go ahead and give them out to whoever needs it the most. But I'll give it to you for today then.",
+    "source_word_map": {
+      "segment_index": 30,
+      "segment_start_ms": 154360,
+      "segment_end_ms": 158360,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "But",
+          "start_ms": 156360,
+          "end_ms": 156553,
+          "confidence": 0.5
+        },
+        {
+          "text": "I'll",
+          "start_ms": 156553,
+          "end_ms": 156811,
+          "confidence": 0.5
+        },
+        {
+          "text": "give",
+          "start_ms": 156811,
+          "end_ms": 157069,
+          "confidence": 0.5
+        },
+        {
+          "text": "it",
+          "start_ms": 157069,
+          "end_ms": 157198,
+          "confidence": 0.5
+        },
+        {
+          "text": "to",
+          "start_ms": 157198,
+          "end_ms": 157327,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 157327,
+          "end_ms": 157520,
+          "confidence": 0.5
+        },
+        {
+          "text": "for",
+          "start_ms": 157520,
+          "end_ms": 157713,
+          "confidence": 0.5
+        },
+        {
+          "text": "today",
+          "start_ms": 157713,
+          "end_ms": 158035,
+          "confidence": 0.5
+        },
+        {
+          "text": "then.",
+          "start_ms": 158035,
+          "end_ms": 158360,
+          "confidence": 0.5
+        },
+        {
+          "text": "It's",
+          "start_ms": 158360,
+          "end_ms": 158893,
+          "confidence": 0.5
+        },
+        {
+          "text": "just",
+          "start_ms": 158893,
+          "end_ms": 159426,
+          "confidence": 0.5
+        },
+        {
+          "text": "$3,000.",
+          "start_ms": 159426,
+          "end_ms": 160360,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "f02c2a3fa7374c7f91f8440b5fd1a6ef",
+    "text_for_tts": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "tts_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "final_tts_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "voice_input": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "semantic_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "semantic_engine_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "grammar_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "timing_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я просто віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+    "tts_text_hash": "3d6a35d1f95c",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 154360,
+    "end_ms": 158360,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  },
+  {
+    "index": 31,
+    "text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "plain_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "translation_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "final_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "file": null,
+    "approved_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "original": "It's just $3,000. I really hope that can help you in some type of way man.",
+    "source_word_map": {
+      "segment_index": 31,
+      "segment_start_ms": 158360,
+      "segment_end_ms": 162360,
+      "timing_source": "estimated",
+      "words": [
+        {
+          "text": "I",
+          "start_ms": 160360,
+          "end_ms": 160405,
+          "confidence": 0.5
+        },
+        {
+          "text": "really",
+          "start_ms": 160405,
+          "end_ms": 160677,
+          "confidence": 0.5
+        },
+        {
+          "text": "hope",
+          "start_ms": 160677,
+          "end_ms": 160858,
+          "confidence": 0.5
+        },
+        {
+          "text": "that",
+          "start_ms": 160858,
+          "end_ms": 161039,
+          "confidence": 0.5
+        },
+        {
+          "text": "can",
+          "start_ms": 161039,
+          "end_ms": 161175,
+          "confidence": 0.5
+        },
+        {
+          "text": "help",
+          "start_ms": 161175,
+          "end_ms": 161356,
+          "confidence": 0.5
+        },
+        {
+          "text": "you",
+          "start_ms": 161356,
+          "end_ms": 161492,
+          "confidence": 0.5
+        },
+        {
+          "text": "in",
+          "start_ms": 161492,
+          "end_ms": 161582,
+          "confidence": 0.5
+        },
+        {
+          "text": "some",
+          "start_ms": 161582,
+          "end_ms": 161763,
+          "confidence": 0.5
+        },
+        {
+          "text": "type",
+          "start_ms": 161763,
+          "end_ms": 161944,
+          "confidence": 0.5
+        },
+        {
+          "text": "of",
+          "start_ms": 161944,
+          "end_ms": 162034,
+          "confidence": 0.5
+        },
+        {
+          "text": "way",
+          "start_ms": 162034,
+          "end_ms": 162170,
+          "confidence": 0.5
+        },
+        {
+          "text": "man.",
+          "start_ms": 162170,
+          "end_ms": 162360,
+          "confidence": 0.5
+        }
+      ],
+      "pauses_ms": []
+    },
+    "segment_id": "d8cb027ce2f846bd869abff3e42925e3",
+    "text_for_tts": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "tts_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "final_tts_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "voice_input": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "semantic_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "semantic_engine_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "grammar_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "timing_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "spoken_text_source": "final_tts_text",
+    "translated_text": "Я дуже сподіваюся, що це допоможе вам у чомусь.",
+    "tts_text_hash": "44225fb3e300",
+    "final_tts_source": "pre_tts_fitted_snapshot",
+    "start_ms": 158360,
+    "end_ms": 162360,
+    "slot_ms": 4000,
+    "assigned_voice": "uk_UA-mykyta-high",
+    "voice": "uk_UA-mykyta-high",
+    "simple_voice_locked": true,
+    "tts_lang_hint": "uk",
+    "tts_cyrillic_ratio": 1.0
+  }
+]

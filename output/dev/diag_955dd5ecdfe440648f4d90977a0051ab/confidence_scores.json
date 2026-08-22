@@ -1,0 +1,103 @@
+{
+  "task_id": "955dd5ecdfe440648f4d90977a0051ab",
+  "stage": "PRE_TTS",
+  "created_at": "2026-08-18T13:40:05.752860+00:00",
+  "rows": [
+    {
+      "index": 0,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.7129,
+      "target_confidence": 0.2871,
+      "scores": {
+        "uk": 0.2871,
+        "ru": 0.7129,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 9,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.6289,
+      "target_confidence": 0.3711,
+      "scores": {
+        "uk": 0.3711,
+        "ru": 0.6289,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 16,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.575,
+      "target_confidence": 0.425,
+      "scores": {
+        "uk": 0.425,
+        "ru": 0.575,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 19,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.6461,
+      "target_confidence": 0.3539,
+      "scores": {
+        "uk": 0.3539,
+        "ru": 0.6461,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 24,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.7584,
+      "target_confidence": 0.2416,
+      "scores": {
+        "uk": 0.2416,
+        "ru": 0.7584,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 25,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.6112,
+      "target_confidence": 0.3888,
+      "scores": {
+        "uk": 0.3888,
+        "ru": 0.6112,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    }
+  ]
+}

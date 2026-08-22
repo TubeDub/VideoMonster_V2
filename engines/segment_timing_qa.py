@@ -118,7 +118,7 @@ def clamp_timeline_to_video_duration(
     timing_map: list | None,
     video_duration_ms: int,
     *,
-    min_slot_ms: int = 800,
+    min_slot_ms: int = 850,
     min_gap_ms: int = 40,
 ) -> list[dict[str, Any]]:
     """Keep every segment inside [0, video_duration_ms].
@@ -1291,6 +1291,36 @@ def build_final_dub_qa_report(task_info: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
+    # Stage 31: last 2–3 lines should still voice franchise / Lucas if source had it.
+    try:
+        from engines.text_slot_fit import ending_keeps_franchise_idea
+
+        speakable = [
+            s
+            for s in (segments_data or [])
+            if isinstance(s, dict) and s.get("merged_into") is None
+        ]
+        for seg in speakable[-3:]:
+            src = str(
+                seg.get("source_text")
+                or seg.get("original_text")
+                or seg.get("en_text")
+                or ""
+            )
+            final = str(
+                seg.get("final_tts_text") or seg.get("plain_text") or seg.get("text") or ""
+            )
+            if src and final and not ending_keeps_franchise_idea(src, final):
+                issues.append(
+                    {
+                        "index": seg.get("index"),
+                        "code": "ending_franchise_missing",
+                        "severity": "warning",
+                    }
+                )
+    except Exception:
+        pass
+
     report = {
         "ok": ok,
         "issue_count": len(issues),
@@ -1304,9 +1334,138 @@ def build_final_dub_qa_report(task_info: dict[str, Any]) -> dict[str, Any]:
         "track_duration_ms": track_ms or None,
         "tail_gap_ms": tail_gap_ms,
     }
-    if video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
+    summary = _tubedub_qa_summary(task_info, segments_data, issues)
+    report.update(summary)
+    if summary.get("forbid_success"):
+        ok = False
+        report["ok"] = False
+        report["final_status"] = summary.get("final_status") or "needs_manual_review"
+    elif video_ms > 0 and track_ms > 0 and tail_gap_ms > 500:
         report["final_status"] = "track_shorter_than_video"
     return report
+
+
+def looks_like_silent_truncation(seg: dict[str, Any]) -> bool:
+    """True when fit used ellipsis / substring chop instead of an honest rewrite."""
+    if not isinstance(seg, dict):
+        return False
+    spoken = str(
+        seg.get("final_tts_text") or seg.get("tts_text") or seg.get("text") or ""
+    ).strip()
+    owned = str(
+        seg.get("translated_text")
+        or seg.get("plain_text")
+        or seg.get("final_text")
+        or ""
+    ).strip()
+    if spoken.endswith("...") and owned and spoken.rstrip(".") != owned.rstrip("."):
+        prefix = spoken.rstrip(".").strip()
+        if prefix and prefix in owned and len(spoken) < len(owned) * 0.9:
+            reason = str(seg.get("text_adaptation_reason") or "")
+            if not reason or "truncat" in reason.lower() or reason in ("trim", "substring"):
+                return True
+    if owned and spoken and owned.startswith(spoken) and 0 < len(spoken) < len(owned) * 0.85:
+        if str(seg.get("text_adaptation_reason") or "") in ("", "trim", "truncate", "substring"):
+            if not seg.get("meaning_fit_applied") and not seg.get("dsal_applied"):
+                return True
+    return False
+
+
+HARD_OVERFLOW_MS = 350
+
+
+def _tubedub_qa_summary(
+    task_info: dict[str, Any],
+    segments_data: list,
+    issues: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """TZ §34 QA counters + §21/§35 SUCCESS forbidden flags."""
+    from engines.pipeline_integrity.segment_normalizer import MIN_SLOT_MS, is_micro_or_fragment
+
+    live = [
+        s
+        for s in (segments_data or [])
+        if isinstance(s, dict) and s.get("merged_into") is None and not s.get("archived")
+    ]
+    micro = 0
+    residual = 0
+    identity_n = 0
+    text_rev = 0
+    tts_rev = 0
+    trunc_n = 0
+    hard_ov = 0
+    atempo_n = 0
+    duck_n = 0
+    missing_audio = 0
+    for seg in live:
+        slot = int(seg.get("slot_ms") or 0)
+        text = str(seg.get("plain_text") or seg.get("text") or "")
+        if is_micro_or_fragment(text, slot, min_ms=MIN_SLOT_MS):
+            micro += 1
+        ov = int(seg.get("overflow_ms") or seg.get("residual_overflow_ms") or 0)
+        if ov > 0:
+            residual += 1
+        if ov > HARD_OVERFLOW_MS:
+            hard_ov += 1
+            seg["sync_status"] = "SYNC_OVERFLOW_REMAINING"
+            seg["needs_manual_review"] = True
+        if (
+            seg.get("identity_mismatch")
+            or seg.get("identity_shift")
+            or (seg.get("identity_guard_violation"))
+        ):
+            identity_n += 1
+        if seg.get("adaptation_uuid") or seg.get("translation_uuid"):
+            text_rev += 1
+        if seg.get("tts_uuid"):
+            tts_rev += 1
+        if looks_like_silent_truncation(seg) or seg.get("voice_truncated"):
+            trunc_n += 1
+        try:
+            if abs(float(seg.get("atempo") or 1.0) - 1.0) > 0.001:
+                atempo_n += 1
+        except (TypeError, ValueError):
+            pass
+        if not str(seg.get("file") or seg.get("tts_file_path") or "").strip():
+            if not (seg.get("silence_pad") or seg.get("audio_padded")):
+                missing_audio += 1
+    mix = task_info.get("mix_volumes") or {}
+    if mix.get("ducking_enabled") or float(mix.get("original_volume") or 0) > 0.001:
+        duck_n = 1
+    deleted = list(task_info.get("cleanup_deleted_files") or [])
+    preserved = list(task_info.get("cleanup_preserved_files") or [])
+    cu = task_info.get("cleanup_engine") or task_info.get("storage_cleanup") or {}
+    if isinstance(cu, dict):
+        deleted = deleted or list(cu.get("removed") or cu.get("cleanup_deleted_files") or [])
+        preserved = preserved or list(
+            cu.get("preserved") or cu.get("cleanup_preserved_files") or []
+        )
+
+    forbid = bool(identity_n or trunc_n or hard_ov)
+    final_status = "ok"
+    if missing_audio:
+        final_status = "ok_with_pads"
+    if forbid:
+        final_status = "needs_manual_review"
+    if identity_n:
+        final_status = "identity_mismatch"
+
+    return {
+        "segment_count": len(live),
+        "micro_slot_count": micro,
+        "residual_overflow_segments": residual,
+        "identity_mismatch_count": identity_n,
+        "text_revision_count": text_rev,
+        "tts_revision_count": tts_rev,
+        "truncated_segment_count": trunc_n,
+        "hard_overflow_count": hard_ov,
+        "atempo_adjusted_count": atempo_n,
+        "source_ducking_count": duck_n,
+        "cleanup_deleted_files": deleted,
+        "cleanup_preserved_files": preserved,
+        "forbid_success": forbid,
+        "final_status": final_status,
+    }
 
 
 def _segment_algorithm_reason(seg: dict[str, Any], timing_aware: dict[str, Any]) -> str:
@@ -1421,42 +1580,70 @@ def _build_openddf_tts_pipeline_block(
 
     _task_id_for_lookup = str(task_info.get("task_id") or "").strip()
 
-    def _deep_resolve(seg_or_name: Any) -> _Path | None:
-        """Try session-aware resolver first, then closed_loop, then shallow."""
-        # Extract candidate name from seg dict or accept a raw name.
-        if isinstance(seg_or_name, dict):
-            for k in ("resolved_path", "fitted_file", "file", "tts_file_path"):
-                v = seg_or_name.get(k)
-                if v:
-                    seg_or_name = v
-                    break
-        raw = str(seg_or_name or "").strip()
-        if not raw:
+    def _deep_resolve_one(raw: Any) -> _Path | None:
+        """Resolve a single path string; never assume the first key is live."""
+        raw_s = str(raw or "").strip()
+        if not raw_s:
             return None
-        p = _Path(raw)
-        if p.is_file():
-            return p
-        # Session-adapter rglob under session_dir (fast for a few dozen files).
+        p = _Path(raw_s)
+        try:
+            if p.is_file() and p.stat().st_size >= int(MIN_AUDIO_BYTES):
+                return p
+        except OSError:
+            pass
         if _resolve_session_audio is not None:
             try:
-                cand = _resolve_session_audio(raw, task_info=task_info)
+                cand = _resolve_session_audio(raw_s, task_info=task_info)
                 if cand and cand.is_file():
-                    return cand
+                    try:
+                        if cand.stat().st_size >= int(MIN_AUDIO_BYTES):
+                            return cand
+                    except OSError:
+                        return cand
             except Exception:
                 pass
-        # Explicit fallbacks: session_dir/closed_loop/<task_id>/basename
         if base is not None:
             for sub in (
+                _Path("closed_loop") / _task_id_for_lookup / "pause" / p.name
+                if _task_id_for_lookup
+                else None,
                 _Path("closed_loop") / _task_id_for_lookup / p.name
                 if _task_id_for_lookup
                 else _Path(p.name),
+                _Path("pause") / p.name,
                 _Path(p.name),
             ):
                 if sub is None:
                     continue
                 cand = base / sub
-                if cand.is_file():
-                    return cand
+                try:
+                    if cand.is_file() and cand.stat().st_size >= int(MIN_AUDIO_BYTES):
+                        return cand
+                except OSError:
+                    continue
+        return None
+
+    def _deep_resolve(seg_or_name: Any) -> _Path | None:
+        """Try every path key until a live file is found (diag 2286c82f)."""
+        raws: list[Any] = []
+        if isinstance(seg_or_name, dict):
+            try:
+                from engines.pipeline_integrity.audio_presence import (
+                    iter_segment_audio_candidates as _iter_cands,
+                )
+
+                raws = list(_iter_cands(seg_or_name))
+            except Exception:
+                for k in ("fitted_file", "file", "tts_file_path", "resolved_path"):
+                    v = seg_or_name.get(k)
+                    if v:
+                        raws.append(v)
+        else:
+            raws = [seg_or_name]
+        for raw in raws:
+            hit = _deep_resolve_one(raw)
+            if hit is not None:
+                return hit
         return None
 
     for idx, seg in enumerate(segments_data):
@@ -2497,12 +2684,26 @@ def build_openddf_segment_diagnostics(
             _rewrite_usage["requires_llm_adaptation"] = True
 
         # Recompute overflow from real slot + TTS (ignore stale overflow when slot was 0).
+        # If speech was hard-trimmed, count trimmed-ms so overflow is not reported as 0.
+        _trimmed_ms = 0
+        try:
+            _tm = seg.get("timing_meta") if isinstance(seg.get("timing_meta"), dict) else {}
+            _trimmed_ms = int(
+                _tm.get("speech_trimmed_ms")
+                or seg.get("speech_trimmed_ms")
+                or 0
+            )
+        except (TypeError, ValueError):
+            _trimmed_ms = 0
         if slot_ms > 0 and actual_ms > 0:
-            overflow_ms = max(0, int(actual_ms) - int(slot_ms))
+            overflow_ms = max(0, int(actual_ms) - int(slot_ms), _trimmed_ms)
             overflow_pct = round(100.0 * overflow_ms / max(slot_ms, 1), 1)
             slot_overflow = overflow_ms > DURATION_TOLERANCE_MS
         else:
-            overflow_ms = int(seg.get("overflow_ms") or 0) if slot_ms > 0 else 0
+            overflow_ms = max(
+                int(seg.get("overflow_ms") or 0) if slot_ms > 0 else 0,
+                _trimmed_ms,
+            )
             overflow_pct = float(seg.get("overflow_pct") or 0.0) if slot_ms > 0 else 0.0
             slot_overflow = bool(seg.get("slot_overflow")) if slot_ms > 0 else False
 

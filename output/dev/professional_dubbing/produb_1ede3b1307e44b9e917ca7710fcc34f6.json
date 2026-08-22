@@ -1,0 +1,2061 @@
+{
+  "meta": {
+    "enabled": true,
+    "task_id": "1ede3b1307e44b9e917ca7710fcc34f6",
+    "groups": 32,
+    "style_id": "professional",
+    "elapsed_sec": 2.833
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "indices": [
+        0
+      ],
+      "voice_hint": {},
+      "plain_text": "Гей, чувак, ти чудово справляєшся. Ось долар. Долар? Ти серйозно?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><break time=\"466ms\"/>Гей,<break time=\"350ms\"/> чувак,<break time=\"256ms\"/> ти чудово справляєшся.<break time=\"350ms\"/> <emphasis level=\"reduced\">Ось</emphasis> долар.<break time=\"350ms\"/> <emphasis level=\"reduced\">Долар</emphasis>?<break time=\"350ms\"/> Ти серйозно?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-5%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 466,
+      "pauses": [
+        {
+          "before": "start",
+          "ms": 466,
+          "type": "source_lead"
+        },
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 256,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Ось",
+          "type": "name"
+        },
+        {
+          "word": "Долар",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 5000,
+      "est_ms_before": 4814,
+      "est_ms_after": 7650,
+      "fill_percent": 153.0,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4278,
+        "slot_ms": 5000,
+        "internal_gaps_ms": [
+          466,
+          256
+        ],
+        "speech_ratio": 0.856,
+        "place_delay_ms": 0,
+        "lead_break_ms": 466,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 1,
+      "indices": [
+        1
+      ],
+      "voice_hint": {},
+      "plain_text": "Ти голодний, у мене є тарілка з їжею і мені вже не хочеться.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Ти голодний,<break time=\"220ms\"/> у мене є тарілка з їжею і мені вже не хочеться.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-8%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 5000,
+      "est_ms_before": 5000,
+      "est_ms_after": 6015,
+      "fill_percent": 120.3,
+      "underfill": false,
+      "decisions": [
+        "natural rate -8%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3784,
+        "slot_ms": 5000,
+        "internal_gaps_ms": [
+          84,
+          173,
+          116,
+          135,
+          509,
+          90,
+          109
+        ],
+        "speech_ratio": 0.757,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 2,
+      "indices": [
+        2
+      ],
+      "voice_hint": {},
+      "plain_text": "І я не хочу викидати його геть. Ти не проти? Я заберу все, що у тебе є.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">І я не хочу викидати його геть.<break time=\"350ms\"/> Ти не проти?<break time=\"350ms\"/> Я заберу все,<break time=\"184ms\"/> що у тебе є.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4400,
+      "est_ms_before": 6538,
+      "est_ms_after": 7772,
+      "fill_percent": 176.6,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 148.6% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 150,
+        "speech_ms": 4016,
+        "slot_ms": 4400,
+        "internal_gaps_ms": [
+          92,
+          142
+        ],
+        "speech_ratio": 0.913,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 3,
+      "indices": [
+        3
+      ],
+      "voice_hint": {},
+      "plain_text": "Гей, чувак швидко сідай. Я з тобою. Добре?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Гей</emphasis>,<break time=\"184ms\"/> чувак швидко сідай.<break time=\"350ms\"/> Я з тобою.<break time=\"350ms\"/> <emphasis level=\"reduced\">Добре</emphasis>?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Гей",
+          "type": "name"
+        },
+        {
+          "word": "Добре",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 2000,
+      "est_ms_before": 3111,
+      "est_ms_after": 4345,
+      "fill_percent": 217.2,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 155.6% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 1901,
+        "slot_ms": 2000,
+        "internal_gaps_ms": [
+          99
+        ],
+        "speech_ratio": 0.951,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 4,
+      "indices": [
+        4
+      ],
+      "voice_hint": {},
+      "plain_text": "Гей, мій здоровяк. Гей, швидко, чувак. Коли ти останнього разу їв? Ти виглядаєш схвильованим з цього приводу.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Гей</emphasis>,<break time=\"184ms\"/> мій здоровяк.<break time=\"350ms\"/> <emphasis level=\"reduced\">Гей</emphasis>,<break time=\"184ms\"/> швидко,<break time=\"218ms\"/> чувак.<break time=\"350ms\"/> <emphasis level=\"reduced\">Коли</emphasis> ти останнього разу їв?<break time=\"350ms\"/> Ти виглядаєш схвильованим з цього приводу.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 218,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Гей",
+          "type": "name"
+        },
+        {
+          "word": "Гей",
+          "type": "name"
+        },
+        {
+          "word": "Коли",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6000,
+      "est_ms_before": 8074,
+      "est_ms_after": 10060,
+      "fill_percent": 167.7,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 134.6% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 96,
+        "speech_ms": 5085,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          116,
+          93,
+          272,
+          103,
+          84
+        ],
+        "speech_ratio": 0.848,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 5,
+      "indices": [
+        5
+      ],
+      "voice_hint": {},
+      "plain_text": "О, напевно, вже два дні минуло.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">О,<break time=\"350ms\"/> напевно,<break time=\"220ms\"/> вже два дні минуло.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 280,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 5000,
+      "est_ms_before": 2307,
+      "est_ms_after": 3872,
+      "fill_percent": 77.4,
+      "underfill": true,
+      "decisions": [
+        "underfill 46.1% → rate -20%",
+        "place_delay 280ms from source rhythm",
+        "lead_break skipped (place_delay on timeline)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 1720,
+        "tail_silence_ms": 0,
+        "speech_ms": 2134,
+        "slot_ms": 5000,
+        "internal_gaps_ms": [
+          474,
+          103,
+          569
+        ],
+        "speech_ratio": 0.427,
+        "place_delay_ms": 280,
+        "lead_break_ms": 520,
+        "suggested_rate_slow": -2
+      }
+    },
+    {
+      "group_index": 6,
+      "indices": [
+        6
+      ],
+      "voice_hint": {},
+      "plain_text": "то зачекай, як ти маєш на увазі? Я хочу віддати це тобі.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">то зачекай,<break time=\"205ms\"/> як ти маєш на увазі?<break time=\"350ms\"/> Я хочу віддати це тобі.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-3%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 205,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4000,
+      "est_ms_before": 4615,
+      "est_ms_after": 5685,
+      "fill_percent": 142.1,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 115.4% → light faster -3% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3629,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          90,
+          149,
+          132
+        ],
+        "speech_ratio": 0.907,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 7,
+      "indices": [
+        7
+      ],
+      "voice_hint": {},
+      "plain_text": "То як ти можеш отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><break time=\"328ms\"/>То як ти можеш отримати їжу?<break time=\"350ms\"/> <emphasis level=\"reduced\">Перед</emphasis> тим,<break time=\"306ms\"/> як відкрити це,<break time=\"205ms\"/> як ти можеш дістати їжу тут,<break time=\"205ms\"/> чоловік?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-6%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 328,
+      "pauses": [
+        {
+          "before": "start",
+          "ms": 328,
+          "type": "source_lead"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 306,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 205,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 205,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Перед",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6000,
+      "est_ms_before": 6923,
+      "est_ms_after": 9187,
+      "fill_percent": 153.1,
+      "underfill": false,
+      "decisions": [
+        "natural rate -8%",
+        "overfill 115.4% → light faster -6% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 1210,
+        "speech_ms": 4203,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          328,
+          145,
+          114
+        ],
+        "speech_ratio": 0.701,
+        "place_delay_ms": 0,
+        "lead_break_ms": 328,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 8,
+      "indices": [
+        8
+      ],
+      "voice_hint": {},
+      "plain_text": "Чесно кажучи, я просто проверяю мусорные баки. Я там не знаю, їси чуже сміття.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Чесно</emphasis> кажучи,<break time=\"184ms\"/> я просто проверяю мусорные баки.<break time=\"350ms\"/> Я там не знаю,<break time=\"184ms\"/> їси чуже сміття.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-4%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Чесно",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 5777,
+      "est_ms_after": 7118,
+      "fill_percent": 177.9,
+      "underfill": false,
+      "decisions": [
+        "natural rate -10%",
+        "overfill 144.4% → light faster -4% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 707,
+        "speech_ms": 1673,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          120,
+          184,
+          117,
+          126,
+          165,
+          836
+        ],
+        "speech_ratio": 0.418,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": -2
+      }
+    },
+    {
+      "group_index": 9,
+      "indices": [
+        9
+      ],
+      "voice_hint": {},
+      "plain_text": "Давай. Так подожди, ти говоришь мені, що ти ешь чужее мусор лише для того, щоб нагодувати себе, їси чуже сміття.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Давай</emphasis>.<break time=\"350ms\"/> <emphasis level=\"reduced\">Так</emphasis> подожди,<break time=\"184ms\"/> ти говоришь мені,<break time=\"184ms\"/> що ти ешь чужее мусор лише для того,<break time=\"184ms\"/> щоб нагодувати себе,<break time=\"184ms\"/> їси чуже сміття.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-2%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 280,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Давай",
+          "type": "name"
+        },
+        {
+          "word": "Так",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6000,
+      "est_ms_before": 8296,
+      "est_ms_after": 9926,
+      "fill_percent": 165.4,
+      "underfill": false,
+      "decisions": [
+        "natural rate -8%",
+        "overfill 138.3% → light faster -2% (pauses scaled)",
+        "place_delay 280ms from source rhythm",
+        "lead_break skipped (place_delay on timeline)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 606,
+        "tail_silence_ms": 0,
+        "speech_ms": 3869,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          120,
+          98,
+          99,
+          171,
+          86,
+          97,
+          654
+        ],
+        "speech_ratio": 0.645,
+        "place_delay_ms": 280,
+        "lead_break_ms": 333,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 10,
+      "indices": [
+        10
+      ],
+      "voice_hint": {},
+      "plain_text": "Так, це нормально тут?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Так</emphasis>,<break time=\"220ms\"/> це нормально тут?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Так",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 1629,
+      "est_ms_after": 2638,
+      "fill_percent": 66.0,
+      "underfill": true,
+      "decisions": [
+        "underfill 40.7% → rate -20%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 2655,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          89,
+          337,
+          235,
+          304,
+          173,
+          137
+        ],
+        "speech_ratio": 0.664,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 11,
+      "indices": [
+        11
+      ],
+      "voice_hint": {},
+      "plain_text": "У мене немає іншого вибору. У мене немає грошей. Да.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">У мене немає іншого вибору.<break time=\"350ms\"/> У мене немає грошей.<break time=\"350ms\"/> Да.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-8%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4000,
+      "est_ms_before": 3851,
+      "est_ms_after": 5293,
+      "fill_percent": 132.3,
+      "underfill": false,
+      "decisions": [
+        "natural rate -8%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 2947,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          93,
+          160,
+          136,
+          397,
+          200
+        ],
+        "speech_ratio": 0.737,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 12,
+      "indices": [
+        12
+      ],
+      "voice_hint": {},
+      "plain_text": "Отже, зараз ви чистите вікна і скільки зазвичай дають за таку роботу?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><break time=\"500ms\"/>Отже,<break time=\"350ms\"/> зараз ви чистите вікна і скільки зазвичай дають за таку роботу?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 500,
+      "pauses": [
+        {
+          "before": "start",
+          "ms": 500,
+          "type": "source_lead"
+        },
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 6000,
+      "est_ms_before": 5111,
+      "est_ms_after": 7510,
+      "fill_percent": 125.2,
+      "underfill": true,
+      "decisions": [
+        "underfill 85.2% → rate -19%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4833,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          598,
+          100,
+          140,
+          329
+        ],
+        "speech_ratio": 0.805,
+        "place_delay_ms": 0,
+        "lead_break_ms": 500,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 13,
+      "indices": [
+        13
+      ],
+      "voice_hint": {},
+      "plain_text": "Іноді я роблю це за 10 центів. Просто будь-який хлопець..",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Іноді</emphasis> я роблю це за <emphasis level=\"reduced\">10</emphasis> центів.<break time=\"350ms\"/> <emphasis level=\"reduced\">Просто</emphasis> будь-який хлопець.<break time=\"350ms\"/>.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-10%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 144,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "10",
+          "type": "number"
+        },
+        {
+          "word": "Іноді",
+          "type": "name"
+        },
+        {
+          "word": "Просто",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 4222,
+      "est_ms_after": 5799,
+      "fill_percent": 145.0,
+      "underfill": false,
+      "decisions": [
+        "natural rate -10%",
+        "place_delay 144ms from source rhythm",
+        "lead_break skipped (place_delay on timeline)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 222,
+        "tail_silence_ms": 0,
+        "speech_ms": 2195,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          100,
+          156,
+          140,
+          553,
+          356,
+          140
+        ],
+        "speech_ratio": 0.549,
+        "place_delay_ms": 144,
+        "lead_break_ms": 240,
+        "suggested_rate_slow": -2
+      }
+    },
+    {
+      "group_index": 14,
+      "indices": [
+        14
+      ],
+      "voice_hint": {},
+      "plain_text": "Да, и дивись Джонатана, правда?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Да,<break time=\"220ms\"/> и дивись <emphasis level=\"reduced\">Джонатана</emphasis>,<break time=\"220ms\"/> правда?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джонатана",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 2296,
+      "est_ms_after": 3703,
+      "fill_percent": 92.6,
+      "underfill": true,
+      "decisions": [
+        "underfill 57.4% → rate -20%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 380,
+        "speech_ms": 2689,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          92,
+          174,
+          290,
+          250,
+          125
+        ],
+        "speech_ratio": 0.672,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 15,
+      "indices": [
+        15
+      ],
+      "voice_hint": {},
+      "plain_text": "Так. Джонатан, ти здається розумним. Ти виглядаєш молодим. Я маю на увазі, що не знаю, що пішло не так.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Так</emphasis>.<break time=\"350ms\"/> <emphasis level=\"reduced\">Джонатан</emphasis>,<break time=\"184ms\"/> ти здається розумним.<break time=\"350ms\"/> Ти виглядаєш молодим.<break time=\"350ms\"/> Я маю на увазі,<break time=\"184ms\"/> що не знаю,<break time=\"184ms\"/> що пішло не так.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Так",
+          "type": "name"
+        },
+        {
+          "word": "Джонатан",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 7629,
+      "est_ms_after": 9581,
+      "fill_percent": 239.5,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 190.7% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4000,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [],
+        "speech_ratio": 1.0,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 16,
+      "indices": [
+        16
+      ],
+      "voice_hint": {},
+      "plain_text": "Я навіть не люблю про це говорити, тому що я молодий. Мені лише 25.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><break time=\"500ms\"/>Я навіть не люблю про це говорити,<break time=\"350ms\"/> тому що<break time=\"200ms\"/> я молодий.<break time=\"350ms\"/> <emphasis level=\"reduced\">Мені</emphasis> лише <emphasis level=\"reduced\">25</emphasis>.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-14%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 500,
+      "pauses": [
+        {
+          "before": "start",
+          "ms": 500,
+          "type": "source_lead"
+        },
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "25",
+          "type": "number"
+        },
+        {
+          "word": "Мені",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6000,
+      "est_ms_before": 5384,
+      "est_ms_after": 7904,
+      "fill_percent": 131.7,
+      "underfill": true,
+      "decisions": [
+        "underfill 89.7% → rate -14%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3301,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          1846,
+          99,
+          306,
+          134,
+          125,
+          110
+        ],
+        "speech_ratio": 0.55,
+        "place_delay_ms": 0,
+        "lead_break_ms": 500,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 17,
+      "indices": [
+        17
+      ],
+      "voice_hint": {},
+      "plain_text": "Я виріс с. У них є сім'ї і все таке, і я бездомний.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Я виріс с.<break time=\"350ms\"/> У них є сім'ї і все таке,<break time=\"220ms\"/> і я бездомний.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 6400,
+      "est_ms_before": 5000,
+      "est_ms_after": 7104,
+      "fill_percent": 111.0,
+      "underfill": true,
+      "decisions": [
+        "underfill 78.1% → rate -20%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 4182,
+        "slot_ms": 6400,
+        "internal_gaps_ms": [
+          124,
+          120,
+          83,
+          234,
+          715,
+          130,
+          82,
+          647
+        ],
+        "speech_ratio": 0.653,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 18,
+      "indices": [
+        18
+      ],
+      "voice_hint": {},
+      "plain_text": "Так. чи це було щось на кшталт поганих рішень у житті?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Так</emphasis>.<break time=\"350ms\"/> чи це було щось на кшталт поганих рішень у житті?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Так",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 8000,
+      "est_ms_before": 4230,
+      "est_ms_after": 5916,
+      "fill_percent": 74.0,
+      "underfill": true,
+      "decisions": [
+        "underfill 52.9% → rate -20%",
+        "place_delay 220ms from source rhythm",
+        "lead_break skipped (place_delay on timeline)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 770,
+        "speech_ms": 4926,
+        "slot_ms": 8000,
+        "internal_gaps_ms": [
+          304,
+          742,
+          178,
+          113,
+          111,
+          624,
+          99
+        ],
+        "speech_ratio": 0.616,
+        "place_delay_ms": 0,
+        "lead_break_ms": 304,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 19,
+      "indices": [
+        19
+      ],
+      "voice_hint": {},
+      "plain_text": "Чесно кажучи, це багато. ніби я втратила свою маму.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Чесно</emphasis> кажучи,<break time=\"220ms\"/> це багато.<break time=\"350ms\"/> ніби я втратила свою маму.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Чесно",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6000,
+      "est_ms_before": 3777,
+      "est_ms_after": 5636,
+      "fill_percent": 93.9,
+      "underfill": true,
+      "decisions": [
+        "underfill 63.0% → rate -20%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 101,
+        "tail_silence_ms": 0,
+        "speech_ms": 2987,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          99,
+          578,
+          86,
+          266,
+          1008,
+          207,
+          84,
+          508
+        ],
+        "speech_ratio": 0.498,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": -2
+      }
+    },
+    {
+      "group_index": 20,
+      "indices": [
+        20
+      ],
+      "voice_hint": {},
+      "plain_text": "Мені шкода.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Мені</emphasis> шкода.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Мені",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 814,
+      "est_ms_after": 1396,
+      "fill_percent": 34.9,
+      "underfill": true,
+      "decisions": [
+        "underfill 20.4% → rate -20%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 2297,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          172,
+          264,
+          107,
+          130,
+          334,
+          141,
+          361,
+          117
+        ],
+        "speech_ratio": 0.574,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 21,
+      "indices": [
+        21
+      ],
+      "voice_hint": {},
+      "plain_text": "Я втратила роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Я втратила роботу.<break time=\"350ms\"/> Я не міг собі дозволити заплатити все,<break time=\"184ms\"/> і ви знаєте,<break time=\"184ms\"/> як люди на зразок мене важко вибратися з таких ситуацій.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-2%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 6000,
+      "est_ms_before": 9407,
+      "est_ms_after": 10684,
+      "fill_percent": 178.1,
+      "underfill": false,
+      "decisions": [
+        "natural rate -8%",
+        "overfill 156.8% → light faster -2% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3589,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          139,
+          168,
+          1128,
+          80,
+          427,
+          160,
+          115,
+          95
+        ],
+        "speech_ratio": 0.598,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 22,
+      "indices": [
+        22
+      ],
+      "voice_hint": {},
+      "plain_text": "Я вже в незручному становищі, а тепер я бездомний.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Я вже в незручному становищі,<break time=\"220ms\"/> а<break time=\"200ms\"/> тепер я бездомний.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-8%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4000,
+      "est_ms_before": 3703,
+      "est_ms_after": 4614,
+      "fill_percent": 115.3,
+      "underfill": true,
+      "decisions": [
+        "underfill 92.6% → rate -8%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 87,
+        "tail_silence_ms": 124,
+        "speech_ms": 2574,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          106,
+          427,
+          258,
+          361
+        ],
+        "speech_ratio": 0.643,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 23,
+      "indices": [
+        23
+      ],
+      "voice_hint": {},
+      "plain_text": "То як, ви знаєте, воно зростає?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">То як,<break time=\"220ms\"/> ви знаєте,<break time=\"350ms\"/> воно зростає?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4000,
+      "est_ms_before": 2307,
+      "est_ms_after": 3872,
+      "fill_percent": 96.8,
+      "underfill": true,
+      "decisions": [
+        "underfill 57.7% → rate -20%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3258,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          82,
+          523
+        ],
+        "speech_ratio": 0.815,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 24,
+      "indices": [
+        24
+      ],
+      "voice_hint": {},
+      "plain_text": "И Мені шкода це чути, як довго ти тут?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">И <emphasis level=\"reduced\">Мені</emphasis> шкода це чути,<break time=\"220ms\"/> як довго ти тут?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-17%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Мені",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 3461,
+      "est_ms_after": 4716,
+      "fill_percent": 117.9,
+      "underfill": true,
+      "decisions": [
+        "underfill 86.5% → rate -17%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 160,
+        "speech_ms": 2791,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          97,
+          952
+        ],
+        "speech_ratio": 0.698,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 25,
+      "indices": [
+        25
+      ],
+      "voice_hint": {},
+      "plain_text": "Може рік. Заткнись. Ти вже цілий рік робиш?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><break time=\"367ms\"/>Може рік.<break time=\"350ms\"/> <emphasis level=\"reduced\">Заткнись</emphasis>.<break time=\"350ms\"/> Ти вже цілий рік робиш?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 367,
+      "pauses": [
+        {
+          "before": "start",
+          "ms": 367,
+          "type": "source_lead"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Заткнись",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 3185,
+      "est_ms_after": 5522,
+      "fill_percent": 138.1,
+      "underfill": true,
+      "decisions": [
+        "underfill 79.6% → rate -20%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 2236,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          367,
+          191,
+          84,
+          1024,
+          98
+        ],
+        "speech_ratio": 0.559,
+        "place_delay_ms": 0,
+        "lead_break_ms": 367,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 26,
+      "indices": [
+        26
+      ],
+      "voice_hint": {},
+      "plain_text": "Добре, Джонатане, я тебе тут відпущу, але перед тим, як.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><break time=\"500ms\"/>Добре,<break time=\"350ms\"/> <emphasis level=\"reduced\">Джонатане</emphasis>,<break time=\"350ms\"/> я тебе тут відпущу,<break time=\"220ms\"/> але перед тим,<break time=\"220ms\"/> як.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 500,
+      "pauses": [
+        {
+          "before": "start",
+          "ms": 500,
+          "type": "source_lead"
+        },
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Джонатане",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6000,
+      "est_ms_before": 4148,
+      "est_ms_after": 7365,
+      "fill_percent": 122.8,
+      "underfill": true,
+      "decisions": [
+        "underfill 69.1% → rate -20%"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 176,
+        "speech_ms": 4063,
+        "slot_ms": 6000,
+        "internal_gaps_ms": [
+          1130,
+          446,
+          102,
+          83
+        ],
+        "speech_ratio": 0.677,
+        "place_delay_ms": 0,
+        "lead_break_ms": 500,
+        "suggested_rate_slow": 0
+      }
+    },
+    {
+      "group_index": 27,
+      "indices": [
+        27
+      ],
+      "voice_hint": {},
+      "plain_text": "Який був останній раз, коли ти спав у ліжку?",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\"><emphasis level=\"reduced\">Який</emphasis> був останній раз,<break time=\"220ms\"/> коли ти спав у ліжку?<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-20%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 280,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 220,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "Який",
+          "type": "name"
+        }
+      ],
+      "segment_ms": 6080,
+      "est_ms_before": 3461,
+      "est_ms_after": 4837,
+      "fill_percent": 79.6,
+      "underfill": true,
+      "decisions": [
+        "underfill 56.9% → rate -20%",
+        "place_delay 280ms from source rhythm",
+        "lead_break skipped (place_delay on timeline)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 706,
+        "tail_silence_ms": 0,
+        "speech_ms": 2949,
+        "slot_ms": 6080,
+        "internal_gaps_ms": [
+          86,
+          84,
+          154,
+          165,
+          138,
+          486,
+          153,
+          193
+        ],
+        "speech_ratio": 0.485,
+        "place_delay_ms": 280,
+        "lead_break_ms": 388,
+        "suggested_rate_slow": -2
+      }
+    },
+    {
+      "group_index": 28,
+      "indices": [
+        28
+      ],
+      "voice_hint": {},
+      "plain_text": "Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що..",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Я хочу,<break time=\"193ms\"/> щоб ви мене почули,<break time=\"350ms\"/> перш ніж ви підете,<break time=\"193ms\"/> я хочу переконатися,<break time=\"193ms\"/> що.<break time=\"350ms\"/>.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+0%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 193,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 350,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 193,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 193,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4400,
+      "est_ms_before": 5407,
+      "est_ms_after": 7036,
+      "fill_percent": 159.9,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 122.9% → light faster +0% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3651,
+        "slot_ms": 4400,
+        "internal_gaps_ms": [
+          115,
+          412,
+          83
+        ],
+        "speech_ratio": 0.83,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 29,
+      "indices": [
+        29
+      ],
+      "voice_hint": {},
+      "plain_text": "Я не дуже люблю зелень.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Я не дуже люблю зелень.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-19%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 220,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4000,
+      "est_ms_before": 1923,
+      "est_ms_after": 2704,
+      "fill_percent": 67.6,
+      "underfill": true,
+      "decisions": [
+        "underfill 48.1% → rate -19%",
+        "place_delay 220ms from source rhythm"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3350,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          121,
+          417,
+          112
+        ],
+        "speech_ratio": 0.838,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 30,
+      "indices": [
+        30
+      ],
+      "voice_hint": {},
+      "plain_text": "Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Я віддам їх тому,<break time=\"184ms\"/> хто цього найбільше потребує,<break time=\"184ms\"/> але я віддам його вам за сьогодні.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "+1%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": ",",
+          "ms": 184,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [],
+      "segment_ms": 4000,
+      "est_ms_before": 6074,
+      "est_ms_after": 6792,
+      "fill_percent": 169.8,
+      "underfill": false,
+      "decisions": [
+        "natural rate -5%",
+        "overfill 151.8% → light faster +1% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 3392,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          83,
+          148,
+          313
+        ],
+        "speech_ratio": 0.848,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 3
+      }
+    },
+    {
+      "group_index": 31,
+      "indices": [
+        31
+      ],
+      "voice_hint": {},
+      "plain_text": "Це лише $3, 000. Я дуже сподіваюся, що це допоможе вам у чомусь.",
+      "text_for_tts": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"uk-UA\">Це лише $<emphasis level=\"reduced\">3</emphasis>,<break time=\"190ms\"/> <emphasis level=\"reduced\">000</emphasis>.<break time=\"350ms\"/> Я дуже сподіваюся,<break time=\"190ms\"/> що це допоможе вам у чомусь.<break time=\"350ms\"/></speak>",
+      "suggested_rate": "-3%",
+      "suggested_pitch": "-2Hz",
+      "place_delay_ms": 0,
+      "lead_in_ms": 0,
+      "pauses": [
+        {
+          "after": ",",
+          "ms": 190,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        },
+        {
+          "after": ",",
+          "ms": 190,
+          "type": "punctuation"
+        },
+        {
+          "after": "sentence_end",
+          "ms": 350,
+          "type": "thought_boundary"
+        }
+      ],
+      "accents": [
+        {
+          "word": "3",
+          "type": "number"
+        },
+        {
+          "word": "000",
+          "type": "number"
+        }
+      ],
+      "segment_ms": 4000,
+      "est_ms_before": 5000,
+      "est_ms_after": 6262,
+      "fill_percent": 156.6,
+      "underfill": false,
+      "decisions": [
+        "natural rate -8%",
+        "overfill 125.0% → light faster -3% (pauses scaled)"
+      ],
+      "source_cues": {
+        "lead_silence_ms": 0,
+        "tail_silence_ms": 0,
+        "speech_ms": 2657,
+        "slot_ms": 4000,
+        "internal_gaps_ms": [
+          144,
+          164,
+          454,
+          105,
+          81,
+          142,
+          106
+        ],
+        "speech_ratio": 0.664,
+        "place_delay_ms": 0,
+        "lead_break_ms": 0,
+        "suggested_rate_slow": 0
+      }
+    }
+  ]
+}

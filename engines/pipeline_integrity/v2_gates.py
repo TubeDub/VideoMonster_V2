@@ -15,6 +15,7 @@ import os
 
 from engines.pipeline_integrity.psa_flags import (
     PSA1_FLAG_ENV,
+    identity_guard_enforce,
     identity_guard_flag,
     list_psa1_flags,
     psa_flag_enabled,
@@ -68,6 +69,11 @@ def is_v2_enabled(flag_id: str, *, default: bool = False) -> bool:
 
 def identity_guard_enabled() -> bool:
     return identity_guard_flag()
+
+
+def identity_guard_enforce_enabled() -> bool:
+    """False → IdentityGuard logs violations (shadow); True → raise."""
+    return identity_guard_enforce()
 
 
 def segment_normalizer_enabled() -> bool:

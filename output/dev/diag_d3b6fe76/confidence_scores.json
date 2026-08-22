@@ -1,0 +1,71 @@
+{
+  "task_id": "d3b6fe7611f243868878c07ec6bf5df7",
+  "stage": "STUDIO",
+  "created_at": "2026-08-18T13:00:08.873045+00:00",
+  "rows": [
+    {
+      "index": 0,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.5947,
+      "target_confidence": 0.4053,
+      "scores": {
+        "uk": 0.4053,
+        "ru": 0.5947,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 27,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.7233,
+      "target_confidence": 0.2767,
+      "scores": {
+        "uk": 0.2767,
+        "ru": 0.7233,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 33,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.5766,
+      "target_confidence": 0.4234,
+      "scores": {
+        "uk": 0.4234,
+        "ru": 0.5766,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    },
+    {
+      "index": 42,
+      "expected": "uk",
+      "detected": "ru",
+      "confidence": 0.6171,
+      "target_confidence": 0.3829,
+      "scores": {
+        "uk": 0.3829,
+        "ru": 0.6171,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "code": "low_confidence",
+      "category": "low_confidence"
+    }
+  ]
+}

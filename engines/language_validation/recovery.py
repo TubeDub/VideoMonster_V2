@@ -18,20 +18,54 @@ _TEXT_KEYS = (
     "plain_text",
     "translation_text",
     "final_text",
+    "final_tts_text",
     "text_for_tts",
     "tts_text",
     "approved_text",
     "voice_input",
+    "semantic_text",
+    "semantic_engine_text",
 )
 
 
 def _stamp_text(seg: dict[str, Any], text: str) -> None:
+    """Write recovered spoken text onto every TTS buffer, even if the key is new.
+
+    Zip 8fadb9dd: recovery updated ``text`` / ``final_tts_text`` but left
+    ``text_for_tts`` / ``voice_input`` as mixed RU; parallel TTS spoke the stale
+    buffer.
+    """
     for k in _TEXT_KEYS:
-        if k in seg or k in ("text", "plain_text", "tts_text"):
-            seg[k] = text
+        seg[k] = text
     seg["text"] = text
     seg["plain_text"] = text
     seg["tts_text"] = text
+    seg["final_tts_text"] = text
+    seg["text_for_tts"] = text
+    seg["voice_input"] = text
+
+
+def _uk_has_ru_leak(text: str, target_lang: str) -> bool:
+    if str(target_lang or "").split("-")[0].lower() != "uk":
+        return False
+    try:
+        from engines.tts_lang_lock import uk_text_has_russian_leak
+
+        return uk_text_has_russian_leak(text)
+    except Exception:
+        return False
+
+
+def _skip_tts_russian(seg: dict[str, Any]) -> None:
+    """Drop voiced Russian so LAST-RESORT/soft-pad fills silence (Stage 29)."""
+    seg["skip_tts"] = True
+    seg["tts_blocked"] = True
+    seg["tts_skip_reason"] = "russian_in_uk"
+    seg["needs_re_tts"] = True
+    seg["audio_exists"] = False
+    for k in ("file", "fitted_file", "tts_file_path", "resolved_path"):
+        if k in seg:
+            seg[k] = None
 
 
 def recover_language_issues(
@@ -70,6 +104,37 @@ def recover_language_issues(
         current = str(seg.get("text") or seg.get("plain_text") or "").strip()
         actions: list[str] = []
         candidate = current
+        if original and not str(seg.get("original_text") or "").strip():
+            seg["original_text"] = original
+
+        def _ru_leak(text: str) -> bool:
+            return _uk_has_ru_leak(text, target_lang)
+
+        # 0) EN→UK remt when STUDIO saw Russian (diag d3b6fe76 idx 27)
+        if _ru_leak(candidate) and original.strip():
+            try:
+                from engines.tts_lang_lock import force_remt_segment_no_cache
+
+                remt = force_remt_segment_no_cache(
+                    original,
+                    src_lang=source_lang or "en",
+                    tgt_lang="uk",
+                )
+                if remt and remt.strip() and not _ru_leak(remt):
+                    candidate = remt.strip()
+                    actions.append("remt_en_uk")
+            except Exception as exc:
+                actions.append(f"remt_failed:{exc}")
+        if _ru_leak(candidate):
+            try:
+                from engines.tts_lang_lock import rewrite_russian_leak_for_uk
+
+                rewritten = rewrite_russian_leak_for_uk(candidate)
+                if rewritten and rewritten != candidate and not _ru_leak(rewritten):
+                    candidate = rewritten
+                    actions.append("ruism_rewrite")
+            except Exception as exc:
+                actions.append(f"ruism_failed:{exc}")
 
         # 1) Phrase-loop deflate
         if d.category in ("phrase_loop", "meaning_collapse") or "phrase_loop" in d.reasons:
@@ -160,7 +225,7 @@ def recover_language_issues(
         }
         trace.append(row)
 
-        if recheck.ok:
+        if recheck.ok and not _ru_leak(candidate):
             _stamp_text(seg, candidate)
             seg["language_recovery"] = {
                 "healed": True,
@@ -169,6 +234,13 @@ def recover_language_issues(
             }
             healed_idx.append(idx)
             continue
+
+        # Glue / это→це must not count as healed while Russian remains
+        # (zip idx 33: «Честно говоря, це много, саме тоді.» fooled classifier).
+        if recheck.ok and _ru_leak(candidate):
+            recheck.ok = False
+            recheck.category = recheck.category or "low_confidence"
+            actions.append("reject_false_uk_glue_heal")
 
         # Persist best candidate even if still flagged (helps next stage)
         if candidate and candidate != current:
@@ -185,6 +257,29 @@ def recover_language_issues(
     hard: list[LanguageValidationDecision] = []
     soft: list[LanguageValidationDecision] = []
     for d in still_bad:
+        idx = int(d.index if d.index is not None else -1)
+        leftover = ""
+        if 0 <= idx < len(segments_data) and isinstance(segments_data[idx], dict):
+            leftover = str(
+                segments_data[idx].get("text")
+                or segments_data[idx].get("plain_text")
+                or d.text_checked
+                or ""
+            )
+        ru_in_uk = str(target_lang or "").split("-")[0].lower() == "uk" and (
+            d.detected_lang == "ru" or _uk_has_ru_leak(leftover, target_lang)
+        )
+        if ru_in_uk and 0 <= idx < len(segments_data) and isinstance(
+            segments_data[idx], dict
+        ):
+            # Zip d3b6fe76: recovery_exhausted_foreign_lang bricked STUDIO.
+            # Pad the hole instead of killing the job after remt/rewrite failed.
+            _skip_tts_russian(segments_data[idx])
+            d.hard_fail = False
+            d.reasons = list(d.reasons) + ["skip_tts_russian_in_uk"]
+            d.recovery_actions = list(d.recovery_actions) + ["skip_tts_pad"]
+            soft.append(d)
+            continue
         if d.category == "language_mismatch" and d.hard_fail:
             hard.append(d)
             continue

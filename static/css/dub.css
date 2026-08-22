@@ -659,6 +659,9 @@
 .tr-text-fits { color: var(--text); }
 .tr-text-overflow { color: #f87171; }
 .tr-overflow-text { line-height: 1.5; }
+.tr-seg.tr-overflow {
+  outline: 1px solid rgba(248, 113, 113, 0.45);
+}
 .tr-live-overflow {
   margin-top: 6px;
   padding: 8px 10px;

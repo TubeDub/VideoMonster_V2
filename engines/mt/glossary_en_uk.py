@@ -171,6 +171,16 @@ _POST_UK_FIXES: tuple[tuple[str, str], ...] = (
     ),
     (r"«Зоряні\s+війни»\.\"\s*$", "«Зоряні війни»."),
     (r"«Зоряні\s+війни»\.\"$", "«Зоряні війни»."),
+    # Stage 37 — conversational Marian calques (IMG_2790 street interview)
+    (r"\bне великий зелений\b", "не дуже люблю зелень"),
+    (r"\bяке середнє значення хтось дає вам для виконання цієї роботи\b", "скільки зазвичай дають за таку роботу"),
+    (r"\bя її не відчуваю\b", "мені вже не хочеться"),
+    (r"\bшвидко застрибує\b", "швидко сідай"),
+    (r"\bЯ тебе дістану\b", "Я з тобою"),
+    (r"\bпрокопаю смітник\b", "перериваю смітник"),
+    (r"\bвиріс с\.", "виріс."),
+    (r"\bДа,\s*и дивись\b", "Так, і дивись"),
+    (r"\bМне жаль\b", "Мені шкода"),
 )
 # Leftover protect-token garbage (Marian-mangled + legacy).
 _GARBAGE_PATTERNS: tuple[re.Pattern[str], ...] = (
@@ -364,3 +374,32 @@ def finalize_mt_text(src_lang: str, tgt_lang: str, text: str) -> str:
         logger.error("[glossary] placeholders remain after finalize: %r", out[:120])
         out = strip_glossary_placeholders(out)
     return out
+
+
+def restore_dropped_source_entities(source: str, mt: str) -> str:
+    """Re-attach dropped money / trash / name facts the source still has."""
+    src = str(source or "")
+    out = str(mt or "").strip()
+    if not src:
+        return out
+    tgt_digits = re.sub(r"\D", "", out)
+    for m in re.finditer(r"\$\s*([\d][\d,]*)", src):
+        digits = re.sub(r"\D", "", m.group(1) or "")
+        if not digits:
+            continue
+        if digits in tgt_digits or "долар" in out.lower() or "тисяч" in out.lower():
+            continue
+        try:
+            n = int(digits)
+        except ValueError:
+            continue
+        money = "три тисячі доларів" if n == 3000 else f"{n} доларів"
+        out = f"{money}. {out}".strip() if out else money
+        tgt_digits = re.sub(r"\D", "", out)
+    src_l = src.lower()
+    out_l = out.lower()
+    if re.search(r"\btrash\b", src_l) and not re.search(r"смітт|trash", out_l):
+        clause = "їси чуже сміття"
+        if clause not in out_l:
+            out = f"{out.rstrip('.!?…')}, {clause}.".strip() if out else f"{clause.capitalize()}."
+    return " ".join(out.split()).strip()

@@ -1,0 +1,645 @@
+{
+  "task_id": "d3b6fe7611f243868878c07ec6bf5df7",
+  "stage": "STUDIO",
+  "created_at": "2026-08-18T13:00:08.873045+00:00",
+  "healed_indices": [
+    33,
+    42
+  ],
+  "still_hard": [
+    {
+      "index": 27,
+      "segment_id": "3c61a6355b844c6f98336e8556475c0b",
+      "code": "low_confidence",
+      "category": "language_mismatch",
+      "detected_lang": "ru",
+      "target_lang": "uk",
+      "confidence": 0.7233,
+      "target_confidence": 0.2767,
+      "scores": {
+        "uk": 0.2767,
+        "ru": 0.7233,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "final_preview": "Да. Джонатан, ты кажется умным.",
+      "reasons": [
+        "низкая уверенность классификатора",
+        "recovery_exhausted_foreign_lang"
+      ],
+      "hard_fail": true,
+      "ok": false,
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.72)\nTarget confidence: 0.28\nCategory: language_mismatch\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора; recovery_exhausted_foreign_lang\nRecovery: needs_recovery_pipeline → revalidate → recovery_exhausted\nText: Да. Джонатан, ты кажется умным.",
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 31,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Да. Джонатан, ты кажется умным."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.2767,
+            "ru": 0.7233,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.7233,
+          "target_confidence": 0.2767,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.7233
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        },
+        {
+          "step": "recovery",
+          "actions": [
+            "revalidate"
+          ],
+          "candidate_preview": "Да. Джонатан, ты кажется умным."
+        },
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 31,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Да. Джонатан, ты кажется умным."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.2767,
+            "ru": 0.7233,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.7233,
+          "target_confidence": 0.2767,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.7233
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "entities_masked": [],
+      "collapse": null
+    }
+  ],
+  "still_soft": [
+    {
+      "index": 0,
+      "segment_id": "34b73a49c9544e73bd33b3722bfabf6b",
+      "code": "low_confidence",
+      "category": "low_confidence",
+      "detected_lang": "ru",
+      "target_lang": "uk",
+      "confidence": 0.5787,
+      "target_confidence": 0.4213,
+      "scores": {
+        "uk": 0.4213,
+        "ru": 0.5787,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "final_preview": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді.",
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "hard_fail": false,
+      "ok": false,
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.58)\nTarget confidence: 0.42\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Эй, мужик, ты отлично справляешься. Ось долар, саме тоді.",
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 57,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.4053,
+            "ru": 0.5947,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.5947,
+          "target_confidence": 0.4053,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6023
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        },
+        {
+          "step": "recovery",
+          "actions": [
+            "revalidate"
+          ],
+          "candidate_preview": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді."
+        },
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 57,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.4213,
+            "ru": 0.5787,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.5787,
+          "target_confidence": 0.4213,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.5714,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.5714
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.4286
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.5947
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "entities_masked": [],
+      "collapse": null
+    }
+  ],
+  "trace": [
+    {
+      "index": 0,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "revalidate"
+      ],
+      "after_ok": false,
+      "after_category": "low_confidence",
+      "after_code": "low_confidence",
+      "after_confidence": 0.5787,
+      "text_preview": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді."
+    },
+    {
+      "index": 27,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "revalidate"
+      ],
+      "after_ok": false,
+      "after_category": "low_confidence",
+      "after_code": "low_confidence",
+      "after_confidence": 0.7233,
+      "text_preview": "Да. Джонатан, ты кажется умным."
+    },
+    {
+      "index": 33,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "naturalizer",
+        "revalidate"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.6987,
+      "text_preview": "Честно говоря, це много, саме тоді."
+    },
+    {
+      "index": 42,
+      "before_category": "low_confidence",
+      "before_code": "low_confidence",
+      "actions": [
+        "naturalizer",
+        "revalidate"
+      ],
+      "after_ok": true,
+      "after_category": "pass",
+      "after_code": "",
+      "after_confidence": 0.7,
+      "text_preview": "И мне жаль це слышать, как долго ты тут, саме тоді, і саме в цей момент."
+    }
+  ],
+  "recovered": 2,
+  "failed_hard": 1,
+  "initial_issues": 4,
+  "decisions": [
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.5947,
+      "target_confidence": 0.4053,
+      "scores": {
+        "uk": 0.4053,
+        "ru": 0.5947,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді.",
+      "text_masked": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді.",
+      "entities_masked": [],
+      "stage": "STUDIO",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 0,
+      "segment_id": "34b73a49c9544e73bd33b3722bfabf6b",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 57,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.4053,
+            "ru": 0.5947,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.5947,
+          "target_confidence": 0.4053,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6023
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.59)\nTarget confidence: 0.41\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Эй, мужик, ты отлично справляешься. Ось долар, саме тоді.",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді."
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.7233,
+      "target_confidence": 0.2767,
+      "scores": {
+        "uk": 0.2767,
+        "ru": 0.7233,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Да. Джонатан, ты кажется умным.",
+      "text_masked": "Да. Джонатан, ты кажется умным.",
+      "entities_masked": [],
+      "stage": "STUDIO",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 27,
+      "segment_id": "3c61a6355b844c6f98336e8556475c0b",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 31,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Да. Джонатан, ты кажется умным."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.2767,
+            "ru": 0.7233,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.7233,
+          "target_confidence": 0.2767,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.7233
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.72)\nTarget confidence: 0.28\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Да. Джонатан, ты кажется умным.",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Да. Джонатан, ты кажется умным."
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.5766,
+      "target_confidence": 0.4234,
+      "scores": {
+        "uk": 0.4234,
+        "ru": 0.5766,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "Честно говоря, это много, саме тоді.",
+      "text_masked": "Честно говоря, это много, саме тоді.",
+      "entities_masked": [],
+      "stage": "STUDIO",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 33,
+      "segment_id": "711362aa865746cd9a9a400f83c0483a",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 36,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "Честно говоря, это много, саме тоді."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.4234,
+            "ru": 0.5766,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.5766,
+          "target_confidence": 0.4234,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 0.8571,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 0.8571
+              },
+              {
+                "lang": "uk",
+                "confidence": 0.1429
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.5845
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.58)\nTarget confidence: 0.42\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: Честно говоря, это много, саме тоді.",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "Честно говоря, это много, саме тоді."
+    },
+    {
+      "ok": false,
+      "hard_fail": false,
+      "category": "low_confidence",
+      "code": "low_confidence",
+      "expected_lang": "uk",
+      "detected_lang": "ru",
+      "confidence": 0.6171,
+      "target_confidence": 0.3829,
+      "scores": {
+        "uk": 0.3829,
+        "ru": 0.6171,
+        "en": 0.0,
+        "zh": 0.0,
+        "other": 0.0
+      },
+      "reasons": [
+        "низкая уверенность классификатора"
+      ],
+      "text_checked": "И мне жаль это слышать, как долго ты здесь, саме тоді, і саме в цей момент.",
+      "text_masked": "И мне жаль это слышать, как долго ты здесь, саме тоді, і саме в цей момент.",
+      "entities_masked": [],
+      "stage": "STUDIO",
+      "module": "engines.language_validation.service",
+      "validator": "unified_language_validation",
+      "index": 42,
+      "segment_id": "19d04c124f3c4fb39ab6b0a95383a4fa",
+      "recovery_actions": [
+        "needs_recovery_pipeline"
+      ],
+      "decision_trace": [
+        {
+          "step": "input",
+          "expected": "uk",
+          "text_len": 75,
+          "stage": "STUDIO"
+        },
+        {
+          "step": "entity_mask",
+          "entities": [],
+          "masked_preview": "И мне жаль это слышать, как долго ты здесь, саме тоді, і саме в цей момент."
+        },
+        {
+          "step": "confidence_primary",
+          "scores": {
+            "uk": 0.3829,
+            "ru": 0.6171,
+            "en": 0.0,
+            "zh": 0.0,
+            "other": 0.0
+          },
+          "detected": "ru",
+          "confidence": 0.6171,
+          "target_confidence": 0.3829,
+          "backup": {
+            "engine": "langdetect",
+            "lang": "ru",
+            "confidence": 1.0,
+            "all": [
+              {
+                "lang": "ru",
+                "confidence": 1.0
+              }
+            ]
+          },
+          "raw_detected": "ru",
+          "raw_confidence": 0.6099
+        },
+        {
+          "step": "script_gate",
+          "bad": false,
+          "code": ""
+        }
+      ],
+      "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.62)\nTarget confidence: 0.38\nCategory: low_confidence\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора\nRecovery: needs_recovery_pipeline\nText: И мне жаль это слышать, как долго ты здесь, саме тоді, і саме в цей момент.",
+      "collapse": null,
+      "script_mismatch": false,
+      "final_preview": "И мне жаль это слышать, как долго ты здесь, саме тоді, і саме в цей момент."
+    }
+  ]
+}

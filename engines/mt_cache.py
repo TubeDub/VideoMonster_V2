@@ -30,6 +30,7 @@ _CRITICAL_ENTITY_CHECKS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("ejected", re.compile(r"викину\w*|ejected", re.I)),
     # розбила / розбив / розбитий — not bare «розбив» only
     ("smash", re.compile(r"розби\w*|аварі\w*|smash(?:ed|ing)?", re.I)),
+    ("trash", re.compile(r"смітт|trash", re.I)),
 )
 
 
@@ -90,6 +91,12 @@ def _missing_critical_entities(src: str, tgt: str) -> bool:
     src_l = src.lower()
     for needle, tgt_pat in _CRITICAL_ENTITY_CHECKS:
         if needle in src_l and not tgt_pat.search(tgt):
+            return True
+    # Stage 37: dropped $amounts (IMG_2790 "$3,000" vanished from Final).
+    tgt_digits = re.sub(r"\D", "", tgt)
+    for m in re.finditer(r"\$\s*([\d][\d,]*)", src):
+        digits = re.sub(r"\D", "", m.group(1) or "")
+        if digits and digits not in tgt_digits and "долар" not in tgt.lower() and "тисяч" not in tgt.lower():
             return True
     return False
 

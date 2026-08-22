@@ -51,6 +51,7 @@ class DubbingResult:
     passed_validation: bool     # If False → TTS is skipped for this segment
     validation_notes: list[str] = field(default_factory=list)
     stage_log: list[StageLog] = field(default_factory=list)
+    segment_id: str = ""
 
     # Timing guidance for audio-fitting
     predicted_ms: int = 0
@@ -75,6 +76,7 @@ class DubbingResult:
     def to_dict(self) -> dict[str, Any]:
         return {
             "index": self.index,
+            "segment_id": self.segment_id,
             "original": self.original_text[:80],
             "input": self.input_text[:80],
             "output": self.output_text[:80],

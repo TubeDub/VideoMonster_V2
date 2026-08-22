@@ -6,6 +6,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +14,33 @@ logger = logging.getLogger("tubedub.tts_lang_lock")
 
 _CYR = re.compile(r"[\u0400-\u04FF]")
 _LAT = re.compile(r"[A-Za-z]")
+# Distinctive Russian letters that never appear in Ukrainian orthography.
+_RU_LETTERS = re.compile(r"[ыэёъЫЭЁЪ]")
+_UK_LETTERS = re.compile(r"[іїєґІЇЄҐ]")
+# Zip d3b6fe76: Marian en→uk leaked full Russian lines; these tokens are not UK.
+_RU_ONLY_WORDS = re.compile(
+    r"\b("
+    r"хорошо|кажется|умн(?:ый|ым|ая|ое|ые)|мужик|отлично|справляешься|"
+    r"честно|говоря|жаль|слышать|слышу|здесь|потому|даже|будто|"
+    r"вырос|потеряла|потерял|молодой|молод|"
+    r"что|этот|эта|это|они|его|её|чтобы|ещё|еще|"
+    r"который|которая|которые|сейчас|очень|тоже|также|если|"
+    r"когда|нет|он|она|"
+    r"мой|быстро|ладно|накормить|себя|долго|уже|целый|делаешь|"
+    r"получить|еду|смотри|верно|как|"
+    r"мне|даже|этом|потому|можешь|тебя|есть|говорить|молод"
+    r")\b",
+    re.I,
+)
+_EN_SOURCE_KEYS = (
+    "original",
+    "original_text",
+    "whisper_text",
+    "source_text",
+    "src_text",
+    "english_text",
+    "stt_text",
+)
 
 # Always-banned cross-locale voices when targeting uk (Stage 18: +ru-RU).
 _FORBIDDEN_VOICE_PREFIXES_FOR_UK = (
@@ -33,6 +61,23 @@ _FORBIDDEN_VOICE_PREFIXES = _FORBIDDEN_VOICE_PREFIXES_FOR_UK
 
 # Stage 17/18: en→uk Edge TTS requires ≥55% cyrillic letters.
 DEFAULT_UK_CYRILLIC_MIN = 0.55
+
+
+def fold_uk_ru_marks(text: str) -> str:
+    """Strip stress acutes so «потому́ что» matches lemmas; keep й/ё/ї."""
+    nfd = unicodedata.normalize("NFD", str(text or ""))
+    stripped = "".join(c for c in nfd if c not in ("\u0300", "\u0301"))
+    return unicodedata.normalize("NFC", stripped)
+
+
+def segment_en_source(seg: dict[str, Any] | None, fallback: str = "") -> str:
+    """English source for remt. Zip 955dd5ec reissue dropped these keys."""
+    if isinstance(seg, dict):
+        for key in _EN_SOURCE_KEYS:
+            val = str(seg.get(key) or "").strip()
+            if val:
+                return val
+    return str(fallback or "").strip()
 
 
 def cyrillic_letter_ratio(text: str) -> float:
@@ -229,11 +274,140 @@ def resolve_uk_tts(
     return str(ident.get("engine_id") or ""), str(ident.get("voice") or "")
 
 
+_RU_STRONG = re.compile(
+    r"\b("
+    r"хорошо|кажется|умн(?:ый|ым|ая|ое)|мужик|честно\s+говоря|"
+    r"слышать|слышу|отлично|справляешься"
+    r")\b",
+    re.I,
+)
+
+
+def uk_text_has_russian_leak(text: str) -> bool:
+    """True when target=uk text is Russian (or mixed RU) rather than Ukrainian.
+
+    Stage 33 / diag d3b6fe76: Cyrillic ratio was 1.0 on
+    «Да. Джонатан, ты кажется умным.» so Stage 29's cyrillic gate voiced it
+    with uk-UA-OstapNeural; STUDIO then hard-failed language_mismatch.
+
+    Stage 34 / diag 955dd5ec: combining accents («потому́») and leftover
+    lemmas (мой/быстро/накормить) must still count as leak.
+    """
+    clean = " ".join(fold_uk_ru_marks(text).split()).strip()
+    if not clean:
+        return False
+    if _RU_LETTERS.search(clean):
+        return True
+    if _RU_STRONG.search(clean):
+        return True
+    ru_hits = _RU_ONLY_WORDS.findall(clean)
+    if not ru_hits:
+        try:
+            from engines.language_intelligence.rules import detect_russian_words
+
+            ru_hits = list(detect_russian_words(clean, "uk") or [])
+        except Exception:
+            ru_hits = []
+    if not ru_hits:
+        return False
+    if not _UK_LETTERS.search(clean):
+        return True
+    return len(ru_hits) >= 2
+
+
+def rewrite_russian_leak_for_uk(text: str) -> str:
+    """Best-effort RU→UK lexical rewrite when Marian remt is unavailable."""
+    out = " ".join(fold_uk_ru_marks(text).split()).strip()
+    if not out:
+        return out
+    try:
+        from engines.language_intelligence.rules import UK_RUISM_RULES
+
+        for pat, repl, _cat in UK_RUISM_RULES:
+            out = re.sub(pat, repl, out)
+    except Exception:
+        pass
+    extras = (
+        (r"\bХорошо\b", "Добре"),
+        (r"\bхорошо\b", "добре"),
+        (r"\bЭй\b", "Гей"),
+        (r"\bэй\b", "гей"),
+        (r"\bты\b", "ти"),
+        (r"\bТы\b", "Ти"),
+        (r"\bмой\b", "мій"),
+        (r"\bМой\b", "Мій"),
+        (r"\bбыстро\b", "швидко"),
+        (r"\bБыстро\b", "Швидко"),
+        (r"\bкажется\b", "здається"),
+        (r"\bумным\b", "розумним"),
+        (r"\bумный\b", "розумний"),
+        (r"\bЧестно говоря\b", "Чесно кажучи"),
+        (r"\bчестно говоря\b", "чесно кажучи"),
+        (r"\bмного\b", "багато"),
+        (r"\bжаль\b", "шкода"),
+        (r"\bслышать\b", "чути"),
+        (r"\bотлично\b", "чудово"),
+        (r"\bсправляешься\b", "справляєшся"),
+        (r"\bмужик\b", "чувак"),
+        (r"\bДа ладно\b", "Та ну"),
+        (r"\bда ладно\b", "та ну"),
+        (r"\bнакормить\b", "нагодувати"),
+        (r"\bсебя\b", "себе"),
+        (r"\bкак долго\b", "як довго"),
+        (r"\bКак долго\b", "Як довго"),
+        (r"\bуже\b", "вже"),
+        (r"\bцелый\b", "цілий"),
+        (r"\bделаешь\b", "робиш"),
+        (r"\bполучить\b", "отримати"),
+        (r"\bеду\b", "їжу"),
+        (r"\bсмотри\b", "дивись"),
+        (r"\bверно\b", "правда"),
+        (r"\bДа\.(?=\s|$)", "Так."),
+        (r"\bИ мне\b", "І мені"),
+        (r"\bМне\b", "Мені"),
+        (r"\bпотому что\b", "тому що"),
+        (r"\bоб этом\b", "про це"),
+        (r"\bчто у тебя есть\b", "що в тебе є"),
+        (r"\bТак как ты\b", "То як ти"),
+        (r"\bТак как ти\b", "То як ти"),
+        (r"\bТак как\b", "То як"),
+        (r"\bкак ты\b", "як ти"),
+        (r"\bдаже\b", "навіть"),
+        (r"\bкак будто\b", "ніби"),
+        (r"\bвырос\b", "виріс"),
+        (r"\bпотеряла\b", "втратила"),
+        (r"\bздесь\b", "тут"),
+        (r"\bговорить\b", "говорити"),
+        (r"\bГоворить\b", "Говорити"),
+        (r"\bгод\b", "рік"),
+        (r"\bГод\b", "Рік"),
+        (r"\bчто\b", "що"),
+        (r"\bЧто\b", "Що"),
+        (r"\bтебя\b", "тебе"),
+        (r"\bесть\b", "є"),
+        (r"\bМне\b", "Мені"),
+        (r"\bмне\b", "мені"),
+        (r"\bДа,\b", "Так,"),
+        (r"\b и \b", " і "),
+        (r"\bможешь\b", "можеш"),
+        (r"\bМожешь\b", "Можеш"),
+        (r"\bэтом\b", "цьому"),
+        (r"\bлюблю\b", "люблю"),
+        (r"\bмолодой\b", "молодий"),
+        (r"\bмолод\b", "молодий"),
+    )
+    for pat, repl in extras:
+        out = re.sub(pat, repl, out)
+    return out.strip()
+
+
 def is_uk_tts_text_ok(
     text: str, *, min_ratio: float = DEFAULT_UK_CYRILLIC_MIN
 ) -> bool:
     clean = " ".join(str(text or "").split()).strip()
     if not clean:
+        return False
+    if uk_text_has_russian_leak(clean):
         return False
     return cyrillic_letter_ratio(clean) >= float(min_ratio)
 
@@ -317,8 +491,9 @@ def guard_uk_tts_text(
     """Ensure TTS text is Ukrainian. Returns (text, meta).
 
     If cyrillic ratio < 0.55 → remt once.
-    Stage 18 Simple/Happy Path (fail_loud): remt fail → raise PIPELINE_LANG_MIX
-    (never skip→empty silence). Legacy: skip with text="".
+    Stage 18 Simple/Happy Path (fail_loud): Latin/empty remt fail → raise
+    PIPELINE_LANG_MIX. Stage 34 leftover Russian (cyrillic but RU leak) after
+    remt/rewrite → skip_tts + pad, never brick the job.
     """
     meta: dict[str, Any] = {
         "tts_lang_ok": True,
@@ -330,6 +505,13 @@ def guard_uk_tts_text(
     }
     tgt = str(tgt_lang or "").split("-")[0].lower()
     clean = " ".join(str(text or "").split()).strip()
+    if tgt == "uk" and clean:
+        try:
+            from engines.text_slot_fit import prepare_uk_spoken_text
+
+            clean = prepare_uk_spoken_text(clean)
+        except Exception:
+            pass
     if tgt != "uk":
         meta["tts_lang_ok"] = True
         return clean, meta
@@ -395,6 +577,37 @@ def guard_uk_tts_text(
     else:
         meta["fail_reason"] = "no_remt_or_empty_source"
 
+    # Stage 33: lexical RU→UK rewrite when remt is empty / still Russian.
+    rewritten = rewrite_russian_leak_for_uk(clean)
+    if (
+        rewritten
+        and rewritten != clean
+        and is_uk_tts_text_ok(rewritten, min_ratio=DEFAULT_UK_CYRILLIC_MIN)
+    ):
+        logger.info(
+            "[TTS] ruism_rewrite_ok seg#%s",
+            segment_index if segment_index >= 0 else "?",
+        )
+        meta["tts_lang_ok"] = True
+        meta["rejected_non_target"] = False
+        meta["ruism_rewrite"] = True
+        meta["fail_reason"] = ""
+        return rewritten, meta
+
+    ru_leftover = uk_text_has_russian_leak(clean)
+    if ru_leftover:
+        # Zip 955dd5ec: fail_loud raised PIPELINE_LANG_MIX on mixed RU with
+        # empty English source. Pad the hole instead of killing TTS_PREP.
+        meta["fail_reason"] = "russian_in_uk"
+        meta["skipped"] = True
+        meta["tts_lang_ok"] = False
+        logger.warning(
+            "[TTS] leftover_russian_skip_tts seg#%s ratio=%s",
+            segment_index if segment_index >= 0 else "?",
+            meta.get("cyrillic_ratio"),
+        )
+        return "", meta
+
     if fail_loud:
         reason = meta.get("fail_reason") or "cyrillic_ratio_low"
         raise RuntimeError(
@@ -440,8 +653,12 @@ def enforce_segments_lang_lock(
             continue
         if seg.get("merged_into") is not None or seg.get("archived"):
             continue
-        # Stage 18b: Simple/fail_loud — never skip→silence; clear stale skip flags.
+        # Stage 18b: Simple/fail_loud — never skip→silence for Latin/empty.
+        # Stage 34: keep russian_in_uk skip so PRE_TTS pad path survives lock.
         if loud and (seg.get("tts_blocked") or seg.get("skip_tts")):
+            if str(seg.get("tts_skip_reason") or "") == "russian_in_uk":
+                stats["skipped"] += 1
+                continue
             seg.pop("skip_tts", None)
             seg.pop("tts_blocked", None)
             seg.pop("tts_skip_reason", None)
@@ -463,13 +680,7 @@ def enforce_segments_lang_lock(
             continue
         active += 1
         stats["checked"] += 1
-        src = str(
-            seg.get("original")
-            or seg.get("original_text")
-            or seg.get("whisper_text")
-            or seg.get("source_text")
-            or ""
-        )
+        src = segment_en_source(seg)
         new_text, meta = guard_uk_tts_text(
             text,
             source_text=src,
@@ -483,8 +694,8 @@ def enforce_segments_lang_lock(
         seg["tts_lang_hint"] = "uk" if meta.get("tts_lang_ok") else "reject"
         seg["tts_cyrillic_ratio"] = meta.get("cyrillic_ratio")
         if meta.get("skipped"):
-            # Legacy non-loud path only — fail_loud guard never returns skipped.
-            if loud:
+            ru_skip = str(meta.get("fail_reason") or "") == "russian_in_uk"
+            if loud and not ru_skip:
                 raise RuntimeError(
                     f"PIPELINE_LANG_MIX: seg#{i} rejected_non_target — refuse skip→silence"
                 )
@@ -492,7 +703,9 @@ def enforce_segments_lang_lock(
             stats["rejected_non_target"] += 1
             seg["skip_tts"] = True
             seg["tts_blocked"] = True
-            seg["tts_skip_reason"] = "reject_non_target_lang_mix"
+            seg["tts_skip_reason"] = (
+                "russian_in_uk" if ru_skip else "reject_non_target_lang_mix"
+            )
             for k in (
                 "final_tts_text",
                 "tts_text",
@@ -503,19 +716,25 @@ def enforce_segments_lang_lock(
                 if k in seg:
                     seg[k] = ""
             continue
-        if meta.get("remt_attempted") and meta.get("tts_lang_ok"):
-            stats["remt_ok"] += 1
-            for k in (
-                "final_tts_text",
-                "tts_text",
-                "plain_text",
-                "text",
-                "translated_text",
+        if meta.get("tts_lang_ok") and new_text:
+            if meta.get("remt_attempted"):
+                stats["remt_ok"] += 1
+            if (
+                meta.get("remt_ok")
+                or meta.get("ruism_rewrite")
+                or new_text != text
             ):
-                if k in seg or k in ("final_tts_text", "tts_text", "plain_text"):
-                    seg[k] = new_text
-            if meta.get("engine"):
-                seg["mt_engine"] = meta["engine"]
+                for k in (
+                    "final_tts_text",
+                    "tts_text",
+                    "plain_text",
+                    "text",
+                    "translated_text",
+                ):
+                    if k in seg or k in ("final_tts_text", "tts_text", "plain_text"):
+                        seg[k] = new_text
+                if meta.get("engine"):
+                    seg["mt_engine"] = meta["engine"]
             stats["ok"] += 1
             continue
         if meta.get("rejected_non_target"):
@@ -560,11 +779,20 @@ def pre_mux_tts_integrity(
         )
         hint = str(seg.get("tts_lang_hint") or "")
         if seg.get("skip_tts") or seg.get("tts_blocked"):
-            rejected += 1
-            if simple_mode and str(target_lang or "").split("-")[0].lower() == "uk":
-                raise RuntimeError(
-                    f"PIPELINE_LANG_MIX: seg#{i} skip_tts on Simple uk — refuse mux silence"
-                )
+            reason = str(seg.get("tts_skip_reason") or "")
+            padded = bool(seg.get("audio_padded") or seg.get("soft_padded"))
+            if reason == "russian_in_uk" or padded:
+                # Stage 34 — pad fills leftover RU; do not count as lang-mix reject.
+                pass
+            else:
+                rejected += 1
+                if (
+                    simple_mode
+                    and str(target_lang or "").split("-")[0].lower() == "uk"
+                ):
+                    raise RuntimeError(
+                        f"PIPELINE_LANG_MIX: seg#{i} skip_tts on Simple uk — refuse mux silence"
+                    )
         if voice and str(target_lang or "").split("-")[0].lower() == "uk":
             assert_voice_matches_target(voice, target_lang, raise_error=True)
         dur = float(seg.get("playback_duration") or seg.get("tts_duration") or 0)

@@ -1,0 +1,6 @@
+{
+  "stage": "Translation",
+  "task_id": "955dd5ecdfe440648f4d90977a0051ab",
+  "error_type": "RuntimeError",
+  "message": "PIPELINE_LANG_MIX: seg#4 no_remt_or_empty_source ratio=1.0 — refuse skip→silence"
+}

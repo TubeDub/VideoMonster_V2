@@ -273,6 +273,24 @@ def sidecar_path_for(audio_path: str | Path) -> Path:
     return p.with_suffix(p.suffix + _SIDECAR_SUFFIX) if p.suffix else Path(str(p) + _SIDECAR_SUFFIX)
 
 
+def _absolute_audio_path(
+    audio_path: str | Path | None,
+    seg: dict[str, Any] | None = None,
+) -> str | None:
+    """Prefer an absolute session path so sidecars never land in CWD."""
+    raw = str(audio_path or "").strip()
+    if raw:
+        p = Path(raw)
+        if p.is_absolute():
+            return str(p)
+    if isinstance(seg, dict):
+        for key in ("tts_file_path", "resolved_path", "file"):
+            cand = str(seg.get(key) or "").strip()
+            if cand and Path(cand).is_absolute():
+                return cand
+    return raw or None
+
+
 def write_wav_sidecar(
     audio_path: str | Path | None,
     seg: dict[str, Any],
@@ -287,6 +305,14 @@ def write_wav_sidecar(
 
     ensure_revision_uuids(seg)
     ensure_tts_uuid(seg, force_new=False)
+    resolved = _absolute_audio_path(audio_path, seg)
+    if not resolved or not Path(resolved).is_absolute():
+        logger.warning(
+            "[RevisionManager] sidecar skipped — refuse CWD write for relative %s",
+            audio_path,
+        )
+        return None
+    audio_path = resolved
     path = sidecar_path_for(audio_path)
     payload = {
         "source_segment_uuid": str(seg.get("source_segment_uuid") or ""),

@@ -17,6 +17,7 @@ REASON_FIELDS = (
     "audio_strategy_reason",
     "slot_strategy_reason",
     "scheduler_reason",
+    "timing_reason",
 )
 
 # Audio-only strategies — must NOT be reported as semantic shorten
@@ -365,6 +366,46 @@ def apply_honest_reasons(
         )
     seg["algorithm_reason"] = honest_algo
 
+    timing_r = str(
+        seg.get("timing_reason")
+        or seg.get("slot_strategy_reason")
+        or audio_r
+        or ""
+    ).strip()
+    if timing_r:
+        seg["timing_reason"] = timing_r
+    action = str(seg.get("segment_action") or "").strip()
+    if not action:
+        if seg.get("split_executed") or seg.get("reissued_from_resegment"):
+            action = "split"
+        elif seg.get("merged_into") is not None or seg.get("merged_into_id"):
+            action = "merged"
+        elif seg.get("silence_pad") or seg.get("audio_padded"):
+            action = "pad"
+        elif audio_r:
+            action = "audio_fit"
+        elif text_r:
+            action = "text_adapt"
+        else:
+            action = "keep"
+        seg["segment_action"] = action
+    rev = str(
+        seg.get("adaptation_uuid")
+        or seg.get("tts_uuid")
+        or seg.get("translation_uuid")
+        or seg.get("text_revision_uuid")
+        or ""
+    ).strip()
+    if rev:
+        seg["revision_id"] = rev
+    parent = str(
+        seg.get("parent_segment_id")
+        or seg.get("split_from_segment_id")
+        or ""
+    ).strip()
+    if parent:
+        seg["parent_segment_id"] = parent
+
     return collect_honest_summary(seg)
 
 
@@ -386,7 +427,11 @@ def collect_honest_summary(seg: dict[str, Any]) -> dict[str, Any]:
         "segment_id": seg.get("segment_id"),
         "text_adaptation_reason": text_r,
         "audio_strategy_reason": audio_r,
+        "timing_reason": str(seg.get("timing_reason") or ""),
         "residual_overflow_ms": int(seg.get("residual_overflow_ms") or residual_overflow_ms(seg)),
+        "segment_action": str(seg.get("segment_action") or ""),
+        "revision_id": str(seg.get("revision_id") or seg.get("adaptation_uuid") or ""),
+        "parent_segment_id": str(seg.get("parent_segment_id") or ""),
         "slot_strategy_reason": slot_r,
         "scheduler_reason": seg.get("scheduler_reason") or "",
         "decision_trace": list(seg.get("decision_trace") or [])

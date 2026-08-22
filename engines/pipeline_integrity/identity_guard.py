@@ -12,16 +12,21 @@ import hashlib
 import logging
 from typing import Any
 
-from engines.pipeline_integrity.exceptions import IdentityMismatchError
+from engines.pipeline_integrity.exceptions import (
+    IdentityMismatchError,
+    PipelineIdentityError,
+)
 
 logger = logging.getLogger("tubedub.pipeline_integrity.identity_guard")
 
 __all__ = [
     "IdentityMismatchError",
+    "apply_engine_text_results",
     "assert_consistent",
     "bind",
     "bind_after_tts",
     "remap_by_uuid",
+    "resolve_row_by_identity",
     "run_identity_guard",
     "text_content_hash",
     "verify_identity_chain",
@@ -97,7 +102,137 @@ def _flag_on(*, force: bool = False) -> bool:
     return bool(identity_guard_enabled())
 
 
-def bind(
+def _shadow_mode(*, force: bool = False) -> bool:
+    """Report-only: log violations, do not raise. force=True always enforces."""
+    if force:
+        return False
+    from engines.pipeline_integrity.v2_gates import identity_guard_enforce_enabled
+
+    return not bool(identity_guard_enforce_enabled())
+
+
+def _shadow_report(
+    exc: PipelineIdentityError,
+    *,
+    stage: str,
+    segments_data: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    details = dict(getattr(exc, "details", None) or {})
+    sid = str(details.get("segment_id") or "").strip()
+    if sid and segments_data:
+        for seg in segments_data:
+            if isinstance(seg, dict) and _sid(seg) == sid:
+                seg["identity_mismatch"] = True
+                seg["identity_shift"] = True
+                seg["identity_guard_violation"] = {
+                    "message": str(exc),
+                    "code": getattr(exc, "code", "identity_mismatch"),
+                    "details": details,
+                    "stage": stage,
+                }
+                break
+    logger.warning(
+        "[IdentityGuard] SHADOW violation stage=%s %s details=%s",
+        stage,
+        exc,
+        details,
+    )
+    return {
+        "enabled": True,
+        "ok": False,
+        "stage": stage,
+        "report_only": True,
+        "mismatches": 1,
+        "violations": [
+            {
+                "message": str(exc),
+                "code": getattr(exc, "code", "identity_mismatch"),
+                "details": details,
+            }
+        ],
+    }
+
+
+def resolve_row_by_identity(
+    segments_data: list[dict[str, Any]],
+    *,
+    segment_id: str = "",
+    index: int | None = None,
+) -> tuple[dict[str, Any] | None, str]:
+    """Resolve a row by UUID first; index only if the result has no UUID."""
+    sid = str(segment_id or "").strip()
+    if sid and not _is_index_like_id(sid):
+        for row in segments_data or []:
+            if isinstance(row, dict) and _sid(row) == sid:
+                return row, "segment_id"
+    if index is not None:
+        try:
+            i = int(index)
+        except (TypeError, ValueError):
+            i = -1
+        if 0 <= i < len(segments_data or []) and isinstance(segments_data[i], dict):
+            return segments_data[i], "index"
+    return None, "miss"
+
+
+def apply_engine_text_results(
+    segments_data: list[dict[str, Any]],
+    results: list[Any],
+    *,
+    text_fields: tuple[str, ...] = (
+        "text",
+        "plain_text",
+        "translation_text",
+        "final_text",
+        "tts_text",
+    ),
+) -> dict[str, Any]:
+    """Write result.output_text onto the matching segment_id row.
+
+    Index fallback only when the result lacks a UUID. Shuffled results
+    with segment_id must not bleed onto the wrong row.
+    """
+    stats: dict[str, Any] = {
+        "applied_by_id": 0,
+        "applied_by_index": 0,
+        "skipped": 0,
+        "warnings": [],
+    }
+    for r in results or []:
+        sid = str(getattr(r, "segment_id", "") or "").strip()
+        text = str(getattr(r, "output_text", "") or "").strip()
+        idx = getattr(r, "index", None)
+        has_uuid = bool(sid) and not _is_index_like_id(sid)
+        if has_uuid:
+            target, how = resolve_row_by_identity(
+                segments_data, segment_id=sid, index=None
+            )
+        else:
+            target, how = resolve_row_by_identity(
+                segments_data, segment_id="", index=idx
+            )
+            if how == "index":
+                logger.warning(
+                    "IdentityGuard: engine result missing segment_id; "
+                    "index fallback index=%s",
+                    idx,
+                )
+                stats["warnings"].append(
+                    {"index": idx, "reason": "missing_segment_id"}
+                )
+        if target is None or not text:
+            stats["skipped"] += 1
+            continue
+        if how == "index":
+            stats["applied_by_index"] += 1
+        else:
+            stats["applied_by_id"] += 1
+        for key in text_fields:
+            target[key] = text
+    return stats
+
+
+def _bind_strict(
     seg: dict[str, Any],
     *,
     text: str | None = None,
@@ -139,6 +274,19 @@ def bind(
     if not rev and thash:
         rev = f"hash:{thash}"
     audio = str(audio_path if audio_path is not None else _wav_ref(seg)).strip()
+    # Bare filenames write sidecars into CWD (diag 8c9850ef *.mp3.vm_rev.json).
+    # Prefer the segment's absolute TTS path when the caller passed a basename.
+    abs_ref = _wav_ref(seg)
+    if audio and abs_ref and abs_ref != audio:
+        try:
+            from pathlib import Path
+
+            a = Path(audio)
+            r = Path(abs_ref)
+            if (not a.is_absolute()) and r.is_absolute() and r.name == a.name:
+                audio = str(r)
+        except Exception:
+            pass
 
     prev = seg.get(_BINDING_KEY) if isinstance(seg.get(_BINDING_KEY), dict) else {}
     prev_tts_bound = bool(prev.get("tts_bound"))
@@ -204,7 +352,33 @@ def bind(
     return {"enabled": True, "noop": False, "stage": stage, "binding": dict(binding)}
 
 
-def bind_after_tts(
+def bind(
+    seg: dict[str, Any],
+    *,
+    text: str | None = None,
+    text_revision: str | None = None,
+    audio_path: str | None = None,
+    stage: str = "bind",
+    allow_rebind: bool = False,
+    force: bool = False,
+) -> dict[str, Any]:
+    try:
+        return _bind_strict(
+            seg,
+            text=text,
+            text_revision=text_revision,
+            audio_path=audio_path,
+            stage=stage,
+            allow_rebind=allow_rebind,
+            force=force,
+        )
+    except PipelineIdentityError as exc:
+        if _shadow_mode(force=force):
+            return _shadow_report(exc, stage=stage, segments_data=[seg] if isinstance(seg, dict) else None)
+        raise
+
+
+def _bind_after_tts_strict(
     seg: dict[str, Any],
     *,
     tts_text: str,
@@ -255,7 +429,7 @@ def bind_after_tts(
     if spoken:
         seg["final_tts_text"] = spoken
         seg["tts_text"] = spoken
-    return bind(
+    return _bind_strict(
         seg,
         text=spoken or owned,
         audio_path=audio_path,
@@ -263,6 +437,36 @@ def bind_after_tts(
         allow_rebind=allow_rebind,
         force=force,
     )
+
+
+def bind_after_tts(
+    seg: dict[str, Any],
+    *,
+    tts_text: str,
+    audio_path: str | None,
+    stage: str = "post_tts",
+    allow_rebind: bool = False,
+    force: bool = False,
+    segments_data: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Orchestration helper: bind spoken text + wav to segment_id after TTS."""
+    try:
+        return _bind_after_tts_strict(
+            seg,
+            tts_text=tts_text,
+            audio_path=audio_path,
+            stage=stage,
+            allow_rebind=allow_rebind,
+            force=force,
+            segments_data=segments_data,
+        )
+    except PipelineIdentityError as exc:
+        if _shadow_mode(force=force):
+            rows = list(segments_data or [])
+            if isinstance(seg, dict) and seg not in rows:
+                rows = [seg] + rows
+            return _shadow_report(exc, stage=stage, segments_data=rows)
+        raise
 
 
 def remap_by_uuid(
@@ -342,7 +546,7 @@ def assert_consistent(
     )
 
 
-def verify_identity_chain(
+def _verify_identity_chain_strict(
     segments_data: list[dict[str, Any]],
     *,
     stage: str,
@@ -548,16 +752,10 @@ def verify_identity_chain(
             continue
         sid = _sid(seg)
         if seg.get("merged_into") is not None:
+            # TZ Phase 10: resolve merge head by UUID only — no list-index fallback.
             head_id = str(seg.get("merged_into_id") or "").strip()
             if head_id:
                 merge_heads.add(head_id)
-            else:
-                try:
-                    hi = int(seg.get("merged_into"))
-                    if 0 <= hi < len(segments_data):
-                        merge_heads.add(_sid(segments_data[hi]))
-                except (TypeError, ValueError):
-                    pass
             continue
         ot = _text(seg)
         if ot and sid:
@@ -625,6 +823,31 @@ def verify_identity_chain(
     return report
 
 
+def verify_identity_chain(
+    segments_data: list[dict[str, Any]],
+    *,
+    stage: str,
+    require_wav: bool = False,
+    require_adaptation_uuid: bool = False,
+    force: bool = False,
+    report_only: bool | None = None,
+) -> dict[str, Any]:
+    """IdentityGuard check. Raises on violation unless shadow/report-only."""
+    shadow = bool(report_only) if report_only is not None else _shadow_mode(force=force)
+    try:
+        return _verify_identity_chain_strict(
+            segments_data,
+            stage=stage,
+            require_wav=require_wav,
+            require_adaptation_uuid=require_adaptation_uuid,
+            force=force,
+        )
+    except PipelineIdentityError as exc:
+        if shadow:
+            return _shadow_report(exc, stage=stage, segments_data=segments_data)
+        raise
+
+
 def run_identity_guard(
     segments_data: list[dict[str, Any]],
     *,
@@ -642,6 +865,11 @@ def run_identity_guard(
         hist = list(task_info.get("identity_guard_log") or [])
         hist.append(report)
         task_info["identity_guard_log"] = hist[-40:]
+        if report.get("ok") is False or report.get("violations"):
+            viol = list(task_info.get("identity_guard_violations") or [])
+            viol.extend(report.get("violations") or [])
+            task_info["identity_guard_violations"] = viol[-80:]
+            task_info["identity_guard_shadow"] = bool(report.get("report_only"))
     return report
 
 
@@ -682,6 +910,8 @@ def archive_and_reissue_ids(
     fresh: list[dict[str, Any]] = []
     new_ids: list[str] = []
     n = min(len(new_texts), len(new_timing)) if new_timing else len(new_texts)
+    live_old = [s for s in old_segments if isinstance(s, dict)]
+    copy_en_src = n == len(live_old)
     for i in range(n):
         text = str(new_texts[i] or "").strip()
         if not text:
@@ -706,6 +936,20 @@ def archive_and_reissue_ids(
             "owned_text_segment_id": sid,
             "reissued_from_resegment": True,
         }
+        # Zip 955dd5ec: 1:1 reissue dropped original English so remt
+        # failed with no_remt_or_empty_source.
+        if copy_en_src and i < len(live_old):
+            src_row = live_old[i]
+            for key in (
+                "original",
+                "original_text",
+                "whisper_text",
+                "source_text",
+                "source_lang",
+            ):
+                val = src_row.get(key)
+                if val not in (None, ""):
+                    seg[key] = val
         ensure_all_uuids(seg)
         if _flag_on():
             bind(seg, text=text, stage="resegment", allow_rebind=True)
@@ -717,3 +961,73 @@ def archive_and_reissue_ids(
         uuid_map[old_ids[0]] = new_ids[0]
 
     return archived, fresh, uuid_map
+
+
+_CHILD_FILE_KEYS = (
+    "file",
+    "tts_file_path",
+    "fitted_file",
+    "runtime_registry_path",
+    "oss_segs_path",
+)
+
+
+def reissue_split_children(
+    parent: dict[str, Any],
+    children: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Archive parent UUID and mint NEW ids for every split child.
+
+    Children never inherit the parent TTS file. Translation/adaptation/TTS
+    must rerun (``needs_retts``). Unique text is the caller's duty
+    (``unique_text_ok``); this helper only refuses a copied parent file.
+    """
+    from engines.pipeline_integrity.segment import new_segment_id
+    from engines.pipeline_integrity.uuid_chain import ensure_all_uuids, ensure_tts_uuid
+
+    parent_sid = _sid(parent)
+    archived = {
+        "segment_id": parent_sid,
+        "archived": True,
+        "text": _text(parent),
+        "start_ms": parent.get("start_ms"),
+        "end_ms": parent.get("end_ms"),
+        "translation_uuid": parent.get("translation_uuid"),
+        "adaptation_uuid": parent.get("adaptation_uuid"),
+        "tts_uuid": parent.get("tts_uuid"),
+        "parent_segment_id": None,
+    }
+    if isinstance(parent, dict):
+        parent["archived"] = True
+        parent["reissued_to"] = []
+
+    fresh: list[dict[str, Any]] = []
+    for child in children:
+        if not isinstance(child, dict):
+            continue
+        row = dict(child)
+        for key in _CHILD_FILE_KEYS:
+            row.pop(key, None)
+        sid = new_segment_id()
+        row["segment_id"] = sid
+        row["segment_uuid"] = sid
+        row["owned_text_segment_id"] = sid
+        row["parent_segment_id"] = parent_sid
+        row["reissued_from"] = [parent_sid] if parent_sid else []
+        row["split_from_segment_id"] = parent_sid
+        row["needs_retts"] = True
+        row["archived"] = False
+        row.pop("merged_into", None)
+        row.pop("merged_into_id", None)
+        ensure_all_uuids(row)
+        ensure_tts_uuid(row, force_new=True)
+        if _flag_on():
+            try:
+                bind(row, text=_text(row), stage="resegment_split", allow_rebind=True)
+            except Exception:
+                pass
+        fresh.append(row)
+        if isinstance(parent, dict):
+            parent.setdefault("reissued_to", []).append(sid)
+
+    return archived, fresh

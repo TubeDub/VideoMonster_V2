@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\api\auto_dub_api.py", line 15598, in _run_pipeline_inner
+    _lang_stats = enforce_segments_lang_lock(
+        segments_data,
+    ...<4 lines>...
+        fail_loud=True,
+    )
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\tts_lang_lock.py", line 589, in enforce_segments_lang_lock
+    new_text, meta = guard_uk_tts_text(
+                     ~~~~~~~~~~~~~~~~~^
+        text,
+        ^^^^^
+    ...<6 lines>...
+        fail_loud=loud,
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\serhii\Desktop\VideoMonster_V2\engines\tts_lang_lock.py", line 516, in guard_uk_tts_text
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: PIPELINE_LANG_MIX: seg#4 no_remt_or_empty_source ratio=1.0 — refuse skip→silence

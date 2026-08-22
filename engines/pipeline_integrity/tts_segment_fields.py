@@ -55,6 +55,18 @@ TTS_ALLOWED_MUTATIONS: frozenset[str] = frozenset(
         "audio_exists",
         "audio_size_bytes",
         "needs_re_tts",
+        # TubeDub TZ — IdentityGuard bind_after_tts + RevisionManager sidecar
+        # (diag 8c9850ef: STAGE_SNAPSHOT_INTEGRITY on identity_binding at tts).
+        # TTS is the stage that completes the bind: audio_path / tts_bound /
+        # bound_at_stage. Frozen identity keys (segment_id, text_hash) stay
+        # the same; only the audio half of the binding is filled in.
+        "identity_binding",
+        "tts_meta",
+        "revision_text_hash",
+        "wav_segment_id",
+        "owned_text_segment_id",
+        "identity_text_hash",
+        "identity_text_revision",
     }
 )
 

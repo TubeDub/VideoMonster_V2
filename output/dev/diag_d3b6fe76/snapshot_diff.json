@@ -1,0 +1,6 @@
+{
+  "stage": "STUDIO",
+  "task_id": "d3b6fe7611f243868878c07ec6bf5df7",
+  "error_type": "RuntimeError",
+  "message": "Language Validation failed.\nExpected language: uk\nDetected: ru (confidence 0.72)\nTarget confidence: 0.28\nCategory: language_mismatch\nCode: low_confidence\nModule: engines.language_validation.service\nValidator: unified_language_validation\nStage: STUDIO\nПричина: низкая уверенность классификатора; recovery_exhausted_foreign_lang\nRecovery: needs_recovery_pipeline → revalidate → recovery_exhausted\nText: Да. Джонатан, ты кажется умным."
+}

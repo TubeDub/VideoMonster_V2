@@ -1,5 +1,267 @@
 # Changelog
 
+## [2026-08-21] Diag 8c9850ef — TTS identity bind vs snapshot guard (local, no git)
+
+Cold Simple EN→UK (`8c9850ef`, 164s) died at TTS with
+`STAGE_SNAPSHOT_INTEGRITY`: IdentityGuard `bind_after_tts` filled
+`identity_binding.audio_path` / `tts_bound` / `bound_at_stage` plus
+RevisionManager `tts_meta` / `revision_text_hash` / `wav_segment_id`.
+`segment_id` and `text_hash` were unchanged. Snapshot whitelist for `tts`
+had not listed those TZ bind fields, so the job aborted after 20/32
+tts_uk/mykyta cache hits (12 unbound, mix/mux never ran).
+
+### Fixes
+- Allow TTS-owned identity-bind fields on the snapshot contract.
+- Bind/sidecar use absolute session audio (no CWD `*.mp3.vm_rev.json`).
+
+### Tests
+- `tests/test_stage_snapshot_guard.py::test_tts_diag_8c9850_identity_bind_is_allowed`
+- `tests/test_psa5_revision_manager.py::test_psa5_sidecar_relative_basename_uses_absolute_tts_path`
+
+## [2026-08-21] TubeDub TZ Phases 9–12 (local, no git)
+
+Review is a read-only snapshot (GET/populate no longer rewrite live
+`final_text`/`tts_text`). User edits look up `segment_id`, mint a revision,
+and mark NeedReTTS. Closed-loop splits archive the parent UUID and reissue
+children. CleanupManager is the single delete gate (FINAL kept, TEMP dropped
+on success and in `finally` on failure). QA summary + honest SUCCESS gate
+(hard overflow >350ms → `SYNC_OVERFLOW_REMAINING`). Simple UK default mix
+keeps ~20% ducked original instead of silence.
+
+Enable IdentityGuard ENFORCE: `VM_FLAG_IDENTITY_GUARD_ENFORCE=1`
+(default remains SHADOW). Live EN→UK dub is still the user's next cold run.
+
+### Tests
+- `tests/test_tubedub_phases_9_12.py`
+
+## [2026-08-19] Stage 37 — EN→UK living MT, no pad repeats (IMG_2790 / 1.json)
+
+Cold Simple EN→UK (task `8fadb9dd`, `1.json` + `IMG_2790_UK.mp4`) voiced
+Marian dump plus pacing glue. Adaptation was `FitsNoChange` (TTS never
+measured), but Final already had fillers and leftover RU.
+
+### What 1.json showed (EN → voiced UK)
+- «Oh it's probably been two days…» → «О, напевно, вже два дні минуло, **саме тоді, і саме в цей момент**.»
+- «I'm sorry.» → «**Мне жаль**, саме тоді, і саме в цей момент.»
+- «I'm not a big greens person.» → «Я не **великий зелений**, саме тоді…»
+- «It's just $3,000. I really hope…» → «Я дуже сподіваюся…» (**$3000 dropped**)
+- «Honestly I just dig through the trash» → «Чесно кажучи… **Чесно кажучи.**» (echo)
+- Studio split children that were only «і саме в цей момент, саме тоді.»
+
+### Root cause in code (not "need a better LLM")
+1. `SOFT_PAD_WHITELIST` **inserted** «саме тоді» / «і саме в цей момент»; `strip_slot_pad_fillers` only removed «ось як це було тоді».
+2. `run_locked_simple_mt` + `stamp_simple_mt_lock` **skipped the rule naturalizer** (Happy Path listed it, Stage 7b never called `polish_lines`).
+3. `_stage19j_repeat_key_phrase` echoed the first content bigram («Чесно кажучи», «Добре Джонатане»).
+4. Unique-split accepted pad-only children (≠ parent, so `unique_text_ok` passed).
+5. RU leak needed two hits when UK pads were present («Мне жаль» + «саме тоді»).
+
+### Fixes (targeted, no MT-stack rewrite, no lip-sync, no git)
+- Ban spoken soft pads; strip trailing/leading pad islands before TTS.
+- Simple MT: Marian → rule naturalizer + glossary + RU rewrite + entity restore.
+- Repeat-key = glossary entities only; adjacent/intra-sentence dedupe.
+- Split refuses copy-parent and pad-only children; `$amount` / `trash` incomplete remt.
+
+### Tests
+- `tests/test_stage37_mt_repetition_and_naturalness.py` (real 1.json lines)
+
+## [2026-08-19] Stage 36 — OSS production patterns (local, no git)
+
+Wired proven open-source dubbing patterns into Simple without rewriting the
+pipeline. Goal: cold EN→UK runs finish with Ukrainian speech, files on disk,
+and mux — one bad sentence never kills the job.
+
+### OSS sources studied
+- VideoLingo — https://github.com/Huanshere/VideoLingo
+  (`core/_10_gen_audio.py`, `_11_merge_audio.py`, `_12_dub_to_vid.py`,
+  `core/utils/models.py` `_AUDIO_SEGS_DIR` / `_AUDIO_TMP_DIR`,
+  `config.yaml` speed_factor min/accept/max)
+- pyVideoTrans — https://github.com/jianchang512/pyvideotrans
+  (`videotrans/tts/_base.py`: fail only if **all** TTS fail;
+  `TEMP_DIR/{uuid}` workdir; assembling pads audio to video duration —
+  https://en.pyvideotrans.com/yuanli)
+- Softcatala open-dubbing — https://github.com/Softcatala/open-dubbing
+  (one `assigned_voice` + `speed` per utterance; rebuild from workdir JSON)
+- SoniTranslate — https://github.com/R3gm/SoniTranslate
+  (`soni_translate/audio_segments.py` `avoid_overlap`: shift next start)
+- Also reviewed: Linly-Dubbing (Edge-TTS / CosyVoice), romazhan/video-dubber
+  (atempo+mux), VideoDubber length-control paper
+  (https://ojs.aaai.org/index.php/AAAI/article/view/26613). Mozilla has no
+  `mozilla/open-dubbing`; Softcatala is the production OSS namesake.
+
+### Already present (Stages 28–35) — not reimplemented
+- UK language/voice lock, leftover-RU skip+pad, recovered Final preferred
+- Text-fit before speed (Stage 31 ±8% / 0.92–1.08)
+- Pad-before-census, LAST-RESORT silence, mux master = video duration
+- One planned Simple voice (`simple_voice_lock`)
+- Never `audio_missing_fatal` / EXPORT_BLOCKED on a hole
+
+### Newly implemented
+1. **Single artifact root** `session_dir/segs/{idx:04d}.wav` (VideoLingo segs
+   workdir). TTS writes here; mux/census prefer `oss_segs_path`. Ghost
+   `*_g0000.mp3` is not used as the dest.
+2. **Skip-missing mix** — missing TTS → silence wav, mix continues
+   (VideoLingo skip + pyVideoTrans “any success is enough”).
+3. **Sequential place + concat** — shift next start by gap, concat silence+clip
+   (SoniTranslate avoid_overlap + VideoLingo merge). Overlay/amix is fallback.
+4. **Lock backend+voice after first successful warmup synth** (one role/clip).
+5. **Duration lever helper** text → 0.9–1.1 speed → pad (cartoon atempo refused).
+
+### Tests
+- `tests/test_stage36_oss_production_patterns.py`
+
+## [2026-08-19] Stage 35 — TTS skip TypeError + stale RU parallel (diag 8fadb9dd)
+
+Cold-run zip `8fadb9dd` + `1.json`: OpenDDF stage=TTS `TypeError`
+`unsupported operand type(s) for /: 'NoneType' and 'float'`.
+Parallel TTS logged `PIPELINE_LANG_MIX: cyrillic_ratio < 0.55` on idx 0
+«Эй, мужик, ты отлично справляешься. Ось долар…» (cyrillic_ratio was 1.0 —
+the real issue was leftover RU). PRE_TTS recovery healed idx 0 to UK Final;
+`text_for_tts` / `voice_input` stayed mixed RU. Census: `audio_present=0`,
+`audio_missing=32`, `padded_count=0`, `tts_ms_zero=32`, `final_status=degraded`.
+31 cache misses were synthesized then discarded because skip handling crashed.
+Voice planned `uk_UA-mykyta-high`. Mix/mux never ran. Session
+`output/sessions/8fadb9dd37984a1aa53e339afa88b86b`.
+
+### Block A — Skip must not kill TTS
+- `TTSFailureReport.from_partial_dict` ignores None `timestamp_ms` so dataclass
+  defaults apply. `timestamp_iso` never divides None.
+- `_mark_tts_segment_skipped` uses that constructor; annotate failures cannot
+  raise. Parallel result apply continues after one skip.
+- Warmup parallel errors are caught like the pool (one leftover RU does not
+  abort the remaining 31).
+
+### Block B — Speak recovered UK, rewrite leftover RU
+- `prefer_locked_uk_spoken_text` prefers recovered `final_tts_text` over stale
+  `voice_input` / `text_for_tts`.
+- Recovery `_stamp_text` always writes spoken buffers including `text_for_tts`
+  and `voice_input`.
+- Parallel `_synthesize_one_edge` rewrites leftover RU; `russian_in_uk` skips
+  without `PIPELINE_LANG_MIX`. Czech/Latin empty still raises (Stage 18).
+- Lang-lock group sync clears `final_tts_text` on skip_tts.
+
+### Tests
+- `tests/test_stage35_parallel_tts_skip.py`
+
+
+## [2026-08-18] Stage 34 — PIPELINE_LANG_MIX leftover RU (diag 955dd5ec)
+
+Cold-run zip `955dd5ec`: OpenDDF Translation `RuntimeError`
+`PIPELINE_LANG_MIX: seg#4 no_remt_or_empty_source ratio=1.0 — refuse skip→silence`.
+TTS/census/mix/mux never ran. Census N/A. PRE_TTS recovery `healed=4 hard_left=0`;
+idx 4 «Эй, мой здоровяк. Эй, быстро, чувак. …» was not in the 6 validator hits.
+Snapshot rows had no `original` (reissue / `_segments_data_entries`). Voice
+planned `tts_uk` / `uk_UA-oleksa-high`; `text_slot_fit` logged atempo cap 1.15
+before the crash. Session `output/sessions/955dd5ecdfe440648f4d90977a0051ab`.
+
+Stage 33 skip_tts was cleared by Simple `fail_loud` lock; rewrite missed
+мой/быстро and combining accents («потому́»).
+
+### Block A — Don't brick leftover Russian
+- `guard_uk_tts_text` leftover RU → skip_tts + pad, not `PIPELINE_LANG_MIX`.
+- `enforce_segments_lang_lock` keeps `russian_in_uk` skip flags; stamps rewrite.
+- `pre_mux_tts_integrity` allows `russian_in_uk` / padded skip on Simple uk.
+- Czech/Latin empty still raises (Stage 18).
+
+### Block B — Remt needs English
+- Copy `original` through `_segments_data_entries` and 1:1 reissue.
+- Lang lock backfills from `source_segments_snapshot`.
+- Fold combining accents; rewrite мой/быстро/накормить/Да ладно/как долго.
+
+### Tests
+- `tests/test_stage34_lang_mix_empty_source.py`
+
+
+## [2026-08-18] Stage 33 — RU leak in EN→UK (diag d3b6fe76)
+
+Cold-run zip `d3b6fe76`: STUDIO `RuntimeError` language_mismatch
+expected=uk detected=ru on «Да. Джонатан, ты кажется умным.»
+`audio_exists=51/51`, `padded_count=0`, no `_g0000` ghosts, atempo 0.92–1.08,
+`tts_backend=edge-offline` / `uk-UA-OstapNeural`. Mux never ran.
+
+Marian en→uk leaked Russian; Stage 29 cyrillic gate saw ratio=1.0 and voiced
+it. Recovery only swapped это→це and appended «саме тоді», then promoted
+`low_confidence` (ru 0.72) to `recovery_exhausted_foreign_lang` and killed
+the job.
+
+### Block A — Russian is not Ukrainian
+- `uk_text_has_russian_leak` (ы/э/ё/ъ + RU-only words).
+- `is_uk_tts_text_ok` refuses RU leak even when Cyrillic ratio is 1.0.
+- Synth / regen skip_reason `russian_in_uk`.
+
+### Block B — Recover from English, don't brick STUDIO
+- Recovery remt en→uk, then lexical RU→UK rewrite.
+- Glue «саме тоді» on leftover Russian is not a heal.
+- If still RU: `skip_tts` + drop file so pad fills — not `fail_pipeline`.
+
+### Tests
+- `tests/test_stage33_ru_in_uk.py`
+
+
+## [2026-08-18] Stage 32 — ghost path census + inverted mix (diag 2286c82f)
+
+Cold-run zip `2286c82f`: `audio_present=7`, `audio_missing=17`, `padded_count=0`,
+`final_status=degraded`, POST `/api/studio/mix` 500. UK stamp was already honest
+(`edge-offline` / `uk-UA-PolinaNeural`). Files were on disk under
+`closed_loop/<task_id>/pause/` and `tts_regen_*`; census looked at a ghost
+`resolved_path=…_g0000.mp3` (and CWD-relative `tts_*.mp3`) first.
+
+### Block A — First existing file
+- `resolve_segment_audio_path` / census `_deep_resolve` try fitted_file → file
+  → tts_file_path → resolved_path and pick the first path that exists on disk.
+- LAST-RESORT still pads when *all* keys miss (relative `tts_07db01fb_….mp3`).
+- Studio mix keeps absolute paths (not basename-only) and copies path keys.
+
+### Block B — Mix 500 / tempo
+- Inverted `merge_adjusted_start` (place_end < place_start, `slot_ms=1`) is
+  ignored; slot stays positive.
+- UK mux `timing_max_atempo` is always **1.08** (zip still logged atempo=1.15).
+- Archive census re-pads true holes before rebuild.
+
+### Block C — Ending
+- Franchise restore targets the timeline tail (unique index / last 20s), not
+  the tail of a split-child list.
+- Short Star Wars source + long unrelated photography dest is *replaced*, not
+  appended.
+
+### Tests
+- `tests/test_stage32_ghost_path_and_mix.py`
+
+
+
+## [2026-08-17] Stage 31 — natural tempo + full ending (text-first, ±8%)
+
+Task 7ee85b61 leftovers after Stage 30: UK text/meaning OK, but speed jumped
+(length_scale/atempo without text-fit), last lines had no franchise/Star Wars
+in audio (`exists:false`, `silence_pads=0`, `final_status=degraded`), and
+`overlap_count=33`.
+
+### Block A — Duration priority (text → ±8% speed)
+- Every speakable segment: estimate TTS vs slot; if `|delta| > 120ms` shorten
+  or expand (entities Fiat / USC / Wexler / Star Wars / George Jr never
+  dropped) or split max 2 children; re-TTS; only then `length_scale` /
+  `atempo` when `|delta|` still `> 150ms`, clamped **0.92–1.08**.
+- `MYKYTA_DURATION_*` and Stage 24 atempo clamp tightened from 1.18/1.12 to
+  **1.08**. Mux UK cap uses `timing_max_atempo` (1.08), not hardcoded 1.15.
+- Honest `duration_control_used`: `text_shorten | text_expand | text_split |
+  length_scale | atempo | soft_pad` — never `none` when speed actually moved.
+- Post-pass `equalize_segment_tempos`: median / global bias ±5%, neighbor jump
+  ≤ 0.08 (no 0.95 then 1.20).
+
+### Block B — Full ending
+- Last 2–3 segments restore franchise / Lucas / Star Wars meaning when the
+  source had it (`restore_ending_franchise_meaning`).
+- Stage 30 pad→census order kept; post-pad ripple so `overlap_count` is from
+  final placement. Mux master = video duration (`target_duration_ms`).
+- FORBIDDEN: `final_status=degraded` when `audio_missing==0` (Stage 30 lock).
+
+### Block C/D — Voice + overlap
+- UK identity lock unchanged (Ostap/Polina / tts_uk mykyta/lada/tetiana).
+- Ripple residual trigger 80ms (was 150); extra uncapped pass after pads.
+
+### Tests
+- `tests/test_stage31_tempo_and_ending.py`
+
+
 ## [2026-08-16] Stage 30 — cold-run fix: audio holes + honest UK stamp
 
 Closes remaining Stage 28/29 leftovers that still allowed
@@ -528,4 +790,7 @@ See `docs/` for Stages 1–5 documentation.
 - Documentation auto-sync
 
 ## [2026-08-13] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-21] Documentation sync
 - Documentation auto-sync

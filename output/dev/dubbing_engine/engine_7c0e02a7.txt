@@ -1,0 +1,13 @@
+=== DUBBING ENGINE REPORT task= run=7c0e02a7 ===
+lang=uk  segments=2  elapsed=0.06s
+adapted=0  skipped=0  strategies={'direct': 2, 'adapted': 0, 'video_adapt': 0, 'merge_next': 0, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=2065ms slot=4000ms
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied
+  [✓] seg#01 strategy=direct pred=2035ms slot=3500ms
+       IN : Він не міг позбутися страху.
+       OUT: Ві́н не міг позбутися страху.
+       [stress] ok
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']

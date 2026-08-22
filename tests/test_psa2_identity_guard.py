@@ -27,6 +27,8 @@ FIXTURE_PATH = ROOT / "tests" / "fixtures" / "ba6ec_compact.json"
 def flag_on(monkeypatch):
     monkeypatch.setenv(VM_FLAG_IDENTITY_GUARD, "1")
     monkeypatch.delenv("VM_IDENTITY_GUARD", raising=False)
+    monkeypatch.setenv("VM_FLAG_REVISION_MANAGER", "0")
+    monkeypatch.setenv("VM_REVISION_MANAGER", "0")
     yield
 
 

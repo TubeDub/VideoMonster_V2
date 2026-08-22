@@ -1,0 +1,31 @@
+{
+  "framework": "OpenDDF",
+  "integration": "TubeDub-Passive",
+  "mode": "passive",
+  "sdk_version": "0.1.0",
+  "run_id": "8fadb9dd37984a1aa53e339afa88b86b",
+  "created_at": "2026-08-18T23:02:54.909308+00:00",
+  "task_id": "8fadb9dd37984a1aa53e339afa88b86b",
+  "stage": "TTS",
+  "developer": {
+    "error_code": "TYPEERROR",
+    "stage": "TTS",
+    "recovery_hint": {
+      "text": "Inspect stacktrace.txt and pipeline.log in the diagnostic archive."
+    },
+    "mode": "passive",
+    "sdk_version": "0.1.0",
+    "integration": "TubeDub-Passive-v0.1"
+  },
+  "snapshot_diff": {
+    "stage": "TTS",
+    "task_id": "8fadb9dd37984a1aa53e339afa88b86b",
+    "error_type": "TypeError",
+    "message": "unsupported operand type(s) for /: 'NoneType' and 'float'"
+  },
+  "exception": {
+    "type": "TypeError",
+    "message": "unsupported operand type(s) for /: 'NoneType' and 'float'"
+  },
+  "timeline_event_count": 20
+}
