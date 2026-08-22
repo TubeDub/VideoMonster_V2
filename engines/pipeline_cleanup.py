@@ -52,6 +52,9 @@ _PROTECTED_AUDIO_PREFIXES = (
     "pad_silence_",
     # Stage 28 §E — softpad_ is the last-resort pad prefix; must survive cleanup.
     "softpad_",
+    # Stage 40 — fitted_/regen_ session audio is mux input until post-success policy.
+    "fitted_",
+    "regen_",
     # spec v3 speaker reference clips
     "speaker_",
     # spec v3 4-stem outputs

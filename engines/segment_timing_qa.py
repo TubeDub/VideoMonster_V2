@@ -1721,6 +1721,10 @@ def _build_openddf_tts_pipeline_block(
                 "audio_padded": bool(
                     seg.get("audio_padded") or seg.get("silence_pad")
                 ),
+                "duration_control_used": seg.get("duration_control_used"),
+                "voice": seg.get("voice")
+                or seg.get("assigned_voice")
+                or seg.get("tts_voice"),
             }
         )
 

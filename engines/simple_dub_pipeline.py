@@ -91,6 +91,11 @@ def apply_simple_pipeline_policy(
         "max_atempo_hard": float(HAPPY_PATH_HARD_MAX_ATEMPO_UK if _uk_simple else HAPPY_PATH_MAX_ATEMPO),
         "no_speech_trim": bool(HAPPY_PATH_NO_SPEECH_TRIM),
         "text_fit_required": True,
+        "soft_pad_missing_audio": True,
+        "keep_segment_audio": True,
+        "strict_llm_adaptation": False,
+        "oss_lock_voice_after_first": True,
+        "snapshot_soft_continue": True,
         "post_tts_resegment_allowed": False,
         "blind_timing_align_allowed": False,
         # Like pyVideoTrans: finish with an MP4, don't stop at Studio.

@@ -289,3 +289,142 @@ def test_tts_diag_8c9850_identity_bind_is_allowed():
     with pytest.raises(StageSnapshotIntegrityError) as exc:
         StageSnapshotGuard.check(before, after_text, stage="tts")
     assert exc.value.field == "plain_text"
+
+
+def _coord_tts_task(tmp_path, task_id: str, *, simple: bool):
+    from engines.dub_task_state import init_auto_task
+    from engines.dubbing_engine.project_session import ProjectSession
+    from engines.pipeline_integrity.guards import PipelineIntegrityCoordinator
+    from engines.pipeline_integrity.segment import new_segment_id
+
+    info = {
+        "simple_pipeline": simple,
+        "happy_path": simple,
+        "session_dir": str(tmp_path / "sess"),
+    }
+    if not simple:
+        # Default UI mode is basic → is_simple_pipeline() is True. Main/Pro
+        # must opt into advanced adaptation so bind vs text can be distinguished.
+        info["user_mode"] = "pro"
+        info["use_advanced_adaptation"] = True
+        info["simple_pipeline"] = False
+        info["happy_path"] = False
+    init_auto_task(
+        task_id,
+        {"status": "running", "step": "tts", "info": info},
+    )
+    session = ProjectSession("sess40", tmp_path, task_id=task_id)
+    sid = new_segment_id()
+    rows = [
+        {
+            "segment_id": sid,
+            "index": 0,
+            "text": "ok",
+            "plain_text": "ok",
+            "identity_binding": {
+                "segment_id": sid,
+                "text_hash": "abc",
+                "text_revision": "rev",
+                "audio_path": "",
+                "bound_at_stage": "pre_tts",
+                "tts_bound": False,
+            },
+        }
+    ]
+    coord = PipelineIntegrityCoordinator(task_id=task_id)
+    coord.assign_segment_ids(rows)
+    assert coord.initialize_guard_context(project_session=session, segments_data=rows)
+    coord.begin_stage("tts", rows)
+    return coord, rows, sid
+
+
+def test_nonsimple_tts_identity_bind_does_not_abort(tmp_path):
+    """Diag 8c9850ef fields must not abort main/non-Simple after partial TTS."""
+    import copy
+
+    from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+    from engines.pipeline_integrity.exceptions import StageSnapshotIntegrityError
+
+    coord, rows, sid = _coord_tts_task(tmp_path, "stage40nonsimple-bind", simple=False)
+    after = copy.deepcopy(rows)
+    after[0].update(
+        {
+            "identity_binding": {
+                "segment_id": sid,
+                "text_hash": "abc",
+                "text_revision": "rev",
+                "audio_path": r"C:\tmp\segs\0000.mp3",
+                "bound_at_stage": "post_tts",
+                "tts_bound": True,
+            },
+            "final_tts_text": "Привіт",
+            "tts_text": "Привіт",
+            "tts_meta": {
+                "segment_id": sid,
+                "sidecar_path": r"C:\tmp\segs\0000.mp3.vm_rev.json",
+            },
+            "revision_text_hash": "0dd698cc3dcc9d33ff24d122",
+            "wav_segment_id": sid,
+            "assigned_voice": "mykyta",
+            "file": r"C:\tmp\segs\0000.mp3",
+            "tts_file_path": r"C:\tmp\segs\0000.mp3",
+            # Nested bind keys may also surface top-level.
+            "audio_path": r"C:\tmp\segs\0000.mp3",
+            "tts_bound": True,
+            "bound_at_stage": "post_tts",
+        }
+    )
+    coord.end_stage("tts", after)
+    assert not any(
+        r.get("snapshot_guard") == "skipped" and "error" in str(r).lower()
+        for r in coord.reports
+    )
+    assert any(r.get("status") == "ok" or r.get("snapshot_guard") == "soft_continue" for r in coord.reports)
+
+    # Safety net: bind field not on the TTS whitelist still continues (not a text swap).
+    coord2, rows2, _sid2 = _coord_tts_task(
+        tmp_path, "stage40nonsimple-bind2", simple=False
+    )
+    after2 = copy.deepcopy(rows2)
+    after2[0]["text_revision"] = "rev-bind-only"
+    coord2.end_stage("tts", after2)
+    assert any(r.get("snapshot_guard") == "soft_continue" for r in coord2.reports)
+    with STATE_LOCK:
+        info = AUTO_TASKS["stage40nonsimple-bind2"]["info"]
+        assert info.get("snapshot_soft_continue") is True
+
+    coord3, rows3, _sid3 = _coord_tts_task(
+        tmp_path, "stage40nonsimple-text", simple=False
+    )
+    after3 = copy.deepcopy(rows3)
+    after3[0]["plain_text"] = "changed source"
+    with pytest.raises(StageSnapshotIntegrityError) as raised:
+        coord3.end_stage("tts", after3)
+    assert raised.value.field == "plain_text"
+
+
+def test_snapshot_mismatch_identity_bind_classifier():
+    from engines.pipeline_integrity.exceptions import StageSnapshotIntegrityError
+    from engines.pipeline_integrity.guards import snapshot_mismatch_is_identity_bind_only
+
+    bind_err = StageSnapshotIntegrityError(
+        "disallowed mutation of 'identity_binding'",
+        stage="tts",
+        field="identity_binding",
+        details={
+            "violations": [
+                {"field": "tts_meta"},
+                {"field": "identity_binding.audio_path"},
+                {"field": "wav_segment_id"},
+            ]
+        },
+    )
+    assert snapshot_mismatch_is_identity_bind_only(bind_err, stage="tts") is True
+
+    text_err = StageSnapshotIntegrityError(
+        "disallowed mutation of 'plain_text'",
+        stage="tts",
+        field="plain_text",
+        details={"violations": [{"field": "identity_binding"}, {"field": "plain_text"}]},
+    )
+    assert snapshot_mismatch_is_identity_bind_only(text_err, stage="tts") is False

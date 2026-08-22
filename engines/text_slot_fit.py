@@ -82,12 +82,14 @@ STAGE31_LENGTH_SCALE_MIN = 0.92
 STAGE31_LENGTH_SCALE_MAX = 1.08
 STAGE31_OK_FILL_LO = 0.92
 STAGE31_OK_FILL_HI = 1.08
-STAGE31_GLOBAL_BIAS_MAX = 0.05
-STAGE31_NEIGHBOR_JUMP_MAX = 0.08
+STAGE31_GLOBAL_BIAS_MAX = 0.03
+STAGE31_NEIGHBOR_JUMP_MAX = 0.03
 DURATION_CONTROL_CANON = (
+    "text_slot_fit",
     "text_shorten",
     "text_expand",
     "text_split",
+    "split",
     "length_scale",
     "atempo",
     "soft_pad",
@@ -942,14 +944,22 @@ def _critical_markers_lost(original: str, shortened: str, source_hint: str = "")
 
 
 def canon_duration_control_used(raw: str | None) -> str:
-    """Map legacy stamps onto Stage 31 honest labels."""
+    """Map legacy stamps onto Stage 31/40 honest labels (combinable with '+')."""
     val = str(raw or "").strip().lower()
+    if "+" in val:
+        parts = [canon_duration_control_used(p) for p in val.split("+") if p.strip()]
+        seen: list[str] = []
+        for p in parts:
+            if p and p != "none" and p not in seen:
+                seen.append(p)
+        return "+".join(seen) if seen else "none"
     alias = {
         "shorten": "text_shorten",
         "text_shorten": "text_shorten",
+        "text_slot_fit": "text_slot_fit",
         "expand": "text_expand",
         "text_expand": "text_expand",
-        "split": "text_split",
+        "split": "split",
         "text_split": "text_split",
         "length_scale": "length_scale",
         "rate": "length_scale",
@@ -961,14 +971,100 @@ def canon_duration_control_used(raw: str | None) -> str:
     return alias.get(val, val or "none")
 
 
+def merge_duration_control_used(*parts: str | None) -> str:
+    """Combine duration levers with '+' (text_slot_fit | length_scale | atempo | soft_pad | split)."""
+    return canon_duration_control_used("+".join(str(p or "") for p in parts if p))
+
+
+def merge_text_slot_fit_stamp(existing: str | None, alias: str | None = None) -> str:
+    """New writes: text lever includes ``text_slot_fit``; keep alias for Stage 23/31."""
+    return merge_duration_control_used(existing, "text_slot_fit", alias)
+
+
+def backstop_duration_control_used(
+    seg: dict | None,
+    *,
+    min_abs_delta_ms: int = 200,
+) -> str:
+    """Honest disk stamp when ``duration_control_used`` is still none/empty.
+
+    Stage 40 TZ: |slot − tts| > 200ms must never stay ``none``. Prefer the
+    lever that actually ran; otherwise stamp ``text_slot_fit`` + alias.
+    Mutates ``seg`` in place and returns the canon stamp.
+    """
+    if not isinstance(seg, dict):
+        return "none"
+    used = canon_duration_control_used(seg.get("duration_control_used"))
+    if used not in ("none", ""):
+        return used
+    try:
+        slot = int(seg.get("slot_ms") or 0)
+    except (TypeError, ValueError):
+        slot = 0
+    if slot <= 0:
+        try:
+            slot = int(seg.get("end_ms") or 0) - int(seg.get("start_ms") or 0)
+        except (TypeError, ValueError):
+            slot = 0
+    try:
+        tts = int(
+            seg.get("tts_ms")
+            or seg.get("playback_duration")
+            or seg.get("actual_duration_ms")
+            or 0
+        )
+    except (TypeError, ValueError):
+        tts = 0
+    if slot <= 0 or tts <= 0:
+        return used or "none"
+    delta = tts - slot
+    if abs(delta) <= int(min_abs_delta_ms):
+        return used or "none"
+    if seg.get("silence_pad") or seg.get("audio_padded"):
+        used = "soft_pad"
+    elif seg.get("split_children") or seg.get("split_index") is not None or seg.get(
+        "split_executed"
+    ):
+        used = merge_text_slot_fit_stamp(used, "text_split")
+    elif seg.get("expand_to_fill_used") or seg.get("text_expanded") or seg.get(
+        "expand_executed"
+    ):
+        used = merge_text_slot_fit_stamp(used, "text_expand")
+    elif seg.get("text_shortened") or seg.get("sso_used") or seg.get("shorten_executed"):
+        used = merge_text_slot_fit_stamp(used, "text_shorten")
+    elif seg.get("trim_trailing_silence") or seg.get("silence_trimmed_ms"):
+        used = "trim_silence"
+    else:
+        try:
+            atempo = float(seg.get("atempo") or 1.0)
+        except (TypeError, ValueError):
+            atempo = 1.0
+        try:
+            ls = float(seg.get("tts_length_scale") or 1.0)
+        except (TypeError, ValueError):
+            ls = 1.0
+        if abs(atempo - 1.0) >= 0.01:
+            used = "atempo"
+        elif abs(ls - 1.0) >= 0.01:
+            used = "length_scale"
+        elif delta > 0:
+            used = merge_text_slot_fit_stamp(used, "text_shorten")
+        else:
+            used = merge_text_slot_fit_stamp(used, "text_expand")
+    used = canon_duration_control_used(used)
+    seg["duration_control_used"] = used
+    return used
+
+
 def stage31_duration_levers(slot_ms: int, tts_ms: int) -> list[str]:
-    """STRICT order: text fit when |delta|>120, then length_scale/atempo if still >150."""
+    """STRICT order: text_slot_fit (aliases kept) when |delta|>120, then speed."""
     slot = max(1, int(slot_ms or 0))
     tts = max(0, int(tts_ms or 0))
     delta = tts - slot
     if abs(delta) <= STAGE31_TEXT_FIT_DELTA_MS:
         return []
-    levers: list[str] = ["text_shorten" if delta > 0 else "text_expand"]
+    alias = "text_shorten" if delta > 0 else "text_expand"
+    levers: list[str] = ["text_slot_fit", alias]
     if abs(delta) > STAGE31_SPEED_DELTA_MS:
         levers.extend(["length_scale", "atempo"])
     return levers

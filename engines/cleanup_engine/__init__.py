@@ -82,7 +82,16 @@ class CleanupReport:
 def _is_protected_segment_audio(path: Path) -> bool:
     name = path.name.lower()
     if name.startswith(
-        ("slot_fit_", "pause_run_", "tts_", "tts_regen_", "pad_silence_", "softpad_")
+        (
+            "slot_fit_",
+            "pause_run_",
+            "tts_",
+            "tts_regen_",
+            "pad_silence_",
+            "softpad_",
+            "fitted_",
+            "regen_",
+        )
     ):
         return True
     if path.suffix.lower() in (".wav", ".mp3", ".ogg", ".flac"):

@@ -11,7 +11,6 @@ from engines.pipeline_integrity import (
     ArchitectureGuard,
     ArtifactIntegrityGuard,
     PipelineAudioIdentityError,
-    PipelineIdentityError,
     PipelineIntegrityCoordinator,
     PipelineValidationError,
     RuntimeIntegrityError,
@@ -52,15 +51,18 @@ class TestImmutableSegmentModel:
 
 
 class TestArchitectureGuard:
-    def test_missing_segment_id_raises(self):
-        with pytest.raises(PipelineIdentityError):
-            ArchitectureGuard.check([{"index": 0, "text": "x"}], stage="test")
+    def test_missing_segment_id_is_repaired(self):
+        rows = [{"index": 0, "text": "x"}]
+        ArchitectureGuard.check(rows, stage="test")
+        assert str(rows[0].get("segment_id") or "").strip()
 
-    def test_duplicate_segment_id_raises(self):
+    def test_duplicate_segment_id_is_repaired(self):
         sid = new_segment_id()
         rows = [_seg_row(segment_id=sid, index=0), _seg_row(segment_id=sid, index=1)]
-        with pytest.raises(PipelineIdentityError):
-            ArchitectureGuard.check(rows, stage="test")
+        ArchitectureGuard.check(rows, stage="test")
+        ids = [str(r["segment_id"]) for r in rows]
+        assert all(ids)
+        assert len(set(ids)) == 2
 
 
 class TestRuntimeIntegrityGuard:
@@ -133,14 +135,13 @@ class TestStageSnapshotGuard:
         after[0]["status"] = "generated"
         StageSnapshotGuard.check(before, after, stage="tts")
 
-    def test_legacy_file_field_mutation_at_tts_raises(self):
+    def test_legacy_file_field_mutation_at_tts_allowed(self):
         before = [_seg_row(file=None)]
         after = copy.deepcopy(before)
         after[0]["file"] = "5b8fd005_seg0000.mp3"
         after[0]["tts_status"] = "generated"
-        with pytest.raises(StageSnapshotIntegrityError) as exc:
-            StageSnapshotGuard.check(before, after, stage="tts")
-        assert exc.value.field == "file"
+        StageSnapshotGuard.check(before, after, stage="tts")
+        assert StageSnapshotGuard.diff_violations(before, after, stage="tts") == []
 
     def test_plain_text_mutation_raises(self):
         before = [_seg_row(file=None, plain_text="immutable")]
@@ -198,8 +199,9 @@ class TestStageSnapshotGuardLifecycle:
         coord.begin_stage("tts", rows)
         bad = copy.deepcopy(rows)
         bad[0]["text"] = "mutated"
-        with pytest.raises(StageSnapshotIntegrityError):
-            coord.end_stage("tts", bad)
+        # No task_info → default UI is Simple/basic: Stage 40 soft-continues.
+        coord.end_stage("tts", bad)
+        assert any(r.get("snapshot_guard") == "soft_continue" for r in coord.reports)
 
 
 class TestArtifactIntegrityGuard:

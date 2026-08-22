@@ -1,6 +1,6 @@
 {
   "task_id": "t-uuid",
-  "created_at": "2026-08-21T16:26:51+00:00",
+  "created_at": "2026-08-22T16:59:18+00:00",
   "agents": [
     {
       "agent_name": "Planner/v3",
@@ -9,7 +9,7 @@
       "error_msg": null,
       "decision": "LOCAL_ONLY",
       "fallback_used": true,
-      "timestamp": "2026-08-21T16:26:51+00:00",
+      "timestamp": "2026-08-22T16:59:18+00:00",
       "segment_idx": null,
       "execution_time_ms": 0.0,
       "retry_count": 0,
@@ -28,5 +28,5 @@
     "total_execution_time_ms": 0.0,
     "total_llm_calls": 0
   },
-  "saved_at": "2026-08-21T16:26:51+00:00"
+  "saved_at": "2026-08-22T16:59:18+00:00"
 }

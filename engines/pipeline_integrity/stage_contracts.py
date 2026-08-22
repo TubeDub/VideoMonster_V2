@@ -215,6 +215,18 @@ STAGE_ALLOWED_MUTATIONS: dict[str, frozenset[str]] = {
             "owned_text_segment_id",
             "identity_text_hash",
             "identity_text_revision",
+            # Stage 40 — bind_after_tts writes spoken Final + revision UUIDs.
+            "final_tts_text",
+            "source_segment_uuid",
+            "translation_uuid",
+            "adaptation_uuid",
+            "assigned_voice",
+            "engine_id",
+            # Nested bind keys (diag 8c9850ef) — never abort if they surface top-level.
+            "audio_path",
+            "tts_bound",
+            "bound_at_stage",
+            "sidecar_path",
         }
     ),
     "slot_fit": frozenset(

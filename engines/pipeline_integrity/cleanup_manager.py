@@ -41,6 +41,8 @@ PROTECTED_MUX_PREFIXES: tuple[str, ...] = (
     "tts_regen_",
     "pad_silence_",
     "softpad_",
+    "fitted_",
+    "regen_",
 )
 
 FINAL_SUFFIXES = {".mp4", ".mkv", ".mov", ".webm"}
@@ -321,6 +323,12 @@ class CleanupManager:
                 report.preserved.append(str(p))
                 return
             if live_mux and is_protected_mux_prefix(p):
+                report.blocked.append(str(p))
+                return
+            if is_protected_mux_prefix(p) and not self.info.get(
+                "cleanup_drop_segment_audio"
+            ):
+                # Stage 40: session pad/tts is FINAL until explicit post-success policy.
                 report.blocked.append(str(p))
                 return
             try:

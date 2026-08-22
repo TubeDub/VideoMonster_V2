@@ -1,0 +1,8 @@
+=== DUBBING ENGINE REPORT task= run=b7a0ef2a ===
+lang=uk  segments=1  elapsed=0.09s
+adapted=0  skipped=0  strategies={'direct': 1, 'adapted': 0, 'video_adapt': 0, 'merge_next': 0, 'skip_tts': 0, 'delay_start': 0}
+
+── PER-SEGMENT LOG ──────────────────────────────────────────────
+  [✓] seg#00 strategy=direct pred=368ms slot=5000ms
+       [validate] passed=True checks=['meaning', 'entity', 'lang', 'stress', 'punct', 'timing', 'overlap', 'voice']
+       NOTES: stress_not_applied

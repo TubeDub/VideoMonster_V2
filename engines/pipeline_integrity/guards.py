@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -26,6 +27,80 @@ from engines.pipeline_integrity.segment import (
 from engines.pipeline_integrity.tts_file_lifecycle import log_tts_lifecycle
 from engines.pipeline_integrity.tts_segment_fields import resolve_segment_audio_ref
 from engines.pipeline_integrity.stage_contracts import allowed_fields_for_stage
+
+# Diag 8c9850ef — IdentityGuard/RevisionManager bind stamps at TTS.
+# Snapshot mismatch on these must never abort after partial synth.
+TTS_IDENTITY_BIND_SNAPSHOT_FIELDS: frozenset[str] = frozenset(
+    {
+        "identity_binding",
+        "tts_meta",
+        "revision_text_hash",
+        "wav_segment_id",
+        "final_tts_text",
+        "assigned_voice",
+        "owned_text_segment_id",
+        "identity_text_hash",
+        "identity_text_revision",
+        "source_segment_uuid",
+        "translation_uuid",
+        "adaptation_uuid",
+        "engine_id",
+        "tts_uuid",
+        "audio_uuid",
+        "audio_bound_uuid",
+        # Nested bind keys (may surface as top-level or dotted paths).
+        "audio_path",
+        "tts_bound",
+        "bound_at_stage",
+        "sidecar_path",
+        "text_revision",
+        "text_hash",
+    }
+)
+TTS_SOURCE_TEXT_SNAPSHOT_FIELDS: frozenset[str] = frozenset(
+    {
+        "text",
+        "plain_text",
+        "translation_text",
+        "translated_text",
+        "final_text",
+        "semantic_text",
+        "locked_text",
+        "grammar_text",
+        "corrected_text",
+        "rewritten_text",
+    }
+)
+
+
+def snapshot_mismatch_is_identity_bind_only(
+    exc: StageSnapshotIntegrityError,
+    *,
+    stage: str = "",
+) -> bool:
+    """True when every snapshot violation is TTS bind-metadata, not source text."""
+    st = str(stage or getattr(exc, "stage", "") or "").strip().lower()
+    if st and st not in ("tts",) and not st.startswith("tts"):
+        return False
+    fields: list[str] = []
+    raw = str(getattr(exc, "field", "") or "").strip()
+    if raw:
+        fields.append(raw)
+    details = getattr(exc, "details", None) or {}
+    for row in list(details.get("violations") or []):
+        if isinstance(row, dict):
+            f = str(row.get("field") or "").strip()
+            if f:
+                fields.append(f)
+    if not fields:
+        return False
+    for f in fields:
+        top = f.split(".", 1)[0]
+        if top in TTS_SOURCE_TEXT_SNAPSHOT_FIELDS:
+            return False
+        if top not in TTS_IDENTITY_BIND_SNAPSHOT_FIELDS:
+            return False
+    return True
 
 STAGE_OWNER_MODULES: dict[str, str] = {
     "stt": "engines.stt_engine",
@@ -636,14 +711,63 @@ class PipelineIntegrityCoordinator:
                 pass
             from engines.pipeline_integrity.openddf_diagnostics import guard_check_with_diagnostics
 
-            guard_check_with_diagnostics(
-                before,
-                segments_data,
-                stage=stage,
-                mutator_module=STAGE_OWNER_MODULES.get(stage),
-                task_id=self.task_id,
-                task_info=task_info,
-            )
+            try:
+                guard_check_with_diagnostics(
+                    before,
+                    segments_data,
+                    stage=stage,
+                    mutator_module=STAGE_OWNER_MODULES.get(stage),
+                    task_id=self.task_id,
+                    task_info=task_info,
+                )
+            except StageSnapshotIntegrityError as exc:
+                simple = False
+                try:
+                    from engines.simple_dub_pipeline import is_simple_pipeline
+
+                    simple = bool(is_simple_pipeline(task_info))
+                except Exception:
+                    simple = bool(
+                        (task_info or {}).get("simple_pipeline")
+                        or (task_info or {}).get("happy_path")
+                    )
+                bind_only = snapshot_mismatch_is_identity_bind_only(exc, stage=stage)
+                if not simple and not bind_only:
+                    raise
+                logger = logging.getLogger("tubedub.pipeline_integrity")
+                why = "Simple" if simple else "identity-bind"
+                logger.warning(
+                    "Task %s: snapshot mismatch at %s — %s continues: %s",
+                    self.task_id,
+                    stage,
+                    why,
+                    exc,
+                )
+                try:
+                    from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+
+                    with STATE_LOCK:
+                        t = AUTO_TASKS.get(self.task_id)
+                        if t and isinstance(t.get("info"), dict):
+                            warns = list(t["info"].get("user_warnings") or [])
+                            warns.append(
+                                {
+                                    "stage": stage,
+                                    "code": "STAGE_SNAPSHOT_SOFT",
+                                    "message": str(exc)[:400],
+                                }
+                            )
+                            t["info"]["user_warnings"] = warns
+                            t["info"]["snapshot_soft_continue"] = True
+                except Exception:
+                    pass
+                self.reports.append(
+                    {
+                        "stage": stage,
+                        "snapshot_guard": "soft_continue",
+                        "reason": str(exc)[:300],
+                    }
+                )
         elif check_mutations and not self.is_snapshot_guard_ready():
             self.reports.append(
                 {

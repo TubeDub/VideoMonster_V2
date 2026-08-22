@@ -178,6 +178,8 @@ def cleanup_task_tts_files(
         "tts_regen_",
         "pad_silence_",
         "softpad_",
+        "fitted_",
+        "regen_",
     )
 
     def _is_protected_seg_audio(path: Path) -> bool:

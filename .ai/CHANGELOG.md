@@ -1,5 +1,50 @@
 # Changelog
 
+## [2026-08-22] Full TZ capability diagnostic + leftover stamps
+
+Self-heal: `has_forbidden_expand_pattern` imported in closed-loop expand;
+`_apply_word_fixes` no longer locally shadowed (RU polish); coordinator
+recovery uses `_FORWARD[i]` instead of undefined `name`.
+
+Closed remaining Stage 40 nits: `stage31_duration_levers` now plans
+`text_slot_fit` first (aliases `text_shorten`/`text_expand` kept). Disk
+`duration_control_used` backstop lives in `text_slot_fit.backstop_duration_control_used`
+(|delta|>200ms never stays `none`). Closed-loop unresolved is stamped
+`soft_complete` via `stamp_closed_loop_unresolved_soft`. ArchitectureGuard
+repairs missing/duplicate UUIDs instead of aborting. Snapshot `file` at TTS
+is allowed; default Simple soft-continues text mismatch.
+
+### Tests
+- `tests/test_tz_full_capability_diag.py` (14 offline capabilities + pre-mux order)
+
+## [2026-08-22] Stage 40 leftovers — main bind-metadata + honest text_slot_fit
+
+Main/non-Simple no longer abort the job on TTS identity-bind snapshot
+mismatch (same 8c9850ef fields as Simple). Source `text` / `plain_text`
+swaps at TTS still fail-loud. New `duration_control_used` writes include
+`text_slot_fit` when text was the lever; `text_shorten` / `text_expand`
+remain aliases. `closed_loop_unresolved` is soft-complete on main too.
+
+### Tests
+- `tests/test_stage_snapshot_guard.py::test_nonsimple_tts_identity_bind_does_not_abort`
+- `tests/test_stage40_simple_en_uk.py::test_duration_control_new_write_includes_text_slot_fit`
+
+
+## [2026-08-22] Stage 40 — Production-grade Simple EN→UK (local, no git)
+
+One pre-mux order for Simple and main: repair → soft-pad → last-resort →
+disk census → re-pad if needed → mux. Pads are silence WAV of slot length;
+`final_status` is `ok` / `ok_with_pads` (never `audio_missing_fatal`).
+Master dub track is padded to ffprobe `video_duration_ms`. Simple snapshot
+mismatch after TTS identity-bind is a warning + continue (diag 8c9850ef
+whitelist also covers `final_tts_text` / revision UUIDs). Forbidden cs/sk
+voices reroute to Ostap; cleanup keeps `pad_silence_*` / `tts_*` / `fitted_*`
+until explicit post-success policy. Closed-loop unresolved is soft-complete.
+
+### Tests
+- `tests/test_stage40_simple_en_uk.py`
+
+
 ## [2026-08-21] Diag 8c9850ef — TTS identity bind vs snapshot guard (local, no git)
 
 Cold Simple EN→UK (`8c9850ef`, 164s) died at TTS with
@@ -793,4 +838,7 @@ See `docs/` for Stages 1–5 documentation.
 - Documentation auto-sync
 
 ## [2026-08-21] Documentation sync
+- Documentation auto-sync
+
+## [2026-08-22] Documentation sync
 - Documentation auto-sync

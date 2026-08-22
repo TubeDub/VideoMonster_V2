@@ -1,0 +1,114 @@
+{
+  "task_id": "t-report",
+  "project_uuid": "2d328178-5662-4d28-aff0-22929047805a",
+  "engine": "Translation+Semantic v4.0",
+  "summary": {
+    "passed_count": 0,
+    "failed_count": 3,
+    "avg_semantic_score": 0.6758,
+    "retries_total": 9
+  },
+  "segment_count": 3,
+  "segments": [
+    {
+      "index": 0,
+      "original_text": "He said that George Smith went home on 12.05.2024.",
+      "machine_translation": "Он сказал что George Smith пошёл домой 12.05.2024.",
+      "semantic_text": "Он сказал, что George Smith пошёл домой 12. 05. 2024.",
+      "errors_found": [
+        "actions_weakened",
+        "entity_inaccuracy",
+        "meaning_loss",
+        "missing_entities:['12.05.2024', '12.05']",
+        "source_language_leak",
+        "unchanged_mt"
+      ],
+      "errors_fixed": [],
+      "semantic_score": 0.66,
+      "retry_count": 3,
+      "model_used": "rule_engine",
+      "quality": {
+        "semantic_score": 0.66,
+        "naturalness_score": 0.8,
+        "translation_confidence": 0.85,
+        "context_confidence": 1.0,
+        "entity_accuracy": 0.5,
+        "issues": [
+          "actions_weakened",
+          "entity_inaccuracy",
+          "meaning_loss",
+          "missing_entities:['12.05.2024', '12.05']",
+          "source_language_leak",
+          "unchanged_mt"
+        ],
+        "fixes_applied": [],
+        "passed": false,
+        "model_used": "rule_engine"
+      }
+    },
+    {
+      "index": 1,
+      "original_text": "Wow!!! That is amazing!",
+      "machine_translation": "Вау!!! Это удивительно!",
+      "semantic_text": "Вау! !! Это удивительно!",
+      "errors_found": [
+        "entity_inaccuracy",
+        "meaning_loss",
+        "missing_entities:['Wow']",
+        "unchanged_mt"
+      ],
+      "errors_fixed": [],
+      "semantic_score": 0.5788,
+      "retry_count": 3,
+      "model_used": "rule_engine",
+      "quality": {
+        "semantic_score": 0.5788,
+        "naturalness_score": 0.8,
+        "translation_confidence": 0.85,
+        "context_confidence": 0.875,
+        "entity_accuracy": 0.0,
+        "issues": [
+          "entity_inaccuracy",
+          "meaning_loss",
+          "missing_entities:['Wow']",
+          "unchanged_mt"
+        ],
+        "fixes_applied": [],
+        "passed": false,
+        "model_used": "rule_engine"
+      }
+    },
+    {
+      "index": 2,
+      "original_text": "I am sad because he left.",
+      "machine_translation": "Мне грустно потому что он ушёл.",
+      "semantic_text": "Мне грустно потому что он ушёл.",
+      "errors_found": [
+        "actions_weakened",
+        "causes_weakened",
+        "meaning_loss",
+        "unchanged_mt"
+      ],
+      "errors_fixed": [],
+      "semantic_score": 0.7887,
+      "retry_count": 3,
+      "model_used": "rule_engine",
+      "quality": {
+        "semantic_score": 0.7887,
+        "naturalness_score": 0.7,
+        "translation_confidence": 0.85,
+        "context_confidence": 0.875,
+        "entity_accuracy": 1.0,
+        "issues": [
+          "actions_weakened",
+          "causes_weakened",
+          "meaning_loss",
+          "unchanged_mt"
+        ],
+        "fixes_applied": [],
+        "passed": false,
+        "model_used": "rule_engine"
+      }
+    }
+  ]
+}

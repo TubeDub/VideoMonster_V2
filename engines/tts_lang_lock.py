@@ -762,6 +762,7 @@ def pre_mux_tts_integrity(
     dur_sum = 0.0
     rejected = 0
     voiced = 0
+    rerouted_uk = False
     for i, seg in enumerate(segments_data or []):
         if not isinstance(seg, dict) or seg.get("merged_into") is not None:
             continue
@@ -790,11 +791,43 @@ def pre_mux_tts_integrity(
                     simple_mode
                     and str(target_lang or "").split("-")[0].lower() == "uk"
                 ):
-                    raise RuntimeError(
-                        f"PIPELINE_LANG_MIX: seg#{i} skip_tts on Simple uk — refuse mux silence"
+                    # Stage 40: do not abort Simple — pin Ostap + mark pad.
+                    try:
+                        from engines.simple_voice_lock import DEFAULT_UK_VOICE
+
+                        seg["voice"] = DEFAULT_UK_VOICE
+                        seg["assigned_voice"] = DEFAULT_UK_VOICE
+                        seg["tts_voice"] = DEFAULT_UK_VOICE
+                    except Exception:
+                        pass
+                    seg["needs_re_tts"] = False
+                    logger.warning(
+                        "[TTS integrity] Simple uk skip_tts seg#%d — reroute default UK + pad",
+                        i + 1,
                     )
         if voice and str(target_lang or "").split("-")[0].lower() == "uk":
-            assert_voice_matches_target(voice, target_lang, raise_error=True)
+            ok_v, why_v = assert_voice_matches_target(
+                voice, target_lang, raise_error=False
+            )
+            if not ok_v:
+                if simple_mode:
+                    try:
+                        from engines.simple_voice_lock import DEFAULT_UK_VOICE
+
+                        seg["voice"] = DEFAULT_UK_VOICE
+                        seg["assigned_voice"] = DEFAULT_UK_VOICE
+                        seg["tts_voice"] = DEFAULT_UK_VOICE
+                        voice = DEFAULT_UK_VOICE
+                        rerouted_uk = True
+                    except Exception:
+                        pass
+                    logger.warning(
+                        "[TTS integrity] Simple forbidden voice %s (%s) — Ostap + pad",
+                        voice,
+                        why_v,
+                    )
+                else:
+                    assert_voice_matches_target(voice, target_lang, raise_error=True)
         dur = float(seg.get("playback_duration") or seg.get("tts_duration") or 0)
         if dur <= 0:
             try:
@@ -837,6 +870,7 @@ def pre_mux_tts_integrity(
         "tts_duration_sum_s": round(dur_sum, 3),
         "timeline_ms": timeline_ms,
         "rows": rows,
+        "rerouted_default_uk": bool(rerouted_uk),
     }
     if timeline_ms and timeline_ms > 0 and dur_sum > 0:
         ratio = (dur_sum * 1000.0) / float(timeline_ms)
@@ -849,8 +883,30 @@ def pre_mux_tts_integrity(
                 timeline_ms,
             )
     if voiced > 0 and rejected / max(voiced + rejected, 1) > 0.20:
-        raise RuntimeError(
-            f"PIPELINE_LANG_MIX: {rejected} skipped / {voiced} voiced "
-            "(>20% rejected_non_target) — refuse mux"
-        )
+        if simple_mode and str(target_lang or "").split("-")[0].lower() == "uk":
+            report["rerouted_default_uk"] = True
+            logger.error(
+                "[TTS integrity] Simple >20%% rejected_non_target (%s/%s) — "
+                "reroute DEFAULT_UK_VOICE + pad, mux continues",
+                rejected,
+                voiced,
+            )
+            try:
+                from engines.simple_voice_lock import (
+                    DEFAULT_UK_VOICE,
+                    lock_simple_pipeline_voice,
+                )
+
+                lock_simple_pipeline_voice(
+                    list(segments_data or []),
+                    pipeline_voice=DEFAULT_UK_VOICE,
+                    task_info={"target_lang": target_lang, "simple_pipeline": True},
+                )
+            except Exception as _rr_exc:
+                logger.warning("Simple UK reroute skipped: %s", _rr_exc)
+        else:
+            raise RuntimeError(
+                f"PIPELINE_LANG_MIX: {rejected} skipped / {voiced} voiced "
+                "(>20% rejected_non_target) — refuse mux"
+            )
     return report

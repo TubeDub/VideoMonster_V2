@@ -35,8 +35,10 @@ from engines.text_slot_fit import (
     UNDERFLOW_TRIGGER_MS,
     canon_duration_control_used,
     clamp_stage31_tempo,
-    restore_ending_franchise_meaning,
     ending_restore_targets,
+    merge_duration_control_used,
+    merge_text_slot_fit_stamp,
+    restore_ending_franchise_meaning,
 )
 
 # Logged at closed-loop entry so diagnostics prove which Stage23/31 build is running.
@@ -44,6 +46,25 @@ STAGE23_RUNTIME_TAG = "stage23b-audio-duration-20260806"
 STAGE31_RUNTIME_TAG = "stage31-text-first-tempo-20260817"
 
 logger = logging.getLogger("tubedub.closed_loop_timing")
+
+
+def stamp_closed_loop_unresolved_soft(
+    stats: dict[str, Any],
+    needing: list[Any] | None,
+) -> dict[str, Any]:
+    """Stage 40: unresolved closed-loop is a soft complete, never a hard abort."""
+    idxs = list(needing or [])
+    if not idxs:
+        return stats
+    stats["requires_llm_adaptation"] = {
+        "count": len(idxs),
+        "segment_indices": idxs,
+        "reason": "closed_loop_unresolved",
+        "soft_complete": True,
+    }
+    stats["closed_loop_unresolved_soft"] = True
+    return stats
+
 
 MAX_REWRITE_ITERATIONS = 5
 OVERFLOW_THRESHOLD_MS = 100
@@ -2040,12 +2061,12 @@ def _stamp_stage19e_fields(
         audio_exists = bool(seg.get("audio_exists"))
         audio_size = int(seg.get("audio_size_bytes") or 0)
     # Underfill without a duration-control lever is dishonest — stamp intent.
-    # TZ: underflow_ms > 250 ⇒ duration_control_used MUST NOT stay "none".
-    _delta_abs = max(int(budget.underflow or 0), int(overflow_ms or 0))
+    # Stage 40 TZ: |delta| > 200ms ⇒ duration_control_used MUST NOT stay "none".
+    _delta_abs = max(int(budget.underflow or 0), int(overflow_ms or 0), abs(int(delta or 0)))
     if (
         duration_control_used in ("none", "", None)
         and (
-            _delta_abs > 250
+            _delta_abs > 200
             or fill < float(globals().get("STAGE23_OK_FILL_LO") or 0.92)
             or fill > float(globals().get("STAGE23_OK_FILL_HI") or 1.12)
         )
@@ -2054,11 +2075,17 @@ def _stamp_stage19e_fields(
         if seg.get("audio_padded") or seg.get("silence_pad"):
             duration_control_used = "soft_pad"
         elif expand_executed and text_changed:
-            duration_control_used = "text_expand"
+            duration_control_used = merge_text_slot_fit_stamp(
+                duration_control_used, "text_expand"
+            )
         elif seg.get("shorten_executed"):
-            duration_control_used = "text_shorten"
+            duration_control_used = merge_text_slot_fit_stamp(
+                duration_control_used, "text_shorten"
+            )
         elif seg.get("split_executed") or seg.get("split_children"):
-            duration_control_used = "text_split"
+            duration_control_used = merge_text_slot_fit_stamp(
+                duration_control_used, "text_split"
+            )
         elif abs(float(seg.get("atempo") or 1.0) - 1.0) >= 0.005:
             duration_control_used = "atempo"
         elif abs(
@@ -2494,7 +2521,9 @@ def _apply_stage23_atempo_slow(
             if str(seg.get("duration_control_used") or "none") in ("none", ""):
                 seg["duration_control_used"] = "atempo"
             elif fill < STAGE23_OK_FILL_LO:
-                seg["duration_control_used"] = "atempo"
+                seg["duration_control_used"] = merge_duration_control_used(
+                    seg.get("duration_control_used"), "atempo"
+                )
             stages = list(seg.get("adaptation_stages") or [])
             tag = f"stage23_atempo_slow:{applied:.3f}"
             if tag not in stages:
@@ -2579,7 +2608,9 @@ def _apply_light_atempo_after_fit(
                 ):
                     seg["duration_control_used"] = "atempo"
                 elif fill < STAGE31_OK_FILL_LO or fill > STAGE31_OK_FILL_HI:
-                    seg["duration_control_used"] = "atempo"
+                    seg["duration_control_used"] = merge_duration_control_used(
+                        seg.get("duration_control_used"), "atempo"
+                    )
             if fill < UNDERFILL_EXPAND_RATIO:
                 seg["strategy"] = (
                     "expand_then_slow"
@@ -2663,6 +2694,7 @@ def apply_stage19b_rule_text_fit(
         estimated_cps,
         expand_to_fill,
         fit_text_to_slot,
+        has_forbidden_expand_pattern,
         is_clean_utterance,
         is_garbage_expand,
         safe_shorten,
@@ -2734,7 +2766,9 @@ def apply_stage19b_rule_text_fit(
         lock_text_fit_algorithm_reason(seg, "TextSlotFitSplit")
         budget.final_status = "stage19e_partial"
         budget.rewrite_reason = "stage19e:force_split_pending"
-        seg["duration_control_used"] = "text_split"
+        seg["duration_control_used"] = merge_text_slot_fit_stamp(
+            seg.get("duration_control_used"), "text_split"
+        )
         _stamp_stage19e_fields(
             seg,
             budget=budget,
@@ -2963,14 +2997,18 @@ def apply_stage19b_rule_text_fit(
         )
     )
     if expand_executed:
-        seg["duration_control_used"] = "text_expand"
+        seg["duration_control_used"] = merge_text_slot_fit_stamp(
+            seg.get("duration_control_used"), "text_expand"
+        )
     if text_changed and fit.action == "shorten":
         shorten_executed = True
         if canon_duration_control_used(seg.get("duration_control_used")) in (
             "none",
             "",
         ):
-            seg["duration_control_used"] = "text_shorten"
+            seg["duration_control_used"] = merge_text_slot_fit_stamp(
+                seg.get("duration_control_used"), "text_shorten"
+            )
     if text_changed and expansion_strategy == "none":
         if expand_executed:
             reasons = [str(r) for r in (fit.reasons or [])]
@@ -4966,11 +5004,7 @@ def run_closed_loop_timing(
         or (b.status in ("overflow", "underflow") and b.final_status != "ok")
     ]
     if needing:
-        stats["requires_llm_adaptation"] = {
-            "count": len(needing),
-            "segment_indices": needing,
-            "reason": "closed_loop_unresolved",
-        }
+        stamp_closed_loop_unresolved_soft(stats, needing)
 
     # Stage 31/32: restore franchise / Lucas on the *timeline* tail (last 2–3
     # unique indices / last 20s), not the tail of a split-child list.

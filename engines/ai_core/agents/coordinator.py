@@ -128,7 +128,7 @@ class AgentCoordinator:
 
                 emit_recovery_action(
                     self.task_id,
-                    from_agent=name,
+                    from_agent=_FORWARD[i],
                     to_agent=res.route_back_to,
                     segment_index=ctx.index,
                     reason=res.reason or "fidelity_repair",

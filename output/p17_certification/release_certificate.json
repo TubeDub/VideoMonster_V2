@@ -2,7 +2,7 @@
   "approved": false,
   "status": "Release Blocked",
   "system_version": "2.0.0-rc1",
-  "issued_at": "2026-08-21T16:29:02Z",
+  "issued_at": "2026-08-22T17:09:39Z",
   "known_limitations": [
     "Golden dataset content fill (20 films / 10k segments) is ongoing; fingerprints scaffolded.",
     "Neural TTS adapters need installed backends on target hosts.",
@@ -53,7 +53,7 @@
             "ok": true,
             "detail": "processing_ms <= 2000.0",
             "baseline": 2000.0,
-            "candidate": 182.8880999237299
+            "candidate": 82.63080008327961
           },
           {
             "name": "determinism",
@@ -359,7 +359,7 @@
         "ok": false,
         "suite": "dsal_v4_p5",
         "llm_off": true,
-        "issued_at": "2026-08-21T16:29:02Z",
+        "issued_at": "2026-08-22T17:09:39Z",
         "golden_path": "C:\\Users\\serhii\\Desktop\\VideoMonster_V2\\tests\\golden\\dub\\george_lucas_en_uk_20.json",
         "gates": {
           "llm_off_ok": {

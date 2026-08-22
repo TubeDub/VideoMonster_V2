@@ -2926,6 +2926,52 @@ def _assert_segments_audio_ready(
         if "tts_uk" not in engines_try:
             engines_try.insert(0, "tts_uk")
 
+    # Stage 40 — census-only: walk every non-merged row from absolute disk
+    # paths. Re-TTS belongs in `_repair_missing_tts_files` (step 1); pads
+    # belong in soft-pad / last-resort (steps 2–3). This gate only reports.
+    if not allow_repair:
+        for idx, seg in enumerate(segments_data or []):
+            if not isinstance(seg, dict):
+                continue
+            if seg.get("merged_into") is not None or seg.get("merged_into_id"):
+                continue
+            path = resolve_segment_audio_path(seg, resolve_path=_resolve)
+            try:
+                abs_p = str(Path(path).resolve()) if path else ""
+            except OSError:
+                abs_p = str(path or "")
+            if abs_p:
+                seg["resolved_path"] = abs_p
+                if not str(seg.get("file") or "").strip():
+                    seg["file"] = abs_p
+            ok, size = audio_stat(abs_p)
+            stamp_audio_presence(seg, resolve_path=_resolve)
+            if not ok or size < MIN_AUDIO_BYTES:
+                missing.append(idx)
+                logger.error(
+                    "Task %s: census-only audio missing idx=%s path=%s size=%s",
+                    task_id,
+                    idx,
+                    abs_p,
+                    size,
+                )
+        result = {
+            "missing_indices": missing,
+            "missing_count": len(missing),
+            "repaired": 0,
+            "padded": 0,
+            "padded_count": int(info.get("padded_count") or 0),
+            "padded_indices": list(info.get("padded_indices") or []),
+            "warnings": warnings,
+            "ok": True,
+            "final_status": (
+                "ok_with_pads"
+                if int(info.get("padded_count") or 0) > 0
+                else ("needs_soft_pad" if missing else "ok")
+            ),
+        }
+        return result
+
     for idx, seg in enumerate(segments_data or []):
         if not isinstance(seg, dict):
             continue
@@ -3159,6 +3205,268 @@ def _assert_segments_audio_ready(
             info["final_status"] = "ok"
             info.pop("export_blocked_reason", None)
     return result
+
+
+def _prepare_segments_audio_before_mux(
+    segments_data: list,
+    *,
+    task_info: dict | None,
+    task_id: str | None,
+    timing_map: list | None = None,
+    voice: str | None = None,
+    resolve_path=None,
+) -> dict:
+    """Single pre-mux order for Simple and main (Stage 40).
+
+    1) repair missing TTS
+    2) soft-pad every hole
+    3) last-resort stdlib-wave pad
+    4) census from absolute disk paths
+    5) if still missing → soft-pad + last-resort again
+    6) sync audio_missing / padded_count / final_status
+    Never abort mux because of pads. final_status is ok | ok_with_pads.
+    """
+    info = task_info if isinstance(task_info, dict) else {}
+    segs = list(segments_data or [])
+
+    def _mux_resolve(p: str) -> str:
+        if resolve_path:
+            try:
+                return str(resolve_path(p) or p)
+            except Exception:
+                return p
+        try:
+            return str(_resolve_segment_audio_path(p) or p)
+        except Exception:
+            return p
+
+    voice0 = str(
+        voice
+        or info.get("voice")
+        or info.get("pipeline_voice")
+        or info.get("tts_voice")
+        or ""
+    )
+
+    repair_stats: dict = {}
+    try:
+        repair_stats = _repair_missing_tts_files(
+            segs,
+            voice=voice0,
+            task_info=info,
+            task_id=task_id,
+            tts_rate=info.get("tts_rate"),
+            tts_pitch=info.get("tts_pitch"),
+            resolve_path=_mux_resolve,
+        )
+        info["stage23b_pre_mux_repair"] = repair_stats
+    except Exception as _rep_exc:
+        logger.warning("Task %s: pre-mux audio repair failed: %s", task_id, _rep_exc)
+        repair_stats = {}
+
+    pad_stats: dict = {}
+    try:
+        pad_stats = _soft_pad_missing_segments(
+            segs,
+            task_info=info,
+            task_id=task_id,
+            timing_map=timing_map,
+            resolve_path=_mux_resolve,
+        )
+    except Exception as _pad_exc:
+        logger.error(
+            "Task %s: soft-pad failed: %s (last-resort still runs)",
+            task_id,
+            _pad_exc,
+        )
+        pad_stats = {}
+
+    lr_stats: dict = {}
+    try:
+        lr_stats = _last_resort_pad_missing_segments(
+            segs,
+            task_info=info,
+            task_id=task_id,
+            timing_map=timing_map,
+            resolve_path=_mux_resolve,
+        )
+    except Exception as _lr_exc:
+        logger.error(
+            "Task %s: last-resort pad loop failed: %s (mux still continues)",
+            task_id,
+            _lr_exc,
+        )
+        lr_stats = {}
+
+    try:
+        _sd = info.get("session_dir") or info.get("artifacts_dir")
+        if _sd:
+            try:
+                info["session_dir"] = str(Path(str(_sd)).resolve())
+                _sd = info["session_dir"]
+            except OSError:
+                pass
+        _absolutize_segment_audio_paths(segs, _sd, task_id=task_id)
+    except Exception:
+        pass
+
+    try:
+        from engines.oss_production import canonicalize_session_artifacts
+
+        canonicalize_session_artifacts(
+            segs,
+            info.get("session_dir"),
+            task_info=info,
+            resolve_path=_mux_resolve,
+        )
+    except Exception as _oss_exc:
+        logger.debug("Task %s: oss segs canonicalize skipped: %s", task_id, _oss_exc)
+
+    gate = _assert_segments_audio_ready(
+        segs,
+        task_id=task_id,
+        resolve_path=_mux_resolve,
+        task_info=info,
+        voice=voice0,
+        allow_repair=False,
+    )
+    gate = dict(gate or {})
+    gate["ok"] = True
+    gate["padded_indices"] = list(
+        dict.fromkeys(
+            list(pad_stats.get("padded_indices") or [])
+            + list(lr_stats.get("padded_indices") or [])
+            + list(gate.get("padded_indices") or [])
+        )
+    )
+    gate["padded_count"] = len(gate["padded_indices"])
+    gate["missing_before_pad"] = list(pad_stats.get("missing_before") or [])
+    if gate["padded_count"] > 0 or int(repair_stats.get("padded") or 0) > 0:
+        gate["final_status"] = "ok_with_pads"
+        info["final_status"] = "ok_with_pads"
+    else:
+        gate["final_status"] = "ok"
+
+    from_segs = [
+        int(s.get("index") if s.get("index") is not None else i)
+        for i, s in enumerate(segs)
+        if isinstance(s, dict) and (s.get("audio_padded") or s.get("silence_pad"))
+    ]
+    info["padded_indices"] = list(
+        dict.fromkeys(
+            list(info.get("padded_indices") or [])
+            + list(gate["padded_indices"])
+            + from_segs
+        )
+    )
+    info["padded_count"] = len(info["padded_indices"])
+    if info["padded_count"] > 0:
+        info["final_status"] = "ok_with_pads"
+        gate["final_status"] = "ok_with_pads"
+        gate["padded_count"] = info["padded_count"]
+        gate["padded_indices"] = list(info["padded_indices"])
+    elif info.get("final_status") in (
+        None,
+        "",
+        "audio_missing_fatal",
+        "silence_pad_used",
+        "degraded",
+    ):
+        info["final_status"] = "ok"
+    info.pop("export_blocked_reason", None)
+    info["stage23b_audio_gate"] = gate
+    info["segments_data"] = list(segs)
+
+    census: dict = {}
+    try:
+        from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
+
+        census = _build_openddf_tts_pipeline_block(info, segments_data=segs)
+        _sync_pad_census_fields(info, census)
+        if int(census.get("audio_missing") or 0) > 0:
+            _log_census_missing_after_pad(
+                task_id=task_id,
+                segments_data=segs,
+                census=census,
+                session_dir=info.get("session_dir"),
+            )
+            _soft_pad_missing_segments(
+                segs,
+                task_info=info,
+                task_id=task_id,
+                timing_map=timing_map,
+                resolve_path=_mux_resolve,
+            )
+            try:
+                _last_resort_pad_missing_segments(
+                    segs,
+                    task_info=info,
+                    task_id=task_id,
+                    timing_map=timing_map,
+                    resolve_path=_mux_resolve,
+                )
+            except Exception:
+                pass
+            try:
+                _absolutize_segment_audio_paths(
+                    segs, info.get("session_dir"), task_id=task_id
+                )
+            except Exception:
+                pass
+            try:
+                from engines.oss_production import canonicalize_session_artifacts as _canon2
+
+                _canon2(
+                    segs,
+                    info.get("session_dir"),
+                    task_info=info,
+                    resolve_path=_mux_resolve,
+                )
+            except Exception:
+                pass
+            info["segments_data"] = list(segs)
+            census = _build_openddf_tts_pipeline_block(info, segments_data=segs)
+            _sync_pad_census_fields(info, census)
+            if int(census.get("audio_missing") or 0) > 0:
+                _log_census_missing_after_pad(
+                    task_id=task_id,
+                    segments_data=segs,
+                    census=census,
+                    session_dir=info.get("session_dir"),
+                )
+        info["tts_pipeline"] = census
+        if info.get("final_status") in ("audio_missing_fatal", "degraded"):
+            info["final_status"] = (
+                "ok_with_pads" if int(info.get("padded_count") or 0) > 0 else "ok"
+            )
+        if int((info.get("tts_pipeline") or {}).get("audio_missing") or 0) == 0:
+            if info.get("final_status") == "degraded":
+                info["final_status"] = (
+                    "ok_with_pads" if int(info.get("padded_count") or 0) > 0 else "ok"
+                )
+        info.pop("export_blocked_reason", None)
+    except Exception as _cen_exc:
+        logger.debug("Task %s: pre-mux census skipped: %s", task_id, _cen_exc)
+        census = dict(info.get("tts_pipeline") or {})
+
+    if int(pad_stats.get("padded_count") or 0) > 0 or int(
+        lr_stats.get("padded_count") or 0
+    ) > 0:
+        logger.warning(
+            "Task %s: pre-mux pad soft=%s last_resort=%s — mux continues",
+            task_id,
+            pad_stats.get("padded_count"),
+            lr_stats.get("padded_count"),
+        )
+    return {
+        "ok": True,
+        "repair": repair_stats,
+        "soft_pad": pad_stats,
+        "last_resort": lr_stats,
+        "gate": gate,
+        "census": census or dict(info.get("tts_pipeline") or {}),
+        "final_status": str(info.get("final_status") or "ok"),
+    }
 
 
 def _post_tts_timing_qa(
@@ -5993,91 +6301,41 @@ def _build_timed_dub_track(
             if _task:
                 task_info = _task.get("info") or {}
 
-    # Stage 23b: mass-repair missing/empty audio, then hard-fail if still missing.
+    # Stage 40 — ONE pre-mux order (Simple and main): repair → soft-pad →
+    # last-resort → census from absolute paths → re-pad if still missing.
     def _mux_resolve(p: str) -> str:
         try:
             return str(_resolve_segment_audio_path(p) or p)
         except Exception:
             return p
 
-    try:
-        _voice = str(
-            (task_info or {}).get("voice")
-            or next(
-                (
-                    s.get("voice")
-                    for s in (segments_data or [])
-                    if isinstance(s, dict) and s.get("voice")
-                ),
-                "",
-            )
-            or ""
+    _voice = str(
+        (task_info or {}).get("voice")
+        or next(
+            (
+                s.get("voice")
+                for s in (segments_data or [])
+                if isinstance(s, dict) and s.get("voice")
+            ),
+            "",
         )
-        _repair_stats = _repair_missing_tts_files(
-            list(segments_data or []),
-            voice=_voice,
-            task_info=task_info or {},
-            task_id=task_id,
-            tts_rate=(task_info or {}).get("tts_rate"),
-            tts_pitch=(task_info or {}).get("tts_pitch"),
-            resolve_path=_mux_resolve,
-        )
-        if task_info is not None:
-            task_info["stage23b_pre_mux_repair"] = _repair_stats
-    except Exception as _rep_exc:
-        logger.warning("Task %s: pre-mux audio repair failed: %s", task_id, _rep_exc)
-
-    _audio_gate = _assert_segments_audio_ready(
-        list(segments_data or []),
-        task_id=task_id,
-        resolve_path=_mux_resolve,
-        task_info=task_info,
-        voice=_voice,
-        allow_repair=True,
+        or ""
     )
-    # TZ: never abort mux on missing audio — soft-pad residual holes and continue.
-    _pad_stats = _soft_pad_missing_segments(
-        list(segments_data or []),
-        task_info=task_info if isinstance(task_info, dict) else {},
-        task_id=task_id,
-        timing_map=timing_map,
-        resolve_path=_mux_resolve,
-    )
-    # Stage 30 §A — LAST RESORT before census/mux (pad_silence_{sid}.wav).
-    _lr_stats = {}
     try:
-        _lr_stats = _last_resort_pad_missing_segments(
+        _prepare_segments_audio_before_mux(
             list(segments_data or []),
             task_info=task_info if isinstance(task_info, dict) else {},
             task_id=task_id,
             timing_map=timing_map,
+            voice=_voice,
             resolve_path=_mux_resolve,
         )
-    except Exception as _lr_exc:
-        logger.error(
-            "Task %s: last-resort pad loop failed: %s (mux still continues)",
+    except Exception as _prep_exc:
+        logger.warning(
+            "Task %s: pre-mux audio prepare failed: %s (mux still continues)",
             task_id,
-            _lr_exc,
+            _prep_exc,
         )
-        _lr_stats = {}
-    _audio_gate = dict(_audio_gate or {})
-    _audio_gate["padded_indices"] = list(
-        dict.fromkeys(
-            list(_pad_stats.get("padded_indices") or [])
-            + list(_lr_stats.get("padded_indices") or [])
-        )
-    )
-    _audio_gate["padded_count"] = len(_audio_gate["padded_indices"])
-    _audio_gate["missing_before_pad"] = list(_pad_stats.get("missing_before") or [])
-    # After pads, gate is always soft-ok (mux proceeds).
-    _audio_gate["ok"] = True
-    if int(_audio_gate.get("padded_count") or 0) > 0 or int(
-        _audio_gate.get("padded") or 0
-    ) > 0:
-        _audio_gate["final_status"] = "ok_with_pads"
-    else:
-        _audio_gate["final_status"] = "ok"
-    _audio_gate.pop("export_blocked_reason", None)
 
     # Stage 31: ripple AFTER pads so silence_pad durations are real, then
     # overlap_count is taken from the final placement (not a pre-pad census).
@@ -6108,149 +6366,6 @@ def _build_timed_dub_track(
             )
     except Exception as _rp_exc:
         logger.debug("stage31 post-pad ripple skipped: %s", _rp_exc)
-
-    if task_info is not None:
-        task_info["stage23b_audio_gate"] = _audio_gate
-        # Sync pads from repair + soft-pad + last-resort + segment flags.
-        _from_segs = [
-            int(s.get("index") if s.get("index") is not None else i)
-            for i, s in enumerate(segments_data or [])
-            if isinstance(s, dict)
-            and (s.get("audio_padded") or s.get("silence_pad"))
-        ]
-        task_info["padded_indices"] = list(
-            dict.fromkeys(
-                list(task_info.get("padded_indices") or [])
-                + list(_pad_stats.get("padded_indices") or [])
-                + list(_lr_stats.get("padded_indices") or [])
-                + list(_audio_gate.get("padded_indices") or [])
-                + _from_segs
-            )
-        )
-        task_info["padded_count"] = len(task_info["padded_indices"])
-        if task_info["padded_count"] > 0:
-            task_info["final_status"] = "ok_with_pads"
-            _audio_gate["final_status"] = "ok_with_pads"
-            _audio_gate["padded_count"] = task_info["padded_count"]
-            _audio_gate["padded_indices"] = list(task_info["padded_indices"])
-        elif task_info.get("final_status") in (
-            None,
-            "",
-            "audio_missing_fatal",
-            "silence_pad_used",
-            "degraded",
-        ):
-            task_info["final_status"] = "ok"
-        task_info.pop("export_blocked_reason", None)
-        # Stage 24/30: absolutize ALL paths BEFORE census (one absolute session_dir).
-        try:
-            _sd = (
-                task_info.get("session_dir")
-                or (task_info.get("artifacts_dir") if task_info else None)
-            )
-            if _sd:
-                try:
-                    task_info["session_dir"] = str(Path(str(_sd)).resolve())
-                    _sd = task_info["session_dir"]
-                except OSError:
-                    pass
-            _absolutize_segment_audio_paths(segments_data, _sd, task_id=task_id)
-        except Exception:
-            pass
-        # Stage 36 — VideoLingo/pyVideoTrans workdir: copy live clips into segs/.
-        try:
-            from engines.oss_production import canonicalize_session_artifacts
-
-            _oss_root = None
-            if isinstance(task_info, dict):
-                _oss_root = task_info.get("session_dir")
-            canonicalize_session_artifacts(
-                list(segments_data or []),
-                _oss_root,
-                task_info=task_info if isinstance(task_info, dict) else None,
-                resolve_path=_mux_resolve,
-            )
-        except Exception as _oss_exc:
-            logger.debug("Task %s: oss segs canonicalize skipped: %s", task_id, _oss_exc)
-        task_info["segments_data"] = list(segments_data or [])
-        # Diagnostics AFTER repair+pad+last-resort — disk truth only.
-        try:
-            from engines.segment_timing_qa import _build_openddf_tts_pipeline_block
-
-            task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
-                task_info, segments_data=segments_data
-            )
-            _sync_pad_census_fields(task_info, task_info["tts_pipeline"])
-            _tp = task_info["tts_pipeline"]
-            if int(_tp.get("audio_missing") or 0) > 0:
-                _log_census_missing_after_pad(
-                    task_id=task_id,
-                    segments_data=list(segments_data or []),
-                    census=_tp,
-                    session_dir=task_info.get("session_dir"),
-                )
-                # Re-pad anything the census still sees as missing, then refresh.
-                _soft_pad_missing_segments(
-                    list(segments_data or []),
-                    task_info=task_info,
-                    task_id=task_id,
-                    timing_map=timing_map,
-                    resolve_path=_mux_resolve,
-                )
-                try:
-                    _last_resort_pad_missing_segments(
-                        list(segments_data or []),
-                        task_info=task_info,
-                        task_id=task_id,
-                        timing_map=timing_map,
-                        resolve_path=_mux_resolve,
-                    )
-                except Exception:
-                    pass
-                try:
-                    _absolutize_segment_audio_paths(
-                        segments_data, task_info.get("session_dir"), task_id=task_id
-                    )
-                except Exception:
-                    pass
-                task_info["segments_data"] = list(segments_data or [])
-                task_info["tts_pipeline"] = _build_openddf_tts_pipeline_block(
-                    task_info, segments_data=segments_data
-                )
-                _sync_pad_census_fields(task_info, task_info["tts_pipeline"])
-                if int(task_info["tts_pipeline"].get("audio_missing") or 0) > 0:
-                    _log_census_missing_after_pad(
-                        task_id=task_id,
-                        segments_data=list(segments_data or []),
-                        census=task_info["tts_pipeline"],
-                        session_dir=task_info.get("session_dir"),
-                    )
-            # Never escalate to audio_missing_fatal — pads keep mux alive.
-            if task_info.get("final_status") in ("audio_missing_fatal", "degraded"):
-                task_info["final_status"] = (
-                    "ok_with_pads"
-                    if int(task_info.get("padded_count") or 0) > 0
-                    else "ok"
-                )
-            if int(task_info.get("tts_pipeline", {}).get("audio_missing") or 0) == 0:
-                if task_info.get("final_status") == "degraded":
-                    task_info["final_status"] = (
-                        "ok_with_pads"
-                        if int(task_info.get("padded_count") or 0) > 0
-                        else "ok"
-                    )
-            task_info.pop("export_blocked_reason", None)
-        except Exception:
-            pass
-        if int(_pad_stats.get("padded_count") or 0) > 0 or int(
-            _lr_stats.get("padded_count") or 0
-        ) > 0:
-            logger.warning(
-                "Task %s: pre-mux pad soft=%s last_resort=%s — mux continues",
-                task_id,
-                _pad_stats.get("padded_count"),
-                _lr_stats.get("padded_count"),
-            )
 
     # Stage 28/32 — UK Simple max_atempo is 1.08 even outside happy-path
     # (diag 2286c82f mux logs still showed atempo=1.15).
@@ -6495,65 +6610,17 @@ def _build_timed_dub_track(
 
     _write_dub_segment_log(task_id, log_entries)
 
-    # Stage 26 §4 — backstop `duration_control_used` stamp when the segment
-    # went through some form of adaptation but the value is still "none"/blank
-    # and |slot_ms − tts_ms| > 250ms. Never rewrite an existing stamp so the
-    # more specific upstream reason (length_scale / atempo / expand / soft_pad)
-    # wins.
+    # Stage 40 — backstop `duration_control_used` when |slot − tts| > 200ms
+    # would otherwise stay "none". Never rewrite a more specific upstream stamp.
     try:
+        from engines.text_slot_fit import backstop_duration_control_used as _dc_backstop
+
         for _s_dc in segments_data or []:
             if not isinstance(_s_dc, dict):
                 continue
             if _s_dc.get("merged_into") is not None or _s_dc.get("merged_into_id"):
                 continue
-            _dc = str(_s_dc.get("duration_control_used") or "").strip().lower()
-            if _dc and _dc not in ("none", "-"):
-                continue
-            _slot = int(
-                _s_dc.get("slot_ms")
-                or (
-                    (_s_dc.get("end_ms") or 0)
-                    - (_s_dc.get("start_ms") or 0)
-                )
-                or 0
-            )
-            _ttsms = int(
-                _s_dc.get("tts_ms")
-                or _s_dc.get("playback_duration")
-                or _s_dc.get("actual_duration_ms")
-                or 0
-            )
-            if _slot <= 0 or _ttsms <= 0:
-                continue
-            _delta = _ttsms - _slot
-            if abs(_delta) <= 150:
-                continue
-            if _s_dc.get("silence_pad") or _s_dc.get("audio_padded"):
-                _s_dc["duration_control_used"] = "soft_pad"
-            elif _s_dc.get("split_children") or _s_dc.get("split_index") is not None:
-                _s_dc["duration_control_used"] = "text_split"
-            elif _s_dc.get("expand_to_fill_used") or _s_dc.get("text_expanded") or _s_dc.get("expand_executed"):
-                _s_dc["duration_control_used"] = "text_expand"
-            elif _s_dc.get("text_shortened") or _s_dc.get("sso_used") or _s_dc.get("shorten_executed"):
-                _s_dc["duration_control_used"] = "text_shorten"
-            elif _s_dc.get("trim_trailing_silence") or _s_dc.get("silence_trimmed_ms"):
-                _s_dc["duration_control_used"] = "trim_silence"
-            elif abs(float(_s_dc.get("atempo") or 1.0) - 1.0) >= 0.01:
-                _s_dc["duration_control_used"] = "atempo"
-            elif _s_dc.get("tts_length_scale") not in (None, "", 1.0, 1, "1.0"):
-                try:
-                    if abs(float(_s_dc.get("tts_length_scale") or 1.0) - 1.0) >= 0.01:
-                        _s_dc["duration_control_used"] = "length_scale"
-                    elif _delta > 0:
-                        _s_dc["duration_control_used"] = "atempo"
-                    else:
-                        _s_dc["duration_control_used"] = "length_scale"
-                except (TypeError, ValueError):
-                    _s_dc["duration_control_used"] = "length_scale"
-            elif _delta > 0:
-                _s_dc["duration_control_used"] = "atempo"
-            else:
-                _s_dc["duration_control_used"] = "length_scale"
+            _dc_backstop(_s_dc)
     except Exception as _dc_exc:
         logger.debug("Task %s: duration_control backstop skipped: %s", task_id, _dc_exc)
 
@@ -6620,6 +6687,21 @@ def _build_timed_dub_track(
         happy_path=_happy_path_timing,
         on_segment_progress=on_segment_progress,
     )
+    # Stage 40 / pyVideoTrans: dub track must cover 100% of video_ms.
+    try:
+        from engines.oss_production import pad_master_to_video_ms
+
+        _vid_pad = int(target_duration_ms or 0)
+        if timed_audio is not None and _vid_pad > 0:
+            _sr = getattr(timed_audio, "frame_rate", None) or 24000
+            timed_audio = pad_master_to_video_ms(
+                timed_audio, _vid_pad, sample_rate=int(_sr)
+            )
+            if isinstance(overlap_report, dict):
+                overlap_report["track_duration_ms"] = int(len(timed_audio))
+                overlap_report["video_duration_ms"] = _vid_pad
+    except Exception as _pad_m_exc:
+        logger.debug("pad_master_to_video_ms skipped: %s", _pad_m_exc)
     # Stamp video/track/tail diagnostics for tts_pipeline + final_dub_qa.
     try:
         track_ms = int(len(timed_audio)) if timed_audio is not None else 0
@@ -17129,6 +17211,33 @@ def _run_pipeline_inner(
                                 audio_filename=one_files[0],
                                 task_info=_tts_info_local,
                             )
+                            if not _tts_info_local.get("oss_locked_voice"):
+                                try:
+                                    from engines.oss_production import (
+                                        lock_voice_after_first_success,
+                                    )
+
+                                    _lv = lock_voice_after_first_success(
+                                        [
+                                            s
+                                            for s in segments_data
+                                            if isinstance(s, dict)
+                                        ],
+                                        voice=str(group_voice or voice or ""),
+                                        engine_id=str(
+                                            tts_engine_id or "edge-offline"
+                                        ),
+                                    )
+                                    voice = str(
+                                        _lv.get("oss_locked_voice")
+                                        or group_voice
+                                        or voice
+                                    )
+                                    task.setdefault("info", {}).update(_lv)
+                                    task["info"]["voice"] = voice
+                                    task["info"]["pipeline_voice"] = voice
+                                except Exception:
+                                    pass
                         else:
                             logger.warning(
                                 "Task %s: TTS returned no file for group %d",
@@ -17372,6 +17481,28 @@ def _run_pipeline_inner(
             with STATE_LOCK:
                 _adapt_mode = resolve_adaptation_mode(task.get("info") or {})
                 task["info"]["adaptation_mode"] = _adapt_mode
+            _simple_soft = False
+            try:
+                from engines.simple_dub_pipeline import is_simple_pipeline as _isp
+
+                _simple_soft = bool(_isp(task.get("info") or {}))
+            except Exception:
+                _simple_soft = bool(
+                    (task.get("info") or {}).get("simple_pipeline")
+                    or (task.get("info") or {}).get("happy_path")
+                )
+            _soft_unresolved = bool(
+                _llm_gate.get("soft_complete")
+                or str(_llm_gate.get("reason") or "") == "closed_loop_unresolved"
+                or (task.get("info") or {}).get("closed_loop_unresolved_soft")
+            )
+            if _simple_soft:
+                _adapt_mode = "automatic"
+            if _simple_soft or _soft_unresolved:
+                with STATE_LOCK:
+                    if _simple_soft:
+                        task["info"]["adaptation_mode"] = _adapt_mode
+                    task["info"]["closed_loop_unresolved_soft"] = True
             if _llm_gate.get("count"):
                 _idxs = _llm_gate.get("segment_indices") or []
                 _caps = detect_capabilities()
@@ -17384,7 +17515,7 @@ def _run_pipeline_inner(
                 )
                 with STATE_LOCK:
                     task["info"]["llm_gate_diagnostics"] = _stop_diag
-                if _adapt_mode == MODE_STRICT:
+                if _adapt_mode == MODE_STRICT and not _simple_soft and not _soft_unresolved:
                     from engines.dubbing_engine.pipeline_failure_diag import fail_pipeline
 
                     reason = (
@@ -18923,11 +19054,34 @@ def _run_pipeline_inner(
             if _mux_info.get("simple_pipeline") or _mux_info.get("happy_path") or _mux_info.get(
                 "simple_voice_locked"
             ):
-                assert_voice_matches_target(_mux_voice, _mux_tgt, raise_error=True)
+                _ok_v, _why_v = assert_voice_matches_target(
+                    _mux_voice, _mux_tgt, raise_error=False
+                )
+                if not _ok_v:
+                    from engines.simple_voice_lock import (
+                        DEFAULT_UK_VOICE,
+                        lock_simple_pipeline_voice,
+                    )
+
+                    logger.warning(
+                        "Task %s: Simple voice locale %s — reroute %s",
+                        task_id,
+                        _why_v,
+                        DEFAULT_UK_VOICE,
+                    )
+                    lock_simple_pipeline_voice(
+                        _mux_sd,
+                        pipeline_voice=DEFAULT_UK_VOICE,
+                        task_info=_mux_info,
+                    )
+                    _mux_voice = DEFAULT_UK_VOICE
                 if int(_mux_info.get("unique_voices_used") or 1) != 1:
-                    raise RuntimeError(
-                        f"PIPELINE_VOICE_LOCALE: unique_voices_used="
-                        f"{_mux_info.get('unique_voices_used')} (need 1)"
+                    from engines.simple_voice_lock import lock_simple_pipeline_voice
+
+                    lock_simple_pipeline_voice(
+                        _mux_sd,
+                        pipeline_voice=_mux_voice,
+                        task_info=_mux_info,
                     )
                 _integ = pre_mux_tts_integrity(
                     _mux_sd,
@@ -18940,8 +19094,30 @@ def _run_pipeline_inner(
                         k: v for k, v in _integ.items() if k != "rows"
                     }
                     task["info"]["tts_pre_mux_rows"] = _integ.get("rows") or []
-        except RuntimeError:
-            raise
+                    if _integ.get("rerouted_default_uk"):
+                        task["info"]["tts_integrity_rerouted_uk"] = True
+        except RuntimeError as _integ_rt:
+            _msg = str(_integ_rt)
+            _simple_here = False
+            try:
+                from engines.simple_dub_pipeline import is_simple_pipeline as _isp2
+
+                _simple_here = bool(_isp2(task.get("info") or {}))
+            except Exception:
+                _simple_here = bool(
+                    (task.get("info") or {}).get("simple_pipeline")
+                    or (task.get("info") or {}).get("happy_path")
+                )
+            if _simple_here and (
+                "PIPELINE_LANG_MIX" in _msg or "PIPELINE_VOICE_LOCALE" in _msg
+            ):
+                logger.warning(
+                    "Task %s: Simple TTS integrity %s — pad/reroute, mux continues",
+                    task_id,
+                    _integ_rt,
+                )
+            else:
+                raise
         except Exception as _integ_exc:
             logger.warning("Task %s: pre-mux TTS integrity soft-fail: %s", task_id, _integ_exc)
 

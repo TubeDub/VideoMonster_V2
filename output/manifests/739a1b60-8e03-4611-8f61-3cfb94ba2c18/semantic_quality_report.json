@@ -1,0 +1,50 @@
+{
+  "task_id": "t-no-shorten",
+  "project_uuid": "739a1b60-8e03-4611-8f61-3cfb94ba2c18",
+  "engine": "Translation+Semantic v4.0",
+  "summary": {
+    "passed_count": 0,
+    "failed_count": 1,
+    "avg_semantic_score": 0.63,
+    "retries_total": 3
+  },
+  "segment_count": 1,
+  "segments": [
+    {
+      "index": 0,
+      "original_text": "He said George Smith went home on 12.05.2024 because it was late.",
+      "machine_translation": "Он сказал, что George Smith пошёл домой 12.05.2024, потому что было поздно.",
+      "semantic_text": "Он сказал, что George Smith пошёл домой 12. 05. 2024, потому что было поздно.",
+      "errors_found": [
+        "actions_weakened",
+        "causes_weakened",
+        "entity_inaccuracy",
+        "meaning_loss",
+        "missing_entities:['12.05.2024', '12.05']",
+        "unchanged_mt"
+      ],
+      "errors_fixed": [],
+      "semantic_score": 0.63,
+      "retry_count": 3,
+      "model_used": "rule_engine",
+      "quality": {
+        "semantic_score": 0.63,
+        "naturalness_score": 0.8,
+        "translation_confidence": 0.85,
+        "context_confidence": 1.0,
+        "entity_accuracy": 0.5,
+        "issues": [
+          "actions_weakened",
+          "causes_weakened",
+          "entity_inaccuracy",
+          "meaning_loss",
+          "missing_entities:['12.05.2024', '12.05']",
+          "unchanged_mt"
+        ],
+        "fixes_applied": [],
+        "passed": false,
+        "model_used": "rule_engine"
+      }
+    }
+  ]
+}

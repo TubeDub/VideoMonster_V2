@@ -11,6 +11,7 @@ from engines.translation_naturalizer import (
     _apply_generic_fixes,
     _apply_ru_word_fixes,
     _apply_uk_word_fixes,
+    _apply_word_fixes,
     _drop_repeated_subject,
     apply_style_polish,
     naturalize_generic,
@@ -120,8 +121,6 @@ def _apply_full_semantic_polish(
             _UK_CALQUE_NATURALIZER,
             _UK_MIXED_LANGUAGE_FIXES,
             _UK_RUISM_FIXES,
-            _apply_word_fixes,
-            naturalize_uk,
         )
 
         out = _apply_word_fixes(out, _UK_MIXED_LANGUAGE_FIXES)
@@ -129,11 +128,7 @@ def _apply_full_semantic_polish(
         out = _apply_word_fixes(out, _UK_CALQUE_NATURALIZER)
         out = naturalize_uk(out, prev_context)
     elif lang == "ru":
-        from engines.translation_naturalizer import (
-            _RU_CALQUE_NATURALIZER,
-            _apply_ru_word_fixes,
-            naturalize_ru,
-        )
+        from engines.translation_naturalizer import _RU_CALQUE_NATURALIZER
 
         out = _apply_word_fixes(out, _RU_CALQUE_NATURALIZER)
         out = _apply_ru_word_fixes(out)

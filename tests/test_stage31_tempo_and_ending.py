@@ -43,11 +43,14 @@ def test_text_fit_before_atempo_when_delta_gt_120():
     assert STAGE31_TEXT_FIT_DELTA_MS == 120
     assert STAGE31_SPEED_DELTA_MS == 150
     overflow = stage31_duration_levers(slot_ms=3000, tts_ms=5000)
-    assert overflow[0] == "text_shorten"
+    assert overflow[0] == "text_slot_fit"
+    assert "text_shorten" in overflow
+    assert overflow.index("text_slot_fit") < overflow.index("length_scale")
     assert overflow.index("text_shorten") < overflow.index("length_scale")
     assert overflow.index("length_scale") < overflow.index("atempo")
     under = stage31_duration_levers(slot_ms=5000, tts_ms=3000)
-    assert under[0] == "text_expand"
+    assert under[0] == "text_slot_fit"
+    assert "text_expand" in under
     assert "atempo" in under
     tiny = stage31_duration_levers(slot_ms=3000, tts_ms=3080)
     assert tiny == []
@@ -132,8 +135,17 @@ def test_apply_stage19b_regens_text_before_length_scale():
         assert calls[0].get("mykyta") in (None, {})
         assert "Фіат" in calls[0]["text"]
         used = str(seg.get("duration_control_used") or "")
-        assert used in ("text_shorten", "length_scale", "atempo", "text_expand")
         assert used != "none"
+        assert any(
+            tok in used
+            for tok in (
+                "text_shorten",
+                "text_slot_fit",
+                "length_scale",
+                "atempo",
+                "text_expand",
+            )
+        )
     set_pipeline_tts_backend(None)
 
 
@@ -180,7 +192,7 @@ def test_neighbor_tempo_evenness_no_095_then_120():
     values = [float(s["atempo"]) for s in segs]
     assert all(0.92 <= v <= 1.08 for v in values)
     for a, b in zip(values, values[1:]):
-        assert abs(a - b) <= 0.08 + 1e-9, (values, a, b)
+        assert abs(a - b) <= 0.03 + 1e-9, (values, a, b)
     assert all(0.92 <= float(s["tts_length_scale"]) <= 1.08 for s in segs)
 
 
