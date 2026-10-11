@@ -119,6 +119,7 @@ def merge_micro_slots(
     timing_map: list[Any],
     *,
     min_ms: int = MIN_SLOT_MS,
+    speaker_ids: list[str] | None = None,
 ) -> tuple[list[str], list[dict[str, int]], dict[str, Any]]:
     """Merge micro-slots / fragments / mid-name cuts into neighbors."""
     texts = [str(s or "").strip() for s in (segments or []) if str(s or "").strip()]
@@ -141,7 +142,13 @@ def merge_micro_slots(
         text, s, e = units[i]
         dur = e - s
         needs = is_micro_or_fragment(text, dur, min_ms=min_ms)
-        if needs and i + 1 < len(units):
+        same_spk = True
+        if speaker_ids and i + 1 < len(speaker_ids):
+            sa = str(speaker_ids[i] or "").strip()
+            sb = str(speaker_ids[i + 1] or "").strip()
+            if sa and sb and sa != sb:
+                same_spk = False
+        if needs and i + 1 < len(units) and same_spk:
             ntext, _ns, ne = units[i + 1]
             joined = f"{text} {ntext}".strip()
             out.append((joined, s, ne))
@@ -149,11 +156,18 @@ def merge_micro_slots(
             i += 2
             continue
         if needs and out:
-            ptext, ps, _pe = out[-1]
-            out[-1] = (f"{ptext} {text}".strip(), ps, e)
-            merged += 1
-            i += 1
-            continue
+            prev_ok = True
+            if speaker_ids and i < len(speaker_ids) and i - 1 >= 0:
+                sa = str(speaker_ids[i - 1] or "").strip()
+                sb = str(speaker_ids[i] or "").strip()
+                if sa and sb and sa != sb:
+                    prev_ok = False
+            if prev_ok:
+                ptext, ps, _pe = out[-1]
+                out[-1] = (f"{ptext} {text}".strip(), ps, e)
+                merged += 1
+                i += 1
+                continue
         out.append((text, s, e))
         i += 1
 
@@ -229,6 +243,7 @@ def normalize_segments(
     tgt_lang: str = "uk",
     min_ms: int = MIN_SLOT_MS,
     run_smart_split: bool = True,
+    speaker_ids: list[str] | None = None,
 ) -> tuple[list[str], list[dict[str, int]], dict[str, Any]]:
     """
     Full Segment Normalizer:
@@ -248,7 +263,7 @@ def normalize_segments(
         return list(segments), tm, {"enabled": False}
 
     texts, timing, micro_report = merge_micro_slots(
-        segments, timing_map, min_ms=min_ms
+        segments, timing_map, min_ms=min_ms, speaker_ids=speaker_ids
     )
     report: dict[str, Any] = {
         "enabled": True,
@@ -341,6 +356,9 @@ def normalize_segments_data(
         return list(segments_data or []), tm, {"enabled": True, "merged": 0}
 
     texts = [_seg_source_text(s) for s in active]
+    spk_ids = [
+        str(s.get("speaker_id") or s.get("speaker") or "") for s in active
+    ]
     if not tm or len(tm) < len(active):
         tm = [_seg_timing(active[i], tm, i) for i in range(len(active))]
 
@@ -351,6 +369,7 @@ def normalize_segments_data(
         tgt_lang=tgt_lang,
         min_ms=min_ms,
         run_smart_split=False,  # PSA4: micro/fragment/mid-name only pre-TTS
+        speaker_ids=spk_ids,
     )
     report["enabled"] = True
 

@@ -358,19 +358,51 @@ def pad_master_to_video_ms(master, video_ms: int, *, sample_rate: int = 24000):
     return master
 
 
+def _item_speaker_id(it: dict[str, Any]) -> str:
+    for key in ("speaker_id", "speaker", "spk"):
+        val = str(it.get(key) or "").strip()
+        if val and val.lower() not in ("default", "none", ""):
+            return val
+    return ""
+
+
 def lock_voice_after_first_success(
     items: list[dict[str, Any]] | None,
     *,
     voice: str,
     engine_id: str,
+    speaker_id: str | None = None,
 ) -> dict[str, Any]:
-    """pyVideoTrans / VideoLingo: one backend+voice for the rest of the clip."""
+    """Lock backend+voice after first success.
+
+    Stage 36/40: one voice for the clip when only 1 speaker (or none labeled).
+    Stage 41: when ≥2 speaker_id values, lock only that role — do not wipe A vs B.
+    """
     voice0 = str(voice or "").strip()
     engine0 = str(engine_id or "").strip() or "edge-offline"
+    lock_sid = str(speaker_id or "").strip()
+    labeled = [_item_speaker_id(it) for it in (items or []) if isinstance(it, dict)]
+    unique = {s for s in labeled if s}
+    per_speaker = len(unique) >= 2
+    if per_speaker and not lock_sid:
+        # Infer the role of this first-success voice from an item already on it.
+        for it in items or []:
+            if not isinstance(it, dict):
+                continue
+            if voice0 and str(it.get("voice") or it.get("assigned_voice") or "") == voice0:
+                lock_sid = _item_speaker_id(it)
+                if lock_sid:
+                    break
+        if not lock_sid:
+            lock_sid = next(iter(unique))
     pinned = 0
     for it in items or []:
         if not isinstance(it, dict):
             continue
+        if per_speaker:
+            it_sid = _item_speaker_id(it)
+            if it_sid and lock_sid and it_sid != lock_sid:
+                continue
         if voice0:
             if str(it.get("voice") or "") != voice0:
                 pinned += 1
@@ -378,12 +410,22 @@ def lock_voice_after_first_success(
             it["assigned_voice"] = voice0
         if engine0:
             it["engine_id"] = engine0
-    return {
-        "oss_locked_voice": voice0,
-        "oss_locked_engine": engine0,
+    stamp = {
+        "oss_locked_voice": voice0 if not per_speaker else None,
+        "oss_locked_engine": engine0 if not per_speaker else None,
         "oss_voice_pinned": pinned,
         "simple_voice_locked": True,
+        "per_speaker_voice_lock": per_speaker,
     }
+    if per_speaker:
+        locks = dict(stamp.get("oss_speaker_voice_lock") or {})
+        if lock_sid:
+            locks[lock_sid] = {"voice": voice0, "engine_id": engine0}
+        stamp["oss_speaker_voice_lock"] = locks
+        stamp["oss_locked_voice"] = voice0
+        stamp["oss_locked_engine"] = engine0
+        stamp["oss_locked_speaker_id"] = lock_sid
+    return stamp
 
 
 def choose_duration_lever(tts_ms: int, slot_ms: int) -> str:

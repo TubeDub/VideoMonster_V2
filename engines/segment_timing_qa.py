@@ -486,9 +486,30 @@ def _update_speech_timing_diagnostics(
 ) -> int:
     """Populate Semantic Timing Adaptation fields on text_adaptation_trace."""
     playback_ms = segment_playback_ms(seg)
-    adapt_trace["original_speech_end_ms"] = start_ms + slot_ms
-    adapt_trace["tts_speech_end_ms"] = start_ms + playback_ms
+    slot_end_ms = start_ms + slot_ms
+    speech_end_ms = start_ms + playback_ms
+    adapt_trace["original_speech_end_ms"] = slot_end_ms
+    adapt_trace["tts_speech_end_ms"] = speech_end_ms
     adapt_trace["speech_difference_ms"] = slot_ms - playback_ms
+    try:
+        from engines.text_slot_fit import (
+            STAGE41_SLOT_SOFT_TOLERANCE_MS,
+            is_uk_simple_context,
+            speech_end_within_soft_slot,
+        )
+
+        if is_uk_simple_context(seg=seg):
+            ok_end = speech_end_within_soft_slot(
+                speech_end_ms, slot_end_ms, tolerance_ms=STAGE41_SLOT_SOFT_TOLERANCE_MS
+            )
+            adapt_trace["speech_end_within_slot"] = ok_end
+            if not ok_end:
+                adapt_trace["speech_end_overshoot_ms"] = max(
+                    0, speech_end_ms - slot_end_ms
+                )
+                seg["speech_end_over_slot"] = True
+    except Exception:
+        pass
     adapt_trace["duration_match_score"] = speech_duration_match_score(
         playback_ms, slot_ms
     )
@@ -1713,11 +1734,13 @@ def _build_openddf_tts_pipeline_block(
                 "resolved_path": resolved,
                 "exists": exists,
                 "size_bytes": size,
-                "tts_backend": seg.get("tts_backend"),
+                "tts_backend": seg.get("tts_backend") or seg.get("tts_engine"),
                 "tts_voice": seg.get("tts_voice") or seg.get("voice"),
                 "tts_language": seg.get("tts_language")
                 or seg.get("target_lang")
-                or task_info.get("target_lang"),
+                or task_info.get("target_lang")
+                or "uk",
+                "speaker_id": seg.get("speaker_id") or seg.get("speaker"),
                 "audio_padded": bool(
                     seg.get("audio_padded") or seg.get("silence_pad")
                 ),
@@ -1795,6 +1818,100 @@ def _build_openddf_tts_pipeline_block(
         block["final_status"] = "ok_with_pads"
     else:
         block["final_status"] = "degraded"
+    # Stage 41 — speakers / prosody / text_quality on the existing TTS block.
+    speakers_acc: dict[str, dict[str, Any]] = {}
+    atempos: list[float] = []
+    length_scales: list[float] = []
+    for i, seg in enumerate(segments_data or []):
+        if not isinstance(seg, dict) or seg.get("merged_into") is not None:
+            continue
+        sid = str(seg.get("speaker_id") or seg.get("speaker") or "SPEAKER_A")
+        rec = speakers_acc.setdefault(
+            sid,
+            {
+                "id": sid,
+                "voice": str(seg.get("tts_voice") or seg.get("voice") or ""),
+                "backend": str(seg.get("tts_backend") or seg.get("tts_engine") or ""),
+                "segment_indices": [],
+            },
+        )
+        rec["segment_indices"].append(int(seg.get("index", i)))
+        if seg.get("tts_voice") or seg.get("voice"):
+            rec["voice"] = str(seg.get("tts_voice") or seg.get("voice") or rec["voice"])
+        if seg.get("tts_backend") or seg.get("tts_engine"):
+            rec["backend"] = str(
+                seg.get("tts_backend") or seg.get("tts_engine") or rec["backend"]
+            )
+        try:
+            atempos.append(float(seg.get("atempo") or 1.0))
+        except (TypeError, ValueError):
+            pass
+        try:
+            length_scales.append(float(seg.get("tts_length_scale") or 1.0))
+        except (TypeError, ValueError):
+            pass
+    qa = task_info.get("post_tts_qa") or {}
+    gate = qa.get("requires_llm_adaptation") or task_info.get("requires_llm_adaptation") or {}
+    block["speakers"] = list(speakers_acc.values())
+    block["prosody"] = {
+        "atempo_min": round(min(atempos), 4) if atempos else 1.0,
+        "atempo_max_used": round(max(atempos), 4) if atempos else 1.0,
+        "length_scale_used": round(
+            max(length_scales, key=lambda x: abs(x - 1.0)), 4
+        )
+        if length_scales
+        else 1.0,
+    }
+    block["text_quality"] = {
+        "repeat_blocked_count": int(
+            task_info.get("repeat_blocked_count")
+            or (task_info.get("simple_mt") or {}).get("repeat_blocked_count")
+            or 0
+        ),
+        "unresolved_count": int(
+            gate.get("count")
+            or task_info.get("closed_loop_unresolved_count")
+            or 0
+        ),
+        "llm_used": bool(
+            task_info.get("llm_adaptation_used")
+            or qa.get("llm_used")
+        ),
+        "tts_bleed_blocked_count": int(
+            task_info.get("tts_bleed_blocked_count")
+            or (task_info.get("simple_mt") or {}).get("tts_bleed_blocked_count")
+            or 0
+        ),
+        "gey_fixed_count": int(
+            task_info.get("gey_fixed_count")
+            or (task_info.get("simple_mt") or {}).get("gey_fixed_count")
+            or 0
+        ),
+        "ru_leak_fixed_count": int(
+            task_info.get("ru_leak_fixed_count")
+            or (task_info.get("simple_mt") or {}).get("ru_rewrites")
+            or 0
+        ),
+    }
+    audio_block = task_info.get("audio") if isinstance(task_info.get("audio"), dict) else {}
+    block["audio"] = {
+        "source_vocal_muted": bool(
+            audio_block.get("source_vocal_muted")
+            or task_info.get("source_vocal_muted")
+        )
+    }
+    block["tts_bleed_blocked_count"] = block["text_quality"]["tts_bleed_blocked_count"]
+    block["gey_fixed_count"] = block["text_quality"]["gey_fixed_count"]
+    block["ru_leak_fixed_count"] = block["text_quality"]["ru_leak_fixed_count"]
+    block["overlap_count"] = int(
+        task_info.get("overlap_count")
+        or (task_info.get("timing_qa") or {}).get("overlap_count")
+        or 0
+    )
+    if isinstance(task_info, dict):
+        task_info.setdefault("speakers", block["speakers"])
+        task_info.setdefault("prosody", block["prosody"])
+        task_info.setdefault("text_quality", block["text_quality"])
     return block
 
 
@@ -2499,6 +2616,16 @@ def build_openddf_full_report(task_info: dict[str, Any]) -> dict[str, Any]:
             "segment_count": len(segments),
             "skipped_count": len(skipped_segments),
             "overlap_count": len(overlaps),
+            "audio_missing": int(
+                (task_info.get("tts_pipeline") or {}).get("audio_missing")
+                or task_info.get("audio_missing")
+                or 0
+            ),
+            "padded_count": int(
+                (task_info.get("tts_pipeline") or {}).get("padded_count")
+                or task_info.get("padded_count")
+                or 0
+            ),
             "adaptation_status": (
                 "ADAPTATION EXECUTED" if any_adaptation else "ADAPTATION NOT EXECUTED"
             ),

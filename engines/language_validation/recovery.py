@@ -130,9 +130,20 @@ def recover_language_issues(
                 from engines.tts_lang_lock import rewrite_russian_leak_for_uk
 
                 rewritten = rewrite_russian_leak_for_uk(candidate)
-                if rewritten and rewritten != candidate and not _ru_leak(rewritten):
+                if rewritten and rewritten != candidate:
                     candidate = rewritten
                     actions.append("ruism_rewrite")
+                try:
+                    from engines.mt.glossary_en_uk import finalize_mt_text
+
+                    polished = finalize_mt_text(
+                        "en", "uk", candidate, source=original
+                    )
+                    if polished:
+                        candidate = polished
+                        actions.append("street_uk_finalize")
+                except Exception:
+                    pass
             except Exception as exc:
                 actions.append(f"ruism_failed:{exc}")
 

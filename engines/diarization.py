@@ -207,17 +207,478 @@ def _overlap_ms(a0: int, a1: int, b0: int, b1: int) -> int:
     return max(0, min(a1, b1) - max(a0, b0))
 
 
+# Stage 41 — offline dialogue roles when PyAnnote is off / single-speaker fallback.
+SPEAKER_TURN_GAP_MS = 400
+# Stage 42 — intra-segment mixed-speaker split (350–400 ms).
+MIXED_SPEAKER_GAP_MS = 350
+SPEAKER_A = "SPEAKER_A"
+SPEAKER_B = "SPEAKER_B"
+_SPEAKER_KEYS = (
+    "speaker_id",
+    "speaker",
+    "speaker_uuid",
+    "spk",
+    "spk_id",
+    "speaker_label",
+)
+_EMPTY_SPEAKER = frozenset(
+    {"", "default", "none", "null", "unknown", "speaker_00", "speaker_0"}
+)
+
+
+def extract_speaker_label(seg: dict[str, Any] | None) -> str:
+    """Read STT/diarization speaker from common keys. Empty if none."""
+    if not isinstance(seg, dict):
+        return ""
+    for key in _SPEAKER_KEYS:
+        raw = seg.get(key)
+        if raw is None:
+            continue
+        val = str(raw).strip()
+        if val and val.lower() not in _EMPTY_SPEAKER:
+            return val
+    return ""
+
+
+def _normalize_role_id(label: str, *, seen: list[str] | None = None) -> str:
+    raw = str(label or "").strip()
+    if not raw:
+        return SPEAKER_A
+    up = raw.upper().replace("-", "_").replace(" ", "_")
+    if up in (SPEAKER_A, "SPEAKER_00", "SPEAKER_0", "SPK_A", "A", "HOST", "0"):
+        return SPEAKER_A
+    if up in (SPEAKER_B, "SPEAKER_01", "SPEAKER_1", "SPK_B", "B", "GUEST", "1"):
+        return SPEAKER_B
+    if seen is not None:
+        if raw not in seen:
+            seen.append(raw)
+        idx = seen.index(raw)
+        return SPEAKER_A if idx == 0 else SPEAKER_B
+    return SPEAKER_A if up.endswith("_00") or up.endswith("_0") else SPEAKER_B
+
+
+def _seg_times(seg: dict[str, Any]) -> tuple[int, int]:
+    try:
+        s0 = int(seg.get("start_ms") or seg.get("start") or 0)
+        s1 = int(seg.get("end_ms") or seg.get("end") or 0)
+        if s1 <= s0:
+            s1 = s0 + int(seg.get("duration_ms") or seg.get("slot_ms") or 0)
+    except Exception:
+        s0, s1 = 0, 0
+    return s0, s1
+
+
+def assign_speakers_heuristic(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """New speaker when pause gap > 400 ms AND turns alternate (A↔B).
+
+    Offline fallback when diarization labels are missing. Dialogue gets at
+    least SPEAKER_A + SPEAKER_B; a single continuous voice stays SPEAKER_A.
+    """
+    rows = [s for s in (segments or []) if isinstance(s, dict)]
+    if not rows:
+        return segments or []
+
+    existing = [extract_speaker_label(s) for s in rows]
+    labeled = [x for x in existing if x]
+    unique_existing = []
+    for lab in labeled:
+        if lab not in unique_existing:
+            unique_existing.append(lab)
+
+    if len(unique_existing) >= 2:
+        for seg, lab in zip(rows, existing):
+            role = _normalize_role_id(lab or unique_existing[0], seen=unique_existing)
+            seg["speaker"] = role
+            seg["speaker_id"] = role
+            seg["speaker_source"] = "stt_label"
+        return segments
+
+    if labeled and len(unique_existing) == 1:
+        # One STT label for everyone — still try gap heuristic for dialogue.
+        pass
+
+    timed = []
+    for i, seg in enumerate(rows):
+        s0, s1 = _seg_times(seg)
+        timed.append((i, s0, s1, seg))
+    timed.sort(key=lambda x: (x[1], x[2], x[0]))
+
+    turn_gaps = 0
+    current = SPEAKER_A
+    prev_end: int | None = None
+    for _i, s0, s1, seg in timed:
+        gap = 0 if prev_end is None else max(0, s0 - prev_end)
+        if prev_end is not None and gap > SPEAKER_TURN_GAP_MS:
+            current = SPEAKER_B if current == SPEAKER_A else SPEAKER_A
+            turn_gaps += 1
+        seg["speaker"] = current
+        seg["speaker_id"] = current
+        seg["speaker_source"] = "gap_heuristic"
+        if s1 > 0:
+            prev_end = s1
+
+    roles = {str(s.get("speaker_id") or "") for s in rows}
+    if turn_gaps == 0 and len(rows) >= 2:
+        # No long pause: keep a single role (monologue).
+        for seg in rows:
+            seg["speaker"] = SPEAKER_A
+            seg["speaker_id"] = SPEAKER_A
+            seg["speaker_source"] = "single_speaker"
+    elif SPEAKER_B not in roles and turn_gaps > 0:
+        # Guarantee two dialogue roles after the first long gap.
+        flipped = False
+        prev_end = None
+        for _i, s0, s1, seg in timed:
+            gap = 0 if prev_end is None else max(0, s0 - prev_end)
+            if not flipped and prev_end is not None and gap > SPEAKER_TURN_GAP_MS:
+                seg["speaker"] = SPEAKER_B
+                seg["speaker_id"] = SPEAKER_B
+                flipped = True
+            if s1 > 0:
+                prev_end = s1
+    return segments
+
+
+def build_speaker_map(segments: list[dict[str, Any]] | None) -> dict[str, Any]:
+    """{speaker_id: {segment_indices, count}} plus ordered role list."""
+    roles: dict[str, dict[str, Any]] = {}
+    for i, seg in enumerate(segments or []):
+        if not isinstance(seg, dict) or seg.get("merged_into") is not None:
+            continue
+        sid = str(seg.get("speaker_id") or extract_speaker_label(seg) or SPEAKER_A)
+        rec = roles.setdefault(
+            sid, {"id": sid, "segment_indices": [], "count": 0}
+        )
+        rec["segment_indices"].append(int(seg.get("index", i)))
+        rec["count"] += 1
+    return {
+        "roles": list(roles.values()),
+        "speaker_ids": list(roles.keys()),
+        "count": len(roles),
+    }
+
+
+def ensure_speaker_ids(
+    segments: list[dict[str, Any]] | None,
+    *,
+    dia: DiarizationResult | None = None,
+    task_info: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Stamp speaker_id on every live segment. Uses diarization, else heuristic."""
+    rows = list(segments or [])
+    if dia is not None and dia.success and len(dia.speakers or []) >= 2:
+        assign_speakers_to_segments(rows, dia)
+        seen: list[str] = []
+        for seg in rows:
+            if not isinstance(seg, dict):
+                continue
+            raw = extract_speaker_label(seg) or SPEAKER_A
+            role = _normalize_role_id(raw, seen=seen)
+            seg["speaker"] = role
+            seg["speaker_id"] = role
+            seg.setdefault("speaker_source", "diarization")
+    else:
+        assign_speakers_heuristic(rows)
+    try:
+        split_rows = split_mixed_speaker_segments(rows, dia=dia, task_info=task_info)
+        if split_rows is not rows:
+            rows = split_rows
+            if segments is not None:
+                try:
+                    segments[:] = split_rows
+                except Exception:
+                    pass
+    except Exception as exc:
+        logger.debug("mixed-speaker split skipped: %s", exc)
+    smap = build_speaker_map(rows)
+    if task_info is not None:
+        task_info["speaker_map"] = smap
+        task_info["speaker_ids"] = list(smap.get("speaker_ids") or [])
+    return smap
+
+
+def _word_start_ms(word: dict[str, Any]) -> int:
+    try:
+        return int(word.get("start_ms") or word.get("start") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _word_end_ms(word: dict[str, Any]) -> int:
+    try:
+        end = int(word.get("end_ms") or word.get("end") or 0)
+    except (TypeError, ValueError):
+        end = 0
+    if end <= 0:
+        end = _word_start_ms(word)
+    return end
+
+
+def _word_speaker(word: dict[str, Any]) -> str:
+    if not isinstance(word, dict):
+        return ""
+    for key in ("speaker_id", "speaker", "spk", "spk_id"):
+        raw = str(word.get(key) or "").strip()
+        if raw and raw.lower() not in _EMPTY_SPEAKER:
+            return raw
+    return ""
+
+
+def _seg_words(seg: dict[str, Any]) -> list[dict[str, Any]]:
+    for key in ("words", "word_timestamps", "source_words"):
+        raw = seg.get(key)
+        if isinstance(raw, list) and raw:
+            return [w for w in raw if isinstance(w, dict)]
+    wm = seg.get("source_word_map")
+    if isinstance(wm, list) and wm:
+        return [w for w in wm if isinstance(w, dict)]
+    return []
+
+
+def _seg_original_text(seg: dict[str, Any]) -> str:
+    return str(
+        seg.get("original_text")
+        or seg.get("original")
+        or seg.get("source_text")
+        or seg.get("whisper_text")
+        or seg.get("text")
+        or ""
+    ).strip()
+
+
+def detect_text_dialogue_split(original: str) -> tuple[str, str] | None:
+    """Split a glued two-person original (Hey man… + A dollar?)."""
+    import re
+
+    t = " ".join(str(original or "").split()).strip()
+    if not t:
+        return None
+    m = re.match(
+        r"(?is)^(hey\b(?:\s+(?:there'?s\s+my\s+big\s+(?:guy|man)|my\s+big\s+guy|man|dude|bro|guys?))?"
+        r"[^.?!]{0,100}[.!?])\s+(.+)$",
+        t,
+    )
+    if m:
+        left, right = m.group(1).strip(), m.group(2).strip()
+        if right and (
+            "?" in right
+            or re.match(
+                r"(?i)^(a\s+dollar|are\s+you|what|wait|seriously|shut\s+up)\b",
+                right,
+            )
+        ):
+            return left, right
+    parts = re.split(r"(?<=[.!])\s+", t, maxsplit=1)
+    if len(parts) == 2:
+        left, right = parts[0].strip(), parts[1].strip()
+        if (
+            re.search(r"(?i)\bhey\b", left)
+            and "?" in right
+            and 1 <= len(right.split()) <= 14
+        ):
+            return left, right
+    return None
+
+
+def _cut_from_words(words: list[dict[str, Any]]) -> tuple[int, int] | None:
+    """Return (word_index, cut_ms) when speaker labels or a turn gap appear."""
+    if len(words) < 2:
+        return None
+    prev_spk = ""
+    prev_end: int | None = None
+    for i, w in enumerate(words):
+        spk = _word_speaker(w)
+        start = _word_start_ms(w)
+        if prev_spk and spk and spk != prev_spk:
+            return i, start
+        if (
+            prev_end is not None
+            and start - prev_end >= MIXED_SPEAKER_GAP_MS
+            and i >= 1
+        ):
+            prev_tok = str(words[i - 1].get("word") or words[i - 1].get("text") or "")
+            if prev_tok.rstrip().endswith((".", "!", "?", "…")) or spk:
+                return i, start
+        if spk:
+            prev_spk = spk
+        end = _word_end_ms(w)
+        if end > 0:
+            prev_end = end
+    return None
+
+
+def _cut_from_diarization(
+    seg: dict[str, Any],
+    dia: DiarizationResult | None,
+) -> int | None:
+    if dia is None or not dia.success or not dia.turns:
+        return None
+    s0, s1 = _seg_times(seg)
+    if s1 <= s0:
+        return None
+    covered: list[tuple[int, str]] = []
+    for t in dia.turns:
+        ov = _overlap_ms(s0, s1, t.start_ms, t.end_ms)
+        if ov >= 180:
+            covered.append((max(s0, t.start_ms), t.speaker))
+    speakers = {spk for _st, spk in covered}
+    if len(speakers) < 2:
+        return None
+    covered.sort()
+    for i in range(1, len(covered)):
+        if covered[i][1] != covered[0][1]:
+            return int(covered[i][0])
+    return None
+
+
+def _split_text_at_word_index(text: str, words: list[dict[str, Any]], idx: int) -> tuple[str, str]:
+    left_parts: list[str] = []
+    right_parts: list[str] = []
+    for i, w in enumerate(words):
+        tok = str(w.get("word") or w.get("text") or "").strip()
+        if not tok:
+            continue
+        if i < idx:
+            left_parts.append(tok)
+        else:
+            right_parts.append(tok)
+    left = " ".join(left_parts).strip()
+    right = " ".join(right_parts).strip()
+    if left and right:
+        return left, right
+    t = " ".join(str(text or "").split())
+    mid = max(1, (len(t) * idx) // max(len(words), 1))
+    return t[:mid].strip(), t[mid:].strip()
+
+
+def split_mixed_speaker_segments(
+    segments: list[dict[str, Any]] | None,
+    *,
+    dia: DiarizationResult | None = None,
+    task_info: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Stage 42 A1: 1 segment = 1 speaker = 1 replica. Archive + mint on split."""
+    rows = [s for s in (segments or []) if isinstance(s, dict)]
+    if not rows:
+        return list(segments or [])
+
+    out: list[dict[str, Any]] = []
+    split_count = 0
+    for seg in rows:
+        if seg.get("merged_into") is not None or seg.get("archived"):
+            out.append(seg)
+            continue
+        original = _seg_original_text(seg)
+        words = _seg_words(seg)
+        cut_ms: int | None = None
+        left = ""
+        right = ""
+        cut = _cut_from_words(words) if words else None
+        if cut is not None:
+            widx, cut_ms = cut
+            left, right = _split_text_at_word_index(original, words, widx)
+            if words:
+                spk_l = _word_speaker(words[0]) or SPEAKER_A
+                spk_r = _word_speaker(words[widx]) or SPEAKER_B
+            else:
+                spk_l, spk_r = SPEAKER_A, SPEAKER_B
+        else:
+            dia_cut = _cut_from_diarization(seg, dia)
+            text_pair = detect_text_dialogue_split(original)
+            if dia_cut is not None and text_pair:
+                left, right = text_pair
+                cut_ms = dia_cut
+                spk_l, spk_r = SPEAKER_A, SPEAKER_B
+            elif text_pair:
+                left, right = text_pair
+                s0, s1 = _seg_times(seg)
+                span = max(1, s1 - s0)
+                cut_ms = s0 + int(span * (len(left) / max(len(original), 1)))
+                spk_l, spk_r = SPEAKER_A, SPEAKER_B
+            elif dia_cut is not None:
+                s0, s1 = _seg_times(seg)
+                ratio = (dia_cut - s0) / max(1, s1 - s0)
+                mid = max(1, int(len(original) * ratio))
+                left, right = original[:mid].strip(), original[mid:].strip()
+                cut_ms = dia_cut
+                spk_l, spk_r = SPEAKER_A, SPEAKER_B
+            else:
+                out.append(seg)
+                continue
+
+        if not left or not right or left == original:
+            out.append(seg)
+            continue
+
+        s0, s1 = _seg_times(seg)
+        cut_ms = int(cut_ms or (s0 + max(1, (s1 - s0) // 2)))
+        cut_ms = min(max(cut_ms, s0 + 80), s1 - 80) if s1 - s0 > 200 else cut_ms
+        child_a = dict(seg)
+        child_b = dict(seg)
+        for key in ("file", "tts_file_path", "fitted_file", "final_tts_text", "tts_text"):
+            child_a.pop(key, None)
+            child_b.pop(key, None)
+        for child, text, st, en, spk in (
+            (child_a, left, s0, cut_ms, spk_l),
+            (child_b, right, cut_ms, s1, spk_r),
+        ):
+            child["text"] = text
+            child["plain_text"] = text
+            child["original"] = text
+            child["original_text"] = text
+            child["source_text"] = text
+            child["whisper_text"] = text
+            child["start_ms"] = int(st)
+            child["end_ms"] = int(en)
+            child["slot_ms"] = max(0, int(en) - int(st))
+            child["speaker"] = spk
+            child["speaker_id"] = spk
+            child["speaker_source"] = "mixed_split"
+        try:
+            from engines.pipeline_integrity.identity_guard import reissue_split_children
+
+            _archived, fresh = reissue_split_children(seg, [child_a, child_b])
+            if len(fresh) >= 2:
+                out.extend(fresh)
+                split_count += 1
+                continue
+        except Exception as exc:
+            logger.debug("mixed-speaker split reissue skipped: %s", exc)
+        out.append(seg)
+
+    if split_count and task_info is not None:
+        task_info["mixed_speaker_splits"] = int(
+            task_info.get("mixed_speaker_splits") or 0
+        ) + split_count
+        try:
+            smap = build_speaker_map(out)
+            task_info["speaker_map"] = smap
+            task_info["speaker_ids"] = list(smap.get("speaker_ids") or [])
+        except Exception:
+            pass
+        logger.info("[diarization] mixed-speaker splits=%d", split_count)
+    # Re-index live rows
+    live_i = 0
+    for seg in out:
+        if not isinstance(seg, dict) or seg.get("archived") or seg.get("merged_into") is not None:
+            continue
+        seg["index"] = live_i
+        live_i += 1
+    return out
+
+
 def assign_speakers_to_segments(
     segments: list[dict[str, Any]],
     dia: DiarizationResult,
 ) -> list[dict[str, Any]]:
-    """Stamp seg["speaker"] and seg["speaker_confidence"] using overlap-max heuristic.
+    """Stamp seg["speaker"] / speaker_id and confidence using overlap-max.
 
     Mutates ``segments`` in place and also returns it for chaining.
     """
     if not segments or not dia or not dia.turns:
         for s in segments or []:
             s.setdefault("speaker", "SPEAKER_00")
+            s.setdefault("speaker_id", s.get("speaker") or "SPEAKER_00")
             s.setdefault("speaker_confidence", 0.0)
         return segments or []
 
@@ -229,6 +690,7 @@ def assign_speakers_to_segments(
             s0, s1 = 0, 0
         if s1 <= s0:
             seg.setdefault("speaker", "SPEAKER_00")
+            seg.setdefault("speaker_id", seg.get("speaker") or "SPEAKER_00")
             seg.setdefault("speaker_confidence", 0.0)
             continue
         per_speaker: dict[str, int] = {}
@@ -240,9 +702,11 @@ def assign_speakers_to_segments(
             best = max(per_speaker.items(), key=lambda kv: kv[1])
             total_ov = sum(per_speaker.values())
             seg["speaker"] = best[0]
+            seg["speaker_id"] = best[0]
             seg["speaker_confidence"] = round(best[1] / max(1, total_ov), 4)
         else:
             seg["speaker"] = "SPEAKER_00"
+            seg["speaker_id"] = "SPEAKER_00"
             seg["speaker_confidence"] = 0.0
     return segments
 

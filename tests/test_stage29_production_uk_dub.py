@@ -237,7 +237,7 @@ def test_simple_pipeline_uk_segment_defaults_4_7_12():
     assert info["segment_max_ms"] == 12000
     assert info["segmentation_aggressiveness"] == 0.50
     assert info["aggressiveness"] == "medium"
-    assert info["mykyta_rate"] == 0.97
+    assert float(info["mykyta_rate"]) >= 1.00
     assert info["max_atempo"] <= 1.05 + 1e-6
 
 

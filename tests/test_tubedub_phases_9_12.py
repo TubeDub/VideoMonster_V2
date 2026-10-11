@@ -347,6 +347,8 @@ def test_source_audio_underlay_and_ducking_path():
         info, {"original_volume": 0.0, "dub_volume": 1.0, "mix_mode": "full_dub"}
     )
     assert abs(float(mv["original_volume"]) - SIMPLE_UK_SOURCE_UNDERLAY) < 0.001
+    assert float(mv["original_volume"]) <= 10 ** (-30 / 20) + 1e-6
+    assert info.get("source_vocal_muted") is True
     assert mv.get("ducking_enabled") is True
     engine = DubEngine.__new__(DubEngine)
     engine.speech_intervals = [{"start_ms": 0, "end_ms": 500}]

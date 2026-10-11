@@ -39,10 +39,23 @@ class EdgeTTSEngine:
         import edge_tts
 
         t0 = time.perf_counter()
-        effective_rate = (rate or os.getenv("VM_TTS_RATE") or "-5%").strip() or "-5%"
+        # UK Edge: light living rate (+4%) instead of flat 0%. Do not drive ±20%.
+        effective_rate = (rate or os.getenv("VM_TTS_RATE") or "+0%").strip() or "+0%"
+        voice_name = str(voice or "")
+        if voice_name.startswith("uk-UA-") and effective_rate in ("+0%", "0%", "-0%", ""):
+            effective_rate = "+4%"
         kwargs: dict = {"text": text, "voice": voice, "rate": effective_rate}
-        if pitch:
-            kwargs["pitch"] = pitch.strip()
+        effective_pitch = (pitch or "").strip() if pitch else ""
+        if voice_name.startswith("uk-UA-") and str(text or "").rstrip().endswith("?"):
+            try:
+                from engines.simple_voice_lock import _bump_edge_pitch_hz
+
+                effective_pitch = _bump_edge_pitch_hz(effective_pitch or "+0Hz", 2)
+            except Exception:
+                if not effective_pitch:
+                    effective_pitch = "+2Hz"
+        if effective_pitch:
+            kwargs["pitch"] = effective_pitch
         last_err: Exception | None = None
         for attempt in range(3):
             try:

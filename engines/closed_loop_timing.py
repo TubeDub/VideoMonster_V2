@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable
@@ -268,6 +269,27 @@ def build_timing_budget(
     if idx + 1 < len(timing_map) and measured > 0:
         next_start, _ = _parse_timing(timing_map[idx + 1])
         overlap_ms = max(0, (start_ms + measured) - next_start - OVERLAP_TOLERANCE_MS)
+
+    try:
+        seg["tts_speech_end_ms"] = start_ms + measured
+        from engines.text_slot_fit import (
+            STAGE41_SLOT_SOFT_TOLERANCE_MS,
+            is_uk_simple_context,
+            speech_end_within_soft_slot,
+        )
+
+        if is_uk_simple_context(seg=seg) and measured > 0:
+            ok_end = speech_end_within_soft_slot(
+                start_ms + measured,
+                end_ms,
+                tolerance_ms=STAGE41_SLOT_SOFT_TOLERANCE_MS,
+            )
+            seg["speech_end_within_slot"] = ok_end
+            if not ok_end:
+                seg["speech_end_over_slot"] = True
+                seg["speech_end_overshoot_ms"] = max(0, (start_ms + measured) - end_ms)
+    except Exception:
+        pass
 
     score = compute_timing_score(
         slot_ms=slot_ms,
@@ -1050,12 +1072,30 @@ def _stage21_watchdog_heartbeat(task_id: str | None, **fields: Any) -> None:
     """Keep PIPELINE_STALLED from firing during slow tts_uk / split regen."""
     if not task_id:
         return
+    payload = dict(fields)
+    payload.setdefault("phase", "closed_loop_regen")
+    payload.setdefault("tts_substep", "slot_fit_regen")
+    payload["last_heartbeat_at"] = time.time()
     try:
-        from engines.pipeline_watchdog import get_pipeline_watchdog
+        from engines.pipeline_watchdog import watchdog_heartbeat
 
-        wd = get_pipeline_watchdog(str(task_id))
-        if wd is not None:
-            wd.heartbeat(**fields)
+        watchdog_heartbeat(str(task_id), **payload)
+    except Exception:
+        pass
+    try:
+        from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+
+        with STATE_LOCK:
+            task = AUTO_TASKS.get(str(task_id))
+            if task:
+                detail = task.setdefault("info", {}).setdefault("progress_detail", {})
+                detail.update({k: v for k, v in payload.items() if v is not None})
+    except Exception:
+        pass
+    try:
+        from engines.pipeline_segment_watchdog import mark_segment_activity
+
+        mark_segment_activity(str(task_id))
     except Exception:
         pass
 
@@ -2200,9 +2240,9 @@ def equalize_segment_tempos(segments: list[dict] | None) -> dict[str, Any]:
         rows.append((i, seg))
     if not rows:
         return stats
-    atempos = [clamp_stage31_tempo(s.get("atempo") or 1.0) for _i, s in rows]
+    atempos = [clamp_stage31_tempo(s.get("atempo") or 1.0, seg=s) for _i, s in rows]
     scales = [
-        clamp_stage31_tempo(s.get("tts_length_scale") or 1.0, default=1.0)
+        clamp_stage31_tempo(s.get("tts_length_scale") or 1.0, default=1.0, seg=s)
         for _i, s in rows
     ]
     atempos_sorted = sorted(atempos)
@@ -2222,8 +2262,8 @@ def equalize_segment_tempos(segments: list[dict] | None) -> dict[str, Any]:
     stats["median_length_scale"] = round(target_ls, 4)
     prev_a = target_a
     for _i, seg in rows:
-        a = clamp_stage31_tempo(seg.get("atempo") or 1.0)
-        ls = clamp_stage31_tempo(seg.get("tts_length_scale") or 1.0)
+        a = clamp_stage31_tempo(seg.get("atempo") or 1.0, seg=seg)
+        ls = clamp_stage31_tempo(seg.get("tts_length_scale") or 1.0, seg=seg)
         new_a = a
         if abs(a - target_a) > STAGE31_NEIGHBOR_JUMP_MAX:
             new_a = target_a
@@ -2231,11 +2271,11 @@ def equalize_segment_tempos(segments: list[dict] | None) -> dict[str, Any]:
             new_a = prev_a + (
                 STAGE31_NEIGHBOR_JUMP_MAX if a > prev_a else -STAGE31_NEIGHBOR_JUMP_MAX
             )
-        new_a = clamp_stage31_tempo(new_a)
+        new_a = clamp_stage31_tempo(new_a, seg=seg)
         new_ls = ls
         if abs(ls - target_ls) > STAGE31_NEIGHBOR_JUMP_MAX:
             new_ls = target_ls
-        new_ls = clamp_stage31_tempo(new_ls)
+        new_ls = clamp_stage31_tempo(new_ls, seg=seg)
         if abs(new_a - a) >= 0.005 or abs(new_ls - ls) >= 0.005:
             stats["adjusted"] += 1
         seg["atempo"] = round(new_a, 4)
@@ -2311,29 +2351,38 @@ def _apply_stage23_duration_control(
         },
         env=False,
     )
-    # Stage 23b/31: compute stretch/compress toward the slot, ±8% only.
-    ctrl = compute_mykyta_duration_controls(slot, meas, base=base)
-    # Underflow: at least a mild stretch, never above 1.08.
-    if meas < slot and ctrl["length_scale"] <= base["length_scale"] + 0.001:
+    # UK Simple: length_scale 0.95–1.02 (no rubber fill), atempo 0.97–1.06.
+    uk_simple = False
+    try:
+        from engines.text_slot_fit import is_uk_simple_context
+
+        uk_simple = is_uk_simple_context(seg=seg)
+    except Exception:
+        uk_simple = False
+    ctrl = compute_mykyta_duration_controls(slot, meas, base=base, uk_simple=uk_simple)
+    ls_lo = 0.95 if uk_simple else STAGE31_LENGTH_SCALE_MIN
+    ls_hi = 1.02 if uk_simple else STAGE31_LENGTH_SCALE_MAX
+    at_lo = 0.97 if uk_simple else STAGE31_ATEMPO_MIN
+    at_hi = 1.06 if uk_simple else STAGE31_ATEMPO_MAX
+    # Underflow: UK Simple must not stretch the voice to fill the slot
+    # (rubber / drunk-slow). Expand text or soft-pad instead.
+    if meas < slot and not uk_simple and ctrl["length_scale"] <= base["length_scale"] + 0.001:
         ctrl["length_scale"] = max(
             ctrl["length_scale"],
             min(
-                STAGE31_LENGTH_SCALE_MAX,
+                ls_hi,
                 max(1.0, float(slot) / float(meas)),
             ),
         )
         ctrl["rate"] = max(
-            STAGE31_ATEMPO_MIN,
-            min(STAGE31_ATEMPO_MAX, 1.0 / max(0.5, ctrl["length_scale"])),
+            at_lo,
+            min(at_hi, 1.0 / max(0.5, ctrl["length_scale"])),
         )
-    ctrl["length_scale"] = max(
-        STAGE31_LENGTH_SCALE_MIN,
-        min(STAGE31_LENGTH_SCALE_MAX, float(ctrl["length_scale"])),
-    )
-    ctrl["rate"] = max(
-        STAGE31_ATEMPO_MIN,
-        min(STAGE31_ATEMPO_MAX, float(ctrl["rate"])),
-    )
+    elif meas < slot and uk_simple:
+        ctrl["length_scale"] = min(ls_hi, max(ls_lo, min(float(base.get("length_scale") or 1.0), 1.0)))
+        ctrl["rate"] = max(at_lo, min(at_hi, float(base.get("rate") or 1.02)))
+    ctrl["length_scale"] = max(ls_lo, min(ls_hi, float(ctrl["length_scale"])))
+    ctrl["rate"] = max(at_lo, min(at_hi, float(ctrl["rate"])))
 
     text = _segment_text(seg)
     if not text:
@@ -2479,7 +2528,15 @@ def _apply_stage23_atempo_slow(
     fill = tts / float(slot)
     if fill >= STAGE31_OK_FILL_LO:
         return budget
-    tempo = max(STAGE31_ATEMPO_MIN, min(1.0, fill))
+    uk_simple = False
+    try:
+        from engines.text_slot_fit import is_uk_simple_context
+
+        uk_simple = is_uk_simple_context(seg=seg)
+    except Exception:
+        uk_simple = False
+    at_lo = 0.97 if uk_simple else STAGE31_ATEMPO_MIN
+    tempo = max(at_lo, min(1.0, fill))
     if abs(tempo - 1.0) < 0.02:
         return budget
 
@@ -2515,7 +2572,7 @@ def _apply_stage23_atempo_slow(
                 seg["actual_duration_ms"] = fitted_ms
                 seg["final_tts_duration_ms"] = fitted_ms
             applied = float((meta or {}).get("atempo") or tempo)
-            applied = max(STAGE31_ATEMPO_MIN, min(1.0, applied))
+            applied = max(at_lo, min(1.0, applied))
             seg["atempo"] = round(applied, 4)
             seg["strategy"] = "atempo_slow"
             if str(seg.get("duration_control_used") or "none") in ("none", ""):
@@ -2542,10 +2599,16 @@ def _apply_light_atempo_after_fit(
     resolve_path: Callable[[str], str] | None,
     fit: Any,
 ) -> TimingBudget:
-    """Stage 31: atempo last resort after text-fit when |Δ|>150, clamp 0.92–1.08."""
+    """Stage 31: atempo last resort after text-fit when |Δ|>150, clamp 0.92–1.08.
+
+    Stage 41 UK Simple: 0.94–1.06 and never atempo-only before text_slot_fit.
+    """
     from engines.text_slot_fit import (
+        STAGE41_UK_SIMPLE_ATEMPO_MAX,
         UNDERFILL_EXPAND_RATIO,
+        allow_atempo_after_text_fit,
         forbid_fast_then_gap,
+        is_uk_simple_context,
         suggested_atempo_for_fill,
     )
 
@@ -2557,11 +2620,15 @@ def _apply_light_atempo_after_fit(
     delta = abs(slot - tts)
     if delta <= STAGE31_SPEED_DELTA_MS and STAGE31_OK_FILL_LO <= fill <= STAGE31_OK_FILL_HI:
         return budget
+    uk_simple = is_uk_simple_context(seg=seg)
+    if uk_simple and not allow_atempo_after_text_fit(seg):
+        logger.info("closed_loop: BAN atempo-only before text_slot_fit idx=%s", seg.get("index"))
+        return budget
     tempo = float(getattr(fit, "atempo", 0) or 0) or suggested_atempo_for_fill(tts, slot)
-    tempo = clamp_stage31_tempo(tempo)
+    tempo = clamp_stage31_tempo(tempo, uk_simple=uk_simple, seg=seg)
     if forbid_fast_then_gap(tempo, fill):
         tempo = max(STAGE31_ATEMPO_MIN, min(1.0, fill))
-        tempo = clamp_stage31_tempo(tempo)
+        tempo = clamp_stage31_tempo(tempo, uk_simple=uk_simple, seg=seg)
     # Skip near-noop tempos.
     if abs(tempo - 1.0) < 0.02:
         return budget
@@ -2586,7 +2653,9 @@ def _apply_light_atempo_after_fit(
             slot,
             work_dir=work_dir / "stage19b_atempo",
             allow_atempo=True,
-            max_atempo=STAGE31_ATEMPO_MAX,
+            max_atempo=(
+                STAGE41_UK_SIMPLE_ATEMPO_MAX if uk_simple else STAGE31_ATEMPO_MAX
+            ),
             text_hint=_segment_text(seg),
         )
         if fitted and Path(fitted).is_file():
@@ -2599,8 +2668,20 @@ def _apply_light_atempo_after_fit(
                 seg["playback_duration"] = fitted_ms
                 seg["tts_ms"] = fitted_ms
                 seg["actual_duration_ms"] = fitted_ms
-            applied = clamp_stage31_tempo((meta or {}).get("atempo") or tempo)
+            applied = clamp_stage31_tempo(
+                (meta or {}).get("atempo") or tempo, uk_simple=uk_simple, seg=seg
+            )
             seg["atempo"] = round(applied, 4)
+            if uk_simple:
+                try:
+                    from engines.text_slot_fit import STAGE41_SLOT_SOFT_TOLERANCE_MS
+
+                    overshoot = max(0, int(fitted_ms or tts) - slot)
+                    if overshoot > STAGE41_SLOT_SOFT_TOLERANCE_MS:
+                        seg["speech_end_over_slot"] = True
+                        seg["speech_end_overshoot_ms"] = overshoot
+                except Exception:
+                    pass
             if abs(applied - 1.0) >= 0.02:
                 if canon_duration_control_used(seg.get("duration_control_used")) in (
                     "none",
@@ -5004,6 +5085,36 @@ def run_closed_loop_timing(
         or (b.status in ("overflow", "underflow") and b.final_status != "ok")
     ]
     if needing:
+        try:
+            from engines.repetition_guard import repair_unresolved_segment_text
+
+            text_attempted = 0
+            for ni in list(needing):
+                try:
+                    idx_i = int(ni)
+                except (TypeError, ValueError):
+                    continue
+                if not (0 <= idx_i < len(segments_data or [])):
+                    continue
+                seg_u = segments_data[idx_i]
+                if not isinstance(seg_u, dict):
+                    continue
+                prev_txt = ""
+                if idx_i > 0 and isinstance(segments_data[idx_i - 1], dict):
+                    prev_txt = str(
+                        segments_data[idx_i - 1].get("final_tts_text")
+                        or segments_data[idx_i - 1].get("text")
+                        or ""
+                    )
+                new_txt, changed = repair_unresolved_segment_text(
+                    seg_u, previous=prev_txt
+                )
+                if changed:
+                    text_attempted += 1
+                    seg_u["text_repair_before_unresolved"] = True
+            stats["text_attempt_before_unresolved"] = text_attempted
+        except Exception as _rep_exc:
+            logger.debug("closed_loop text repair before unresolved skipped: %s", _rep_exc)
         stamp_closed_loop_unresolved_soft(stats, needing)
 
     # Stage 31/32: restore franchise / Lucas on the *timeline* tail (last 2–3

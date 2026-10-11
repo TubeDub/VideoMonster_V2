@@ -80,6 +80,14 @@ STAGE31_ATEMPO_MIN = 0.92
 STAGE31_ATEMPO_MAX = 1.08
 STAGE31_LENGTH_SCALE_MIN = 0.92
 STAGE31_LENGTH_SCALE_MAX = 1.08
+# UK Simple prefers slightly faster speech. Do not stretch
+# the voice to fill a slot (length_scale > 1.02) and do not atempo-slow
+# below 0.97 (drunk-slow). Neighbor evenness stays ±0.03.
+STAGE41_UK_SIMPLE_ATEMPO_MIN = 0.97
+STAGE41_UK_SIMPLE_ATEMPO_MAX = 1.06
+STAGE41_UK_SIMPLE_LENGTH_SCALE_MIN = 0.95
+STAGE41_UK_SIMPLE_LENGTH_SCALE_MAX = 1.02
+STAGE41_SLOT_SOFT_TOLERANCE_MS = 40
 STAGE31_OK_FILL_LO = 0.92
 STAGE31_OK_FILL_HI = 1.08
 STAGE31_GLOBAL_BIAS_MAX = 0.03
@@ -1070,11 +1078,111 @@ def stage31_duration_levers(slot_ms: int, tts_ms: int) -> list[str]:
     return levers
 
 
-def clamp_stage31_tempo(value: float, *, default: float = 1.0) -> float:
+def is_uk_simple_context(
+    task_info: dict[str, Any] | None = None,
+    seg: dict[str, Any] | None = None,
+) -> bool:
+    """True when Simple/Happy Path + target uk (Stage 41 tighter tempo).
+
+    Empty/default context is NOT UK Simple — Stage 40 clamp 0.92–1.08 must
+    stay for ``clamp_stage31_tempo(1.30)`` with no flags. Do not treat
+    ``is_simple_pipeline({})`` (empty user_mode) as UK Simple.
+    """
+    info = dict(task_info or {})
+    if seg and isinstance(seg, dict):
+        if seg.get("uk_simple_prosody"):
+            lang0 = str(
+                seg.get("tts_language")
+                or seg.get("target_lang")
+                or info.get("target_lang")
+                or "uk"
+            ).split("-")[0].lower()
+            return lang0 == "uk"
+        info.setdefault("simple_pipeline", seg.get("simple_pipeline"))
+        info.setdefault("happy_path", seg.get("happy_path"))
+        info.setdefault(
+            "target_lang",
+            seg.get("tts_language") or seg.get("target_lang"),
+        )
+        if seg.get("simple_voice_locked"):
+            info["simple_pipeline"] = True
+    lang = str(info.get("target_lang") or info.get("lang") or "").split("-")[0].lower()
+    if lang and lang != "uk":
+        return False
+    if info.get("simple_pipeline") or info.get("happy_path") or info.get("simple_voice_locked"):
+        return (lang or "uk") == "uk"
+    return False
+
+
+def clamp_uk_simple_atempo(value: float, *, default: float = 1.0) -> float:
     try:
         v = float(value)
     except (TypeError, ValueError):
         v = float(default)
+    return max(STAGE41_UK_SIMPLE_ATEMPO_MIN, min(STAGE41_UK_SIMPLE_ATEMPO_MAX, v))
+
+
+def clamp_uk_simple_length_scale(value: float, *, default: float = 1.0) -> float:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        v = float(default)
+    return max(
+        STAGE41_UK_SIMPLE_LENGTH_SCALE_MIN,
+        min(STAGE41_UK_SIMPLE_LENGTH_SCALE_MAX, v),
+    )
+
+
+def text_fit_tried(seg: dict[str, Any] | None) -> bool:
+    """True when text_slot_fit (or alias) already ran — required before atempo."""
+    if not isinstance(seg, dict):
+        return False
+    used = str(seg.get("duration_control_used") or "").lower()
+    if any(
+        token in used
+        for token in ("text_slot_fit", "text_shorten", "text_expand", "text_split", "split")
+    ):
+        return True
+    if seg.get("shorten_executed") or seg.get("expand_executed") or seg.get("split_children"):
+        return True
+    stages = seg.get("adaptation_stages") or []
+    return any("text_slot_fit" in str(s) for s in stages)
+
+
+def speech_end_within_soft_slot(
+    tts_speech_end_ms: int,
+    slot_end_ms: int,
+    *,
+    tolerance_ms: int = STAGE41_SLOT_SOFT_TOLERANCE_MS,
+) -> bool:
+    """True when speech ends by slot end + 40 ms (Stage 41 D1)."""
+    try:
+        return int(tts_speech_end_ms) <= int(slot_end_ms) + int(tolerance_ms)
+    except (TypeError, ValueError):
+        return False
+
+
+def allow_atempo_after_text_fit(seg: dict[str, Any] | None) -> bool:
+    """BAN atempo-only before text_slot_fit on UK Simple."""
+    if not is_uk_simple_context(seg=seg):
+        return True
+    return text_fit_tried(seg)
+
+
+def clamp_stage31_tempo(
+    value: float,
+    *,
+    default: float = 1.0,
+    uk_simple: bool = False,
+    task_info: dict[str, Any] | None = None,
+    seg: dict[str, Any] | None = None,
+) -> float:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        v = float(default)
+    if uk_simple or is_uk_simple_context(task_info, seg):
+        return clamp_uk_simple_atempo(v, default=default)
     return max(STAGE31_ATEMPO_MIN, min(STAGE31_ATEMPO_MAX, v))
 
 
@@ -1767,6 +1875,20 @@ def prepare_uk_spoken_text(text: str) -> str:
         from engines.repetition_guard import remove_repeated_sentences
 
         t, _ = remove_repeated_sentences(t)
+    except Exception:
+        pass
+    try:
+        from engines.mt.glossary_en_uk import (
+            apply_uk_gender_lock,
+            apply_uk_ru_conjunction_i,
+            rewrite_hey_vocative_uk,
+            strip_en_tokens_for_uk_tts,
+        )
+
+        t = rewrite_hey_vocative_uk(t)
+        t = apply_uk_ru_conjunction_i(t)
+        t = apply_uk_gender_lock(t, gender="male")
+        t = strip_en_tokens_for_uk_tts(t)
     except Exception:
         pass
     return " ".join(str(t or "").split()).strip()

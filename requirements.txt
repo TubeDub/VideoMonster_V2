@@ -8,6 +8,8 @@ langdetect>=1.0.9
 pydub>=0.25.1
 audioop-lts; python_version >= '3.13'
 ffmpeg-python>=0.2.0
+# Optional for КиноКадр face tracking (local Auto Reframe):
+#   pip install mediapipe opencv-python-headless
 faster-whisper>=1.0.0
 gunicorn>=21.2.0
 # transformers + torch — MarianMT / NLLB offline engines (optional, recommended)

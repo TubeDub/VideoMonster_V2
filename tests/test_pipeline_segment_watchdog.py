@@ -4,7 +4,10 @@ import threading
 import time
 
 from engines.pipeline_segment_watchdog import (
+    CLOSED_LOOP_TTS_TIMEOUT_SEC,
     SEGMENT_PROCESS_TIMEOUT_SEC,
+    last_segment_activity_age_sec,
+    mark_segment_activity,
     run_segment_bounded,
 )
 
@@ -100,3 +103,15 @@ def test_translation_review_manual_hold_only_in_dev_mode(monkeypatch):
 
     monkeypatch.setenv("VM_DEV_MODE", "1")
     assert _translation_review_requires_manual_hold()
+
+
+def test_closed_loop_tts_timeout_is_longer_than_llm_bound():
+    """Diag 55ad3d34: CPU tts_uk regen took 28–37s; 30s bound false-failed."""
+    assert CLOSED_LOOP_TTS_TIMEOUT_SEC >= 120.0
+    assert CLOSED_LOOP_TTS_TIMEOUT_SEC > SEGMENT_PROCESS_TIMEOUT_SEC
+
+
+def test_mark_segment_activity_resets_age():
+    mark_segment_activity("55ad3d34-activity")
+    assert last_segment_activity_age_sec("55ad3d34-activity") < 1.0
+    assert last_segment_activity_age_sec("missing-task") == float("inf")

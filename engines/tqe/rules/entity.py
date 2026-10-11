@@ -14,11 +14,30 @@ def check_entities(original: str, translation: str, ctx: dict) -> list[dict]:
         from engines.semantic_meaning import check_critical_entities
         from engines.translation_quality import missing_preserved_tokens
 
+        _FN_DENY = {
+            "yeah",
+            "are",
+            "how's",
+            "hows",
+            "honestly",
+            "before",
+            "come",
+            "sometimes",
+            "really",
+            "shut",
+            "alright",
+        }
         for err in check_critical_entities(original, translation) or []:
+            if isinstance(err, dict):
+                raw_tok = str(err.get("value") or err.get("token") or "")
+            else:
+                raw_tok = str(err)
+            if raw_tok.lower().strip(" .?!,") in _FN_DENY:
+                continue
             errors.append(
                 {
                     "code": "entity_missing",
-                    "token": err if isinstance(err, str) else str(err),
+                    "token": raw_tok or (err if isinstance(err, str) else str(err)),
                     "severity": "critical",
                 }
             )
@@ -34,6 +53,9 @@ def check_entities(original: str, translation: str, ctx: dict) -> list[dict]:
             "star wars",
         }
         for tok in missing:
+            key = str(tok or "").lower().strip(" .?!,")
+            if key in _FN_DENY:
+                continue
             sev = (
                 "critical"
                 if tok.lower().strip(".") in critical

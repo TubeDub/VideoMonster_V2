@@ -175,7 +175,7 @@ def _ensure_complete_mt(
     from engines.mt_cache import is_incomplete_mt_pair
 
     src = " ".join(str(source or "").split()).strip()
-    tr = finalize_mt_text(source_lang, target_lang, translated)
+    tr = finalize_mt_text(source_lang, target_lang, translated, source=src)
     if not src or not tr:
         return tr, False
     if not is_incomplete_mt_pair(src, tr, source_lang, target_lang):
@@ -187,7 +187,7 @@ def _ensure_complete_mt(
         len(tr.split()),
     )
     remt = _remt_incomplete_raw(src, source_lang, target_lang, app_dir=app_dir)
-    remt = finalize_mt_text(source_lang, target_lang, remt)
+    remt = finalize_mt_text(source_lang, target_lang, remt, source=src)
     best = _prefer_complete_mt(src, tr, remt, source_lang, target_lang)
     if stats is not None:
         stats["mt_incomplete_remts"] = int(stats.get("mt_incomplete_remts") or 0) + 1
@@ -284,7 +284,7 @@ def translate_segments_batch(
         )
         if hit is not None:
             # Hit already passed incomplete check inside lookup — safe to finalize.
-            finalized = finalize_mt_text(src_l, tgt_l, hit)
+            finalized = finalize_mt_text(src_l, tgt_l, hit, source=text)
             out[i] = finalized
             if src_l.lower() == "en" and tgt_l.lower() == "uk":
                 seg_engines[i] = "cache+glossary"
@@ -332,7 +332,7 @@ def translate_segments_batch(
             used_marian_batch = True
             stats["mt_calls"] += 1
             for j, idx in enumerate(group):
-                tr = finalize_mt_text(src_l, tgt_l, rejoined[j])
+                tr = finalize_mt_text(src_l, tgt_l, rejoined[j], source=texts[j])
                 eng_label = "marian_batch"
                 if tr and is_incomplete_mt_pair(texts[j], tr, src_l, tgt_l):
                     tr, did_remt = _ensure_complete_mt(
@@ -394,7 +394,7 @@ def translate_segments_batch(
         for attempt in range(3):
             try:
                 tr, meta = _translate_one_traced(text, src_l, tgt_l, app_dir=base)
-                tr = finalize_mt_text(src_l, tgt_l, tr)
+                tr = finalize_mt_text(src_l, tgt_l, tr, source=text)
                 if tr and not is_incomplete_mt_pair(text, tr, src_l, tgt_l):
                     return idx, tr, meta, retries
                 if tr and is_incomplete_mt_pair(text, tr, src_l, tgt_l):
@@ -434,8 +434,8 @@ def translate_segments_batch(
         if "marian" in eng.lower() and "remt" not in eng.lower():
             eng = "marian"
         engines_used.add(eng)
-        tr = finalize_mt_text(src_l, tgt_l, tr)
         src_text = str(segments[i2] or "")
+        tr = finalize_mt_text(src_l, tgt_l, tr, source=src_text)
         out[i2] = tr
         seg_engines[i2] = eng if eng else "marian"
         if tr and not is_incomplete_mt_pair(src_text, tr, src_l, tgt_l):

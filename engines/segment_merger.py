@@ -24,6 +24,21 @@ _CJK_SENTENCE_END = re.compile(r"[。！？!?…．]\s*$")
 _CJK_CHARS = re.compile(r"[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]")
 
 
+def _looks_new_speaker_turn(prev: str, nxt: str) -> bool:
+    """Stage 42: do not glue «Hey man…» + «A dollar?» into one slot."""
+    n = str(nxt or "").strip()
+    if not n:
+        return False
+    if re.match(
+        r"(?i)^(hey|a\s+dollar|are\s+you|wait[,.]|what\?|seriously|shut\s+up)\b",
+        n,
+    ):
+        return True
+    if n.endswith("?") and len(n.split()) <= 8 and _ends_sentence(prev):
+        return True
+    return False
+
+
 def _ends_sentence(text: str) -> bool:
     t = str(text or "").rstrip()
     if not t:
@@ -153,6 +168,9 @@ def merge_stt_segments(
             next_dur = _segment_duration_ms(timing_map, j)
 
             if not _same_speaker(j - 1, j):
+                break
+            nxt_preview = str(segments[j] or "").strip()
+            if _looks_new_speaker_turn(prev if parts else text, nxt_preview):
                 break
 
             # Fill short blocks up to min_safe even across sentence ends (TZ).

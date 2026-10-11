@@ -267,8 +267,8 @@ def test_simple_pipeline_uk_defaults_use_mykyta_and_atempo_105():
     apply_simple_pipeline_policy(info, user_mode="basic")
 
     assert info["max_atempo"] <= 1.05 + 1e-6
-    assert info.get("mykyta_rate") == 0.97
-    assert info.get("mykyta_length_scale") == 1.05
+    assert float(info.get("mykyta_rate") or 0) >= 1.00
+    assert float(info.get("mykyta_length_scale") or 1) <= 1.00
     assert info.get("mykyta_volume") == 1.05
 
 

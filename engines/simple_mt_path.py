@@ -56,6 +56,10 @@ def finalize_living_uk_segments(
         "naturalizer_applied": False,
         "ru_rewrites": 0,
         "pads_stripped": 0,
+        "repeat_blocked_count": 0,
+        "tts_bleed_blocked_count": 0,
+        "gey_fixed_count": 0,
+        "ru_leak_fixed_count": 0,
     }
     if not n:
         return [], meta
@@ -79,36 +83,115 @@ def finalize_living_uk_segments(
         logger.warning("simple_mt naturalizer skipped: %s", exc)
         polished = list(lines)
 
-    from engines.mt.glossary_en_uk import finalize_mt_text, restore_dropped_source_entities
+    from engines.mt.glossary_en_uk import (
+        apply_street_interview_uk,
+        apply_uk_gender_lock,
+        finalize_mt_text,
+        restore_dropped_source_entities,
+        rewrite_hey_vocative_uk,
+        street_uk_honesty_gaps,
+        strip_en_tokens_for_uk_tts,
+    )
     from engines.text_slot_fit import prepare_uk_spoken_text
     from engines.tts_lang_lock import rewrite_russian_leak_for_uk, uk_text_has_russian_leak
 
     out: list[str] = []
     applied = 0
     for src, raw in zip(sources, polished):
-        t = finalize_mt_text("en", "uk", raw)
+        t = finalize_mt_text("en", "uk", raw, source=src)
         before = t
         t = prepare_uk_spoken_text(t)
         if t != before:
             meta["pads_stripped"] += 1
         t = restore_dropped_source_entities(src, t)
+        t = apply_street_interview_uk(src, t)
         if t and uk_text_has_russian_leak(t):
             rewritten = rewrite_russian_leak_for_uk(t)
             rewritten = prepare_uk_spoken_text(rewritten)
             if rewritten:
                 t = rewritten
                 meta["ru_rewrites"] += 1
+        meta["ru_leak_fixed_count"] = int(meta.get("ru_rewrites") or 0)
         if t != str(raw or "").strip():
             applied += 1
         out.append(t)
 
     try:
-        from engines.repetition_guard import dedupe_adjacent_copies, dedupe_segment_texts
+        from engines.repetition_guard import (
+            dedupe_segment_texts,
+            refuse_naturalized_inheritance,
+            rewrite_near_repeats,
+            sanitize_neighbor_bleed,
+            strip_looped_clauses,
+        )
 
+        inherited: list[str] = []
+        prev_nat = ""
+        for i, line in enumerate(out):
+            own_raw = lines[i] if i < len(lines) else ""
+            fixed = refuse_naturalized_inheritance(line, prev_nat, own_raw)
+            inherited.append(fixed)
+            if fixed:
+                prev_nat = fixed
+        out = inherited
         out, _ = dedupe_segment_texts(out)
-        out = dedupe_adjacent_copies(out)
+        cleaned_loops: list[str] = []
+        for line in out:
+            c, _ch = strip_looped_clauses(line)
+            cleaned_loops.append(c)
+        out = cleaned_loops
+        out, blocked = rewrite_near_repeats(out, raw_mts=lines, semantics=polished)
+        meta["repeat_blocked_count"] = int(blocked)
+        out, bleed_n = sanitize_neighbor_bleed(
+            out, raw_mts=lines, naturalized=polished, sources=sources
+        )
+        meta["tts_bleed_blocked_count"] = int(bleed_n)
     except Exception:
         pass
+
+    final_out: list[str] = []
+    honesty: list[str] = []
+    for i, t in enumerate(out):
+        src_i = sources[i] if i < len(sources) else ""
+        before = t
+        t = rewrite_hey_vocative_uk(t)
+        t = apply_uk_gender_lock(t, gender="male")
+        t = strip_en_tokens_for_uk_tts(t)
+        t = apply_street_interview_uk(src_i, t)
+        t = restore_dropped_source_entities(src_i, t)
+        t = prepare_uk_spoken_text(t)
+        if t != before and "Гей" in before:
+            meta["gey_fixed_count"] += 1
+        honesty.extend(street_uk_honesty_gaps(src_i, t))
+        final_out.append(t)
+    out = final_out
+
+    try:
+        from engines.repetition_guard import sanitize_neighbor_bleed
+
+        out, bleed2 = sanitize_neighbor_bleed(
+            out, raw_mts=lines, naturalized=polished, sources=sources
+        )
+        meta["tts_bleed_blocked_count"] = int(meta.get("tts_bleed_blocked_count") or 0) + int(bleed2)
+    except Exception:
+        pass
+    # Own-source facts must survive a last bleed pass (dollar / greens / $AMOUNT).
+    sealed: list[str] = []
+    honesty = []
+    for i, t in enumerate(out):
+        src_i = sources[i] if i < len(sources) else ""
+        t = apply_street_interview_uk(src_i, t)
+        t = restore_dropped_source_entities(src_i, t)
+        t = apply_uk_gender_lock(t, gender="male")
+        t = rewrite_hey_vocative_uk(t)
+        t = strip_en_tokens_for_uk_tts(t)
+        t = prepare_uk_spoken_text(t)
+        honesty.extend(street_uk_honesty_gaps(src_i, t))
+        sealed.append(t)
+    out = sealed
+    if honesty:
+        meta["honesty_gaps"] = sorted(set(honesty))
+        meta["needs_manual_review"] = True
 
     meta["naturalizer_applied"] = applied > 0
     return out, meta

@@ -11,6 +11,33 @@ from typing import Callable, TypeVar
 logger = logging.getLogger("tubedub.pipeline_segment_watchdog")
 
 SEGMENT_PROCESS_TIMEOUT_SEC = 30.0
+# CPU tts_uk (no CUDA) routinely takes 10–40s per closed-loop regen.
+# The 30s LLM bound caused regen_ok=False + retry loops, then
+# PIPELINE_STALLED while synthesis was still running (diag 55ad3d34).
+CLOSED_LOOP_TTS_TIMEOUT_SEC = 180.0
+
+_LAST_ACTIVITY: dict[str, float] = {}
+_ACTIVITY_LOCK = threading.Lock()
+
+
+def mark_segment_activity(task_id: str | None) -> None:
+    """Record START/END as liveness for the pipeline idle watchdog."""
+    tid = str(task_id or "").strip()
+    if not tid:
+        return
+    with _ACTIVITY_LOCK:
+        _LAST_ACTIVITY[tid] = time.time()
+
+
+def last_segment_activity_age_sec(task_id: str | None) -> float:
+    tid = str(task_id or "").strip()
+    if not tid:
+        return float("inf")
+    with _ACTIVITY_LOCK:
+        stamp = float(_LAST_ACTIVITY.get(tid) or 0.0)
+    if stamp <= 0:
+        return float("inf")
+    return max(0.0, time.time() - stamp)
 
 T = TypeVar("T")
 
@@ -36,6 +63,7 @@ def log_segment_start(
     stage: str | None = None,
 ) -> None:
     stage_label = stage or phase
+    mark_segment_activity(task_id)
     logger.info(
         "START SEGMENT %d task=%s phase=%s stage=%s thread=%d",
         segment_index,
@@ -56,6 +84,7 @@ def log_segment_end(
     error: str = "",
 ) -> None:
     stage_label = stage or phase
+    mark_segment_activity(task_id)
     err_suffix = f" error={error}" if error else ""
     logger.info(
         "END SEGMENT %d task=%s phase=%s stage=%s elapsed=%.2fs thread=%d%s",

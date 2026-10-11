@@ -1,0 +1,20 @@
+{
+  "task_id": "7e5236dbee1e4bcab3420ab9285c767a",
+  "path": "stage6_parallel_cache",
+  "tts_cache_hits": 0,
+  "tts_cache_misses": 23,
+  "tts_skips_existing": 0,
+  "tts_retries": 0,
+  "tts_segments_total": 23,
+  "tts_concurrency_used": 6,
+  "tts_wall_sec": 67.856,
+  "tts_rate_limit_backs": 0,
+  "oss_speaker_voice_lock": {
+    "SPEAKER_A": {
+      "voice": "mykyta",
+      "engine_id": "tts_uk"
+    }
+  },
+  "oss_locked_voice": "mykyta",
+  "oss_locked_engine": "tts_uk"
+}

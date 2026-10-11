@@ -225,3 +225,73 @@ def test_voice_verification_heartbeat_prevents_tts_stall(task_env):
     wd._tick()
     assert not wd._stall_reported
     assert wd._stage.stage == "voice_verification"
+
+
+def test_diag_55ad3d34_closed_loop_regen_does_not_false_stall(task_env):
+    """Cold run 55ad3d34: official TTS finished in 14s (step stayed tts),
+    then CPU tts_uk slot_fit_regen kept synthesizing for ~25 min.
+    Watchdog last_progress was ~15 min stale → PIPELINE_STALLED
+    tts_engine_slow_or_blocked while gen_start/gen_end continued.
+    """
+    from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+    from engines.pipeline_segment_watchdog import mark_segment_activity
+    from engines.pipeline_watchdog import PipelineWatchdog
+
+    task_id, _, _ = task_env
+    with STATE_LOCK:
+        AUTO_TASKS[task_id]["step"] = "tts"
+        AUTO_TASKS[task_id]["progress"] = 80.0
+        AUTO_TASKS[task_id]["info"]["progress_detail"] = {
+            "phase": "tts",
+            "last_heartbeat_at": time.time() - 901.0,
+        }
+
+    wd = PipelineWatchdog(task_id)
+    wd.stage_start("tts")
+    wd._ticks = 5
+    wd._stage.last_progress_at = time.time() - 901.6
+
+    mark_segment_activity(task_id)
+    wd.heartbeat(
+        phase="closed_loop_regen",
+        tts_substep="slot_fit_regen",
+        current_segment=10,
+        total_segments=32,
+    )
+    with STATE_LOCK:
+        AUTO_TASKS[task_id]["info"]["progress_detail"].update(
+            {
+                "phase": "closed_loop_regen",
+                "tts_substep": "slot_fit_regen",
+                "current_segment": 10,
+                "last_heartbeat_at": time.time(),
+            }
+        )
+
+    wd._tick()
+    assert not wd._stall_reported
+
+
+def test_diag_55ad3d34_stale_tts_step_segment_activity_keeps_alive(task_env):
+    """Same zip: even if progress_detail is stale, START SEGMENT is liveness."""
+    from engines.dub_task_state import AUTO_TASKS, STATE_LOCK
+    from engines.pipeline_segment_watchdog import mark_segment_activity
+    from engines.pipeline_watchdog import PipelineWatchdog
+
+    task_id, _, _ = task_env
+    with STATE_LOCK:
+        AUTO_TASKS[task_id]["step"] = "tts"
+        AUTO_TASKS[task_id]["progress"] = 80.0
+        AUTO_TASKS[task_id]["info"]["progress_detail"] = {
+            "phase": "tts",
+            "last_heartbeat_at": time.time() - 901.0,
+        }
+
+    wd = PipelineWatchdog(task_id)
+    wd.stage_start("tts")
+    wd._ticks = 5
+    wd._stage.last_progress_at = time.time() - 901.6
+
+    mark_segment_activity(task_id)
+    wd._tick()
+    assert not wd._stall_reported

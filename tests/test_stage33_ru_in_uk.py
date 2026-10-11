@@ -25,6 +25,11 @@ ZIP_IDX27_UK = "Так. Джонатане, ти здаєшся розумним
 ZIP_IDX0_MIXED = "Эй, мужик, ты отлично справляешься. Ось долар, саме тоді."
 ZIP_FALSE_HEAL = "Честно говоря, це много, саме тоді."
 UK_CLEAN = "Привіт усім друзям сьогодні, це український текст."
+# Diag 55ad3d34 idx=10 — Marian mixed RU into UK; tts_uk voiced it.
+ZIP_55AD_IDX10 = (
+    "Давай. Так подожди, ти говоришь мені, що ти ешь чужее мусор "
+    "лише для того, щоб нагодувати себе, їси чуже сміття."
+)
 
 
 def test_russian_line_is_not_uk_tts_ok():
@@ -38,6 +43,8 @@ def test_russian_line_is_not_uk_tts_ok():
     assert not is_uk_tts_text_ok(ZIP_FALSE_HEAL)
     assert not uk_text_has_russian_leak(UK_CLEAN)
     assert is_uk_tts_text_ok(UK_CLEAN)
+    assert uk_text_has_russian_leak(ZIP_55AD_IDX10)
+    assert not is_uk_tts_text_ok(ZIP_55AD_IDX10)
 
 
 def test_ruism_rewrite_clears_zip_idx27():
@@ -53,6 +60,22 @@ def test_ruism_rewrite_clears_zip_idx27():
     assert is_uk_tts_text_ok(out)
     assert "ты" not in out
     assert "умным" not in out
+
+
+def test_diag_55ad3d34_idx10_ru_mix_is_rewritten():
+    from engines.tts_lang_lock import (
+        rewrite_russian_leak_for_uk,
+        uk_text_has_russian_leak,
+    )
+
+    assert uk_text_has_russian_leak(ZIP_55AD_IDX10)
+    out = rewrite_russian_leak_for_uk(ZIP_55AD_IDX10)
+    assert "подожди" not in out.lower()
+    assert "говоришь" not in out.lower()
+    assert "ешь" not in out.split()
+    assert "чужее" not in out.lower()
+    assert "мусор" not in out.lower()
+    assert not uk_text_has_russian_leak(out), out
 
 
 def test_guard_rewrites_russian_without_source():

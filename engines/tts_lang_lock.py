@@ -28,7 +28,9 @@ _RU_ONLY_WORDS = re.compile(
     r"когда|нет|он|она|"
     r"мой|быстро|ладно|накормить|себя|долго|уже|целый|делаешь|"
     r"получить|еду|смотри|верно|как|"
-    r"мне|даже|этом|потому|можешь|тебя|есть|говорить|молод"
+    r"мне|даже|этом|потому|можешь|тебя|есть|говорить|молод|"
+    r"подожди|говоришь|ешь|чужое|чужее|мусор|"
+    r"молодец|последний|ела|меня|выбора|смотрите"
     r")\b",
     re.I,
 )
@@ -168,6 +170,16 @@ def force_uk_tts_identity(
         }
 
     vl = v.lower()
+    for bad in _FORBIDDEN_VOICE_PREFIXES_FOR_UK:
+        if v.startswith(bad):
+            logger.warning(
+                "[TTS] attempted non-uk voice=%s for target=uk — remap to UK pool "
+                "(never silent cs/sk)",
+                v,
+            )
+            v = ""
+            vl = ""
+            break
 
     def _pick_tts_uk_voice() -> str:
         if vl in TTS_UK_VOICES:
@@ -277,7 +289,9 @@ def resolve_uk_tts(
 _RU_STRONG = re.compile(
     r"\b("
     r"хорошо|кажется|умн(?:ый|ым|ая|ое)|мужик|честно\s+говоря|"
-    r"слышать|слышу|отлично|справляешься"
+    r"слышать|слышу|отлично|справляешься|"
+    r"подожди|говоришь|ешь|чужое|чужее|мусор|"
+    r"молодец|последний|ела|выбора"
     r")\b",
     re.I,
 )
@@ -330,8 +344,8 @@ def rewrite_russian_leak_for_uk(text: str) -> str:
     extras = (
         (r"\bХорошо\b", "Добре"),
         (r"\bхорошо\b", "добре"),
-        (r"\bЭй\b", "Гей"),
-        (r"\bэй\b", "гей"),
+        (r"\bЭй\b", "Хей"),
+        (r"\bэй\b", "хей"),
         (r"\bты\b", "ти"),
         (r"\bТы\b", "Ти"),
         (r"\bмой\b", "мій"),
@@ -362,6 +376,13 @@ def rewrite_russian_leak_for_uk(text: str) -> str:
         (r"\bеду\b", "їжу"),
         (r"\bсмотри\b", "дивись"),
         (r"\bверно\b", "правда"),
+        (r"\bподожди\b", "зачекай"),
+        (r"\bПодожди\b", "Зачекай"),
+        (r"\bговоришь\b", "кажеш"),
+        (r"\bешь\b", "їси"),
+        (r"\bчужее\b", "чуже"),
+        (r"\bчужое\b", "чуже"),
+        (r"\bмусор\b", "сміття"),
         (r"\bДа\.(?=\s|$)", "Так."),
         (r"\bИ мне\b", "І мені"),
         (r"\bМне\b", "Мені"),
@@ -375,7 +396,7 @@ def rewrite_russian_leak_for_uk(text: str) -> str:
         (r"\bдаже\b", "навіть"),
         (r"\bкак будто\b", "ніби"),
         (r"\bвырос\b", "виріс"),
-        (r"\bпотеряла\b", "втратила"),
+        (r"\bпотеряла\b", "втратив"),
         (r"\bздесь\b", "тут"),
         (r"\bговорить\b", "говорити"),
         (r"\bГоворить\b", "Говорити"),
@@ -395,9 +416,44 @@ def rewrite_russian_leak_for_uk(text: str) -> str:
         (r"\bлюблю\b", "люблю"),
         (r"\bмолодой\b", "молодий"),
         (r"\bмолод\b", "молодий"),
+        (r"\bпроверяю мусорные баки\b", "перериваю смітники"),
+        (r"\bмусорные баки\b", "смітники"),
+        (r"\bЗаткнись\b", "Та ну?"),
+        (r"\bJonathan\b", "Джонатан"),
+        (r"\bYeah\b", "Так"),
+        (r"\bAre you\b", "Ти"),
+        (r"\bмолодец\b", "молодець"),
+        (r"\bпоследний\b", "останній"),
+        (r"\bела\b", "їв"),
+        (r"\bменя\b", "мене"),
+        (r"\bвыбора\b", "вибору"),
+        (r"\bУ меня\b", "У мене"),
+        (r"\bДа, чувак\b", "Так, чувак"),
+        (r"\bИ смотрите\b", "І дивись"),
+        (r"\bИ смотри\b", "І дивись"),
+        (r"\bвсего\s+(\d+)\b", r"лише \1"),
+        (r"\bИ Мені\b", "І мені"),
+        (r"\bЗамовкни\b", "Та ну?"),
     )
     for pat, repl in extras:
         out = re.sub(pat, repl, out)
+    try:
+        from engines.mt.glossary_en_uk import (
+            apply_surprise_shut_up,
+            apply_uk_gender_lock,
+            apply_uk_ru_conjunction_i,
+            rewrite_hey_vocative_uk,
+            strip_en_tokens_for_uk_tts,
+        )
+
+        out = apply_uk_ru_conjunction_i(out)
+        out = rewrite_hey_vocative_uk(out)
+        out = apply_uk_gender_lock(out, gender="male")
+        out = strip_en_tokens_for_uk_tts(out)
+        out = apply_surprise_shut_up(out)
+    except Exception:
+        out = re.sub(r"(?i)^Гей([,!\s])", r"Хей\1", out)
+        out = re.sub(r"(?i)\bГей,\s*чувак\b", "Хей, чувак", out)
     return out.strip()
 
 
@@ -474,7 +530,9 @@ def force_remt_segment_no_cache(
     out, _meta = translate_direct_marian(
         src, src_lang, tgt_lang, app_dir=base, segment_index=-1
     )
-    return finalize_mt_text(src_lang, tgt_lang, str(out or "").strip())
+    return finalize_mt_text(
+        src_lang, tgt_lang, str(out or "").strip(), source=src
+    )
 
 
 def guard_uk_tts_text(

@@ -113,11 +113,12 @@ DEFAULT_EDGE_VOICE = "uk-UA-OstapNeural"
 DEFAULT_TTS_UK_VOICE = "mykyta"
 DEFAULT_PIPER_VOICE = "uk_UA-mykyta-high"
 
-# Stage 23 — production Mykyta defaults (slightly slower / longer)
-MYKYTA_RATE_DEFAULT = 0.97
+# UK Simple / default auto-dub uk: slightly FASTER, not stretched.
+# rate 0.97 + length_scale 1.05 was "резиновая" slow speech.
+MYKYTA_RATE_DEFAULT = 1.02
 MYKYTA_PITCH_DEFAULT = 0.0
 MYKYTA_VOLUME_DEFAULT = 1.05
-MYKYTA_LENGTH_SCALE_DEFAULT = 1.05
+MYKYTA_LENGTH_SCALE_DEFAULT = 0.98
 MYKYTA_RATE_RANGE = (0.85, 1.15)
 MYKYTA_PITCH_RANGE = (-4.0, 4.0)
 MYKYTA_VOLUME_RANGE = (0.7, 1.3)
@@ -225,22 +226,23 @@ def compute_mykyta_duration_controls(
     measured_ms: int,
     *,
     base: dict[str, Any] | None = None,
+    uk_simple: bool = False,
 ) -> dict[str, float]:
     """Stage 31: length_scale / rate after text-fit, clamped ±8%.
 
-    length_scale = clamp(slot/measured, 0.92, 1.08)
-    rate         = clamp(1/length_scale, 0.92, 1.08)
+    Stage 41/43 UK Simple: length_scale in [0.95, 1.02] (no rubber stretch),
+    rate in [0.97, 1.06] (no drunk-slow). Tighter than Stage 31 0.92–1.08.
     """
     slot = max(1, int(slot_ms or 0))
     meas = max(1, int(measured_ms or 0))
-    length_scale = _clamp(
-        float(slot) / float(meas),
-        *MYKYTA_DURATION_LENGTH_SCALE_RANGE,
-    )
-    rate = _clamp(
-        1.0 / max(0.5, length_scale),
-        *MYKYTA_DURATION_RATE_RANGE,
-    )
+    if uk_simple:
+        ls_lo, ls_hi = 0.95, 1.02
+        rate_lo, rate_hi = 0.97, 1.06
+    else:
+        ls_lo, ls_hi = MYKYTA_DURATION_LENGTH_SCALE_RANGE
+        rate_lo, rate_hi = MYKYTA_DURATION_RATE_RANGE
+    length_scale = _clamp(float(slot) / float(meas), ls_lo, ls_hi)
+    rate = _clamp(1.0 / max(0.5, length_scale), rate_lo, rate_hi)
     base_ctrl = resolve_mykyta_controls(base, env=False)
     return {
         "rate": rate,
@@ -771,7 +773,7 @@ def synthesize_with_backend(
         # Never fall back to cs/sk/pl/ru — only uk-UA-*.
         if not str(edge_voice).startswith("uk-UA-"):
             edge_voice = DEFAULT_EDGE_VOICE
-        # Edge rejects Mykyta float rates like "0.97"; convert to ±N%.
+        # Edge rejects Mykyta float rates like "1.02"; convert to ±N%.
         edge_rate = rate
         try:
             raw = str(rate or "").strip()
@@ -781,9 +783,9 @@ def synthesize_with_backend(
                     pct = int(round((ratio - 1.0) * 100))
                     edge_rate = f"{pct:+d}%"
         except Exception:
-            edge_rate = "-4%"
+            edge_rate = "+4%"
         if not edge_rate or str(edge_rate).replace(".", "", 1).isdigit():
-            edge_rate = "-4%"
+            edge_rate = "+4%"
         edge_pitch = pitch
         try:
             pr = str(pitch or "").strip()

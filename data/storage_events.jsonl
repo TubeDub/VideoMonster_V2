@@ -1603,3 +1603,29 @@
 {"event": "PROJECT_MIGRATED", "ts": 1787419052.9897478, "payload": {"project_id": "39cc823e-43e1-5fe6-98ff-dc20146dc3c9", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1787419053.0396433, "payload": {"project_id": "ec94efd6-3ebe-5a43-a4f0-c6009af3ed1d", "source": "tdproj"}}
 {"event": "PROJECT_MIGRATED", "ts": 1787419053.1123338, "payload": {"project_id": "91f8b570-2fca-50b8-b2a7-439b8229dd8f", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1788805829.0863178, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.1398208, "payload": {"project_id": "bbc418c1-6e58-559a-b1a3-07e2692b222d", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.1731055, "payload": {"project_id": "dcab93d9-c70e-5080-b6cd-62f702030da1", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.2052991, "payload": {"project_id": "308512ee-de2c-5762-a79c-0ecc50763573", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.2388964, "payload": {"project_id": "5188f4a2-7a94-512f-a0fc-17281ab87715", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.289469, "payload": {"project_id": "4ec24f85-54a8-5f90-99fa-c4a78e38ac57", "source": "studio_session"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.6183636, "payload": {"project_id": "06dfd091-ae0f-5052-8442-1e00a5cee223", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.6715357, "payload": {"project_id": "aa75aece-af18-5131-bc46-47698711e807", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.7249367, "payload": {"project_id": "ad082833-8efe-5c14-b421-c28c7e5ecf7d", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.7878354, "payload": {"project_id": "a51ddaa9-5281-5b51-9806-15a6020f62c2", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.829945, "payload": {"project_id": "155166a6-10c9-5587-ba84-381bb73481c9", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805829.8811076, "payload": {"project_id": "6c899c6e-3722-5ede-a40b-16d6dd171196", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.0061142, "payload": {"project_id": "67fcabad-5800-54ec-9872-accb9d06cea8", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.183088, "payload": {"project_id": "cfb2c1dc-65d4-5ce2-acf7-0f973b296a72", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.2175004, "payload": {"project_id": "76bbdfe0-c9f9-5ce8-a4f2-4362e006838f", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.2564406, "payload": {"project_id": "7c082764-0803-526a-881e-39c007fb775f", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.301578, "payload": {"project_id": "dfa6dd63-8679-5485-babf-f7b8b67772a8", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.3425467, "payload": {"project_id": "bc69961f-3a72-5edf-b0b2-030895e0a870", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.380286, "payload": {"project_id": "87ef950b-b52d-5d91-a52e-0425200c4456", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.4246447, "payload": {"project_id": "3fe311aa-e8d9-50cb-ba37-e644abc79fbd", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.4667723, "payload": {"project_id": "f5ced7c7-50ba-5228-85dd-3fa079b7871e", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.50782, "payload": {"project_id": "d2f6ae42-cfda-5d7d-bee2-3c86cc1b1051", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.5515032, "payload": {"project_id": "4dfb7032-1509-537c-b7ab-f42d50e7a2fb", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.598585, "payload": {"project_id": "61652d35-06f3-50d0-b222-bf7088870eb9", "source": "tdproj"}}
+{"event": "PROJECT_MIGRATED", "ts": 1788805830.6397896, "payload": {"project_id": "4d24aba2-01f7-57f4-ad47-a28857b5009e", "source": "tdproj"}}
+{"event": "STORAGE_CLEANUP", "ts": 1788805887.493153, "payload": {"files_deleted": 0, "bytes_freed": 0, "stale_locks_removed": 0, "temp_files_removed": 0, "cache_bytes_freed": 0, "errors": []}}

@@ -374,6 +374,9 @@ def synthesize_segments_parallel(
                 "rate": str(raw.get("rate") or ""),
                 "pitch": str(raw.get("pitch") or ""),
                 "engine_id": str(raw.get("engine_id") or "edge-offline"),
+                "speaker_id": str(
+                    raw.get("speaker_id") or raw.get("speaker") or ""
+                ).strip(),
                 "_raw": raw,
             }
         )
@@ -421,13 +424,23 @@ def synthesize_segments_parallel(
                 pass
 
     # A) Warmup — first N sequential (Microsoft connection settle).
-    # pyVideoTrans / VideoLingo: lock backend+voice after the first success.
+    # Stage 36: one backend+voice after first success when a single speaker.
+    # Stage 41: lock per speaker_id so A success does not wipe B.
     warm_items = normalized[:warm_n]
     pool_items = normalized[warm_n:]
     _locked_voice = ""
     _locked_engine = ""
+    _locked_by_speaker: dict[str, tuple[str, str]] = {}
+    _speaker_ids = {str(n.get("speaker_id") or "") for n in normalized}
+    _speaker_ids.discard("")
+    _multi_speaker = len(_speaker_ids) >= 2
     for it in warm_items:
-        if _locked_voice:
+        it_sid = str(it.get("speaker_id") or "")
+        if _multi_speaker and it_sid and it_sid in _locked_by_speaker:
+            _lv, _le = _locked_by_speaker[it_sid]
+            it["voice"] = _lv
+            it["engine_id"] = _le or it["engine_id"]
+        elif _locked_voice and not _multi_speaker:
             it["voice"] = _locked_voice
             it["engine_id"] = _locked_engine or it["engine_id"]
         try:
@@ -463,24 +476,45 @@ def synthesize_segments_parallel(
                 "tts_parallel: rate-limit during warmup → concurrency=%d", workers
             )
         _finish(one)
-        if not one.get("error") and not _locked_voice:
-            _locked_voice = str(it.get("voice") or "")
-            _locked_engine = str(it.get("engine_id") or "")
-            if _locked_voice:
+        if not one.get("error"):
+            _ok_voice = str(it.get("voice") or "")
+            _ok_engine = str(it.get("engine_id") or "")
+            _ok_sid = str(it.get("speaker_id") or "")
+            if _ok_sid:
+                _locked_by_speaker[_ok_sid] = (_ok_voice, _ok_engine)
+            if not _locked_voice:
+                _locked_voice = _ok_voice
+                _locked_engine = _ok_engine
+            if _ok_voice:
                 try:
                     from engines.oss_production import lock_voice_after_first_success
 
                     lock_voice_after_first_success(
                         pool_items,
-                        voice=_locked_voice,
-                        engine_id=_locked_engine,
+                        voice=_ok_voice,
+                        engine_id=_ok_engine,
+                        speaker_id=_ok_sid or None,
                     )
-                    stats["oss_locked_voice"] = _locked_voice
-                    stats["oss_locked_engine"] = _locked_engine
+                    if not _multi_speaker:
+                        stats["oss_locked_voice"] = _ok_voice
+                        stats["oss_locked_engine"] = _ok_engine
+                    else:
+                        stats.setdefault("oss_speaker_voice_lock", {})
+                        if _ok_sid:
+                            stats["oss_speaker_voice_lock"][_ok_sid] = {
+                                "voice": _ok_voice,
+                                "engine_id": _ok_engine,
+                            }
+                        stats["oss_locked_voice"] = _ok_voice
+                        stats["oss_locked_engine"] = _ok_engine
                 except Exception:
                     for rest in pool_items:
-                        rest["voice"] = _locked_voice
-                        rest["engine_id"] = _locked_engine or rest.get("engine_id")
+                        if _multi_speaker:
+                            rest_sid = str(rest.get("speaker_id") or "")
+                            if rest_sid and _ok_sid and rest_sid != _ok_sid:
+                                continue
+                        rest["voice"] = _ok_voice
+                        rest["engine_id"] = _ok_engine or rest.get("engine_id")
 
     # B) Remaining via ThreadPoolExecutor.
     if pool_items:

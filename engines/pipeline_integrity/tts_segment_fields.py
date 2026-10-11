@@ -206,7 +206,14 @@ def resolve_segment_text_for_tts(seg: dict[str, Any]) -> str:
             strip_glossary_placeholders,
         )
 
-        text = finalize_mt_text("en", "uk", text)
+        src_en = str(
+            seg.get("original")
+            or seg.get("original_text")
+            or seg.get("whisper_text")
+            or seg.get("source_text")
+            or ""
+        )
+        text = finalize_mt_text("en", "uk", text, source=src_en)
         if contains_glossary_garbage(text):
             logger = __import__("logging").getLogger("tubedub.tts_fields")
             logger.error("[glossary] TTS text still dirty after finalize: %r", text[:120])

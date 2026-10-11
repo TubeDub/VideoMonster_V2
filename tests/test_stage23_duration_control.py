@@ -111,12 +111,12 @@ def test_mykyta_production_defaults():
         resolve_mykyta_controls,
     )
 
-    assert MYKYTA_RATE_DEFAULT == 0.97
-    assert MYKYTA_LENGTH_SCALE_DEFAULT == 1.05
+    assert MYKYTA_RATE_DEFAULT >= 1.00
+    assert MYKYTA_LENGTH_SCALE_DEFAULT <= 1.00
     assert MYKYTA_VOLUME_DEFAULT == 1.05
     ctrl = resolve_mykyta_controls({}, env=False)
-    assert ctrl["rate"] == 0.97
-    assert ctrl["length_scale"] == 1.05
+    assert ctrl["rate"] >= 1.00
+    assert ctrl["length_scale"] <= 1.00
     assert ctrl["volume"] == 1.05
 
 

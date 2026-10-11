@@ -3503,11 +3503,21 @@ def _post_tts_timing_qa(
         task_info["timing_joint_fixes"] = joint_fixes
 
     def _regen(text, **kwargs):
-        from engines.pipeline_segment_watchdog import run_segment_bounded
+        from engines.pipeline_segment_watchdog import (
+            CLOSED_LOOP_TTS_TIMEOUT_SEC,
+            run_segment_bounded,
+        )
 
         seg_idx = int(kwargs.get("segment_index") or 0)
         work_root = _artifacts_dir() / "closed_loop" / task_id
         work_root.mkdir(parents=True, exist_ok=True)
+        if task_id:
+            _update_progress_detail(
+                task_id,
+                phase="closed_loop_regen",
+                tts_substep="slot_fit_regen",
+                current_segment=seg_idx + 1,
+            )
 
         def _do_regen():
             return _regen_segment_tts(
@@ -3531,14 +3541,30 @@ def _post_tts_timing_qa(
                 or target_lang,
             )
 
-        watch = run_segment_bounded(
-            task_id=task_id or "",
-            phase="closed_loop_regen",
-            segment_index=seg_idx,
-            stage="closed_loop_regen",
-            fn=_do_regen,
-            fallback=lambda: (None, 0),
-        )
+        def _run_bounded():
+            return run_segment_bounded(
+                task_id=task_id or "",
+                phase="closed_loop_regen",
+                segment_index=seg_idx,
+                stage="closed_loop_regen",
+                fn=_do_regen,
+                fallback=lambda: (None, 0),
+                timeout_sec=CLOSED_LOOP_TTS_TIMEOUT_SEC,
+            )
+
+        if task_id:
+            with _blocking_progress_heartbeat(
+                task_id,
+                "closed_loop_regen",
+                interval=15.0,
+                messages=[
+                    f"Підгонка TTS сегмент {seg_idx + 1}…",
+                    "Синтез озвучки…",
+                ],
+            ):
+                watch = _run_bounded()
+        else:
+            watch = _run_bounded()
         return watch.value
 
     def _commit(segs, indices, *, tts_text, audio_filename):
@@ -5213,7 +5239,25 @@ def _regen_segment_tts(
         "output_dir": _artifacts_dir(),
         "context": ctx_extra,
     }
-    files = generate_audio(**gen_kwargs)
+    if task_id:
+        _update_progress_detail(
+            task_id,
+            phase="closed_loop_regen",
+            tts_substep="slot_fit_regen",
+            current_segment=int(segment_index or 0) + 1,
+        )
+        with _blocking_progress_heartbeat(
+            task_id,
+            "closed_loop_regen",
+            interval=15.0,
+            messages=[
+                f"Підгонка TTS сегмент {int(segment_index or 0) + 1}…",
+                "Синтез озвучки…",
+            ],
+        ):
+            files = generate_audio(**gen_kwargs)
+    else:
+        files = generate_audio(**gen_kwargs)
     if not files:
         log_tts_lifecycle(
             task_id,
@@ -7324,9 +7368,20 @@ def api_auto_dub_start():
     orig_override = _vol_pct("original_volume")
     if orig_override is None:
         orig_override = _vol_pct("original_volume_pct")
+    if orig_override is None:
+        orig_override = _vol_pct("source_volume")
+    if orig_override is None:
+        orig_override = _vol_pct("orig")
     if _style_gated:
-        # Keep documentary-like underlay instead of silencing original (TZ §24–26).
-        orig_override = 0.20
+        # Gated Simple: keep documentary 20% for non-UK. For Simple UK mute
+        # only when the user did not set a source slider (50% must win).
+        _tgt_mix = str(data.get("target_lang") or data.get("lang") or "").split("-")[0].lower()
+        _simple_uk = (
+            str(_user_mode or "").lower() in ("basic", "simple", "")
+            or bool(data.get("simple_pipeline"))
+        ) and _tgt_mix == "uk"
+        if orig_override is None or float(orig_override) <= 0.001:
+            orig_override = 0.0 if _simple_uk else 0.20
 
     resolved_style = resolve_dub_style(style_id, original_volume=orig_override)
     mix_mode = resolved_style["mix_mode"]
@@ -7341,10 +7396,13 @@ def api_auto_dub_start():
             or bool(data.get("simple_pipeline")),
             "happy_path": True,
         }
+        if orig_override is not None:
+            _mix_info["source_volume"] = orig_override
+            _mix_info["original_volume_pct"] = int(round(float(orig_override) * 100))
         mix_volumes = apply_simple_uk_source_underlay(
             _mix_info,
             mix_volumes,
-            explicit_original=orig_override if not _style_gated else None,
+            explicit_original=orig_override,
             raw_style=_raw_style_req,
             style_gated=_style_gated,
         )
@@ -7504,6 +7562,11 @@ def api_auto_dub_start():
             .lower(),
             "user_mode": _user_mode,
             "mix_mode": mix_mode,
+            "mix_volumes": mix_volumes,
+            "original_volume_pct": int(
+                round(float((mix_volumes or {}).get("original_volume") or 0) * 100)
+            ),
+            "source_volume": (mix_volumes or {}).get("original_volume"),
             "underlay_style_gated": bool(_style_gated),
             "stt_quality": _stt_quality_req or "simple",
             "spec_v3": bool(data.get("spec_v3") or _stt_quality_req == "high"),
@@ -8488,10 +8551,22 @@ def api_translation_review_approve(task_id):
                     or "modern"
                 )
                 resolved = resolve_dub_style(style_id, original_volume=pct)
-                info["mix_volumes"] = dict(resolved["mix_volumes"])
-                info["mix_volumes_backup"] = dict(resolved["mix_volumes"])
-                info["mix_mode"] = resolved["mix_mode"]
-                info["mix_mode_backup"] = resolved["mix_mode"]
+                try:
+                    from engines.simple_dub_pipeline import apply_simple_uk_source_underlay
+
+                    info["source_volume"] = pct
+                    info["original_volume_pct"] = int(round(pct * 100))
+                    mv = apply_simple_uk_source_underlay(
+                        info,
+                        dict(resolved["mix_volumes"]),
+                        explicit_original=pct,
+                    )
+                except Exception:
+                    mv = dict(resolved["mix_volumes"])
+                info["mix_volumes"] = dict(mv)
+                info["mix_volumes_backup"] = dict(mv)
+                info["mix_mode"] = mv.get("mix_mode") or resolved["mix_mode"]
+                info["mix_mode_backup"] = info["mix_mode"]
                 info["original_volume_pct"] = int(round(pct * 100))
 
     if edits:
@@ -11938,6 +12013,40 @@ def _run_pipeline_inner(
             merged_lines, merged_timing = merge_stt_segments_happy_path(
                 raw_lines, timing_map or raw_timing_backup, **_merge_kw
             )
+            try:
+                from engines.diarization import split_mixed_speaker_segments
+
+                _tmp = []
+                for _i, _t in enumerate(merged_lines or []):
+                    _tm = (merged_timing or [])[_i] if _i < len(merged_timing or []) else {}
+                    _tmp.append(
+                        {
+                            "text": _t,
+                            "original_text": _t,
+                            "original": _t,
+                            "start_ms": int((_tm or {}).get("start") or 0),
+                            "end_ms": int((_tm or {}).get("end") or 0),
+                        }
+                    )
+                _split = split_mixed_speaker_segments(_tmp)
+                _live = [
+                    s
+                    for s in _split
+                    if isinstance(s, dict) and not s.get("archived")
+                ]
+                if _live and len(_live) != len(merged_lines or []):
+                    merged_lines = [
+                        str(s.get("original_text") or s.get("text") or "") for s in _live
+                    ]
+                    merged_timing = [
+                        {
+                            "start": int(s.get("start_ms") or 0),
+                            "end": int(s.get("end_ms") or 0),
+                        }
+                        for s in _live
+                    ]
+            except Exception as _mix_split_exc:
+                logger.debug("mixed-speaker STT split skipped: %s", _mix_split_exc)
             _before_n = len(raw_lines)
             _after_n = len(merged_lines or [])
             with STATE_LOCK:
@@ -15872,10 +15981,32 @@ def _run_pipeline_inner(
             except Exception as _tm_align_exc:
                 logger.debug("pre-TTS timing_map align skipped: %s", _tm_align_exc)
             try:
+                from engines.diarization import ensure_speaker_ids
+
+                with STATE_LOCK:
+                    _spk_info = dict(task.get("info") or {})
+                    _spk_info.setdefault("target_lang", target_lang)
+                ensure_speaker_ids(segments_data, task_info=_spk_info)
+                with STATE_LOCK:
+                    if _spk_info.get("speaker_map"):
+                        task["info"]["speaker_map"] = _spk_info["speaker_map"]
+                        task["info"]["speaker_ids"] = _spk_info.get("speaker_ids")
+            except Exception as _spk_exc:
+                logger.debug("Task %s: speaker_map before TTS skipped: %s", task_id, _spk_exc)
+            _tts_speaker_ids = []
+            for _srow in segments_data or []:
+                if isinstance(_srow, dict):
+                    _tts_speaker_ids.append(
+                        str(_srow.get("speaker_id") or _srow.get("speaker") or "")
+                    )
+                else:
+                    _tts_speaker_ids.append("")
+            try:
                 tts_groups = build_tts_groups(
                     segments,
                     current_timing_map_snapshot,
                     min_duration_ms=_tts_min_ms,
+                    speaker_ids=_tts_speaker_ids,
                 )
             except TypeError:
                 tts_groups = build_tts_groups(segments, current_timing_map_snapshot)
@@ -16006,15 +16137,21 @@ def _run_pipeline_inner(
                                     "voice_lock_pinned_segments",
                                     "voice_platform_skipped",
                                     "voice",
+                                    "per_speaker_voice_lock",
+                                    "speaker_voice_lock",
+                                    "speaker_map",
+                                    "speaker_ids",
+                                    "oss_locked_voice",
                                 )
                                 if k in _vinfo
                             }
                         )
                         task["info"]["segments_data"] = segments_data
                     logger.info(
-                        "Task %s: Simple voice lock tts_voice=%s unique=1",
+                        "Task %s: Simple voice lock tts_voice=%s unique=%s",
                         task_id,
                         voice,
+                        _vinfo.get("unique_voices_used", 1),
                     )
                     # Stage 12: reject non-uk TTS text; remt once or skip.
                     try:
@@ -16525,7 +16662,14 @@ def _run_pipeline_inner(
                             task["info"]["simple_voice_locked"] = True
                             task["info"]["pipeline_voice"] = voice
                             task["info"]["tts_voice"] = voice
-                            task["info"]["unique_voices_used"] = 1
+                            task["info"]["unique_voices_used"] = int(
+                                _vpin.get("unique_voices_used") or 1
+                            )
+                            if _vpin.get("per_speaker_voice_lock"):
+                                task["info"]["per_speaker_voice_lock"] = True
+                                task["info"]["speaker_voice_lock"] = _vpin.get(
+                                    "speaker_voice_lock"
+                                )
                 except Exception as _vpin_exc:
                     logger.debug("Simple voice re-pin skipped: %s", _vpin_exc)
 
@@ -16625,17 +16769,32 @@ def _run_pipeline_inner(
                                 or (task.get("info") or {}).get("simple_pipeline")
                                 or (task.get("info") or {}).get("happy_path")
                             )
+                            _multi_spk = bool(
+                                (task.get("info") or {}).get("per_speaker_voice_lock")
+                            ) or int(
+                                (task.get("info") or {}).get("unique_voices_used") or 1
+                            ) >= 2
                         group_voice = (
                             voice
-                            if _simple_v
+                            if (_simple_v and not _multi_spk)
                             else _segment_tts_voice(segments_data[head_idx], voice)
                         )
+                        _head = segments_data[head_idx]
+                        _spk_id = str(
+                            _head.get("speaker_id") or _head.get("speaker") or ""
+                        )
+                        if isinstance(_head, dict):
+                            if _head.get("tts_rate"):
+                                group["prosody_rate"] = _head.get("tts_rate")
+                            if _head.get("tts_pitch"):
+                                group["prosody_pitch"] = _head.get("tts_pitch")
                         work_items.append(
                             {
                                 "g_idx": g_idx,
                                 "indices": indices,
                                 "text": text,
                                 "voice": group_voice,
+                                "speaker_id": _spk_id,
                                 "timing": group.get("timing"),
                                 "rate": group.get("prosody_rate") or tts_rate,
                                 "pitch": group.get("prosody_pitch") or tts_pitch,
@@ -17057,9 +17216,14 @@ def _run_pipeline_inner(
                                 or (task.get("info") or {}).get("simple_pipeline")
                                 or (task.get("info") or {}).get("happy_path")
                             )
+                        _multi_spk2 = bool(
+                            (task.get("info") or {}).get("per_speaker_voice_lock")
+                        ) or int(
+                            (task.get("info") or {}).get("unique_voices_used") or 1
+                        ) >= 2
                         group_voice = (
                             voice
-                            if _simple_v2
+                            if (_simple_v2 and not _multi_spk2)
                             else _segment_tts_voice(
                                 segments_data[head_idx]
                                 if head_idx < len(segments_data)
@@ -17211,12 +17375,23 @@ def _run_pipeline_inner(
                                 audio_filename=one_files[0],
                                 task_info=_tts_info_local,
                             )
-                            if not _tts_info_local.get("oss_locked_voice"):
+                            if not _tts_info_local.get("oss_locked_voice") or _tts_info_local.get(
+                                "per_speaker_voice_lock"
+                            ):
                                 try:
                                     from engines.oss_production import (
                                         lock_voice_after_first_success,
                                     )
 
+                                    _head_spk = ""
+                                    if 0 <= head_idx < len(segments_data) and isinstance(
+                                        segments_data[head_idx], dict
+                                    ):
+                                        _head_spk = str(
+                                            segments_data[head_idx].get("speaker_id")
+                                            or segments_data[head_idx].get("speaker")
+                                            or ""
+                                        )
                                     _lv = lock_voice_after_first_success(
                                         [
                                             s
@@ -17227,15 +17402,31 @@ def _run_pipeline_inner(
                                         engine_id=str(
                                             tts_engine_id or "edge-offline"
                                         ),
+                                        speaker_id=_head_spk or None,
                                     )
-                                    voice = str(
-                                        _lv.get("oss_locked_voice")
-                                        or group_voice
-                                        or voice
-                                    )
-                                    task.setdefault("info", {}).update(_lv)
-                                    task["info"]["voice"] = voice
-                                    task["info"]["pipeline_voice"] = voice
+                                    if not _lv.get("per_speaker_voice_lock"):
+                                        voice = str(
+                                            _lv.get("oss_locked_voice")
+                                            or group_voice
+                                            or voice
+                                        )
+                                        task.setdefault("info", {}).update(_lv)
+                                        task["info"]["voice"] = voice
+                                        task["info"]["pipeline_voice"] = voice
+                                    else:
+                                        task.setdefault("info", {}).update(
+                                            {
+                                                k: _lv[k]
+                                                for k in _lv
+                                                if k
+                                                not in (
+                                                    "oss_locked_voice",
+                                                    "pipeline_voice",
+                                                    "voice",
+                                                )
+                                            }
+                                        )
+                                        task["info"]["per_speaker_voice_lock"] = True
                                 except Exception:
                                     pass
                         else:
@@ -19075,7 +19266,10 @@ def _run_pipeline_inner(
                         task_info=_mux_info,
                     )
                     _mux_voice = DEFAULT_UK_VOICE
-                if int(_mux_info.get("unique_voices_used") or 1) != 1:
+                if (
+                    int(_mux_info.get("unique_voices_used") or 1) != 1
+                    and not _mux_info.get("per_speaker_voice_lock")
+                ):
                     from engines.simple_voice_lock import lock_simple_pipeline_voice
 
                     lock_simple_pipeline_voice(
@@ -19200,6 +19394,36 @@ def _run_pipeline_inner(
                     bg_path,
                     dialogue_path or "n/a",
                 )
+
+            # Honor the latest user source/original volume (review approve may
+            # have updated mix_volumes_backup after start). 50% must not mux mute.
+            with STATE_LOCK:
+                _info_mux = dict((AUTO_TASKS.get(task_id) or {}).get("info") or {})
+            _mix_for_mux = dict(mix_volumes or {})
+            _backup_mv = dict(
+                _info_mux.get("mix_volumes_backup")
+                or _info_mux.get("mix_volumes")
+                or {}
+            )
+            for _k, _v in _backup_mv.items():
+                if _v is not None:
+                    _mix_for_mux[_k] = _v
+            try:
+                from engines.simple_dub_pipeline import (
+                    apply_simple_uk_source_underlay,
+                    resolve_user_source_volume,
+                )
+
+                _explicit_mux = resolve_user_source_volume(_info_mux, _mix_for_mux)
+                _mix_for_mux = apply_simple_uk_source_underlay(
+                    _info_mux,
+                    _mix_for_mux,
+                    explicit_original=_explicit_mux,
+                )
+            except Exception:
+                pass
+            mix_volumes = _mix_for_mux
+            mix_mode = str(_mix_for_mux.get("mix_mode") or mix_mode)
 
             # Resolve the professional mix policy (levels + intelligent ducking)
             # from the content mode + the user's requested volumes. Single source

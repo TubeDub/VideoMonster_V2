@@ -620,6 +620,18 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
         # Dim values may be 0–1 fractions — scale for Review display
         if 0 < quality_score <= 1.0:
             quality_score = round(quality_score * 100.0, 1)
+        try:
+            from engines.mt.glossary_en_uk import street_uk_honesty_gaps
+
+            spoken_chk = final or text_for_tts or naturalized or ""
+            gaps = street_uk_honesty_gaps(original, spoken_chk)
+            if gaps:
+                quality_score = min(float(quality_score or 0), 62.0)
+                seg["needs_manual_review"] = True
+                audit["needs_manual_review"] = True
+                audit["honesty_gaps"] = gaps
+        except Exception:
+            pass
 
         slot_ms_val = float(seg.get("slot_ms") or audit.get("duration_ms") or 0)
         playback_ms_val = float(
@@ -962,8 +974,34 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
                 "transformation_chain": qd.get("transformation_chain"),
                 "user_edited": bool(audit.get("user_edited")),
                 "warnings": warnings,
+                "speaker_id": str(seg.get("speaker_id") or seg.get("speaker") or ""),
+                "final_tts_text": str(seg.get("final_tts_text") or text_for_tts or final or ""),
+                "bleed_flag": bool(seg.get("bleed_flag")),
+                "has_gey_vocative": bool(seg.get("has_gey_vocative")),
+                "has_ru_leak": bool(seg.get("has_ru_leak")),
+                "gender_form": str(seg.get("gender_form") or "ok"),
             }
         )
+
+    try:
+        from engines.repetition_guard import stamp_stage42_segment_flags
+
+        for i, row in enumerate(rows):
+            prev_t = str(rows[i - 1].get("final_tts_text") or "") if i else ""
+            next_t = str(rows[i + 1].get("final_tts_text") or "") if i + 1 < len(rows) else ""
+            seg_i = (
+                dict(segments_data[i])
+                if i < len(segments_data) and isinstance(segments_data[i], dict)
+                else {}
+            )
+            flags = stamp_stage42_segment_flags(
+                {"final_tts_text": row.get("final_tts_text") or row.get("text_for_tts"), **seg_i},
+                previous_text=prev_t,
+                next_text=next_t,
+            )
+            row.update(flags)
+    except Exception:
+        pass
 
     return {
         "segment_count": len(rows),
@@ -991,6 +1029,27 @@ def build_translation_review(task_info: dict[str, Any]) -> dict[str, Any]:
         "tps_manual_indices": list(task_info.get("tps_manual_indices") or []),
         "tps_metrics": task_info.get("tps_metrics"),
         "segments": rows,
+        "tts_bleed_blocked_count": int(
+            task_info.get("tts_bleed_blocked_count")
+            or (task_info.get("simple_mt") or {}).get("tts_bleed_blocked_count")
+            or sum(1 for r in rows if r.get("bleed_flag"))
+        ),
+        "gey_fixed_count": int(
+            task_info.get("gey_fixed_count")
+            or (task_info.get("simple_mt") or {}).get("gey_fixed_count")
+            or 0
+        ),
+        "ru_leak_fixed_count": int(
+            task_info.get("ru_leak_fixed_count")
+            or (task_info.get("simple_mt") or {}).get("ru_rewrites")
+            or 0
+        ),
+        "audio": {
+            "source_vocal_muted": bool(
+                (task_info.get("audio") or {}).get("source_vocal_muted")
+                or task_info.get("source_vocal_muted")
+            )
+        },
     }
 
 

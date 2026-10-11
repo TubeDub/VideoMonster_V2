@@ -19,7 +19,7 @@ logger = logging.getLogger("tubedub.mt_cache")
 
 _WS = re.compile(r"\s+")
 _SHORT_RATIO = 0.55
-_CACHE_KEY_SUFFIX = "v4_uk_quality_repairs"
+_CACHE_KEY_SUFFIX = "v6_stage43_street_uk_review_v3_glossary_split"
 
 # src needle → tgt must match (Stage 12b keys).
 _CRITICAL_ENTITY_CHECKS: tuple[tuple[str, re.Pattern[str]], ...] = (
@@ -31,7 +31,36 @@ _CRITICAL_ENTITY_CHECKS: tuple[tuple[str, re.Pattern[str]], ...] = (
     # розбила / розбив / розбитий — not bare «розбив» only
     ("smash", re.compile(r"розби\w*|аварі\w*|smash(?:ed|ing)?", re.I)),
     ("trash", re.compile(r"смітт|trash", re.I)),
+    ("dollar", re.compile(r"долар|тисяч|dollar", re.I)),
+    ("greens", re.compile(r"зелен|greens", re.I)),
 )
+
+
+_POISON_UK_RE = re.compile(
+    r"\bмолодец\b|\bпоследний\b|\bела\b|\bвыбора\b|У меня|\bДа,\s*чувак|"
+    r"\bИ смотри|\bвсего\s+\d+|\$\s*\d+\s*,\s*\d+",
+    re.I,
+)
+
+
+def is_poison_cached_uk(translated: str) -> bool:
+    """Cached UK that must never be served (RU lemmas, Гей, broken $3, 000)."""
+    tgt = str(translated or "")
+    if not tgt.strip():
+        return True
+    if _POISON_UK_RE.search(tgt):
+        return True
+    if re.search(r"(?:^|[.!?…]\s)Гей[,!\s]|\bГей,\s*(?:чувак|мій|швидко)", tgt):
+        return True
+    try:
+        from engines.tts_lang_lock import uk_text_has_russian_leak
+
+        if uk_text_has_russian_leak(tgt):
+            return True
+    except Exception:
+        if re.search(r"[ыэёъЫЭЁЪ]", tgt):
+            return True
+    return False
 
 
 def mt_cache_disabled() -> bool:
@@ -63,6 +92,23 @@ def normalize_mt_cache_text(text: str) -> str:
     return _WS.sub(" ", str(text or "").strip())
 
 
+def source_hash_for_cache(text: str) -> str:
+    return hashlib.sha1(normalize_mt_cache_text(text).encode("utf-8")).hexdigest()
+
+
+def cached_payload_matches_source(source: str, payload: dict[str, Any] | None) -> bool:
+    """Reject a cache hit whose stored original_text does not match the query."""
+    data = payload if isinstance(payload, dict) else {}
+    src = normalize_mt_cache_text(source)
+    stored = normalize_mt_cache_text(str(data.get("source") or ""))
+    if stored and src and stored != src:
+        return False
+    stored_hash = str(data.get("source_hash") or "").strip()
+    if stored_hash and stored_hash != source_hash_for_cache(src):
+        return False
+    return True
+
+
 def mt_cache_key(
     text: str,
     source_lang: str,
@@ -92,11 +138,20 @@ def _missing_critical_entities(src: str, tgt: str) -> bool:
     for needle, tgt_pat in _CRITICAL_ENTITY_CHECKS:
         if needle in src_l and not tgt_pat.search(tgt):
             return True
-    # Stage 37: dropped $amounts (IMG_2790 "$3,000" vanished from Final).
-    tgt_digits = re.sub(r"\D", "", tgt)
-    for m in re.finditer(r"\$\s*([\d][\d,]*)", src):
-        digits = re.sub(r"\D", "", m.group(1) or "")
-        if digits and digits not in tgt_digits and "долар" not in tgt.lower() and "тисяч" not in tgt.lower():
+    # Stage 37/43: dropped $amounts — leftover `$3, 000` still counts as missing.
+    if re.search(r"\$\s*\d+\s*,\s*\d+", tgt):
+        return True
+    if re.search(r"(?i)\bdollar\b|\$\s*\d", src) and not re.search(
+        r"(?i)долар|тисяч", tgt
+    ):
+        return True
+    src_sents = [s for s in re.split(r"(?<=[.!?])\s+", src) if s.strip()]
+    if len(src_sents) >= 2 and len(tgt.split()) < max(3, int(0.45 * len(src.split()))):
+        if re.search(
+            r"(?i)dollar|greens|hungry|normal out here|two whole days|got you|"
+            r"that'?s all i need",
+            src,
+        ):
             return True
     return False
 
@@ -146,6 +201,8 @@ def is_incomplete_mt_pair(
     # c) critical entities
     if _missing_critical_entities(src, dst):
         return True
+    if is_poison_cached_uk(dst):
+        return True
     # d) leftover protect tokens / near-empty after strip on long src
     try:
         from engines.mt.glossary_en_uk import (
@@ -188,6 +245,13 @@ def lookup_mt_cache(
         out = str(data.get("translated") or "").strip()
         if not out:
             logger.debug("mt_cache_miss empty key=%s", key[:12])
+            return None
+        if not cached_payload_matches_source(text, data):
+            logger.warning("mt_cache_reject_source_mismatch key=%s", key[:12])
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                pass
             return None
         # Never finalize incomplete — unlink + miss first.
         if is_incomplete_mt_pair(text, out, source_lang, target_lang):
@@ -249,6 +313,7 @@ def store_mt_cache(
             json.dumps(
                 {
                     "source": src,
+                    "source_hash": source_hash_for_cache(src),
                     "translated": dst,
                     "source_lang": source_lang,
                     "target_lang": target_lang,

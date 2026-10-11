@@ -26,8 +26,10 @@ STALL_IDLE_SEC: dict[str, float] = {
     # Stage 20/21: tts_uk + closed_loop regen of split children can exceed 5 min.
     "tts": 900.0,
     "slot_fit": 600.0,
+    "slot_fit_regen": 900.0,
     "closed_loop": 900.0,
     "closed_loop_regen": 900.0,
+    "stage21_split_regen": 900.0,
     "voice_verification": 300.0,
     "adaptation": 300.0,
     "post_tts_qa": 240.0,
@@ -68,6 +70,9 @@ _STAGE_LABELS = {
         "translate": "Перевод",
         "tts": "Озвучка (TTS)",
         "slot_fit": "Подгонка под тайминг",
+        "slot_fit_regen": "Подгонка под тайминг",
+        "closed_loop": "Подгонка под тайминг",
+        "closed_loop_regen": "Подгонка под тайминг",
         "voice_verification": "Проверка озвучки",
         "timing": "Синхронизация",
         "studio": "Сведение",
@@ -77,6 +82,9 @@ _STAGE_LABELS = {
         "translate": "Translation",
         "tts": "TTS",
         "slot_fit": "Slot fit",
+        "slot_fit_regen": "Slot fit",
+        "closed_loop": "Slot fit",
+        "closed_loop_regen": "Slot fit",
         "voice_verification": "Voice verification",
         "timing": "Synchronization",
         "studio": "Mix",
@@ -86,6 +94,9 @@ _STAGE_LABELS = {
         "translate": "Переклад",
         "tts": "Озвучка (TTS)",
         "slot_fit": "Підгонка під таймінг",
+        "slot_fit_regen": "Підгонка під таймінг",
+        "closed_loop": "Підгонка під таймінг",
+        "closed_loop_regen": "Підгонка під таймінг",
         "voice_verification": "Перевірка озвучки",
         "timing": "Синхронізація",
         "studio": "Зведення",
@@ -319,6 +330,16 @@ class PipelineWatchdog:
         tts_sub = str(detail.get("tts_substep") or "")
         if tts_sub == "voice_verify" or detail_phase == "voice_verification":
             effective_step = "voice_verification"
+        elif tts_sub in ("slot_fit_regen", "closed_loop_regen") or detail_phase in (
+            "closed_loop_regen",
+            "closed_loop",
+            "slot_fit_regen",
+            "stage21_split_regen",
+            "stage21_split_regen_done",
+        ):
+            # Diag 55ad3d34: task.step stayed "tts" after official TTS
+            # completed while closed-loop slot_fit_regen kept synthesizing.
+            effective_step = "closed_loop_regen"
         elif detail_phase in STALL_IDLE_SEC:
             effective_step = detail_phase
         elif detail_phase and detail_phase != step:
@@ -348,12 +369,29 @@ class PipelineWatchdog:
         if self._stall_reported:
             return
 
+        # Diag 55ad3d34: official TTS finished (step=tts) then CPU tts_uk
+        # slot_fit_regen ran 25 min without progress_detail heartbeats.
+        # Segment START/END is liveness even when progress_detail is stale.
+        try:
+            from engines.pipeline_segment_watchdog import last_segment_activity_age_sec
+
+            seg_age = last_segment_activity_age_sec(self.task_id)
+        except Exception:
+            seg_age = float("inf")
+        if self._stage.thread_alive and seg_age < threshold:
+            with self._lock:
+                self._stage.last_progress_at = time.time()
+            return
+
         # Still working? extend if thread alive and recent detail heartbeat.
         detail_hb = float(detail.get("last_heartbeat_at") or 0)
         hb_age = time.time() - detail_hb if detail_hb else float("inf")
         # TTS heartbeats may be sparse (one per group); use full threshold.
         hb_window = (
-            threshold if effective_step == "tts" else min(threshold, 120.0)
+            threshold
+            if effective_step
+            in ("tts", "closed_loop_regen", "closed_loop", "slot_fit_regen")
+            else min(threshold, 120.0)
         )
         if self._stage.thread_alive and detail_hb and hb_age < hb_window:
             with self._lock:
@@ -418,7 +456,7 @@ class PipelineWatchdog:
             return "llm_slow_or_unresponsive"
         if step == "voice_verification":
             return "voice_verification_slow"
-        if step == "slot_fit":
+        if step in ("slot_fit", "closed_loop", "closed_loop_regen", "slot_fit_regen"):
             return "slot_fit_slow"
         if step == "tts":
             sub = str(detail.get("tts_substep") or "")

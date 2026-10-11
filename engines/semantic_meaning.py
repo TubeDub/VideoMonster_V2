@@ -460,7 +460,25 @@ def extract_critical_entity_tokens(source: str, *, app_dir=None) -> list[str]:
         key = re.sub(r"\s+", "", tok.lower())
         if key in seen or len(tok) <= 2:
             continue
-        if key in {"hello", "his", "her", "their", "this", "that"}:
+        if key in {
+            "hello",
+            "his",
+            "her",
+            "their",
+            "this",
+            "that",
+            "yeah",
+            "are",
+            "how's",
+            "hows",
+            "honestly",
+            "before",
+            "come",
+            "sometimes",
+            "really",
+            "shut",
+            "alright",
+        }:
             continue
         seen.add(key)
         tokens.append(tok)

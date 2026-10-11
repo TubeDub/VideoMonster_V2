@@ -74,19 +74,24 @@ def apply_simple_pipeline_policy(
         task_info["adaptation_path"] = "happy_path"
         task_info["adaptation_shorteners"] = ["naturalizer", "text_slot_fit"]
 
-    # Stage 28 §D1/F — UK Simple caps atempo at 1.05 (hard 1.08) and prefers
-    # tts_uk/mykyta with rate=0.97 / length_scale=1.05 / volume=1.05 (no manual
-    # knobs, meaning-first). Non-UK targets keep the legacy Edge default.
+    # Stage 28 §D1/F — UK Simple prefers tts_uk/mykyta slightly FASTER than
+    # real-time (rate ~1.02, length_scale ~0.98). Do not default to 0.97/1.05
+    # stretch. Non-UK targets keep the legacy Edge default.
     _tgt = str(task_info.get("target_lang") or task_info.get("lang") or "").split("-")[0].lower()
     _uk_simple = _tgt == "uk"
     _max_atempo = float(HAPPY_PATH_MAX_ATEMPO_UK if _uk_simple else HAPPY_PATH_MAX_ATEMPO)
     _default_engine = "tts_uk" if _uk_simple else "edge-offline"
+    _existing_engine = str(task_info.get("tts_engine") or "").strip().lower()
+    if _uk_simple and _existing_engine in ("", "edge-offline", "edge", "edge_offline"):
+        _resolved_engine = "tts_uk"
+    else:
+        _resolved_engine = str(task_info.get("tts_engine") or _default_engine).strip() or _default_engine
     policy = {
         "simple_pipeline": True,
         "simple_pipeline_steps": list(SIMPLE_PIPELINE_STEPS),
         "simple_disabled_modules": list(SIMPLE_DISABLED),
-        # Timing / speech
-        "min_atempo": float(HAPPY_PATH_MIN_ATEMPO),
+        # Timing / speech — UK Simple: do not atempo-slow below 0.97.
+        "min_atempo": 0.97 if _uk_simple else float(HAPPY_PATH_MIN_ATEMPO),
         "max_atempo": _max_atempo,
         "max_atempo_hard": float(HAPPY_PATH_HARD_MAX_ATEMPO_UK if _uk_simple else HAPPY_PATH_MAX_ATEMPO),
         "no_speech_trim": bool(HAPPY_PATH_NO_SPEECH_TRIM),
@@ -100,8 +105,7 @@ def apply_simple_pipeline_policy(
         "blind_timing_align_allowed": False,
         # Like pyVideoTrans: finish with an MP4, don't stop at Studio.
         "simple_auto_mix": True,
-        "tts_engine": str(task_info.get("tts_engine") or _default_engine).strip()
-        or _default_engine,
+        "tts_engine": _resolved_engine,
         # Segmentation: Happy Path glue, never adaptive re-split.
         "segmentation_mode": "happy_path",
         # Stage 7: never fall into AI-Core streaming_text after MT.
@@ -129,10 +133,9 @@ def apply_simple_pipeline_policy(
         "oss_speed_max": 1.10,
     }
     if _uk_simple:
-        # Stage 28 §F / Stage 29 §D — UK Simple defaults (only lang + volume
-        # are user-facing). Segment targets ~4 / 7 / 12 s, aggressiveness medium.
-        policy.setdefault("mykyta_rate", 0.97)
-        policy.setdefault("mykyta_length_scale", 1.05)
+        # UK Simple defaults: slightly faster Mykyta, not stretched.
+        policy.setdefault("mykyta_rate", 1.02)
+        policy.setdefault("mykyta_length_scale", 0.98)
         policy.setdefault("mykyta_volume", 1.05)
         policy.setdefault("mykyta_pitch", 0)
         policy.setdefault("segment_min_ms", 4000)
@@ -160,7 +163,71 @@ def apply_simple_pipeline_policy(
     return task_info
 
 
-SIMPLE_UK_SOURCE_UNDERLAY = 0.20
+SIMPLE_UK_SOURCE_UNDERLAY = 0.0
+SIMPLE_UK_SOURCE_DUCK_DB = -30.0
+SIMPLE_UK_DUB_VOLUME = 0.95
+# Volumes at/below this look like the stale wizard 20% default, not a 50% slider.
+_STALE_UNDERLAY_MAX = 0.26
+
+
+def _volume_01(val: Any) -> float | None:
+    if val is None or val is False:
+        return None
+    if isinstance(val, str) and not str(val).strip():
+        return None
+    try:
+        v = float(val)
+    except (TypeError, ValueError):
+        return None
+    if v > 1.0:
+        v = v / 100.0
+    return max(0.0, min(1.0, v))
+
+
+def resolve_user_source_volume(
+    task_info: dict[str, Any] | None = None,
+    mix_volumes: dict[str, Any] | None = None,
+    *,
+    explicit_original: float | None = None,
+) -> float | None:
+    """User-facing original/source volume in 0..1, or None if unset.
+
+    UI keys: original_volume, original_volume_pct, source_volume, orig, underlay.
+    A stale ~20% underlay in mix_volumes (no explicit slider) is ignored so
+    Stage 42 can still mute when the user asked for 0% / full replace.
+    """
+    if explicit_original is not None:
+        parsed = _volume_01(explicit_original)
+        if parsed is not None:
+            return parsed
+    info = task_info or {}
+    mv = mix_volumes or {}
+    audio = info.get("audio") if isinstance(info.get("audio"), dict) else {}
+    user_keys = (
+        "source_volume",
+        "original_volume_pct",
+        "user_original_volume",
+        "user_source_volume",
+    )
+    for src in (info, mv, audio):
+        if not isinstance(src, dict):
+            continue
+        for key in user_keys:
+            parsed = _volume_01(src.get(key))
+            if parsed is not None:
+                return parsed
+    for src in (info, mv, audio):
+        if not isinstance(src, dict):
+            continue
+        for key in ("original_volume", "orig", "underlay"):
+            parsed = _volume_01(src.get(key))
+            if parsed is None:
+                continue
+            if parsed <= 0.001:
+                return 0.0
+            if parsed >= _STALE_UNDERLAY_MAX:
+                return parsed
+    return None
 
 
 def apply_simple_uk_source_underlay(
@@ -171,11 +238,11 @@ def apply_simple_uk_source_underlay(
     raw_style: str = "",
     style_gated: bool = False,
 ) -> dict[str, Any]:
-    """TZ §24–26: Simple auto-dub UK keeps ~20% ducked original, not silence.
+    """Simple UK mix: user source/original volume wins over Stage 42 mute.
 
-    Does not override an explicit user mute or an explicitly chosen full_dub
-    style (modern/cinematic). Default Simple UK (no style / gated documentary)
-    uses documentary-like underlay.
+    Mute (0 / ≤−30 dB) only when the user asked for 0% / full replace / no source.
+    A 50% slider must mux original at ~0.5, not 0. Stale ~20% underlay without
+    an explicit user volume still mutes (Stage 42 anti-bleed default).
     """
     info = task_info or {}
     mv = dict(mix_volumes or {})
@@ -192,28 +259,61 @@ def apply_simple_uk_source_underlay(
         "cinematic",
         "professional",
     )
-    if user_picked_full_dub and not style_gated:
-        return mv
-    if (
-        explicit_original is not None
-        and float(explicit_original) <= 0.001
-        and not style_gated
-        and user_picked_full_dub
-    ):
+    stems = bool(
+        info.get("source_separation")
+        or info.get("stems")
+        or mv.get("stems")
+        or mv.get("background_stem")
+    )
+    user_vol = resolve_user_source_volume(
+        info, mv, explicit_original=explicit_original
+    )
+    # Explicit 0%, no slider, or full-replace style without a 50%-class volume.
+    mute = user_vol is None or user_vol <= 0.001
+    if user_vol is None and user_picked_full_dub:
+        mute = True
+    _ = style_gated
+
+    dub = float(mv.get("dub_volume") or 1.0)
+    if dub < 0.85:
+        mv["dub_volume"] = SIMPLE_UK_DUB_VOLUME
+    elif dub > 1.0:
+        mv["dub_volume"] = 1.0
+
+    if mute:
+        mv["original_volume"] = 0.0
+        mv["ducking_enabled"] = True
+        mv["ducking_db"] = SIMPLE_UK_SOURCE_DUCK_DB
+        if not stems:
+            bg = float(mv.get("background_volume") or 0.0)
+            if bg <= 0.25:
+                mv["background_volume"] = 0.0
+        if str(mv.get("mix_mode") or "") in ("custom", "documentary", ""):
+            mv["mix_mode"] = "full_dub"
+        info["simple_uk_source_underlay"] = 0.0
+        info["source_vocal_muted"] = True
+        audio = info.setdefault("audio", {})
+        if isinstance(audio, dict):
+            audio["source_vocal_muted"] = True
+            audio["source_vocal_duck_db"] = SIMPLE_UK_SOURCE_DUCK_DB
         return mv
 
-    orig = float(mv.get("original_volume") or 0.0)
-    if orig > 0.001:
-        mv.setdefault("ducking_enabled", True)
-        return mv
-
-    mv["original_volume"] = float(SIMPLE_UK_SOURCE_UNDERLAY)
-    mv["ducking_enabled"] = True
-    if float(mv.get("background_volume") or 0.0) <= 0.001:
-        mv["background_volume"] = float(SIMPLE_UK_SOURCE_UNDERLAY)
-    if str(mv.get("mix_mode") or "") == "full_dub":
-        mv["mix_mode"] = "custom"
-    info["simple_uk_source_underlay"] = float(SIMPLE_UK_SOURCE_UNDERLAY)
+    # User slider (~50% / −6 dB) must be audible under the dub.
+    orig = float(user_vol)
+    mv["original_volume"] = orig
+    mv["mix_mode"] = "custom"
+    mv["ducking_enabled"] = False
+    if "ducking_db" in mv:
+        mv["ducking_db"] = min(-6.0, float(mv.get("ducking_db") or -6.0))
+    if not stems:
+        mv["background_volume"] = orig
+    info["simple_uk_source_underlay"] = orig
+    info["source_vocal_muted"] = False
+    info["original_volume_pct"] = int(round(orig * 100))
+    audio = info.setdefault("audio", {})
+    if isinstance(audio, dict):
+        audio["source_vocal_muted"] = False
+        audio["source_vocal_volume"] = orig
     return mv
 
 
@@ -281,16 +381,22 @@ def run_simple_dub_pipeline(
         task_id,
         ",".join(SIMPLE_PIPELINE_STEPS),
     )
-    # Stage 28 §F — UK Simple defaults to tts_uk/mykyta (fallback resolves in
-    # force_uk_tts_identity: Edge uk-UA-Ostap only if tts_uk missing).
+    # UK Simple defaults to tts_uk/mykyta. Ignore leftover Ostap default so
+    # SPEAKER_A actually synthesizes Mykyta when tts_uk is installed.
+    _tgt = str(target_lang or "").split("-")[0].lower()
+    _voice = voice
+    if _tgt == "uk":
+        vlow = str(voice or "").strip().lower()
+        if not vlow or vlow in ("uk-ua-ostapneural", "ostap"):
+            _voice = "mykyta"
     return _run_pipeline(
         task_id=task_id,
         video_path=video_path,
         target_lang=target_lang,
-        voice=voice
+        voice=_voice
         or (
             "mykyta"
-            if str(target_lang or "").startswith("uk")
+            if _tgt == "uk"
             else "en-US-GuyNeural"
         ),
         model_size=model_size,

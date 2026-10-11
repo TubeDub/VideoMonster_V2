@@ -1381,6 +1381,7 @@ def merge_segments_for_translation(
     max_batch: int = MAX_BATCH_SEGMENTS,
     *,
     cross_sentence: bool = False,
+    speaker_ids: Sequence[Any] | None = None,
 ) -> List[List[int]]:
     """Группы индексов для пакетного перевода (соседние короткие реплики Whisper).
 
@@ -1427,6 +1428,10 @@ def merge_segments_for_translation(
         except Exception:
             pass
 
+        if speaker_ids and idx < len(speaker_ids) and (idx - 1) < len(speaker_ids):
+            if refuse_cross_speaker_merge(speaker_ids[idx - 1], speaker_ids[idx]):
+                can_merge = False
+
         if can_merge:
             current.append(idx)
         else:
@@ -1462,18 +1467,38 @@ def merge_segments_for_translation_happy_path(
     )
 
 
+def refuse_cross_speaker_merge(speaker_a: Any, speaker_b: Any) -> bool:
+    """True when two labeled roles must not share one TTS file."""
+    sa = str(speaker_a or "").strip()
+    sb = str(speaker_b or "").strip()
+    if not sa or not sb:
+        return False
+    if sa.lower() in ("default", "none") or sb.lower() in ("default", "none"):
+        return False
+    return sa != sb
+
+
 def merge_segments_for_tts(
     segments: List[str],
     timing_map: Sequence[Any],
     min_duration_ms: int = DEFAULT_MIN_TTS_MS,
     max_gap_ms: int = DEFAULT_MAX_GAP_MS,
+    speaker_ids: Sequence[Any] | None = None,
 ) -> List[List[int]]:
-    """Объединяет короткие сегменты для одного TTS-вызова; паузы между группами сохраняются."""
+    """Объединяет короткие сегменты для одного TTS-вызова; паузы между группами сохраняются.
+
+    Stage 41: never glue different speaker_id into one TTS file.
+    """
     if not segments:
         return []
 
     groups: List[List[int]] = []
     current: List[int] = [0]
+
+    def _spk(i: int) -> str:
+        if not speaker_ids or i >= len(speaker_ids):
+            return ""
+        return str(speaker_ids[i] or "").strip()
 
     for idx in range(1, len(segments)):
         gap = _gap_ms(timing_map, idx)
@@ -1493,6 +1518,8 @@ def merge_segments_for_tts(
             and not ends_sentence
             and span < min_duration_ms * 2
         )
+        if refuse_cross_speaker_merge(_spk(idx - 1), _spk(idx)):
+            can_merge = False
 
         if can_merge:
             current.append(idx)
@@ -1509,6 +1536,7 @@ def build_tts_groups(
     timing_map: Sequence[Any],
     min_duration_ms: int = DEFAULT_MIN_TTS_MS,
     max_gap_ms: int = DEFAULT_MAX_GAP_MS,
+    speaker_ids: Sequence[Any] | None = None,
 ) -> List[dict]:
     """
     План TTS: одна озвучка на группу коротких сегментов.
@@ -1526,7 +1554,11 @@ def build_tts_groups(
         timing_map = list(timing_map or [])
 
     index_groups = merge_segments_for_tts(
-        segments, timing_map, min_duration_ms=min_duration_ms, max_gap_ms=max_gap_ms
+        segments,
+        timing_map,
+        min_duration_ms=min_duration_ms,
+        max_gap_ms=max_gap_ms,
+        speaker_ids=speaker_ids,
     )
     groups: List[dict] = []
     for indices in index_groups:
@@ -2307,6 +2339,14 @@ def polish_lines(
                         naturalizer_meta_out[-1]["naturalizer_applied"] = True
             except Exception:
                 pass
+
+        try:
+            from engines.repetition_guard import refuse_naturalized_inheritance
+
+            if prev:
+                seg = refuse_naturalized_inheritance(seg, prev, raw_mt)
+        except Exception:
+            pass
 
         polished.append(seg)
         if seg:

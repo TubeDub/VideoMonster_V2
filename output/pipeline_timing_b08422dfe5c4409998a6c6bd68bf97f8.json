@@ -1,0 +1,78 @@
+{
+  "task_id": "b08422dfe5c4409998a6c6bd68bf97f8",
+  "updated_at": "2026-08-23T14:07:50.971526+00:00",
+  "total_sec": 1039.225,
+  "stages": {
+    "extract": 1.087,
+    "whisper": 119.631,
+    "translation": 34.24,
+    "natural": 0.0,
+    "validation": 0.0,
+    "translation_post": 0.0,
+    "tts": 100.419,
+    "slot_fit": 13.424,
+    "timing": 0.0,
+    "mux": 0.0,
+    "export": 0.0
+  },
+  "meta": {
+    "stt_wall_sec": 119.631,
+    "stt_model": "small",
+    "stt_device": "cpu",
+    "stt_compute_type": "int8",
+    "stt_beam_size": 1,
+    "stt_cache_hit": false,
+    "translation_breakdown": {
+      "marian_sec": 34.24,
+      "llm_adaptation_sec": 0.0,
+      "validation_sec": 0.0,
+      "post_processing_sec": 0.0,
+      "translation_total_sec": 34.24,
+      "segment_count": 37,
+      "marian_segments_done": 37,
+      "llm_segments_done": 0,
+      "current_subphase": "done",
+      "ui_buckets": {
+        "marian_mt": 34.24,
+        "llm_adaptation": 0.0,
+        "post_processing": 0.0
+      },
+      "phase_status": {
+        "marian_mt": "done",
+        "llm_adaptation": "skipped",
+        "post_processing": "skipped"
+      },
+      "hidden_buckets": [
+        "llm_adaptation",
+        "post_processing"
+      ],
+      "segment_stats": {
+        "marian_mt": {
+          "segments": 37,
+          "sec": 34.2,
+          "avg_sec_per_segment": 0.925,
+          "status": "done"
+        },
+        "llm_adaptation": {
+          "segments": 0,
+          "sec": 0.0,
+          "avg_sec_per_segment": 0.0,
+          "status": "skipped"
+        },
+        "post_processing": {
+          "segments": 0,
+          "sec": 0.0,
+          "avg_sec_per_segment": 0.0,
+          "status": "skipped"
+        }
+      },
+      "ui_labels": {
+        "marian_mt": "Marian MT",
+        "llm_adaptation": "Qwen / LLM Adaptation",
+        "post_processing": "Post-processing"
+      },
+      "llm_adaptation_used": false,
+      "simple_mt_locked": true
+    }
+  }
+}

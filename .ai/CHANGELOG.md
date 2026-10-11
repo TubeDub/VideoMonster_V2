@@ -1,5 +1,91 @@
 # Changelog
 
+## [2026-09-07] КиноКадр — local Auto Reframe
+
+New sidebar module converts landscape video to 9:16 / 1:1 / 4:5.
+Two local passes: face/people tracking (MediaPipe when installed, OpenCV /
+skin+motion fallback) then FFmpeg crop with a smoothed camera path.
+Original duration and audio are preserved (`-c:a copy`). Download, open
+folder, and add-to-timeline land the clip in Dub Studio.
+
+### Tests
+- `tests/test_kinokadr.py`
+
+## [2026-08-23] IMG_2790 UK review — street rules, cache v6, anti-bleed
+
+Offline EN→UK: street-interview restore (dollar / I got you / greens /
+two whole days / look NAME / $AMOUNT / surprise Shut up), RU lemmas
+(молодец, ела, выбора, Да+чувак, И смотри), male їв, man vocative ≠ чоловік.
+Anti-bleed runs after naturalize and on Text for TTS (substring / 3-gram /
+30% tokens + source-owned clauses). Cache key `v6_stage43_street_uk_review`
+rejects poison (RU, Гей, `$3, 000`, dropped dollar). Function words are
+not named entities. Review no longer stamps 100% when facts are missing.
+
+### Tests
+- `tests/test_img2790_uk_review_quality.py`
+- `tests/test_stage42_uk_bleed_and_hey.py`
+
+## [2026-08-23] Simple UK — 50% source wins, faster speech, living Edge
+
+User source/original volume now beats Stage 42 mute: a 50% slider muxes
+original at ~0.5 (custom mix, no −30 dB duck). Mute only at 0% / full
+replace. UK Simple defaults: Mykyta rate 1.02 / length_scale 0.98 (not
+0.97/1.05 stretch); atempo floor 0.97; no length_scale > 1.02 to fill a
+slot. SPEAKER_A prefers Mykyta when tts_uk is installed; Edge rate is
++4%/+6% with +2Hz on questions.
+
+### Tests
+- `tests/test_stage42_uk_bleed_and_hey.py`
+- `tests/test_stage41_living_uk_dub.py`
+
+## [2026-08-23] Stage 42 — clean UK, 1 speaker/segment, no «Гей», mute source
+
+Simple EN→UK: mixed-speaker originals split before MT/TTS (archive+reissue);
+TTS bleed rebuilt from this segment_id only (>30% neighbor tokens or
+substring swallow). Marian «Гей» vocative → Хей / Давай, здоров'яче.
+RU «и» / male «втратила» / leftover EN tokens cleaned offline. Simple UK
+mux mutes source vocal (0 / ≤−30 dB); ambience kept if stems exist.
+
+### Tests
+- `tests/test_stage42_uk_bleed_and_hey.py`
+
+## [2026-08-23] Stage 41 — living UK dub (roles, not a robot)
+
+Simple EN→UK no longer uses one Ostap for every turn. Dialogue gets
+SPEAKER_A / SPEAKER_B from STT labels or a 400 ms gap heuristic; each
+role keeps its own UK voice (Mykyta + Ostap/Polina — never cs/sk).
+Voice lock after first TTS success is per-speaker when ≥2 roles.
+UK Simple tempo is tighter (length_scale 0.95–1.06, atempo 0.94–1.06)
+and cannot heal a slot with atempo before text_slot_fit. Offline
+anti-repeat (80% neighbor overlap + 3× clause loops) runs in
+repetition_guard; closed-loop tries a rule text repair before
+soft-complete. OpenDDF TTS block now has speakers / prosody /
+text_quality. Cross-speaker TTS merge is refused.
+
+### Tests
+- `tests/test_stage41_living_uk_dub.py`
+
+## [2026-08-22] Diag 55ad3d34 — false TTS stall during closed-loop regen
+
+Cold EN→UK (164s, 32 segs, mykyta/Ostap, no CUDA) died with
+`PIPELINE_STALLED` / `tts_engine_slow_or_blocked` after 15 min idle
+while slot_fit_regen was still synthesizing. Official TTS had already
+finished in 14s; `task.step` stayed `tts` and closed-loop did not
+heartbeat. CPU tts_uk gens of 28–37s also tripped the 30s segment
+bound (`regen_ok=False`) and were retried.
+
+### Fixes
+- Closed-loop regen heartbeats `phase=closed_loop_regen` (blocking +
+  per-gen). Segment START/END is liveness for the pipeline watchdog.
+- Closed-loop TTS wall-clock is 180s (30s remains for LLM).
+- Zip idx=10 RU mix (`подожди` / `говоришь` / `ешь` / `чужее` / `мусор`)
+  is a leak + rewrite, not voiced as UK.
+
+### Tests
+- `tests/test_pipeline_watchdog.py::test_diag_55ad3d34_closed_loop_regen_does_not_false_stall`
+- `tests/test_pipeline_watchdog.py::test_diag_55ad3d34_stale_tts_step_segment_activity_keeps_alive`
+- `tests/test_stage33_ru_in_uk.py::test_diag_55ad3d34_idx10_ru_mix_is_rewritten`
+
 ## [2026-08-22] Full TZ capability diagnostic + leftover stamps
 
 Self-heal: `has_forbidden_expand_pattern` imported in closed-loop expand;

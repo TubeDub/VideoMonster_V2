@@ -1,0 +1,549 @@
+=== PROFESSIONAL DUBBING task=b08422dfe5c4409998a6c6bd68bf97f8 ===
+groups=37
+
+--- Group 1 indices=[0] ---
+Original Translation: Хей, чувак, ти молодец.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Хей</emphasis>,<break time="220ms"/> чувак,<break time="220ms"/> ти молодец.<break time="350ms"/></speak>
+Segment duration: 2400 ms
+Est TTS before: 1703 ms
+Est TTS after: 2966 ms
+Fill %: 123.6
+Rate: -19%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Хей', 'type': 'name'}
+  Decision: underfill 71.0% → rate -19%
+
+--- Group 2 indices=[1] ---
+Original Translation: Ти серйозно?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Ти серйозно?<break time="350ms"/></speak>
+Segment duration: 2600 ms
+Est TTS before: 888 ms
+Est TTS after: 1473 ms
+Fill %: 56.7
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 34.2% → rate -19%
+  Decision: place_delay 119ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 3 indices=[2] ---
+Original Translation: Ти голодний, у мене є тарілка з їжею і мені вже не хочеться.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Ти голодний,<break time="220ms"/> у мене є тарілка з їжею і мені вже не хочеться.<break time="350ms"/></speak>
+Segment duration: 5000 ms
+Est TTS before: 5000 ms
+Est TTS after: 6015 ms
+Fill %: 120.3
+Rate: -8%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -8%
+
+--- Group 4 indices=[3] ---
+Original Translation: І я не хочу викидати його геть. Ти не проти? Я заберу все, що у тебе є.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">І я не хочу викидати його геть.<break time="350ms"/> Ти не проти?<break time="350ms"/> Я заберу все,<break time="184ms"/> що у тебе є.<break time="350ms"/></speak>
+Segment duration: 4400 ms
+Est TTS before: 6538 ms
+Est TTS after: 7772 ms
+Fill %: 176.6
+Rate: +1%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -5%
+  Decision: overfill 148.6% → light faster +1% (pauses scaled)
+
+--- Group 5 indices=[4] ---
+Original Translation: Хей, чувак швидко сідай.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Хей</emphasis>,<break time="184ms"/> чувак швидко сідай.<break time="350ms"/></speak>
+Segment duration: 1125 ms
+Est TTS before: 1777 ms
+Est TTS after: 2311 ms
+Fill %: 205.4
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Хей', 'type': 'name'}
+  Decision: natural rate -5%
+  Decision: overfill 158.0% → light faster +1% (pauses scaled)
+
+--- Group 6 indices=[5] ---
+Original Translation: Я з тобою.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я з тобою.<break time="350ms"/></speak>
+Segment duration: 875 ms
+Est TTS before: 1153 ms
+Est TTS after: 1503 ms
+Fill %: 171.8
+Rate: +1%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -5%
+  Decision: overfill 131.8% → light faster +1% (pauses scaled)
+
+--- Group 7 indices=[6] ---
+Original Translation: Давай, здоров'яче.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Давай</emphasis>,<break time="220ms"/> здоров'яче.<break time="350ms"/></speak>
+Segment duration: 2000 ms
+Est TTS before: 1333 ms
+Est TTS after: 2264 ms
+Fill %: 113.2
+Rate: -19%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Давай', 'type': 'name'}
+  Decision: underfill 66.7% → rate -19%
+  Decision: place_delay 166ms from source rhythm
+
+--- Group 8 indices=[7] ---
+Original Translation: Хей, швидко, чувак.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><break time="272ms"/>Хей,<break time="212ms"/> швидко,<break time="184ms"/> чувак.<break time="350ms"/></speak>
+Segment duration: 919 ms
+Est TTS before: 1407 ms
+Est TTS after: 2473 ms
+Fill %: 269.1
+Rate: -2%
+  Pause: {'before': 'start', 'ms': 272, 'type': 'source_lead'}
+  Pause: {'after': ',', 'ms': 212, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -8%
+  Decision: overfill 153.1% → light faster -2% (pauses scaled)
+
+--- Group 9 indices=[8] ---
+Original Translation: коли ти в последний раз ела?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">коли ти в последний раз ела?<break time="350ms"/></speak>
+Segment duration: 3081 ms
+Est TTS before: 2307 ms
+Est TTS after: 3161 ms
+Fill %: 102.6
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 74.9% → rate -19%
+
+--- Group 10 indices=[9] ---
+Original Translation: О, напевно, вже два дні минуло.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">О,<break time="220ms"/> напевно,<break time="220ms"/> вже два дні минуло.<break time="350ms"/></speak>
+Segment duration: 3000 ms
+Est TTS before: 2307 ms
+Est TTS after: 3716 ms
+Fill %: 123.9
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 76.9% → rate -20%
+  Decision: place_delay 280ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 11 indices=[10] ---
+Original Translation: як ти маєш на увазі? О, зачекай тут, ти йдеш, я хочу дати це тобі.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">як ти маєш на увазі?<break time="350ms"/> О,<break time="220ms"/> зачекай тут,<break time="350ms"/> ти йдеш,<break time="220ms"/> я хочу дати це тобі.<break time="350ms"/></speak>
+Segment duration: 6400 ms
+Est TTS before: 5769 ms
+Est TTS after: 8202 ms
+Fill %: 128.2
+Rate: -13%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 350, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 90.1% → rate -13%
+  Decision: place_delay 280ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 12 indices=[11] ---
+Original Translation: То як ти можеш отримати їжу? Перед тим, як відкрити це, як ти можеш дістати їжу тут, чоловік?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><break time="328ms"/>То як ти можеш отримати їжу?<break time="350ms"/> <emphasis level="reduced">Перед</emphasis> тим,<break time="306ms"/> як відкрити це,<break time="205ms"/> як ти можеш дістати їжу тут,<break time="205ms"/> чоловік?<break time="350ms"/></speak>
+Segment duration: 6000 ms
+Est TTS before: 6923 ms
+Est TTS after: 9187 ms
+Fill %: 153.1
+Rate: -6%
+  Pause: {'before': 'start', 'ms': 328, 'type': 'source_lead'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 306, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 205, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 205, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Перед', 'type': 'name'}
+  Decision: natural rate -8%
+  Decision: overfill 115.4% → light faster -6% (pauses scaled)
+
+--- Group 13 indices=[12] ---
+Original Translation: Чесно кажучи, я просто перериваю смітники. Я там не знаю, їси чуже сміття.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Чесно</emphasis> кажучи,<break time="184ms"/> я просто перериваю смітники.<break time="350ms"/> Я там не знаю,<break time="184ms"/> їси чуже сміття.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 5481 ms
+Est TTS after: 6810 ms
+Fill %: 170.2
+Rate: -4%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Чесно', 'type': 'name'}
+  Decision: natural rate -10%
+  Decision: overfill 137.0% → light faster -4% (pauses scaled)
+
+--- Group 14 indices=[13] ---
+Original Translation: Давай. Так зачекай, ти кажеш мені, що ти їси чуже сміття лише для того, щоб нагодувати себе, їси чуже сміття.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Давай</emphasis>.<break time="350ms"/> <emphasis level="reduced">Так</emphasis> зачекай,<break time="184ms"/> ти кажеш мені,<break time="184ms"/> що ти їси чуже сміття лише для того,<break time="184ms"/> щоб нагодувати себе,<break time="184ms"/> їси чуже сміття.<break time="350ms"/></speak>
+Segment duration: 6000 ms
+Est TTS before: 8074 ms
+Est TTS after: 9700 ms
+Fill %: 161.7
+Rate: -2%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Давай', 'type': 'name'}
+  Accent: {'word': 'Так', 'type': 'name'}
+  Decision: natural rate -8%
+  Decision: overfill 134.6% → light faster -2% (pauses scaled)
+  Decision: place_delay 280ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 15 indices=[14] ---
+Original Translation: Так, це..
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Так</emphasis>,<break time="220ms"/> це.<break time="350ms"/>.<break time="350ms"/></speak>
+Segment duration: 2000 ms
+Est TTS before: 769 ms
+Est TTS after: 2026 ms
+Fill %: 101.3
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Так', 'type': 'name'}
+  Decision: underfill 38.5% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 16 indices=[15] ---
+Original Translation: У меня немає другого выбора. У мене немає грошей.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">У меня немає другого выбора.<break time="350ms"/> У мене немає грошей.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 3629 ms
+Est TTS after: 4761 ms
+Fill %: 119.0
+Rate: -10%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 90.7% → rate -10%
+
+--- Group 17 indices=[16] ---
+Original Translation: Так. і яке середньостатистичне значення хтось дає тобі за виконання цієї роботи?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Так</emphasis>.<break time="350ms"/> і яке середньостатистичне значення хтось дає тобі за виконання цієї роботи?<break time="350ms"/></speak>
+Segment duration: 8400 ms
+Est TTS before: 5925 ms
+Est TTS after: 7950 ms
+Fill %: 94.6
+Rate: -20%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Так', 'type': 'name'}
+  Decision: underfill 70.5% → rate -20%
+
+--- Group 18 indices=[17] ---
+Original Translation: Іноді я роблю це за 10 центів. Просто будь-який хлопець..
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Іноді</emphasis> я роблю це за <emphasis level="reduced">10</emphasis> центів.<break time="350ms"/> <emphasis level="reduced">Просто</emphasis> будь-який хлопець.<break time="350ms"/>.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 4222 ms
+Est TTS after: 5799 ms
+Fill %: 145.0
+Rate: -10%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': '10', 'type': 'number'}
+  Accent: {'word': 'Іноді', 'type': 'name'}
+  Accent: {'word': 'Просто', 'type': 'name'}
+  Decision: natural rate -10%
+  Decision: place_delay 144ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 19 indices=[18] ---
+Original Translation: Да, чувак.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Да,<break time="220ms"/> чувак.<break time="350ms"/></speak>
+Segment duration: 2000 ms
+Est TTS before: 769 ms
+Est TTS after: 1606 ms
+Fill %: 80.3
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 38.5% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 20 indices=[19] ---
+Original Translation: И смотрите Джонатану правильно?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">И смотрите <emphasis level="reduced">Джонатану</emphasis> правильно?<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 2296 ms
+Est TTS after: 3175 ms
+Fill %: 79.4
+Rate: -20%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джонатану', 'type': 'name'}
+  Decision: underfill 57.4% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 21 indices=[20] ---
+Original Translation: Джонатан, ти виглядаєш розумним. Я маю на увазі, що я не знаю, що пішло не так.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Джонатан</emphasis>,<break time="184ms"/> ти виглядаєш розумним.<break time="350ms"/> Я маю на увазі,<break time="184ms"/> що я не знаю,<break time="184ms"/> що пішло не так.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 6153 ms
+Est TTS after: 7553 ms
+Fill %: 188.8
+Rate: -2%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Джонатан', 'type': 'name'}
+  Decision: natural rate -8%
+  Decision: overfill 153.8% → light faster -2% (pauses scaled)
+
+--- Group 22 indices=[21] ---
+Original Translation: Я навіть не люблю говорити про це, тому що я молодий, мені всего 25.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я навіть не люблю говорити про це,<break time="184ms"/> тому що<break time="184ms"/> я молодий,<break time="245ms"/> мені всего <emphasis level="reduced">25</emphasis>.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 5384 ms
+Est TTS after: 6286 ms
+Fill %: 157.2
+Rate: -2%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 245, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': '25', 'type': 'number'}
+  Decision: natural rate -8%
+  Decision: overfill 134.6% → light faster -2% (pauses scaled)
+  Decision: place_delay 280ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 23 indices=[22] ---
+Original Translation: Я виріс с. У них є сім'ї і все таке, і я бездомний.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я виріс с.<break time="350ms"/> У них є сім'ї і все таке,<break time="220ms"/> і я бездомний.<break time="350ms"/></speak>
+Segment duration: 6400 ms
+Est TTS before: 5000 ms
+Est TTS after: 7104 ms
+Fill %: 111.0
+Rate: -20%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 78.1% → rate -20%
+
+--- Group 24 indices=[23] ---
+Original Translation: Так. чи це було щось на кшталт поганих рішень у житті?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Так</emphasis>.<break time="350ms"/> чи це було щось на кшталт поганих рішень у житті?<break time="350ms"/></speak>
+Segment duration: 8000 ms
+Est TTS before: 4230 ms
+Est TTS after: 5916 ms
+Fill %: 74.0
+Rate: -20%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Так', 'type': 'name'}
+  Decision: underfill 52.9% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 25 indices=[24] ---
+Original Translation: Чесно кажучи, це багато. ніби я втратив свою маму.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Чесно</emphasis> кажучи,<break time="220ms"/> це багато.<break time="350ms"/> ніби я втратив свою маму.<break time="350ms"/></speak>
+Segment duration: 6000 ms
+Est TTS before: 3703 ms
+Est TTS after: 5547 ms
+Fill %: 92.5
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Чесно', 'type': 'name'}
+  Decision: underfill 61.7% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 26 indices=[25] ---
+Original Translation: Мені шкода.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Мені</emphasis> шкода.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 814 ms
+Est TTS after: 1396 ms
+Fill %: 34.9
+Rate: -20%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Мені', 'type': 'name'}
+  Decision: underfill 20.4% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 27 indices=[26] ---
+Original Translation: Я втратив роботу. Я не міг собі дозволити заплатити все, і ви знаєте, як люди на зразок мене важко вибратися з таких ситуацій.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я втратив роботу.<break time="350ms"/> Я не міг собі дозволити заплатити все,<break time="184ms"/> і ви знаєте,<break time="184ms"/> як люди на зразок мене важко вибратися з таких ситуацій.<break time="350ms"/></speak>
+Segment duration: 6000 ms
+Est TTS before: 9333 ms
+Est TTS after: 10609 ms
+Fill %: 176.8
+Rate: -2%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -8%
+  Decision: overfill 155.6% → light faster -2% (pauses scaled)
+
+--- Group 28 indices=[27] ---
+Original Translation: Я вже в незручному становищі, а тепер я бездомний.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я вже в незручному становищі,<break time="220ms"/> а<break time="200ms"/> тепер я бездомний.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 3703 ms
+Est TTS after: 4614 ms
+Fill %: 115.3
+Rate: -8%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 92.6% → rate -8%
+
+--- Group 29 indices=[28] ---
+Original Translation: То як, ви знаєте, воно зростає?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">То як,<break time="220ms"/> ви знаєте,<break time="350ms"/> воно зростає?<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 2307 ms
+Est TTS after: 3872 ms
+Fill %: 96.8
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 350, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 57.7% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 30 indices=[29] ---
+Original Translation: И Мені шкода це чути, як довго ти тут?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">И <emphasis level="reduced">Мені</emphasis> шкода це чути,<break time="220ms"/> як довго ти тут?<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 3461 ms
+Est TTS after: 4716 ms
+Fill %: 117.9
+Rate: -17%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Мені', 'type': 'name'}
+  Decision: underfill 86.5% → rate -17%
+
+--- Group 31 indices=[30] ---
+Original Translation: Може рік.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Може</emphasis> рік.<break time="350ms"/></speak>
+Segment duration: 2000 ms
+Est TTS before: 769 ms
+Est TTS after: 1342 ms
+Fill %: 67.1
+Rate: -20%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Може', 'type': 'name'}
+  Decision: underfill 38.5% → rate -20%
+  Decision: place_delay 220ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 32 indices=[31] ---
+Original Translation: Замовкни. Ти це вже цілий рік робиш? Добре, Джонатане, я тебе тут відпущу, але перед тим, як.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Замовкни</emphasis>.<break time="350ms"/> Ти це вже цілий рік робиш?<break time="350ms"/> <emphasis level="reduced">Добре</emphasis>,<break time="220ms"/> <emphasis level="reduced">Джонатане</emphasis>,<break time="350ms"/> я тебе тут відпущу,<break time="350ms"/> але перед тим,<break time="220ms"/> як.<break time="350ms"/></speak>
+Segment duration: 8000 ms
+Est TTS before: 6888 ms
+Est TTS after: 10712 ms
+Fill %: 133.9
+Rate: -18%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 350, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 350, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Замовкни', 'type': 'name'}
+  Accent: {'word': 'Добре', 'type': 'name'}
+  Accent: {'word': 'Джонатане', 'type': 'name'}
+  Decision: underfill 86.1% → rate -18%
+  Decision: place_delay 280ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 33 indices=[32] ---
+Original Translation: Який був останній раз, коли ти спав у ліжку?
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA"><emphasis level="reduced">Який</emphasis> був останній раз,<break time="220ms"/> коли ти спав у ліжку?<break time="350ms"/></speak>
+Segment duration: 6080 ms
+Est TTS before: 3461 ms
+Est TTS after: 4837 ms
+Fill %: 79.6
+Rate: -20%
+  Pause: {'after': ',', 'ms': 220, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': 'Який', 'type': 'name'}
+  Decision: underfill 56.9% → rate -20%
+  Decision: place_delay 280ms from source rhythm
+  Decision: lead_break skipped (place_delay on timeline)
+
+--- Group 34 indices=[33] ---
+Original Translation: Я хочу, щоб ви мене почули, перш ніж ви підете, я хочу переконатися, що..
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я хочу,<break time="193ms"/> щоб ви мене почули,<break time="350ms"/> перш ніж ви підете,<break time="193ms"/> я хочу переконатися,<break time="193ms"/> що.<break time="350ms"/>.<break time="350ms"/></speak>
+Segment duration: 4400 ms
+Est TTS before: 5407 ms
+Est TTS after: 7036 ms
+Fill %: 159.9
+Rate: +0%
+  Pause: {'after': ',', 'ms': 193, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 350, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 193, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 193, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -5%
+  Decision: overfill 122.9% → light faster +0% (pauses scaled)
+
+--- Group 35 indices=[34] ---
+Original Translation: Я не дуже люблю зелень.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я не дуже люблю зелень.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 1923 ms
+Est TTS after: 2704 ms
+Fill %: 67.6
+Rate: -19%
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: underfill 48.1% → rate -19%
+  Decision: place_delay 220ms from source rhythm
+
+--- Group 36 indices=[35] ---
+Original Translation: Я віддам їх тому, хто цього найбільше потребує, але я віддам його вам за сьогодні.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Я віддам їх тому,<break time="184ms"/> хто цього найбільше потребує,<break time="184ms"/> але я віддам його вам за сьогодні.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 6074 ms
+Est TTS after: 6792 ms
+Fill %: 169.8
+Rate: +1%
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': ',', 'ms': 184, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Decision: natural rate -5%
+  Decision: overfill 151.8% → light faster +1% (pauses scaled)
+
+--- Group 37 indices=[36] ---
+Original Translation: Це лише $3, 000. Я дуже сподіваюся, що це допоможе вам у чомусь.
+Text for TTS: <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="uk-UA">Це лише $<emphasis level="reduced">3</emphasis>,<break time="190ms"/> <emphasis level="reduced">000</emphasis>.<break time="350ms"/> Я дуже сподіваюся,<break time="190ms"/> що це допоможе вам у чомусь.<break time="350ms"/></speak>
+Segment duration: 4000 ms
+Est TTS before: 5000 ms
+Est TTS after: 6262 ms
+Fill %: 156.6
+Rate: -3%
+  Pause: {'after': ',', 'ms': 190, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Pause: {'after': ',', 'ms': 190, 'type': 'punctuation'}
+  Pause: {'after': 'sentence_end', 'ms': 350, 'type': 'thought_boundary'}
+  Accent: {'word': '3', 'type': 'number'}
+  Accent: {'word': '000', 'type': 'number'}
+  Decision: natural rate -8%
+  Decision: overfill 125.0% → light faster -3% (pauses scaled)

@@ -76,6 +76,62 @@ def lock_segments_final_tts(
 ) -> list[str]:
     """Stamp final_tts_text on every active segment; return locked texts."""
     locked: list[str] = []
+    try:
+        from engines.repetition_guard import sanitize_neighbor_bleed
+
+        raws = []
+        nats = []
+        srcs = []
+        for i, raw in enumerate(texts):
+            if i < len(segments_data) and isinstance(segments_data[i], dict):
+                row = segments_data[i]
+                raws.append(
+                    str(row.get("raw_mt") or row.get("raw_translation") or raw or "")
+                )
+                nats.append(
+                    str(
+                        row.get("naturalized_text")
+                        or row.get("raw_mt")
+                        or ""
+                    )
+                )
+                srcs.append(
+                    str(
+                        row.get("original_text")
+                        or row.get("original")
+                        or row.get("source_text")
+                        or ""
+                    )
+                )
+            else:
+                raws.append(str(raw or "").strip())
+                nats.append("")
+                srcs.append("")
+        texts, bleed_n = sanitize_neighbor_bleed(
+            list(texts), raw_mts=raws, naturalized=nats, sources=srcs
+        )
+        try:
+            from engines.mt.glossary_en_uk import finalize_mt_text
+
+            cleaned: list[str] = []
+            for i, line in enumerate(texts):
+                src_i = srcs[i] if i < len(srcs) else ""
+                cleaned.append(
+                    finalize_mt_text("en", "uk", str(line or ""), source=src_i)
+                    if src_i
+                    else str(line or "")
+                )
+            texts = cleaned
+            texts, bleed2 = sanitize_neighbor_bleed(
+                list(texts), raw_mts=raws, naturalized=nats, sources=srcs
+            )
+            bleed_n = int(bleed_n) + int(bleed2)
+        except Exception:
+            pass
+        if bleed_n:
+            logger.info("tts_bleed_blocked_count=%s", bleed_n)
+    except Exception:
+        pass
     audit_by = {}
     if audits:
         for a in audits:
